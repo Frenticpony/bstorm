@@ -117,10 +117,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
           screenHeight = std::atoi(match[1].str().c_str());
           logger->logInfo(defFileName + ": screen.height = " + std::to_string(screenHeight) + ".");
         } else if (regex_match(line, match, std::regex(R"(window.title\s*=\s*(.*))"))) {
-          windowTitle = toUnicode(match[1].str());
+          windowTitle = fromMultiByte<932>(match[1].str());
           logger->logInfo(defFileName + ": window.title = " + toUTF8(windowTitle) + ".");
         } else if (regex_match(line, match, std::regex(R"(package.script.main\s*=\s*(.*))"))) {
-          packageMainScriptPath = toUnicode(match[1].str());
+          packageMainScriptPath = fromMultiByte<932>(match[1].str());
           logger->logInfo(defFileName + ": package.script.main = " + toUTF8(packageMainScriptPath) + ".");
         }
       }
