@@ -1,0 +1,11 @@
+package.script.main = script/ExRumia/ExRumia_Package_Main.txt
+
+window.title = ExRumia
+
+screen.width=640
+
+screen.height=480
+
+window.width=640
+
+window.height=480

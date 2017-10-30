@@ -1,0 +1,6 @@
+[submodule "imgui"]
+	path = imgui
+	url = ssh://github.com/ocornut/imgui.git
+[submodule "bsengine/tool/reflex"]
+	path = bsengine/tool/reflex
+	url = ssh://github.com/Genivia/RE-flex.git

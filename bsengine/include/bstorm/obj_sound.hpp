@@ -1,0 +1,36 @@
+﻿#include <windows.h>
+
+#include <bstorm/obj.hpp>
+
+namespace bstorm {
+  class SoundDevice;
+  class SoundBuffer;
+  class ObjSound : public Obj {
+  public:
+    enum class SoundDivision {
+      BGM,
+      SE
+    };
+    ObjSound(const std::shared_ptr<GameState>& gameState);
+    ~ObjSound();
+    void update() override;
+    void load(const std::wstring& path);
+    void play();
+    void stop();
+    void setVolumeRate(float vol);
+    void setPanRate(float pan);
+    void setFade(float fadeRatePerSec);
+    void setLoopEnable(bool enable);
+    void setLoopTime(double startSec, double endSec);
+    void setLoopSampleCount(DWORD startCount, DWORD endCount);
+    void setRestartEnable(bool enable);
+    void setSoundDivision(SoundDivision division);
+    bool isPlaying() const;
+    float getVolumeRate() const;
+  private:
+    std::shared_ptr<SoundBuffer> soundBuffer;
+    bool restartEnable;
+    float fadeRatePerSec;
+    SoundDivision division;
+  };
+}
