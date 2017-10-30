@@ -20,6 +20,10 @@ namespace bstorm {
     int64_t getElapsedFrame() const;
     void setScreenSize(int width, int height);
     bool isPackageClosed() const;
+    bool isRenderIntersectionEnabled() const;
+    void setRenderIntersectionEnable(bool enable);
+    bool isPlayerInvincibleEnabled() const;
+    void setPlayerInvincibleEnable(bool enable);
   private:
     std::shared_ptr<Engine> engine;
     ScriptInfo mainScript;
@@ -29,5 +33,7 @@ namespace bstorm {
     bool paused;
     int screenWidth;
     int screenHeight;
+    bool renderIntersectionEnable;
+    bool playerInvincibleEnable;
   };
 }

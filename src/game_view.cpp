@@ -78,8 +78,14 @@ namespace bstorm {
         // tool bar
         ImGui::BeginGroup();
         ImGui::Text("elapsed: %lld", playController->getElapsedFrame());
-        float toolStartX = ImGui::GetContentRegionAvailWidth() * 0.88f;
+        float toolStartX = ImGui::GetContentRegionAvailWidth() * 0.68f;
         ImGui::SameLine(toolStartX);
+        {
+          bool renderIntersectionEnable = playController->isRenderIntersectionEnabled();
+          ImGui::Checkbox("render intersection", &renderIntersectionEnable);
+          playController->setRenderIntersectionEnable(renderIntersectionEnable);
+        }
+        ImGui::SameLine();
         if (ImGui::Button(ICON_FA_REFRESH)) {
           playController->reload();
         }
@@ -103,6 +109,12 @@ namespace bstorm {
         {
           ImGui::Text(playController->isPackageClosed() ? "select package" : "running");
           ImGui::SameLine(toolStartX);
+          {
+            bool playerInvincibleEnable = playController->isPlayerInvincibleEnabled();
+            ImGui::Checkbox("player invincible", &playerInvincibleEnable);
+            playController->setPlayerInvincibleEnable(playerInvincibleEnable);
+          }
+          ImGui::SameLine();
           ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
           int playSpeed = playController->getPlaySpeed();
           ImGui::InputInt("##playSpeed", &playSpeed, 1, 5);

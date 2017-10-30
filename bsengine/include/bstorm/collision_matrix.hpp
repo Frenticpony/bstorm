@@ -71,6 +71,7 @@ namespace bstorm {
     CollisionGroup getCollisionGroup() const {
       return COL_GRP_PLAYER_GRAZE;
     }
+    virtual void render(const std::shared_ptr<Renderer>& renderer, bool permitCamera) const {};
   };
 
   class ObjSpell;

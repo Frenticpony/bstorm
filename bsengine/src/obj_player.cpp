@@ -113,6 +113,7 @@ namespace bstorm {
 
   void ObjPlayer::render() {
     ObjSprite2D::render();
+    ObjCol::renderIntersection(isPermitCamera());
   }
 
   void ObjPlayer::addIntersectionCircleA1(float dx, float dy, float r, float dr) {
@@ -214,11 +215,14 @@ namespace bstorm {
   void ObjPlayer::addPoint(int64_t point) { globalParams->point += point; }
 
   void ObjPlayer::hit(int collisionObjId) {
-    if (state == STATE_NORMAL && !isInvincible()) {
-      state = STATE_HIT;
-      hitStateTimer = rebirthFrame;
-      // NOTE: 状態を変更してからイベントを送る
-      if (auto gameState = getGameState()) {
+    if (auto gameState = getGameState()) {
+#ifdef _DEVMODE
+      if (gameState->forcePlayerInvincibleEnable) return;
+#endif
+      if (state == STATE_NORMAL && !isInvincible()) {
+        state = STATE_HIT;
+        hitStateTimer = rebirthFrame;
+        // NOTE: 状態を変更してからイベントを送る
         if (auto playerScript = gameState->stagePlayerScript.lock()) {
           playerScript->notifyEvent(EV_HIT, std::make_unique<DnhArray>(std::vector<double>{ (double)collisionObjId }));
         }

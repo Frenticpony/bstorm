@@ -17,7 +17,7 @@ namespace bstorm {
     void addTempIntersection(const std::shared_ptr<Intersection>& isect);
     void transIntersection(float dx, float dy);
     void setWidthIntersection(float width);
-    void renderIntersection(bool isPermitCamera);
+    void renderIntersection(bool isPermitCamera) const;
     void clearIntersection();
     // update‚É•Û—p‚ğ‹ó‚É‚µ‚Ä’Ç‰Á—p‚Æ•Û—p‚ğ“ü‚ê‘Ö‚¦‚é,
     void clearOldTempIntersection();

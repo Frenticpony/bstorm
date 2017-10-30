@@ -75,6 +75,10 @@ namespace bstorm {
     int getScreenHeight() const;
     void setScreenPos(const std::shared_ptr<int>& posX, const std::shared_ptr<int>& posY);
     void setGameViewSize(const std::shared_ptr<int>& width, const std::shared_ptr<int>& height);
+    bool isRenderIntersectionEnabled() const;
+    void setRenderIntersectionEnable(bool enable);
+    bool isForcePlayerInvincibleEnabled() const;
+    void setForcePlayerInvincibleEnable(bool enable);
     /* graphic device control */
     IDirect3DDevice9* getGraphicDevice() const;
     // should call only to reset device

@@ -1,6 +1,7 @@
 #include <iterator>
 
 #include <bstorm/intersection.hpp>
+#include <bstorm/collision_matrix.hpp>
 #include <bstorm/game_state.hpp>
 #include <bstorm/obj_col.hpp>
 
@@ -36,11 +37,14 @@ namespace bstorm {
     }
   }
 
-  void ObjCol::renderIntersection(bool isPermitCamera) {
+  void ObjCol::renderIntersection(bool isPermitCamera) const {
 #ifdef _DEVMODE
     if (auto state = gameState.lock()) {
       if (state->renderIntersectionEnable) {
-        for (auto& isect : oldTempIsects) {
+        for (auto& isect : getIntersections()) {
+          isect->render(state->renderer, isPermitCamera);
+        }
+        for (auto& isect : getTempIntersections()) {
           isect->render(state->renderer, isPermitCamera);
         }
       }

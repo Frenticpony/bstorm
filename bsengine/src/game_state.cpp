@@ -70,6 +70,7 @@ namespace bstorm {
     screenWidth(screenWidth),
     screenHeight(screenHeight),
     renderIntersectionEnable(false),
+    forcePlayerInvincibleEnable(false),
     defaultBonusItemEnable(true)
   {
   }

@@ -68,7 +68,7 @@ namespace bstorm {
     virtual ~Intersection();
     virtual CollisionGroup getCollisionGroup() const = 0;
     bool isIntersected(const std::shared_ptr<Intersection>& isect) const;
-    void render(const std::shared_ptr<Renderer>& renderer, bool permitCamera) const;
+    virtual void render(const std::shared_ptr<Renderer>& renderer, bool permitCamera) const;
     const Shape& getShape() const;
     int getTreeIndex() const;
     const std::vector<std::weak_ptr<Intersection>>& getCollideIntersections() const;

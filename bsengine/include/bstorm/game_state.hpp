@@ -106,6 +106,7 @@ namespace bstorm {
     bool deleteShotFadeEventOnShotScriptEnable;
     bool deleteShotToItemEventOnShotScriptEnable;
     bool renderIntersectionEnable;
+    bool forcePlayerInvincibleEnable;
     bool defaultBonusItemEnable;
   };
 }

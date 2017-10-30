@@ -202,6 +202,22 @@ namespace bstorm {
     gameState->inputDevice->setGameViewSize(width, height);
   }
 
+  bool Engine::isRenderIntersectionEnabled() const {
+    return gameState->renderIntersectionEnable;
+  }
+
+  void Engine::setRenderIntersectionEnable(bool enable) {
+    gameState->renderIntersectionEnable = enable;
+  }
+
+  bool Engine::isForcePlayerInvincibleEnabled() const {
+    return gameState->forcePlayerInvincibleEnable;
+  }
+
+  void Engine::setForcePlayerInvincibleEnable(bool enable) {
+    gameState->forcePlayerInvincibleEnable = enable;
+  }
+
   IDirect3DDevice9* Engine::getGraphicDevice() const {
     return graphicDevice->getDevice();
   }
