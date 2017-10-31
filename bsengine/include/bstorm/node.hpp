@@ -528,9 +528,9 @@ namespace bstorm {
   };
 
   struct NodeCase : public Node {
-    NodeCase(const std::shared_ptr<NodeExp>& e, const std::shared_ptr<NodeBlock>& blk) : Node(), exp(e), block(blk) {}
+    NodeCase(const std::vector<std::shared_ptr<NodeExp>>& es, const std::shared_ptr<NodeBlock>& blk) : Node(), exps(es), block(blk) {}
     void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
-    std::shared_ptr<NodeExp> exp;
+    std::vector<std::shared_ptr<NodeExp>> exps;
     std::shared_ptr<NodeBlock> block;
   };
 

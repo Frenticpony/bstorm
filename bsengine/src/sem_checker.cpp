@@ -277,7 +277,9 @@ namespace bstorm {
     if (stmt.elseBlock) stmt.elseBlock->traverse(*this);
   }
   void SemChecker::traverse(NodeCase& c) {
-    c.exp->traverse(*this);
+    for (auto& exp : c.exps) {
+      exp->traverse(*this);
+    }
     c.block->traverse(*this);
   }
   void SemChecker::traverse(NodeAlternative& stmt) {

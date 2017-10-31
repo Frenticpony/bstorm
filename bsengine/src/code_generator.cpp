@@ -512,8 +512,18 @@ namespace bstorm {
     addCode("local c = "); genCopy(stmt.cond); addCode(";"); newLine(stmt.cond->filePath, stmt.cond->line);
     /* gen if-seq */
     for (int i = 0; i < stmt.cases.size(); i++) {
-      if (i != 0) addCode("else");
-      addCode("if " + runtime("compare") + "(c,"); stmt.cases[i]->exp->traverse(*this); addCode(") == 0 then"); newLine(stmt.cases[i]->exp->filePath, stmt.cases[i]->exp->line);
+      // case
+      if (i != 0) addCode("else"); // 1つ目以降のcaseはelse if
+      addCode("if false");
+      // orの右結合計算列を作る(右結合の方が恐らく早く短絡するので)
+      for (auto& exp : stmt.cases[i]->exps) {
+        addCode(" or (");
+        addCode("(" + runtime("compare") + "(c,"); exp->traverse(*this); addCode(") == 0)");
+      }
+      for (auto& exp : stmt.cases[i]->exps) {
+        addCode(")");
+      }
+      addCode(" then"); newLine(stmt.cases[i]->filePath, stmt.cases[i]->line);
       stmt.cases[i]->block->traverse(*this);
     }
     /* gen else*/

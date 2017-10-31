@@ -384,7 +384,7 @@ alternative        : TK_ALTERNATIVE TK_LPAREN exp TK_RPAREN cases opt-others { $
 cases              : none       { $$ = new std::vector<std::shared_ptr<NodeCase>>(); }
                    | cases case { $$ = $1; $$->push_back(std::shared_ptr<NodeCase>($2)); }
 
-case               : TK_CASE TK_LPAREN exp TK_RPAREN new-scope block { $$ = new NodeCase(exp($3), block($6)); fixPos($$, @1); }
+case               : TK_CASE TK_LPAREN exps1 TK_RPAREN new-scope block { $$ = new NodeCase(*$3, block($6)); fixPos($$, @1); delete $3; }
 
 opt-others         : TK_OTHERS new-scope block  { $$ = $3; fixPos($3, @1); }
                    | none                       { $$ = NULL; }
