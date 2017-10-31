@@ -307,6 +307,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
     }
   }
   } catch (const std::exception& e) {
+    logger->logError(e.what());
     MessageBoxW(hWnd, toUnicode(e.what()).c_str(), L"Error", MB_OK);
   }
 #ifdef _DEVMODE
