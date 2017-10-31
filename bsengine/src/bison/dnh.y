@@ -350,11 +350,13 @@ func-result-decl   : {
 
 task-def           : TK_TASK TK_IDENT { checkDupDef(ctx, @2, *$2); } new-scope opt-params block { auto def = new NodeTaskDef(*$2, *$5, block($6)); fixPos(def, @1); addDef(ctx, def); delete($2); delete($5); }
 
-params             : params1
+params             : params1 opt-comma { $$ = $1; }
                    | none { $$ = new std::vector<std::string>(); }
 params1            : params1 TK_COMMA param { $$ = $1; $1->push_back(*$3); delete $3; }
                    | param { $$ = new std::vector<std::string>{*$1}; delete $1; }
 param              : opt-declarator TK_IDENT { auto param = new NodeProcParam(*$2); fixPos(param, @2); addDef(ctx, param); $$ = $2; }
+
+opt-comma          : none | TK_COMMA
 
 opt-declarator     : none
                    | declarator
@@ -424,7 +426,7 @@ header             : TK_HEADER TK_LBRACKET header-params TK_RBRACKET
                          delete $1; delete $2;
                        }
 
-header-params      : header-params1
+header-params      : header-params1 opt-comma { $$ = $1; }
                    | none { $$ = new std::vector<std::wstring>(); }
 header-params1     : header-params1 TK_COMMA header-param { $$ = $1; $1->push_back(*$3); delete $3; }
                    | header-param { $$ = new std::vector<std::wstring>{*$1}; delete $1; }
@@ -438,7 +440,7 @@ cond               : TK_LPAREN exp TK_RPAREN { $$ = $2; }
 
 loop-param         : opt-declarator TK_IDENT { auto param = new NodeLoopParam(*$2); fixPos(param, @2); addDef(ctx, param); $$ = $2; }
 
-exps               : exps1
+exps               : exps1 opt-comma { $$ = $1; }
                    | none { $$ = new std::vector<std::shared_ptr<NodeExp>>(); }
 exps1              : exps1 TK_COMMA exp { $$ = $1; $1->push_back(exp($3)); }
                    | exp { $$ = new std::vector<std::shared_ptr<NodeExp>>{exp($1)}; }
