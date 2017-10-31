@@ -2362,6 +2362,18 @@ namespace bstorm {
   static int ObjRender_SetAngleX(lua_State* L) { return ObjRender_Set<&ObjRender::setAngleX>(L); }
   static int ObjRender_SetAngleY(lua_State* L) { return ObjRender_Set<&ObjRender::setAngleY>(L); }
   static int ObjRender_SetAngleZ(lua_State* L) { return ObjRender_Set<&ObjRender::setAngleZ>(L); }
+
+  static int ObjRender_SetAngleXYZ(lua_State* L) {
+    Engine* engine = getEngine(L);
+    int objId = DnhValue::toInt(L, 1);
+    double rx = DnhValue::toNum(L, 2);
+    double ry = DnhValue::toNum(L, 3);
+    double rz = DnhValue::toNum(L, 4);
+    lua_pop(L, 4);
+    if (auto obj = engine->getObject<ObjRender>(objId)) { obj->setAngleXYZ(rx, ry, rz); }
+    return 0;
+  }
+
   static int ObjRender_SetScaleX(lua_State* L) { return ObjRender_Set<&ObjRender::setScaleX>(L); }
   static int ObjRender_SetScaleY(lua_State* L) { return ObjRender_Set<&ObjRender::setScaleY>(L); }
   static int ObjRender_SetScaleZ(lua_State* L) { return ObjRender_Set<&ObjRender::setScaleZ>(L); }
@@ -5913,6 +5925,7 @@ namespace bstorm {
     safe(ObjRender_SetAngleX, 2);
     safe(ObjRender_SetAngleY, 2);
     safe(ObjRender_SetAngleZ, 2);
+    safe(ObjRender_SetAngleXYZ, 4);
     safe(ObjRender_SetScaleX, 2);
     safe(ObjRender_SetScaleY, 2);
     safe(ObjRender_SetScaleZ, 2);
