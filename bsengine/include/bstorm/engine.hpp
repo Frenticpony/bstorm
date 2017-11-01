@@ -64,7 +64,7 @@ namespace bstorm {
     }
     HWND getWindowHandle() const;
     /* engine control */
-    bool tickFrame();
+    void tickFrame();
     void render(); // render to backbuffer
     void render(const std::wstring& renderTargetName);
     void renderToTextureA1(const std::wstring& renderTargetName, int begin, int end, bool doClear);

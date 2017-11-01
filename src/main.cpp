@@ -24,9 +24,9 @@
 #include "camera_browser.hpp"
 #include "object_browser.hpp"
 #include "game_view.hpp"
+#include "play_controller.hpp"
 #endif
 
-#include "play_controller.hpp"
 #include "file_logger.hpp"
 
 using namespace bstorm;
@@ -128,9 +128,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
     } else {
       logger->logWarn(defFileName + " not found.");
     }
-}
+  }
 
-/* create window */
+  /* create window */
   WNDCLASSEX windowClass;
   windowClass.cbSize = sizeof(WNDCLASSEX);
   windowClass.style = CS_HREDRAW | CS_VREDRAW;
@@ -296,16 +296,16 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
 #ifdef _DEVMODE
               ImGui_ImplDX9_CreateDeviceObjects();
 #endif
-        } else {
+            } else {
               Sleep(1);
             }
             break;
           case D3DERR_DRIVERINTERNALERROR:
             throw std::runtime_error("graphic device internal error occured.");
             break;
+        }
       }
     }
-  }
   } catch (const std::exception& e) {
     logger->logError(e.what());
     MessageBoxW(hWnd, toUnicode(e.what()).c_str(), L"Error", MB_OK);
@@ -314,4 +314,4 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
   ImGui_ImplDX9_Shutdown();
 #endif
   return (int)msg.wParam;
-  }
+}

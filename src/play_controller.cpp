@@ -16,10 +16,15 @@ namespace bstorm {
   }
 
   void PlayController::tick() {
-    for (int i = 0; i < playSpeed; i++) {
-      if (!engine->isPackageFinished()) {
-        engine->tickFrame();
+    try {
+      for (int i = 0; i < playSpeed; i++) {
+        if (!engine->isPackageFinished()) {
+          engine->tickFrame();
+        }
       }
+    } catch (const std::exception& e) {
+      engine->logError(e.what());
+      engine->reset(screenWidth, screenHeight);
     }
   }
 

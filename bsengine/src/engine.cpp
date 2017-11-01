@@ -74,82 +74,75 @@ namespace bstorm {
     return hWnd;
   }
 
-  bool Engine::tickFrame() {
+  void Engine::tickFrame() {
      // NOTE: 衝突判定、スクリプト更新、オブジェクト更新の順の方が正しそう、問題があったら直す
-    try {
-      if (isPackageFinished()) {
-        logWarn("package is not setted, please select package.");
-        return false;
-      }
-
-      if (auto packageMain = gameState->packageMainScript.lock()) {
-        if (packageMain->isClosed()) {
-          packageMain.reset();
-          throw std::runtime_error("shutdown package.");
-        }
-      }
-
-      if (getElapsedFrame() % (60 / std::min(gameState->pseudoEnemyFps, gameState->pseudoPlayerFps)) == 0) {
-        if (auto stageMain = gameState->stageMainScript.lock()) {
-          if (stageMain->isClosed()) {
-            if (gameState->stageForceTerminated) {
-              gameState->stageSceneResult = STAGE_RESULT_BREAK_OFF;
-              gameState->globalPlayerParams = std::make_shared<GlobalPlayerParams>();
-              gameState->globalPlayerParams->life = 0.0;
-            } else if (auto player = getPlayerObject()) {
-              gameState->stageSceneResult = player->getState() != STATE_END ? STAGE_RESULT_CLEARED : STAGE_RESULT_PLAYER_DOWN;
-            } else {
-              gameState->stageSceneResult = STAGE_RESULT_PLAYER_DOWN;
-            }
-            renderToTextureA1(TRANSITION_RENDER_TARGET_NAME, 0, MAX_RENDER_PRIORITY, true);
-            gameState->objTable->deleteStgSceneObject();
-            gameState->scriptManager->closeStgSceneScript();
-            gameState->stageMainScript.reset();
-            gameState->stagePlayerScript.reset();
-            gameState->stageForceTerminated = false;
-            gameState->stagePaused = true;
-            gameState->pseudoPlayerFps = gameState->pseudoEnemyFps = 60;
-          }
-        }
-        gameState->scriptManager->cleanClosedScript();
-
-        if (!isStagePaused()) {
-          gameState->colDetector->run();
-        }
-
-        // SetShotIntersection{Circle, Line}で設定した判定削除
-        gameState->tempEnemyShotIsects.clear();
-
-        gameState->inputDevice->updateInputState();
-
-        gameState->scriptManager->runAll(isStagePaused());
-
-        gameState->objTable->updateAll(isStagePaused());
-
-        gameState->autoItemCollectionManager->reset();
-      }
-      // 使われなくなったリソース開放
-      switch (getElapsedFrame() & 0xff) {
-        case 0:
-          releaseUnusedLostableGraphicResource();
-          break;
-        case 30:
-          releaseUnusedTextureCache();
-          break;
-        case 60:
-          releaseUnusedFontCache();
-          break;
-        case 90:
-          releaseUnusedMeshCache();
-          break;
-      }
-      gameState->elapsedFrame += 1;
-    } catch (const std::exception& e) {
-      logError(e.what());
-      reset(gameState->screenWidth, gameState->screenHeight);
-      return false;
+    if (isPackageFinished()) {
+      logWarn("package is not setted, please select package.");
+      return;
     }
-    return true;
+
+    if (auto packageMain = gameState->packageMainScript.lock()) {
+      if (packageMain->isClosed()) {
+        packageMain.reset();
+        throw std::runtime_error("shutdown package.");
+      }
+    }
+
+    if (getElapsedFrame() % (60 / std::min(gameState->pseudoEnemyFps, gameState->pseudoPlayerFps)) == 0) {
+      if (auto stageMain = gameState->stageMainScript.lock()) {
+        if (stageMain->isClosed()) {
+          if (gameState->stageForceTerminated) {
+            gameState->stageSceneResult = STAGE_RESULT_BREAK_OFF;
+            gameState->globalPlayerParams = std::make_shared<GlobalPlayerParams>();
+            gameState->globalPlayerParams->life = 0.0;
+          } else if (auto player = getPlayerObject()) {
+            gameState->stageSceneResult = player->getState() != STATE_END ? STAGE_RESULT_CLEARED : STAGE_RESULT_PLAYER_DOWN;
+          } else {
+            gameState->stageSceneResult = STAGE_RESULT_PLAYER_DOWN;
+          }
+          renderToTextureA1(TRANSITION_RENDER_TARGET_NAME, 0, MAX_RENDER_PRIORITY, true);
+          gameState->objTable->deleteStgSceneObject();
+          gameState->scriptManager->closeStgSceneScript();
+          gameState->stageMainScript.reset();
+          gameState->stagePlayerScript.reset();
+          gameState->stageForceTerminated = false;
+          gameState->stagePaused = true;
+          gameState->pseudoPlayerFps = gameState->pseudoEnemyFps = 60;
+        }
+      }
+      gameState->scriptManager->cleanClosedScript();
+
+      if (!isStagePaused()) {
+        gameState->colDetector->run();
+      }
+
+      // SetShotIntersection{Circle, Line}で設定した判定削除
+      gameState->tempEnemyShotIsects.clear();
+
+      gameState->inputDevice->updateInputState();
+
+      gameState->scriptManager->runAll(isStagePaused());
+
+      gameState->objTable->updateAll(isStagePaused());
+
+      gameState->autoItemCollectionManager->reset();
+    }
+    // 使われなくなったリソース開放
+    switch (getElapsedFrame() & 0xff) {
+      case 0:
+        releaseUnusedLostableGraphicResource();
+        break;
+      case 30:
+        releaseUnusedTextureCache();
+        break;
+      case 60:
+        releaseUnusedFontCache();
+        break;
+      case 90:
+        releaseUnusedMeshCache();
+        break;
+    }
+    gameState->elapsedFrame += 1;
   }
 
   void Engine::render() {
