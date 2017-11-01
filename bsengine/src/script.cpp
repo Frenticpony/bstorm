@@ -145,10 +145,6 @@ namespace bstorm {
   }
 
   void Script::callLuaChunk() {
-    if (isClosed()) {
-      lua_pop(L, 1);
-      return;
-    }
     bool tmp = luaStateBusy;
     luaStateBusy = true;
     if (lua_pcall(L, 0, 0, 0) != 0) {
@@ -277,7 +273,10 @@ namespace bstorm {
 
   void ScriptManager::notifyEventAll(int eventType) {
     for (auto& script : scriptList) {
-      script->notifyEvent(eventType);
+      // NOTE: NotifyEventAllで送るとcloseされたスクリプトには届かない
+      if (!script->isClosed()) {
+        script->notifyEvent(eventType);
+      }
     }
   }
 
