@@ -99,7 +99,9 @@ namespace bstorm {
       auto enemyShotIsect = std::dynamic_pointer_cast<ShotIntersection>(isect1);
       ObjShot* enemyShot = enemyShotIsect->shot;
       if (isShotIntersectionEnabled(enemyShotIsect) && isShotIntersectionEnabled(playerShotIsect)) {
-        playerShot->setPenetration(playerShot->getPenetration() - 1);
+        if (playerShot->getType() == OBJ_SHOT) {
+          playerShot->setPenetration(playerShot->getPenetration() - 1);
+        }
         enemyShot->eraseWithSpell();
       }
     }
@@ -141,7 +143,9 @@ namespace bstorm {
     if (isShotIntersectionEnabled(playerShotIsect)) {
       ObjShot* shot = playerShotIsect->shot;
       ObjEnemy* enemy = std::dynamic_pointer_cast<EnemyIntersectionToShot>(isect2)->enemy;
-      shot->setPenetration(shot->getPenetration() - 1);
+      if (shot->getType() == OBJ_SHOT) {
+        shot->setPenetration(shot->getPenetration() - 1);
+      }
       if (shot->isSpellFactorEnabled()) {
         enemy->addSpellDamage(shot->getDamage());
       } else {

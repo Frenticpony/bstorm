@@ -557,6 +557,7 @@ namespace bstorm {
     itemDistance(25)
   {
     setSpellResist(true);
+    setPenetration(1<<24);
   }
 
   void ObjLaser::setShotData(const std::shared_ptr<ShotData>& shotData) {
