@@ -165,6 +165,11 @@ namespace bstorm {
   }
 
   void ObjSprite2D::setDestRect(float left, float top, float right, float bottom) {
+    // 0.5 (for half pixel offset)
+    left -= 0.5f;
+    top -= 0.5f;
+    right -= 0.5f;
+    bottom -= 0.5f;
     setVertexPosition(0, left, top, 0);
     setVertexPosition(1, right, top, 0);
     setVertexPosition(2, left, bottom, 0);
@@ -232,10 +237,11 @@ namespace bstorm {
   }
 
   void ObjSpriteList2D::setDestRect(float left, float top, float right, float bottom) {
-    dstRectLeft = left;
-    dstRectTop = top;
-    dstRectRight = right;
-    dstRectBottom = bottom;
+    // 0.5 (for half pixel offset)
+    dstRectLeft = left - 0.5f;
+    dstRectTop = top - 0.5f;
+    dstRectRight = right - 0.5f;
+    dstRectBottom = bottom - 0.5f;
   }
 
   void ObjSpriteList2D::setDestCenter() {
@@ -243,10 +249,7 @@ namespace bstorm {
     if (getD3DTexture()) {
       float hw = (srcRectRight - srcRectLeft) / 2.0;
       float hh = (srcRectBottom - srcRectTop) / 2.0;
-      dstRectLeft = -hw;
-      dstRectTop = -hh;
-      dstRectRight = hw;
-      dstRectBottom = hh;
+      setDestRect(-hw, -hh, hw, hh);
     }
   }
 
@@ -346,6 +349,11 @@ namespace bstorm {
   }
 
   void ObjSprite3D::setDestRect(float left, float top, float right, float bottom) {
+    // 0.5 (for half pixel offset)
+    left -= 0.5f;
+    top -= 0.5f;
+    right -= 0.5f;
+    bottom -= 0.5f;
     // NOTE : Sprite2Dとは頂点の順番が違う
     setVertexPosition(0, left, top, 0);
     setVertexPosition(1, left, bottom, 0);

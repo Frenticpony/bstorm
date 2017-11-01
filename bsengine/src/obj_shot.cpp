@@ -1032,13 +1032,14 @@ namespace bstorm {
       const float dx = halfWidth * cos(normalDir);
       const float dy = halfWidth * sin(normalDir);
 
+      // 0.5 (for half pixel offset)
       if (tailPos == trail.size()) {
-        trail.push_back(Vertex(headX + dx, headY + dy, 0, 0, 0, 0));
-        trail.push_back(Vertex(headX - dx, headY - dy, 0, 0, 0, 0));
+        trail.push_back(Vertex(headX + dx - 0.5f, headY + dy - 0.5f, 0, 0, 0, 0));
+        trail.push_back(Vertex(headX - dx - 0.5f, headY - dy - 0.5f, 0, 0, 0, 0));
       }
 
-      trail.push_back(Vertex(x + dx, y + dy, 0, 0, 0, 0));
-      trail.push_back(Vertex(x - dx, y - dy, 0, 0, 0, 0));
+      trail.push_back(Vertex(x + dx - 0.5f, y + dy - 0.5f, 0, 0, 0, 0));
+      trail.push_back(Vertex(x - dx - 0.5f, y - dy - 0.5f, 0, 0, 0, 0));
 
       float laserNodeLength = norm(x - headX, y - headY);
       totalLaserLength += laserNodeLength;

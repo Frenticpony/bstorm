@@ -14,9 +14,8 @@ namespace bstorm {
   }
 
   void Camera2D::generateProjMatrix(float screenWidth, float screenHeight, float cameraScreenX, float cameraScreenY, D3DXMATRIX& proj) const {
-    // NOTE : half pixel offset問題のための0.5調整を入れている
-    D3DXMATRIX trans; // 原点を左上+offsetにずらす
-    D3DXMatrixTranslation(&trans, -screenWidth / 2.0f + cameraScreenX - 0.5f, screenHeight / 2.0f - cameraScreenY + 0.5f, 0.0f);
+    D3DXMATRIX trans;
+    D3DXMatrixTranslation(&trans, -screenWidth / 2.0f + cameraScreenX, screenHeight / 2.0f - cameraScreenY, 0.0f);
     D3DXMatrixScaling(&proj, 2.0f / screenWidth, 2.0f / screenHeight, 1.0f);
     proj = trans * proj;
   }
