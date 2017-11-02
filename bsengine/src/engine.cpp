@@ -75,7 +75,6 @@ namespace bstorm {
   }
 
   void Engine::tickFrame() {
-     // NOTE: 衝突判定、スクリプト更新、オブジェクト更新の順の方が正しそう、問題があったら直す
     if (isPackageFinished()) {
       logWarn("package is not setted, please select package.");
       return;
@@ -84,7 +83,7 @@ namespace bstorm {
     if (auto packageMain = gameState->packageMainScript.lock()) {
       if (packageMain->isClosed()) {
         packageMain.reset();
-        throw std::runtime_error("shutdown package.");
+        return;
       }
     }
 
