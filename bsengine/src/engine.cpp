@@ -843,7 +843,7 @@ namespace bstorm {
   }
 
   std::wstring Engine::getDefaultCommonDataSavePath(const std::wstring & areaName) const {
-    std::wstring basePath = getMainStgScriptPath();
+    std::wstring basePath = getMainPackageScriptPath() == DEFAULT_PACKAGE_PATH ? getMainStgScriptPath() : getMainPackageScriptPath();
     if (basePath.empty()) {
       basePath = getMainPackageScriptPath();
     }
