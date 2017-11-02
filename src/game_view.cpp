@@ -107,7 +107,7 @@ namespace bstorm {
           playController->tick();
         }
         {
-          ImGui::Text(playController->isPackageClosed() ? "select package" : "running");
+          ImGui::Text(playController->isPackageFinished() ? "select package" : "running");
           ImGui::SameLine(toolStartX);
           {
             bool playerInvincibleEnable = playController->isPlayerInvincibleEnabled();

@@ -18,9 +18,8 @@ namespace bstorm {
   void PlayController::tick() {
     try {
       for (int i = 0; i < playSpeed; i++) {
-        if (!engine->isPackageFinished()) {
-          engine->tickFrame();
-        }
+        if (engine->isPackageFinished()) break;
+        engine->tickFrame();
       }
     } catch (const std::exception& e) {
       engine->logError(e.what());
@@ -101,7 +100,7 @@ namespace bstorm {
     screenHeight = height;
   }
 
-  bool PlayController::isPackageClosed() const {
+  bool PlayController::isPackageFinished() const {
     return engine->isPackageFinished();
   }
 

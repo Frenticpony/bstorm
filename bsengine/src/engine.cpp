@@ -82,7 +82,9 @@ namespace bstorm {
 
     if (auto packageMain = gameState->packageMainScript.lock()) {
       if (packageMain->isClosed()) {
-        packageMain.reset();
+        logInfo("finish package.");
+        gameState->packageMainScript.reset();
+        reset(getScreenWidth(), getScreenHeight());
         return;
       }
     }

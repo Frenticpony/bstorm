@@ -279,9 +279,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
         ImGui::Render();
 #else
         d3DDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(114, 144, 154), 1.0f, 0);
+        if (engine->isPackageFinished()) break;
         engine->tickFrame();
         engine->render();
-        if (engine->isPackageFinished()) break;
 #endif
         d3DDevice->EndScene();
         switch (d3DDevice->Present(NULL, NULL, NULL, NULL)) {

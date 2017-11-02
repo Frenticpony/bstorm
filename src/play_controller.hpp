@@ -19,7 +19,7 @@ namespace bstorm {
     void setScript(const ScriptInfo& mainScript, const ScriptInfo& playerScript);
     int64_t getElapsedFrame() const;
     void setScreenSize(int width, int height);
-    bool isPackageClosed() const;
+    bool isPackageFinished() const;
     bool isRenderIntersectionEnabled() const;
     void setRenderIntersectionEnable(bool enable);
     bool isPlayerInvincibleEnabled() const;
