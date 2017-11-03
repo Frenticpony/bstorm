@@ -118,6 +118,7 @@ namespace bstorm {
         engine->deleteObject(objId);
       }
     }
+
     if (L) lua_close(L);
   }
 
@@ -136,12 +137,14 @@ namespace bstorm {
   bool Script::isClosed() const { return state == State::SCRIPT_CLOSED; }
 
   void Script::runBuiltInSub(const std::string &name) {
-    if (luaStateBusy) {
-      lua_getglobal(L, (DNH_VAR_PREFIX + name).c_str());
-    } else {
-      lua_getglobal(L, (std::string(DNH_RUNTIME_PREFIX) + "run_" + name).c_str());
+    if (errMsg.empty()) {
+      if (luaStateBusy) {
+        lua_getglobal(L, (DNH_VAR_PREFIX + name).c_str());
+      } else {
+        lua_getglobal(L, (std::string(DNH_RUNTIME_PREFIX) + "run_" + name).c_str());
+      }
+      callLuaChunk();
     }
-    callLuaChunk();
   }
 
   void Script::callLuaChunk() {
@@ -151,11 +154,10 @@ namespace bstorm {
       std::string msg = lua_tostring(L, -1);
       lua_pop(L, 1);
       state = State::SCRIPT_CLOSED;
-      luaStateBusy = false;
-      if (!errMsg.empty()) {
-        throw std::runtime_error(errMsg);
+      if (errMsg.empty()) {
+        errMsg = "unexpected script runtime error occured, please send a bug report : " + msg;
       }
-      throw std::runtime_error("unexpected script runtime error occured, please send a bug report : " + msg);
+      throw std::runtime_error(errMsg);
     }
     luaStateBusy = tmp;
   }
