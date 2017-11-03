@@ -38,7 +38,6 @@ namespace bstorm {
           lastEnemyBossX = enemyBoss->getX();
           lastEnemyBossY = enemyBoss->getY();
         } else {
-          state->scriptManager->notifyEventAll(EV_END_BOSS_STEP);
           // スペルカードで
           if (isSpell()) {
             // 時間制限内にクリアしたか、または耐久スペルで
