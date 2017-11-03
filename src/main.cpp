@@ -65,8 +65,8 @@ static LRESULT WINAPI windowProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
   _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #ifdef _DEVMODE
-  LONG windowWidth = 1920;
-  LONG windowHeight = 1080;
+  LONG windowWidth = 1600;
+  LONG windowHeight = 900;
 #else
   LONG windowWidth = 640;
   LONG windowHeight = 480;
