@@ -33,9 +33,9 @@
  | shot data | **o** | **o** | o | o | **x** |
  | item data  | **o** | **o** | o | o | **x** |
  | mqo | **o** | **o** | o | o | **x** |
+ | ObjTextT | x | x | x | o | o |
  | th_dnf.def | x | x | x | o | o |
  | HLSL | x | x | x | o | x |
- | ObjTextT | x | x | x | x | o |
 
 ※太字は弾幕風から変更された部分
 
