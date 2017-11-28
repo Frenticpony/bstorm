@@ -73,7 +73,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
 #endif
   LONG screenWidth = 640;
   LONG screenHeight = 480;
-  std::wstring version = L"a1.0.1";
+  std::wstring version = L"a1.0.2";
   std::wstring windowTitle = L"Bullet storm [" + version + L"]";
   std::wstring packageMainScriptPath;
   std::shared_ptr<Logger> logger;
