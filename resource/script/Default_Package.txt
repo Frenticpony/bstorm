@@ -1,0 +1,122 @@
+﻿#東方弾幕風[Package]
+#Title["default package"]
+
+function getPackageArgs(name) {
+  return GetAreaCommonData("__DEFAULT_PACKAGE_ARGS__", name, "");
+}
+
+@Initialize {
+  TStageScene;
+}
+
+@MainLoop {
+  yield;
+}
+
+
+task TStageScene {
+  InitializeStageScene();
+  SetStageIndex(1);
+  // StageMain, StagePlayer, StageReplayは設定済み
+  StartStageScene();
+  loop {
+    if(GetVirtualKeyState(VK_PAUSE) == KEY_PUSH) {
+      alternative(runPauseScript())
+      case(RESULT_RETRY) {
+        TerminateStageScene();
+        TStageScene;
+        return;
+      }
+      case(RESULT_END) {
+        TerminateStageScene();
+        ClosePackage();
+        return;
+      }
+    }
+
+    if(GetKeyState(KEY_BACK) == KEY_PUSH) {
+      TerminateStageScene();
+      TStageScene;
+      return;
+    }
+
+    if (GetStageSceneState() == STAGE_STATE_FINISHED) {
+      alternative(GetStageSceneResult())
+      case(STAGE_RESULT_CLEARED) {
+        TEndScene();
+        return;
+      }
+      case(STAGE_RESULT_PLAYER_DOWN) {
+        TEndScene();
+        return;
+      }
+      case(STAGE_RESULT_BREAK_OFF) {
+        ClosePackage();
+        return;
+      }
+    }
+    yield;
+  }
+}
+
+function runPauseScript() {
+  RenderToTextureA1(GetTransitionRenderTargetName(), 0, 100, true);
+  PauseStageScene(true);
+
+  let pauseScriptPath = getPackageArgs("PauseScript");
+  if (!pauseScriptPath) {
+    pauseScriptPath = "script/default_system/Default_Pause.txt";
+  }
+
+  let scriptId = LoadScript(pauseScriptPath);
+  StartScript(scriptId);
+
+  while(!IsCloseScript(scriptId)) {
+    yield;
+  }
+
+  PauseStageScene(false);
+  return GetScriptResult(scriptId);
+}
+
+task TEndScene() {
+  if (!IsReplay()) {
+    FinalizeStageScene();
+  }
+
+  let endSceneScriptPath = getPackageArgs("EndSceneScript");
+  if (!endSceneScriptPath) {
+    endSceneScriptPath = "script/default_system/Default_EndScene.txt";
+  }
+
+  let scriptId = LoadScript(endSceneScriptPath);
+  StartScript(scriptId);
+
+  while(!IsCloseScript(scriptId)) {
+    yield;
+  }
+
+  alternative(GetScriptResult(scriptId))
+  case(RESULT_SAVE_REPLAY) {
+    if (!IsReplay()) {
+      TReplaySaveScene();
+    }
+  }
+  case(RESULT_END) { ClosePackage(); }
+  case(RESULT_RETRY) { TStageScene(); }
+}
+
+task TReplaySaveScene() {
+  let replaySaveSceneScriptPath = getPackageArgs("ReplaySaveSceneScript");
+  if (!replaySaveSceneScriptPath) {
+    replaySaveSceneScriptPath = "script/default_system/Default_ReplaySaveScene.txt";
+  }
+
+  let scriptId = LoadScript(replaySaveSceneScriptPath);
+  StartScript(scriptId);
+
+  while(!IsCloseScript(scriptId)) {
+    yield;
+  }
+  ClosePackage();
+}

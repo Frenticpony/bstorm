@@ -1,0 +1,73 @@
+﻿item_image = "resource/img/System_Stg_Item.png"
+
+// 1UP
+ItemData {
+  id = -65536;
+  rect = (1, 1, 17, 17);
+  out = (112, 0, 128, 16);
+  render = ALPHA;
+}
+
+// 1UP_S
+ItemData {
+  id = -65535;
+  rect = (1, 1, 17, 17);
+  out = (112, 0, 128, 16);
+  render = ALPHA;
+}
+
+// SPELL
+ItemData {
+  id = -65534;
+  rect = (20, 1, 36, 17);
+  out = (112, 0, 128, 16);
+  render = ALPHA;
+}
+
+// SPELL_S
+ItemData {
+  id = -65533;
+  rect = (20, 1, 36, 17);
+  out = (112, 0, 128, 16);
+  render = ALPHA;
+}
+
+// POWER
+ItemData {
+  id = -65532;
+  rect = (39, 1, 55, 17);
+  out = (112, 0, 128, 16);
+  render = ALPHA;
+}
+
+// POWER_S
+ItemData {
+  id = -65531;
+  rect = (39, 1, 55, 17);
+  out = (112, 0, 128, 16);
+  render = ALPHA;
+}
+
+// POINT
+ItemData {
+  id = -65530;
+  rect = (1, 20, 17, 36);
+  out = (112, 0, 128, 16);
+  render = ALPHA;
+}
+
+// POINT_S
+ItemData {
+  id = -65529;
+  rect = (1, 20, 17, 36);
+  out = (112, 0, 128, 16);
+  render = ALPHA;
+}
+
+// BONUS
+ItemData {
+  id = -65528;
+  rect = (20, 20, 36, 36);
+  out = (0, 0, 0, 0);
+  render = ALPHA;
+}
