@@ -96,13 +96,13 @@ namespace bstorm {
     ImGui::Separator();
     {
       float azimuthAngle = camera3D.getAzimuthAngle();
-      SliderAngleRow("aziumuthAngle", "##camera3DAzimuthAngle", &azimuthAngle);
+      SliderAngleRow("azimuth-angle", "##camera3DAzimuthAngle", &azimuthAngle);
       camera3D.setAzimuthAngle(azimuthAngle);
     }
     ImGui::Separator();
     {
       float elevationAngle = camera3D.getElevationAngle();
-      SliderAngleRow("aziumuthAngle", "##camera3DElevationAngle", &elevationAngle);
+      SliderAngleRow("elevation-angle", "##camera3DElevationAngle", &elevationAngle);
       camera3D.setElevationAngle(elevationAngle);
     }
     ImGui::Separator();
