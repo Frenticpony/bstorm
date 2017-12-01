@@ -11,6 +11,10 @@ th_dnh.log
 /bstorm/DebugDev/
 /bstorm/Release/
 /bstorm/ReleaseDev/
+/bstorm_dev/Debug/
+/bstorm_dev/DebugDev/
+/bstorm_dev/Release/
+/bstorm_dev/ReleaseDev/
 /bsengine/Debug/
 /bsengine/DebugDev/
 /bsengine/Release/
@@ -19,5 +23,7 @@ th_dnh.log
 /Win32/
 /bstorm/x64/
 /bstorm/Win32/
+/bstorm_dev/x64/
+/bstorm_dev/Win32/
 /bsengine/x64/
 /bsengine/Win32/

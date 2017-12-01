@@ -38,7 +38,6 @@ namespace bstorm {
   }
 
   void ObjCol::renderIntersection(bool isPermitCamera) const {
-#ifdef _DEVMODE
     if (auto state = gameState.lock()) {
       if (state->renderIntersectionEnable) {
         for (auto& isect : getIntersections()) {
@@ -49,7 +48,6 @@ namespace bstorm {
         }
       }
     }
-#endif
   }
 
   void ObjCol::clearIntersection() {

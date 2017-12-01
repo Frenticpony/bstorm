@@ -216,9 +216,7 @@ namespace bstorm {
 
   void ObjPlayer::hit(int collisionObjId) {
     if (auto gameState = getGameState()) {
-#ifdef _DEVMODE
       if (gameState->forcePlayerInvincibleEnable) return;
-#endif
       if (state == STATE_NORMAL && !isInvincible()) {
         state = STATE_HIT;
         hitStateTimer = rebirthFrame;

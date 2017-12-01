@@ -1,9 +1,9 @@
 [submodule "imgui"]
-	path = bstorm/imgui
+	path = bstorm_dev/imgui
 	url = ssh://github.com/ocornut/imgui.git
 [submodule "bsengine/tool/reflex"]
 	path = bsengine/tool/reflex
 	url = ssh://github.com/Genivia/RE-flex.git
 [submodule "bstorm/IconFontCppHeaders"]
-	path = bstorm/IconFontCppHeaders
+	path = bstorm_dev/IconFontCppHeaders
 	url = ssh://github.com/juliettef/IconFontCppHeaders.git

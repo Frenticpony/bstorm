@@ -225,7 +225,6 @@ namespace bstorm {
   }
 
   void Shape::render(const std::shared_ptr<Renderer>& renderer, bool permitCamera) const {
-#ifdef _DEVMODE
     const D3DCOLOR color = D3DCOLOR_ARGB(128, 255, 0, 0);
     if (type == Type::CIRCLE) {
       static constexpr int vertexNum = 66;
@@ -274,7 +273,6 @@ namespace bstorm {
       D3DXMatrixIdentity(&world);
       renderer->renderPrim2D(D3DPT_TRIANGLESTRIP, vertices.size(), vertices.data(), NULL, BLEND_ALPHA, world, std::shared_ptr<Shader>(), permitCamera);
     }
-#endif
   }
 
   Shape::Type Shape::getType() const {

@@ -11,38 +11,13 @@
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/render_target.hpp>
 
-#ifdef _DEVMODE
-#include <imgui.h>
-#include "../imgui/examples/directx9_example/imgui_impl_dx9.h"
-#include <IconsFontAwesome_c.h>
-#include "glyph_ranges_ja.hpp"
-#include "log_window.hpp"
-#include "script_explorer.hpp"
-#include "resource_monitor.hpp"
-#include "common_data_browser.hpp"
-#include "user_def_data_browser.hpp"
-#include "camera_browser.hpp"
-#include "object_browser.hpp"
-#include "game_view.hpp"
-#include "play_controller.hpp"
-#endif
-
 #include "file_logger.hpp"
 
 using namespace bstorm;
 
 bool g_isLostFocus = false;
 
-#ifdef _DEVMODE
-extern IMGUI_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
-#endif
-
-constexpr wchar_t* GAME_VIEW_RENDER_TARGET = L"___GAME_VIEW_RENDER_TARGET___";
-
 static LRESULT WINAPI windowProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
-#ifdef _DEVMODE
-  if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wp, lp)) return true;
-#endif
   switch (msg) {
     case WM_SYSCOMMAND:
       if ((wp & 0xfff0) == SC_KEYMENU) {
@@ -64,13 +39,8 @@ static LRESULT WINAPI windowProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
   _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-#ifdef _DEVMODE
-  LONG windowWidth = 1600;
-  LONG windowHeight = 900;
-#else
   LONG windowWidth = 640;
   LONG windowHeight = 480;
-#endif
   LONG screenWidth = 640;
   LONG screenHeight = 480;
   std::wstring version = L"a1.0.3";
@@ -78,26 +48,17 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
   std::wstring packageMainScriptPath;
   std::shared_ptr<Logger> logger;
 
-#ifdef _DEVMODE
-  auto logWindow = std::make_shared<LogWindow>();
-  logger = logWindow;
-#else
   try {
     logger = std::make_shared<FileLogger>(L"th_dnh.log");
   } catch (const std::exception& e) {
     OutputDebugStringA(e.what());
     logger = std::make_shared<DummyLogger>();
   }
-#endif
 
   // 設定ファイル読み込み
   {
     std::ifstream thDnhDefFile;
-#ifdef _DEVMODE
-    std::string defFileName = "th_dnh_dev.def";
-#else
     std::string defFileName = "th_dnh.def";
-#endif
     thDnhDefFile.open(defFileName, std::ios::in);
     if (thDnhDefFile.good()) {
       std::string line;
@@ -171,41 +132,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
     masterKeyConfig->addVirtualKey(VK_USER2, KEY_V, 9);
     masterKeyConfig->addVirtualKey(VK_PAUSE, KEY_ESCAPE, 10);
 
-#ifdef _DEVMODE
-    auto scriptExplorer = std::make_shared<ScriptExplorer>(windowWidth * 990 / 1280, 19, windowWidth * (1280 - 990) / 1280, windowHeight - 19);
-    logWindow->setInitWindowPos(0, windowHeight * 550 / 720, windowWidth * 990 / 1280, windowHeight * 172 / 720);
-    auto resourceMonitor = std::make_shared<ResourceMonitor>(0, 19, 300, 530);
-    auto commonDataBrowser = std::make_shared<CommonDataBrowser>(300, 19, 300, 530);
-    auto userDefDataBrowser = std::make_shared<UserDefDataBrowser>(600, 19, 300, 530);
-    auto cameraBrowser = std::make_shared<CameraBrowser>(0, 39, 300, 530);
-    auto objectBrowser = std::make_shared<ObjectBrowser>(0, 39, 300, 530);
-    auto engine = std::make_shared<Engine>(hWnd, screenWidth, screenHeight, logWindow, masterKeyConfig);
-    auto playController = std::make_shared<PlayController>(engine);
-    auto gameView = std::make_shared<GameView>(windowWidth / 2 - 320, 60, 640, 480, playController);
-    engine->setScreenPos(gameView->getViewPosX(), gameView->getViewPosY());
-    engine->setGameViewSize(gameView->getViewWidth(), gameView->getViewHeight());
-#else
     auto engine = std::make_shared<Engine>(hWnd, screenWidth, screenHeight, logger, masterKeyConfig);
-#endif
 
-#ifdef _DEVMODE
-    ImGui_ImplDX9_Init(hWnd, engine->getGraphicDevice());
-    ImGuiIO& io = ImGui::GetIO();
-    ImFontConfig config;
-    config.MergeMode = true;
-    io.Fonts->AddFontDefault();
-    io.Fonts->AddFontFromFileTTF("fonts/ja/ipagp.ttf", 12, &config, glyphRangesJapanese);
-    static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-    io.Fonts->AddFontFromFileTTF("fonts/fa/fontawesome-webfont.ttf", 13.0f, &config, icon_ranges);
-#endif
-
-#ifndef _DEVMODE
     if (packageMainScriptPath.empty()) {
       throw std::runtime_error("package main script not specified.");
     }
     engine->setPackageMainScript(packageMainScriptPath);
     engine->startPackage();
-#endif
 
     /* message loop */
     engine->resetFpsCounter();
@@ -227,75 +160,17 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
       if (SUCCEEDED(d3DDevice->BeginScene())) {
         engine->updateFpsCounter();
         engine->setBackBufferRenderTarget();
-#ifdef _DEVMODE
-        d3DDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(114, 144, 154), 1.0f, 0);
-        // NOTE : PlayController, 及びPlayControllerを使っているモジュールは他より先に描画(tickでテクスチャの解放が行われる可能性があるので)
-        ImGui_ImplDX9_NewFrame();
-        playController->setScript(scriptExplorer->getSelectedMainScript(), scriptExplorer->getSelectedPlayerScript());
-        if (!playController->isPaused()) {
-          playController->tick();
-        }
-        auto gameViewRenderTarget = engine->getRenderTarget(GAME_VIEW_RENDER_TARGET);
-        if (!gameViewRenderTarget) {
-          gameViewRenderTarget = engine->createRenderTarget(GAME_VIEW_RENDER_TARGET, screenWidth, screenHeight);
-        }
-        engine->render(GAME_VIEW_RENDER_TARGET);
-        gameView->draw(gameViewRenderTarget);
-        {
-          // main menu bar
-          if (ImGui::BeginMainMenuBar()) {
-            if (ImGui::BeginMenu("Tool")) {
-              if (ImGui::MenuItem("Resource", NULL, resourceMonitor->isOpened())) {
-                resourceMonitor->setOpen(!resourceMonitor->isOpened());
-              }
-              if (ImGui::MenuItem("Common Data", NULL, commonDataBrowser->isOpened())) {
-                commonDataBrowser->setOpen(!commonDataBrowser->isOpened());
-              }
-              if (ImGui::MenuItem("User Defined Data", NULL, userDefDataBrowser->isOpened())) {
-                userDefDataBrowser->setOpen(!userDefDataBrowser->isOpened());
-              }
-              if (ImGui::MenuItem("Camera", NULL, cameraBrowser->isOpened())) {
-                cameraBrowser->setOpen(!cameraBrowser->isOpened());
-              }
-              if (ImGui::MenuItem("Object", NULL, objectBrowser->isOpened())) {
-                objectBrowser->setOpen(!objectBrowser->isOpened());
-              }
-              ImGui::EndMenu();
-            }
-            ImGui::EndMainMenuBar();
-          }
-        }
-        logWindow->draw();
-        scriptExplorer->draw();
-        resourceMonitor->draw(engine);
-        commonDataBrowser->draw(engine);
-        userDefDataBrowser->draw(engine);
-        cameraBrowser->draw(engine);
-        objectBrowser->draw(engine);
-#ifdef _DEBUG
-        static bool showTestWindow = true;
-        ImGui::ShowTestWindow(&showTestWindow);
-#endif
-        ImGui::Render();
-#else
         d3DDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(114, 144, 154), 1.0f, 0);
         if (engine->isPackageFinished()) break;
         engine->tickFrame();
         engine->render();
-#endif
         d3DDevice->EndScene();
         switch (d3DDevice->Present(NULL, NULL, NULL, NULL)) {
           case D3DERR_DEVICELOST:
             if (d3DDevice->TestCooperativeLevel() == D3DERR_DEVICENOTRESET) {
               engine->releaseLostableGraphicResource();
-#ifdef _DEVMODE
-              ImGui_ImplDX9_InvalidateDeviceObjects();
-#endif
               engine->resetGraphicDevice();
               engine->restoreLostableGraphicDevice();
-#ifdef _DEVMODE
-              ImGui_ImplDX9_CreateDeviceObjects();
-#endif
             } else {
               Sleep(1);
             }
@@ -310,8 +185,5 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
     logger->logError(e.what());
     MessageBoxW(hWnd, toUnicode(e.what()).c_str(), L"Error", MB_OK);
   }
-#ifdef _DEVMODE
-  ImGui_ImplDX9_Shutdown();
-#endif
   return (int)msg.wParam;
 }

@@ -10,17 +10,10 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="src\file_logger.cpp" />
-    <ClCompile Include="src\main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\file_logger.hpp" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{CECC5244-D2F6-47CE-86FE-8E4F0D53E6E7}</ProjectGuid>
+    <ProjectGuid>{5C9E9735-0A63-4488-8B7B-F46C9BDDA576}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>bstorm</RootNamespace>
+    <RootNamespace>bstorm_dev</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -100,6 +93,42 @@
       <AdditionalLibraryDirectories>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x64;$(SolutionDir)$(Platform)\$(Configuration);$(SolutionDir)bsengine\lib\luajit\$(Configuration);$(SolutionDir)bsengine\lib\ogg\$(Configuration);$(SolutionDir)bsengine\lib\vorbis\$(Configuration)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="imgui\examples\directx9_example\imgui_impl_dx9.cpp" />
+    <ClCompile Include="imgui\imgui.cpp" />
+    <ClCompile Include="imgui\imgui_demo.cpp" />
+    <ClCompile Include="imgui\imgui_draw.cpp" />
+    <ClCompile Include="src\camera_browser.cpp" />
+    <ClCompile Include="src\common_data_browser.cpp" />
+    <ClCompile Include="src\file_logger.cpp" />
+    <ClCompile Include="src\game_view.cpp" />
+    <ClCompile Include="src\object_browser.cpp" />
+    <ClCompile Include="src\play_controller.cpp" />
+    <ClCompile Include="src\resource_monitor.cpp" />
+    <ClCompile Include="src\script_explorer.cpp" />
+    <ClCompile Include="src\log_window.cpp" />
+    <ClCompile Include="src\main.cpp">
+    </ClCompile>
+    <ClCompile Include="src\user_def_data_browser.cpp" />
+    <ClCompile Include="src\util.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="imgui\examples\directx9_example\imgui_impl_dx9.h" />
+    <ClInclude Include="imgui\imgui.h" />
+    <ClInclude Include="imgui\imgui_internal.h" />
+    <ClInclude Include="src\camera_browser.hpp" />
+    <ClInclude Include="src\common_data_browser.hpp" />
+    <ClInclude Include="src\file_logger.hpp" />
+    <ClInclude Include="src\game_view.hpp" />
+    <ClInclude Include="src\object_browser.hpp" />
+    <ClInclude Include="src\play_controller.hpp" />
+    <ClInclude Include="src\resource_monitor.hpp" />
+    <ClInclude Include="src\script_explorer.hpp" />
+    <ClInclude Include="src\glyph_ranges_ja.hpp" />
+    <ClInclude Include="src\log_window.hpp" />
+    <ClInclude Include="src\user_def_data_browser.hpp" />
+    <ClInclude Include="src\util.hpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

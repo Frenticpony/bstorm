@@ -10,30 +10,29 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bstorm", "bstorm\bstorm.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bsengine", "bsengine\bsengine.vcxproj", "{75133251-B980-4FBF-A49F-02EEDF331BD0}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bstorm_dev", "bstorm_dev\bstorm_dev.vcxproj", "{5C9E9735-0A63-4488-8B7B-F46C9BDDA576}"
+	ProjectSection(ProjectDependencies) = postProject
+		{75133251-B980-4FBF-A49F-02EEDF331BD0} = {75133251-B980-4FBF-A49F-02EEDF331BD0}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
-		DebugDev|x64 = DebugDev|x64
-		RelaeseDev|x64 = RelaeseDev|x64
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{CECC5244-D2F6-47CE-86FE-8E4F0D53E6E7}.Debug|x64.ActiveCfg = Debug|x64
 		{CECC5244-D2F6-47CE-86FE-8E4F0D53E6E7}.Debug|x64.Build.0 = Debug|x64
-		{CECC5244-D2F6-47CE-86FE-8E4F0D53E6E7}.DebugDev|x64.ActiveCfg = DebugDev|x64
-		{CECC5244-D2F6-47CE-86FE-8E4F0D53E6E7}.DebugDev|x64.Build.0 = DebugDev|x64
-		{CECC5244-D2F6-47CE-86FE-8E4F0D53E6E7}.RelaeseDev|x64.ActiveCfg = RelaeseDev|x64
-		{CECC5244-D2F6-47CE-86FE-8E4F0D53E6E7}.RelaeseDev|x64.Build.0 = RelaeseDev|x64
 		{CECC5244-D2F6-47CE-86FE-8E4F0D53E6E7}.Release|x64.ActiveCfg = Release|x64
 		{CECC5244-D2F6-47CE-86FE-8E4F0D53E6E7}.Release|x64.Build.0 = Release|x64
 		{75133251-B980-4FBF-A49F-02EEDF331BD0}.Debug|x64.ActiveCfg = Debug|x64
 		{75133251-B980-4FBF-A49F-02EEDF331BD0}.Debug|x64.Build.0 = Debug|x64
-		{75133251-B980-4FBF-A49F-02EEDF331BD0}.DebugDev|x64.ActiveCfg = DebugDev|x64
-		{75133251-B980-4FBF-A49F-02EEDF331BD0}.DebugDev|x64.Build.0 = DebugDev|x64
-		{75133251-B980-4FBF-A49F-02EEDF331BD0}.RelaeseDev|x64.ActiveCfg = RelaeseDev|x64
-		{75133251-B980-4FBF-A49F-02EEDF331BD0}.RelaeseDev|x64.Build.0 = RelaeseDev|x64
 		{75133251-B980-4FBF-A49F-02EEDF331BD0}.Release|x64.ActiveCfg = Release|x64
 		{75133251-B980-4FBF-A49F-02EEDF331BD0}.Release|x64.Build.0 = Release|x64
+		{5C9E9735-0A63-4488-8B7B-F46C9BDDA576}.Debug|x64.ActiveCfg = Debug|x64
+		{5C9E9735-0A63-4488-8B7B-F46C9BDDA576}.Debug|x64.Build.0 = Debug|x64
+		{5C9E9735-0A63-4488-8B7B-F46C9BDDA576}.Release|x64.ActiveCfg = Release|x64
+		{5C9E9735-0A63-4488-8B7B-F46C9BDDA576}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
