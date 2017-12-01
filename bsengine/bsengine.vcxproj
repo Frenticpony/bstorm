@@ -1,9 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
@@ -145,69 +153,111 @@
     <CustomBuild Include="src\runtime.lua">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">lib\luajit\luajit.exe -b src\runtime.lua src\runtime.h</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">lib\luajit\luajit.exe -b src\runtime.lua src\runtime.h</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">src\runtime.h</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">src\runtime.h</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">lib\luajit\luajit.exe -b src\runtime.lua src\runtime.h</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">lib\luajit\luajit.exe -b src\runtime.lua src\runtime.h</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">src\runtime.h</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">src\runtime.h</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">generate runtime library bytecode</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">generate runtime library bytecode</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">generate runtime library bytecode</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">generate runtime library bytecode</Message>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="src\bison\dnh.y">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)tool\bison\win_bison.exe --output="src/bison/dnh.tab.cpp" --defines="src/bison/dnh.tab.hpp"  "src/bison/dnh.y"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)tool\bison\win_bison.exe --output="src/bison/dnh.tab.cpp" --defines="src/bison/dnh.tab.hpp"  "src/bison/dnh.y"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">generate dnh parser</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">generate dnh parser</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">src\bison\dnh.tab.cpp;src\bison\dnh.tab.hpp;src\bison\stack.hh</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">src\bison\dnh.tab.cpp;src\bison\dnh.tab.hpp;src\bison\stack.hh</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)tool\bison\win_bison.exe --output="src/bison/dnh.tab.cpp" --defines="src/bison/dnh.tab.hpp"  "src/bison/dnh.y"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)tool\bison\win_bison.exe --output="src/bison/dnh.tab.cpp" --defines="src/bison/dnh.tab.hpp"  "src/bison/dnh.y"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">generate dnh parser</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">generate dnh parser</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">src\bison\dnh.tab.cpp;src\bison\dnh.tab.hpp;src\bison\stack.hh</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">src\bison\dnh.tab.cpp;src\bison\dnh.tab.hpp;src\bison\stack.hh</Outputs>
     </CustomBuild>
     <CustomBuild Include="src\bison\user_def_data.y">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)tool\bison\win_bison.exe --output="src/bison/user_def_data.tab.cpp" --defines="src/bison/user_def_data.tab.hpp"  "src/bison/user_def_data.y"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)tool\bison\win_bison.exe --output="src/bison/user_def_data.tab.cpp" --defines="src/bison/user_def_data.tab.hpp"  "src/bison/user_def_data.y"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">generate user-def-data parser</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">generate user-def-data parser</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">src\bison\user_def_data.tab.hpp;src\bison\user_def_data.tab.cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">src\bison\user_def_data.tab.hpp;src\bison\user_def_data.tab.cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)tool\bison\win_bison.exe --output="src/bison/user_def_data.tab.cpp" --defines="src/bison/user_def_data.tab.hpp"  "src/bison/user_def_data.y"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)tool\bison\win_bison.exe --output="src/bison/user_def_data.tab.cpp" --defines="src/bison/user_def_data.tab.hpp"  "src/bison/user_def_data.y"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">generate user-def-data parser</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">generate user-def-data parser</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">src\bison\user_def_data.tab.hpp;src\bison\user_def_data.tab.cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">src\bison\user_def_data.tab.hpp;src\bison\user_def_data.tab.cpp</Outputs>
     </CustomBuild>
     <CustomBuild Include="src\reflex\dnh.l">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)tool\reflex\bin\reflex.exe src/reflex/dnh.l --header-file=src/reflex/dnh_lexer.hpp -o src/reflex/dnh_lexer.cpp </Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)tool\reflex\bin\reflex.exe src/reflex/dnh.l --header-file=src/reflex/dnh_lexer.hpp -o src/reflex/dnh_lexer.cpp </Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">generate dnh lexer</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">generate dnh lexer</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">src\reflex\dnh_lexer.cpp;src\reflex\dnh_lexer.hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">src\reflex\dnh_lexer.cpp;src\reflex\dnh_lexer.hpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)tool\reflex\bin\reflex.exe src/reflex/dnh.l --header-file=src/reflex/dnh_lexer.hpp -o src/reflex/dnh_lexer.cpp </Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)tool\reflex\bin\reflex.exe src/reflex/dnh.l --header-file=src/reflex/dnh_lexer.hpp -o src/reflex/dnh_lexer.cpp </Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">generate dnh lexer</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">generate dnh lexer</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">src\reflex\dnh_lexer.cpp;src\reflex\dnh_lexer.hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">src\reflex\dnh_lexer.cpp;src\reflex\dnh_lexer.hpp</Outputs>
     </CustomBuild>
     <CustomBuild Include="src\reflex\user_def_data.l">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)tool\reflex\bin\reflex.exe src/reflex/user_def_data.l --header-file=src/reflex/user_def_data_lexer.hpp  -o src/reflex/user_def_data_lexer.cpp </Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)tool\reflex\bin\reflex.exe src/reflex/user_def_data.l --header-file=src/reflex/user_def_data_lexer.hpp  -o src/reflex/user_def_data_lexer.cpp </Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">generate user-def-data lexer</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">generate user-def-data lexer</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">src\reflex\user_def_data_lexer.hpp;src\reflex\user_def_data_lexer.cpp;</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">src\reflex\user_def_data_lexer.hpp;src\reflex\user_def_data_lexer.cpp;</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)tool\reflex\bin\reflex.exe src/reflex/user_def_data.l --header-file=src/reflex/user_def_data_lexer.hpp  -o src/reflex/user_def_data_lexer.cpp </Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)tool\reflex\bin\reflex.exe src/reflex/user_def_data.l --header-file=src/reflex/user_def_data_lexer.hpp  -o src/reflex/user_def_data_lexer.cpp </Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">generate user-def-data lexer</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">generate user-def-data lexer</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">src\reflex\user_def_data_lexer.hpp;src\reflex\user_def_data_lexer.cpp;</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">src\reflex\user_def_data_lexer.hpp;src\reflex\user_def_data_lexer.cpp;</Outputs>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="src\bison\mqo.y">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)tool\bison\win_bison.exe --output="src/bison/mqo.tab.cpp" --defines="src/bison/mqo.tab.hpp"  "src/bison/mqo.y"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)tool\bison\win_bison.exe --output="src/bison/mqo.tab.cpp" --defines="src/bison/mqo.tab.hpp"  "src/bison/mqo.y"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">generate .mqo parser</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">generate .mqo parser</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)tool\bison\win_bison.exe --output="src/bison/mqo.tab.cpp" --defines="src/bison/mqo.tab.hpp"  "src/bison/mqo.y"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)tool\bison\win_bison.exe --output="src/bison/mqo.tab.cpp" --defines="src/bison/mqo.tab.hpp"  "src/bison/mqo.y"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">generate .mqo parser</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">generate .mqo parser</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">src\bison\mqo.tab.cpp;src\bison\mqo.tab.hpp;src\bison\stack.hh</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">src\bison\mqo.tab.cpp;src\bison\mqo.tab.hpp;src\bison\stack.hh</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">src\bison\mqo.tab.cpp;src\bison\mqo.tab.hpp;src\bison\stack.hh</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">src\bison\mqo.tab.cpp;src\bison\mqo.tab.hpp;src\bison\stack.hh</Outputs>
     </CustomBuild>
     <CustomBuild Include="src\reflex\mqo.l">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)tool\reflex\bin\reflex.exe src/reflex/mqo.l --header-file=src/reflex/mqo_lexer.hpp -o src/reflex/mqo_lexer.cpp </Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)tool\reflex\bin\reflex.exe src/reflex/mqo.l --header-file=src/reflex/mqo_lexer.hpp -o src/reflex/mqo_lexer.cpp </Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">generate .mqo lexer</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">generate .mqo lexer</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)tool\reflex\bin\reflex.exe src/reflex/mqo.l --header-file=src/reflex/mqo_lexer.hpp -o src/reflex/mqo_lexer.cpp </Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)tool\reflex\bin\reflex.exe src/reflex/mqo.l --header-file=src/reflex/mqo_lexer.hpp -o src/reflex/mqo_lexer.cpp </Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">generate .mqo lexer</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">generate .mqo lexer</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">src\reflex\mqo_lexer.cpp;src\reflex\mqo_lexer.hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">src\reflex\mqo_lexer.cpp;src\reflex\mqo_lexer.hpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">src\reflex\mqo_lexer.cpp;src\reflex\mqo_lexer.hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">src\reflex\mqo_lexer.cpp;src\reflex\mqo_lexer.hpp</Outputs>
     </CustomBuild>
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -223,7 +273,20 @@
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
@@ -238,14 +301,26 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -271,7 +346,57 @@
       </AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level1</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>NOMINMAX;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Include;$(ProjectDir)include;$(ProjectDir)lib;$(ProjectDir)tool\reflex\include;</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <DisableSpecificWarnings>4477;4503;4819;</DisableSpecificWarnings>
+      <BasicRuntimeChecks>UninitializedLocalUsageCheck</BasicRuntimeChecks>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+    </Lib>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level1</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NOMINMAX;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Include;$(ProjectDir)include;$(ProjectDir)lib;$(ProjectDir)tool\reflex\include;</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <OmitFramePointers>true</OmitFramePointers>
+      <DisableSpecificWarnings>4477;4503;4819;</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level1</WarningLevel>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
