@@ -1,5 +1,5 @@
 [submodule "imgui"]
-	path = imgui
+	path = bstorm/imgui
 	url = ssh://github.com/ocornut/imgui.git
 [submodule "bsengine/tool/reflex"]
 	path = bsengine/tool/reflex
