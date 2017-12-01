@@ -1,4 +1,4 @@
-彈幕嵐 [α1.0.0]
+彈幕嵐 [α1.0.4]
 ===
 
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](./LICENSE)
