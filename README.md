@@ -8,8 +8,7 @@
 ほぼ東方弾幕風Ph3[.1 pre6a]と同様に使えます
 
 # 動作環境
- * Windows7以降のWindows OS
- * 64bit版のみの提供となります
+ * Vista以降のWindows OS(32/64bit)
 
 # 本家との変更点
 ## スクリプト関連
