@@ -11,13 +11,13 @@ namespace bstorm {
   IDirectSoundBuffer8 * SoundDataLoaderFromSoundFile::loadSoundData(const std::wstring & path, IDirectSound8 * dSound) {
     IDirectSoundBuffer8* dSoundBuffer = NULL;
     // waveデータの書き込み
-    const std::wstring ext(getExt(path));
-    if (ext == L".wave" || ext == L".wav" || ext == L".WAV" || ext == L".WAVE") {
+    std::wstring ext(getLowerExt(path));
+    if (ext == L".wave" || ext == L".wav") {
       dSoundBuffer = readWaveFile(path, dSound);
-    } else if (ext == L".ogg" || ext == L".OGG") {
+    } else if (ext == L".ogg") {
       dSoundBuffer = readOggVorbisFile(path, dSound);
     } else {
-      throw std::runtime_error("unsupported sound file: " + toUTF8(path));
+      throw std::runtime_error("unsupported sound file format: " + toUTF8(path));
     }
     return dSoundBuffer;
   }

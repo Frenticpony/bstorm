@@ -26,6 +26,12 @@ namespace bstorm {
     return (found != std::string::npos) ? path.substr(found) : L"";
   }
 
+  std::wstring getLowerExt(const std::wstring& path) {
+    auto ext = getExt(path);
+    std::transform(ext.begin(), ext.end(), ext.begin(), tolower);
+    return ext;
+  }
+
   std::wstring getStem(const std::wstring & path) {
     std::wstring fileName = getFileName(path);
     auto found = fileName.find_last_of(L".");
@@ -45,11 +51,11 @@ namespace bstorm {
     }
   }
 
-  void getFilePathsRecursively(const std::wstring& dir, std::vector<std::wstring>& pathList, const std::unordered_set<std::wstring>& targetExt) {
-    getFilePaths(dir, pathList, targetExt, true);
+  void getFilePathsRecursively(const std::wstring& dir, std::vector<std::wstring>& pathList, const std::unordered_set<std::wstring>& ignoreExts) {
+    getFilePaths(dir, pathList, ignoreExts, true);
   }
 
-  void getFilePaths(const std::wstring & dir, std::vector<std::wstring>& pathList, const std::unordered_set<std::wstring>& targetExt, bool doRecursive) {
+  void getFilePaths(const std::wstring & dir, std::vector<std::wstring>& pathList, const std::unordered_set<std::wstring>& ignoreExts, bool doRecursive) {
     if (dir.empty()) return;
     WIN32_FIND_DATA data;
     HANDLE fh = FindFirstFile((dir + L"/*").c_str(), &data);
@@ -61,10 +67,10 @@ namespace bstorm {
       }
       std::wstring path = concatPath(dir, fileName);
       if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-        if (doRecursive) getFilePathsRecursively(path, pathList, targetExt);
+        if (doRecursive) getFilePathsRecursively(path, pathList, ignoreExts);
       } else {
-        auto ext = getExt(path);
-        if (targetExt.empty() || targetExt.count(ext) != 0) {
+        const auto ext = getLowerExt(path);
+        if (ignoreExts.count(ext) == 0) {
           pathList.push_back(path);
         }
       }

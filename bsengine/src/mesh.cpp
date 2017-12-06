@@ -105,7 +105,8 @@ namespace bstorm {
   }
 
   std::shared_ptr<Mesh> MeshCache::load(const std::wstring & path, const std::shared_ptr<TextureCache>& textureCache) {
-    if (getExt(path) != L".mqo") {
+    const auto ext = getLowerExt(path);
+    if (ext != L".mqo") {
       throw std::runtime_error("this file format is not supported: " + toUTF8(path));
     }
 

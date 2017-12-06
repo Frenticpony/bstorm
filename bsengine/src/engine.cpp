@@ -428,14 +428,14 @@ namespace bstorm {
   }
 
   static D3DXIMAGE_FILEFORMAT getProperFileFormat(const std::wstring& path) {
-    auto ext = getExt(path);
-    if (ext == L".png" || ext == L".PNG" || ext.empty()) return D3DXIFF_PNG;
-    if (ext == L".bmp" || ext == L".BMP") return D3DXIFF_BMP;
-    if (ext == L".dds" || ext == L".DDS") return D3DXIFF_DDS;
-    if (ext == L".jpg" || ext == L".JPG") return D3DXIFF_JPG;
-    if (ext == L".dib" || ext == L".DIB") return D3DXIFF_DIB;
-    if (ext == L".hdr" || ext == L".HDR") return D3DXIFF_HDR;
-    if (ext == L".pfm" || ext == L".PFM") return D3DXIFF_PFM;
+    auto ext = getLowerExt(path);
+    if (ext == L".png" || ext.empty()) return D3DXIFF_PNG;
+    if (ext == L".bmp") return D3DXIFF_BMP;
+    if (ext == L".dds") return D3DXIFF_DDS;
+    if (ext == L".jpg" || ext == L".jpeg") return D3DXIFF_JPG;
+    if (ext == L".dib") return D3DXIFF_DIB;
+    if (ext == L".hdr") return D3DXIFF_HDR;
+    if (ext == L".pfm") return D3DXIFF_PFM;
     return D3DXIFF_PNG;
   }
 

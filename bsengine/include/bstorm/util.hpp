@@ -80,13 +80,14 @@ namespace bstorm {
   void mkdir_p(const std::wstring& dirName);
 
   std::wstring getExt(const std::wstring& path);
+  std::wstring getLowerExt(const std::wstring& path);
   std::wstring getStem(const std::wstring& path);
   std::wstring getFileName(const std::wstring& path);
 
   // dir : 検索対象ディレクトリ、末尾の/はいらない、例：L"."
-  // targetExt : 検索対象の拡張子の集合、空ならすべてのファイルが対象、例：{L".txt", L".dnh"}
-  void getFilePaths(const std::wstring& dir, std::vector<std::wstring>& pathList, const std::unordered_set<std::wstring>& targetExt, bool doRecurive);
-  void getFilePathsRecursively(const std::wstring& dir, std::vector<std::wstring>& pathList, const std::unordered_set<std::wstring>& targetExt);
+  // ignoreExts : 検索除外対象の拡張子の集合、小文字で記述、例：{L".png", L".jpg"}
+  void getFilePaths(const std::wstring& dir, std::vector<std::wstring>& pathList, const std::unordered_set<std::wstring>& ignoreExts, bool doRecurive);
+  void getFilePathsRecursively(const std::wstring& dir, std::vector<std::wstring>& pathList, const std::unordered_set<std::wstring>& ignoreExts);
 
   void getDirs(const std::wstring& dir, std::vector<std::wstring>& dirList, bool doRecursive);
   void getDirsRecursively(const std::wstring& dir, std::vector<std::wstring>& dirList);
