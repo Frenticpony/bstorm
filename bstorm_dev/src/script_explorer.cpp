@@ -30,6 +30,8 @@ namespace bstorm {
     }
   };
 
+  const std::unordered_set<std::wstring> ignoreExts{L".png", L".jpg", L".jpeg", L".bmp", L".gif", L".dds", L".hdr", L".dib", L".pfm", L".tif", L".tiff", L".ttf", L".otf", L".mqo", L".mp3", L".mp4", L".avi", L".ogg", L".wav", L".wave", L".def", L".dat", L".fx", L".exe"};
+
   static void drawFlatView(const std::map<std::wstring, ScriptInfo>& scripts, std::wstring& selectedPath) {
     int uiId = 0;
     for (const auto& entry : scripts) {
@@ -104,8 +106,7 @@ namespace bstorm {
     iniWidth(width),
     iniHeight(height),
     useTreeView(false),
-    showAllPlayerScripts(false),
-    targetExt({ L".txt", L".dnh" })
+    showAllPlayerScripts(false)
   {
     refresh();
   }
@@ -246,7 +247,7 @@ namespace bstorm {
 
     // script/以下のスクリプトを再帰的に取得
     std::vector<std::wstring> scriptPaths;
-    getFilePathsRecursively(L"./script", scriptPaths, targetExt);
+    getFilePathsRecursively(L"./script", scriptPaths, ignoreExts);
 
     auto loader = std::make_shared<WinFileLoader>();
 

@@ -39,6 +39,5 @@ namespace bstorm {
     TreeView playerScriptTreeView;
     std::wstring selectedMainScriptPath;
     std::wstring selectedPlayerScriptPath;
-    std::unordered_set<std::wstring> targetExt;
   };
 }
