@@ -1239,7 +1239,7 @@ namespace bstorm {
 
   std::vector<ScriptInfo> Engine::getScriptList(const std::wstring & dirPath, int scriptType, bool doRecursive) {
     std::vector<std::wstring> pathList;
-    getFilePaths(dirPath, pathList, { L".txt", L".TXT", L".dnh", L".DNH" }, doRecursive);
+    getFilePaths(dirPath, pathList, {}, doRecursive);
     std::vector<ScriptInfo> infos;
     infos.reserve(pathList.size());
     const std::wstring scriptTypeName = getScriptTypeNameFromConst(scriptType);
