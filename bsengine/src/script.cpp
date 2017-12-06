@@ -17,6 +17,8 @@
 #include "runtime.h"
 
 namespace bstorm {
+  const std::unordered_set<std::wstring> ignoreScriptExts{L".png", L".jpg", L".jpeg", L".bmp", L".gif", L".dds", L".hdr", L".dib", L".pfm", L".tif", L".tiff", L".ttf", L".otf", L".mqo", L".mp3", L".mp4", L".avi", L".ogg", L".wav", L".wave", L".def", L".dat", L".fx", L".exe"};
+
   Script::Script(const std::wstring& path, const std::wstring& type, const std::wstring& version, int id, Engine* engine) :
     L(NULL),
     path(path),

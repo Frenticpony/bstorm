@@ -4,8 +4,9 @@
 #include <memory>
 #include <vector>
 #include <utility>
-#include <luajit/lua.hpp>
+#include <unordered_set>
 #include <unordered_map>
+#include <luajit/lua.hpp>
 
 #include <bstorm/non_copyable.hpp>
 #include <bstorm/code_generator.hpp>
@@ -15,6 +16,7 @@ namespace bstorm {
   class DnhValue;
   class DnhArray;
   class ScriptManager;
+  extern const std::unordered_set<std::wstring> ignoreScriptExts;
   class Script : private NonCopyable {
   public:
     enum class State {
