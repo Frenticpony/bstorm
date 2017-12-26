@@ -17,7 +17,6 @@ namespace bstorm {
     static CommonDataDB::DataAreaName selectedArea;
     {
       // common data area list
-      ImGui::BeginGroup();
       ImGui::Text("Data Area");
       ImGui::BeginChild("CommonDataAreaList", ImVec2(-1, ImGui::GetContentRegionAvail().y * 0.1), true, ImGuiWindowFlags_HorizontalScrollbar);
       for (const auto& entry : areaTable) {
@@ -28,11 +27,9 @@ namespace bstorm {
         }
       }
       ImGui::EndChild();
-      ImGui::EndGroup();
     }
     {
       // key-value list
-      ImGui::BeginGroup();
       ImGui::BeginChild("CommonDataKeyValueList", ImVec2(-1, -1), true, ImGuiWindowFlags_HorizontalScrollbar);
       auto it = areaTable.find(selectedArea);
       if (it != areaTable.end()) {
@@ -52,7 +49,6 @@ namespace bstorm {
         ImGui::Separator();
       }
       ImGui::EndChild();
-      ImGui::EndGroup();
     }
   }
 
