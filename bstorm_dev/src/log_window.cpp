@@ -28,10 +28,10 @@ namespace bstorm {
 
   void LogWindow::log(const std::string& tag, const std::string& text) {
     int oldSize = buf.size();
-    buf.append(tag.c_str());
-    buf.append(" ");
-    buf.append(text.c_str());
-    buf.append("\n");
+    buf.appendf(tag.c_str());
+    buf.appendf(" ");
+    buf.appendf(text.c_str());
+    buf.appendf("\n");
     for (int newSize = buf.size(); oldSize < newSize; oldSize++) {
       if (buf[oldSize] == '\n') lineOffsets.push_back(oldSize);
     }

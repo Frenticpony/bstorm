@@ -162,12 +162,19 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
 
     ImGui_ImplDX9_Init(hWnd, engine->getGraphicDevice());
     ImGuiIO& io = ImGui::GetIO();
+    io.Fonts->AddFontDefault();
     ImFontConfig config;
     config.MergeMode = true;
-    io.Fonts->AddFontDefault();
     io.Fonts->AddFontFromFileTTF("fonts/ja/ipagp.ttf", 12, &config, glyphRangesJapanese);
     static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
     io.Fonts->AddFontFromFileTTF("fonts/fa/fontawesome-webfont.ttf", 13.0f, &config, icon_ranges);
+
+    // スタイル設定
+    {
+      ImGuiStyle& imGuiStyle = ImGui::GetStyle();
+      ImGui::StyleColorsDark();
+      imGuiStyle.FrameRounding = 3.0f;
+    }
 
     /* message loop */
     engine->resetFpsCounter();
@@ -234,8 +241,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
         cameraBrowser->draw(engine);
         objectBrowser->draw(engine);
 #ifdef _DEBUG
-        static bool showTestWindow = true;
-        ImGui::ShowTestWindow(&showTestWindow);
+        ImGui::ShowDemoWindow();
+        ImGui::ShowMetricsWindow();
+        ImGui::ShowStyleEditor();
+        ImGui::ShowStyleSelector("style selector");
+        ImGui::ShowFontSelector("font selector");
+        ImGui::ShowUserGuide();
 #endif
         ImGui::Render();
         d3DDevice->EndScene();
