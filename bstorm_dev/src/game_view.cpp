@@ -75,54 +75,78 @@ namespace bstorm {
       }
       {
         ImGui::PopStyleVar();
+        const float optionSpace = 149.0f;
+        const float controllerSpace = 69.0f;
+        // 調整用
+        //ImGui::SliderFloat("option Space", &optionSpace, 0, 1000);
+        //ImGui::SliderFloat("controller Space", &controllerSpace, 0, 1000);
+
         // tool bar
         ImGui::BeginGroup();
-        ImGui::Text("elapsed: %lld", playController->getElapsedFrame());
-        float toolStartX = ImGui::GetContentRegionAvailWidth() * 0.68f;
-        ImGui::SameLine(toolStartX);
         {
-          bool renderIntersectionEnable = playController->isRenderIntersectionEnabled();
-          ImGui::Checkbox("render intersection", &renderIntersectionEnable);
-          playController->setRenderIntersectionEnable(renderIntersectionEnable);
+          // info text
+          ImGui::BeginGroup();
+          ImGui::Text(" elapsed: %lld", playController->getElapsedFrame());
+          ImGui::Text(playController->isPackageFinished() ? " select package" : " running");
+          ImGui::EndGroup();
         }
-        ImGui::SameLine();
-        if (ImGui::Button(ICON_FA_REFRESH)) {
-          playController->reload();
-        }
-        if (ImGui::IsItemHovered()) {
-          ImGui::SetTooltip("reload package");
-        }
-        ImGui::SameLine();
-        if (playController->isPaused()) {
-          if (ImGui::Button(ICON_FA_PLAY)) {
-            playController->pause(false);
-          }
-        } else {
-          if (ImGui::Button(ICON_FA_PAUSE)) {
-            playController->pause(true);
-          }
-        }
-        ImGui::SameLine();
-        if (ImGui::Button(ICON_FA_STEP_FORWARD)) {
-          playController->tick();
-        }
+        ImGui::SameLine(ImGui::GetContentRegionAvailWidth() - optionSpace - controllerSpace);
         {
-          ImGui::Text(playController->isPackageFinished() ? "select package" : "running");
-          ImGui::SameLine(toolStartX);
+          // option
+          ImGui::BeginGroup();
+          {
+            bool renderIntersectionEnable = playController->isRenderIntersectionEnabled();
+            ImGui::Checkbox("show intersection", &renderIntersectionEnable);
+            playController->setRenderIntersectionEnable(renderIntersectionEnable);
+          }
           {
             bool playerInvincibleEnable = playController->isPlayerInvincibleEnabled();
-            ImGui::Checkbox("player invincible", &playerInvincibleEnable);
+            ImGui::Checkbox("never hit", &playerInvincibleEnable);
             playController->setPlayerInvincibleEnable(playerInvincibleEnable);
           }
-          ImGui::SameLine();
-          ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
-          int playSpeed = playController->getPlaySpeed();
-          ImGui::InputInt("##playSpeed", &playSpeed, 1, 5);
-          playController->setPlaySpeed(std::max(playSpeed, 1));
-          ImGui::PopItemWidth();
+          ImGui::EndGroup();
         }
-        if (ImGui::IsItemHovered()) {
-          ImGui::SetTooltip("speed");
+        ImGui::SameLine(ImGui::GetContentRegionAvailWidth() - controllerSpace);
+        {
+          // controller
+          ImGui::BeginGroup();
+          {
+            // row 1
+            if (ImGui::Button(ICON_FA_REFRESH)) {
+              playController->reload();
+            }
+            if (ImGui::IsItemHovered()) {
+              ImGui::SetTooltip("reload package");
+            }
+            ImGui::SameLine();
+            if (playController->isPaused()) {
+              if (ImGui::Button(ICON_FA_PLAY)) {
+                playController->pause(false);
+              }
+            } else {
+              if (ImGui::Button(ICON_FA_PAUSE)) {
+                playController->pause(true);
+              }
+            }
+            ImGui::SameLine();
+            if (ImGui::Button(ICON_FA_STEP_FORWARD)) {
+              playController->tick();
+            }
+          }
+          {
+            // row2
+            {
+              ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
+              int playSpeed = playController->getPlaySpeed();
+              ImGui::InputInt("##playSpeed", &playSpeed, 1, 5);
+              playController->setPlaySpeed(std::max(playSpeed, 1));
+              ImGui::PopItemWidth();
+            }
+            if (ImGui::IsItemHovered()) {
+              ImGui::SetTooltip("speed");
+            }
+          }
+          ImGui::EndGroup();
         }
         ImGui::EndGroup();
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
