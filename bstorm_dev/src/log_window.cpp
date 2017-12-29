@@ -62,7 +62,7 @@ namespace bstorm {
         ImGui::TextUnformatted(buf.begin());
       }
       if (scrollToBottom) {
-        ImGui::SetScrollHere(1.0f);
+        ImGui::SetScrollHere(0.99999f);
       }
       scrollToBottom = false;
       ImGui::LogFinish();
