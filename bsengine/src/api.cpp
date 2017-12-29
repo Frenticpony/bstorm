@@ -36,11 +36,6 @@
 #undef VK_PAUSE
 
 namespace bstorm {
-  static int DummyFunction(lua_State* L) {
-    return 0;
-  }
-
-
   static int GetModuleDirectory(lua_State* L) {
     DnhArray(L"./").push(L);
     return 1;
