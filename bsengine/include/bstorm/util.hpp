@@ -8,7 +8,6 @@
 #include <d3dx9.h>
 
 #include <bstorm/type.hpp>
-#include <bstorm/script_info.hpp>
 
 namespace bstorm {
   template <class T>

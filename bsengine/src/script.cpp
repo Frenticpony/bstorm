@@ -3,6 +3,7 @@
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/const.hpp>
 #include <bstorm/util.hpp>
+#include <bstorm/script_info.hpp>
 #include <bstorm/parser.hpp>
 #include <bstorm/obj.hpp>
 #include <bstorm/dnh_value.hpp>
