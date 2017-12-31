@@ -35,6 +35,7 @@ namespace bstorm {
 }
 
 %code { // dnh.tab.cpp after #include dnh.tab.hpp
+#include <regex>
 #include <bstorm/static_script_error.hpp>
 #include <bstorm/util.hpp>
 
@@ -207,7 +208,8 @@ static void addDef(DnhParseContext* ctx, NodeDef* def) {
 %token <wstr> TK_STR "<string>"
 
 /* for header */
-%token <wstr> TK_HEADER "<header>"
+%token <wstr> TK_HEADER "#<header>"
+%token TK_IGNORED_HEADER "##..#<header>"
 
 %token TK_EOF 0 "end of file"
 
@@ -225,7 +227,7 @@ static void addDef(DnhParseContext* ctx, NodeDef* def) {
 %type <stmt> call-stmt return yield break var-assign var-init
 %type <stmt> loop-stmt local loop times while ascent descent
 %type <stmt> if alternative
-%type <stmt> header
+%type <stmt> header ignored-header
 %type <block> block loop-body opt-else opt-others
 %type <elsifs> elsifs
 %type <elsif> elsif
@@ -323,6 +325,7 @@ compound-stmt      : builtin-sub-def { $$ = NULL; }
                    | alternative
                    | loop-stmt
                    | header
+                   | ignored-header
 
 loop-stmt          : loop
                    | times
@@ -426,6 +429,9 @@ header             : TK_HEADER TK_LBRACKET header-params TK_RBRACKET
                          delete $1; delete $2;
                        }
 
+ignored-header     : TK_IGNORED_HEADER TK_LBRACKET header-params TK_RBRACKET { $$ = NULL; delete $3; }
+                   | TK_IGNORED_HEADER TK_STR { $$ = NULL; delete $2; }
+
 header-params      : header-params1 opt-comma { $$ = $1; }
                    | none { $$ = new std::vector<std::wstring>(); }
 header-params1     : header-params1 TK_COMMA header-param { $$ = $1; $1->push_back(*$3); delete $3; }
@@ -458,7 +464,7 @@ indices1           : TK_LBRACKET exp TK_RBRACKET          { $$ = new std::vector
 declarator         : TK_LET | TK_REAL | TK_VAR
 var-decl           : declarator TK_IDENT { checkDupDef(ctx, @2, *$2); } { auto varDecl = new NodeVarDecl(*$2); fixPos(varDecl, @1); addDef(ctx, varDecl); delete($2); }
 
-var-init           : declarator TK_IDENT { checkDupDef(ctx, @2, *$2); } TK_ASSIGN exp { $$ = new NodeVarInit(*$2, exp($5)); fixPos($$, @1); addDef(ctx, new NodeVarDecl(*$2)); delete $2; }
+var-init           : declarator TK_IDENT { checkDupDef(ctx, @2, *$2); } TK_ASSIGN exp { $$ = new NodeVarInit(*$2, exp($5)); auto varDecl = new NodeVarDecl(*$2); fixPos($$, @1); fixPos(varDecl, @1); addDef(ctx, varDecl); delete $2; }
 
 var-assign         : left-value TK_ASSIGN exp    { $$ = new NodeAssign(leftval($1), exp($3)); fixPos($$, @2); }
                    | left-value TK_ADDASSIGN exp { $$ = new NodeAddAssign(leftval($1), exp($3)); fixPos($$, @2); }
@@ -504,7 +510,12 @@ call-exp           : TK_IDENT                          { $$ = new NodeNoParenCal
 
 lit                : TK_NUM   { $$ = new NodeNum(*$1);  fixPos($$, @1); delete $1; }
                    | TK_CHAR  { $$ = new NodeChar($1); fixPos($$, @1); }
-                   | TK_STR   { $$ = new NodeStr(*$1);  fixPos($$, @1); delete $1 ; }
+                   | TK_STR
+                       {
+                         // escape: \x -> x
+                         $$ = new NodeStr(std::regex_replace(*$1, std::wregex(L"\\\\(.)"), L"$1"));  fixPos($$, @1);
+                         delete $1 ;
+                       }
                    | array
 
 array              : TK_LBRACKET exps TK_RBRACKET { $$ = new NodeArray(*$2); fixPos($$, @1); delete($2); }

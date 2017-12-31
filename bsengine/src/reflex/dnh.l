@@ -10,6 +10,7 @@
 #include <vector>
 #include <cstdio>
 #include <memory>
+#include <set>
 
 #include <bstorm/util.hpp>
 #include <bstorm/static_script_error.hpp>
@@ -35,10 +36,8 @@ public :
     } else {
       includePath = std::make_shared<std::wstring>(canonicalPath(path));
     }
-    for (const auto& included : includeStack) {
-      if (*includePath == *included) {
-        throw static_script_error(*getCurrentFilePath(), lineno(), columno(), L"detect recursive include: " + path);
-      }
+    if (visitedFilePaths.count(*includePath) != 0) {
+      return;
     }
     std::FILE* fp = loader->openFile(*includePath);
     if (fp == NULL) {
@@ -48,6 +47,7 @@ public :
         throw static_script_error(*getCurrentFilePath(), lineno(), columno(), L"can't include file: " + path);
       }
     }
+    visitedFilePaths.insert(*includePath);
     if (includeStack.empty()) {
       in(fp);
     } else {
@@ -75,6 +75,7 @@ protected :
   std::string v_str;
   std::vector<std::shared_ptr<std::wstring>> includeStack;
   std::shared_ptr<FileLoader> loader;
+  std::set<std::wstring> visitedFilePaths;
 %}
 
 %{
@@ -168,12 +169,15 @@ newline \r?\n
 
 <STRING_LIT>{
 \" { start(INITIAL); return tk::TK_STR; }
-\\. { v_wstr += (wstr())[1]; }
+[\\][\\] { v_wstr += wstr(); }
+\\\" { v_wstr += (wstr())[1]; }
 . { v_wstr += wstr(); }
 }
 
 {ident} { v_str = str(); return tk::TK_IDENT; }
 
+"#"{2,}"東方弾幕風" { return tk::TK_IGNORED_HEADER; }
+"#"{2,}{ident} { return tk::TK_IGNORED_HEADER; }
 "#東方弾幕風" { v_wstr = L"TouhouDanmakufu"; return tk::TK_HEADER; }
 "#"{ident} { v_wstr = wstr().substr(1); return tk::TK_HEADER; }
 
