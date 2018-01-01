@@ -241,7 +241,7 @@ static void addDef(DnhParseContext* ctx, NodeDef* def) {
 %type <strs> params params1 opt-params
 %type <str> param loop-param
 %type <wstr> header-param
-%type <wstrs> header-params header-params1
+%type <wstrs> header-params
 
 %start program
 
@@ -432,10 +432,9 @@ header             : TK_HEADER TK_LBRACKET header-params TK_RBRACKET
 ignored-header     : TK_IGNORED_HEADER TK_LBRACKET header-params TK_RBRACKET { $$ = NULL; delete $3; }
                    | TK_IGNORED_HEADER TK_STR { $$ = NULL; delete $2; }
 
-header-params      : header-params1 opt-comma { $$ = $1; }
+header-params      : header-params header-param { $$ = $1; $1->push_back(*$2); delete $2; }
+                   | header-params TK_COMMA { $$ = $1;}
                    | none { $$ = new std::vector<std::wstring>(); }
-header-params1     : header-params1 TK_COMMA header-param { $$ = $1; $1->push_back(*$3); delete $3; }
-                   | header-param { $$ = new std::vector<std::wstring>{*$1}; delete $1; }
 header-param       : TK_STR 
                    | TK_IDENT { $$ = new std::wstring(toUnicode(*$1)); delete($1); }
                    | TK_NUM { $$ = new std::wstring(toUnicode(*$1)); delete($1); }
