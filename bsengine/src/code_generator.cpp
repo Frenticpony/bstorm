@@ -182,10 +182,11 @@ namespace bstorm {
     addCode(")"); newLine();
     blk.traverse(*this);
     if (std::dynamic_pointer_cast<NodeFuncDef>(def)) {
-      if (!std::dynamic_pointer_cast<NodeProcParam>(blk.table.at("result"))) {
+      auto result = blk.table.at("result");
+      if (!std::dynamic_pointer_cast<NodeProcParam>(result)) {
         indent();
         addCode("do return " + varname("result") + " end");
-        newLine();
+        newLine(result->filePath, result->line);
         unindent();
       }
     }

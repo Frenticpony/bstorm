@@ -98,7 +98,7 @@ namespace bstorm {
             auto prefix = srcPos.filename ? (toUTF8(getFileName(*srcPos.filename)) + "L" + std::to_string(srcPos.line) + ": ") : "";
             throw std::runtime_error(prefix + "too many variable used in one function");
           } else {
-            throw std::runtime_error("too many variable used in one function");
+            throw std::runtime_error("too many variable used in one function.");
           }
         } else {
           throw std::runtime_error("unexpected compile error occured, please send a bug report: " + msg);

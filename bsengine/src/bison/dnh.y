@@ -84,6 +84,7 @@ static void checkDupDef(DnhParseContext* ctx, const DnhParser::location_type& yy
   if (ctx->env->table.count(name) != 0) {
     auto prevDef = ctx->env->table[name];
     if (name == "result" && (!prevDef->filePath || (*prevDef->filePath).empty())) {
+      // FIXME: this block is never called.
       throw static_script_error(*yylloc.begin.filename, yylloc.begin.line, yylloc.begin.column, L"'result' has already been declared by compiler in function");
     }
     auto prevDefLine = std::to_wstring(prevDef->line);
@@ -337,19 +338,21 @@ builtin-sub-def    : TK_ATMARK TK_IDENT { checkDupDef(ctx, @2, *$2); } new-scope
 
 sub-def            : TK_SUB TK_IDENT { checkDupDef(ctx, @2, *$2); } new-scope opt-nullparams block { auto def = new NodeSubDef(*$2, block($6)); fixPos(def, @1); addDef(ctx, def); delete($2); }
 
-func-def           : TK_FUNCTION TK_IDENT { checkDupDef(ctx, @2, *$2); } new-scope opt-params func-result-decl block
+func-def           : TK_FUNCTION TK_IDENT { checkDupDef(ctx, @2, *$2); } new-scope opt-params
+                       {
+                         if (ctx->env->table.count("result") == 0) {
+                           auto result = new NodeVarDecl("result");
+                           fixPos(result, @1);
+                           addDef(ctx, result);
+                         }
+                       }
+                       block
                        {
                          auto def = new NodeFuncDef(*$2, *$5, block($7));
                          fixPos(def, @1);
                          addDef(ctx, def);
                          delete($2); delete($5);
                        }
-
-func-result-decl   : {
-                       if (ctx->env->table.count("result") == 0) {
-                         addDef(ctx, new NodeVarDecl("result"));
-                       }
-                     }
 
 task-def           : TK_TASK TK_IDENT { checkDupDef(ctx, @2, *$2); } new-scope opt-params block { auto def = new NodeTaskDef(*$2, *$5, block($6)); fixPos(def, @1); addDef(ctx, def); delete($2); delete($5); }
 

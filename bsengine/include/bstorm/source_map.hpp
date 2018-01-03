@@ -2,7 +2,7 @@
 
 #include <string>
 #include <memory>
-#include <unordered_map>
+#include <map>
 
 namespace bstorm {
   struct SourcePos {
@@ -21,6 +21,6 @@ namespace bstorm {
     void logSourcePos(int outputLine, const std::shared_ptr<std::wstring>& path, int srcLine);
     SourcePos getSourcePos(int outputLine) const;
   private:
-    std::unordered_map<int, SourcePos> srcMap;
+    std::map<int, SourcePos> srcMap;
   };
 }
