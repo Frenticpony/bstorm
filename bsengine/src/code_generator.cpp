@@ -31,6 +31,7 @@ namespace bstorm {
   }
   void CodeGenerator::traverse(NodeChar& exp) {
     addCode("[=[" + toUTF8(std::wstring{ exp.c }) + "]=]");
+    if (exp.c == L'\r' || exp.c == L'\n') outputLine++;
   }
   void CodeGenerator::traverse(NodeStr& exp) {
     addCode("{");
