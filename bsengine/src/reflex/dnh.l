@@ -88,11 +88,24 @@ ident [A-Za-z_][A-Za-z0-9_]*
 number ([0-9]+(\.[0-9]+)?)|(0x[0-9a-fA-F]+)
 newline \r?\n
 
+%x LINE_COMMENT
 %x STRING_LIT
 
 %%
 "/*".*?"*/"
-"//".*?{newline}
+"//" { start(LINE_COMMENT); }
+
+<LINE_COMMENT>{
+{newline} { start(INITIAL); }
+<<EOF>> {
+  start(INITIAL);
+  if (includeStack.size() <= 1) {
+    return tk::TK_EOF;
+  }
+  popInclude();
+}
+.
+}
 
 {white}
 "alternative" { return(tk::TK_ALTERNATIVE); }

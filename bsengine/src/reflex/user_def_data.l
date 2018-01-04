@@ -60,11 +60,18 @@ white [ \t\r\n\f]+
 number [0-9]+(\.[0-9]+)?
 newline \r?\n
 
+%x LINE_COMMENT
 %x STRING_LIT
 
 %%
 "/*".*?"*/"
-"//".*?{newline}
+"//" { start(LINE_COMMENT); }
+
+<LINE_COMMENT>{
+{newline} { start(INITIAL); }
+<<EOF>> { return tk::TK_EOF; }
+.
+}
 
 {white}
 "#UserShotData"    { return tk::TK_USER_SHOT_DATA; }
@@ -114,9 +121,10 @@ newline \r?\n
 \"                 { v_wstr.clear(); start(STRING_LIT); }
 
 <STRING_LIT>{
-\"  { start(INITIAL); return tk::TK_STR; }
-\\. { v_wstr += (wstr())[1]; }
-.   { v_wstr += wstr(); }
+\" { start(INITIAL); return tk::TK_STR; }
+[\\][\\] { v_wstr += wstr(); }
+\\\" { v_wstr += (wstr())[1]; }
+. { v_wstr += wstr(); }
 }
 
 . {
