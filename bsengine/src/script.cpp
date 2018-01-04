@@ -82,8 +82,6 @@ namespace bstorm {
       srcMap = codeGen.getSourceMap();
       engine->logInfo("codegen completed.");
 
-      engine->logInfo(codeGen.getCode());
-
       // ランタイム読み込み
       luaL_loadbuffer(L, (const char *)luaJIT_BC_runtime, luaJIT_BC_runtime_SIZE, DNH_RUNTIME_NAME);
       callLuaChunk();
