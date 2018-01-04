@@ -400,6 +400,7 @@ namespace bstorm {
     return fontParamModified;
   }
 
+  // TODO: パーサの引数に返り値を持たせないと使いにくいので直す(要求度：低)
 
   static bool parseChar(const std::wstring& src, int& i, wchar_t c) {
     if (i < src.size() && src[i] == c) {
@@ -410,7 +411,7 @@ namespace bstorm {
   }
 
   static bool parseString(const std::wstring& src, int& i, const std::wstring& s) {
-    if (i < src.size() && src.substr(i, s.size()) == s) {
+    if (i < src.size() && s == src.substr(i, s.size())) {
       i += s.size();
       return true;
     }
@@ -442,9 +443,22 @@ namespace bstorm {
       if (!parseChar(src, i, L'"')) goto parse_failed;
       std::wstring& dst = (propName == L"rb") ? rb : rt;
       while (i < src.size() && src[i] != L'"') {
-        dst += src[i++];
+        if (parseString(src, i, L"&nbsp;")) {
+          dst += L" ";
+        } else if (parseString(src, i, L"&quot;")) {
+          dst += L"\"";
+        } else if (parseString(src, i, L"&osb;")) {
+          dst += L"[";
+        } else if (parseString(src, i, L"&csb;")) {
+          dst += L"]";
+        } else {
+          dst += src[i++];
+        }
       }
       if (!parseChar(src, i, L'"')) goto parse_failed;
+      skipSpace(src, i);
+      parseChar(src, i, L','); // カンマをセパレータにできる。(NOTE: 本家は他にも書けるが未対応
+      skipSpace(src, i);
     }
     if (!parseChar(src, i, L']')) goto parse_failed;
     return true;
@@ -465,6 +479,14 @@ parse_failed:
     for (int i = 0; i < src.size();) {
       if (parseNewLine(src, i)) {
         bodyText += L'\n';
+      } else if (parseString(src, i, L"&nbsp;")) {
+        bodyText += L" ";
+      } else if (parseString(src, i, L"&quot;")) {
+        bodyText += L"\"";
+      } else if (parseString(src, i, L"&osb;")) {
+        bodyText += L"[";
+      } else if (parseString(src, i, L"&csb;")) {
+        bodyText += L"]";
       } else {
         std::wstring rb;
         std::wstring rt;
