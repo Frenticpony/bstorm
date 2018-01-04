@@ -78,7 +78,7 @@ namespace bstorm {
     ScriptExplorer::TreeView root;
     for (const auto& entry : scripts) {
       const auto& script = entry.second;
-      std::vector<std::wstring> trail = split(L"./" + script.path, L'/');
+      std::vector<std::wstring> trail = split(script.path, L'/');
       ScriptExplorer::TreeView* current = &root;
       std::string uniq;
       for (int k = 0; k < trail.size(); k++) {
@@ -246,7 +246,7 @@ namespace bstorm {
 
     // script/以下のスクリプトを再帰的に取得
     std::vector<std::wstring> scriptPaths;
-    getFilePathsRecursively(L"./script", scriptPaths, ignoreScriptExts);
+    getFilePathsRecursively(L"script", scriptPaths, ignoreScriptExts);
 
     auto loader = std::make_shared<WinFileLoader>();
 
