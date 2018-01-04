@@ -4166,6 +4166,17 @@ namespace bstorm {
     return 1;
   }
 
+  static int ObjEnemyBossScene_SetSpellTimer(lua_State* L) {
+    Engine* engine = getEngine(L);
+    int objId = DnhValue::toInt(L, 1);
+    int sec = DnhValue::toInt(L, 2);
+    lua_pop(L, 2);
+    if (auto obj = engine->getObject<ObjEnemyBossScene>(objId)) {
+      obj->setTimer(sec);
+    }
+    return 0;
+  }
+
   static int ObjEnemyBossScene_StartSpell(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
@@ -6103,6 +6114,7 @@ namespace bstorm {
       unsafe(ObjEnemyBossScene_Add, 3);
       unsafe(ObjEnemyBossScene_LoadInThread, 1);
       unsafe(ObjEnemyBossScene_GetInfo, 2);
+      unsafe(ObjEnemyBossScene_SetSpellTimer, 2);
       unsafe(ObjEnemyBossScene_StartSpell, 1);
 
       safe(ObjShot_Create, 1);
