@@ -172,32 +172,40 @@ namespace bstorm {
     return saveCommonDataArea(areaName, fstream);
   }
 
-  static int readCommonDataHeader(std::istream& in) {
+  static uint32_t readCommonDataHeader(std::istream& in) {
     in.ignore(sizeof(commonDataHeader) - 1);
     uint32_t keyCntx2 = 0;
     in.read((char*)&keyCntx2, sizeof(keyCntx2));
-    return keyCntx2 >> 1;
+    return keyCntx2;
   }
 
   static void readCommonDataDataSection(CommonDataDB::CommonDataArea& area, std::istream& in) {
-    in.ignore(sizeof(uint8_t)); // skip 0xff
-    uint32_t keySize = 0;
-    in.read((char*)&keySize, sizeof(keySize));
-    std::string keyName(keySize, '\0');
-    in.read(&keyName[0], keySize);
-    // skip element size
-    in.ignore(sizeof(uint32_t));
-    auto value = DnhValue::deserialize(in);
-    // skip 0x02, keyName_sizeSize, keyName_size, 0x00000004, keySize
-    in.ignore(sizeof(uint8_t) + sizeof(uint32_t) + keySize + 5 + sizeof(uint32_t) + sizeof(uint32_t));
-    area[fromMultiByte<932>(keyName)] = std::move(value);
+    uint8_t sectionType = 0x02;
+    in.read((char*)&sectionType, sizeof(sectionType)); // 0xff or 0x02
+    if (sectionType == 0xff) {
+      // read element
+      uint32_t keySize = 0;
+      in.read((char*)&keySize, sizeof(keySize));
+      std::string keyName(keySize, '\0');
+      in.read(&keyName[0], keySize);
+      // skip element size
+      in.ignore(sizeof(uint32_t));
+      auto value = DnhValue::deserialize(in);
+      area[fromMultiByte<932>(keyName)] = std::move(value);
+    } else {
+      // read element size
+      uint32_t keySizeSize = 0;
+      in.read((char*)&keySizeSize, sizeof(keySizeSize));
+      // skip keyName_size, 0x00000004, element size
+      in.ignore(keySizeSize + sizeof(uint32_t) + sizeof(uint32_t));
+    }
   }
 
   bool CommonDataDB::loadCommonDataArea(const DataAreaName& areaName, std::istream& in) {
     // 新しいエリアで上書きする
     CommonDataArea area;
-    int keyCnt = readCommonDataHeader(in);
-    for (int i = 0; i < keyCnt; i++) {
+    const auto keyCntx2 = readCommonDataHeader(in);
+    for (auto i = 0; i < keyCntx2; i++) {
       readCommonDataDataSection(area, in);
     }
     areaTable[areaName] = std::move(area);
