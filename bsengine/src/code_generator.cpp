@@ -517,7 +517,7 @@ namespace bstorm {
       // case
       if (i != 0) addCode("else"); // 1つ目以降のcaseはelse if
       addCode("if false");
-      // orの右結合計算列を作る(右結合の方が恐らく早く短絡するので)
+      // orの右結合計算列を作る(右結合の方が早く短絡するので)
       for (auto& exp : stmt.cases[i]->exps) {
         addCode(" or (");
         addCode("(" + runtime("compare") + "(c,"); exp->traverse(*this); addCode(") == 0)");

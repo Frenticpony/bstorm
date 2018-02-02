@@ -205,7 +205,7 @@ namespace bstorm {
     // 新しいエリアで上書きする
     CommonDataArea area;
     const auto keyCntx2 = readCommonDataHeader(in);
-    for (auto i = 0; i < keyCntx2; i++) {
+    for (uint32_t i = 0; i < keyCntx2; i++) {
       readCommonDataDataSection(area, in);
     }
     areaTable[areaName] = std::move(area);
