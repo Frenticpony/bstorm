@@ -117,26 +117,27 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
   UpdateWindow(hWnd);
 
   MSG msg;
-  std::shared_ptr<KeyConfig> masterKeyConfig = std::make_shared<KeyConfig>();
+  std::shared_ptr<KeyConfig> defaultKeyConfig = std::make_shared<KeyConfig>();
   try {
-    masterKeyConfig->addVirtualKey(VK_LEFT, KEY_LEFT, 0);
-    masterKeyConfig->addVirtualKey(VK_RIGHT, KEY_RIGHT, 1);
-    masterKeyConfig->addVirtualKey(VK_UP, KEY_UP, 2);
-    masterKeyConfig->addVirtualKey(VK_DOWN, KEY_DOWN, 3);
-    masterKeyConfig->addVirtualKey(VK_SHOT, KEY_Z, 5);
-    masterKeyConfig->addVirtualKey(VK_SPELL, KEY_X, 6);
-    masterKeyConfig->addVirtualKey(VK_OK, KEY_Z, 5);
-    masterKeyConfig->addVirtualKey(VK_CANCEL, KEY_X, 6);
-    masterKeyConfig->addVirtualKey(VK_SLOWMOVE, KEY_LSHIFT, 7);
-    masterKeyConfig->addVirtualKey(VK_USER1, KEY_C, 8);
-    masterKeyConfig->addVirtualKey(VK_USER2, KEY_V, 9);
-    masterKeyConfig->addVirtualKey(VK_PAUSE, KEY_ESCAPE, 10);
+    defaultKeyConfig->addVirtualKey(VK_LEFT, KEY_LEFT, 0);
+    defaultKeyConfig->addVirtualKey(VK_RIGHT, KEY_RIGHT, 1);
+    defaultKeyConfig->addVirtualKey(VK_UP, KEY_UP, 2);
+    defaultKeyConfig->addVirtualKey(VK_DOWN, KEY_DOWN, 3);
+    defaultKeyConfig->addVirtualKey(VK_SHOT, KEY_Z, 5);
+    defaultKeyConfig->addVirtualKey(VK_SPELL, KEY_X, 6);
+    defaultKeyConfig->addVirtualKey(VK_OK, KEY_Z, 5);
+    defaultKeyConfig->addVirtualKey(VK_CANCEL, KEY_X, 6);
+    defaultKeyConfig->addVirtualKey(VK_SLOWMOVE, KEY_LSHIFT, 7);
+    defaultKeyConfig->addVirtualKey(VK_USER1, KEY_C, 8);
+    defaultKeyConfig->addVirtualKey(VK_USER2, KEY_V, 9);
+    defaultKeyConfig->addVirtualKey(VK_PAUSE, KEY_ESCAPE, 10);
 
-    auto engine = std::make_shared<Engine>(hWnd, screenWidth, screenHeight, logger, masterKeyConfig);
+    auto engine = std::make_shared<Engine>(hWnd, screenWidth, screenHeight, logger, defaultKeyConfig);
 
     if (packageMainScriptPath.empty()) {
       throw std::runtime_error("package main script not specified.");
     }
+
     engine->setPackageMainScript(packageMainScriptPath);
     engine->startPackage();
 

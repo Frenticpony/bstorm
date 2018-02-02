@@ -25,7 +25,6 @@
     <ClInclude Include="include\bstorm\code_generator.hpp" />
     <ClInclude Include="include\bstorm\collision_matrix.hpp" />
     <ClInclude Include="include\bstorm\common_data_db.hpp" />
-    <ClInclude Include="include\bstorm\com_deleter.hpp" />
     <ClInclude Include="include\bstorm\const.hpp" />
     <ClInclude Include="include\bstorm\dnh_const.hpp" />
     <ClInclude Include="include\bstorm\dnh_value.hpp" />

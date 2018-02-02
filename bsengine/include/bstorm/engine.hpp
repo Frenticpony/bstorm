@@ -53,7 +53,7 @@ namespace bstorm {
   class GameState;
   class Engine {
   public:
-    Engine(HWND hWnd, int screenWidth, int screenHeight, const std::shared_ptr<Logger>& logger, const std::shared_ptr<KeyConfig>& masterKeyConfig);
+    Engine(HWND hWnd, int screenWidth, int screenHeight, const std::shared_ptr<Logger>& logger, const std::shared_ptr<KeyConfig>& defaultKeyConfig);
     virtual ~Engine();
     void addLostableGraphicResource(const std::shared_ptr<LostableGraphicResource>& resource);
     template <class T, class... Args>
@@ -390,7 +390,7 @@ namespace bstorm {
     std::shared_ptr<int> gameViewWidth;
     std::shared_ptr<int> gameViewHeight;
     std::shared_ptr<Logger> logger;
-    std::shared_ptr<KeyConfig> masterKeyConfig;
+    std::shared_ptr<KeyConfig> defaultKeyConfig;
     std::shared_ptr<Renderer> renderer;
     std::unordered_map<std::wstring, std::shared_ptr<RenderTarget>> renderTargets;
     std::shared_ptr<GameState> gameState;

@@ -54,12 +54,12 @@
 #undef VK_PAUSE
 
 namespace bstorm {
-  Engine::Engine(HWND hWnd, int screenWidth, int screenHeight, const std::shared_ptr<Logger>& logger, const std::shared_ptr<KeyConfig>& masterKeyConfig) :
+  Engine::Engine(HWND hWnd, int screenWidth, int screenHeight, const std::shared_ptr<Logger>& logger, const std::shared_ptr<KeyConfig>& defaultKeyConfig) :
     hWnd(hWnd),
     graphicDevice(std::make_unique<GraphicDevice>(hWnd)),
     lostableGraphicResourceManager(std::make_unique<LostableGraphicResourceManager>()),
     logger(logger),
-    masterKeyConfig(masterKeyConfig),
+    defaultKeyConfig(defaultKeyConfig),
     renderer(std::make_shared<Renderer>(graphicDevice->getDevice()))
   {
     logger->logInfo("boot engine.");
@@ -163,7 +163,7 @@ namespace bstorm {
   }
 
   void Engine::reset(int screenWidth, int screenHeight) {
-    gameState = std::make_shared<GameState>(screenWidth, screenHeight, getWindowHandle(), getGraphicDevice(), logger, renderer, masterKeyConfig, screenPosX, screenPosY, gameViewWidth, gameViewHeight, this);
+    gameState = std::make_shared<GameState>(screenWidth, screenHeight, getWindowHandle(), getGraphicDevice(), logger, renderer, defaultKeyConfig, screenPosX, screenPosY, gameViewWidth, gameViewHeight, this);
     reset2DCamera();
     resetCamera();
 

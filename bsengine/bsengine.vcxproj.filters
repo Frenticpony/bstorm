@@ -186,9 +186,6 @@
     <ClInclude Include="include\bstorm\obj_sound.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="include\bstorm\com_deleter.hpp">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="include\bstorm\mqo.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>

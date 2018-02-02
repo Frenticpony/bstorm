@@ -12,9 +12,9 @@
 #include <bstorm/render_target.hpp>
 
 #include <imgui.h>
-#include "../imgui/examples/directx9_example/imgui_impl_dx9.h"
+#include "../../imgui/examples/directx9_example/imgui_impl_dx9.h"
 #include <IconsFontAwesome_c.h>
-#include "glyph_ranges_ja.hpp"
+#include "../../glyph_ranges_ja.hpp"
 #include "log_window.hpp"
 #include "script_explorer.hpp"
 #include "resource_monitor.hpp"
@@ -63,7 +63,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
   LONG screenWidth = 640;
   LONG screenHeight = 480;
   std::wstring version = L"a1.0.4";
-  std::wstring windowTitle = L"Bullet storm [" + version + L"]";
+  std::wstring windowTitle = L"bstorm [" + version + L"]";
   std::wstring packageMainScriptPath;
   std::shared_ptr<Logger> logger;
 
