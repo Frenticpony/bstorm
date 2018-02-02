@@ -44,7 +44,7 @@ namespace bstorm {
   void LogWindow::draw() {
     ImGui::SetNextWindowPos(ImVec2(iniLeft, iniTop), ImGuiSetCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(iniWidth, iniHeight), ImGuiSetCond_FirstUseEver);
-    if (ImGui::Begin("Log")) {
+    if (ImGui::Begin("Log", NULL, ImGuiWindowFlags_ResizeFromAnySide)) {
       ImGui::BeginChild("LogTextArea", ImVec2(0, -ImGui::GetTextLineHeightWithSpacing()*1.3), false, ImGuiWindowFlags_HorizontalScrollbar);
       if (doCopy) ImGui::LogToClipboard();
       doCopy = false;

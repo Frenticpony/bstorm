@@ -27,7 +27,12 @@ namespace bstorm {
     ImGui::SetNextWindowPos(ImVec2(iniLeft, iniTop), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(iniWidth, iniHeight + 65), ImGuiCond_FirstUseEver);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-    if (ImGui::Begin("Game View", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoTitleBar)) {
+    auto windowFlags = ImGuiWindowFlags_NoResize |
+      ImGuiWindowFlags_NoScrollbar |
+      ImGuiWindowFlags_MenuBar |
+      ImGuiWindowFlags_NoScrollWithMouse |
+      ImGuiWindowFlags_NoTitleBar;
+    if (ImGui::Begin("Game View", NULL, windowFlags)) {
       {
         // menu bar
         ImGui::PopStyleVar();

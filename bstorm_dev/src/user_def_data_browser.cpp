@@ -341,7 +341,7 @@ namespace bstorm {
     if (!isOpened()) return;
     ImGui::SetNextWindowPos(ImVec2(iniLeft, iniTop), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(iniWidth, iniHeight), ImGuiCond_FirstUseEver);
-    if (ImGui::Begin("UserDefData", &openFlag)) {
+    if (ImGui::Begin("UserDefData", &openFlag, ImGuiWindowFlags_ResizeFromAnySide)) {
       engine->backDoor<UserDefDataBrowser>();
     }
     ImGui::End();

@@ -162,13 +162,14 @@ namespace bstorm {
     openFlag(false)
   {
   }
+
   CameraBrowser::~CameraBrowser() { }
 
   void CameraBrowser::draw(const std::shared_ptr<Engine>& engine) {
     if (!isOpened()) return;
     ImGui::SetNextWindowPos(ImVec2(iniLeft, iniTop), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(iniWidth, iniHeight), ImGuiCond_FirstUseEver);
-    if (ImGui::Begin("Camera", &openFlag)) {
+    if (ImGui::Begin("Camera", &openFlag, ImGuiWindowFlags_ResizeFromAnySide)) {
       engine->backDoor<CameraBrowser>();
     }
     ImGui::End();

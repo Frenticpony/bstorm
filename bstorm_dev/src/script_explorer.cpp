@@ -115,7 +115,7 @@ namespace bstorm {
   void ScriptExplorer::draw() {
     ImGui::SetNextWindowPos(ImVec2(iniLeft, iniTop), ImGuiSetCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(iniWidth, iniHeight), ImGuiSetCond_FirstUseEver);
-    if (ImGui::Begin("Script Explorer")) {
+    if (ImGui::Begin("Script Explorer", NULL, ImGuiWindowFlags_ResizeFromAnySide)) {
       float contentWidth = ImGui::GetContentRegionAvailWidth();
       {
         // ツールバー
