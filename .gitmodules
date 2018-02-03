@@ -7,3 +7,6 @@
 [submodule "bstorm/IconFontCppHeaders"]
 	path = IconFontCppHeaders
 	url = ssh://github.com/juliettef/IconFontCppHeaders.git
+[submodule "json"]
+	path = json
+	url = ssh://github.com/nlohmann/json
