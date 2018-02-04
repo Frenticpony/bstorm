@@ -1,0 +1,88 @@
+{
+    "generated_by": "xxxxx",
+    "key_config": {
+        "key_maps": [
+            {
+                "action_name": "Left (左)", 
+                "vkey": 0,
+                "key": 203,
+                "pad": 0
+            },
+            {
+                "action_name": "Right (右)", 
+                "vkey": 1,
+                "key": 205,
+                "pad": 1
+            },
+            {
+                "action_name": "Up (上)", 
+                "vkey": 2,
+                "key": 200,
+                "pad": 2
+            },
+            {
+                "action_name": "Down (下)", 
+                "vkey": 3,
+                "key": 208,
+                "pad": 3
+            },
+            {
+                "action_name": "Decide (決定)", 
+                "vkey": 4,
+                "key": 44,
+                "pad": 5
+            },
+            {
+                "action_name": "Cancel (キャンセル)", 
+                "vkey": 5,
+                "key": 45,
+                "pad": 6
+            },
+            {
+                "action_name": "Shot (ショット)", 
+                "vkey": 6,
+                "key": 44,
+                "pad": 5
+            },
+            {
+                "action_name": "Bomb (ボム)", 
+                "vkey": 7,
+                "key": 45,
+                "pad": 6
+            },
+            {
+                "action_name": "SlowMove (低速移動)", 
+                "vkey": 8,
+                "key": 42,
+                "pad": 7
+            },
+            {
+                "action_name": "User1 (ユーザ定義1)", 
+                "vkey": 9,
+                "key": 46,
+                "pad": 8
+            },
+            {
+                "action_name": "User2 (ユーザ定義2)", 
+                "vkey": 10,
+                "key": 47,
+                "pad": 9
+            },
+            {
+                "action_name": "Pause (一時停止)", 
+                "vkey": 11,
+                "key": 1,
+                "pad": 10
+            }
+        ]
+    },
+    "options": {
+        "hide_mouse_cursor": false,
+        "save_log_file": true
+    },
+    "window_config": {
+        "full_screen": false,
+        "window_height": 480,
+        "window_width": 640
+    }
+}

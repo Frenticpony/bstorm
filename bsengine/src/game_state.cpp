@@ -1,6 +1,7 @@
 ﻿#include <bstorm/dnh_const.hpp>
 #include <bstorm/fps_counter.hpp>
 #include <bstorm/input_device.hpp>
+#include <bstorm/real_device_input_source.hpp>
 #include <bstorm/file_loader.hpp>
 #include <bstorm/sound_device.hpp>
 #include <bstorm/texture.hpp>
@@ -21,13 +22,16 @@
 #include <bstorm/item_data.hpp>
 #include <bstorm/auto_delete_clip.hpp>
 #include <bstorm/rand_generator.hpp>
+#include <bstorm/config.hpp>
 #include <bstorm/game_state.hpp>
 
 namespace bstorm {
-  GameState::GameState(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevice9* d3DDevice, const std::shared_ptr<Logger>& logger, const std::shared_ptr<Renderer>& renderer, const std::shared_ptr<KeyConfig>& keyConfig, const std::shared_ptr<int>& screenPosX, const std::shared_ptr<int>& screenPosY, const std::shared_ptr<int>& gameViewWidth, const std::shared_ptr<int>& gameViewHeight, Engine* engine) :
+  GameState::GameState(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevice9* d3DDevice, const std::shared_ptr<Logger>& logger, const std::shared_ptr<Renderer>& renderer, const std::shared_ptr<conf::KeyConfig>& keyConfig, const std::shared_ptr<int>& screenPosX, const std::shared_ptr<int>& screenPosY, const std::shared_ptr<int>& gameViewWidth, const std::shared_ptr<int>& gameViewHeight, Engine* engine) :
     logger(logger),
     fpsCounter(std::make_shared<FpsCounter>(16)),
-    inputDevice(std::make_shared<InputDevice>(hWnd, *keyConfig, screenPosX, screenPosY, screenWidth, screenHeight, gameViewWidth, gameViewHeight)),
+    inputDevice(std::make_shared<InputDevice>(hWnd, screenPosX, screenPosY, screenWidth, screenHeight, gameViewWidth, gameViewHeight)),
+    keyAssign(std::make_shared<KeyAssign>()),
+    vKeyInputSource(std::make_shared<RealDeviceInputSource>(inputDevice, keyAssign)),
     soundDevice(std::make_shared<SoundDevice>(hWnd)),
     renderer(renderer),
     objTable(std::make_shared<ObjectTable>()),
@@ -73,5 +77,8 @@ namespace bstorm {
     forcePlayerInvincibleEnable(false),
     defaultBonusItemEnable(true)
   {
+    for (const auto& keyMap : keyConfig->keyMaps) {
+      keyAssign->addVirtualKey(keyMap.vkey, keyMap.key, keyMap.pad);
+    }
   }
 }

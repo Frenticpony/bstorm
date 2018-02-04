@@ -23,7 +23,14 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="resource.h" />
     <ClInclude Include="src\file_logger.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="bstorm.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\bstorm_conf\default_config.json" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{CECC5244-D2F6-47CE-86FE-8E4F0D53E6E7}</ProjectGuid>

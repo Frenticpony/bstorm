@@ -10,6 +10,10 @@
 #include <bstorm/input_device.hpp>
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/render_target.hpp>
+#include <bstorm/config.hpp>
+
+#include "../../version.hpp"
+#include "../resource.h"
 
 #include "file_logger.hpp"
 
@@ -37,14 +41,16 @@ static LRESULT WINAPI windowProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
   return DefWindowProc(hWnd, msg, wp, lp);
 }
 
+constexpr bool useBinaryFormat = true;
+constexpr char* configFilePath = useBinaryFormat ? "config.dat" : "config.json";
+
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
   _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
   LONG windowWidth = 640;
   LONG windowHeight = 480;
   LONG screenWidth = 640;
   LONG screenHeight = 480;
-  std::wstring version = L"a1.0.4";
-  std::wstring windowTitle = L"Bullet storm [" + version + L"]";
+  std::wstring windowTitle = L"bstorm "  BSTORM_VERSION_W;
   std::wstring packageMainScriptPath;
   std::shared_ptr<Logger> logger;
 
@@ -55,84 +61,76 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
     logger = std::make_shared<DummyLogger>();
   }
 
-  // 設定ファイル読み込み
-  {
-    std::ifstream thDnhDefFile;
-    std::string defFileName = "th_dnh.def";
-    thDnhDefFile.open(defFileName, std::ios::in);
-    if (thDnhDefFile.good()) {
-      std::string line;
-      while (std::getline(thDnhDefFile, line)) {
-        if (line.empty()) continue;
-        std::smatch match;
-        if (regex_match(line, match, std::regex(R"(window.width\s*=\s*(\d+))"))) {
-          windowWidth = std::atoi(match[1].str().c_str());
-          logger->logInfo(defFileName + ": window width = " + std::to_string(windowWidth) + ".");
-        } else if (regex_match(line, match, std::regex(R"(window.height\s*=\s*(\d+))"))) {
-          windowHeight = std::atoi(match[1].str().c_str());
-          logger->logInfo(defFileName + ": window.height = " + std::to_string(windowHeight) + ".");
-        } else if (regex_match(line, match, std::regex(R"(screen.width\s*=\s*(\d+))"))) {
-          screenWidth = std::atoi(match[1].str().c_str());
-          logger->logInfo(defFileName + ": screen.width = " + std::to_string(screenWidth) + ".");
-        } else if (regex_match(line, match, std::regex(R"(screen.height\s*=\s*(\d+))"))) {
-          screenHeight = std::atoi(match[1].str().c_str());
-          logger->logInfo(defFileName + ": screen.height = " + std::to_string(screenHeight) + ".");
-        } else if (regex_match(line, match, std::regex(R"(window.title\s*=\s*(.*))"))) {
-          windowTitle = fromMultiByte<932>(match[1].str());
-          logger->logInfo(defFileName + ": window.title = " + toUTF8(windowTitle) + ".");
-        } else if (regex_match(line, match, std::regex(R"(package.script.main\s*=\s*(.*))"))) {
-          packageMainScriptPath = fromMultiByte<932>(match[1].str());
-          logger->logInfo(defFileName + ": package.script.main = " + toUTF8(packageMainScriptPath) + ".");
-        }
-      }
-      thDnhDefFile.close();
-    } else {
-      logger->logWarn(defFileName + " not found.");
-    }
-  }
-
-  /* create window */
-  WNDCLASSEX windowClass;
-  windowClass.cbSize = sizeof(WNDCLASSEX);
-  windowClass.style = CS_HREDRAW | CS_VREDRAW;
-  windowClass.lpfnWndProc = windowProc;
-  windowClass.cbClsExtra = 0;
-  windowClass.cbWndExtra = 0;
-  windowClass.hInstance = GetModuleHandle(NULL);
-  windowClass.hIcon = NULL;
-  windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
-  windowClass.hbrBackground = NULL;
-  windowClass.lpszMenuName = NULL;
-  windowClass.lpszClassName = L"bstorm";
-  windowClass.hIconSm = NULL;
-
-  RegisterClassEx(&windowClass);
-
-  RECT windowRect = { 0, 0, windowWidth, windowHeight };
-  DWORD windowStyle = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
-  AdjustWindowRect(&windowRect, windowStyle, FALSE);
-  HWND hWnd = CreateWindowEx(0, windowClass.lpszClassName, windowTitle.c_str(), windowStyle, CW_USEDEFAULT, CW_USEDEFAULT, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, NULL, NULL, GetModuleHandle(NULL), NULL);
-  ValidateRect(hWnd, NULL);
-  ShowWindow(hWnd, SW_RESTORE);
-  UpdateWindow(hWnd);
-
+  HWND hWnd = NULL;
   MSG msg;
-  std::shared_ptr<KeyConfig> defaultKeyConfig = std::make_shared<KeyConfig>();
   try {
-    defaultKeyConfig->addVirtualKey(VK_LEFT, KEY_LEFT, 0);
-    defaultKeyConfig->addVirtualKey(VK_RIGHT, KEY_RIGHT, 1);
-    defaultKeyConfig->addVirtualKey(VK_UP, KEY_UP, 2);
-    defaultKeyConfig->addVirtualKey(VK_DOWN, KEY_DOWN, 3);
-    defaultKeyConfig->addVirtualKey(VK_SHOT, KEY_Z, 5);
-    defaultKeyConfig->addVirtualKey(VK_SPELL, KEY_X, 6);
-    defaultKeyConfig->addVirtualKey(VK_OK, KEY_Z, 5);
-    defaultKeyConfig->addVirtualKey(VK_CANCEL, KEY_X, 6);
-    defaultKeyConfig->addVirtualKey(VK_SLOWMOVE, KEY_LSHIFT, 7);
-    defaultKeyConfig->addVirtualKey(VK_USER1, KEY_C, 8);
-    defaultKeyConfig->addVirtualKey(VK_USER2, KEY_V, 9);
-    defaultKeyConfig->addVirtualKey(VK_PAUSE, KEY_ESCAPE, 10);
+    conf::BstormConfig config = loadBstormConfig(configFilePath, useBinaryFormat, IDR_HTML1);
 
-    auto engine = std::make_shared<Engine>(hWnd, screenWidth, screenHeight, logger, defaultKeyConfig);
+    windowWidth = config.windowConfig.windowWidth;
+    windowHeight = config.windowConfig.windowHeight;
+
+    // th_dnf.def 読み込み
+    {
+      std::ifstream thDnhDefFile;
+      std::string defFileName = "th_dnh.def";
+      thDnhDefFile.open(defFileName, std::ios::in);
+      if (thDnhDefFile.good()) {
+        std::string line;
+        while (std::getline(thDnhDefFile, line)) {
+          if (line.empty()) continue;
+          std::smatch match;
+          if (regex_match(line, match, std::regex(R"(window.width\s*=\s*(\d+))"))) {
+            windowWidth = std::atoi(match[1].str().c_str());
+            logger->logInfo(defFileName + ": window width = " + std::to_string(windowWidth) + ".");
+          } else if (regex_match(line, match, std::regex(R"(window.height\s*=\s*(\d+))"))) {
+            windowHeight = std::atoi(match[1].str().c_str());
+            logger->logInfo(defFileName + ": window.height = " + std::to_string(windowHeight) + ".");
+          } else if (regex_match(line, match, std::regex(R"(screen.width\s*=\s*(\d+))"))) {
+            screenWidth = std::atoi(match[1].str().c_str());
+            logger->logInfo(defFileName + ": screen.width = " + std::to_string(screenWidth) + ".");
+          } else if (regex_match(line, match, std::regex(R"(screen.height\s*=\s*(\d+))"))) {
+            screenHeight = std::atoi(match[1].str().c_str());
+            logger->logInfo(defFileName + ": screen.height = " + std::to_string(screenHeight) + ".");
+          } else if (regex_match(line, match, std::regex(R"(window.title\s*=\s*(.*))"))) {
+            windowTitle = fromMultiByte<932>(match[1].str());
+            logger->logInfo(defFileName + ": window.title = " + toUTF8(windowTitle) + ".");
+          } else if (regex_match(line, match, std::regex(R"(package.script.main\s*=\s*(.*))"))) {
+            packageMainScriptPath = fromMultiByte<932>(match[1].str());
+            logger->logInfo(defFileName + ": package.script.main = " + toUTF8(packageMainScriptPath) + ".");
+          }
+        }
+        thDnhDefFile.close();
+      } else {
+        logger->logWarn(defFileName + " not found.");
+      }
+    }
+
+    /* create window */
+    WNDCLASSEX windowClass;
+    windowClass.cbSize = sizeof(WNDCLASSEX);
+    windowClass.style = CS_HREDRAW | CS_VREDRAW;
+    windowClass.lpfnWndProc = windowProc;
+    windowClass.cbClsExtra = 0;
+    windowClass.cbWndExtra = 0;
+    windowClass.hInstance = GetModuleHandle(NULL);
+    windowClass.hIcon = NULL;
+    windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
+    windowClass.hbrBackground = NULL;
+    windowClass.lpszMenuName = NULL;
+    windowClass.lpszClassName = L"bstorm";
+    windowClass.hIconSm = NULL;
+
+    RegisterClassEx(&windowClass);
+
+    RECT windowRect = { 0, 0, windowWidth, windowHeight };
+    DWORD windowStyle = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
+    AdjustWindowRect(&windowRect, windowStyle, FALSE);
+    hWnd = CreateWindowEx(0, windowClass.lpszClassName, windowTitle.c_str(), windowStyle, CW_USEDEFAULT, CW_USEDEFAULT, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, NULL, NULL, GetModuleHandle(NULL), NULL);
+    ValidateRect(hWnd, NULL);
+    ShowWindow(hWnd, SW_RESTORE);
+    UpdateWindow(hWnd);
+
+    auto engine = std::make_shared<Engine>(hWnd, screenWidth, screenHeight, logger, std::make_shared<conf::KeyConfig>(config.keyConfig));
 
     if (packageMainScriptPath.empty()) {
       throw std::runtime_error("package main script not specified.");

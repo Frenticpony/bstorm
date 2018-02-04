@@ -1,5 +1,5 @@
 ﻿#include <bstorm/dnh_const.hpp>
-#include <bstorm/input_device.hpp>
+#include <bstorm/virtual_key_input_source.hpp>
 #include <bstorm/script.hpp>
 #include <bstorm/intersection.hpp>
 #include <bstorm/collision_matrix.hpp>
@@ -87,7 +87,7 @@ namespace bstorm {
       // ボム入力処理
       // hitStateTimerのカウント処理の後に行う
       if (state == STATE_NORMAL || state == STATE_HIT) {
-        int spellKey = gameState->inputDevice->getVirtualKeyState(VK_SPELL);
+        int spellKey = gameState->vKeyInputSource->getVirtualKeyState(VK_SPELL);
         if (spellKey == KEY_PUSH) {
           callSpell();
         }
@@ -272,12 +272,12 @@ namespace bstorm {
 
   void ObjPlayer::moveByKeyInput() {
     if (auto gameState = getGameState()) {
-      auto r = gameState->inputDevice->getVirtualKeyState(VK_RIGHT);
-      auto l = gameState->inputDevice->getVirtualKeyState(VK_LEFT);
-      auto u = gameState->inputDevice->getVirtualKeyState(VK_UP);
-      auto d = gameState->inputDevice->getVirtualKeyState(VK_DOWN);
+      auto r = gameState->vKeyInputSource->getVirtualKeyState(VK_RIGHT);
+      auto l = gameState->vKeyInputSource->getVirtualKeyState(VK_LEFT);
+      auto u = gameState->vKeyInputSource->getVirtualKeyState(VK_UP);
+      auto d = gameState->vKeyInputSource->getVirtualKeyState(VK_DOWN);
 
-      auto shift = gameState->inputDevice->getVirtualKeyState(VK_SLOWMOVE);
+      auto shift = gameState->vKeyInputSource->getVirtualKeyState(VK_SLOWMOVE);
       bool isSlowMode = shift == KEY_HOLD || shift == KEY_PUSH;
       float speed = (isSlowMode ? slowSpeed : normalSpeed);
 

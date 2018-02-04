@@ -8,25 +8,25 @@
 
 namespace bstorm {
   CommonDataDB::CommonDataDB() {
-    createCommonDataArea(defaultDataAreaName);
+    createCommonDataArea(DefaultDataAreaName);
   }
 
   CommonDataDB::~CommonDataDB() {}
 
   void CommonDataDB::setCommonData(const DataKey& key, std::unique_ptr<DnhValue>&& value) {
-    setAreaCommonData(defaultDataAreaName, key, std::move(value));
+    setAreaCommonData(DefaultDataAreaName, key, std::move(value));
   }
 
   std::unique_ptr<DnhValue> CommonDataDB::getCommonData(const DataKey& key, std::unique_ptr<DnhValue>&& defaultValue) const {
-    return getAreaCommonData(defaultDataAreaName, key, std::move(defaultValue));
+    return getAreaCommonData(DefaultDataAreaName, key, std::move(defaultValue));
   }
 
   void CommonDataDB::clearCommonData() {
-    clearAreaCommonData(defaultDataAreaName);
+    clearAreaCommonData(DefaultDataAreaName);
   }
 
   void CommonDataDB::deleteCommonData(const DataKey& key) {
-    deleteAreaCommonData(defaultDataAreaName, key);
+    deleteAreaCommonData(DefaultDataAreaName, key);
   }
 
   void CommonDataDB::setAreaCommonData(const DataAreaName& areaName, const DataKey& key, std::unique_ptr<DnhValue>&& value) {

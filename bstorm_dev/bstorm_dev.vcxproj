@@ -191,6 +191,7 @@
     <ClCompile Include="src\util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="resource.h" />
     <ClInclude Include="src\camera_browser.hpp" />
     <ClInclude Include="src\common_data_browser.hpp" />
     <ClInclude Include="src\file_logger.hpp" />
@@ -202,6 +203,12 @@
     <ClInclude Include="src\log_window.hpp" />
     <ClInclude Include="src\user_def_data_browser.hpp" />
     <ClInclude Include="src\util.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="bstorm_dev.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\bstorm_conf\default_config.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

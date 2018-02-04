@@ -5,7 +5,3 @@ window.title = ExRumia
 screen.width=640
 
 screen.height=480
-
-window.width=640
-
-window.height=480

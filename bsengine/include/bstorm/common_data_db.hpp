@@ -34,7 +34,7 @@ namespace bstorm {
     bool saveCommonDataArea(const DataAreaName& areaName, const std::wstring& path) const;
     bool loadCommonDataArea(const DataAreaName& areaName, std::istream& stream);
     bool loadCommonDataArea(const DataAreaName& areaName, const std::wstring& path);
-    static constexpr wchar_t* defaultDataAreaName = L"";
+    static constexpr wchar_t* DefaultDataAreaName = L"";
     template <typename T>
     void backDoor() const {}
   private:

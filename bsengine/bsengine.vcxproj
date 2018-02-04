@@ -25,12 +25,14 @@
     <ClInclude Include="include\bstorm\code_generator.hpp" />
     <ClInclude Include="include\bstorm\collision_matrix.hpp" />
     <ClInclude Include="include\bstorm\common_data_db.hpp" />
+    <ClInclude Include="include\bstorm\config.hpp" />
     <ClInclude Include="include\bstorm\const.hpp" />
     <ClInclude Include="include\bstorm\dnh_const.hpp" />
     <ClInclude Include="include\bstorm\dnh_value.hpp" />
     <ClInclude Include="include\bstorm\env.hpp" />
     <ClInclude Include="include\bstorm\fps_counter.hpp" />
     <ClInclude Include="include\bstorm\input_device.hpp" />
+    <ClInclude Include="include\bstorm\key_name_map.hpp" />
     <ClInclude Include="include\bstorm\mesh.hpp" />
     <ClInclude Include="include\bstorm\mqo.hpp" />
     <ClInclude Include="include\bstorm\node.hpp" />
@@ -38,6 +40,7 @@
     <ClInclude Include="include\bstorm\obj_mesh.hpp" />
     <ClInclude Include="include\bstorm\obj_sound.hpp" />
     <ClInclude Include="include\bstorm\parser.hpp" />
+    <ClInclude Include="include\bstorm\real_device_input_source.hpp" />
     <ClInclude Include="include\bstorm\script_info.hpp" />
     <ClInclude Include="include\bstorm\shader.hpp" />
     <ClInclude Include="include\bstorm\engine.hpp" />
@@ -75,6 +78,7 @@
     <ClInclude Include="include\bstorm\texture.hpp" />
     <ClInclude Include="include\bstorm\type.hpp" />
     <ClInclude Include="include\bstorm\util.hpp" />
+    <ClInclude Include="include\bstorm\virtual_key_input_source.hpp" />
     <ClInclude Include="src\bison\dnh.tab.hpp" />
     <ClInclude Include="src\bison\mqo.tab.hpp" />
     <ClInclude Include="src\bison\stack.hh" />
@@ -94,6 +98,7 @@
     <ClCompile Include="src\code_generator.cpp" />
     <ClCompile Include="src\collision_matrix.cpp" />
     <ClCompile Include="src\common_data_db.cpp" />
+    <ClCompile Include="src\config.cpp" />
     <ClCompile Include="src\dnh_value.cpp" />
     <ClCompile Include="src\env.cpp" />
     <ClCompile Include="src\fps_counter.cpp" />
@@ -105,6 +110,7 @@
     <ClCompile Include="src\obj_player.cpp" />
     <ClCompile Include="src\obj_sound.cpp" />
     <ClCompile Include="src\parser.cpp" />
+    <ClCompile Include="src\real_device_input_source.cpp" />
     <ClCompile Include="src\reflex\dnh_lexer.cpp" />
     <ClCompile Include="src\reflex\mqo_lexer.cpp" />
     <ClCompile Include="src\reflex\user_def_data_lexer.cpp" />

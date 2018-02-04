@@ -7,23 +7,6 @@
 #include <bstorm/input_device.hpp>
 
 namespace bstorm {
-  void KeyConfig::addVirtualKey(VirtualKey vkey, Key key, PadButton padButton) {
-    keyAssign[vkey] = std::make_pair(key, padButton);
-  }
-
-  Key KeyConfig::getAssignedKey(VirtualKey vkey) const {
-    auto it = keyAssign.find(vkey);
-    if (it != keyAssign.end()) return it->second.first;
-    return KEY_INVALID;
-  }
-
-  PadButton KeyConfig::getAssignedPadButton(VirtualKey vkey) const {
-    auto it = keyAssign.find(vkey);
-    if (it != keyAssign.end()) return it->second.second;
-    return KEY_INVALID;
-  }
-
-
   static BOOL CALLBACK enumAxesCallback(LPCDIDEVICEOBJECTINSTANCE pdidoi, LPVOID dev) {
     DIPROPRANGE diprg;
 
@@ -42,7 +25,7 @@ namespace bstorm {
     return DIENUM_CONTINUE;
   }
 
-  InputDevice::InputDevice(HWND hWnd, const KeyConfig& keyConfig, const std::shared_ptr<int>& screenPosX, const std::shared_ptr<int>& screenPosY, int screenWidth, int screenHeight, const std::shared_ptr<int>& gameViewWidth, const std::shared_ptr<int>& gameViewHeight) :
+  InputDevice::InputDevice(HWND hWnd, const std::shared_ptr<int>& screenPosX, const std::shared_ptr<int>& screenPosY, int screenWidth, int screenHeight, const std::shared_ptr<int>& gameViewWidth, const std::shared_ptr<int>& gameViewHeight) :
     hWnd(hWnd),
     dInput(NULL),
     keyboardDevice(NULL),
@@ -51,7 +34,6 @@ namespace bstorm {
     padInputState(NULL),
     prevPadInputState(NULL),
     mouseMoveZ(0),
-    keyConfig(keyConfig),
     screenPosX(screenPosX),
     screenPosY(screenPosY),
     screenWidth(screenWidth),
@@ -154,8 +136,6 @@ namespace bstorm {
     } else {
       initPadDevice();
     }
-
-    directSettedVirtualKeyStates.clear();
   }
 
   void InputDevice::resetInputState() {
@@ -170,38 +150,11 @@ namespace bstorm {
     memset(padInputState, 0, sizeof(DIJOYSTATE));
     memset(prevPadInputState, 0, sizeof(DIJOYSTATE));
     mouseMoveZ = 0;
-    directSettedVirtualKeyStates.clear();
   }
 
   KeyState InputDevice::getKeyState(Key k) {
     if (k < 0 || k > 255) return KEY_FREE;
     return ((prevKeyInputStates[k] >> 6) | (keyInputStates[k] >> 7));
-  }
-
-  KeyState InputDevice::getVirtualKeyState(VirtualKey vk) {
-    // 優先順
-    // 1. SetVirtualKeyStateでセットされた状態
-    // 2. 割り当てられたキーボードのキーの状態
-    // 3. 割り当てられたパッドのボタンの状態
-    {
-      auto it = directSettedVirtualKeyStates.find(vk);
-      if (it != directSettedVirtualKeyStates.end()) {
-        return it->second;
-      }
-    }
-    auto keyState = getKeyState(keyConfig.getAssignedKey(vk));
-    if (keyState != KEY_FREE) {
-      return keyState;
-    }
-    return getPadButtonState(keyConfig.getAssignedPadButton(vk));
-  }
-
-  void InputDevice::setVirtualKeyState(VirtualKey vkey, KeyState state) {
-    directSettedVirtualKeyStates[vkey] = state;
-  }
-
-  void InputDevice::addVirtualKey(VirtualKey vkey, Key key, PadButton padButton) {
-    keyConfig.addVirtualKey(vkey, key, padButton);
   }
 
   KeyState InputDevice::getMouseState(MouseButton btn) const {

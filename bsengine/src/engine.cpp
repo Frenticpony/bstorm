@@ -9,6 +9,8 @@
 #include <bstorm/logger.hpp>
 #include <bstorm/fps_counter.hpp>
 #include <bstorm/input_device.hpp>
+#include <bstorm/virtual_key_input_source.hpp>
+#include <bstorm/real_device_input_source.hpp>
 #include <bstorm/sound_device.hpp>
 #include <bstorm/renderer.hpp>
 #include <bstorm/lostable_graphic_resource.hpp>
@@ -43,6 +45,7 @@
 #include <bstorm/file_loader.hpp>
 #include <bstorm/script_info.hpp>
 #include <bstorm/script.hpp>
+#include <bstorm/config.hpp>
 #include <bstorm/game_state.hpp>
 #include <bstorm/engine.hpp>
 
@@ -54,7 +57,7 @@
 #undef VK_PAUSE
 
 namespace bstorm {
-  Engine::Engine(HWND hWnd, int screenWidth, int screenHeight, const std::shared_ptr<Logger>& logger, const std::shared_ptr<KeyConfig>& defaultKeyConfig) :
+  Engine::Engine(HWND hWnd, int screenWidth, int screenHeight, const std::shared_ptr<Logger>& logger, const std::shared_ptr<conf::KeyConfig>& defaultKeyConfig) :
     hWnd(hWnd),
     graphicDevice(std::make_unique<GraphicDevice>(hWnd)),
     lostableGraphicResourceManager(std::make_unique<LostableGraphicResourceManager>()),
@@ -245,15 +248,15 @@ namespace bstorm {
   }
 
   KeyState Engine::getVirtualKeyState(VirtualKey vk) {
-    return gameState->inputDevice->getVirtualKeyState(vk);
+    return gameState->vKeyInputSource->getVirtualKeyState(vk);
   }
 
   void Engine::setVirtualKeyState(VirtualKey vk, KeyState state) {
-    gameState->inputDevice->setVirtualKeyState(vk, state);
+    gameState->vKeyInputSource->setVirtualKeyState(vk, state);
   }
 
   void Engine::addVirtualKey(VirtualKey vk, Key k, PadButton btn) {
-    gameState->inputDevice->addVirtualKey(vk, k, btn);
+    gameState->keyAssign->addVirtualKey(vk, k, btn);
   }
 
   KeyState Engine::getMouseState(MouseButton btn) {

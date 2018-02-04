@@ -34,3 +34,6 @@ bstorm.exe
 *.pdb
 *.log
 *.tlog
+*.aps
+config.dat
+config.json

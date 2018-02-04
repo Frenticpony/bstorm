@@ -10,11 +10,14 @@
 #include <bstorm/input_device.hpp>
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/render_target.hpp>
+#include <bstorm/config.hpp>
 
 #include <imgui.h>
 #include "../../imgui/examples/directx9_example/imgui_impl_dx9.h"
 #include <IconsFontAwesome_c.h>
 #include "../../glyph_ranges_ja.hpp"
+#include "../../version.hpp"
+#include "../resource.h"
 #include "log_window.hpp"
 #include "script_explorer.hpp"
 #include "resource_monitor.hpp"
@@ -30,6 +33,9 @@
 using namespace bstorm;
 
 bool g_isLostFocus = false;
+
+constexpr bool useBinaryFormat = true;
+constexpr char* configFilePath = useBinaryFormat ? "config.dat" : "config.json";
 
 extern IMGUI_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -62,90 +68,78 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
   LONG windowHeight = 900;
   LONG screenWidth = 640;
   LONG screenHeight = 480;
-  std::wstring version = L"a1.0.4";
-  std::wstring windowTitle = L"bstorm [" + version + L"]";
+  std::wstring windowTitle = L"bstorm [dev] "  BSTORM_VERSION_W;
   std::wstring packageMainScriptPath;
   std::shared_ptr<Logger> logger;
 
   auto logWindow = std::make_shared<LogWindow>();
   logger = logWindow;
 
-  // 設定ファイル読み込み
-  {
-    std::ifstream thDnhDefFile;
-    std::string defFileName = "th_dnh_dev.def";
-    thDnhDefFile.open(defFileName, std::ios::in);
-    if (thDnhDefFile.good()) {
-      std::string line;
-      while (std::getline(thDnhDefFile, line)) {
-        if (line.empty()) continue;
-        std::smatch match;
-        if (regex_match(line, match, std::regex(R"(window.width\s*=\s*(\d+))"))) {
-          windowWidth = std::atoi(match[1].str().c_str());
-          logger->logInfo(defFileName + ": window width = " + std::to_string(windowWidth) + ".");
-        } else if (regex_match(line, match, std::regex(R"(window.height\s*=\s*(\d+))"))) {
-          windowHeight = std::atoi(match[1].str().c_str());
-          logger->logInfo(defFileName + ": window.height = " + std::to_string(windowHeight) + ".");
-        } else if (regex_match(line, match, std::regex(R"(screen.width\s*=\s*(\d+))"))) {
-          screenWidth = std::atoi(match[1].str().c_str());
-          logger->logInfo(defFileName + ": screen.width = " + std::to_string(screenWidth) + ".");
-        } else if (regex_match(line, match, std::regex(R"(screen.height\s*=\s*(\d+))"))) {
-          screenHeight = std::atoi(match[1].str().c_str());
-          logger->logInfo(defFileName + ": screen.height = " + std::to_string(screenHeight) + ".");
-        } else if (regex_match(line, match, std::regex(R"(window.title\s*=\s*(.*))"))) {
-          windowTitle = fromMultiByte<932>(match[1].str());
-          logger->logInfo(defFileName + ": window.title = " + toUTF8(windowTitle) + ".");
-        } else if (regex_match(line, match, std::regex(R"(package.script.main\s*=\s*(.*))"))) {
-          packageMainScriptPath = fromMultiByte<932>(match[1].str());
-          logger->logInfo(defFileName + ": package.script.main = " + toUTF8(packageMainScriptPath) + ".");
-        }
-      }
-      thDnhDefFile.close();
-    } else {
-      logger->logWarn(defFileName + " not found.");
-    }
-  }
-
-  /* create window */
-  WNDCLASSEX windowClass;
-  windowClass.cbSize = sizeof(WNDCLASSEX);
-  windowClass.style = CS_HREDRAW | CS_VREDRAW;
-  windowClass.lpfnWndProc = windowProc;
-  windowClass.cbClsExtra = 0;
-  windowClass.cbWndExtra = 0;
-  windowClass.hInstance = GetModuleHandle(NULL);
-  windowClass.hIcon = NULL;
-  windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
-  windowClass.hbrBackground = NULL;
-  windowClass.lpszMenuName = NULL;
-  windowClass.lpszClassName = L"bstorm";
-  windowClass.hIconSm = NULL;
-
-  RegisterClassEx(&windowClass);
-
-  RECT windowRect = { 0, 0, windowWidth, windowHeight };
-  DWORD windowStyle = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
-  AdjustWindowRect(&windowRect, windowStyle, FALSE);
-  HWND hWnd = CreateWindowEx(0, windowClass.lpszClassName, windowTitle.c_str(), windowStyle, CW_USEDEFAULT, CW_USEDEFAULT, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, NULL, NULL, GetModuleHandle(NULL), NULL);
-  ValidateRect(hWnd, NULL);
-  ShowWindow(hWnd, SW_RESTORE);
-  UpdateWindow(hWnd);
-
+  HWND hWnd = NULL;
   MSG msg;
-  std::shared_ptr<KeyConfig> masterKeyConfig = std::make_shared<KeyConfig>();
   try {
-    masterKeyConfig->addVirtualKey(VK_LEFT, KEY_LEFT, 0);
-    masterKeyConfig->addVirtualKey(VK_RIGHT, KEY_RIGHT, 1);
-    masterKeyConfig->addVirtualKey(VK_UP, KEY_UP, 2);
-    masterKeyConfig->addVirtualKey(VK_DOWN, KEY_DOWN, 3);
-    masterKeyConfig->addVirtualKey(VK_SHOT, KEY_Z, 5);
-    masterKeyConfig->addVirtualKey(VK_SPELL, KEY_X, 6);
-    masterKeyConfig->addVirtualKey(VK_OK, KEY_Z, 5);
-    masterKeyConfig->addVirtualKey(VK_CANCEL, KEY_X, 6);
-    masterKeyConfig->addVirtualKey(VK_SLOWMOVE, KEY_LSHIFT, 7);
-    masterKeyConfig->addVirtualKey(VK_USER1, KEY_C, 8);
-    masterKeyConfig->addVirtualKey(VK_USER2, KEY_V, 9);
-    masterKeyConfig->addVirtualKey(VK_PAUSE, KEY_ESCAPE, 10);
+    conf::BstormConfig config = loadBstormConfig(configFilePath, useBinaryFormat, IDR_HTML1);
+
+    // th_dnh.def読み込み
+    {
+      std::ifstream thDnhDefFile;
+      std::string defFileName = "th_dnh_dev.def";
+      thDnhDefFile.open(defFileName, std::ios::in);
+      if (thDnhDefFile.good()) {
+        std::string line;
+        while (std::getline(thDnhDefFile, line)) {
+          if (line.empty()) continue;
+          std::smatch match;
+          if (regex_match(line, match, std::regex(R"(window.width\s*=\s*(\d+))"))) {
+            windowWidth = std::atoi(match[1].str().c_str());
+            logger->logInfo(defFileName + ": window width = " + std::to_string(windowWidth) + ".");
+          } else if (regex_match(line, match, std::regex(R"(window.height\s*=\s*(\d+))"))) {
+            windowHeight = std::atoi(match[1].str().c_str());
+            logger->logInfo(defFileName + ": window.height = " + std::to_string(windowHeight) + ".");
+          } else if (regex_match(line, match, std::regex(R"(screen.width\s*=\s*(\d+))"))) {
+            screenWidth = std::atoi(match[1].str().c_str());
+            logger->logInfo(defFileName + ": screen.width = " + std::to_string(screenWidth) + ".");
+          } else if (regex_match(line, match, std::regex(R"(screen.height\s*=\s*(\d+))"))) {
+            screenHeight = std::atoi(match[1].str().c_str());
+            logger->logInfo(defFileName + ": screen.height = " + std::to_string(screenHeight) + ".");
+          } else if (regex_match(line, match, std::regex(R"(window.title\s*=\s*(.*))"))) {
+            windowTitle = fromMultiByte<932>(match[1].str());
+            logger->logInfo(defFileName + ": window.title = " + toUTF8(windowTitle) + ".");
+          } else if (regex_match(line, match, std::regex(R"(package.script.main\s*=\s*(.*))"))) {
+            packageMainScriptPath = fromMultiByte<932>(match[1].str());
+            logger->logInfo(defFileName + ": package.script.main = " + toUTF8(packageMainScriptPath) + ".");
+          }
+        }
+        thDnhDefFile.close();
+      } else {
+        logger->logWarn(defFileName + " not found.");
+      }
+    }
+
+    /* create window */
+    WNDCLASSEX windowClass;
+    windowClass.cbSize = sizeof(WNDCLASSEX);
+    windowClass.style = CS_HREDRAW | CS_VREDRAW;
+    windowClass.lpfnWndProc = windowProc;
+    windowClass.cbClsExtra = 0;
+    windowClass.cbWndExtra = 0;
+    windowClass.hInstance = GetModuleHandle(NULL);
+    windowClass.hIcon = NULL;
+    windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
+    windowClass.hbrBackground = NULL;
+    windowClass.lpszMenuName = NULL;
+    windowClass.lpszClassName = L"bstorm";
+    windowClass.hIconSm = NULL;
+
+    RegisterClassEx(&windowClass);
+
+    RECT windowRect = { 0, 0, windowWidth, windowHeight };
+    DWORD windowStyle = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
+    AdjustWindowRect(&windowRect, windowStyle, FALSE);
+    hWnd = CreateWindowEx(0, windowClass.lpszClassName, windowTitle.c_str(), windowStyle, CW_USEDEFAULT, CW_USEDEFAULT, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, NULL, NULL, GetModuleHandle(NULL), NULL);
+    ValidateRect(hWnd, NULL);
+    ShowWindow(hWnd, SW_RESTORE);
+    UpdateWindow(hWnd);
 
     auto scriptExplorer = std::make_shared<ScriptExplorer>(windowWidth * 990 / 1280, 19, windowWidth * (1280 - 990) / 1280, windowHeight - 19);
     logWindow->setInitWindowPos(0, windowHeight * 550 / 720, windowWidth * 990 / 1280, windowHeight * 172 / 720);
@@ -154,23 +148,27 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
     auto userDefDataBrowser = std::make_shared<UserDefDataBrowser>(600, 19, 300, 530);
     auto cameraBrowser = std::make_shared<CameraBrowser>(0, 39, 300, 530);
     auto objectBrowser = std::make_shared<ObjectBrowser>(0, 39, 300, 530);
-    auto engine = std::make_shared<Engine>(hWnd, screenWidth, screenHeight, logWindow, masterKeyConfig);
+    auto engine = std::make_shared<Engine>(hWnd, screenWidth, screenHeight, logWindow, std::make_shared<conf::KeyConfig>(config.keyConfig));
     auto playController = std::make_shared<PlayController>(engine);
     auto gameView = std::make_shared<GameView>(windowWidth / 2 - 320, 60, 640, 480, playController);
     engine->setScreenPos(gameView->getViewPosX(), gameView->getViewPosY());
     engine->setGameViewSize(gameView->getViewWidth(), gameView->getViewHeight());
 
     ImGui_ImplDX9_Init(hWnd, engine->getGraphicDevice());
-    ImGuiIO& io = ImGui::GetIO();
-    io.Fonts->AddFontDefault();
-    ImFontConfig config;
-    config.MergeMode = true;
-    io.Fonts->AddFontFromFileTTF("fonts/ja/ipagp.ttf", 12, &config, glyphRangesJapanese);
-    static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-    io.Fonts->AddFontFromFileTTF("fonts/fa/fontawesome-webfont.ttf", 13.0f, &config, icon_ranges);
 
-    // スタイル設定
     {
+      // フォント設定
+      ImGuiIO& io = ImGui::GetIO();
+      io.Fonts->AddFontDefault();
+      ImFontConfig fontConfig;
+      fontConfig.MergeMode = true;
+      io.Fonts->AddFontFromFileTTF("fonts/ja/ipagp.ttf", 12, &fontConfig, glyphRangesJapanese);
+      static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+      io.Fonts->AddFontFromFileTTF("fonts/fa/fontawesome-webfont.ttf", 13.0f, &fontConfig, icon_ranges);
+    }
+
+    {
+      // スタイル設定
       ImGuiStyle& imGuiStyle = ImGui::GetStyle();
       ImGui::StyleColorsDark();
       imGuiStyle.FrameRounding = 3.0f;
