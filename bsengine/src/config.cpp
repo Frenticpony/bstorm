@@ -1,6 +1,8 @@
 #include <fstream>
 #include <cstdio>
 #include <windows.h>
+
+#include <bstorm/util.hpp>
 #include <bstorm/config.hpp>
 
 #include "../../version.hpp"
@@ -45,20 +47,5 @@ namespace bstorm {
       configFileOut << std::setw(4) << conf::json(config) << std::endl;
     }
     return true;
-  }
-
-  std::string readResourceText(int resourceId) {
-    HINSTANCE hInstance = GetModuleHandle(NULL);
-    if (HRSRC hResource = FindResource(hInstance, MAKEINTRESOURCE(resourceId), RT_HTML)) {
-      if (DWORD resourceSize = SizeofResource(hInstance, hResource)) {
-        if (HGLOBAL hMem = LoadResource(hInstance, hResource)) {
-          if (LPVOID pMem = LockResource(hMem)) {
-            return std::string((char*)pMem, resourceSize);
-          }
-          FreeResource(hMem);
-        }
-      }
-    }
-    return "";
   }
 }

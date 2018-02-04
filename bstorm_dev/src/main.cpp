@@ -128,7 +128,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
     windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
     windowClass.hbrBackground = NULL;
     windowClass.lpszMenuName = NULL;
-    windowClass.lpszClassName = L"bstorm";
+    windowClass.lpszClassName = L"bstorm_dev";
     windowClass.hIconSm = NULL;
 
     RegisterClassEx(&windowClass);

@@ -109,5 +109,4 @@ namespace bstorm {
   }
   conf::BstormConfig loadBstormConfig(const std::string& path, bool isBinaryFormat, int defaultConfigResourceId) noexcept(false);
   bool saveBstormConfig(const std::string& path, bool isBinaryFormat, conf::BstormConfig config);
-  std::string readResourceText(int resourceId);
 }

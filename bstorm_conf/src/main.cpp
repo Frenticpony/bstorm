@@ -34,10 +34,15 @@ static LRESULT WINAPI windowProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
   return DefWindowProc(hWnd, msg, wp, lp);
 }
 
-constexpr DWORD windowWidth = 800;
-constexpr DWORD windowHeight = 600;
 constexpr float configWindowWidth = 480;
 constexpr float configWindowHeight = 360;
+#ifdef _DEBUG
+constexpr DWORD windowWidth = 800;
+constexpr DWORD windowHeight = 600;
+#else
+constexpr DWORD windowWidth = configWindowWidth;
+constexpr DWORD windowHeight = configWindowHeight;
+#endif
 
 constexpr wchar_t* windowTitle = L"bstorm config " BSTORM_VERSION_W;
 constexpr char* jaFontPath = "fonts/ja/ipagp.ttf";
@@ -243,12 +248,14 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
 
         }
         ImGui::End();
+#ifdef _DEBUG
         ImGui::ShowDemoWindow();
         ImGui::ShowMetricsWindow();
         ImGui::ShowStyleEditor();
         ImGui::ShowStyleSelector("style selector");
         ImGui::ShowFontSelector("font selector");
         ImGui::ShowUserGuide();
+#endif
         ImGui::Render();
         d3DDevice->EndScene();
         switch (d3DDevice->Present(NULL, NULL, NULL, NULL)) {

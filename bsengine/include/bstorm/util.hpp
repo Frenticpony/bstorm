@@ -113,4 +113,6 @@ namespace bstorm {
   std::wstring concatPath(const std::wstring& a, const std::wstring& b);
   std::wstring parentPath(const std::wstring& path);
   std::wstring expandIncludePath(const std::wstring& includerPath, const std::wstring& includeePath);
+
+  std::string readResourceText(int resourceId);
 }
