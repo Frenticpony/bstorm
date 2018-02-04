@@ -122,10 +122,10 @@ namespace bstorm {
     float bcX = cx - b.x;
     float bcY = cy - b.y;
     // d : 円の中心からABを通る直線への垂線の長さ
-    float d = abs(cross2(abX, abY, acX, acY)) / norm(abX, abY);
+    float d = abs(cross2(abX, abY, acX, acY)) / std::hypotf(abX, abY);
     if (d > r) return false;
     if (dot2(abX, abY, acX, acY) * dot2(abX, abY, bcX, bcY) <= 0) return true;
-    return norm(acX, acY) <= r || norm(bcX, bcY) <= r;
+    return std::hypotf(acX, acY) <= r || std::hypotf(bcX, bcY) <= r;
   }
 
   // 弾幕風のLine = Rect

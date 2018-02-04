@@ -68,7 +68,7 @@ namespace bstorm {
   void ObjMove::setDestAtSpeed(float x, float y, float speed) {
     float dx = x - getMoveX();
     float dy = y - getMoveY();
-    float dist = norm(dx, dy);
+    float dist = std::hypotf(dx, dy);
     int frame = (int)(ceil(dist / speed));
     float angle = D3DXToDegree(atan2(dy, dx));
     setMoveMode(std::make_shared<MoveModeAtFrame>(frame, speed, angle));
@@ -77,7 +77,7 @@ namespace bstorm {
   void ObjMove::setDestAtFrame(float x, float y, int frame) {
     float dx = x - getMoveX();
     float dy = y - getMoveY();
-    float dist = norm(dx, dy);
+    float dist = std::hypotf(dx, dy);
     float speed = dist / frame;
     float angle = D3DXToDegree(atan2(dy, dx));
     setMoveMode(std::make_shared<MoveModeAtFrame>(frame, speed, angle));
@@ -173,7 +173,7 @@ namespace bstorm {
   }
 
   float MoveModeB::getSpeed() const {
-    return norm(speedX, speedY);
+    return std::hypotf(speedX, speedY);
   }
 
   MoveModeAtFrame::MoveModeAtFrame(int frame, float speed, float angle) :
@@ -214,7 +214,7 @@ namespace bstorm {
 
   void MoveModeAtWeight::move(float & x, float & y) {
     if (isArrived) return;
-    float distFromDest = norm(x - destX, y - destY);
+    float distFromDest = std::hypotf(x - destX, y - destY);
     if (distFromDest <= 1) {
       speed = 0;
       isArrived = true;

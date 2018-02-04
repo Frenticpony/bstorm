@@ -68,7 +68,7 @@ namespace bstorm {
           float playerY = player->getY();
           float distX = playerX - x;
           float distY = playerY - y;
-          float dist = norm(distX, distY);
+          float dist = std::hypotf(distX, distY);
           float dx = autoCollectSpeed * distX / dist;
           float dy = autoCollectSpeed * distY / dist;
           // moveによる移動を消す
@@ -394,7 +394,7 @@ namespace bstorm {
   {
     float distX = destX - obj->getMoveX();
     float distY = destY - obj->getMoveY();
-    float dist = norm(distX, distY);
+    float dist = std::hypotf(distX, distY);
     speed = dist / 16.0;
     frame = 0;
     lastX = obj->getMoveX();
@@ -436,7 +436,7 @@ namespace bstorm {
     if (auto player = targetPlayer.lock()) {
       float distX = player->getX() - x;
       float distY = player->getY() - y;
-      float dist = norm(distX, distY);
+      float dist = std::hypotf(distX, distY);
       float dx = speed * distX / dist;
       float dy = speed * distY / dist;
       x += dx;

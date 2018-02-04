@@ -1042,7 +1042,7 @@ namespace bstorm {
       trail.push_back(Vertex(x + dx - 0.5f, y + dy - 0.5f, 0, 0, 0, 0));
       trail.push_back(Vertex(x - dx - 0.5f, y - dy - 0.5f, 0, 0, 0, 0));
 
-      float laserNodeLength = norm(x - headX, y - headY);
+      float laserNodeLength = std::hypotf(x - headX, y - headY);
       totalLaserLength += laserNodeLength;
       laserNodeLengthList.push_back(laserNodeLength);
 

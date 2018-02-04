@@ -94,10 +94,6 @@ namespace bstorm {
   D3DXMATRIX rotScaleTrans(float x, float y, float z, float rx, float ry, float rz, float sx, float sy, float sz);
   std::array<Vertex, 4> rectToVertices(D3DCOLOR color, int textureWidth, int textureHeight, const Rect<int> &rect);
 
-  inline float norm(float x, float y) {
-    return sqrt(x*x + y*y);
-  }
-
   inline int nextPow2(int x) {
     if (x < 0) return 0;
     --x;
