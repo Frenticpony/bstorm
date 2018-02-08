@@ -1788,7 +1788,14 @@ namespace bstorm {
     // [stgFrameMin, stgFrameMax]
     {
       if (!isStagePaused()) {
-        renderer->enableScissorTest({ (LONG)gameState->stgFrame->left, (LONG)gameState->stgFrame->top, (LONG)gameState->stgFrame->right, (LONG)gameState->stgFrame->bottom });
+        RECT scissorRect = { (LONG)gameState->stgFrame->left, (LONG)gameState->stgFrame->top, (LONG)gameState->stgFrame->right, (LONG)gameState->stgFrame->bottom };
+        if (renderToBackBuffer) {
+          scissorRect.left = gameState->stgFrame->left * graphicDevice->getBackBufferWidth() / gameState->screenWidth;
+          scissorRect.top = gameState->stgFrame->top * graphicDevice->getBackBufferHeight() / gameState->screenHeight;
+          scissorRect.right = gameState->stgFrame->right * graphicDevice->getBackBufferWidth() / gameState->screenWidth;
+          scissorRect.bottom = gameState->stgFrame->bottom * graphicDevice->getBackBufferHeight() / gameState->screenHeight;
+        }
+        renderer->enableScissorTest(scissorRect);
       }
 
       // set 2D matrix

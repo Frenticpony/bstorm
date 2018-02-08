@@ -13,6 +13,8 @@ namespace bstorm {
     void reset();
     IDirect3DDevice9* getDevice() const;
     void setBackbufferRenderTarget();
+    DWORD getBackBufferWidth() const;
+    DWORD getBackBufferHeight() const;
   private:
     IDirect3D9 *d3D;
     IDirect3DDevice9 *d3DDevice;

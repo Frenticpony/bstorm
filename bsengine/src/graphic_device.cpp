@@ -71,4 +71,12 @@ namespace bstorm {
     d3DDevice->SetRenderTarget(0, backBufferSurface);
     d3DDevice->SetDepthStencilSurface(backBufferDepthStencilSurface);
   }
+
+  DWORD GraphicDevice::getBackBufferWidth() const {
+    return presentParams.BackBufferWidth;
+  }
+
+  DWORD GraphicDevice::getBackBufferHeight() const {
+    return presentParams.BackBufferHeight;
+  }
 }
