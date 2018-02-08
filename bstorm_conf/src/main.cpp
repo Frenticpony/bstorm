@@ -180,7 +180,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
           ImGuiWindowFlags_NoMove;
         ImGui::Begin("Config", NULL, windowFlag);
         ImGui::Columns(3, "tabs", false);
-        static Tab selectedTab = Tab::KEY;
+        static Tab selectedTab = Tab::WINDOW;
         if (ImGui::Selectable("Window", selectedTab == Tab::WINDOW)) {
           selectedTab = Tab::WINDOW;
         }
@@ -195,7 +195,17 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
         ImGui::NextColumn();
         ImGui::Columns(1);
         if (selectedTab == Tab::WINDOW) {
+          if (ImGui::CollapsingHeader(u8"Window Size (ウインドウサイズ)", ImGuiTreeNodeFlags_DefaultOpen)) {
+            int width = config.windowConfig.windowWidth;
+            ImGui::InputInt("width##window_width", &width, 1);
+            config.windowConfig.windowWidth = width;
 
+            int height = config.windowConfig.windowHeight;
+            ImGui::InputInt("height##window_height", &height, 1);
+            config.windowConfig.windowHeight = height;
+
+            ImGui::Checkbox("fullscreen", &config.windowConfig.fullScreen);
+          }
         } else if (selectedTab == Tab::KEY) {
           ImGui::BeginChild("KeyConfig");
           conf::KeyConfig& keyConfig = config.keyConfig;
