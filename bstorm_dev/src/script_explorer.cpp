@@ -1,4 +1,5 @@
 ﻿#include <memory>
+#include <thread>
 #include <imgui.h>
 #include <IconsFontAwesome_c.h>
 
@@ -107,12 +108,14 @@ namespace bstorm {
     useTreeView(false),
     showAllPlayerScripts(false)
   {
-    refresh();
+    reload();
   }
 
   ScriptExplorer::~ScriptExplorer() { }
 
   void ScriptExplorer::draw() {
+    std::lock_guard<std::mutex> lock(mutex);
+
     ImGui::SetNextWindowPos(ImVec2(iniLeft, iniTop), ImGuiSetCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(iniWidth, iniHeight), ImGuiSetCond_FirstUseEver);
     if (ImGui::Begin("Script Explorer", NULL, ImGuiWindowFlags_ResizeFromAnySide)) {
@@ -123,10 +126,10 @@ namespace bstorm {
         ImGui::Text("Select Script");
         ImGui::SameLine(contentWidth - 45);
         if (ImGui::Button(ICON_FA_REFRESH)) {
-          refresh();
+          reload();
         }
         if (ImGui::IsItemHovered())
-          ImGui::SetTooltip("refresh");
+          ImGui::SetTooltip("reload");
         ImGui::SameLine();
         if (ImGui::Button(useTreeView ? ICON_FA_LIST : ICON_FA_FILES_O)) {
           useTreeView = !useTreeView;
@@ -224,6 +227,8 @@ namespace bstorm {
   }
 
   ScriptInfo ScriptExplorer::getSelectedMainScript() const {
+    std::lock_guard<std::mutex> lock(mutex);
+
     auto it = mainScripts.find(selectedMainScriptPath);
     if (it != mainScripts.end()) {
       return it->second;
@@ -232,6 +237,8 @@ namespace bstorm {
   }
 
   ScriptInfo ScriptExplorer::getSelectedPlayerScript() const {
+    std::lock_guard<std::mutex> lock(mutex);
+
     auto it = playerScripts.find(selectedPlayerScriptPath);
     if (it != playerScripts.end()) {
       return it->second;
@@ -239,38 +246,53 @@ namespace bstorm {
     return ScriptInfo();
   }
 
-  void ScriptExplorer::refresh() {
-    mainScripts.clear();
-    playerScripts.clear();
-    freePlayerScriptPaths.clear();
+  void ScriptExplorer::reload() {
+    std::thread reloadThread([this]() {
 
-    // script/以下のスクリプトを再帰的に取得
-    std::vector<std::wstring> scriptPaths;
-    getFilePathsRecursively(L"script", scriptPaths, ignoreScriptExts);
+      {
+        std::lock_guard<std::mutex> lock(mutex);
 
-    auto loader = std::make_shared<WinFileLoader>();
+        mainScripts.clear();
+        playerScripts.clear();
+        freePlayerScriptPaths.clear();
+      }
 
-    for (auto& path : scriptPaths) {
-      try {
-        ScriptInfo script = scanDnhScriptInfo(path, loader);
+      // script/以下のスクリプトを再帰的に取得
+      std::vector<std::wstring> scriptPaths;
+      getFilePathsRecursively(L"script", scriptPaths, ignoreScriptExts);
 
-        if (script.systemPath.empty() || script.systemPath == L"DEFAULT") {
-          script.systemPath = DEFAULT_SYSTEM_PATH;
-        }
+      auto loader = std::make_shared<WinFileLoader>();
 
-        if (script.type == SCRIPT_TYPE_PLAYER) {
-          playerScripts[script.path] = script;
-          if (script.path.find_first_of(FREE_PLAYER_DIR) == 0) {
-            freePlayerScriptPaths.push_back(script.path);
+      for (auto& path : scriptPaths) {
+        try {
+          ScriptInfo script = scanDnhScriptInfo(path, loader);
+
+          if (script.systemPath.empty() || script.systemPath == L"DEFAULT") {
+            script.systemPath = DEFAULT_SYSTEM_PATH;
           }
-        } else {
-          mainScripts[script.path] = script;
-        }
-      } catch (...) {}
-    }
 
-    // TreeViewの作成
-    mainScriptTreeView = createTreeView(mainScripts);
-    playerScriptTreeView = createTreeView(playerScripts);
+          {
+            std::lock_guard<std::mutex> lock(mutex);
+            if (script.type == SCRIPT_TYPE_PLAYER) {
+              playerScripts[script.path] = script;
+              if (script.path.find_first_of(FREE_PLAYER_DIR) == 0) {
+                freePlayerScriptPaths.push_back(script.path);
+              }
+            } else {
+              mainScripts[script.path] = script;
+            }
+          }
+        } catch (...) {}
+      }
+
+      // TreeViewの作成
+      {
+        std::lock_guard<std::mutex> lock(mutex);
+
+        mainScriptTreeView = createTreeView(mainScripts);
+        playerScriptTreeView = createTreeView(playerScripts);
+      }
+    });
+    reloadThread.detach();
   }
 }
