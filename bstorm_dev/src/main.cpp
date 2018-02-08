@@ -1,8 +1,5 @@
 ﻿#include <crtdbg.h>
-#include <fstream>
-#include <iostream>
 #include <string>
-#include <regex>
 
 #include <bstorm/logger.hpp>
 #include <bstorm/engine.hpp>
@@ -11,6 +8,7 @@
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/render_target.hpp>
 #include <bstorm/config.hpp>
+#include <bstorm/th_dnh_def.hpp>
 
 #include <imgui.h>
 #include "../../imgui/examples/directx9_example/imgui_impl_dx9.h"
@@ -32,8 +30,9 @@
 
 using namespace bstorm;
 
-bool g_isLostFocus = false;
+static bool isLostFocus = false;
 
+constexpr char* thDnhDefFilePath = "th_dnh_dev.def";
 constexpr bool useBinaryFormat = true;
 constexpr char* configFilePath = useBinaryFormat ? "config.dat" : "config.json";
 
@@ -53,10 +52,10 @@ static LRESULT WINAPI windowProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
       PostQuitMessage(0);
       return 0;
     case WM_SETFOCUS:
-      g_isLostFocus = false;
+      isLostFocus = false;
       return 0;
     case WM_KILLFOCUS:
-      g_isLostFocus = true;
+      isLostFocus = true;
       return 0;
   }
   return DefWindowProc(hWnd, msg, wp, lp);
@@ -80,40 +79,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
   try {
     conf::BstormConfig config = loadBstormConfig(configFilePath, useBinaryFormat, IDR_HTML1);
 
-    // th_dnh.def読み込み
     {
-      std::ifstream thDnhDefFile;
-      std::string defFileName = "th_dnh_dev.def";
-      thDnhDefFile.open(defFileName, std::ios::in);
-      if (thDnhDefFile.good()) {
-        std::string line;
-        while (std::getline(thDnhDefFile, line)) {
-          if (line.empty()) continue;
-          std::smatch match;
-          if (regex_match(line, match, std::regex(R"(window.width\s*=\s*(\d+))"))) {
-            windowWidth = std::atoi(match[1].str().c_str());
-            logger->logInfo(defFileName + ": window width = " + std::to_string(windowWidth) + ".");
-          } else if (regex_match(line, match, std::regex(R"(window.height\s*=\s*(\d+))"))) {
-            windowHeight = std::atoi(match[1].str().c_str());
-            logger->logInfo(defFileName + ": window.height = " + std::to_string(windowHeight) + ".");
-          } else if (regex_match(line, match, std::regex(R"(screen.width\s*=\s*(\d+))"))) {
-            screenWidth = std::atoi(match[1].str().c_str());
-            logger->logInfo(defFileName + ": screen.width = " + std::to_string(screenWidth) + ".");
-          } else if (regex_match(line, match, std::regex(R"(screen.height\s*=\s*(\d+))"))) {
-            screenHeight = std::atoi(match[1].str().c_str());
-            logger->logInfo(defFileName + ": screen.height = " + std::to_string(screenHeight) + ".");
-          } else if (regex_match(line, match, std::regex(R"(window.title\s*=\s*(.*))"))) {
-            windowTitle = fromMultiByte<932>(match[1].str());
-            logger->logInfo(defFileName + ": window.title = " + toUTF8(windowTitle) + ".");
-          } else if (regex_match(line, match, std::regex(R"(package.script.main\s*=\s*(.*))"))) {
-            packageMainScriptPath = fromMultiByte<932>(match[1].str());
-            logger->logInfo(defFileName + ": package.script.main = " + toUTF8(packageMainScriptPath) + ".");
-          }
-        }
-        thDnhDefFile.close();
-      } else {
-        logger->logWarn(defFileName + " not found.");
-      }
+      // th_dnh.def読み込み
+      ThDnhDef def = loadThDnhDef(thDnhDefFilePath);
+      packageMainScriptPath = def.packageScriptMain;
+      if (!def.windowTitle.empty()) windowTitle = def.windowTitle;
+      screenWidth = def.screenWidth;
+      screenHeight = def.screenHeight;
     }
 
     /* create window */
@@ -187,7 +159,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
         DispatchMessage(&msg);
         continue;
       }
-      if (g_isLostFocus) {
+      if (isLostFocus) {
         Sleep(1);
         continue;
       }

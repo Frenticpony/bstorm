@@ -76,6 +76,7 @@
     <ClInclude Include="include\bstorm\source_map.hpp" />
     <ClInclude Include="include\bstorm\static_script_error.hpp" />
     <ClInclude Include="include\bstorm\texture.hpp" />
+    <ClInclude Include="include\bstorm\th_dnh_def.hpp" />
     <ClInclude Include="include\bstorm\type.hpp" />
     <ClInclude Include="include\bstorm\util.hpp" />
     <ClInclude Include="include\bstorm\virtual_key_input_source.hpp" />
@@ -143,6 +144,7 @@
     <ClCompile Include="src\source_map.cpp" />
     <ClCompile Include="src\static_script_error.cpp" />
     <ClCompile Include="src\texture.cpp" />
+    <ClCompile Include="src\th_dnh_def.cpp" />
     <ClCompile Include="src\util.cpp" />
     <ClCompile Include="tool\reflex\lib\convert.cpp" />
     <ClCompile Include="tool\reflex\lib\debug.cpp" />
