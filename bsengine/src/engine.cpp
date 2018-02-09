@@ -324,7 +324,7 @@ namespace bstorm {
   }
 
   float Engine::getCurrentFps() const {
-    return gameState->fpsCounter->get();
+    return gameState->fpsCounter->getStable();
   }
 
   float Engine::getStageTime() const {

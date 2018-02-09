@@ -30,7 +30,8 @@ namespace bstorm {
   FpsCounter::FpsCounter() :
     prevFrameTime(),
     milliSecPerFrameAccum(0.0f),
-    milliSecPerFrameIdx(0)
+    milliSecPerFrameIdx(0),
+    stableFps(60.0f)
   {
     milliSecPerFrameList.fill(0.0f);
   }
@@ -47,9 +48,14 @@ namespace bstorm {
     milliSecPerFrameIdx = (milliSecPerFrameIdx + 1) & (sampleCnt - 1);
     prevFrameTime = now;
     fps = 1000.0f / (milliSecPerFrameAccum / sampleCnt);
+    if (milliSecPerFrameIdx == 0) { stableFps = fps; }
   }
 
   float FpsCounter::get() const {
     return fps;
+  }
+
+  float FpsCounter::getStable() const {
+    return stableFps;
   }
 }

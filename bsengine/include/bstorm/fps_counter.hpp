@@ -23,12 +23,14 @@ namespace bstorm {
     ~FpsCounter();
     void update();
     float get() const;
+    float getStable() const;
   private:
-    static constexpr int sampleCnt = 16; // 2のべき乗
+    static constexpr int sampleCnt = 64; // 2のべき乗
     TimePoint prevFrameTime;
     float milliSecPerFrameAccum;
     int milliSecPerFrameIdx;
     float fps;
+    float stableFps; // 表示用(nフレームに1回更新するので表示したときにチラつかない)
     std::array<float, sampleCnt> milliSecPerFrameList;
   };
 }
