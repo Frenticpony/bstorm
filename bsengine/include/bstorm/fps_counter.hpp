@@ -1,6 +1,6 @@
 #pragma once
 
-#include <deque>
+#include <array>
 #include <windows.h>
 
 namespace bstorm {
@@ -8,24 +8,27 @@ namespace bstorm {
   public:
     TimePoint();
     ~TimePoint();
-    double getElapsedMilliSec(const TimePoint& tp = TimePoint()) const;
+    float getElapsedMilliSec(const TimePoint& tp = TimePoint()) const;
   private:
     bool isHighAccuracyMode;
-    LARGE_INTEGER from; // 記録時点
-    LARGE_INTEGER freq;
+    INT64 time; // 記録時点
+    INT64 freq;
     // 高精度モードが使えない時用
-    DWORD fromMilliSec;
+    DWORD timeMilli;
   };
 
   class FpsCounter {
   public:
-    FpsCounter(int sampleCount);
+    FpsCounter();
     ~FpsCounter();
     void update();
-    double get() const;
+    float get() const;
   private:
+    static constexpr int sampleCnt = 16; // 2のべき乗
     TimePoint prevFrameTime;
-    double milliSecPerFrameAverage;
-    std::deque<double> milliSecPerFrameList;
+    float milliSecPerFrameAccum;
+    int milliSecPerFrameIdx;
+    float fps;
+    std::array<float, sampleCnt> milliSecPerFrameList;
   };
 }

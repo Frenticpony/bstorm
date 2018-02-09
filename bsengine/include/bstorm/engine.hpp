@@ -110,9 +110,9 @@ namespace bstorm {
     void writeLog(const std::wstring& msg);
     /* time */
     std::wstring getCurrentDateTimeS();
-    double getCurrentFps() const;
-    double getStageTime() const;
-    double getPackageTime() const;
+    float getCurrentFps() const;
+    float getStageTime() const;
+    float getPackageTime() const;
     void updateFpsCounter();
     void resetFpsCounter();
     void startSlow(int pseudoFps, bool byPlayer);

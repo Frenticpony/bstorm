@@ -10,28 +10,29 @@ static DWORD getTimeMilliSec() {
 
 namespace bstorm {
   TimePoint::TimePoint() :
-    isHighAccuracyMode(QueryPerformanceCounter(&from))
+    isHighAccuracyMode(QueryPerformanceCounter((LARGE_INTEGER*)&time))
   {
     if (isHighAccuracyMode) {
-      QueryPerformanceFrequency(&freq);
+      QueryPerformanceFrequency((LARGE_INTEGER*)&freq);
     }
-    fromMilliSec = getTimeMilliSec();
+    timeMilli = getTimeMilliSec();
   }
 
   TimePoint::~TimePoint() { }
 
-  double TimePoint::getElapsedMilliSec(const TimePoint& tp) const {
+  float TimePoint::getElapsedMilliSec(const TimePoint& tp) const {
     if (isHighAccuracyMode && tp.isHighAccuracyMode) {
-      return 1000.0 * (tp.from.QuadPart - from.QuadPart) / freq.QuadPart;
+      return 1000.0f * (tp.time - time) / freq;
     }
-    return (double)(tp.fromMilliSec - fromMilliSec);
+    return (float)(tp.timeMilli - timeMilli);
   }
 
-  FpsCounter::FpsCounter(int sampleCount) :
+  FpsCounter::FpsCounter() :
     prevFrameTime(),
-    milliSecPerFrameAverage(1000.0 / 60.0),
-    milliSecPerFrameList(sampleCount, 1000.0 / 60)
+    milliSecPerFrameAccum(0.0f),
+    milliSecPerFrameIdx(0)
   {
+    milliSecPerFrameList.fill(0.0f);
   }
 
   FpsCounter::~FpsCounter() {
@@ -39,15 +40,16 @@ namespace bstorm {
 
   void FpsCounter::update() {
     TimePoint now;
-    double pushedTime = prevFrameTime.getElapsedMilliSec(now);
-    double popedTime = milliSecPerFrameList.front();
+    float deltaTime = prevFrameTime.getElapsedMilliSec(now);
+    float removedTime = milliSecPerFrameList[milliSecPerFrameIdx];
+    milliSecPerFrameAccum += deltaTime - removedTime;
+    milliSecPerFrameList[milliSecPerFrameIdx] = deltaTime;
+    milliSecPerFrameIdx = (milliSecPerFrameIdx + 1) & (sampleCnt - 1);
     prevFrameTime = now;
-    milliSecPerFrameList.pop_front();
-    milliSecPerFrameList.push_back(pushedTime);
-    milliSecPerFrameAverage += (pushedTime - popedTime) / milliSecPerFrameList.size();
+    fps = 1000.0f / (milliSecPerFrameAccum / sampleCnt);
   }
 
-  double FpsCounter::get() const {
-    return 1000.0 / milliSecPerFrameAverage;
+  float FpsCounter::get() const {
+    return fps;
   }
 }

@@ -147,7 +147,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
     }
 
     /* message loop */
-    engine->resetFpsCounter();
     while (true) {
       auto d3DDevice = engine->getGraphicDevice();
       if (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE)) {
@@ -164,10 +163,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
         continue;
       }
       if (SUCCEEDED(d3DDevice->BeginScene())) {
-        engine->updateFpsCounter();
+        // NOTE : PlayController, 及びPlayControllerを使っているモジュールは他より先に描画(tickでテクスチャの解放が行われる可能性があるので)
         engine->setBackBufferRenderTarget();
         d3DDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(114, 144, 154), 1.0f, 0);
-        // NOTE : PlayController, 及びPlayControllerを使っているモジュールは他より先に描画(tickでテクスチャの解放が行われる可能性があるので)
+        engine->updateFpsCounter();
         ImGui_ImplDX9_NewFrame();
         playController->setScript(scriptExplorer->getSelectedMainScript(), scriptExplorer->getSelectedPlayerScript());
         if (!playController->isPaused()) {

@@ -112,7 +112,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
     engine->startPackage();
 
     /* message loop */
-    engine->resetFpsCounter();
     while (true) {
       auto d3DDevice = engine->getGraphicDevice();
       if (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE)) {

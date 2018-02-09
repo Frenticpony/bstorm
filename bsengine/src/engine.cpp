@@ -323,18 +323,18 @@ namespace bstorm {
     return toUnicode(buf);
   }
 
-  double Engine::getCurrentFps() const {
+  float Engine::getCurrentFps() const {
     return gameState->fpsCounter->get();
   }
 
-  double Engine::getStageTime() const {
+  float Engine::getStageTime() const {
     if (isStageFinished()) {
       return 0.0;
     }
     return gameState->stageStartTime->getElapsedMilliSec();
   }
 
-  double Engine::getPackageTime() const {
+  float Engine::getPackageTime() const {
     return gameState->packageStartTime->getElapsedMilliSec();
   }
 
@@ -343,7 +343,7 @@ namespace bstorm {
   }
 
   void Engine::resetFpsCounter() {
-    gameState->fpsCounter = std::make_shared<FpsCounter>(16);
+    gameState->fpsCounter = std::make_shared<FpsCounter>();
   }
 
   void Engine::startSlow(int pseudoFps, bool byPlayer) {
