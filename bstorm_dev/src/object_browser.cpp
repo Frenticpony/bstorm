@@ -35,10 +35,11 @@ namespace bstorm {
   static const char blendTypeList[] = "NONE\0ALPHA\0ADD\0ADD_ARGB\0MULTIPLY\0SUBTRACT\0SHADOW\0INV_DESTRGB\0";
   static const char primitiveTypeList[] = "POINT_LIST\0LINELIST\0LINESTRIP\0TRIANGLELIST\0TRIANGLESTRIP\0TRIANGLEFAN\0";
   void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLayerList>& layerList) {
+    constexpr ImGuiTreeNodeFlags headerFlags = ImGuiTreeNodeFlags_DefaultOpen;
     ImGui::PushID(obj->getID());
     {
       // Obj
-      if (ImGui::CollapsingHeader("Obj", ImGuiTreeNodeFlags_DefaultOpen)) {
+      if (ImGui::CollapsingHeader("Obj", headerFlags)) {
         ImGui::Columns(2);
         ImGui::Text("Name"); ImGui::NextColumn(); ImGui::Text("Value"); ImGui::NextColumn();
         ImGui::Separator();
@@ -69,7 +70,7 @@ namespace bstorm {
     {
       // ObjRender
       if (auto objRender = std::dynamic_pointer_cast<ObjRender>(obj)) {
-        if (ImGui::CollapsingHeader("ObjRender")) {
+        if (ImGui::CollapsingHeader("ObjRender", headerFlags)) {
           ImGui::Columns(2);
           ImGui::Text("Name"); ImGui::NextColumn(); ImGui::Text("Value"); ImGui::NextColumn();
           ImGui::Separator();
@@ -173,7 +174,7 @@ namespace bstorm {
     {
       // ObjPrim
       if (auto objPrim = std::dynamic_pointer_cast<ObjPrim>(obj)) {
-        if (ImGui::CollapsingHeader("ObjPrim")) {
+        if (ImGui::CollapsingHeader("ObjPrim", headerFlags)) {
           const auto& texture = objPrim->getTexture();
           const auto& renderTarget = objPrim->getRenderTarget();
           ImGui::Columns(2);
@@ -278,7 +279,7 @@ namespace bstorm {
     {
       // ObjMove
       if (auto objMove = std::dynamic_pointer_cast<ObjMove>(obj)) {
-        if (ImGui::CollapsingHeader("ObjMove")) {
+        if (ImGui::CollapsingHeader("ObjMove", headerFlags)) {
           const auto& mode = objMove->getMoveMode();
           ImGui::Columns(2);
           ImGui::Text("Name"); ImGui::NextColumn(); ImGui::Text("Value"); ImGui::NextColumn();
@@ -356,7 +357,7 @@ namespace bstorm {
     {
       // ObjText
       if (auto objText = std::dynamic_pointer_cast<ObjText>(obj)) {
-        if (ImGui::CollapsingHeader("ObjText")) {
+        if (ImGui::CollapsingHeader("ObjText", headerFlags)) {
           ImGui::Columns(2);
           ImGui::Text("Name"); ImGui::NextColumn(); ImGui::Text("Value"); ImGui::NextColumn();
           ImGui::Separator();
@@ -533,7 +534,7 @@ namespace bstorm {
     {
       // ObjShot
       if (auto objShot = std::dynamic_pointer_cast<ObjShot>(obj)) {
-        if (ImGui::CollapsingHeader("ObjShot")) {
+        if (ImGui::CollapsingHeader("ObjShot", headerFlags)) {
           const auto& shotData = objShot->getShotData();
           ImGui::Columns(2);
           ImGui::Text("Name"); ImGui::NextColumn(); ImGui::Text("Value"); ImGui::NextColumn();
@@ -699,7 +700,7 @@ namespace bstorm {
     {
       // ObjLaser
       if (auto objLaser = std::dynamic_pointer_cast<ObjLaser>(obj)) {
-        if (ImGui::CollapsingHeader("ObjLaser")) {
+        if (ImGui::CollapsingHeader("ObjLaser", headerFlags)) {
           ImGui::Columns(2);
           ImGui::Text("Name"); ImGui::NextColumn(); ImGui::Text("Value"); ImGui::NextColumn();
           ImGui::Separator();
@@ -743,7 +744,7 @@ namespace bstorm {
     {
       // ObjLooseLaser
       if (auto objLooseLaser = std::dynamic_pointer_cast<ObjLooseLaser>(obj)) {
-        if (ImGui::CollapsingHeader("ObjLooseLaser")) {
+        if (ImGui::CollapsingHeader("ObjLooseLaser", headerFlags)) {
           ImGui::Columns(2);
           ImGui::Text("Name"); ImGui::NextColumn(); ImGui::Text("Value"); ImGui::NextColumn();
           ImGui::Separator();
@@ -777,7 +778,7 @@ namespace bstorm {
     {
       // ObjStLaser
       if (auto objStLaser = std::dynamic_pointer_cast<ObjStLaser>(obj)) {
-        if (ImGui::CollapsingHeader("ObjStLaser")) {
+        if (ImGui::CollapsingHeader("ObjStLaser", headerFlags)) {
           ImGui::Columns(2);
           ImGui::Text("Name"); ImGui::NextColumn(); ImGui::Text("Value"); ImGui::NextColumn();
           ImGui::Separator();
@@ -801,7 +802,7 @@ namespace bstorm {
     {
       // ObjCrLaser
       if (auto objCrLaser = std::dynamic_pointer_cast<ObjCrLaser>(obj)) {
-        if (ImGui::CollapsingHeader("ObjCrLaser")) {
+        if (ImGui::CollapsingHeader("ObjCrLaser", headerFlags)) {
           ImGui::Columns(2);
           ImGui::Text("Name"); ImGui::NextColumn(); ImGui::Text("Value"); ImGui::NextColumn();
           ImGui::Separator();
@@ -821,7 +822,7 @@ namespace bstorm {
     {
       // ObjEnemy
       if (auto objEnemy = std::dynamic_pointer_cast<ObjEnemy>(obj)) {
-        if (ImGui::CollapsingHeader("ObjEnemy")) {
+        if (ImGui::CollapsingHeader("ObjEnemy", headerFlags)) {
           ImGui::Columns(2);
           ImGui::Text("Name"); ImGui::NextColumn(); ImGui::Text("Value"); ImGui::NextColumn();
           ImGui::Separator();
@@ -870,7 +871,7 @@ namespace bstorm {
     {
       // ObjSpell
       if (auto objSpell = std::dynamic_pointer_cast<ObjSpell>(obj)) {
-        if (ImGui::CollapsingHeader("ObjSpell")) {
+        if (ImGui::CollapsingHeader("ObjSpell", headerFlags)) {
           ImGui::Columns(2);
           ImGui::Text("Name"); ImGui::NextColumn(); ImGui::Text("Value"); ImGui::NextColumn();
           ImGui::Separator();
@@ -909,7 +910,7 @@ namespace bstorm {
     {
       // ObjItem
       if (auto objItem = std::dynamic_pointer_cast<ObjItem>(obj)) {
-        if (ImGui::CollapsingHeader("ObjItem")) {
+        if (ImGui::CollapsingHeader("ObjItem", headerFlags)) {
           const auto& itemData = objItem->getItemData();
           ImGui::Columns(2);
           ImGui::Text("Name"); ImGui::NextColumn(); ImGui::Text("Value"); ImGui::NextColumn();
