@@ -57,19 +57,19 @@ namespace bstorm {
     }
   }
 
-  void ObjEnemyBossScene::regist() {
+  void ObjEnemyBossScene::regist(const std::shared_ptr<SourcePos>& srcPos) {
     auto state = getGameState();
     if (!state) return;
     if (registerFlag) {
       return;
     }
-    loadInThread();
+    loadInThread(srcPos);
     for (auto& entry : steps) {
       for (auto& phase : entry.second) {
         if (auto script = state->scriptManager->get(phase.scriptId)) {
           script->notifyEvent(EV_REQUEST_LIFE);
           if (script->getScriptResult()->getType() == DnhValue::Type::NIL) {
-            state->logger->logWarn("enemy life hasn't been returned from @Event, set a default value 2000.");
+            Logger::WriteLog(Log::Level::LV_WARN, "enemy life hasn't been returned from @Event, set a default value 2000.");
             phase.maxLife = phase.life = 2000.0f;
           } else {
             phase.maxLife = phase.life = std::max(0.0, script->getScriptResult()->toNum());
@@ -113,14 +113,14 @@ namespace bstorm {
     steps[step].push_back(Phase(path));
   }
 
-  void ObjEnemyBossScene::loadInThread() {
+  void ObjEnemyBossScene::loadInThread(const std::shared_ptr<SourcePos>& srcPos) {
     auto state = getGameState();
     if (!state) return;
     if (registerFlag) return;
     for (auto& entry : steps) {
       for (auto& phase : entry.second) {
         if (phase.scriptId < 0)
-          phase.scriptId = state->scriptManager->newScript(phase.path, SCRIPT_TYPE_SINGLE, state->stageMainScriptInfo.version)->getID();
+          phase.scriptId = state->scriptManager->newScript(phase.path, SCRIPT_TYPE_SINGLE, state->stageMainScriptInfo.version, srcPos)->getID();
       }
     }
     if (steps.count(0) != 0 && !steps[0].empty()) {
@@ -295,7 +295,7 @@ namespace bstorm {
 
   const ObjEnemyBossScene::Phase& ObjEnemyBossScene::getCurrentPhase() const {
     if (!existPhase()) {
-      throw std::runtime_error("phase not exists, please send bug report");
+      throw Log(Log::Level::LV_ERROR).setMessage("phase not exists, please send bug report.");
     }
     const auto& phases = steps.at(currentStep);
     return phases.at(currentPhase);

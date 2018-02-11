@@ -13,7 +13,6 @@ namespace bstorm {
   class GraphicDevice;
   class LostableGraphicResource;
   class LostableGraphicResourceManager;
-  class Logger;
   class KeyAssign;
   class Renderer;
   class RenderTarget;
@@ -50,11 +49,13 @@ namespace bstorm {
   class ItemData;
   class ScriptInfo;
   class Script;
+  class SoundBuffer;
   class GameState;
+  struct SourcePos;
   namespace conf { struct KeyConfig; }
   class Engine {
   public:
-    Engine(HWND hWnd, int screenWidth, int screenHeight, const std::shared_ptr<Logger>& logger, const std::shared_ptr<conf::KeyConfig>& defaultKeyConfig);
+    Engine(HWND hWnd, int screenWidth, int screenHeight, const std::shared_ptr<conf::KeyConfig>& defaultKeyConfig);
     virtual ~Engine();
     void addLostableGraphicResource(const std::shared_ptr<LostableGraphicResource>& resource);
     template <class T, class... Args>
@@ -99,15 +100,7 @@ namespace bstorm {
     int getMouseY();
     int getMouseMoveZ();
     /* logging function */
-    void logInfo(const std::string& msg);
-    void logInfo(const std::wstring& msg);
-    void logWarn(const std::string& msg);
-    void logWarn(const std::wstring& msg);
-    void logError(const std::string& msg);
-    void logError(const std::wstring& msg);
-    void logDebug(const std::string& msg);
-    void logDebug(const std::wstring& msg);
-    void writeLog(const std::wstring& msg);
+    void writeLog(const std::wstring& msg, const std::shared_ptr<SourcePos>& srcPos);
     /* time */
     std::wstring getCurrentDateTimeS();
     float getCurrentFps() const;
@@ -123,34 +116,36 @@ namespace bstorm {
     std::wstring Engine::getMainStgScriptDirectory() const;
     std::wstring getMainPackageScriptPath() const;
     /* texture */
-    std::shared_ptr<Texture> loadTexture(const std::wstring& path, bool reserve);
+    std::shared_ptr<Texture> loadTexture(const std::wstring& path, bool reserve, const std::shared_ptr<SourcePos>& srcPos);
     void removeTextureReservedFlag(const std::wstring& path);
     void releaseUnusedTextureCache();
     /* font */
     void releaseUnusedFontCache();
+    bool installFont(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
     /* render target */
-    std::shared_ptr<RenderTarget> createRenderTarget(const std::wstring& name, int width, int height);
-    void removeRenderTarget(const std::wstring& name);
+    std::shared_ptr<RenderTarget> createRenderTarget(const std::wstring& name, int width, int height, const std::shared_ptr<SourcePos>& srcPos);
+    void removeRenderTarget(const std::wstring& name, const std::shared_ptr<SourcePos>& srcPos);
     std::shared_ptr<RenderTarget> getRenderTarget(const std::wstring& name) const;
     std::wstring getReservedRenderTargetName(int idx) const;
     std::wstring getTransitionRenderTargetName() const;
-    void saveRenderedTextureA1(const std::wstring& name, const std::wstring& path);
-    void saveRenderedTextureA2(const std::wstring& name, const std::wstring& path, int left, int top, int right, int bottom);
-    void saveSnapShotA1(const std::wstring& path);
-    void saveSnapShotA2(const std::wstring& path, int left, int top, int right, int bottom);
+    void saveRenderedTextureA1(const std::wstring& name, const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    void saveRenderedTextureA2(const std::wstring& name, const std::wstring& path, int left, int top, int right, int bottom, const std::shared_ptr<SourcePos>& srcPos);
+    void saveSnapShotA1(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    void saveSnapShotA2(const std::wstring& path, int left, int top, int right, int bottom, const std::shared_ptr<SourcePos>& srcPos);
     /* shader */
     std::shared_ptr<Shader> createShader(const std::wstring& path, bool precompiled);
     bool isPixelShaderSupported(int major, int minor);
     /* mesh */
-    std::shared_ptr<Mesh> loadMesh(const std::wstring& path);
+    std::shared_ptr<Mesh> loadMesh(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
     void releaseUnusedMeshCache();
     /* sound */
-    void loadSound(const std::wstring& path);
-    void removeSound(const std::wstring& path);
+    std::shared_ptr<SoundBuffer> loadSound(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    void loadOrphanSound(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    void removeOrphanSound(const std::wstring& path);
     void playBGM(const std::wstring& path, double loopStartSec, double loopEndSec);
     void playSE(const std::wstring& path);
-    void stopSound(const std::wstring& path);
-    void cacheSound(const std::wstring& path);
+    void stopOrphanSound(const std::wstring& path);
+    void cacheSound(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
     void removeSoundCache(const std::wstring& path);
     void clearSoundCache();
     /* layer */
@@ -232,12 +227,12 @@ namespace bstorm {
     bool loadCommonDataAreaA2(const std::wstring& areaName, const std::wstring& path);
     std::wstring Engine::getDefaultCommonDataSavePath(const std::wstring& areaName) const;
     /* user def data */
-    void loadPlayerShotData(const std::wstring& path);
-    void reloadPlayerShotData(const std::wstring& path);
-    void loadEnemyShotData(const std::wstring& path);
-    void reloadEnemyShotData(const std::wstring& path);
-    void loadItemData(const std::wstring& path);
-    void reloadItemData(const std::wstring& path);
+    void loadPlayerShotData(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    void reloadPlayerShotData(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    void loadEnemyShotData(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    void reloadEnemyShotData(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    void loadItemData(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    void reloadItemData(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
     std::shared_ptr<ShotData> getPlayerShotData(int id) const;
     std::shared_ptr<ShotData> getEnemyShotData(int id) const;
     std::shared_ptr<ItemData> getItemData(int id) const;
@@ -293,12 +288,12 @@ namespace bstorm {
     std::shared_ptr<ObjItem> createItemU1(int itemDataId, float x, float y, int64_t score);
     std::shared_ptr<ObjItem> createItemU2(int itemDataId, float x, float y, float destX, float destY, int64_t score);
     std::shared_ptr<ObjEnemy> createObjEnemy();
-    std::shared_ptr<ObjEnemyBossScene> createObjEnemyBossScene();
+    std::shared_ptr<ObjEnemyBossScene> createObjEnemyBossScene(const std::shared_ptr<SourcePos>& srcPos);
     std::shared_ptr<ObjSpell> createObjSpell();
     std::shared_ptr<ObjItem> createObjItem(int itemType);
     /* script */
     std::shared_ptr<Script> getScript(int scriptId) const;
-    std::shared_ptr<Script> loadScript(const std::wstring& path, const std::wstring& type, const std::wstring& version);
+    std::shared_ptr<Script> loadScript(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<SourcePos>& srcPos);
     void closeStgScene();
     void notifyEventAll(int eventType);
     void notifyEventAll(int eventType, const std::unique_ptr<DnhArray>& args);
@@ -311,7 +306,7 @@ namespace bstorm {
     void getLoadFreePlayerScriptList();
     int getFreePlayerScriptCount() const;
     ScriptInfo getFreePlayerScriptInfo(int idx) const;
-    ScriptInfo getScriptInfo(const std::wstring& path);
+    ScriptInfo getScriptInfo(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
     /* point */
     int64_t getScore() const;
     void addScore(int64_t score);
@@ -334,7 +329,7 @@ namespace bstorm {
     int getEnemyShotCount() const;
     int getPlayerShotCount() const;
     void setShotAutoDeleteClip(float left, float top, float right, float bottom);
-    void startShotScript(const std::wstring& path);
+    void startShotScript(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
     void setDeleteShotImmediateEventOnShotScriptEnable(bool enable);
     void setDeleteShotFadeEventOnShotScriptEnable(bool enable);
     void setDeleteShotToItemEventOnShotScriptEnable(bool enable);
@@ -349,17 +344,17 @@ namespace bstorm {
     void collectItemsInCircle(float x, float y, float r);
     void cancelCollectItems();
     void setDefaultBonusItemEnable(bool enable);
-    void startItemScript(const std::wstring& path);
+    void startItemScript(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
     /* package */
     bool isPackageFinished() const;
     void closePackage();
     void initializeStageScene();
     void finalizeStageScene();
-    void startStageScene();
+    void startStageScene(const std::shared_ptr<SourcePos>& srcPos);
     void setStageIndex(uint16_t idx);
-    void setStageMainScript(const std::wstring& path);
+    void setStageMainScript(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
     void setStageMainScript(const ScriptInfo& script);
-    void setStagePlayerScript(const std::wstring& path);
+    void setStagePlayerScript(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
     void setStagePlayerScript(const ScriptInfo& script);
     void setStageReplayFile(const std::wstring& path);
     bool isStageFinished() const;
@@ -390,7 +385,6 @@ namespace bstorm {
     std::shared_ptr<int> screenPosY;
     std::shared_ptr<int> gameViewWidth;
     std::shared_ptr<int> gameViewHeight;
-    std::shared_ptr<Logger> logger;
     std::shared_ptr<conf::KeyConfig> defaultKeyConfig;
     std::shared_ptr<Renderer> renderer;
     std::unordered_map<std::wstring, std::shared_ptr<RenderTarget>> renderTargets;

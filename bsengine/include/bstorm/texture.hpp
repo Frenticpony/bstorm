@@ -8,7 +8,6 @@
 #include <bstorm/non_copyable.hpp>
 
 namespace bstorm {
-  class Logger;
   class Texture : private NonCopyable {
   public:
     Texture(const std::wstring& path, IDirect3DTexture9* d3DTexture);
@@ -37,13 +36,14 @@ namespace bstorm {
     IDirect3DTexture9* loadTexture(const std::wstring& path, IDirect3DDevice9*) override;
   };
 
+  struct SourcePos;
   class TextureCache {
   public:
     TextureCache(IDirect3DDevice9* d3DDevice);
     void setLoader(const std::shared_ptr<TextureLoader>& loader);
-    std::shared_ptr<Texture> load(const std::wstring& path, bool reserve);
+    std::shared_ptr<Texture> load(const std::wstring& path, bool reserve, const std::shared_ptr<SourcePos>& srcPos);
     void removeReservedFlag(const std::wstring& path);
-    void releaseUnusedTexture(const std::shared_ptr<Logger>& logger);
+    void releaseUnusedTexture();
     // backdoor
     template <typename T>
     void backDoor() const {}

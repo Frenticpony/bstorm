@@ -35,25 +35,26 @@ namespace bstorm {
   class Mesh {
   public:
     Mesh(const std::wstring& path);
+    ~Mesh();
     std::vector<MeshMaterial> materials;
     const std::wstring& getPath() const;
   private:
     std::wstring path;
   };
 
+  struct SourcePos;
   class TextureCache;
   struct Mqo;
-  std::shared_ptr<Mesh> mqoToMesh(const Mqo& mqo, const std::shared_ptr<TextureCache>& textureCache);
+  std::shared_ptr<Mesh> mqoToMesh(const Mqo& mqo, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos);
 
-  class Logger;
   class FileLoader;
   class TextureCache;
   class MeshCache {
   public:
     MeshCache();
     void setLoader(const std::shared_ptr<FileLoader>& loader);
-    std::shared_ptr<Mesh> load(const std::wstring& path, const std::shared_ptr<TextureCache>& textureCache);
-    void releaseUnusedMesh(const std::shared_ptr<Logger>& logger);
+    std::shared_ptr<Mesh> load(const std::wstring& path, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos);
+    void releaseUnusedMesh();
     // backdoor
     template <typename T>
     void backDoor() const {}

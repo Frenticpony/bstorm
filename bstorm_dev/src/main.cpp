@@ -26,8 +26,6 @@
 #include "game_view.hpp"
 #include "play_controller.hpp"
 
-#include "file_logger.hpp"
-
 using namespace bstorm;
 
 static bool isLostFocus = false;
@@ -35,6 +33,7 @@ static bool isLostFocus = false;
 constexpr char* thDnhDefFilePath = "th_dnh_dev.def";
 constexpr bool useBinaryFormat = true;
 constexpr char* configFilePath = useBinaryFormat ? "config.dat" : "config.json";
+constexpr wchar_t* logFilePath = L"th_dnh_dev.log";
 
 extern IMGUI_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -69,10 +68,21 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
   LONG screenHeight = 480;
   std::wstring windowTitle = L"bstorm [dev] "  BSTORM_VERSION_W;
   std::wstring packageMainScriptPath;
-  std::shared_ptr<Logger> logger;
+  bool logToFile = true;
 
   auto logWindow = std::make_shared<LogWindow>();
-  logger = logWindow;
+  if (logToFile) {
+    try {
+      Logger::Init(std::make_shared<FileLogger>(logFilePath, logWindow));
+    } catch (Log& log) {
+      log.setLevel(Log::Level::LV_WARN);
+      logWindow->log(log);
+      Logger::Shutdown();
+      Logger::Init(logWindow);
+    }
+  } else {
+    Logger::Init(logWindow);
+  }
 
   HWND hWnd = NULL;
   MSG msg;
@@ -120,14 +130,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
     auto userDefDataBrowser = std::make_shared<UserDefDataBrowser>(600, 19, 300, 530);
     auto cameraBrowser = std::make_shared<CameraBrowser>(0, 39, 300, 530);
     auto objectBrowser = std::make_shared<ObjectBrowser>(0, 39, 300, 530);
-    auto engine = std::make_shared<Engine>(hWnd, screenWidth, screenHeight, logWindow, std::make_shared<conf::KeyConfig>(config.keyConfig));
+    auto engine = std::make_shared<Engine>(hWnd, screenWidth, screenHeight, std::make_shared<conf::KeyConfig>(config.keyConfig));
     auto playController = std::make_shared<PlayController>(engine);
     auto gameView = std::make_shared<GameView>(windowWidth / 2 - 320, 60, 640, 480, playController);
     engine->setScreenPos(gameView->getViewPosX(), gameView->getViewPosY());
     engine->setGameViewSize(gameView->getViewWidth(), gameView->getViewHeight());
 
     ImGui_ImplDX9_Init(hWnd, engine->getGraphicDevice());
-
     {
       // フォント設定
       ImGuiIO& io = ImGui::GetIO();
@@ -138,12 +147,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
       static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
       io.Fonts->AddFontFromFileTTF("fonts/fa/fontawesome-webfont.ttf", 13.0f, &fontConfig, icon_ranges);
     }
-
     {
       // スタイル設定
       ImGuiStyle& imGuiStyle = ImGui::GetStyle();
       ImGui::StyleColorsDark();
       imGuiStyle.FrameRounding = 3.0f;
+
+      ImGui::GetIO().MouseDrawCursor = true;
     }
 
     /* message loop */
@@ -174,14 +184,16 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
         }
         auto gameViewRenderTarget = engine->getRenderTarget(GAME_VIEW_RENDER_TARGET);
         if (!gameViewRenderTarget) {
-          gameViewRenderTarget = engine->createRenderTarget(GAME_VIEW_RENDER_TARGET, screenWidth, screenHeight);
+          Logger::SetEnable(false);
+          gameViewRenderTarget = engine->createRenderTarget(GAME_VIEW_RENDER_TARGET, screenWidth, screenHeight, nullptr);
+          Logger::SetEnable(true);
         }
         engine->render(GAME_VIEW_RENDER_TARGET);
         gameView->draw(gameViewRenderTarget);
         {
           // main menu bar
           if (ImGui::BeginMainMenuBar()) {
-            if (ImGui::BeginMenu("Tool")) {
+            if (ImGui::BeginMenu("Tools")) {
               if (ImGui::MenuItem("Resource", NULL, resourceMonitor->isOpened())) {
                 resourceMonitor->setOpen(!resourceMonitor->isOpened());
               }
@@ -238,9 +250,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
       }
     }
   } catch (const std::exception& e) {
-    logger->logError(e.what());
-    MessageBoxW(hWnd, toUnicode(e.what()).c_str(), L"Error", MB_OK);
+    Logger::WriteLog(Log::Level::LV_ERROR, e.what());
+    MessageBoxW(hWnd, toUnicode(e.what()).c_str(), L"Unexpected Error", MB_OK);
   }
+  Logger::Shutdown();
   ImGui_ImplDX9_Shutdown();
   return (int)msg.wParam;
 }

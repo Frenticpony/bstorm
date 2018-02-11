@@ -45,9 +45,9 @@ namespace bstorm {
     float removedTime = milliSecPerFrameList[milliSecPerFrameIdx];
     milliSecPerFrameAccum += deltaTime - removedTime;
     milliSecPerFrameList[milliSecPerFrameIdx] = deltaTime;
-    milliSecPerFrameIdx = (milliSecPerFrameIdx + 1) & (sampleCnt - 1);
+    milliSecPerFrameIdx = (milliSecPerFrameIdx + 1) & (SampleCnt - 1);
     prevFrameTime = now;
-    fps = 1000.0f / (milliSecPerFrameAccum / sampleCnt);
+    fps = 1000.0f / (milliSecPerFrameAccum / SampleCnt);
     if (milliSecPerFrameIdx == 0) { stableFps = fps; }
   }
 

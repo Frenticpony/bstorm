@@ -15,6 +15,10 @@ namespace bstorm {
 
   Texture::~Texture() {
     d3DTexture->Release();
+    Logger::WriteLog(std::move(
+      Log(Log::Level::LV_INFO)
+      .setMessage("release texture.")
+      .setParam(Log::Param(Log::Param::Tag::TEXTURE, path))));
   }
 
   const std::wstring& Texture::getPath() const {
@@ -63,7 +67,7 @@ namespace bstorm {
     return d3DTexture;
   }
 
-  std::shared_ptr<Texture> TextureCache::load(const std::wstring& path, bool reserve) {
+  std::shared_ptr<Texture> TextureCache::load(const std::wstring& path, bool reserve, const std::shared_ptr<SourcePos>& srcPos) {
     auto uniqPath = canonicalPath(path);
     auto it = textureMap.find(uniqPath);
     if (it != textureMap.end()) {
@@ -75,10 +79,16 @@ namespace bstorm {
         auto texture = std::make_shared<Texture>(uniqPath, d3DTexture);
         texture->setReservedFlag(reserve);
         textureMap[uniqPath] = texture;
+        Logger::WriteLog(std::move(
+          Log(Log::Level::LV_INFO).setMessage(std::string("load texture") + (reserve ? " (reserved)." : "."))
+          .setParam(Log::Param(Log::Param::Tag::TEXTURE, uniqPath))
+          .addSourcePos(srcPos)));
         return texture;
       }
     }
-    throw std::runtime_error("failed to load texture: " + toUTF8(path));
+    throw Log(Log::Level::LV_ERROR)
+      .setMessage("failed to load texture.")
+      .setParam(Log::Param(Log::Param::Tag::TEXTURE, path));
   }
 
   void TextureCache::removeReservedFlag(const std::wstring & path) {
@@ -89,12 +99,11 @@ namespace bstorm {
     }
   }
 
-  void TextureCache::releaseUnusedTexture(const std::shared_ptr<Logger>& logger) {
+  void TextureCache::releaseUnusedTexture() {
     auto it = textureMap.begin();
     while (it != textureMap.end()) {
       auto& texture = it->second;
       if (!texture->isReserved() && texture.use_count() <= 1) {
-        logger->logInfo(L"release texture: " + it->first);
         textureMap.erase(it++);
       } else ++it;
     }

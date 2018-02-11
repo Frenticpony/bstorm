@@ -25,12 +25,9 @@ namespace bstorm {
     }
   }
 
-  void ObjSound::load(const std::wstring & path) {
+  void ObjSound::setSound(const std::shared_ptr<SoundBuffer>& buf) {
     restartEnable = false;
-    soundBuffer.reset();
-    if (auto gameState = getGameState()) {
-      soundBuffer = gameState->soundDevice->loadSound(path, false);
-    }
+    soundBuffer = buf;
   }
 
   void ObjSound::play() {

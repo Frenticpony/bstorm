@@ -33,7 +33,7 @@ namespace bstorm {
 }
 
 %code { // mqo.tab.cpp after #include mqo.tab.hpp
-#include <bstorm/static_script_error.hpp>
+#include <bstorm/logger.hpp>
 #include <bstorm/util.hpp>
 
 #include "../reflex/mqo_lexer.hpp"
@@ -53,12 +53,14 @@ static int yylex(MqoParser::semantic_type *yylval, MqoParser::location_type* yyl
   }
   yylloc->begin.filename = lexer->getFilePath();
   yylloc->begin.line = lexer->lineno();
-  yylloc->begin.column = lexer->columno();
+  yylloc->begin.column = lexer->columno() + 1;
   return tk;
 }
 
 void MqoParser::error(const MqoParser::location_type& yylloc, const std::string& msg) {
-  throw static_script_error(*yylloc.begin.filename, yylloc.begin.line, yylloc.begin.column, toUnicode(msg));
+  throw Log(Log::Level::LV_ERROR)
+    .setMessage(msg)
+    .addSourcePos(std::make_shared<SourcePos>(yylloc.begin));
 }
 
 static MqoColor4 toMqoColor4(uint32_t col) {

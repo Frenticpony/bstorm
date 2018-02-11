@@ -57,20 +57,19 @@
 #undef VK_PAUSE
 
 namespace bstorm {
-  Engine::Engine(HWND hWnd, int screenWidth, int screenHeight, const std::shared_ptr<Logger>& logger, const std::shared_ptr<conf::KeyConfig>& defaultKeyConfig) :
+  Engine::Engine(HWND hWnd, int screenWidth, int screenHeight, const std::shared_ptr<conf::KeyConfig>& defaultKeyConfig) :
     hWnd(hWnd),
     graphicDevice(std::make_unique<GraphicDevice>(hWnd)),
     lostableGraphicResourceManager(std::make_unique<LostableGraphicResourceManager>()),
-    logger(logger),
     defaultKeyConfig(defaultKeyConfig),
     renderer(std::make_shared<Renderer>(graphicDevice->getDevice()))
   {
-    logger->logInfo("boot engine.");
+    Logger::WriteLog(Log::Level::LV_INFO, "boot engine.");
     reset(screenWidth, screenHeight);
   }
 
   Engine::~Engine() {
-    logInfo("shutdown engine.");
+    Logger::WriteLog(Log::Level::LV_INFO, "shutdown engine.");
   }
 
   HWND Engine::getWindowHandle() const {
@@ -79,13 +78,13 @@ namespace bstorm {
 
   void Engine::tickFrame() {
     if (isPackageFinished()) {
-      logWarn("package is not setted, please select package.");
+      Logger::WriteLog(Log::Level::LV_WARN, "package is not setted, please select package.");
       return;
     }
 
     if (auto packageMain = gameState->packageMainScript.lock()) {
       if (packageMain->isClosed()) {
-        logInfo("finish package.");
+        Logger::WriteLog(Log::Level::LV_INFO, "finish package.");
         gameState->packageMainScript.reset();
         reset(getScreenWidth(), getScreenHeight());
         return;
@@ -166,17 +165,19 @@ namespace bstorm {
   }
 
   void Engine::reset(int screenWidth, int screenHeight) {
-    gameState = std::make_shared<GameState>(screenWidth, screenHeight, getWindowHandle(), getGraphicDevice(), logger, renderer, defaultKeyConfig, screenPosX, screenPosY, gameViewWidth, gameViewHeight, this);
+    Logger::SetEnable(false);
+    gameState = std::make_shared<GameState>(screenWidth, screenHeight, getWindowHandle(), getGraphicDevice(), renderer, defaultKeyConfig, screenPosX, screenPosY, gameViewWidth, gameViewHeight, this);
     reset2DCamera();
     resetCamera();
 
     renderTargets.clear();
-    createRenderTarget(TRANSITION_RENDER_TARGET_NAME, getScreenWidth(), getScreenHeight());
-    createRenderTarget(getReservedRenderTargetName(0), 1024, 512);
-    createRenderTarget(getReservedRenderTargetName(1), 1024, 512);
-    createRenderTarget(getReservedRenderTargetName(2), 1024, 512);
+    createRenderTarget(TRANSITION_RENDER_TARGET_NAME, getScreenWidth(), getScreenHeight(), nullptr);
+    createRenderTarget(getReservedRenderTargetName(0), 1024, 512, nullptr);
+    createRenderTarget(getReservedRenderTargetName(1), 1024, 512, nullptr);
+    createRenderTarget(getReservedRenderTargetName(2), 1024, 512, nullptr);
     renderer->setForbidCameraViewProjMatrix2D(getScreenWidth(), getScreenHeight());
     renderer->setFogEnable(false);
+    Logger::SetEnable(true);
   }
 
   int Engine::getScreenWidth() const {
@@ -275,44 +276,11 @@ namespace bstorm {
     return gameState->inputDevice->getMouseMoveZ();
   }
 
-  void Engine::logInfo(const std::string & msg) {
-    logger->logInfo(msg);
-  }
-
-  void Engine::logInfo(const std::wstring & msg) {
-    logger->logInfo(msg);
-  }
-
-  void Engine::logWarn(const std::string & msg) {
-    logger->logWarn(msg);
-  }
-
-  void Engine::logWarn(const std::wstring & msg) {
-    logger->logWarn(msg);
-  }
-
-  void Engine::logError(const std::string & msg) {
-    logger->logError(msg);
-  }
-
-  void Engine::logError(const std::wstring & text) {
-    logger->logError(text);
-  }
-
-  void Engine::logDebug(const std::string & text) {
-#ifdef _DEBUG
-    logger->logDebug(text);
-#endif
-  }
-
-  void Engine::logDebug(const std::wstring & text) {
-#ifdef _DEBUG
-    logger->logDebug(text);
-#endif
-  }
-
-  void Engine::writeLog(const std::wstring & msg) {
-    logger->log(L"[user]", msg);
+  void Engine::writeLog(const std::wstring & msg, const std::shared_ptr<SourcePos>& srcPos) {
+    Logger::WriteLog(std::move(
+      Log(Log::Level::LV_USER)
+      .setMessage(msg)
+      .addSourcePos(srcPos)));
   }
 
   std::wstring Engine::getCurrentDateTimeS() {
@@ -379,12 +347,8 @@ namespace bstorm {
     return gameState->packageMainScriptInfo.path;
   }
 
-  std::shared_ptr<Texture> Engine::loadTexture(const std::wstring & path, bool reserve) {
-    auto texture = gameState->textureCache->load(path, reserve);
-    if (texture.use_count() == 2) {
-      logInfo(L"load texture: " + path);
-    }
-    return texture;
+  std::shared_ptr<Texture> Engine::loadTexture(const std::wstring & path, bool reserve, const std::shared_ptr<SourcePos>& srcPos) {
+    return gameState->textureCache->load(path, reserve, srcPos);
   }
 
   void Engine::removeTextureReservedFlag(const std::wstring & path) {
@@ -392,25 +356,47 @@ namespace bstorm {
   }
 
   void Engine::releaseUnusedTextureCache() {
-    gameState->textureCache->releaseUnusedTexture(logger);
+    gameState->textureCache->releaseUnusedTexture();
   }
 
   void Engine::releaseUnusedFontCache() {
     gameState->fontCache->releaseUnusedFont();
   }
 
-  std::shared_ptr<RenderTarget> Engine::createRenderTarget(const std::wstring & name, int width, int height) {
+  bool Engine::installFont(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos) {
+    bool result = bstorm::installFont(path);
+    if (!result) {
+      Logger::WriteLog(std::move(
+        Log(Log::Level::LV_WARN)
+        .setMessage("failed to install font.")
+        .setParam(Log::Param(Log::Param::Tag::TEXT, path))
+        .addSourcePos(srcPos)));
+    }
+    return result;
+  }
+
+  std::shared_ptr<RenderTarget> Engine::createRenderTarget(const std::wstring & name, int width, int height, const std::shared_ptr<SourcePos>& srcPos) {
     auto renderTarget = std::make_shared<RenderTarget>(name, width, height, getGraphicDevice());
     renderTarget->setViewport(0, 0, getScreenWidth(), getScreenHeight());
     renderTargets[name] = renderTarget;
     addLostableGraphicResource(renderTarget);
+    Logger::WriteLog(std::move(
+      Log(Log::Level::LV_INFO)
+      .setMessage("create render target.")
+      .setParam(Log::Param(Log::Param::Tag::RENDER_TARGET, name))
+      .addSourcePos(srcPos)));
     return renderTarget;
   }
 
-  void Engine::removeRenderTarget(const std::wstring & name) {
+  void Engine::removeRenderTarget(const std::wstring & name, const std::shared_ptr<SourcePos>& srcPos) {
     auto it = renderTargets.find(name);
     if (it != renderTargets.end()) {
       renderTargets.erase(it);
+      Logger::WriteLog(std::move(
+        Log(Log::Level::LV_INFO)
+        .setMessage("remove render target.")
+        .setParam(Log::Param(Log::Param::Tag::RENDER_TARGET, name))
+        .addSourcePos(srcPos)));
     }
   }
 
@@ -442,14 +428,14 @@ namespace bstorm {
     return D3DXIFF_PNG;
   }
 
-  void Engine::saveRenderedTextureA1(const std::wstring & name, const std::wstring & path) {
+  void Engine::saveRenderedTextureA1(const std::wstring & name, const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos) {
     if (auto renderTarget = getRenderTarget(name)) {
       auto viewport = renderTarget->getViewport();
-      saveRenderedTextureA2(name, path, viewport.X, viewport.Y, viewport.X + viewport.Width, viewport.Y + viewport.Height);
+      saveRenderedTextureA2(name, path, viewport.X, viewport.Y, viewport.X + viewport.Width, viewport.Y + viewport.Height, srcPos);
     }
   }
 
-  void Engine::saveRenderedTextureA2(const std::wstring & name, const std::wstring & path, int left, int top, int right, int bottom) {
+  void Engine::saveRenderedTextureA2(const std::wstring & name, const std::wstring & path, int left, int top, int right, int bottom, const std::shared_ptr<SourcePos>& srcPos) {
     if (auto renderTarget = getRenderTarget(name)) {
       auto viewport = renderTarget->getViewport();
       RECT rect = { left, top, right, bottom };
@@ -458,24 +444,33 @@ namespace bstorm {
         return;
       }
     }
-    logWarn(L"failed to save render target '" + name + L"'.");
+    Logger::WriteLog(std::move(
+      Log(Log::Level::LV_WARN)
+      .setMessage("failed to save render target.")
+      .setParam(Log::Param(Log::Param::Tag::RENDER_TARGET, name))
+      .addSourcePos(srcPos)));
   }
 
-  void Engine::saveSnapShotA1(const std::wstring & path) {
-    saveSnapShotA2(path, 0, 0, getScreenWidth(), getScreenHeight());
+  void Engine::saveSnapShotA1(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos) {
+    saveSnapShotA2(path, 0, 0, getScreenWidth(), getScreenHeight(), srcPos);
   }
 
-  void Engine::saveSnapShotA2(const std::wstring & path, int left, int top, int right, int bottom) {
-    removeRenderTarget(SNAP_SHOT_RENDER_TARGET_NAME);
+  void Engine::saveSnapShotA2(const std::wstring & path, int left, int top, int right, int bottom, const std::shared_ptr<SourcePos>& srcPos) {
+    removeRenderTarget(SNAP_SHOT_RENDER_TARGET_NAME, srcPos);
     try {
-      createRenderTarget(SNAP_SHOT_RENDER_TARGET_NAME, getScreenWidth(), getScreenHeight());
+      createRenderTarget(SNAP_SHOT_RENDER_TARGET_NAME, getScreenWidth(), getScreenHeight(), srcPos);
       renderToTexture(SNAP_SHOT_RENDER_TARGET_NAME, 0, MAX_RENDER_PRIORITY, ID_INVALID, true, false, true, true);
-      saveRenderedTextureA2(SNAP_SHOT_RENDER_TARGET_NAME, path, left, top, right, bottom);
-    } catch (const std::exception& e) {
-      logWarn(e.what());
-      logWarn(L"failed to create snap shot: " + path);
+      saveRenderedTextureA2(SNAP_SHOT_RENDER_TARGET_NAME, path, left, top, right, bottom, srcPos);
+    } catch (Log& log) {
+      log.setLevel(Log::Level::LV_WARN).addSourcePos(srcPos);
+      Logger::WriteLog(log);
+      Logger::WriteLog(std::move(
+        Log(Log::Level::LV_WARN)
+        .setMessage("failed to create snap shot.")
+        .setParam(Log::Param(Log::Param::Tag::TEXT, path))
+        .addSourcePos(srcPos)));
     }
-    removeRenderTarget(SNAP_SHOT_RENDER_TARGET_NAME);
+    removeRenderTarget(SNAP_SHOT_RENDER_TARGET_NAME, srcPos);
   }
 
   std::shared_ptr<Shader> Engine::createShader(const std::wstring & path, bool precompiled) {
@@ -490,23 +485,23 @@ namespace bstorm {
     return caps.PixelShaderVersion >= D3DPS_VERSION(major, minor);
   }
 
-  std::shared_ptr<Mesh> Engine::loadMesh(const std::wstring & path) {
-    auto mesh = gameState->meshCache->load(path, gameState->textureCache);
-    if (mesh.use_count() == 2) {
-      logInfo(L"load mesh: " + path);
-    }
-    return mesh;
+  std::shared_ptr<Mesh> Engine::loadMesh(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos) {
+    return gameState->meshCache->load(path, gameState->textureCache, srcPos);
   }
 
   void Engine::releaseUnusedMeshCache() {
-    gameState->meshCache->releaseUnusedMesh(logger);
+    gameState->meshCache->releaseUnusedMesh();
   }
 
-  void Engine::loadSound(const std::wstring & path) {
-    gameState->orphanSounds[canonicalPath(path)] = gameState->soundDevice->loadSound(path, false);
+  std::shared_ptr<SoundBuffer> Engine::loadSound(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos) {
+    return gameState->soundDevice->loadSound(path, false, srcPos);
   }
 
-  void Engine::removeSound(const std::wstring & path) {
+  void Engine::loadOrphanSound(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos) {
+    gameState->orphanSounds[canonicalPath(path)] = loadSound(path, srcPos);
+  }
+
+  void Engine::removeOrphanSound(const std::wstring & path) {
     gameState->orphanSounds.erase(canonicalPath(path));
   }
 
@@ -530,15 +525,15 @@ namespace bstorm {
     }
   }
 
-  void Engine::stopSound(const std::wstring & path) {
+  void Engine::stopOrphanSound(const std::wstring & path) {
     auto it = gameState->orphanSounds.find(canonicalPath(path));
     if (it != gameState->orphanSounds.end()) {
       it->second->stop();
     }
   }
 
-  void Engine::cacheSound(const std::wstring & path) {
-    gameState->soundDevice->loadSound(path, true);
+  void Engine::cacheSound(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos) {
+    gameState->soundDevice->loadSound(path, true, srcPos);
   }
 
   void Engine::removeSoundCache(const std::wstring & path) {
@@ -856,43 +851,28 @@ namespace bstorm {
     return parentPath(basePath) + L"/data/" + getStem(basePath) + L"_common_" + areaName + L".dat";
   }
 
-  void Engine::loadPlayerShotData(const std::wstring & path) {
-    if (gameState->playerShotDataTable->isLoaded(path)) {
-      logWarn(L"player shot data already loaded: " + path);
-    } else {
-      reloadPlayerShotData(path);
-    }
+  void Engine::loadPlayerShotData(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos) {
+    gameState->playerShotDataTable->load(path, gameState->fileLoader, gameState->textureCache, srcPos);
   }
 
-  void Engine::reloadPlayerShotData(const std::wstring & path) {
-    gameState->playerShotDataTable->reload(path, gameState->fileLoader, gameState->textureCache);
-    logInfo(L"load player shot data: " + path);
+  void Engine::reloadPlayerShotData(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos) {
+    gameState->playerShotDataTable->reload(path, gameState->fileLoader, gameState->textureCache, srcPos);
   }
 
-  void Engine::loadEnemyShotData(const std::wstring & path) {
-    if (gameState->enemyShotDataTable->isLoaded(path)) {
-      logWarn(L"enemy shot data already loaded: " + path);
-    } else {
-      reloadEnemyShotData(path);
-    }
+  void Engine::loadEnemyShotData(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos) {
+    gameState->enemyShotDataTable->load(path, gameState->fileLoader, gameState->textureCache, srcPos);
   }
 
-  void Engine::reloadEnemyShotData(const std::wstring & path) {
-    gameState->enemyShotDataTable->reload(path, gameState->fileLoader, gameState->textureCache);
-    logInfo(L"load enemy shot data: " + path);
+  void Engine::reloadEnemyShotData(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos) {
+    gameState->enemyShotDataTable->reload(path, gameState->fileLoader, gameState->textureCache, srcPos);
   }
 
-  void Engine::loadItemData(const std::wstring & path) {
-    if (gameState->itemDataTable->isLoaded(path)) {
-      logWarn(L"item data already loaded: " + path);
-    } else {
-      reloadItemData(path);
-    }
+  void Engine::loadItemData(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos) {
+    gameState->itemDataTable->load(path, gameState->fileLoader, gameState->textureCache, srcPos);
   }
 
-  void Engine::reloadItemData(const std::wstring & path) {
-    gameState->itemDataTable->reload(path, gameState->fileLoader, gameState->textureCache);
-    logInfo(L"load item data: " + path);
+  void Engine::reloadItemData(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos) {
+    gameState->itemDataTable->reload(path, gameState->fileLoader, gameState->textureCache, srcPos);
   }
 
   std::shared_ptr<ShotData> Engine::getPlayerShotData(int id) const {
@@ -1100,10 +1080,13 @@ namespace bstorm {
     return enemy;
   }
 
-  std::shared_ptr<ObjEnemyBossScene> Engine::createObjEnemyBossScene() {
+  std::shared_ptr<ObjEnemyBossScene> Engine::createObjEnemyBossScene(const std::shared_ptr<SourcePos>& srcPos) {
     if (auto bossScene = gameState->enemyBossSceneObj.lock()) {
       if (!bossScene->isDead()) {
-        logWarn("boss scene object already exists");
+        Logger::WriteLog(std::move(
+          Log(Log::Level::LV_WARN)
+          .setMessage("boss scene object already exists.")
+          .addSourcePos(srcPos)));
         return bossScene;
       }
     }
@@ -1128,9 +1111,8 @@ namespace bstorm {
     return gameState->scriptManager->get(scriptId);
   }
 
-  std::shared_ptr<Script> Engine::loadScript(const std::wstring & path, const std::wstring & type, const std::wstring & version) {
-    logInfo(L"LoadScript: " + path);
-    auto script = gameState->scriptManager->newScript(path, type, version);
+  std::shared_ptr<Script> Engine::loadScript(const std::wstring & path, const std::wstring & type, const std::wstring & version, const std::shared_ptr<SourcePos>& srcPos) {
+    auto script = gameState->scriptManager->newScript(path, type, version, srcPos);
     script->runLoading();
     return script;
   }
@@ -1252,7 +1234,7 @@ namespace bstorm {
         if (scriptType == TYPE_SCRIPT_ALL || scriptTypeName == info.type) {
           infos.push_back(info);
         }
-      } catch (const std::exception&) {
+      } catch (const Log& log) {
       }
     }
     return infos;
@@ -1270,12 +1252,17 @@ namespace bstorm {
     return gameState->freePlayerScriptInfoList.at(idx);
   }
 
-  ScriptInfo Engine::getScriptInfo(const std::wstring & path) {
+  ScriptInfo Engine::getScriptInfo(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos) {
     try {
       return scanDnhScriptInfo(path, gameState->fileLoader);
-    } catch (const std::exception& e) {
-      logWarn(e.what());
-      logWarn(L"failed to load script info: " + path);
+    } catch (Log& log) {
+      log.setLevel(Log::Level::LV_WARN).addSourcePos(srcPos);
+      Logger::WriteLog(log);
+      Logger::WriteLog(std::move(
+        Log(Log::Level::LV_WARN)
+        .setMessage("failed to load script info.")
+        .setParam(Log::Param(Log::Param::Tag::SCRIPT, path))
+        .addSourcePos(srcPos)));
       return ScriptInfo();
     }
   }
@@ -1359,12 +1346,16 @@ namespace bstorm {
     gameState->shotAutoDeleteClip->setClip(left, top, right, bottom);
   }
 
-  void Engine::startShotScript(const std::wstring & path) {
+  void Engine::startShotScript(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos) {
     if (isStageFinished()) {
-      logWarn("shot script is only available in stage.");
+      Logger::WriteLog(std::move(
+        Log(Log::Level::LV_WARN)
+        .setMessage("shot script is only available in stage.")
+        .setParam(Log::Param(Log::Param::Tag::SCRIPT, canonicalPath(path)))
+        .addSourcePos(srcPos)));
       return;
     }
-    auto shotScript = loadScript(path, SCRIPT_TYPE_SHOT_CUSTOM, gameState->stageMainScriptInfo.version);
+    auto shotScript = loadScript(path, SCRIPT_TYPE_SHOT_CUSTOM, gameState->stageMainScriptInfo.version, srcPos);
     gameState->shotScript = shotScript;
     shotScript->runInitialize();
   }
@@ -1477,12 +1468,16 @@ namespace bstorm {
     gameState->defaultBonusItemEnable = enable;
   }
 
-  void Engine::startItemScript(const std::wstring & path) {
+  void Engine::startItemScript(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos) {
     if (isStageFinished()) {
-      logWarn("item script is only available in stage.");
+      Logger::WriteLog(std::move(
+        Log(Log::Level::LV_WARN)
+        .setMessage("item script is only available in stage.")
+        .setParam(Log::Param(Log::Param::Tag::SCRIPT, canonicalPath(path)))
+        .addSourcePos(srcPos)));
       return;
     }
-    auto itemScript = loadScript(path, SCRIPT_TYPE_ITEM_CUSTOM, gameState->stageMainScriptInfo.version);
+    auto itemScript = loadScript(path, SCRIPT_TYPE_ITEM_CUSTOM, gameState->stageMainScriptInfo.version, srcPos);
     gameState->itemScript = itemScript;
     itemScript->runInitialize();
   }
@@ -1528,12 +1523,12 @@ namespace bstorm {
 
   void Engine::startPackage() {
     if (!isPackageFinished()) {
-      logWarn("package already started.");
+      Logger::WriteLog(Log::Level::LV_WARN, "package already started.");
       return;
     }
     gameState->packageStartTime = std::make_shared<TimePoint>();
-    logInfo("start package.");
-    auto script = gameState->scriptManager->newScript(gameState->packageMainScriptInfo.path, SCRIPT_TYPE_PACKAGE, gameState->packageMainScriptInfo.version);
+    Logger::WriteLog(Log::Level::LV_INFO, "start package.");
+    auto script = gameState->scriptManager->newScript(gameState->packageMainScriptInfo.path, SCRIPT_TYPE_PACKAGE, gameState->packageMainScriptInfo.version, nullptr);
     gameState->packageMainScript = script;
     script->runLoading();
     script->runInitialize();
@@ -1583,23 +1578,25 @@ namespace bstorm {
     gameState->stageIdx = idx;
   }
 
-  void Engine::setStageMainScript(const std::wstring & path) {
+  void Engine::setStageMainScript(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos) {
     try {
       gameState->stageMainScriptInfo = scanDnhScriptInfo(path, gameState->fileLoader);
-    } catch (const std::exception& e) {
-      logWarn(e.what());
+    } catch (Log& log) {
+      log.setLevel(Log::Level::LV_WARN).addSourcePos(srcPos);
+      Logger::WriteLog(log);
       gameState->stageMainScriptInfo = ScriptInfo();
       gameState->stageMainScriptInfo.path = path;
     }
   }
 
-  void Engine::setStagePlayerScript(const std::wstring & path) {
+  void Engine::setStagePlayerScript(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos) {
     try {
       gameState->stagePlayerScriptInfo = scanDnhScriptInfo(path, gameState->fileLoader);
-    } catch (const std::exception& e) {
-      logWarn(e.what());
-      gameState->stagePlayerScriptInfo = ScriptInfo();
-      gameState->stagePlayerScriptInfo.path = path;
+    } catch (Log& log) {
+      log.setLevel(Log::Level::LV_WARN).addSourcePos(srcPos);
+      Logger::WriteLog(log);
+      gameState->stageMainScriptInfo = ScriptInfo();
+      gameState->stageMainScriptInfo.path = path;
     }
   }
 
@@ -1649,10 +1646,11 @@ namespace bstorm {
   void Engine::setPackageMainScript(const std::wstring & path) {
     try {
       gameState->packageMainScriptInfo = scanDnhScriptInfo(path, gameState->fileLoader);
-    } catch (const std::exception& e) {
-      logWarn(e.what());
-      gameState->packageMainScriptInfo = ScriptInfo();
-      gameState->packageMainScriptInfo.path = path;
+    } catch (Log& log) {
+      log.setLevel(Log::Level::LV_WARN);
+      Logger::WriteLog(log);
+      gameState->stageMainScriptInfo = ScriptInfo();
+      gameState->stageMainScriptInfo.path = path;
     }
   }
 
@@ -1660,19 +1658,19 @@ namespace bstorm {
     gameState->packageMainScriptInfo = script;
   }
 
-  void Engine::startStageScene() {
+  void Engine::startStageScene(const std::shared_ptr<SourcePos>& srcPos) {
     gameState->objTable->deleteStgSceneObject();
     gameState->scriptManager->closeStgSceneScript();
     gameState->inputDevice->resetInputState();
     reset2DCamera();
     resetCamera();
     setDefaultBonusItemEnable(true);
-    gameState->playerShotDataTable = std::make_shared<ShotDataTable>();
-    gameState->enemyShotDataTable = std::make_shared<ShotDataTable>();
+    gameState->playerShotDataTable = std::make_shared<ShotDataTable>(ShotDataTable::Type::PLAYER);
+    gameState->enemyShotDataTable = std::make_shared<ShotDataTable>(ShotDataTable::Type::ENEMY);
     gameState->itemDataTable = std::make_shared<ItemDataTable>();
     gameState->stageMainScript.reset();
     gameState->stagePlayerScript.reset();
-    reloadItemData(DEFAULT_ITEM_DATA_PATH);
+    reloadItemData(DEFAULT_ITEM_DATA_PATH, nullptr);
     gameState->stageSceneResult = 0;
     gameState->stageForceTerminated = false;
     setDeleteShotImmediateEventOnShotScriptEnable(false);
@@ -1687,19 +1685,20 @@ namespace bstorm {
     }
 
     // #System
-    logInfo(L"load system script: " + gameState->stageMainScriptInfo.systemPath);
-    auto systemScript = gameState->scriptManager->newScript(gameState->stageMainScriptInfo.systemPath, SCRIPT_TYPE_STAGE, gameState->stageMainScriptInfo.version);
+    auto systemScript = gameState->scriptManager->newScript(gameState->stageMainScriptInfo.systemPath, SCRIPT_TYPE_STAGE, gameState->stageMainScriptInfo.version, srcPos);
     systemScript->runLoading();
     systemScript->runInitialize();
 
     // Player
-    logInfo(L"create player object");
+    Logger::WriteLog(std::move(
+      Log(Log::Level::LV_INFO)
+      .setMessage("create player object.")
+      .addSourcePos(srcPos)));
     auto player = gameState->objTable->create<ObjPlayer>(gameState, gameState->globalPlayerParams);
     gameState->objLayerList->setRenderPriority(player, DEFAULT_PLAYER_RENDER_PRIORITY);
     gameState->playerObj = player;
 
-    logInfo(L"load player script: " + gameState->stagePlayerScriptInfo.path);
-    auto playerScript = gameState->scriptManager->newScript(gameState->stagePlayerScriptInfo.path, SCRIPT_TYPE_PLAYER, gameState->stagePlayerScriptInfo.version);
+    auto playerScript = gameState->scriptManager->newScript(gameState->stagePlayerScriptInfo.path, SCRIPT_TYPE_PLAYER, gameState->stagePlayerScriptInfo.version, srcPos);
     gameState->stagePlayerScript = playerScript;
     playerScript->runLoading();
     playerScript->runInitialize();
@@ -1711,8 +1710,7 @@ namespace bstorm {
     } else if (gameState->stageMainScriptInfo.type == SCRIPT_TYPE_PLURAL) {
       stageMainScriptPath = SYSTEM_PLURAL_STAGE_PATH;
     }
-    logInfo(L"load main script: " + stageMainScriptPath);
-    auto stageMainScript = gameState->scriptManager->newScript(stageMainScriptPath, SCRIPT_TYPE_STAGE, gameState->stageMainScriptInfo.version);
+    auto stageMainScript = gameState->scriptManager->newScript(stageMainScriptPath, SCRIPT_TYPE_STAGE, gameState->stageMainScriptInfo.version, srcPos);
     gameState->stageMainScript = stageMainScript;
     stageMainScript->runLoading();
     stageMainScript->runInitialize();
@@ -1720,15 +1718,14 @@ namespace bstorm {
 
     // #Background
     if (!gameState->stageMainScriptInfo.backgroundPath.empty() && gameState->stageMainScriptInfo.backgroundPath != L"DEFAULT") {
-      logInfo(L"load background script: " + gameState->stageMainScriptInfo.backgroundPath);
-      auto backgroundScript = gameState->scriptManager->newScript(gameState->stageMainScriptInfo.backgroundPath, SCRIPT_TYPE_STAGE, gameState->stageMainScriptInfo.version);
+      auto backgroundScript = gameState->scriptManager->newScript(gameState->stageMainScriptInfo.backgroundPath, SCRIPT_TYPE_STAGE, gameState->stageMainScriptInfo.version, srcPos);
       backgroundScript->runLoading();
       backgroundScript->runInitialize();
     }
 
     // #BGM
     if (!gameState->stageMainScriptInfo.bgmPath.empty() && gameState->stageMainScriptInfo.bgmPath != L"DEFAULT") {
-      loadSound(gameState->stageMainScriptInfo.bgmPath);
+      loadOrphanSound(gameState->stageMainScriptInfo.bgmPath, nullptr);
       auto& bgm = gameState->orphanSounds[canonicalPath(gameState->packageMainScriptInfo.bgmPath)];
       bgm->setLoopEnable(true);
       bgm->play();

@@ -26,8 +26,7 @@
 #include <bstorm/game_state.hpp>
 
 namespace bstorm {
-  GameState::GameState(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevice9* d3DDevice, const std::shared_ptr<Logger>& logger, const std::shared_ptr<Renderer>& renderer, const std::shared_ptr<conf::KeyConfig>& keyConfig, const std::shared_ptr<int>& screenPosX, const std::shared_ptr<int>& screenPosY, const std::shared_ptr<int>& gameViewWidth, const std::shared_ptr<int>& gameViewHeight, Engine* engine) :
-    logger(logger),
+  GameState::GameState(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevice9* d3DDevice, const std::shared_ptr<Renderer>& renderer, const std::shared_ptr<conf::KeyConfig>& keyConfig, const std::shared_ptr<int>& screenPosX, const std::shared_ptr<int>& screenPosY, const std::shared_ptr<int>& gameViewWidth, const std::shared_ptr<int>& gameViewHeight, Engine* engine) :
     fpsCounter(std::make_shared<FpsCounter>()),
     inputDevice(std::make_shared<InputDevice>(hWnd, screenPosX, screenPosY, screenWidth, screenHeight, gameViewWidth, gameViewHeight)),
     keyAssign(std::make_shared<KeyAssign>()),
@@ -45,8 +44,8 @@ namespace bstorm {
     commonDataDB(std::make_shared<CommonDataDB>()),
     scriptManager(std::make_shared<ScriptManager>(engine)),
     fileLoader(std::make_shared<FileLoaderFromTextFile>()),
-    playerShotDataTable(std::make_shared<ShotDataTable>()),
-    enemyShotDataTable(std::make_shared<ShotDataTable>()),
+    playerShotDataTable(std::make_shared<ShotDataTable>(ShotDataTable::Type::PLAYER)),
+    enemyShotDataTable(std::make_shared<ShotDataTable>(ShotDataTable::Type::ENEMY)),
     itemDataTable(std::make_shared<ItemDataTable>()),
     globalPlayerParams(std::make_shared<GlobalPlayerParams>()),
     stgFrame(std::make_shared<Rect<float>>(32.0f, 16.0f, 416.0f, 464.0f)),

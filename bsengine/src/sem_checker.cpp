@@ -2,39 +2,53 @@
 #include <bstorm/sem_checker.hpp>
 
 namespace bstorm {
-  static static_script_error invalid_return(const std::wstring& path, int line, int column) {
-    return static_script_error(path, line, column, L"'return' with a value is available only in function.");
+  static Log invalid_return(const std::shared_ptr<SourcePos>& srcPos) {
+    return Log(Log::Level::LV_ERROR)
+      .setMessage("'return' with a value is available only in function.")
+      .addSourcePos(srcPos);
   }
 
-  static static_script_error variable_call(const std::wstring& path, int line, int column, const std::string& name) {
-    return static_script_error(path, line, column, L"can't call variable '" + toUnicode(name) + L"' as if it were a function.");
+  static Log variable_call(const std::shared_ptr<SourcePos>& srcPos, const std::string& name) {
+    return Log(Log::Level::LV_ERROR)
+      .setMessage("can't call variable '" + name + "' as if it were a function.")
+      .addSourcePos(srcPos);
   }
 
-  static static_script_error undefined_name(const std::wstring& path, int line, int column, const std::string& name) {
-    return static_script_error(path, line, column, L"'" + toUnicode(name) + L"' is not defined.");
+  static Log undefined_name(const std::shared_ptr<SourcePos>& srcPos, const std::string& name) {
+    return Log(Log::Level::LV_ERROR)
+      .setMessage("'" + name + "' is not defined.")
+      .addSourcePos(srcPos);
   }
 
-  static static_script_error wrong_number_args(const std::wstring& path, int line, int column, const std::string& name, int passed, int expected) {
-    auto wpassed = std::to_wstring(passed);
-    auto wexpected = std::to_wstring(expected);
-    auto msg = L"wrong number of arguments was passed to '" + toUnicode(name) + L"' (passed : " + wpassed + L", expected : " + wexpected + L").";
-    return static_script_error(path, line, column, msg);
+  static Log wrong_number_args(const std::shared_ptr<SourcePos>& srcPos, const std::string& name, int passed, int expected) {
+    auto msg = "wrong number of arguments was passed to '" + name + "' (passed : " + std::to_string(passed) + ", expected : " + std::to_string(expected) + ").";
+    return Log(Log::Level::LV_ERROR)
+      .setMessage(msg)
+      .addSourcePos(srcPos);
   }
 
-  static static_script_error invalid_left_value(const std::wstring& path, int line, int column, const std::string& name) {
-    return static_script_error(path, line, column, L"invalid assignment : '" + toUnicode(name) + L"' is not a variable.");
+  static Log invalid_left_value(const std::shared_ptr<SourcePos>& srcPos, const std::string& name) {
+    return Log(Log::Level::LV_ERROR)
+      .setMessage("invalid assignment : '" + name + "' is not a variable.")
+      .addSourcePos(srcPos);
   }
 
-  static static_script_error invalid_sub_call(const std::wstring& path, int line, int column, const std::string& name) {
-    return static_script_error(path, line, column, L"can't call subroutine '" + toUnicode(name) + L"' as an expression.");
+  static Log invalid_sub_call(const std::shared_ptr<SourcePos>& srcPos, const std::string& name) {
+    return Log(Log::Level::LV_ERROR)
+      .setMessage("can't call subroutine '" + name + "' as an expression.")
+      .addSourcePos(srcPos);
   }
 
-  static static_script_error invalid_task_call(const std::wstring& path, int line, int column, const std::string& name) {
-    return static_script_error(path, line, column, L"can't call micro thread '" + toUnicode(name) + L"' as an expression.");
+  static Log invalid_task_call(const std::shared_ptr<SourcePos>& srcPos, const std::string& name) {
+    return Log(Log::Level::LV_ERROR)
+      .setMessage("can't call micro thread '" + name + "' as an expression.")
+      .addSourcePos(srcPos);
   }
 
-  static static_script_error invalid_break(const std::wstring& path, int line, int column) {
-    return static_script_error(path, line, column, L"'break' outside the loop.");
+  static Log invalid_break(const std::shared_ptr<SourcePos>& srcPos) {
+    return Log(Log::Level::LV_ERROR)
+      .setMessage("'break' outside the loop.")
+      .addSourcePos(srcPos);
   }
 
   static bool isVariable(const std::shared_ptr<NodeDef>& def) {
@@ -49,6 +63,13 @@ namespace bstorm {
     if (auto f = std::dynamic_pointer_cast<NodeFuncDef>(def)) return (int)f->params.size();
     if (auto t = std::dynamic_pointer_cast<NodeTaskDef>(def)) return (int)t->params.size();
     return 0;
+  }
+
+  std::vector<Log> SemChecker::check(Node & n) {
+    env = std::shared_ptr<Env>();
+    errors.clear();
+    n.traverse(*this);
+    return errors;
   }
 
   void SemChecker::traverse(NodeNum&) {}
@@ -79,35 +100,35 @@ namespace bstorm {
     auto def = env->findDef(call.name);
     if (!def) {
       // 未定義名の使用
-      errors.push_back(undefined_name(*call.filePath, call.line, call.column, call.name));
+      errors.push_back(undefined_name(call.srcPos, call.name));
     } else if (std::dynamic_pointer_cast<NodeSubDef>(def)) {
       // サブルーチンの使用
-      errors.push_back(invalid_sub_call(*call.filePath, call.line, call.column, call.name));
+      errors.push_back(invalid_sub_call(call.srcPos, call.name));
     } else if (std::dynamic_pointer_cast<NodeTaskDef>(def)) {
       // マイクロスレッドの使用
-      errors.push_back(invalid_task_call(*call.filePath, call.line, call.column, call.name));
+      errors.push_back(invalid_task_call(call.srcPos, call.name));
     } else if (getParamCnt(def) != 0) {
       // 引数の数が定義と一致しない
-      errors.push_back(wrong_number_args(*call.filePath, call.line, call.column, call.name, 0, getParamCnt(def)));
+      errors.push_back(wrong_number_args(call.srcPos, call.name, 0, getParamCnt(def)));
     }
   }
   void SemChecker::traverse(NodeCallExp& call) {
     auto def = env->findDef(call.name);
     if (!def) {
       // 未定義名の使用
-      errors.push_back(undefined_name(*call.filePath, call.line, call.column, call.name));
+      errors.push_back(undefined_name(call.srcPos, call.name));
     } else if (std::dynamic_pointer_cast<NodeSubDef>(def)) {
       // サブルーチンの使用
-      errors.push_back(invalid_sub_call(*call.filePath, call.line, call.column, call.name));
+      errors.push_back(invalid_sub_call(call.srcPos, call.name));
     } else if (std::dynamic_pointer_cast<NodeTaskDef>(def)) {
       // マイクロスレッドの使用
-      errors.push_back(invalid_task_call(*call.filePath, call.line, call.column, call.name));
+      errors.push_back(invalid_task_call(call.srcPos, call.name));
     } else if (isVariable(def)) {
         // 変数を呼び出している
-      errors.push_back(variable_call(*call.filePath, call.line, call.column, call.name));
+      errors.push_back(variable_call(call.srcPos, call.name));
     } else if (getParamCnt(def) != call.args.size()) {
       // 引数の数が定義と一致しない
-      errors.push_back(wrong_number_args(*call.filePath, call.line, call.column, call.name, (int)call.args.size(), getParamCnt(def)));
+      errors.push_back(wrong_number_args(call.srcPos, call.name, (int)call.args.size(), getParamCnt(def)));
     }
     for (auto arg : call.args) { arg->traverse(*this); }
   }
@@ -128,10 +149,10 @@ namespace bstorm {
     auto def = env->findDef(left.name);
     if (!def) {
       // 未定義名の使用
-      errors.push_back(undefined_name(*left.filePath, left.line, left.column, left.name));
+      errors.push_back(undefined_name(left.srcPos, left.name));
     } else if (!isVariable(def)) {
       // 変数以外へのの代入
-      errors.push_back(invalid_left_value(*left.filePath, left.line, left.column, left.name));
+      errors.push_back(invalid_left_value(left.srcPos, left.name));
     }
     for (auto& idx : left.indices) idx->traverse(*this);
   }
@@ -147,19 +168,19 @@ namespace bstorm {
     auto def = env->findDef(call.name);
     if (!def) {
       // 未定義名の使用
-      errors.push_back(undefined_name(*call.filePath, call.line, call.column, call.name));
+      errors.push_back(undefined_name(call.srcPos, call.name));
     } else if (isVariable(def)) {
       // 変数を呼び出している
-      errors.push_back(variable_call(*call.filePath, call.line, call.column, call.name));
+      errors.push_back(variable_call(call.srcPos, call.name));
     } else if (getParamCnt(def) != call.args.size()) {
       // 引数の数が定義と一致しない
-      errors.push_back(wrong_number_args(*call.filePath, call.line, call.column, call.name, (int)call.args.size(), getParamCnt(def)));
+      errors.push_back(wrong_number_args(call.srcPos, call.name, (int)call.args.size(), getParamCnt(def)));
     }
     for (auto arg : call.args) { arg->traverse(*this); }
   }
   void SemChecker::traverse(NodeReturn& stmt) {
     if (!inFunc()) {
-      errors.push_back(invalid_return(*stmt.filePath, stmt.line, stmt.column));
+      errors.push_back(invalid_return(stmt.srcPos));
     }
     stmt.ret->traverse(*this);
   }
@@ -167,7 +188,7 @@ namespace bstorm {
   void SemChecker::traverse(NodeYield &) {}
   void SemChecker::traverse(NodeBreak& stmt) {
     if (!inLoop()) {
-      errors.push_back(invalid_break(*stmt.filePath, stmt.line, stmt.column));
+      errors.push_back(invalid_break(stmt.srcPos));
     }
   }
   void SemChecker::traverse(NodeSucc& stmt) {

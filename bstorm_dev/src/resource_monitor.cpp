@@ -34,7 +34,7 @@ namespace bstorm {
       float areaTop = ImGui::GetCursorScreenPos().y;
       ImGui::Image(texture->getTexture(), ImVec2(width, height));
       for (const auto& rect : rects) {
-        drawRect(areaLeft, areaTop, rect, 0xff00ff00);
+        drawRect(areaLeft, areaTop, rect, IM_COL32(0x00, 0xff, 0x00, 0xff));
       }
       ImGui::TreePop();
     }
@@ -104,7 +104,7 @@ namespace bstorm {
       float areaTop = ImGui::GetCursorScreenPos().y;
       ImGui::Image(renderTarget->getTexture(), ImVec2(width, height));
       for (const auto& rect : rects) {
-        drawRect(areaLeft, areaTop, rect, 0xff00ff00);
+        drawRect(areaLeft, areaTop, rect, IM_COL32(0x00, 0xff, 0x00, 0xff));
       }
       ImGui::TreePop();
     }

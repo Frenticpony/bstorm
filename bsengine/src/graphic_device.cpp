@@ -1,4 +1,5 @@
 ﻿#include <bstorm/util.hpp>
+#include <bstorm/logger.hpp>
 #include <bstorm/graphic_device.hpp>
 
 namespace bstorm {
@@ -35,7 +36,8 @@ namespace bstorm {
       if (FAILED(d3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_FPU_PRESERVE, &presentParams, &d3DDevice))) {
         if (FAILED(d3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_REF, hWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_FPU_PRESERVE, &presentParams, &d3DDevice))) {
           d3D->Release();
-          // todo : throw error
+          throw Log(Log::Level::LV_ERROR)
+            .setMessage("failed to init graphic device.");
         }
       }
     }
@@ -55,7 +57,7 @@ namespace bstorm {
     safe_release(backBufferSurface);
     safe_release(backBufferDepthStencilSurface);
     if (FAILED(d3DDevice->Reset(&presentParams))) {
-      throw std::runtime_error("failed to reset graphic device.");
+      throw Log(Log::Level::LV_ERROR).setMessage("failed to reset graphic device.");
     }
     d3DDevice->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &backBufferSurface);
     d3DDevice->GetDepthStencilSurface(&backBufferDepthStencilSurface);

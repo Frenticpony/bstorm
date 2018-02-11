@@ -1,4 +1,5 @@
 #include <bstorm/const.hpp>
+#include <bstorm/logger.hpp>
 #include <bstorm/engine.hpp>
 
 #include "play_controller.hpp"
@@ -21,8 +22,8 @@ namespace bstorm {
         if (engine->isPackageFinished()) break;
         engine->tickFrame();
       }
-    } catch (const std::exception& e) {
-      engine->logError(e.what());
+    } catch (Log& log) {
+      Logger::WriteLog(log);
       engine->reset(screenWidth, screenHeight);
     }
   }
@@ -46,10 +47,10 @@ namespace bstorm {
         engine->startPackage();
       } else {
         if (mainScript.path.empty()) {
-          engine->logWarn("main script is not selected.");
+          Logger::WriteLog(Log::Level::LV_ERROR, "main script is not selected.");
         }
         if (playerScript.path.empty()) {
-          engine->logWarn("player script is not selected.");
+          Logger::WriteLog(Log::Level::LV_ERROR, "player script is not selected.");
         }
         if (!mainScript.path.empty() && !playerScript.path.empty()) {
           if (mainScript.type == SCRIPT_TYPE_UNKNOWN) {
@@ -66,8 +67,8 @@ namespace bstorm {
           engine->startPackage();
         }
       }
-    } catch (const std::exception& e) {
-      engine->logError(e.what());
+    } catch (Log& log) {
+      Logger::WriteLog(log);
       engine->reset(screenWidth, screenHeight);
     }
     engine->setRenderIntersectionEnable(renderIntersectionEnable);

@@ -8,10 +8,12 @@
 
 #include <bstorm/input_device.hpp>
 #include <bstorm/key_name_map.hpp>
+#include <bstorm/logger.hpp>
 #include <bstorm/config.hpp>
+#include <bstorm/util.hpp>
 
 #include "../../imgui/examples/directx9_example/imgui_impl_dx9.h"
-#include "../../IconFontCppHeaders/IconsFontAwesome.h"
+#include "../../IconFontCppHeaders/IconsFontAwesome_c.h"
 #include "../../glyph_ranges_ja.hpp"
 #include "../../version.hpp"
 #include "../resource.h"
@@ -286,8 +288,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
     }
     /* save config */
     saveBstormConfig(configFilePath, useBinaryFormat, config);
+  } catch (Log& log) {
+    MessageBoxW(hWnd, toUnicode(log.toString()).c_str(), L"Engine Error", MB_OK);
   } catch (const std::exception& e) {
-    MessageBoxA(hWnd, e.what(), "Error", MB_OK);
+    Logger::WriteLog(Log::Level::LV_ERROR, e.what());
+    MessageBoxW(hWnd, toUnicode(e.what()).c_str(), L"Unexpected Error", MB_OK);
   }
 
   // clean

@@ -51,6 +51,19 @@ namespace bstorm {
     }
   }
 
+  std::wstring getOmittedFileName(const std::wstring & path, int size) {
+    auto stem = getStem(path);
+    auto ext = getExt(path);
+    std::wstring ret;
+    int omittedStemSize = std::max(0, size - (int)ext.size());
+    ret += stem.substr(0, omittedStemSize);
+    if (omittedStemSize < stem.size()) {
+      ret += L"…";
+    }
+    ret += ext;
+    return ret;
+  }
+
   void getFilePathsRecursively(const std::wstring& dir, std::vector<std::wstring>& pathList, const std::unordered_set<std::wstring>& ignoreExts) {
     getFilePaths(dir, pathList, ignoreExts, true);
   }

@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 #include <mutex>
+#include <thread>
 
 #include <bstorm/script_info.hpp>
 
@@ -25,6 +26,7 @@ namespace bstorm {
     ScriptInfo getSelectedMainScript() const;
     ScriptInfo getSelectedPlayerScript() const;
   private:
+    bool isLoadingNow() const;
     void reload();
     int iniLeft;
     int iniTop;
@@ -39,6 +41,7 @@ namespace bstorm {
     TreeView playerScriptTreeView;
     std::wstring selectedMainScriptPath;
     std::wstring selectedPlayerScriptPath;
+    std::thread reloadThread; // Don't join.
     mutable std::mutex mutex;
   };
 }

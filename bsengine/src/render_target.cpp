@@ -1,6 +1,7 @@
 ﻿#include <exception>
 
 #include <bstorm/util.hpp>
+#include <bstorm/logger.hpp>
 #include <bstorm/render_target.hpp>
 
 namespace bstorm {
@@ -61,7 +62,9 @@ namespace bstorm {
   void RenderTarget::onResetDevice() {
     if (textureSurface != NULL || textureDepthStencilSurface != NULL) return;
 
-    std::runtime_error err("failed to create render target: " + toUTF8(name));
+    Log err = Log(Log::Level::LV_ERROR)
+      .setMessage("failed to create render target.")
+      .setParam(Log::Param(Log::Param::Tag::RENDER_TARGET, name));
 
     if (FAILED(d3DDevice->CreateTexture(
       width,

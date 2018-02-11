@@ -145,13 +145,12 @@ namespace bstorm {
     virtual void traverse(NodeHeader&) {};
   };
 
+  struct SourcePos;
   struct Node {
-    Node() : filePath(std::make_shared<std::wstring>(L"")), line(-1), column(-1) {}
+    Node() {}
     virtual ~Node() {};
     virtual void traverse(NodeTraverser& traverser) = 0;
-    std::shared_ptr<std::wstring> filePath;
-    int line;
-    int column;
+    std::shared_ptr<SourcePos> srcPos;
   };
 
   struct NodeStmt : public Node {

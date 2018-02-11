@@ -4,6 +4,7 @@
 #include <bstorm/parser.hpp>
 #include <bstorm/util.hpp>
 #include <bstorm/texture.hpp>
+#include <bstorm/logger.hpp>
 #include <bstorm/shot_data.hpp>
 
 namespace bstorm {
@@ -25,7 +26,9 @@ namespace bstorm {
   {
   }
 
-  ShotDataTable::ShotDataTable() {
+  ShotDataTable::ShotDataTable(Type type) :
+    type(type)
+  {
   }
 
   ShotDataTable::~ShotDataTable() {
@@ -37,10 +40,34 @@ namespace bstorm {
     }
   }
 
-  void ShotDataTable::reload(const std::wstring & path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache) {
+  const char * ShotDataTable::getTypeName(Type type) {
+    if (type == Type::PLAYER) return "player";
+    if (type == Type::ENEMY) return "enemy";
+    return "unknown";
+  }
+
+  static Log::Param::Tag getElemTag(ShotDataTable::Type type) {
+    if (type == ShotDataTable::Type::PLAYER) return Log::Param::Tag::PLAYER_SHOT_DATA;
+    if (type == ShotDataTable::Type::ENEMY) return Log::Param::Tag::ENEMY_SHOT_DATA;
+    return Log::Param::Tag::TEXT;
+  }
+
+  void ShotDataTable::load(const std::wstring & path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos) {
+    if (isLoaded(path)) {
+      Logger::WriteLog(std::move(
+        Log(Log::Level::LV_WARN)
+        .setMessage(std::string(getTypeName(type)) + " shot data already loaded.")
+        .setParam(Log::Param(getElemTag(type), path))
+        .addSourcePos(srcPos)));
+    } else {
+      reload(path, loader, textureCache, srcPos);
+    }
+  }
+
+  void ShotDataTable::reload(const std::wstring & path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos) {
     std::wstring uniqPath = canonicalPath(path);
     auto userShotData = parseUserShotData(uniqPath, loader);
-    auto texture = textureCache->load(userShotData->imagePath, false);
+    auto texture = textureCache->load(userShotData->imagePath, false, srcPos);
     for (auto& entry : userShotData->dataMap) {
       auto& data = entry.second;
       if (!data.useDelayRect) {
@@ -60,6 +87,11 @@ namespace bstorm {
       table[data.id] = std::make_shared<ShotData>(data);
     }
     loadedPaths.insert(uniqPath);
+    Logger::WriteLog(std::move(
+      Log(Log::Level::LV_INFO)
+      .setMessage("load " + std::string(getTypeName(type)) + " shot data.")
+      .setParam(Log::Param(getElemTag(type), path))
+      .addSourcePos(srcPos)));
   }
 
   bool ShotDataTable::isLoaded(const std::wstring & path) const {
@@ -72,5 +104,9 @@ namespace bstorm {
       return it->second;
     }
     return nullptr;
+  }
+
+  ShotDataTable::Type ShotDataTable::getType() const {
+    return type;
   }
 }

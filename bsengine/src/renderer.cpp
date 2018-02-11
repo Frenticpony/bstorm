@@ -7,6 +7,7 @@
 #include <bstorm/shader.hpp>
 #include <bstorm/texture.hpp>
 #include <bstorm/mesh.hpp>
+#include <bstorm/logger.hpp>
 #include <bstorm/renderer.hpp>
 
 static const char prim2DVertexShaderSrc[] =
@@ -101,7 +102,7 @@ namespace bstorm {
     try {
     // create vertex shader 2D
       if (FAILED(D3DXCompileShader(prim2DVertexShaderSrc, sizeof(prim2DVertexShaderSrc) - 1, NULL, NULL, "main", "vs_1_1", D3DXSHADER_PACKMATRIX_ROWMAJOR, &code, &error, NULL))) {
-        throw std::runtime_error((const char*)error->GetBufferPointer());
+        throw Log(Log::Level::LV_ERROR).setMessage((const char*)error->GetBufferPointer());
       }
       d3DDevice->CreateVertexShader((const DWORD*)code->GetBufferPointer(), &prim2DVertexShader);
       safe_release(code);
@@ -109,7 +110,7 @@ namespace bstorm {
 
       // create vertex shader 3D
       if (FAILED(D3DXCompileShader(prim3DVertexShaderSrc, sizeof(prim3DVertexShaderSrc) - 1, NULL, NULL, "main", "vs_1_1", D3DXSHADER_PACKMATRIX_ROWMAJOR, &code, &error, NULL))) {
-        throw std::runtime_error((const char*)error->GetBufferPointer());
+        throw Log(Log::Level::LV_ERROR).setMessage((const char*)error->GetBufferPointer());
       }
       d3DDevice->CreateVertexShader((const DWORD*)code->GetBufferPointer(), &prim3DVertexShader);
       safe_release(code);
@@ -117,7 +118,7 @@ namespace bstorm {
 
       // create vertex shader mesh
       if (FAILED(D3DXCompileShader(meshVertexShaderSrc, sizeof(meshVertexShaderSrc) - 1, NULL, NULL, "main", "vs_1_1", D3DXSHADER_PACKMATRIX_ROWMAJOR, &code, &error, NULL))) {
-        throw std::runtime_error((const char*)error->GetBufferPointer());
+        throw Log(Log::Level::LV_ERROR).setMessage((const char*)error->GetBufferPointer());
       }
       d3DDevice->CreateVertexShader((const DWORD*)code->GetBufferPointer(), &meshVertexShader);
       safe_release(code);

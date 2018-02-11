@@ -82,6 +82,7 @@ namespace bstorm {
   std::wstring getLowerExt(const std::wstring& path);
   std::wstring getStem(const std::wstring& path);
   std::wstring getFileName(const std::wstring& path);
+  std::wstring getOmittedFileName(const std::wstring& path, int size);
 
   // dir : 検索対象ディレクトリ、末尾の/はいらない、例：L"."
   // ignoreExts : 検索除外対象の拡張子の集合、小文字で記述、例：{L".png", L".jpg"}

@@ -9,7 +9,8 @@
 #include <memory>
 
 #include <bstorm/util.hpp>
-#include <bstorm/static_script_error.hpp>
+#include <bstorm/logger.hpp>
+#include <bstorm/source_map.hpp>
 #include <bstorm/file_loader.hpp>
 %}
 
@@ -26,7 +27,8 @@ public :
     filePath = std::make_shared<std::wstring>(canonicalPath(path));
     fp = loader->openFile(*filePath);
     if (fp == NULL) {
-      throw std::runtime_error("can't open file : " + toUTF8(path));
+      throw Log(Log::Level::LV_ERROR).setMessage("can't open file.")
+        .setParam(Log::Param(Log::Param::Tag::TEXT, path));
     }
     in(fp);
   }
@@ -34,9 +36,14 @@ public :
     if (filePath) return filePath;
     return std::make_shared<std::wstring>(L"");
   }
+
+  SourcePos getSourcePos() const {
+    return {(int)lineno(), (int)columno() + 1, getFilePath()};
+  }
   std::wstring getWString() const {
     return v_wstr;
   }
+
   ~UserDefDataLexer() {
     if (fp) {
       loader->closeFile(*getFilePath(), fp);
@@ -50,7 +57,6 @@ protected :
 %}
 
 %{
-#include <bstorm/static_script_error.hpp>
 #include "../bison/user_def_data.tab.hpp"
 
 using tk = bstorm::UserDefDataParser::token;
@@ -128,7 +134,9 @@ newline \r?\n
 }
 
 . {
-  throw static_script_error(*getFilePath(), lineno(), columno(), L"found illegal token '" + wstr() + L"'");
+  throw Log(Log::Level::LV_ERROR).setMessage("found illegal token.")
+    .setParam(Log::Param(Log::Param::Tag::TEXT, str()))
+    .addSourcePos(std::make_shared<SourcePos>(getSourcePos()));
 }
 
 <<EOF>> {

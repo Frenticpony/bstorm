@@ -13,8 +13,6 @@
 #include "../../version.hpp"
 #include "../resource.h"
 
-#include "file_logger.hpp"
-
 using namespace bstorm;
 
 static bool isLostFocus = false;
@@ -22,6 +20,7 @@ static bool isLostFocus = false;
 constexpr char* thDnhDefFilePath = "th_dnh.def";
 constexpr bool useBinaryFormat = true;
 constexpr char* configFilePath = useBinaryFormat ? "config.dat" : "config.json";
+constexpr wchar_t* logFilePath = L"th_dnh.log";
 
 static LRESULT WINAPI windowProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
   switch (msg) {
@@ -54,10 +53,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
   std::shared_ptr<Logger> logger;
 
   try {
-    logger = std::make_shared<FileLogger>(L"th_dnh.log");
-  } catch (const std::exception& e) {
-    OutputDebugStringA(e.what());
-    logger = std::make_shared<DummyLogger>();
+    Logger::Init(std::make_shared<FileLogger>(logFilePath, nullptr));
+  } catch (Log& log) {
+    OutputDebugStringA(log.toString().c_str());
+    Logger::Shutdown();
+    Logger::Init(std::make_shared<DummyLogger>());
   }
 
   HWND hWnd = NULL;
@@ -102,10 +102,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
     ShowWindow(hWnd, SW_RESTORE);
     UpdateWindow(hWnd);
 
-    auto engine = std::make_shared<Engine>(hWnd, screenWidth, screenHeight, logger, std::make_shared<conf::KeyConfig>(config.keyConfig));
+    auto engine = std::make_shared<Engine>(hWnd, screenWidth, screenHeight, std::make_shared<conf::KeyConfig>(config.keyConfig));
 
     if (packageMainScriptPath.empty()) {
-      throw std::runtime_error("package main script not specified.");
+      throw Log(Log::Level::LV_ERROR).setMessage("package main script not specified.");
     }
 
     engine->setPackageMainScript(packageMainScriptPath);
@@ -146,14 +146,18 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
             }
             break;
           case D3DERR_DRIVERINTERNALERROR:
-            throw std::runtime_error("graphic device internal error occured.");
+            throw Log(Log::Level::LV_ERROR).setMessage("graphic device internal error occured.");
             break;
         }
       }
     }
+  } catch (Log& log) {
+    Logger::WriteLog(log);
+    MessageBoxW(hWnd, toUnicode(log.toString()).c_str(), L"Engine Error", MB_OK);
   } catch (const std::exception& e) {
-    logger->logError(e.what());
-    MessageBoxW(hWnd, toUnicode(e.what()).c_str(), L"Error", MB_OK);
+    Logger::WriteLog(Log::Level::LV_ERROR, e.what());
+    MessageBoxW(hWnd, toUnicode(e.what()).c_str(), L"Unexpected Error", MB_OK);
   }
+  Logger::Shutdown();
   return (int)msg.wParam;
 }

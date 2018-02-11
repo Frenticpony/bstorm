@@ -53,19 +53,28 @@ namespace bstorm {
     std::unordered_map<int, ShotData> dataMap;
   };
 
+  struct SourcePos;
   class TextureCache;
   class ShotDataTable {
   public:
-    ShotDataTable();
+    enum class Type {
+      PLAYER,
+      ENEMY
+    };
+    static const char* getTypeName(Type type);
+    ShotDataTable(Type type);
     ~ShotDataTable();
     void add(const std::shared_ptr<ShotData>& data);
-    void reload(const std::wstring& path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache);
+    void load(const std::wstring& path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos);
+    void reload(const std::wstring& path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos);
     bool isLoaded(const std::wstring& path) const;
     std::shared_ptr<ShotData> get(int id) const;
+    Type getType() const;
     /* backdoor */
     template <typename T>
     void backDoor() const {}
   private:
+    Type type;
     std::unordered_set<std::wstring> loadedPaths;
     std::map<int, std::shared_ptr<ShotData>> table;
   };

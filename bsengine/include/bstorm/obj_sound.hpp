@@ -14,7 +14,7 @@ namespace bstorm {
     ObjSound(const std::shared_ptr<GameState>& gameState);
     ~ObjSound();
     void update() override;
-    void load(const std::wstring& path);
+    void setSound(const std::shared_ptr<SoundBuffer>& buf);
     void play();
     void stop();
     void setVolumeRate(float vol);

@@ -7,10 +7,12 @@
 #include <bstorm/env.hpp>
 
 namespace bstorm {
+  struct SourcePos;
   void addStandardAPI(const std::wstring& type, const std::wstring& version, NameTable& table);
 
   // helper
   int getCurrentLine(lua_State* L);
+  std::shared_ptr<SourcePos> getSourcePos(lua_State* L);
   int __UnsafeFunctionCommon(lua_State* L, lua_CFunction func);
   template <lua_CFunction func>
   int UnsafeFunction(lua_State* L) {

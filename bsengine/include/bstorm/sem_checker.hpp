@@ -5,17 +5,12 @@
 
 #include <bstorm/env.hpp>
 #include <bstorm/node.hpp>
-#include <bstorm/static_script_error.hpp>
+#include <bstorm/logger.hpp>
 
 namespace bstorm {
   class SemChecker : public NodeTraverser {
   public:
-    std::vector<static_script_error> check(Node& n) {
-      env = std::shared_ptr<Env>();
-      errors.clear();
-      n.traverse(*this);
-      return errors;
-    }
+    std::vector<Log> check(Node& n);
     void traverse(NodeNum&);
     void traverse(NodeChar&);
     void traverse(NodeStr&);
@@ -85,7 +80,7 @@ namespace bstorm {
   protected:
     bool inFunc() const;
     bool inLoop() const;
-    std::vector<static_script_error> errors;
+    std::vector<Log> errors;
     std::stack<bool> funcCtxStack;
     std::stack<bool> loopCtxStack;
     std::shared_ptr<Env> env;

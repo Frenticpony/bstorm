@@ -1,5 +1,4 @@
 ﻿#include <memory>
-#include <thread>
 #include <imgui.h>
 #include <IconsFontAwesome_c.h>
 
@@ -7,6 +6,7 @@
 #include <bstorm/script_info.hpp>
 #include <bstorm/parser.hpp>
 #include <bstorm/util.hpp>
+#include <bstorm/logger.hpp>
 #include <bstorm/const.hpp>
 #include <bstorm/script.hpp>
 
@@ -111,7 +111,9 @@ namespace bstorm {
     reload();
   }
 
-  ScriptExplorer::~ScriptExplorer() { }
+  ScriptExplorer::~ScriptExplorer() {
+    while (isLoadingNow()) Sleep(1);
+  }
 
   void ScriptExplorer::draw() {
     std::lock_guard<std::mutex> lock(mutex);
@@ -125,8 +127,13 @@ namespace bstorm {
         ImGui::BeginGroup();
         ImGui::Text("Select Script");
         ImGui::SameLine(contentWidth - 45);
-        if (ImGui::Button(ICON_FA_REFRESH)) {
-          reload();
+        if (isLoadingNow()) {
+          // reload中
+          ImGui::Button(ICON_FA_SPINNER);
+        } else {
+          if (ImGui::Button(ICON_FA_REFRESH)) {
+            reload();
+          }
         }
         if (ImGui::IsItemHovered())
           ImGui::SetTooltip("reload");
@@ -212,7 +219,7 @@ namespace bstorm {
           ImGui::Text(join(colons, "\n").c_str());
           ImGui::SameLine();
           ImGui::Text(join(contents, "\n").c_str());
-        //   説明文
+        //  説明文
           float textAreaWidth = ImGui::GetContentRegionAvailWidth();
           float textAreaHeight = ImGui::GetContentRegionAvail().y;
           ImGui::BeginChild("script description", ImVec2(textAreaWidth, textAreaHeight - 5), true);
@@ -246,9 +253,14 @@ namespace bstorm {
     return ScriptInfo();
   }
 
-  void ScriptExplorer::reload() {
-    std::thread reloadThread([this]() {
+  bool ScriptExplorer::isLoadingNow() const {
+    return reloadThread.joinable();
+  }
 
+  void ScriptExplorer::reload() {
+    if (isLoadingNow()) return;
+
+    reloadThread = std::thread([this]() {
       {
         std::lock_guard<std::mutex> lock(mutex);
 
@@ -282,7 +294,8 @@ namespace bstorm {
               mainScripts[script.path] = script;
             }
           }
-        } catch (...) {}
+        } catch (Log&) {
+        }
       }
 
       // TreeViewの作成
@@ -292,7 +305,8 @@ namespace bstorm {
         mainScriptTreeView = createTreeView(mainScripts);
         playerScriptTreeView = createTreeView(playerScripts);
       }
+
+      reloadThread.detach();
     });
-    reloadThread.detach();
   }
 }

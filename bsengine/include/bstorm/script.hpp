@@ -12,6 +12,7 @@
 #include <bstorm/code_generator.hpp>
 
 namespace bstorm {
+  class Log;
   class Engine;
   class DnhValue;
   class DnhArray;
@@ -27,15 +28,15 @@ namespace bstorm {
       SCRIPT_TERMINATED,
       SCRIPT_CLOSED
     };
-    Script(const std::wstring& path, const std::wstring& type, const std::wstring& version, int id, Engine* engine);
+    Script(const std::wstring& path, const std::wstring& type, const std::wstring& version, int id, Engine* engine, const std::shared_ptr<SourcePos>& srcPos);
     ~Script();
     int getID() const;
     std::wstring getType() const;
     State getState() const;
     void close();
     bool isClosed() const;
-    SourcePos getSourcePos(int line);
-    void setErrorMessage(const std::string& msg);
+    std::shared_ptr<SourcePos> getSourcePos(int line);
+    void saveErrLog(const std::shared_ptr<Log>& log);
     void runLoading();
     void runInitialize();
     void runMainLoop();
@@ -60,7 +61,7 @@ namespace bstorm {
     SourceMap srcMap;
     bool stgSceneScript;
     bool luaStateBusy;
-    std::string errMsg;
+    std::shared_ptr<Log> errLog;
     std::vector<int> autoDeleteTargetObjIds;
     std::unordered_map<int, std::unique_ptr<DnhValue>> scriptArgs;
     bool autoDeleteObjectEnable;
@@ -72,7 +73,7 @@ namespace bstorm {
   public:
     ScriptManager(Engine* engine);
     ~ScriptManager();
-    std::shared_ptr<Script> ScriptManager::newScript(const std::wstring& path, const std::wstring& type, const std::wstring& version);
+    std::shared_ptr<Script> ScriptManager::newScript(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<SourcePos>& srcPos);
     void runAll(bool ignoreStgSceneScript);
     std::shared_ptr<Script> get(int id) const;
     void notifyEventAll(int eventType);

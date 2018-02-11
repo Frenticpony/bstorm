@@ -3,6 +3,7 @@
 #include <windows.h>
 
 #include <bstorm/util.hpp>
+#include <bstorm/logger.hpp>
 #include <bstorm/config.hpp>
 
 #include "../../version.hpp"
@@ -29,7 +30,8 @@ namespace bstorm {
         config = conf::json::parse(defaultConfigText);
       }
     } catch (...) {
-      throw std::runtime_error("can't load uncompatible config file: " + path + " (hint: please delete it, and try again.)");
+      throw Log(Log::Level::LV_ERROR)
+        .setMessage("can't load uncompatible config file: " + path + " (hint: please delete it, and try again.)");
     }
     return config;
   }

@@ -12,17 +12,19 @@
 #include <bstorm/code_generator.hpp>
 #include <bstorm/api.hpp>
 #include <bstorm/file_loader.hpp>
+#include <bstorm/logger.hpp>
 #include <bstorm/engine.hpp>
+#include <bstorm/fps_counter.hpp>
 #include <bstorm/script.hpp>
 
 #include "runtime.h"
 
 namespace bstorm {
-  const std::unordered_set<std::wstring> ignoreScriptExts{L".png", L".jpg", L".jpeg", L".bmp", L".gif", L".dds", L".hdr", L".dib", L".pfm", L".tif", L".tiff", L".ttf", L".otf", L".mqo", L".mp3", L".mp4", L".avi", L".ogg", L".wav", L".wave", L".def", L".dat", L".fx", L".exe"};
+  const std::unordered_set<std::wstring> ignoreScriptExts{ L".png", L".jpg", L".jpeg", L".bmp", L".gif", L".dds", L".hdr", L".dib", L".pfm", L".tif", L".tiff", L".ttf", L".otf", L".mqo", L".mp3", L".mp4", L".avi", L".ogg", L".wav", L".wave", L".def", L".dat", L".fx", L".exe" };
 
-  Script::Script(const std::wstring& path, const std::wstring& type, const std::wstring& version, int id, Engine* engine) :
+  Script::Script(const std::wstring& p, const std::wstring& type, const std::wstring& version, int id, Engine* engine, const std::shared_ptr<SourcePos>& srcPos) :
     L(NULL),
-    path(path),
+    path(canonicalPath(p)),
     type(type),
     id(id),
     state(State::SCRIPT_NOT_COMPILED),
@@ -58,51 +60,89 @@ namespace bstorm {
       setEngine(L, engine);
       setScript(L, this);
 
-      engine->logInfo("parse start...");
       // パース
       std::shared_ptr<NodeBlock> program;
-      program = parseDnhScript(path, globalEnv, true, std::make_shared<FileLoaderFromTextFile>());
-      engine->logInfo("parse completed.");
+      {
+        Logger::WriteLog(std::move(
+          Log(Log::Level::LV_DETAIL)
+          .setMessage("parse start...")
+          .setParam(Log::Param(Log::Param::Tag::SCRIPT, path))
+          .addSourcePos(srcPos)));
+        TimePoint tp;
+        program = parseDnhScript(path, globalEnv, true, std::make_shared<FileLoaderFromTextFile>());
+        Logger::WriteLog(std::move(
+          Log(Log::Level::LV_DETAIL)
+          .setMessage("...parse complete " + std::to_string(tp.getElapsedMilliSec()) + " [ms].")
+          .setParam(Log::Param(Log::Param::Tag::SCRIPT, path))
+          .addSourcePos(srcPos)));
+      }
 
       // 静的エラー検査
       {
-        engine->logInfo("check start...");
         SemChecker checker;
         auto errors = checker.check(*program);
-        if (!errors.empty()) {
-          throw errors[0];
+        for (auto& err : errors) {
+          Logger::WriteLog(err);
         }
-        engine->logInfo("check completed.");
+        if (!errors.empty()) {
+          throw Log(Log::Level::LV_ERROR)
+            .setMessage("found " + std::to_string(errors.size()) + " script error" + (errors.size() > 1 ? "s." : "."));
+        }
       }
 
       // 変換
-      engine->logInfo("codegen start...");
       CodeGenerator codeGen;
-      codeGen.generate(*program);
-      srcMap = codeGen.getSourceMap();
-      engine->logInfo("codegen completed.");
+      {
+        Logger::WriteLog(std::move(
+          Log(Log::Level::LV_DETAIL)
+          .setMessage("code generation start...")
+          .setParam(Log::Param(Log::Param::Tag::SCRIPT, path))
+          .addSourcePos(srcPos)));
+        TimePoint tp;
+        codeGen.generate(*program);
+        Logger::WriteLog(std::move(
+          Log(Log::Level::LV_DETAIL)
+          .setMessage("...code generation complete " + std::to_string(tp.getElapsedMilliSec()) + " [ms].")
+          .setParam(Log::Param(Log::Param::Tag::SCRIPT, path))
+          .addSourcePos(srcPos)));
+        srcMap = codeGen.getSourceMap();
+      }
 
       // ランタイム読み込み
       luaL_loadbuffer(L, (const char *)luaJIT_BC_runtime, luaJIT_BC_runtime_SIZE, DNH_RUNTIME_NAME);
       callLuaChunk();
 
       // コンパイル
-      int hasCompileError = luaL_loadstring(L, codeGen.getCode());
-      if (hasCompileError) {
-        std::string msg = lua_tostring(L, -1); lua_pop(L, 1);
-        if (msg.find("has more than 200 local variables") != std::string::npos) {
-          auto ss = split(toUnicode(msg), L':');
-          if (ss.size() >= 2) {
-            int line = _wtoi(ss[1].c_str());
-            auto srcPos = srcMap.getSourcePos(line);
-            auto prefix = srcPos.filename ? (toUTF8(getFileName(*srcPos.filename)) + "L" + std::to_string(srcPos.line) + ": ") : "";
-            throw std::runtime_error(prefix + "too many variable used in one function");
+      {
+        Logger::WriteLog(std::move(
+          Log(Log::Level::LV_DETAIL)
+          .setMessage("compile start...")
+          .setParam(Log::Param(Log::Param::Tag::SCRIPT, path))
+          .addSourcePos(srcPos)));
+        TimePoint tp;
+        int hasCompileError = luaL_loadstring(L, codeGen.getCode());
+        if (hasCompileError) {
+          std::string msg = lua_tostring(L, -1); lua_pop(L, 1);
+          if (msg.find("has more than 200 local variables") != std::string::npos) {
+            auto ss = split(toUnicode(msg), L':');
+            Log err = Log(Log::Level::LV_ERROR)
+              .setMessage("too many variable used in one function.");
+            if (ss.size() >= 2) {
+              int line = _wtoi(ss[1].c_str());
+              err.addSourcePos(srcMap.getSourcePos(line));
+            }
+            throw err;
           } else {
-            throw std::runtime_error("too many variable used in one function.");
+            throw Log(Log::Level::LV_ERROR)
+              .setMessage("unexpected compile error occured, please send a bug report.")
+              .setParam(Log::Param(Log::Param::Tag::TEXT, msg));
           }
-        } else {
-          throw std::runtime_error("unexpected compile error occured, please send a bug report: " + msg);
         }
+        Logger::WriteLog(std::move(
+          Log(Log::Level::LV_DETAIL)
+          .setMessage("...compile complete " + std::to_string(tp.getElapsedMilliSec()) + " [ms].")
+          .setParam(Log::Param(Log::Param::Tag::SCRIPT, path))
+          .addSourcePos(srcPos)));
       }
       // グローバル領域のコード実行
       callLuaChunk();
@@ -123,6 +163,11 @@ namespace bstorm {
     }
 
     if (L) lua_close(L);
+
+    Logger::WriteLog(std::move(
+      Log(Log::Level::LV_INFO)
+      .setMessage("release script.")
+      .setParam(Log::Param(Log::Param(Log::Param::Tag::SCRIPT, path)))));
   }
 
   Script::State Script::getState() const { return state; }
@@ -140,7 +185,7 @@ namespace bstorm {
   bool Script::isClosed() const { return state == State::SCRIPT_CLOSED; }
 
   void Script::runBuiltInSub(const std::string &name) {
-    if (errMsg.empty()) {
+    if (!errLog) {
       if (luaStateBusy) {
         lua_getglobal(L, (DNH_VAR_PREFIX + name).c_str());
       } else {
@@ -154,13 +199,17 @@ namespace bstorm {
     bool tmp = luaStateBusy;
     luaStateBusy = true;
     if (lua_pcall(L, 0, 0, 0) != 0) {
+      luaStateBusy = false;
       std::string msg = lua_tostring(L, -1);
       lua_pop(L, 1);
       state = State::SCRIPT_CLOSED;
-      if (errMsg.empty()) {
-        errMsg = "unexpected script runtime error occured, please send a bug report : " + msg;
+      if (!errLog) {
+        errLog = std::make_shared<Log>(
+          Log(Log::Level::LV_ERROR)
+          .setMessage("unexpected script runtime error occured, please send a bug report.")
+          .setParam(Log::Param(Log::Param::Tag::TEXT, msg)));
       }
-      throw std::runtime_error(errMsg);
+      throw *errLog;
     }
     luaStateBusy = tmp;
   }
@@ -235,12 +284,12 @@ namespace bstorm {
     return scriptArgs[idx]->clone();
   }
 
-  SourcePos Script::getSourcePos(int line) {
+  std::shared_ptr<SourcePos> Script::getSourcePos(int line) {
     return srcMap.getSourcePos(line);
   }
 
-  void Script::setErrorMessage(const std::string & msg) {
-    errMsg = msg;
+  void Script::saveErrLog(const std::shared_ptr<Log>& log) {
+    errLog = log;
   }
 
   ScriptManager::ScriptManager(Engine * engine) :
@@ -251,10 +300,15 @@ namespace bstorm {
 
   ScriptManager::~ScriptManager() {}
 
-  std::shared_ptr<Script> ScriptManager::newScript(const std::wstring& path, const std::wstring& type, const std::wstring& version) {
-    auto script = std::make_shared<Script>(path, type, version, idGen++, engine);
+  std::shared_ptr<Script> ScriptManager::newScript(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<SourcePos>& srcPos) {
+    auto script = std::make_shared<Script>(path, type, version, idGen++, engine, srcPos);
     scriptList.push_back(script);
     scriptMap[script->getID()] = script;
+    Logger::WriteLog(std::move(
+      Log(Log::Level::LV_INFO)
+      .setMessage("load script.")
+      .setParam(Log::Param(Log::Param(Log::Param::Tag::SCRIPT, canonicalPath(path))))
+      .addSourcePos(srcPos)));
     return script;
   }
 

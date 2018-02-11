@@ -24,6 +24,7 @@
 #include <bstorm/item_data.hpp>
 #include <bstorm/script_info.hpp>
 #include <bstorm/script.hpp>
+#include <bstorm/logger.hpp>
 #include <bstorm/dnh_value.hpp>
 #include <bstorm/engine.hpp>
 #include <bstorm/api.hpp>
@@ -98,14 +99,10 @@ namespace bstorm {
 
   // API
   static int InstallFont(lua_State* L) {
+    Engine* engine = getEngine(L);
     auto path = DnhValue::toString(L, 1);
     lua_pop(L, 1);
-    bool result = installFont(path);
-    if (!result) {
-      Engine* engine = getEngine(L);
-      engine->logWarn(L"failed to load font : " + path);
-    }
-    lua_pushboolean(L, result);
+    lua_pushboolean(L, engine->installFont(path, getSourcePos(L)));
     return 1;
   }
 
@@ -126,13 +123,15 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     std::wstring msg = DnhValue::toString(L, 1);
     lua_pop(L, 1);
-    engine->writeLog(msg);
+    engine->writeLog(msg, getSourcePos(L));
     return 0;
   }
 
   static int RaiseError(lua_State* L) {
     std::wstring msg = DnhValue::toString(L, 1); lua_pop(L, 1);
-    throw std::runtime_error("RaiseError: " + toUTF8(msg));
+    throw Log(Log::Level::LV_ERROR)
+      .setMessage("RaiseError.")
+      .setParam(Log::Param(Log::Param::Tag::TEXT, toUTF8(msg)));
     return 0;
   }
 
@@ -141,7 +140,9 @@ namespace bstorm {
     std::wstring msg = DnhValue::toString(L, 2);
     lua_pop(L, 2);
     if (!cond) {
-      throw std::runtime_error("assertion failed: " + toUTF8(msg));
+      throw Log(Log::Level::LV_ERROR)
+        .setMessage("assertion failed.")
+        .setParam(Log::Param(Log::Param::Tag::TEXT, toUTF8(msg)));
     }
     return 0;
   }
@@ -314,7 +315,7 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     auto path = DnhValue::toString(L, 1);
     lua_pop(L, 1);
-    engine->loadSound(path);
+    engine->loadOrphanSound(path, getSourcePos(L));
     return 0;
   }
 
@@ -322,7 +323,7 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     auto path = DnhValue::toString(L, 1);
     lua_pop(L, 1);
-    engine->removeSound(path);
+    engine->removeOrphanSound(path);
     return 0;
   }
 
@@ -348,7 +349,7 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     auto path = DnhValue::toString(L, 1);
     lua_pop(L, 1);
-    engine->stopSound(path);
+    engine->stopOrphanSound(path);
     return 0;
   }
 
@@ -428,10 +429,12 @@ namespace bstorm {
     std::wstring name = DnhValue::toString(L, 1);
     lua_pop(L, 1);
     try {
-      engine->createRenderTarget(name, 1024, 512);
+      engine->createRenderTarget(name, 1024, 512, getSourcePos(L));
       lua_pushboolean(L, true);
-    } catch (const std::exception& e) {
-      engine->logWarn(e.what());
+    } catch (Log& log) {
+      log.setLevel(Log::Level::LV_WARN)
+        .addSourcePos(getSourcePos(L));
+      Logger::WriteLog(log);
       lua_pushboolean(L, false);
     }
     return 1;
@@ -463,7 +466,7 @@ namespace bstorm {
     std::wstring name = DnhValue::toString(L, 1);
     auto path = DnhValue::toString(L, 2);
     lua_pop(L, 2);
-    engine->saveRenderedTextureA1(name, path);
+    engine->saveRenderedTextureA1(name, path, getSourcePos(L));
     return 0;
   }
 
@@ -476,7 +479,7 @@ namespace bstorm {
     int r = DnhValue::toInt(L, 5);
     int b = DnhValue::toInt(L, 6);
     lua_pop(L, 6);
-    engine->saveRenderedTextureA2(name, path, l, t, r, b);
+    engine->saveRenderedTextureA2(name, path, l, t, r, b, getSourcePos(L));
     return 0;
   }
 
@@ -484,7 +487,7 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     auto path = DnhValue::toString(L, 1);
     lua_pop(L, 1);
-    engine->saveSnapShotA1(path);
+    engine->saveSnapShotA1(path, getSourcePos(L));
     return 0;
   }
 
@@ -496,7 +499,7 @@ namespace bstorm {
     int r = DnhValue::toInt(L, 4);
     int b = DnhValue::toInt(L, 5);
     lua_pop(L, 5);
-    engine->saveSnapShotA2(path, l, t, r, b);
+    engine->saveSnapShotA2(path, l, t, r, b, getSourcePos(L));
     return 0;
   }
 
@@ -555,7 +558,7 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     auto path = DnhValue::toString(L, 1);
     lua_pop(L, 1);
-    engine->loadTexture(path, true);
+    engine->loadTexture(path, true, getSourcePos(L));
     return 0;
   }
 
@@ -580,8 +583,11 @@ namespace bstorm {
       lua_pushnumber(L, target->getWidth());
     } else {
       try {
-        lua_pushnumber(L, engine->loadTexture(name, false)->getWidth());
-      } catch (const std::exception& e) {
+        lua_pushnumber(L, engine->loadTexture(name, false, getSourcePos(L))->getWidth());
+      } catch (Log& log) {
+        log.setLevel(Log::Level::LV_WARN)
+          .addSourcePos(getSourcePos(L));
+        Logger::WriteLog(log);
         lua_pushnumber(L, 0);
       }
     }
@@ -596,8 +602,11 @@ namespace bstorm {
       lua_pushnumber(L, target->getHeight());
     } else {
       try {
-        lua_pushnumber(L, engine->loadTexture(name, false)->getHeight());
-      } catch (const std::exception& e) {
+        lua_pushnumber(L, engine->loadTexture(name, false, getSourcePos(L))->getHeight());
+      } catch (Log& log) {
+        log.setLevel(Log::Level::LV_WARN)
+          .addSourcePos(getSourcePos(L));
+        Logger::WriteLog(log);
         lua_pushnumber(L, 0);
       }
     }
@@ -746,7 +755,7 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     std::wstring path = DnhValue::toString(L, 1);
     lua_pop(L, 1);
-    if (std::shared_ptr<Script> script = engine->loadScript(path, getScript(L)->getType(), SCRIPT_VERSION_PH3)) {
+    if (std::shared_ptr<Script> script = engine->loadScript(path, getScript(L)->getType(), SCRIPT_VERSION_PH3, getSourcePos(L))) {
       lua_pushnumber(L, (double)script->getID());
     }
     return 1;
@@ -1388,14 +1397,14 @@ namespace bstorm {
   static int LoadEnemyShotData(lua_State* L) {
     Engine* engine = getEngine(L);
     std::wstring path = DnhValue::toString(L, 1); lua_pop(L, 1);
-    engine->loadEnemyShotData(path);
+    engine->loadEnemyShotData(path, getSourcePos(L));
     return 0;
   }
 
   static int ReloadEnemyShotData(lua_State* L) {
     Engine* engine = getEngine(L);
     std::wstring path = DnhValue::toString(L, 1); lua_pop(L, 1);
-    engine->reloadEnemyShotData(path);
+    engine->reloadEnemyShotData(path, getSourcePos(L));
     return 0;
   }
 
@@ -1459,7 +1468,7 @@ namespace bstorm {
       }
     });
     format = L"%" + format;
-    std::wstring buf(1024, L'\0'); // FIXME : 優先度(極低)
+    std::wstring buf(1024, L'\0');
     if (format.find(L'd') != std::string::npos) {
       swprintf_s(&buf[0], buf.size(), &format[0], value->toInt());
     } else if (format.find(L'f') != std::string::npos) {
@@ -1872,7 +1881,7 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     auto path = DnhValue::toString(L, 1);
     lua_pop(L, 1);
-    engine->startShotScript(path);
+    engine->startShotScript(path, getSourcePos(L));
     return 0;
   }
 
@@ -1982,7 +1991,7 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     auto path = DnhValue::toString(L, 1);
     lua_pop(L, 1);
-    engine->startItemScript(path);
+    engine->startItemScript(path, getSourcePos(L));
     return 0;
   }
 
@@ -1998,7 +2007,7 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     std::wstring path = DnhValue::toString(L, 1);
     lua_pop(L, 1);
-    engine->loadItemData(path);
+    engine->loadItemData(path, getSourcePos(L));
     return 0;
   }
 
@@ -2006,7 +2015,7 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     std::wstring path = DnhValue::toString(L, 1);
     lua_pop(L, 1);
-    engine->reloadItemData(path);
+    engine->reloadItemData(path, getSourcePos(L));
     return 0;
   }
 
@@ -2153,7 +2162,7 @@ namespace bstorm {
     auto path = DnhValue::toString(L, 1);
     int infoType = DnhValue::toInt(L, 2);
     lua_pop(L, 2);
-    ScriptInfo info = engine->getScriptInfo(path);
+    ScriptInfo info = engine->getScriptInfo(path, getSourcePos(L));
     switch (infoType) {
       case INFO_SCRIPT_TYPE:
         lua_pushnumber(L, getScriptTypeConstFromName(info.type));
@@ -2593,7 +2602,7 @@ namespace bstorm {
       if (auto renderTarget = engine->getRenderTarget(name)) {
         obj->setRenderTarget(renderTarget);
       } else {
-        obj->setTexture(engine->loadTexture(name, false));
+        obj->setTexture(engine->loadTexture(name, false, getSourcePos(L)));
       }
     }
     return 0;
@@ -2866,7 +2875,7 @@ namespace bstorm {
     auto path = DnhValue::toString(L, 2);
     lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjMesh>(objId)) {
-      if (auto mesh = engine->loadMesh(path)) {
+      if (auto mesh = engine->loadMesh(path, getSourcePos(L))) {
         obj->setMesh(mesh);
       }
     }
@@ -3291,7 +3300,7 @@ namespace bstorm {
       if (auto renderTarget = engine->getRenderTarget(name)) {
         obj->setShaderTexture(toUTF8(name), renderTarget);
       } else {
-        obj->setShaderTexture(toUTF8(name), engine->loadTexture(path, false));
+        obj->setShaderTexture(toUTF8(name), engine->loadTexture(path, false, getSourcePos(L)));
       }
     }
     return 0;
@@ -3316,7 +3325,8 @@ namespace bstorm {
     auto path = DnhValue::toString(L, 2);
     lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjSound>(objId)) {
-      obj->load(path);
+      obj->setSound(nullptr);
+      obj->setSound(engine->loadSound(path, getSourcePos(L)));
     }
     return 0;
   }
@@ -4052,7 +4062,7 @@ namespace bstorm {
   static int ObjEnemyBossScene_Create(lua_State* L) {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
-    if (auto obj = engine->createObjEnemyBossScene()) {
+    if (auto obj = engine->createObjEnemyBossScene(getSourcePos(L))) {
       script->addAutoDeleteTargetObjectId(obj->getID());
       lua_pushnumber(L, obj->getID());
     } else {
@@ -4066,7 +4076,7 @@ namespace bstorm {
     int objId = DnhValue::toInt(L, 1);
     lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjEnemyBossScene>(objId)) {
-      obj->regist();
+      obj->regist(getSourcePos(L));
     }
     return 0;
   }
@@ -4089,7 +4099,7 @@ namespace bstorm {
     int objId = DnhValue::toInt(L, 1);
     lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjEnemyBossScene>(objId)) {
-      obj->loadInThread();
+      obj->loadInThread(getSourcePos(L));
     }
     return 0;
   }
@@ -4731,14 +4741,14 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     std::wstring path = DnhValue::toString(L, 1);
     lua_pop(L, 1);
-    engine->loadPlayerShotData(path);
+    engine->loadPlayerShotData(path, getSourcePos(L));
     return 0;
   }
 
   static int ReloadPlayerShotData(lua_State* L) {
     Engine* engine = getEngine(L);
     std::wstring path = DnhValue::toString(L, 1); lua_pop(L, 1);
-    engine->reloadPlayerShotData(path);
+    engine->reloadPlayerShotData(path, getSourcePos(L));
     return 0;
   }
 
@@ -4903,7 +4913,7 @@ namespace bstorm {
 
   static int StartStageScene(lua_State* L) {
     Engine* engine = getEngine(L);
-    engine->startStageScene();
+    engine->startStageScene(getSourcePos(L));
     return 0;
   }
 
@@ -4919,7 +4929,7 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     auto path = DnhValue::toString(L, 1);
     lua_pop(L, 1);
-    engine->setStageMainScript(path);
+    engine->setStageMainScript(path, getSourcePos(L));
     return 0;
   }
 
@@ -4927,7 +4937,7 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     auto path = DnhValue::toString(L, 1);
     lua_pop(L, 1);
-    engine->setStagePlayerScript(path);
+    engine->setStagePlayerScript(path, getSourcePos(L));
     return 0;
   }
 
@@ -5051,7 +5061,7 @@ namespace bstorm {
 
   // helper
 
-  static int getCurrentLine(lua_State* L) {
+  int getCurrentLine(lua_State* L) {
     // コールスタックから現在の行番号を取得する
     lua_Debug deb;
     int level = 1;
@@ -5068,6 +5078,12 @@ namespace bstorm {
     return line;
   }
 
+  std::shared_ptr<SourcePos> getSourcePos(lua_State * L) {
+    int line = getCurrentLine(L);
+    Script* script = getScript(L);
+    return script->getSourcePos(line);
+  }
+
   // MEMO :
   // UnsafeFunctionCommonで例外を拾い
   // __UnsafeFunctionCommonでlua_errorでlongjmpする
@@ -5076,13 +5092,22 @@ namespace bstorm {
   static int UnsafeFunctionCommon(lua_State* L, lua_CFunction func) {
     try {
       return func(L);
+    } catch (Log& log) {
+      int line = getCurrentLine(L);
+      Script* script = getScript(L);
+      auto srcPos = getSourcePos(L);
+      log.addSourcePos(srcPos);
+      script->saveErrLog(std::make_shared<Log>(log));
+      lua_pushstring(L, "script_runtime_error");
     } catch (const std::exception& e) {
       int line = getCurrentLine(L);
       Script* script = getScript(L);
-      auto srcPos = script->getSourcePos(line);
-      auto prefix = srcPos.filename ? (toUTF8(getFileName(*srcPos.filename)) + ":L" + std::to_string(srcPos.line) + ": ") : "";
-      script->setErrorMessage(prefix + e.what());
-      lua_pushstring(L, "script_runtime_error");
+      auto srcPos = getSourcePos(L);
+      script->saveErrLog(
+        std::make_shared<Log>(std::move(Log(Log::Level::LV_ERROR)
+        .setMessage("unexpected script runtime error occured.")
+        .addSourcePos(srcPos))));
+      lua_pushstring(L, "unexpected_script_runtime_error");
     }
     return -1;
   }
@@ -5167,7 +5192,7 @@ namespace bstorm {
   int __c_raiseerror(lua_State* L) {
     std::string msg = lua_tostring(L, 1);
     lua_pop(L, 1);
-    throw std::runtime_error(msg);
+    throw Log(Log::Level::LV_ERROR).setMessage(msg);
     return 0;
   }
 

@@ -89,7 +89,7 @@ namespace bstorm {
     void addCode(const std::wstring& s);
     void addCode(const std::string& s);
     void newLine();
-    void newLine(const std::shared_ptr<std::wstring>& path, int srcLine);
+    void newLine(const std::shared_ptr<SourcePos>& srcPos);
     void indent();
     void unindent();
     void genMonoOp(const std::string& fname, NodeMonoOp& exp);

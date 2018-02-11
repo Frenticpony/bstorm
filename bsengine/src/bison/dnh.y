@@ -36,7 +36,7 @@ namespace bstorm {
 
 %code { // dnh.tab.cpp after #include dnh.tab.hpp
 #include <regex>
-#include <bstorm/static_script_error.hpp>
+#include <bstorm/logger.hpp>
 #include <bstorm/util.hpp>
 
 #include "../reflex/dnh_lexer.hpp"
@@ -59,14 +59,14 @@ static int yylex(DnhParser::semantic_type *yylval, DnhParser::location_type* yyl
        yylval->wchar = lexer->getWChar();
        break;
   }
-  yylloc->begin.filename = lexer->getCurrentFilePath();
-  yylloc->begin.line = lexer->lineno();
-  yylloc->begin.column = lexer->columno();
+  yylloc->begin = lexer->getSourcePos();
   return tk;
 }
 
 void DnhParser::error(const DnhParser::location_type& yylloc, const std::string& msg) {
-  throw static_script_error(*yylloc.begin.filename, yylloc.begin.line, yylloc.begin.column, toUnicode(msg));
+  throw Log(Log::Level::LV_ERROR)
+    .setMessage(msg)
+    .addSourcePos(std::make_shared<SourcePos>(yylloc.begin));
 }
 
 static std::shared_ptr<NodeExp> exp(NodeExp* exp) { return std::shared_ptr<NodeExp>(exp); }
@@ -75,22 +75,18 @@ static std::shared_ptr<NodeLeftVal> leftval(NodeLeftVal* leftval) { return std::
 static std::shared_ptr<NodeBlock> block(NodeBlock* block) { return std::shared_ptr<NodeBlock>(block); }
 
 static void fixPos(Node *node, const DnhParser::location_type& yylloc) {
-  node->filePath = yylloc.begin.filename ? yylloc.begin.filename : std::make_shared<std::wstring>(L"");
-  node->line = yylloc.begin.line;
-  node->column = yylloc.begin.column;
+  node->srcPos = std::make_shared<SourcePos>(yylloc.begin);
 }
 
 static void checkDupDef(DnhParseContext* ctx, const DnhParser::location_type& yylloc, const std::string& name) {
   if (ctx->env->table.count(name) != 0) {
     auto prevDef = ctx->env->table[name];
-    if (name == "result" && (!prevDef->filePath || (*prevDef->filePath).empty())) {
-      // FIXME: this block is never called.
-      throw static_script_error(*yylloc.begin.filename, yylloc.begin.line, yylloc.begin.column, L"'result' has already been declared by compiler in function");
-    }
-    auto prevDefLine = std::to_wstring(prevDef->line);
-    auto prevDefPath = prevDef->filePath ? *prevDef->filePath : L"";
-    auto msg = L"'" + toUnicode(prevDef->name) + L"' : found a duplicate definition (previous definition was on line " + prevDefLine + L" of " + prevDefPath;
-    throw static_script_error(*yylloc.begin.filename, yylloc.begin.line, yylloc.begin.column, msg);
+    auto prevDefLine = std::to_string(prevDef->srcPos->line);
+    auto prevDefPath = toUTF8(*prevDef->srcPos->filename);
+    auto msg = "'" + prevDef->name + "' : found a duplicate definition (previous definition was on line " + prevDefLine + " of " + prevDefPath + ".";
+    throw Log(Log::Level::LV_ERROR)
+      .setMessage(msg)
+      .addSourcePos(std::make_shared<SourcePos>(yylloc.begin));
   }
 }
 
@@ -250,9 +246,7 @@ static void addDef(DnhParseContext* ctx, NodeDef* def) {
 program            : stmts TK_EOF
                       {
                         ctx->result = std::make_shared<NodeBlock>(ctx->env->table, *$1);
-                        ctx->result->filePath = ctx->lexer->getCurrentFilePath();
-                        ctx->result->line = 1;
-                        ctx->result->column = 0;
+                        ctx->result->srcPos = std::make_shared<SourcePos>(SourcePos({1, 1, ctx->lexer->getCurrentFilePath()}));
                         delete($1);
                       }
 

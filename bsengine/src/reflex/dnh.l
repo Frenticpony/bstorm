@@ -13,7 +13,8 @@
 #include <set>
 
 #include <bstorm/util.hpp>
-#include <bstorm/static_script_error.hpp>
+#include <bstorm/logger.hpp>
+#include <bstorm/source_map.hpp>
 #include <bstorm/file_loader.hpp>
 %}
 
@@ -25,6 +26,9 @@ public :
   std::shared_ptr<std::wstring> getCurrentFilePath() const {
     if (includeStack.empty()) return std::make_shared<std::wstring>(L"");
     return includeStack.back();
+  }
+  SourcePos getSourcePos() const {
+    return {(int)lineno(), (int)columno() + 1, getCurrentFilePath()};
   }
   void setLoader(const std::shared_ptr<FileLoader>& loader) {
     this->loader = loader;
@@ -42,9 +46,12 @@ public :
     std::FILE* fp = loader->openFile(*includePath);
     if (fp == NULL) {
       if (includeStack.empty()) {
-        throw std::runtime_error("can't open file: " + toUTF8(path));
+        throw Log(Log::Level::LV_ERROR).setMessage("can't open file.")
+          .setParam(Log::Param(Log::Param::Tag::TEXT, path));
       } else {
-        throw static_script_error(*getCurrentFilePath(), lineno(), columno(), L"can't include file: " + path);
+        throw Log(Log::Level::LV_ERROR).setMessage("can't include file.")
+          .setParam(Log::Param(Log::Param::Tag::TEXT, path))
+          .addSourcePos(std::make_shared<SourcePos>(getSourcePos()));
       }
     }
     visitedFilePaths.insert(*includePath);
@@ -195,7 +202,9 @@ newline \r?\n
 "#"{ident} { v_wstr = wstr().substr(1); return tk::TK_HEADER; }
 
 . {
-  throw static_script_error(*getCurrentFilePath(), lineno(), columno(), L"found illegal token: " + wstr());
+  throw Log(Log::Level::LV_ERROR).setMessage("found illegal token.")
+    .setParam(Log::Param(Log::Param::Tag::TEXT, str()))
+    .addSourcePos(std::make_shared<SourcePos>(getSourcePos()));
 }
 
 <<EOF>> {

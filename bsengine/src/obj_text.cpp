@@ -400,7 +400,7 @@ namespace bstorm {
     return fontParamModified;
   }
 
-  // TODO: パーサの引数に返り値を持たせないと使いにくいので直す(要求度：低)
+  // FUTURE: パーサの引数に返り値を持たせないと使いにくいので直す(要求度：低)
 
   static bool parseChar(const std::wstring& src, int& i, wchar_t c) {
     if (i < src.size() && src[i] == c) {

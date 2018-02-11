@@ -5,6 +5,7 @@
 #include <vorbis/vorbisfile.h>
 
 #include <bstorm/util.hpp>
+#include <bstorm/logger.hpp>
 #include <bstorm/sound_device.hpp>
 
 namespace bstorm {
@@ -17,7 +18,9 @@ namespace bstorm {
     } else if (ext == L".ogg") {
       dSoundBuffer = readOggVorbisFile(path, dSound);
     } else {
-      throw std::runtime_error("unsupported sound file format: " + toUTF8(path));
+      throw Log(Log::Level::LV_ERROR)
+        .setMessage("unsupported sound file format.")
+        .setParam(Log::Param(Log::Param::Tag::TEXT, path));
     }
     return dSoundBuffer;
   }
@@ -57,7 +60,9 @@ namespace bstorm {
 
       WAVEFORMATEX waveFormat;
       if (FAILED(dSoundBuffer->GetFormat(&waveFormat, sizeof(waveFormat), NULL))) {
-        throw std::runtime_error("failed to get sound buffer format: " + toUTF8(path));
+        throw Log(Log::Level::LV_ERROR)
+          .setMessage("failed to get sound buffer format.")
+          .setParam(Log::Param(Log::Param::Tag::TEXT, path));
       }
       samplePerSec = waveFormat.nSamplesPerSec;
       bytesPerSample = waveFormat.wBitsPerSample / 8;
@@ -65,12 +70,16 @@ namespace bstorm {
 
       loopEndEvent = CreateEvent(NULL, TRUE, FALSE, getLoopEndEventName().c_str());
       if (loopEndEvent == NULL) {
-        throw std::runtime_error("failed to create loop end event: " + toUTF8(path));
+        throw Log(Log::Level::LV_ERROR)
+          .setMessage("failed to create loop end event.")
+          .setParam(Log::Param(Log::Param::Tag::TEXT, path));
       }
 
       controlThread = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)SoundControlThread, this, 0, NULL);
       if (controlThread == NULL) {
-        throw std::runtime_error("failed to create sound control thread: " + toUTF8(path));
+        throw Log(Log::Level::LV_ERROR)
+          .setMessage("failed to create sound control thread.")
+          .setParam(Log::Param(Log::Param::Tag::TEXT, path));
       }
     } catch (...) {
       if (loopEndEvent) {
@@ -97,7 +106,9 @@ namespace bstorm {
     try {
       IDirectSoundBuffer* dSoundTempBuffer = NULL;
       if (DS_OK != dSound->DuplicateSoundBuffer(src->dSoundBuffer, &dSoundTempBuffer)) {
-        throw std::runtime_error("failed to duplicate sound buffer: " + toUTF8(path));
+        throw Log(Log::Level::LV_ERROR)
+          .setMessage("failed to duplicate sound buffer.")
+          .setParam(Log::Param(Log::Param::Tag::TEXT, path));
       }
       dSoundTempBuffer->QueryInterface(IID_IDirectSoundBuffer8, (void**)&(this->dSoundBuffer));
       // バグがあるので、バッファ複製直後に元の音量からちょっとずらす必要があるらしい
@@ -111,7 +122,9 @@ namespace bstorm {
 
       WAVEFORMATEX waveFormat;
       if (FAILED(dSoundBuffer->GetFormat(&waveFormat, sizeof(waveFormat), NULL))) {
-        throw std::runtime_error("failed to get sound buffer format: " + toUTF8(path));
+        throw Log(Log::Level::LV_ERROR)
+          .setMessage("failed to get sound buffer format.")
+          .setParam(Log::Param(Log::Param::Tag::TEXT, path));
       }
       samplePerSec = waveFormat.nSamplesPerSec;
       bytesPerSample = waveFormat.wBitsPerSample / 8;
@@ -119,12 +132,16 @@ namespace bstorm {
 
       loopEndEvent = CreateEvent(NULL, TRUE, FALSE, getLoopEndEventName().c_str());
       if (loopEndEvent == NULL) {
-        throw std::runtime_error("failed to create loop end event: " + toUTF8(path));
+        throw Log(Log::Level::LV_ERROR)
+          .setMessage("failed to create loop end event.")
+          .setParam(Log::Param(Log::Param::Tag::TEXT, path));
       }
 
       controlThread = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)SoundControlThread, this, 0, NULL);
       if (controlThread == NULL) {
-        throw std::runtime_error("failed to create sound control thread: " + toUTF8(path));
+        throw Log(Log::Level::LV_ERROR)
+          .setMessage("failed to create sound control thread.")
+          .setParam(Log::Param(Log::Param::Tag::TEXT, path));
       }
     } catch (...) {
       if (loopEndEvent) {
@@ -227,6 +244,10 @@ namespace bstorm {
     CloseHandle(controlThread);
     CloseHandle(loopEndEvent);
     safe_release(dSoundBuffer);
+    Logger::WriteLog(std::move(
+      Log(Log::Level::LV_INFO)
+      .setMessage("release sound.")
+      .setParam(Log::Param(Log::Param::Tag::SOUND, path))));
   }
 
   SoundDevice::SoundDevice(HWND hWnd) :
@@ -235,7 +256,8 @@ namespace bstorm {
     loader(std::make_shared<SoundDataLoaderFromSoundFile>())
   {
     if (DS_OK != DirectSoundCreate8(NULL, &(this->dSound), NULL)) {
-      throw std::runtime_error("failed to init sound device.");
+      throw Log(Log::Level::LV_ERROR)
+        .setMessage("failed to init sound device.");
     }
     dSound->SetCooperativeLevel(hWnd, DSSCL_PRIORITY);
   }
@@ -244,7 +266,7 @@ namespace bstorm {
     safe_release(dSound);
   }
 
-  std::shared_ptr<SoundBuffer> SoundDevice::loadSound(const std::wstring & path, bool doCache) {
+  std::shared_ptr<SoundBuffer> SoundDevice::loadSound(const std::wstring & path, bool doCache, const std::shared_ptr<SourcePos>& srcPos) {
     auto uniqPath = canonicalPath(path);
     auto it = cache.find(uniqPath);
     if (it != cache.end()) {
@@ -252,12 +274,19 @@ namespace bstorm {
     }
     IDirectSoundBuffer8* buf = loader->loadSoundData(path, dSound);
     if (buf == NULL) {
-      throw std::runtime_error("failed to load sound data: " + toUTF8(path));
+      throw Log(Log::Level::LV_ERROR)
+        .setMessage("failed to load sound data.")
+        .setParam(Log::Param(Log::Param::Tag::TEXT, path));
     }
     auto sound = std::make_shared<SoundBuffer>(uniqPath, buf);
     if (doCache) {
       cache[uniqPath] = sound;
     }
+    Logger::WriteLog(std::move(
+      Log(Log::Level::LV_INFO)
+      .setMessage("load sound.")
+      .setParam(Log::Param(Log::Param::Tag::SOUND, uniqPath)))
+      .addSourcePos(srcPos));
     return sound;
   }
 
@@ -308,11 +337,17 @@ namespace bstorm {
     memset(&mmioInfo, 0, sizeof(MMIOINFO));
     hMmio = mmioOpen((LPWSTR)path.c_str(), &mmioInfo, MMIO_READ);
     if (!hMmio) {
-      throw std::runtime_error("can't open file: " + toUTF8(path));
+      throw Log(Log::Level::LV_ERROR)
+        .setMessage("can't open file")
+        .setParam(Log::Param(Log::Param::Tag::TEXT, path));
     }
 
-    auto illegal_wave_format = std::runtime_error("illegal wave format file: " + toUTF8(path));
-    auto failed_to_load_wave = std::runtime_error("failed to load wave file: " + toUTF8(path));
+    auto illegal_wave_format = Log(Log::Level::LV_ERROR)
+      .setMessage("illegal wave format file.")
+      .setParam(Log::Param(Log::Param::Tag::TEXT, path));
+    auto failed_to_load_wave = Log(Log::Level::LV_ERROR)
+      .setMessage("failed to load wave file.")
+      .setParam(Log::Param(Log::Param::Tag::TEXT, path));
 
     try {
       MMRESULT mmResult;
@@ -373,9 +408,16 @@ namespace bstorm {
   }
 
   IDirectSoundBuffer8 * readOggVorbisFile(const std::wstring & path, IDirectSound8 * dSound) {
-    auto cant_open_file = std::runtime_error("can't open ogg-vorbis file: " + toUTF8(path));
-    auto illegal_vorbis_format = std::runtime_error("illegal ogg-vorbis format file: " + toUTF8(path));
-    auto failed_to_load_vorbis = std::runtime_error("failed to load ogg-vorbis file: " + toUTF8(path));
+    auto cant_open_file = Log(Log::Level::LV_ERROR)
+      .setMessage("can't open ogg-vorbis file.")
+      .setParam(Log::Param(Log::Param::Tag::TEXT, path));
+    auto illegal_vorbis_format = Log(Log::Level::LV_ERROR)
+      .setMessage("illegal ogg-vorbis format file.")
+      .setParam(Log::Param(Log::Param::Tag::TEXT, path));
+    auto failed_to_load_vorbis = Log(Log::Level::LV_ERROR)
+      .setMessage("failed to load ogg-vorbis file.")
+      .setParam(Log::Param(Log::Param::Tag::TEXT, path));
+
 
     FILE* fp = _wfopen(path.c_str(), L"rb");
     if (fp == NULL) {

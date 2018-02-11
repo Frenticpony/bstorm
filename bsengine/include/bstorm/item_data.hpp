@@ -10,6 +10,7 @@
 #include <bstorm/file_loader.hpp>
 
 namespace bstorm {
+  struct SourcePos;
   class Texture;
   class ItemData {
   public:
@@ -36,7 +37,8 @@ namespace bstorm {
     ItemDataTable();
     ~ItemDataTable();
     void add(const std::shared_ptr<ItemData>& data);
-    void reload(const std::wstring& path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache);
+    void load(const std::wstring& path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos);
+    void reload(const std::wstring& path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos);
     bool isLoaded(const std::wstring& path) const;
     std::shared_ptr<ItemData> get(int id) const;
     /* backdoor */

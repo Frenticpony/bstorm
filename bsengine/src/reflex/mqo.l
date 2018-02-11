@@ -11,7 +11,7 @@
 #include <memory>
 
 #include <bstorm/util.hpp>
-#include <bstorm/static_script_error.hpp>
+#include <bstorm/logger.hpp>
 #include <bstorm/file_loader.hpp>
 %}
 
@@ -27,7 +27,9 @@ public :
     filePath = std::make_shared<std::wstring>(canonicalPath(path));
     fp = loader->openFile(*filePath);
     if (fp == NULL) {
-      throw std::runtime_error("can't open file: " + toUTF8(path));
+      throw Log(Log::Level::LV_ERROR)
+        .setMessage("can't open file")
+        .setParam(Log::Param(Log::Param::Tag::TEXT, path));
     }
     in(fp);
   }

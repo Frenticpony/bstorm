@@ -25,12 +25,12 @@ namespace bstorm {
     return n;
   }
 
-  std::shared_ptr<Mesh> mqoToMesh(const Mqo & mqo, const std::shared_ptr<TextureCache>& textureCache) {
+  std::shared_ptr<Mesh> mqoToMesh(const Mqo & mqo, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos) {
     auto mesh = std::make_shared<Mesh>(mqo.path);
 
     // ÞŽ¿î•ñ‚ðƒRƒs[
     for (const auto& mqoMat : mqo.materials) {
-      auto texture = textureCache->load(concatPath(parentPath(mqo.path), mqoMat.tex), false);
+      auto texture = textureCache->load(concatPath(parentPath(mqo.path), mqoMat.tex), false, srcPos);
       mesh->materials.push_back(MeshMaterial(mqoMat.col.r, mqoMat.col.g, mqoMat.col.b, mqoMat.col.a, mqoMat.dif, mqoMat.amb, mqoMat.emi, texture));
     }
 
@@ -91,6 +91,13 @@ namespace bstorm {
   Mesh::Mesh(const std::wstring & path) : path(path) {
   }
 
+  Mesh::~Mesh() {
+    Logger::WriteLog(std::move(
+      Log(Log::Level::LV_INFO)
+      .setMessage("release mesh.")
+      .setParam(Log::Param(Log::Param::Tag::MESH, path))));
+  }
+
   const std::wstring & Mesh::getPath() const {
     return path;
   }
@@ -104,10 +111,13 @@ namespace bstorm {
     this->loader = loader;
   }
 
-  std::shared_ptr<Mesh> MeshCache::load(const std::wstring & path, const std::shared_ptr<TextureCache>& textureCache) {
+  std::shared_ptr<Mesh> MeshCache::load(const std::wstring & path, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos) {
     const auto ext = getLowerExt(path);
     if (ext != L".mqo") {
-      throw std::runtime_error("this file format is not supported: " + toUTF8(path));
+      throw Log(Log::Level::LV_ERROR)
+        .setMessage("this file format is not supported.")
+        .setParam(Log::Param(Log::Param::Tag::TEXT, path))
+        .addSourcePos(srcPos);
     }
 
     auto uniqPath = canonicalPath(path);
@@ -116,18 +126,25 @@ namespace bstorm {
       return it->second;
     } else {
       if (auto mqo = parseMqo(uniqPath, loader)) {
-        return meshMap[uniqPath] = mqoToMesh(*mqo, textureCache);
+        auto mesh = mqoToMesh(*mqo, textureCache, srcPos);
+        Logger::WriteLog(std::move(
+          Log(Log::Level::LV_INFO).setMessage("load mesh.")
+          .setParam(Log::Param(Log::Param::Tag::MESH, uniqPath))
+          .addSourcePos(srcPos)));
+        return meshMap[uniqPath] = std::move(mesh);
       }
-      throw std::runtime_error("failed to load mesh: " + toUTF8(path));
+      throw Log(Log::Level::LV_ERROR)
+        .setMessage("failed to load mesh.")
+        .setParam(Log::Param(Log::Param::Tag::TEXT, path))
+        .addSourcePos(srcPos);
     }
   }
 
-  void MeshCache::releaseUnusedMesh(const std::shared_ptr<Logger>& logger) {
+  void MeshCache::releaseUnusedMesh() {
     auto it = meshMap.begin();
     while (it != meshMap.end()) {
       auto& mesh = it->second;
       if (mesh.use_count() <= 1) {
-        logger->logInfo(L"release mesh: " + it->first);
         meshMap.erase(it++);
       } else ++it;
     }

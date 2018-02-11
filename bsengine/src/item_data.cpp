@@ -4,6 +4,7 @@
 #include <bstorm/util.hpp>
 #include <bstorm/parser.hpp>
 #include <bstorm/texture.hpp>
+#include <bstorm/logger.hpp>
 #include <bstorm/item_data.hpp>
 
 namespace bstorm {
@@ -28,16 +29,33 @@ namespace bstorm {
     }
   }
 
-  void ItemDataTable::reload(const std::wstring & path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache) {
+  void ItemDataTable::load(const std::wstring & path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos) {
+    if (isLoaded(path)) {
+      Logger::WriteLog(std::move(
+        Log(Log::Level::LV_WARN)
+        .setMessage("item data already loaded.")
+        .setParam(Log::Param(Log::Param::Tag::ITEM_DATA, path))
+        .addSourcePos(srcPos)));
+    } else {
+      reload(path, loader, textureCache, srcPos);
+    }
+  }
+
+  void ItemDataTable::reload(const std::wstring & path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos) {
     std::wstring uniqPath = canonicalPath(path);
     auto userItemData = parseUserItemData(uniqPath, loader);
-    auto texture = textureCache->load(userItemData->imagePath, false);
+    auto texture = textureCache->load(userItemData->imagePath, false, srcPos);
     for (auto& entry : userItemData->dataMap) {
       auto& data = entry.second;
       data.texture = texture;
       table[data.id] = std::make_shared<ItemData>(data);
     }
     loadedPaths.insert(uniqPath);
+    Logger::WriteLog(std::move(
+      Log(Log::Level::LV_INFO)
+      .setMessage("load item data.")
+      .setParam(Log::Param(Log::Param::Tag::ITEM_DATA, path))
+      .addSourcePos(srcPos)));
   }
 
   bool ItemDataTable::isLoaded(const std::wstring & path) const {

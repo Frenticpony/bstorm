@@ -458,7 +458,7 @@ namespace bstorm {
 
   void ItemScoreTextSpawner::spawn(float x, float y, int64_t score, const std::shared_ptr<GameState>& gameState) {
     if (gameState) {
-      std::shared_ptr<Texture> texture = gameState->textureCache->load(SYSTEM_STG_DIGIT_IMG_PATH, false);
+      std::shared_ptr<Texture> texture = gameState->textureCache->load(SYSTEM_STG_DIGIT_IMG_PATH, false, nullptr);
       auto scoreText = gameState->objTable->create<ObjItemScoreText>(score, texture, gameState);
       gameState->objLayerList->setRenderPriority(scoreText, gameState->objLayerList->getItemRenderPriority());
       scoreText->setMovePosition(x, y);

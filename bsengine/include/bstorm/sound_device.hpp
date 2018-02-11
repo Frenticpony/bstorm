@@ -58,11 +58,12 @@ namespace bstorm {
     HANDLE controlThread;
   };
 
+  struct SourcePos;
   class SoundDevice : private NonCopyable {
   public:
     SoundDevice(HWND hWnd);
     ~SoundDevice();
-    std::shared_ptr<SoundBuffer> loadSound(const std::wstring& path, bool doCache);
+    std::shared_ptr<SoundBuffer> loadSound(const std::wstring& path, bool doCache, const std::shared_ptr<SourcePos>& srcPos);
     void setLoader(const std::shared_ptr<SoundDataLoader>& ld);
     void removeSoundCache(const std::wstring& path);
     void clearSoundCache();

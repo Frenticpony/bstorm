@@ -3,14 +3,15 @@
 #include <bstorm/obj.hpp>
 
 namespace bstorm {
+  struct SourcePos;
   class ObjEnemy;
   class ObjEnemyBossScene : public Obj {
   public:
     ObjEnemyBossScene(const std::shared_ptr<GameState>& gameState);
     void update() override;
-    void regist();
+    void regist(const std::shared_ptr<SourcePos>& srcPos);
     void add(int step, const std::wstring& path);
-    void loadInThread();
+    void loadInThread(const std::shared_ptr<SourcePos>& srcPos);
     int getTimer() const;
     int getTimerF() const;
     int getOrgTimerF() const;

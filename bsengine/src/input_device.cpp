@@ -4,6 +4,7 @@
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/const.hpp>
 #include <bstorm/util.hpp>
+#include <bstorm/logger.hpp>
 #include <bstorm/input_device.hpp>
 
 namespace bstorm {
@@ -43,11 +44,11 @@ namespace bstorm {
   {
     try {
       if (FAILED(DirectInput8Create(GetModuleHandle(NULL), DIRECTINPUT_VERSION, IID_IDirectInput8, (LPVOID *)&dInput, NULL))) {
-        throw std::runtime_error("failed to init input device.");
+        throw Log(Log::Level::LV_ERROR).setMessage("failed to init input device.");
       }
 
-      auto keyboardInitFailed = std::runtime_error("failed to init keyboard.");
-      auto mouseInitFailed = std::runtime_error("failed to init mouse.");
+      auto keyboardInitFailed = Log(Log::Level::LV_ERROR).setMessage("failed to init keyboard.");
+      auto mouseInitFailed = Log(Log::Level::LV_ERROR).setMessage("failed to init mouse.");
 
       // init keyboard
       if (FAILED(dInput->CreateDevice(GUID_SysKeyboard, &keyboardDevice, NULL))) {

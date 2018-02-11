@@ -53,7 +53,7 @@ namespace bstorm {
 
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/util.hpp>
-#include <bstorm/static_script_error.hpp>
+#include <bstorm/logger.hpp>
 
 #include "../reflex/user_def_data_lexer.hpp"
 
@@ -76,14 +76,14 @@ static int yylex(UserDefDataParser::semantic_type* yylval,  UserDefDataParser::l
       ctx->tmpStr = lexer->getWString();
       break;
   }
-  yylloc->begin.filename = lexer->getFilePath();
-  yylloc->begin.line = lexer->lineno();
-  yylloc->begin.column = lexer->columno();
+  yylloc->begin = lexer->getSourcePos();
   return tk;
 }
 
 void UserDefDataParser::error(const UserDefDataParser::location_type& yylloc, const std::string &msg) {
-  throw static_script_error(*yylloc.begin.filename, yylloc.begin.line, yylloc.begin.column, toUnicode(msg));
+  throw Log(Log::Level::LV_ERROR)
+    .setMessage(msg)
+    .addSourcePos(std::make_shared<SourcePos>(yylloc.begin));
 }
 
 }

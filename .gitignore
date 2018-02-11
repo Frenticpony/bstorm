@@ -1,12 +1,26 @@
+## ext
+*.aps
+*.dat
 *.db
+*.log
+*.obj
 *.opendb
+*.pdb
 *.swo
 *.swp
-/.vs/
+*.tlog
 *.user
+
+## distribution
 imgui.ini
+config.json
+bstorm_dev.exe
+bstorm_conf.exe
+bstorm.exe
+
+## dir
+/.vs/
 /ipch/
-th_dnh.log
 /Debug/
 /Release/
 /x64/
@@ -27,13 +41,8 @@ th_dnh.log
 /bstorm_conf/Win32/
 /bstorm_conf/Debug/
 /bstorm_conf/Release/
-bstorm_dev.exe
-bstorm_conf.exe
-bstorm.exe
-*.obj
-*.pdb
-*.log
-*.tlog
-*.aps
-config.dat
-config.json
+/DxSDK/Include/*
+/DxSDK/Lib/Win32/*
+/DxSDK/Lib/x64/*
+
+!.gitkeep

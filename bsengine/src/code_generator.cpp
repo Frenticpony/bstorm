@@ -83,7 +83,7 @@ namespace bstorm {
         std::dynamic_pointer_cast<NodeLoopParam>(def)) {
       genCheckNil(call.name);
     } else if (call.name == "GetCurrentScriptDirectory" && std::dynamic_pointer_cast<NodeBuiltInFunc>(def)) {
-      NodeStr(parentPath(*call.filePath) + L"/").traverse(*this);
+      NodeStr(parentPath(*call.srcPos->filename) + L"/").traverse(*this);
     } else if (auto c = std::dynamic_pointer_cast<NodeConst>(def)) {
       addCode(toUTF8(c->value) + " --[[ " + call.name + " ]]");
     } else {
@@ -94,7 +94,7 @@ namespace bstorm {
   void CodeGenerator::traverse(NodeCallExp& call) {
     auto def = env->findDef(call.name);
     if (call.name == "GetCurrentScriptDirectory" && std::dynamic_pointer_cast<NodeBuiltInFunc>(def)) {
-      NodeStr(parentPath(*call.filePath) + L"/").traverse(*this);
+      NodeStr(parentPath(*call.srcPos->filename) + L"/").traverse(*this);
     } else if (auto c = std::dynamic_pointer_cast<NodeConst>(def)) {
       addCode(toUTF8(c->value) + " --[[ " + call.name + " ]]");
     } else {
@@ -132,8 +132,8 @@ namespace bstorm {
     addCode("\n");
     isLineHead = true;
   }
-  void CodeGenerator::newLine(const std::shared_ptr<std::wstring>& path, int srcLine) {
-    srcMap.logSourcePos(outputLine, path, srcLine);
+  void CodeGenerator::newLine(const std::shared_ptr<SourcePos>& srcPos) {
+    srcMap.logSourcePos(outputLine, srcPos->filename, srcPos->line);
     newLine();
   }
   void CodeGenerator::indent() {
@@ -187,7 +187,7 @@ namespace bstorm {
       if (!std::dynamic_pointer_cast<NodeProcParam>(result)) {
         indent();
         addCode("do return " + varname("result") + " end");
-        newLine(result->filePath, result->line);
+        newLine(result->srcPos);
         unindent();
       }
     }
@@ -205,7 +205,7 @@ namespace bstorm {
           addCode(",");
           right->traverse(*this);
         }
-        addCode(");"); newLine(left->filePath, left->line);
+        addCode(");"); newLine(left->srcPos);
         break;
       case 1:
         // a[_i] += e;
@@ -213,8 +213,8 @@ namespace bstorm {
         //        local i = _i;
         //        r_write1(a, i, r_add(r_read(a, i), e));
         addCode("do"); newLine();
-        genCheckNil(left->name); newLine(left->filePath, left->line);
-        addCode("local i = "); left->indices[0]->traverse(*this); addCode(";"); newLine(left->filePath, left->line);
+        genCheckNil(left->name); newLine(left->srcPos);
+        addCode("local i = "); left->indices[0]->traverse(*this); addCode(";"); newLine(left->srcPos);
         addCode("r_write1(" + varname(left->name) + ", i, ");
         addCode(runtime(fname) + "(");
         addCode(runtime("read") + "(" + varname(left->name) + ", i)");
@@ -222,7 +222,7 @@ namespace bstorm {
           addCode(",");
           right->traverse(*this);
         }
-        addCode("));"); newLine(left->filePath, left->line);
+        addCode("));"); newLine(left->srcPos);
         addCode("end"); newLine();
         break;
       default:
@@ -231,13 +231,13 @@ namespace bstorm {
         //       local is = {i, j, .. , z};
         //       r_write(check_nil(a), is, r_add(r_read(..r_read(a, is[1]), is[2]), .. is[n]), e);
         addCode("do"); newLine();
-        genCheckNil(left->name); newLine(left->filePath, left->line);
+        genCheckNil(left->name); newLine(left->srcPos);
         addCode("local is = {");
         for (int i = 0; i < left->indices.size(); i++) {
           if (i != 0) addCode(",");
           left->indices[i]->traverse(*this);
         }
-        addCode("};"); newLine(left->filePath, left->line);
+        addCode("};"); newLine(left->srcPos);
         addCode("r_write(" + varname(left->name) + ", is");
         addCode("," + runtime(fname) + "(");
         for (int i = 0; i < left->indices.size(); i++) {
@@ -252,7 +252,7 @@ namespace bstorm {
           addCode(",");
           right->traverse(*this);
         }
-        addCode("));"); newLine(left->filePath, left->line);
+        addCode("));"); newLine(left->srcPos);
         addCode("end"); newLine();
         break;
     }
@@ -353,7 +353,7 @@ namespace bstorm {
         addCode(");");
         break;
     }
-    newLine(stmt.filePath, stmt.line);
+    newLine(stmt.srcPos);
   }
   void CodeGenerator::traverse(NodeAddAssign& stmt) { genOpAssign("add", stmt.lhs, stmt.rhs); }
   void CodeGenerator::traverse(NodeSubAssign& stmt) { genOpAssign("subtract", stmt.lhs, stmt.rhs); }
@@ -389,11 +389,11 @@ namespace bstorm {
     if (isTask && call.args.size() != 0) {
       addCode("}");
     }
-    addCode(");"); newLine(call.filePath, call.line);
+    addCode(");"); newLine(call.srcPos);
   }
   void CodeGenerator::traverse(NodeReturn& stmt) {
     addCode("do return "); stmt.ret->traverse(*this); addCode(" end");
-    newLine(stmt.filePath, stmt.line);
+    newLine(stmt.srcPos);
   }
   void CodeGenerator::traverse(NodeReturnVoid& stmt) {
     if (procStack.empty()) {
@@ -414,12 +414,12 @@ namespace bstorm {
         addCode("do return end");
       }
     }
-    newLine(stmt.filePath, stmt.line);
+    newLine(stmt.srcPos);
   }
   void CodeGenerator::traverse(NodeYield& stmt) {
     if (!procStack.empty()) {
       addCode("coroutine.yield();");
-      newLine(stmt.filePath, stmt.line);
+      newLine(stmt.srcPos);
     }
   }
   void CodeGenerator::traverse(NodeBreak& stmt) {
@@ -428,7 +428,7 @@ namespace bstorm {
     } else {
       addCode("do break end");
     }
-    newLine(stmt.filePath, stmt.line);
+    newLine(stmt.srcPos);
   }
 
   void CodeGenerator::traverse(NodeSucc& stmt) { genOpAssign("successor", stmt.lhs, std::shared_ptr<NodeExp>()); }
@@ -437,12 +437,12 @@ namespace bstorm {
   void CodeGenerator::traverse(NodeVarDecl &) {}
   void CodeGenerator::traverse(NodeVarInit& stmt) {
     addCode(varname(stmt.name) + " = "); genCopy(stmt.rhs); addCode(";");
-    newLine(stmt.rhs->filePath, stmt.rhs->line);
+    newLine(stmt.rhs->srcPos);
   }
   void CodeGenerator::traverse(NodeProcParam &) {}
   void CodeGenerator::traverse(NodeLoopParam& param) {
     addCode("local " + varname(param.name) + " = r_cp(i);");
-    newLine(param.filePath, param.line);
+    newLine(param.srcPos);
   }
   void CodeGenerator::traverse(NodeBuiltInFunc &) {}
   void CodeGenerator::traverse(NodeConst &) {}
@@ -458,9 +458,9 @@ namespace bstorm {
   }
   void CodeGenerator::traverse(NodeTimes& stmt) {
     addCode("do"); newLine();
-    addCode("local i = 0;"); newLine(stmt.filePath, stmt.line);
+    addCode("local i = 0;"); newLine(stmt.srcPos);
     addCode("local e = math.ceil(r_tonum(");  stmt.cnt->traverse(*this); addCode("));");
-    newLine(stmt.cnt->filePath, stmt.cnt->line);
+    newLine(stmt.cnt->srcPos);
     addCode("while i < e do"); newLine();
     stmt.block->traverse(*this);
     indent();
@@ -470,36 +470,36 @@ namespace bstorm {
     addCode("end"); newLine();
   }
   void CodeGenerator::traverse(NodeWhile& stmt) {
-    addCode("while r_tobool("); stmt.cond->traverse(*this); addCode(") do"); newLine(stmt.cond->filePath, stmt.cond->line);
+    addCode("while r_tobool("); stmt.cond->traverse(*this); addCode(") do"); newLine(stmt.cond->srcPos);
     stmt.block->traverse(*this);
     addCode("end"); newLine();
   }
   void CodeGenerator::traverse(NodeAscent& stmt) {
     addCode("do"); newLine();
-    addCode("local i = ");  stmt.range->start->traverse(*this); addCode(";"); newLine(stmt.range->start->filePath, stmt.range->start->line);
-    addCode("local e = ");  stmt.range->end->traverse(*this); addCode(";"); newLine(stmt.range->end->filePath, stmt.range->end->line);
-    addCode("while " + runtime("compare") + "(e, i) > 0 do"); newLine(stmt.filePath, stmt.line);
+    addCode("local i = ");  stmt.range->start->traverse(*this); addCode(";"); newLine(stmt.range->start->srcPos);
+    addCode("local e = ");  stmt.range->end->traverse(*this); addCode(";"); newLine(stmt.range->end->srcPos);
+    addCode("while " + runtime("compare") + "(e, i) > 0 do"); newLine(stmt.srcPos);
     stmt.block->traverse(*this);
-    indent(); addCode("i = " + runtime("successor") + "(i);"); newLine(stmt.filePath, stmt.line); unindent();
+    indent(); addCode("i = " + runtime("successor") + "(i);"); newLine(stmt.srcPos); unindent();
     addCode("end"); newLine();
     addCode("end"); newLine();
   }
   void CodeGenerator::traverse(NodeDescent& stmt) {
     addCode("do"); newLine();
-    addCode("local s = ");  stmt.range->start->traverse(*this); addCode(";"); newLine(stmt.range->start->filePath, stmt.range->start->line);
-    addCode("local i = ");  stmt.range->end->traverse(*this); addCode(";"); newLine(stmt.range->end->filePath, stmt.range->end->line);
-    addCode("while " + runtime("compare") + "(s, i) < 0 do"); newLine(stmt.filePath, stmt.line);
-    indent(); addCode("i = " + runtime("predecessor") + "(i);"); newLine(stmt.filePath, stmt.line); unindent();
+    addCode("local s = ");  stmt.range->start->traverse(*this); addCode(";"); newLine(stmt.range->start->srcPos);
+    addCode("local i = ");  stmt.range->end->traverse(*this); addCode(";"); newLine(stmt.range->end->srcPos);
+    addCode("while " + runtime("compare") + "(s, i) < 0 do"); newLine(stmt.srcPos);
+    indent(); addCode("i = " + runtime("predecessor") + "(i);"); newLine(stmt.srcPos); unindent();
     stmt.block->traverse(*this);
     addCode("end"); newLine();
     addCode("end"); newLine();
   }
   void CodeGenerator::traverse(NodeElseIf& elsif) {
-    addCode("elseif r_tobool("); elsif.cond->traverse(*this); addCode(") then"); newLine(elsif.cond->filePath, elsif.cond->line);
+    addCode("elseif r_tobool("); elsif.cond->traverse(*this); addCode(") then"); newLine(elsif.cond->srcPos);
     elsif.block->traverse(*this);
   }
   void CodeGenerator::traverse(NodeIf& stmt) {
-    addCode("if r_tobool("); stmt.cond->traverse(*this); addCode(") then"); newLine(stmt.cond->filePath, stmt.cond->line);
+    addCode("if r_tobool("); stmt.cond->traverse(*this); addCode(") then"); newLine(stmt.cond->srcPos);
     stmt.thenBlock->traverse(*this);
     for (auto elsif : stmt.elsifs) { elsif->traverse(*this); }
     if (stmt.elseBlock) {
@@ -511,7 +511,7 @@ namespace bstorm {
   void CodeGenerator::traverse(NodeCase &) {}
   void CodeGenerator::traverse(NodeAlternative& stmt) {
     addCode("do"); newLine();
-    addCode("local c = "); genCopy(stmt.cond); addCode(";"); newLine(stmt.cond->filePath, stmt.cond->line);
+    addCode("local c = "); genCopy(stmt.cond); addCode(";"); newLine(stmt.cond->srcPos);
     /* gen if-seq */
     for (int i = 0; i < stmt.cases.size(); i++) {
       // case
@@ -525,7 +525,7 @@ namespace bstorm {
       for (auto& exp : stmt.cases[i]->exps) {
         addCode(")");
       }
-      addCode(" then"); newLine(stmt.cases[i]->filePath, stmt.cases[i]->line);
+      addCode(" then"); newLine(stmt.cases[i]->srcPos);
       stmt.cases[i]->block->traverse(*this);
     }
     /* gen else*/
@@ -552,7 +552,7 @@ namespace bstorm {
       for (const auto& bind : blk.table) {
         auto def = bind.second;
         if (isDeclarationNeeded(def)) {
-          addCode("local "); addCode(varname(def->name)); addCode(";"); newLine(def->filePath, def->line);
+          addCode("local "); addCode(varname(def->name)); addCode(";"); newLine(def->srcPos);
         }
       }
     }
