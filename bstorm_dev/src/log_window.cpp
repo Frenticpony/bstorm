@@ -156,10 +156,12 @@ namespace bstorm {
           ImGui::PushID(logIdx); // ここ以降にbreak, continueを書かない
           ImGui::Columns(5, NULL, false);
           const float iconColWidth = defaultIconColWidth;
-          const float srcPosColWidth = log.getSourcePosStack().empty() && !log.getParam() ? 0 : defaultSrcPosColWidth;
+          const float srcPosColWidth = log.getSourcePosStack().empty() ? 0.0f : defaultSrcPosColWidth;
           const float copyColWidth = defaultCopyColWidth;
-          const float msgColWidth = (availWidth - iconColWidth - srcPosColWidth - copyColWidth) / (log.getParam() ? 2 : 1);
-          const float paramColWidth = log.getParam() ? msgColWidth : 0;
+          const float msgColWidth = log.getParam() ?
+            (availWidth - iconColWidth - defaultSrcPosColWidth - copyColWidth) / 2 : 
+            (availWidth - iconColWidth - srcPosColWidth - copyColWidth); 
+          const float paramColWidth = log.getParam() ? (availWidth - iconColWidth - msgColWidth - srcPosColWidth - copyColWidth) : 0.0f;
           ImGui::SetColumnWidth(0, iconColWidth);
           ImGui::SetColumnWidth(1, msgColWidth);
           ImGui::SetColumnWidth(2, paramColWidth);
