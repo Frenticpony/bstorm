@@ -49,8 +49,9 @@ namespace bstorm {
         icon = ICON_FA_CUBE;
       }
       ImGui::PushID(uiId++);
-      if (ImGui::Selectable((icon + " " + toUTF8(script.title.empty() ? script.path : script.title)).c_str(), selectedPath == script.path)) {
-        selectedPath = script.path;
+      bool isSelected = selectedPath == script.path;
+      if (ImGui::Selectable((icon + " " + toUTF8(script.title.empty() ? script.path : script.title)).c_str(), isSelected)) {
+        selectedPath = isSelected ? L"" : script.path;
       }
       ImGui::PopID();
     }
@@ -61,9 +62,12 @@ namespace bstorm {
     if (view.isLeaf()) {
       auto nodeFlag = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
       std::wstring path = toUnicode(view.uniq);
-      if (selectedPath == path) nodeFlag |= ImGuiTreeNodeFlags_Selected;
+      bool isSelected = selectedPath == path;
+      if (isSelected) nodeFlag |= ImGuiTreeNodeFlags_Selected;
       ImGui::TreeNodeEx((ICON_FA_FILE" " + view.name + uiId).c_str(), nodeFlag);
-      if (ImGui::IsItemClicked()) selectedPath = path;
+      if (ImGui::IsItemClicked()) {
+        selectedPath = isSelected ? L"" : path;
+      }
     } else {
       std::string icon = view.isOpen ? ICON_FA_FOLDER_OPEN : ICON_FA_FOLDER;
       if (view.isOpen = ImGui::TreeNodeEx((view.name + uiId).c_str(), NULL, (icon + " " + view.name).c_str())) {
@@ -186,8 +190,9 @@ namespace bstorm {
               if (playerScripts.count(path) == 0) continue;
               const ScriptInfo& playerScript = playerScripts.at(path);
               ImGui::PushID(uiId++);
-              if (ImGui::Selectable((ICON_FA_USER " " + toUTF8(playerScript.title.empty() ? playerScript.path : playerScript.title)).c_str(), selectedPlayerScriptPath == path)) {
-                selectedPlayerScriptPath = path;
+              bool isSelected = selectedPlayerScriptPath == path;
+              if (ImGui::Selectable((ICON_FA_USER " " + toUTF8(playerScript.title.empty() ? playerScript.path : playerScript.title)).c_str(), isSelected)) {
+                selectedPlayerScriptPath = isSelected ? L"" : path;
               }
               ImGui::PopID();
             }
