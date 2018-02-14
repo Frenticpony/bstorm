@@ -34,7 +34,7 @@ namespace bstorm {
     clearOldTempIntersection();
     for (const auto& isect : getTempIntersections()) {
       if (auto toShot = std::dynamic_pointer_cast<EnemyIntersectionToShot>(isect)) {
-        prevTempIsectToShotPositions.push_back(Point2D{ toShot->getX(), toShot->getY() });
+        prevTempIsectToShotPositions.emplace_back(toShot->getX(), toShot->getY());
       }
     }
   }

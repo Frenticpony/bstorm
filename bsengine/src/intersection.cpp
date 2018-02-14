@@ -21,10 +21,10 @@ namespace bstorm {
     const float normalDir = atan2(y2 - y1, x2 - x1) + D3DX_PI / 2;
     const float dx = halfWidth * cos(normalDir);
     const float dy = halfWidth * sin(normalDir);
-    return std::array<Point2D, 4>{Point2D{ x1 + dx, y1 + dy },
-      Point2D{ x1 - dx, y1 - dy },
-      Point2D{ x2 - dx, y2 - dy },
-      Point2D{ x2 + dx, y2 + dy }};
+    return std::array<Point2D, 4>{Point2D(x1 + dx, y1 + dy),
+      Point2D(x1 - dx, y1 - dy),
+      Point2D(x2 - dx, y2 - dy),
+      Point2D(x2 + dx, y2 + dy)};
   }
 
   BoundingBox::BoundingBox() :
@@ -136,7 +136,7 @@ namespace bstorm {
       if (isIntersectedCircleSegment(cx, cy, r, rect[i], rect[(i + 1) & 3])) return true;
     }
     // 円が矩形に入っている場合
-    return isPointInRect(Point2D{ cx, cy }, rect);
+    return isPointInRect(Point2D(cx, cy), rect);
   }
 
   Shape::Shape(float x, float y, float r) :

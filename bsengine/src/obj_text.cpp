@@ -59,7 +59,7 @@ namespace bstorm {
               fonts.push_back(fc->create(FontParams(fontName, size / 2, FW_BOLD, topColor, bottomColor, borderType, borderWidth / 2, borderColor, c)));
             }
           }
-          rubyFonts.push_back({ ruby.begin, ruby.end, fonts });
+          rubyFonts.emplace_back(ruby.begin, ruby.end, fonts);
         }
       }
       fontParamModified = false;
@@ -491,11 +491,7 @@ parse_failed:
         std::wstring rb;
         std::wstring rt;
         if (parseRuby(src, i, rb, rt)) {
-          Ruby<std::wstring> ruby;
-          ruby.begin = bodyText.size();
-          ruby.end = ruby.begin + rb.size();
-          ruby.text = rt;
-          rubies.push_back(ruby);
+          rubies.emplace_back(bodyText.size(), bodyText.size() + rb.size(), rt);
           bodyText += rb;
         } else {
         // 改行は除去

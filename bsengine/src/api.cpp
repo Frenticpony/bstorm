@@ -1156,7 +1156,7 @@ namespace bstorm {
       Point2D speeds{ player->getNormalSpeed(), player->getSlowSpeed() };
       DnhArray(speeds).push(L);
     } else {
-      DnhArray(Point2D{ 0.0f, 0.0f }).push(L);
+      DnhArray(Point2D(0.0f, 0.0f)).push(L);
     }
     return 1;
   }
@@ -1311,7 +1311,7 @@ namespace bstorm {
     lua_pop(L, 3);
     auto enemies = engine->getObjectAll<ObjEnemy>();
     std::vector<Point2D> ps;
-    getEnemyIntersectionPositionFromPoint(ps, enemies, Point2D{ (float)x, (float)y });
+    getEnemyIntersectionPositionFromPoint(ps, enemies, Point2D((float)x, (float)y));
     if (ps.size() > n) { ps.resize(n); }
     DnhArray(ps).push(L);
     return 1;
@@ -1374,7 +1374,7 @@ namespace bstorm {
     lua_pop(L, 1);
     std::vector<Point2D> ps;
     if (auto obj = engine->getObject<ObjEnemy>(objId)) {
-      getEnemyIntersectionPositionFromPoint(ps, { obj }, Point2D{ obj->getX(), obj->getY() });
+      getEnemyIntersectionPositionFromPoint(ps, { obj }, Point2D(obj->getX(), obj->getY()));
     }
     DnhArray(ps).push(L);
     return 1;
@@ -1388,7 +1388,7 @@ namespace bstorm {
     lua_pop(L, 3);
     std::vector<Point2D> ps;
     if (auto obj = engine->getObject<ObjEnemy>(objId)) {
-      getEnemyIntersectionPositionFromPoint(ps, { obj }, Point2D{ x, y });
+      getEnemyIntersectionPositionFromPoint(ps, { obj }, Point2D(x, y));
     }
     DnhArray(ps).push(L);
     return 1;
@@ -2085,7 +2085,7 @@ namespace bstorm {
     if (auto obj = engine->getObject<ObjRender>(objId)) {
       DnhArray(engine->get2DPosition(obj->getX(), obj->getY(), obj->getZ(), obj->isStgSceneObject())).push(L);
     } else {
-      DnhArray(Point2D{ 0, 0 }).push(L);
+      DnhArray(Point2D(0, 0)).push(L);
     }
     return 1;
   }

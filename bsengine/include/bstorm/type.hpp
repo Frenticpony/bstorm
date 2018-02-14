@@ -51,6 +51,8 @@ namespace bstorm {
   };
 
   struct Point2D {
+    Point2D() : x(0.0f), y(0.0f) {}
+    Point2D(float x, float y) : x(x), y(y) {}
     float x;
     float y;
   };

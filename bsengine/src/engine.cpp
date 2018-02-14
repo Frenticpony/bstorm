@@ -131,17 +131,17 @@ namespace bstorm {
       gameState->autoItemCollectionManager->reset();
     }
     // 使われなくなったリソース開放
-    switch (getElapsedFrame() & 0xff) {
+    switch (getElapsedFrame() % 1920) {
       case 0:
         releaseUnusedLostableGraphicResource();
         break;
-      case 30:
+      case 480:
         releaseUnusedTextureCache();
         break;
-      case 60:
+      case 960:
         releaseUnusedFontCache();
         break;
-      case 90:
+      case 1440:
         releaseUnusedMeshCache();
         break;
     }
@@ -1571,7 +1571,7 @@ namespace bstorm {
       D3DXMatrixInverse(&viewProjViewport, NULL, &viewProjViewport);
       D3DXVec3TransformCoord(&pos, &pos, &viewProjViewport);
     }
-    return Point2D{ pos.x, pos.y };
+    return Point2D(pos.x, pos.y);
   }
 
   void Engine::setStageIndex(uint16_t idx) {

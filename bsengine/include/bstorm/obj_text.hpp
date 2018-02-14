@@ -57,6 +57,10 @@ namespace bstorm {
     const std::vector<std::shared_ptr<Font>>& getBodyFonts() const;
     template <typename T>
     struct Ruby {
+      Ruby(int begin, int end, const T& text) :
+        begin(begin),
+        end(end),
+        text(text) {}
       int begin;
       int end;
       T text;

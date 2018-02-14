@@ -110,7 +110,7 @@ namespace bstorm {
     if (steps.count(step) == 0) {
       steps[step] = std::vector<Phase>();
     }
-    steps[step].push_back(Phase(path));
+    steps[step].emplace_back(path);
   }
 
   void ObjEnemyBossScene::loadInThread(const std::shared_ptr<SourcePos>& srcPos) {

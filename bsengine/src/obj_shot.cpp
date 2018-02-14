@@ -308,7 +308,7 @@ namespace bstorm {
     if (auto state = getGameState()) {
       if (auto shot = state->objTable->get<ObjShot>(shotObjId)) {
         shot->registerFlag = false;
-        addedShots.push_back(AddedShot(shotObjId, frame));
+        addedShots.emplace_back(shotObjId, frame);
       }
     }
   }
@@ -318,7 +318,7 @@ namespace bstorm {
     if (auto state = getGameState()) {
       if (auto shot = state->objTable->get<ObjShot>(shotObjId)) {
         shot->registerFlag = false;
-        addedShots.push_back(AddedShot(shotObjId, frame, dist, angle));
+        addedShots.emplace_back(shotObjId, frame, dist, angle);
       }
     }
   }
@@ -344,7 +344,7 @@ namespace bstorm {
         // EV_DELETE_SHOT_TO_ITEM 
         auto evArgs = std::make_unique<DnhArray>();
         evArgs->pushBack(std::make_unique<DnhReal>(getID()));
-        evArgs->pushBack(std::make_unique<DnhArray>(Point2D{ getX(), getY() }));
+        evArgs->pushBack(std::make_unique<DnhArray>(Point2D(getX(), getY())));
         if (auto itemScript = gameState->itemScript.lock()) {
           itemScript->notifyEvent(EV_DELETE_SHOT_TO_ITEM, evArgs);
         }
@@ -375,7 +375,7 @@ namespace bstorm {
         if (auto shotScript = gameState->shotScript.lock()) {
           auto evArgs = std::make_unique<DnhArray>();
           evArgs->pushBack(std::make_unique<DnhReal>(getID()));
-          evArgs->pushBack(std::make_unique<DnhArray>(Point2D{ getX(), getY() }));
+          evArgs->pushBack(std::make_unique<DnhArray>(Point2D(getX(), getY())));
           shotScript->notifyEvent(EV_DELETE_SHOT_IMMEDIATE, evArgs);
         }
       }
@@ -422,7 +422,7 @@ namespace bstorm {
     ObjCol::transIntersection(dx, dy);
   }
 
- void ObjShot::renderIntersection() {
+  void ObjShot::renderIntersection() {
     ObjCol::renderIntersection(isPermitCamera());
   }
 
@@ -557,7 +557,7 @@ namespace bstorm {
     itemDistance(25)
   {
     setSpellResist(true);
-    setPenetration(1<<24);
+    setPenetration(1 << 24);
   }
 
   void ObjLaser::setShotData(const std::shared_ptr<ShotData>& shotData) {
@@ -723,7 +723,7 @@ namespace bstorm {
   }
 
   Point2D ObjLooseLaser::getHead() const {
-    return Point2D{ getX(), getY() };
+    return Point2D(getX(), getY());
   }
 
   Point2D ObjLooseLaser::getTail() const {
@@ -731,7 +731,7 @@ namespace bstorm {
     if (getSpeed() < 0) rdir += D3DX_PI;
     float dx = getRenderLength() * cos(rdir);
     float dy = getRenderLength() * sin(rdir);
-    return Point2D{ getX() + dx, getY() + dy };
+    return Point2D(getX() + dx, getY() + dy);
   }
 
   float ObjLooseLaser::getRenderLength() const {
@@ -856,7 +856,7 @@ namespace bstorm {
     float dir = D3DXToRadian(laserAngle);
     float tailX = getX() + getLength() * cos(dir);
     float tailY = getY() + getLength() * sin(dir);
-    return Point2D{ tailX, tailY };
+    return Point2D(tailX, tailY);
   }
 
   float ObjStLaser::getLaserAngle() const {
@@ -1035,12 +1035,12 @@ namespace bstorm {
 
       // 0.5 (for half pixel offset)
       if (tailPos == trail.size()) {
-        trail.push_back(Vertex(headX + dx - 0.5f, headY + dy - 0.5f, 0, 0, 0, 0));
-        trail.push_back(Vertex(headX - dx - 0.5f, headY - dy - 0.5f, 0, 0, 0, 0));
+        trail.emplace_back(headX + dx - 0.5f, headY + dy - 0.5f, 0.0f, 0, 0.0f, 0.0f);
+        trail.emplace_back(headX - dx - 0.5f, headY - dy - 0.5f, 0.0f, 0, 0.0f, 0.0f);
       }
 
-      trail.push_back(Vertex(x + dx - 0.5f, y + dy - 0.5f, 0, 0, 0, 0));
-      trail.push_back(Vertex(x - dx - 0.5f, y - dy - 0.5f, 0, 0, 0, 0));
+      trail.emplace_back(x + dx - 0.5f, y + dy - 0.5f, 0.0f, 0, 0.0f, 0.0f);
+      trail.emplace_back(x - dx - 0.5f, y - dy - 0.5f, 0.0f, 0, 0.0f, 0.0f);
 
       float laserNodeLength = std::hypotf(x - headX, y - headY);
       totalLaserLength += laserNodeLength;

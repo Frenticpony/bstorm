@@ -231,7 +231,7 @@ animation-data-struct          : { ctx->animationData.clear(); } TK_ST_ANIMATION
 
 animation-data-struct-params   : none
                                | animation-data-struct-params animation-data-struct-param
-                                   { ctx->animationData.push_back(AnimationClip($2.a, $2.b, $2.c, $2.d, $2.e)); }
+                                   { ctx->animationData.emplace_back($2.a, $2.b, $2.c, $2.d, $2.e); }
 
 animation-data-struct-param    : TK_P_ANIMATION_DATA TK_EQ animation-clip opt-semi { $$ = $3; }
 

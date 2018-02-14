@@ -207,7 +207,7 @@ namespace bstorm {
         globalParams->graze += graze;
         currentFrameGrazeCnt += graze;
         currentFrameGrazeObjIds.push_back((double)shot->getID());
-        currentFrameGrazeShotPoints.push_back(Point2D{ shot->getX(), shot->getY() });
+        currentFrameGrazeShotPoints.emplace_back(shot->getX(), shot->getY());
       }
     }
   }

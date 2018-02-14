@@ -337,7 +337,7 @@ namespace bstorm {
   }
 
   void AutoItemCollectionManager::collectItemsInCircle(float x, float y, float r) {
-    circles.push_back(std::make_tuple(x, y, r));
+    circles.emplace_back(x, y, r);
   }
 
   void AutoItemCollectionManager::cancelCollectItems() {

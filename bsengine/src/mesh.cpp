@@ -31,7 +31,7 @@ namespace bstorm {
     // 材質情報をコピー
     for (const auto& mqoMat : mqo.materials) {
       auto texture = textureCache->load(concatPath(parentPath(mqo.path), mqoMat.tex), false, srcPos);
-      mesh->materials.push_back(MeshMaterial(mqoMat.col.r, mqoMat.col.g, mqoMat.col.b, mqoMat.col.a, mqoMat.dif, mqoMat.amb, mqoMat.emi, texture));
+      mesh->materials.emplace_back(mqoMat.col.r, mqoMat.col.g, mqoMat.col.b, mqoMat.col.a, mqoMat.dif, mqoMat.amb, mqoMat.emi, texture);
     }
 
     // 材質別に頂点配列を生成
@@ -80,7 +80,7 @@ namespace bstorm {
             const auto& pos = obj.vertices[vIdx];
             const auto& nor = facet < s ? vertexNormals[vIdx] : faceNormal;
             const auto& uv = j < face.uvs.size() ? face.uvs[j] : MqoVec2{ 0.0f, 0.0f };
-            meshMat.vertices.push_back(MeshVertex(pos.x, pos.y, -pos.z, nor.x, nor.y, nor.z, uv.x, uv.y));
+            meshMat.vertices.emplace_back(pos.x, pos.y, -pos.z, nor.x, nor.y, nor.z, uv.x, uv.y);
           }
         }
       }
