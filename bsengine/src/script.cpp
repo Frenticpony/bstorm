@@ -95,14 +95,14 @@ namespace bstorm {
       {
         Logger::WriteLog(std::move(
           Log(Log::Level::LV_DETAIL)
-          .setMessage("code generation start...")
+          .setMessage("codegen start...")
           .setParam(Log::Param(Log::Param::Tag::SCRIPT, path))
           .addSourcePos(srcPos)));
         TimePoint tp;
         codeGen.generate(*program);
         Logger::WriteLog(std::move(
           Log(Log::Level::LV_DETAIL)
-          .setMessage("...code generation complete " + std::to_string(tp.getElapsedMilliSec()) + " [ms].")
+          .setMessage("...codegen complete " + std::to_string(tp.getElapsedMilliSec()) + " [ms].")
           .setParam(Log::Param(Log::Param::Tag::SCRIPT, path))
           .addSourcePos(srcPos)));
         srcMap = codeGen.getSourceMap();

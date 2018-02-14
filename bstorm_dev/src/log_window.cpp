@@ -159,7 +159,7 @@ namespace bstorm {
           const float srcPosColWidth = log.getSourcePosStack().empty() ? 0.0f : defaultSrcPosColWidth;
           const float copyColWidth = defaultCopyColWidth;
           const float msgColWidth = log.getParam() ?
-            (availWidth - iconColWidth - defaultSrcPosColWidth - copyColWidth) / 2 : 
+            (availWidth - iconColWidth - defaultSrcPosColWidth - copyColWidth) * 0.3f : 
             (availWidth - iconColWidth - srcPosColWidth - copyColWidth); 
           const float paramColWidth = log.getParam() ? (availWidth - iconColWidth - msgColWidth - srcPosColWidth - copyColWidth) : 0.0f;
           ImGui::SetColumnWidth(0, iconColWidth);
@@ -209,7 +209,7 @@ namespace bstorm {
               auto omittedPos = toUTF8(getOmittedFileName(*srcPosStack[0].filename, 15)) + ":" + std::to_string(srcPosStack[0].line);
               auto omittedPosWidth = ImGui::CalcTextSize(omittedPos.c_str()).x;
               ImGui::Text("");
-              ImGui::SameLine(0, srcPosColWidth - omittedPosWidth - 12);
+              ImGui::SameLine(0.0f, srcPosColWidth - omittedPosWidth - 12.0f);
               ImGui::TextWrapped(omittedPos.c_str());
               if (ImGui::IsItemHovered()) {
                 ImGui::BeginTooltip();
