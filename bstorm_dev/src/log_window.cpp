@@ -250,16 +250,14 @@ namespace bstorm {
       }
       ImGui::Separator();
       {
-        const float countWidth = 100.0f;
+        const float countWidth = 120.0f;
         // tool space
         if (ImGui::Button(ICON_FA_TRASH)) {
           clear();
         }
         ImGui::SameLine();
-        ImGui::Text(ICON_FA_FILTER);
-        ImGui::SameLine();
         ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth() - countWidth);
-        ImGui::InputText("##logfilter", filterInput.data(), filterInput.size());
+        ImGui::InputText(ICON_FA_SEARCH"##logfilter", filterInput.data(), filterInput.size());
         ImGui::PopItemWidth();
         ImGui::SameLine();
         ImGui::Text(ICON_FA_EYE" Count: %d", showCnt);

@@ -130,9 +130,7 @@ namespace bstorm {
       {
         // ツールバー
         ImGui::BeginGroup();
-        ImGui::Text(ICON_FA_FILTER);
-        ImGui::SameLine();
-        ImGui::InputText("##filterMain", filterInputMain.data(), filterInputMain.size());
+        ImGui::InputText(ICON_FA_SEARCH"##filterMain", filterInputMain.data(), filterInputMain.size());
         ImGui::SameLine(contentWidth - 45);
         if (isLoadingNow()) {
           // reload中
@@ -172,9 +170,7 @@ namespace bstorm {
         // Playerスクリプト一覧
         {
           ImGui::BeginGroup();
-          ImGui::Text(ICON_FA_FILTER);
-          ImGui::SameLine();
-          ImGui::InputText("##filterPlayer", filterInputPlayer.data(), filterInputPlayer.size());
+          ImGui::InputText(ICON_FA_SEARCH"##filterPlayer", filterInputPlayer.data(), filterInputPlayer.size());
           ImGui::SameLine(contentWidth - 80);
           // 全てのPlayerスクリプトを表示するか、Mainスクリプトに関連したものだけを表示するかの選択
           ImGui::Checkbox("Show All", &showAllPlayerScripts);
