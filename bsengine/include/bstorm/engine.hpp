@@ -117,6 +117,7 @@ namespace bstorm {
     std::wstring getMainPackageScriptPath() const;
     /* texture */
     std::shared_ptr<Texture> loadTexture(const std::wstring& path, bool reserve, const std::shared_ptr<SourcePos>& srcPos);
+    void loadTextureInThread(const std::wstring& path, bool reserve, const std::shared_ptr<SourcePos>& srcPos) noexcept(true);
     void removeTextureReservedFlag(const std::wstring& path);
     void releaseUnusedTextureCache();
     /* font */

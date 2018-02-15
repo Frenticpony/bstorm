@@ -121,8 +121,7 @@ namespace bstorm {
   }
 
   void ScriptExplorer::draw() {
-    std::lock_guard<std::mutex> lock(mutex);
-
+    std::lock_guard<std::mutex> lock(memberAccessSection);
     ImGui::SetNextWindowPos(ImVec2(iniLeft, iniTop), ImGuiSetCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(iniWidth, iniHeight), ImGuiSetCond_FirstUseEver);
     if (ImGui::Begin("Script Explorer", NULL, ImGuiWindowFlags_ResizeFromAnySide)) {
@@ -249,8 +248,7 @@ namespace bstorm {
   }
 
   ScriptInfo ScriptExplorer::getSelectedMainScript() const {
-    std::lock_guard<std::mutex> lock(mutex);
-
+    std::lock_guard<std::mutex> lock(memberAccessSection);
     auto it = mainScripts.find(selectedMainScriptPath);
     if (it != mainScripts.end()) {
       return it->second;
@@ -259,8 +257,7 @@ namespace bstorm {
   }
 
   ScriptInfo ScriptExplorer::getSelectedPlayerScript() const {
-    std::lock_guard<std::mutex> lock(mutex);
-
+    std::lock_guard<std::mutex> lock(memberAccessSection);
     auto it = playerScripts.find(selectedPlayerScriptPath);
     if (it != playerScripts.end()) {
       return it->second;
@@ -273,12 +270,11 @@ namespace bstorm {
   }
 
   void ScriptExplorer::reload() {
-    if (isLoadingNow()) return;
-
+    std::lock_guard<std::mutex> lock(reloadSection);
+    if (isLoadingNow()) return; // 既にロード中なら無視
     reloadThread = std::thread([this]() {
       {
-        std::lock_guard<std::mutex> lock(mutex);
-
+        std::lock_guard<std::mutex> lock(memberAccessSection);
         mainScripts.clear();
         playerScripts.clear();
         freePlayerScriptPaths.clear();
@@ -299,7 +295,7 @@ namespace bstorm {
           }
 
           {
-            std::lock_guard<std::mutex> lock(mutex);
+            std::lock_guard<std::mutex> lock(memberAccessSection);
             if (script.type == SCRIPT_TYPE_PLAYER) {
               playerScripts[script.path] = script;
               if (script.path.find_first_of(FREE_PLAYER_DIR) == 0) {
@@ -315,13 +311,14 @@ namespace bstorm {
 
       // TreeViewの作成
       {
-        std::lock_guard<std::mutex> lock(mutex);
-
+        std::lock_guard<std::mutex> lock(memberAccessSection);
         mainScriptTreeView = createTreeView(mainScripts);
         playerScriptTreeView = createTreeView(playerScripts);
       }
-
-      reloadThread.detach();
+      {
+        std::lock_guard<std::mutex> lock(reloadSection);
+        reloadThread.detach();
+      }
     });
   }
 }

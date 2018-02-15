@@ -351,6 +351,10 @@ namespace bstorm {
     return gameState->textureCache->load(path, reserve, srcPos);
   }
 
+  void Engine::loadTextureInThread(const std::wstring & path, bool reserve, const std::shared_ptr<SourcePos>& srcPos) noexcept(true) {
+    gameState->textureCache->loadInThread(path, reserve, srcPos);
+  }
+
   void Engine::removeTextureReservedFlag(const std::wstring & path) {
     gameState->textureCache->removeReservedFlag(path);
   }

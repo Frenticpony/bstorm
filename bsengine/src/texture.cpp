@@ -67,59 +67,132 @@ namespace bstorm {
     return d3DTexture;
   }
 
-  std::shared_ptr<Texture> TextureCache::load(const std::wstring& path, bool reserve, const std::shared_ptr<SourcePos>& srcPos) {
-    auto uniqPath = canonicalPath(path);
-    auto it = textureMap.find(uniqPath);
-    if (it != textureMap.end()) {
-      if (reserve) it->second->setReservedFlag(true);
-      return it->second;
-    } else {
-      IDirect3DTexture9* d3DTexture = loader->loadTexture(uniqPath, d3DDevice);
-      if (d3DTexture) {
-        auto texture = std::make_shared<Texture>(uniqPath, d3DTexture);
-        texture->setReservedFlag(reserve);
-        textureMap[uniqPath] = texture;
-        Logger::WriteLog(std::move(
-          Log(Log::Level::LV_INFO).setMessage(std::string("load texture") + (reserve ? " (reserved)." : "."))
-          .setParam(Log::Param(Log::Param::Tag::TEXTURE, uniqPath))
-          .addSourcePos(srcPos)));
-        return texture;
+  std::shared_ptr<Texture> TextureCache::load(const std::wstring& p, bool reserve, const std::shared_ptr<SourcePos>& srcPos) {
+    auto uniqPath = canonicalPath(p);
+    {
+      // cache hit
+      std::lock_guard<std::mutex> lock(memberAccessSection);
+      auto it = m_textureMap.find(uniqPath);
+      if (it != m_textureMap.end()) {
+        if (reserve) it->second->setReservedFlag(true);
+        return it->second;
       }
+    }
+    return execLoad(uniqPath, reserve, srcPos);
+  }
+
+  std::shared_ptr<Texture> TextureCache::execLoad(const std::wstring & uniqPath, bool reserve, const std::shared_ptr<SourcePos>& srcPos) {
+    IDirect3DTexture9* d3DTexture = NULL;
+    {
+      std::lock_guard<std::mutex> lock(textureLoadSection);
+      {
+        // 他のスレッドのtextureLoadSectionでロードされたテクスチャがあればそれを返す
+        std::lock_guard<std::mutex> lock(memberAccessSection);
+        auto it = m_textureMap.find(uniqPath);
+        if (it != m_textureMap.end()) {
+          if (reserve) it->second->setReservedFlag(true);
+          return it->second;
+        }
+      }
+      // load
+      d3DTexture = m_loader->loadTexture(uniqPath, d3DDevice);
+    }
+    if (d3DTexture) {
+      auto texture = std::make_shared<Texture>(uniqPath, d3DTexture);
+      texture->setReservedFlag(reserve);
+      {
+        std::lock_guard<std::mutex> lock(memberAccessSection);
+        m_textureMap[uniqPath] = texture;
+      }
+      Logger::WriteLog(std::move(
+        Log(Log::Level::LV_INFO).setMessage(std::string("load texture") + (reserve ? " (reserved)." : "."))
+        .setParam(Log::Param(Log::Param::Tag::TEXTURE, uniqPath))
+        .addSourcePos(srcPos)));
+      return texture;
     }
     throw Log(Log::Level::LV_ERROR)
       .setMessage("failed to load texture.")
-      .setParam(Log::Param(Log::Param::Tag::TEXTURE, path));
+      .setParam(Log::Param(Log::Param::Tag::TEXTURE, uniqPath));
   }
 
-  void TextureCache::removeReservedFlag(const std::wstring & path) {
-    auto uniqPath = canonicalPath(path);
-    auto it = textureMap.find(uniqPath);
-    if (it != textureMap.end()) {
-      it->second->setReservedFlag(false);
+  void TextureCache::loadInThread(const std::wstring & p, bool reserve, const std::shared_ptr<SourcePos>& srcPos) {
+    const std::wstring& uniqPath = canonicalPath(p);
+    {
+      std::lock_guard<std::mutex> lock(memberAccessSection);
+      {
+        // cache hit
+        auto it = m_textureMap.find(uniqPath);
+        if (it != m_textureMap.end()) {
+          if (reserve) it->second->setReservedFlag(true);
+          return;
+        }
+      }
+      if (m_loadThreads.count(uniqPath) != 0) return; // ロード中
+      m_loadThreads[uniqPath] = std::thread([this, uniqPath, reserve, srcPos]() {
+        try {
+          execLoad(uniqPath, reserve, srcPos);
+        } catch (Log& log) {
+          log.setLevel(Log::Level::LV_WARN);
+          log.addSourcePos(srcPos);
+          Logger::WriteLog(log);
+        }
+        {
+          std::lock_guard<std::mutex> lock(memberAccessSection);
+          m_loadThreads[uniqPath].detach();
+          m_loadThreads.erase(uniqPath);
+        }
+      });
+    }
+  }
+
+  void TextureCache::removeReservedFlag(const std::wstring & p) {
+    auto uniqPath = canonicalPath(p);
+    {
+      std::lock_guard<std::mutex> lock(memberAccessSection);
+      auto it = m_textureMap.find(uniqPath);
+      if (it != m_textureMap.end()) {
+        it->second->setReservedFlag(false);
+      }
     }
   }
 
   void TextureCache::releaseUnusedTexture() {
-    auto it = textureMap.begin();
-    while (it != textureMap.end()) {
+    std::lock_guard<std::mutex> lock(memberAccessSection);
+    auto it = m_textureMap.begin();
+    while (it != m_textureMap.end()) {
       auto& texture = it->second;
       if (!texture->isReserved() && texture.use_count() <= 1) {
-        textureMap.erase(it++);
+        m_textureMap.erase(it++);
       } else ++it;
     }
   }
 
   TextureCache::TextureCache(IDirect3DDevice9* d3DDevice) :
     d3DDevice(d3DDevice),
-    loader(std::make_shared<TextureLoaderFromImageFile>())
+    m_loader(std::make_shared<TextureLoaderFromImageFile>())
   {
   }
 
+  TextureCache::~TextureCache() {
+    while (true) {
+      bool allThreadFinished = true;
+      {
+        std::lock_guard<std::mutex> lock(memberAccessSection);
+        for (const auto& thread : m_loadThreads) {
+          allThreadFinished = allThreadFinished && !thread.second.joinable();
+        }
+      }
+      if (allThreadFinished) break;
+      Sleep(1);
+    }
+  }
+
   void TextureCache::setLoader(const std::shared_ptr<TextureLoader>& ld) {
+    std::lock_guard<std::mutex> lock(memberAccessSection);
     if (ld) {
-      loader = ld;
+      m_loader = ld;
     } else {
-      loader = std::make_shared<TextureLoaderFromImageFile>();
+      m_loader = std::make_shared<TextureLoaderFromImageFile>();
     }
   }
 

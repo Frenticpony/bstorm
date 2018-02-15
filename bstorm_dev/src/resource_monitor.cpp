@@ -113,30 +113,33 @@ namespace bstorm {
   template<>
   void TextureCache::backDoor<ResourceMonitor>() const {
     static std::wstring selectedTexturePath;
-    float sideBarWidth = ImGui::GetContentRegionAvailWidth() * 0.2;
+    const float sideBarWidth = ImGui::GetContentRegionAvailWidth() * 0.2;
     ImGui::BeginChild("ResourceTextureTabSideBar", ImVec2(sideBarWidth, -1), true, ImGuiWindowFlags_HorizontalScrollbar);
-    for (const auto& entry : textureMap) {
-      std::wstring path = entry.first;
-      const auto& texture = entry.second;
-      ImGui::BeginGroup();
-      float iconWidth = std::min(sideBarWidth * 0.4f, 1.0f * texture->getWidth());
-      float iconHeight = std::max(iconWidth / texture->getWidth() * texture->getHeight(), ImGui::GetTextLineHeight());
-      if (ImGui::ImageButton(texture->getTexture(), ImVec2(iconWidth, iconHeight), ImVec2(0, 0), ImVec2(1, 1), 0, ImVec4(0, 0, 0, 1))) {
-        selectedTexturePath = path;
+    {
+      std::lock_guard<std::mutex> lock(memberAccessSection);
+      for (const auto& entry : m_textureMap) {
+        std::wstring path = entry.first;
+        const auto& texture = entry.second;
+        ImGui::BeginGroup();
+        float iconWidth = std::min(sideBarWidth * 0.4f, 1.0f * texture->getWidth());
+        float iconHeight = std::max(iconWidth / texture->getWidth() * texture->getHeight(), ImGui::GetTextLineHeight());
+        if (ImGui::ImageButton(texture->getTexture(), ImVec2(iconWidth, iconHeight), ImVec2(0, 0), ImVec2(1, 1), 0, ImVec4(0, 0, 0, 1))) {
+          selectedTexturePath = path;
+        }
+        ImGui::SameLine();
+        if (ImGui::Selectable(toUTF8(path).c_str(), selectedTexturePath == path)) {
+          selectedTexturePath = path;
+        }
+        ImGui::EndGroup();
       }
+      ImGui::EndChild();
       ImGui::SameLine();
-      if (ImGui::Selectable(toUTF8(path).c_str(), selectedTexturePath == path)) {
-        selectedTexturePath = path;
+      ImGui::BeginChild("ResourceTextureTabInfoArea", ImVec2(-1, -1), false, ImGuiWindowFlags_HorizontalScrollbar);
+      ImGui::Text("Texture Info");
+      auto it = m_textureMap.find(selectedTexturePath);
+      if (it != m_textureMap.end()) {
+        drawTextureInfo(it->second, std::vector<Rect<int>>());
       }
-      ImGui::EndGroup();
-    }
-    ImGui::EndChild();
-    ImGui::SameLine();
-    ImGui::BeginChild("ResourceTextureTabInfoArea", ImVec2(-1, -1), false, ImGuiWindowFlags_HorizontalScrollbar);
-    ImGui::Text("Texture Info");
-    auto it = textureMap.find(selectedTexturePath);
-    if (it != textureMap.end()) {
-      drawTextureInfo(it->second, std::vector<Rect<int>>());
     }
     ImGui::EndChild();
   }

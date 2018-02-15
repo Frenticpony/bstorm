@@ -563,8 +563,11 @@ namespace bstorm {
   }
 
   static int LoadTextureInLoadThread(lua_State* L) {
-    // FUTURE : impl
-    return LoadTexture(L);
+    Engine* engine = getEngine(L);
+    auto path = DnhValue::toString(L, 1);
+    lua_pop(L, 1);
+    engine->loadTextureInThread(path, true, getSourcePos(L));
+    return 0;
   }
 
   static int RemoveTexture(lua_State* L) {
@@ -5730,7 +5733,7 @@ namespace bstorm {
     safe(GetMouseMoveZ, 0);
     safe(SetSkipModeKey, 1);
     unsafe(LoadTexture, 1);
-    unsafe(LoadTextureInLoadThread, 1);
+    safe(LoadTextureInLoadThread, 1);
     safe(RemoveTexture, 1);
     safe(GetTextureWidth, 1);
     safe(GetTextureHeight, 1);

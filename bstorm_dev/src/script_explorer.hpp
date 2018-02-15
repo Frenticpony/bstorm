@@ -46,6 +46,7 @@ namespace bstorm {
     std::wstring selectedMainScriptPath;
     std::wstring selectedPlayerScriptPath;
     std::thread reloadThread; // Don't join.
-    mutable std::mutex mutex;
+    mutable std::mutex memberAccessSection;
+    mutable std::mutex reloadSection;
   };
 }
