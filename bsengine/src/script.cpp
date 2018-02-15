@@ -86,7 +86,8 @@ namespace bstorm {
         }
         if (!errors.empty()) {
           throw Log(Log::Level::LV_ERROR)
-            .setMessage("found " + std::to_string(errors.size()) + " script error" + (errors.size() > 1 ? "s." : "."));
+            .setMessage("found " + std::to_string(errors.size()) + " script error" + (errors.size() > 1 ? "s." : "."))
+            .setParam(Log::Param(Log::Param::Tag::SCRIPT, path));
         }
       }
 
@@ -130,6 +131,8 @@ namespace bstorm {
             if (ss.size() >= 2) {
               int line = _wtoi(ss[1].c_str());
               err.addSourcePos(srcMap.getSourcePos(line));
+            } else {
+              err.setParam(Log::Param(Log::Param::Tag::SCRIPT, path));
             }
             throw err;
           } else {
