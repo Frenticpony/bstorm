@@ -140,6 +140,10 @@ namespace bstorm {
     return r;
   }
 
+  bool matchString(const std::string& searchText, const std::string& searchTarget) {
+    return searchTarget.find(searchText) != std::string::npos;
+  }
+
   bool isSpace(wchar_t c) {
     return c == L' ' || c == L'\t' || c == L'\n' || c == L'\r' || c == L'\f' || c == L'\v' || c == L'\b';
   }

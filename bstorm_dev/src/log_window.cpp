@@ -87,9 +87,10 @@ namespace bstorm {
     ImGui::MenuItem(text.c_str(), NULL, selected);
     ImGui::PopItemFlag();
   }
+
   static bool matchLog(const std::string& searchText, const Log& log) {
-    if (log.getMessage().find(searchText) != std::string::npos) return true;
-    if (log.getParam() && log.getParam()->getText().find(searchText) != std::string::npos) return true;
+    if (matchString(searchText, log.getMessage())) return true;
+    if (log.getParam() && matchString(searchText, log.getParam()->getText())) return true;
     return false;
   }
 
@@ -249,16 +250,19 @@ namespace bstorm {
       }
       ImGui::Separator();
       {
+        const float countWidth = 100.0f;
         // tool space
-        if (ImGui::Button(ICON_FA_TRASH" Clear")) {
+        if (ImGui::Button(ICON_FA_TRASH)) {
           clear();
         }
         ImGui::SameLine();
-        ImGui::Text(ICON_FA_EYE" Count: %d", showCnt);
+        ImGui::Text(ICON_FA_FILTER);
         ImGui::SameLine();
-        ImGui::Text(ICON_FA_FILTER" Filter");
-        ImGui::SameLine();
+        ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth() - countWidth);
         ImGui::InputText("##logfilter", filterInput.data(), filterInput.size());
+        ImGui::PopItemWidth();
+        ImGui::SameLine();
+        ImGui::Text(ICON_FA_EYE" Count: %d", showCnt);
       }
     }
     ImGui::End();

@@ -22,20 +22,15 @@ static std::string join(const std::vector<std::string>& ss, const std::string& d
 }
 
 namespace bstorm {
-  class WinFileLoader : public FileLoader {
-  public:
-    FILE* openFile(const std::wstring& path) override {
-      return _wfopen(path.c_str(), L"rb");
-    }
-    void closeFile(const std::wstring& path, FILE* fp) override {
-      fclose(fp);
-    }
-  };
-
-  static void drawFlatView(const std::map<std::wstring, ScriptInfo>& scripts, std::wstring& selectedPath) {
+  static void drawFlatView(const std::map<std::wstring, ScriptInfo>& scripts, std::wstring& selectedPath, const std::string& searchText) {
     int uiId = 0;
     for (const auto& entry : scripts) {
       const ScriptInfo& script = entry.second;
+      const auto pathU8 = toUTF8(script.path);
+      const auto titleU8 = toUTF8(script.title);
+      if (!searchText.empty()) {
+        if (!(matchString(searchText, titleU8) || matchString(searchText, pathU8))) continue;
+      }
       std::string icon;
       if (script.type == SCRIPT_TYPE_PLURAL) {
         icon = ICON_FA_CUBES;
@@ -50,19 +45,23 @@ namespace bstorm {
       }
       ImGui::PushID(uiId++);
       bool isSelected = selectedPath == script.path;
-      if (ImGui::Selectable((icon + " " + toUTF8(script.title.empty() ? script.path : script.title)).c_str(), isSelected)) {
+      if (ImGui::Selectable((icon + " " + (titleU8.empty() ? pathU8 : titleU8)).c_str(), isSelected)) {
         selectedPath = isSelected ? L"" : script.path;
       }
       ImGui::PopID();
     }
   }
 
-  static void drawTreeView(ScriptExplorer::TreeView& view, std::wstring& selectedPath) {
+  static void drawTreeView(ScriptExplorer::TreeView& view, std::wstring& selectedPath, const std::string& searchText) {
     std::string uiId = "##" + view.uniq;
     if (view.isLeaf()) {
-      auto nodeFlag = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+      if (!searchText.empty()) {
+        // filter
+        if (!matchString(searchText, view.uniq)) return;
+      }
       std::wstring path = toUnicode(view.uniq);
       bool isSelected = selectedPath == path;
+      auto nodeFlag = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
       if (isSelected) nodeFlag |= ImGuiTreeNodeFlags_Selected;
       ImGui::TreeNodeEx((ICON_FA_FILE" " + view.name + uiId).c_str(), nodeFlag);
       if (ImGui::IsItemClicked()) {
@@ -70,9 +69,9 @@ namespace bstorm {
       }
     } else {
       std::string icon = view.isOpen ? ICON_FA_FOLDER_OPEN : ICON_FA_FOLDER;
-      if (view.isOpen = ImGui::TreeNodeEx((view.name + uiId).c_str(), NULL, (icon + " " + view.name).c_str())) {
+      if (view.isOpen = ImGui::TreeNodeEx((view.name + uiId).c_str(), ImGuiTreeNodeFlags_DefaultOpen, (icon + " " + view.name).c_str())) {
         for (auto& entry : view.children) {
-          drawTreeView(entry.second, selectedPath);
+          drawTreeView(entry.second, selectedPath, searchText);
         }
         ImGui::TreePop();
       }
@@ -112,6 +111,8 @@ namespace bstorm {
     useTreeView(false),
     showAllPlayerScripts(false)
   {
+    filterInputMain.fill('\0');
+    filterInputPlayer.fill('\0');
     reload();
   }
 
@@ -129,7 +130,9 @@ namespace bstorm {
       {
         // ツールバー
         ImGui::BeginGroup();
-        ImGui::Text("Select Script");
+        ImGui::Text(ICON_FA_FILTER);
+        ImGui::SameLine();
+        ImGui::InputText("##filterMain", filterInputMain.data(), filterInputMain.size());
         ImGui::SameLine(contentWidth - 45);
         if (isLoadingNow()) {
           // reload中
@@ -156,10 +159,11 @@ namespace bstorm {
       if (mainScriptListOpened = ImGui::CollapsingHeader("Main Script", ImGuiTreeNodeFlags_DefaultOpen)) {
         // スクリプト一覧
         ImGui::BeginChildFrame(ImGui::GetID("main script list"), ImVec2(contentWidth, contentHeight * 0.4), ImGuiWindowFlags_HorizontalScrollbar);
+        std::string searchTextMain(filterInputMain.data()); // delete null sequence
         if (useTreeView) {
-          drawTreeView(mainScriptTreeView, selectedMainScriptPath);
+          drawTreeView(mainScriptTreeView, selectedMainScriptPath, searchTextMain);
         } else {
-          drawFlatView(mainScripts, selectedMainScriptPath);
+          drawFlatView(mainScripts, selectedMainScriptPath, searchTextMain);
         }
         ImGui::EndChildFrame();
       }
@@ -167,21 +171,26 @@ namespace bstorm {
       if (ImGui::CollapsingHeader("Player Script", ImGuiTreeNodeFlags_DefaultOpen)) {
         // Playerスクリプト一覧
         {
-          // 全てのPlayerスクリプトを表示するか、Mainスクリプトに関連したものだけを表示するかの選択
           ImGui::BeginGroup();
-          ImGui::Text("");
+          ImGui::Text(ICON_FA_FILTER);
+          ImGui::SameLine();
+          ImGui::InputText("##filterPlayer", filterInputPlayer.data(), filterInputPlayer.size());
           ImGui::SameLine(contentWidth - 80);
+          // 全てのPlayerスクリプトを表示するか、Mainスクリプトに関連したものだけを表示するかの選択
           ImGui::Checkbox("Show All", &showAllPlayerScripts);
           ImGui::EndGroup();
         }
         ImGui::BeginChildFrame(ImGui::GetID("player script list"), ImVec2(contentWidth, contentHeight * (mainScriptListOpened ? 0.2 : 0.4)), ImGuiWindowFlags_HorizontalScrollbar);
+        std::string searchTextPlayer(filterInputPlayer.data()); // delete null sequence
         if (showAllPlayerScripts) {
+          // 全Playerスクリプト
           if (useTreeView) {
-            drawTreeView(playerScriptTreeView, selectedPlayerScriptPath);
+            drawTreeView(playerScriptTreeView, selectedPlayerScriptPath, searchTextPlayer);
           } else {
-            drawFlatView(playerScripts, selectedPlayerScriptPath);
+            drawFlatView(playerScripts, selectedPlayerScriptPath, searchTextPlayer);
           }
         } else {
+          // #Playerで指定されたスクリプト
           if (mainScripts.count(selectedMainScriptPath) != 0) {
             const ScriptInfo& mainScript = mainScripts.at(selectedMainScriptPath);
             const std::vector<std::wstring>& paths = (mainScript.playerScripts.empty() || mainScript.playerScripts[0] == L"DEFAULT") ? freePlayerScriptPaths : mainScript.playerScripts;
@@ -189,9 +198,14 @@ namespace bstorm {
             for (auto& path : paths) {
               if (playerScripts.count(path) == 0) continue;
               const ScriptInfo& playerScript = playerScripts.at(path);
+              const auto pathU8 = toUTF8(playerScript.path);
+              const auto titleU8 = toUTF8(playerScript.title);
+              if (!searchTextPlayer.empty()) {
+                if (!(matchString(searchTextPlayer, titleU8) || matchString(searchTextPlayer, pathU8))) continue;
+              }
               ImGui::PushID(uiId++);
               bool isSelected = selectedPlayerScriptPath == path;
-              if (ImGui::Selectable((ICON_FA_USER " " + toUTF8(playerScript.title.empty() ? playerScript.path : playerScript.title)).c_str(), isSelected)) {
+              if (ImGui::Selectable((ICON_FA_USER " " + (titleU8.empty() ? pathU8 : titleU8)).c_str(), isSelected)) {
                 selectedPlayerScriptPath = isSelected ? L"" : path;
               }
               ImGui::PopID();
@@ -278,7 +292,7 @@ namespace bstorm {
       std::vector<std::wstring> scriptPaths;
       getFilePathsRecursively(L"script", scriptPaths, ignoreScriptExts);
 
-      auto loader = std::make_shared<WinFileLoader>();
+      auto loader = std::make_shared<FileLoaderFromTextFile>();
 
       for (auto& path : scriptPaths) {
         try {

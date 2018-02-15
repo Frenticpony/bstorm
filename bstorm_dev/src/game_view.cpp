@@ -92,7 +92,7 @@ namespace bstorm {
           // info text
           ImGui::BeginGroup();
           ImGui::Text(" elapsed: %lld (%.1f fps)", playController->getElapsedFrame(), ImGui::GetIO().Framerate);
-          ImGui::Text(playController->isPackageFinished() ? " select package" : " running");
+          ImGui::Text(playController->isPackageFinished() ? " select package" : playController->isPaused() ? " pause" : " running");
           ImGui::EndGroup();
         }
         ImGui::SameLine(ImGui::GetContentRegionAvailWidth() - optionSpace - controllerSpace);

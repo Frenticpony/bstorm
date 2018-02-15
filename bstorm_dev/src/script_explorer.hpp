@@ -3,6 +3,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <array>
 #include <mutex>
 #include <thread>
 
@@ -16,7 +17,7 @@ namespace bstorm {
     void draw();
     // ディレクトリーツリー表示用のデータ構造
     struct TreeView {
-      TreeView() : isOpen(false) {}
+      TreeView() : isOpen(true) {}
       std::string name;
       std::string uniq;
       bool isOpen;
@@ -26,6 +27,9 @@ namespace bstorm {
     ScriptInfo getSelectedMainScript() const;
     ScriptInfo getSelectedPlayerScript() const;
   private:
+    static constexpr int MaxFilterInputSize = 65;
+    std::array<char, MaxFilterInputSize> filterInputMain;
+    std::array<char, MaxFilterInputSize> filterInputPlayer;
     bool isLoadingNow() const;
     void reload();
     int iniLeft;

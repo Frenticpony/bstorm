@@ -59,6 +59,8 @@ namespace bstorm {
   std::vector<std::wstring> split(const std::wstring& s, wchar_t delimiter);
   std::vector<std::wstring> split(const std::wstring& s, const std::wstring& delimiter);
 
+  bool matchString(const std::string& searchText, const std::string& searchTarget);
+
   bool isSpace(wchar_t c);
 
   void trimSpace(std::wstring& s);
