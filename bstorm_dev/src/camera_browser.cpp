@@ -137,7 +137,7 @@ namespace bstorm {
   void Engine::backDoor<CameraBrowser>() {
     ImGui::Columns(2, "camera tab");
     ImGui::Separator();
-    static int selectedCamera = 1; // 0: 2D, 1: 3D
+    static int selectedCamera = 0; // 0: 2D, 1: 3D
     if (ImGui::Selectable("Camera2D##Camera2DTab", selectedCamera == 0)) {
       selectedCamera = 0;
     }
