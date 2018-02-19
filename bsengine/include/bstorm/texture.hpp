@@ -11,6 +11,9 @@
 #include <bstorm/non_copyable.hpp>
 
 namespace bstorm {
+  IDirect3DTexture9* loadTextureFromFile(const std::wstring& path, IDirect3DDevice9*) noexcept(true);
+
+  struct SourcePos;
   class Texture : private NonCopyable {
   public:
     Texture(const std::wstring& path, IDirect3DTexture9* d3DTexture);
@@ -21,44 +24,34 @@ namespace bstorm {
     void setReservedFlag(bool flag);
     bool isReserved() const;
     IDirect3DTexture9* getTexture() const;
+    void reload(IDirect3DTexture9* d3DTex);
   private:
-    std::wstring path;
+    const std::wstring path;
     int width;
     int height;
     std::atomic<bool> reservedFlag;
     IDirect3DTexture9* d3DTexture;
   };
 
-  class TextureLoader {
-  public:
-    virtual ~TextureLoader() {}
-    virtual IDirect3DTexture9* loadTexture(const std::wstring& path, IDirect3DDevice9*) = 0;
-  };
-
-  class TextureLoaderFromImageFile : public TextureLoader {
-    IDirect3DTexture9* loadTexture(const std::wstring& path, IDirect3DDevice9*) override;
-  };
-
-  struct SourcePos;
   class TextureCache {
   public:
     TextureCache(IDirect3DDevice9* d3DDevice);
     ~TextureCache();
-    void setLoader(const std::shared_ptr<TextureLoader>& loader);
     std::shared_ptr<Texture> load(const std::wstring& path, bool reserve, const std::shared_ptr<SourcePos>& srcPos);
     void loadInThread(const std::wstring& path, bool reserve, const std::shared_ptr<SourcePos>& srcPos);
+    void reload(const std::wstring& path, bool reserve, const std::shared_ptr<SourcePos>& srcPos);
     void removeReservedFlag(const std::wstring& path);
     void releaseUnusedTexture();
     // backdoor
     template <typename T>
-    void backDoor() const {} // NOTE: 排他制御忘れないように
+    void backDoor() {} // NOTE: 排他制御忘れないように
   private:
-    std::shared_ptr<Texture> execLoad(const std::wstring& uniqPath, bool reserve, const std::shared_ptr<SourcePos>& srcPos);
+    std::shared_ptr<Texture> getTexture(const std::wstring& uniqPath) const;
+    std::shared_ptr<Texture> loadFirst(const std::wstring& uniqPath, bool reserve, const std::shared_ptr<SourcePos>& srcPos);
     IDirect3DDevice9* d3DDevice;
     std::unordered_map<std::wstring, std::shared_ptr<Texture>> m_textureMap;
-    std::shared_ptr<TextureLoader> m_loader;
-    mutable std::mutex textureLoadSection; // lock1
-    mutable std::mutex memberAccessSection; // lock2 この順でlock
+    mutable std::recursive_mutex textureLoadSection; // lock1
+    mutable std::recursive_mutex memberAccessSection; // lock2 この順でlock
     std::unordered_map<std::wstring, std::thread> m_loadThreads;
   };
 

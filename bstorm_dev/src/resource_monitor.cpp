@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <imgui.h>
+#include <IconsFontAwesome_c.h>
 
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/util.hpp>
@@ -111,26 +112,33 @@ namespace bstorm {
   }
 
   template<>
-  void TextureCache::backDoor<ResourceMonitor>() const {
+  void TextureCache::backDoor<ResourceMonitor>() {
     static std::wstring selectedTexturePath;
     const float sideBarWidth = ImGui::GetContentRegionAvailWidth() * 0.2;
     ImGui::BeginChild("ResourceTextureTabSideBar", ImVec2(sideBarWidth, -1), true, ImGuiWindowFlags_HorizontalScrollbar);
     {
-      std::lock_guard<std::mutex> lock(memberAccessSection);
+      std::lock_guard<std::recursive_mutex> lock(memberAccessSection);
       for (const auto& entry : m_textureMap) {
         std::wstring path = entry.first;
-        const auto& texture = entry.second;
+        auto pathU8 = toUTF8(path);
+        ImGui::PushID(pathU8.c_str());
+        auto& texture = entry.second;
         ImGui::BeginGroup();
+        if (ImGui::Button(ICON_FA_REFRESH)) {
+          reload(path, texture->isReserved(), nullptr);
+        }
+        ImGui::SameLine();
         float iconWidth = std::min(sideBarWidth * 0.4f, 1.0f * texture->getWidth());
         float iconHeight = std::max(iconWidth / texture->getWidth() * texture->getHeight(), ImGui::GetTextLineHeight());
         if (ImGui::ImageButton(texture->getTexture(), ImVec2(iconWidth, iconHeight), ImVec2(0, 0), ImVec2(1, 1), 0, ImVec4(0, 0, 0, 1))) {
           selectedTexturePath = path;
         }
         ImGui::SameLine();
-        if (ImGui::Selectable(toUTF8(path).c_str(), selectedTexturePath == path)) {
+        if (ImGui::Selectable(pathU8.c_str(), selectedTexturePath == path)) {
           selectedTexturePath = path;
         }
         ImGui::EndGroup();
+        ImGui::PopID();
       }
       ImGui::EndChild();
       ImGui::SameLine();

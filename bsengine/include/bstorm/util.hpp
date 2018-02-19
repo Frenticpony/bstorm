@@ -30,6 +30,13 @@ namespace bstorm {
     }
   };
 
+  template <class T>
+  struct com_deleter {
+    void operator()(T* p) {
+      safe_release(p);
+    }
+  };
+
   template <UINT cp>
   std::string toMultiByte(const std::wstring& ws) {
     if (ws.empty()) return std::string();
