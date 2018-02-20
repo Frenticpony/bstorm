@@ -127,21 +127,21 @@ namespace bstorm {
   }
 
   static int RaiseError(lua_State* L) {
-    std::wstring msg = DnhValue::toString(L, 1);
+    std::string msg = DnhValue::toStringU8(L, 1);
     throw Log(Log::Level::LV_ERROR)
       .setMessage("RaiseError.")
-      .setParam(Log::Param(Log::Param::Tag::TEXT, toUTF8(msg)));
+      .setParam(Log::Param(Log::Param::Tag::TEXT, std::move(msg)));
     return 0;
   }
 
   static int assert(lua_State* L) {
     bool cond = DnhValue::toBool(L, 1);
-    std::wstring msg = DnhValue::toString(L, 2);
+    std::string msg = DnhValue::toStringU8(L, 2);
     lua_pop(L, 2);
     if (!cond) {
       throw Log(Log::Level::LV_ERROR)
         .setMessage("assertion failed.")
-        .setParam(Log::Param(Log::Param::Tag::TEXT, toUTF8(msg)));
+        .setParam(Log::Param(Log::Param::Tag::TEXT, std::move(msg)));
     }
     return 0;
   }
@@ -3240,10 +3240,10 @@ namespace bstorm {
   static int ObjShader_SetTechnique(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    std::wstring technique = DnhValue::toString(L, 2);
+    std::string technique = DnhValue::toStringU8(L, 2);
     lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjRender>(objId)) {
-      obj->setShaderTechnique(toUTF8(technique));
+      obj->setShaderTechnique(technique);
     }
     return 0;
   }
@@ -3251,14 +3251,14 @@ namespace bstorm {
   static int ObjShader_SetVector(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    std::wstring name = DnhValue::toString(L, 2);
+    std::string name = DnhValue::toStringU8(L, 2);
     double x = DnhValue::toNum(L, 3);
     double y = DnhValue::toNum(L, 4);
     double z = DnhValue::toNum(L, 5);
     double w = DnhValue::toNum(L, 6);
     lua_pop(L, 6);
     if (auto obj = engine->getObject<ObjRender>(objId)) {
-      obj->setShaderVector(toUTF8(name), x, y, z, w);
+      obj->setShaderVector(name, x, y, z, w);
     }
     return 0;
   }
@@ -3266,11 +3266,11 @@ namespace bstorm {
   static int ObjShader_SetFloat(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    std::wstring name = DnhValue::toString(L, 2);
+    std::string name = DnhValue::toStringU8(L, 2);
     double f = DnhValue::toNum(L, 3);
     lua_pop(L, 3);
     if (auto obj = engine->getObject<ObjRender>(objId)) {
-      obj->setShaderFloat(toUTF8(name), f);
+      obj->setShaderFloat(name, f);
     }
     return 0;
   }
@@ -3278,7 +3278,7 @@ namespace bstorm {
   static int ObjShader_SetFloatArray(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    std::wstring name = DnhValue::toString(L, 2);
+    std::string name = DnhValue::toStringU8(L, 2);
     auto value = DnhValue::get(L, 3);
     lua_pop(L, 3);
     if (auto obj = engine->getObject<ObjRender>(objId)) {
@@ -3288,7 +3288,7 @@ namespace bstorm {
         for (int i = 0; i < size; i++) {
           fs[i] = (float)floatArray->index(i)->toNum();
         }
-        obj->setShaderFloatArray(toUTF8(name), fs);
+        obj->setShaderFloatArray(name, fs);
       }
     }
     return 0;
@@ -3297,14 +3297,14 @@ namespace bstorm {
   static int ObjShader_SetTexture(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    std::wstring name = DnhValue::toString(L, 2);
+    std::string name = DnhValue::toStringU8(L, 2);
     std::wstring path = DnhValue::toString(L, 3);
     lua_pop(L, 3);
     if (auto obj = engine->getObject<ObjRender>(objId)) {
-      if (auto renderTarget = engine->getRenderTarget(name)) {
-        obj->setShaderTexture(toUTF8(name), renderTarget);
+      if (auto renderTarget = engine->getRenderTarget(toUnicode(name))) {
+        obj->setShaderTexture(name, renderTarget);
       } else {
-        obj->setShaderTexture(toUTF8(name), engine->loadTexture(path, false, getSourcePos(L)));
+        obj->setShaderTexture(name, engine->loadTexture(path, false, getSourcePos(L)));
       }
     }
     return 0;
