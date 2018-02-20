@@ -64,7 +64,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     auto dirPath = DnhValue::toString(L, 1);
     int scriptType = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     DnhArray pathList;
     for (const auto& info : engine->getScriptList(dirPath, scriptType, false)) {
       pathList.pushBack(std::make_unique<DnhArray>(info.path));
@@ -101,14 +100,12 @@ namespace bstorm {
   static int InstallFont(lua_State* L) {
     Engine* engine = getEngine(L);
     auto path = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     lua_pushboolean(L, engine->installFont(path, getSourcePos(L)));
     return 1;
   }
 
   static int ToString(lua_State* L) {
     auto str = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     DnhArray(str).push(L);
     return 1;
   }
@@ -137,7 +134,6 @@ namespace bstorm {
   static int assert(lua_State* L) {
     bool cond = DnhValue::toBool(L, 1);
     std::string msg = DnhValue::toStringU8(L, 2);
-    lua_pop(L, 2);
     if (!cond) {
       throw Log(Log::Level::LV_ERROR)
         .setMessage("assertion failed.")
@@ -150,7 +146,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     std::wstring key = DnhValue::toString(L, 1);
     auto value = DnhValue::get(L, 2);
-    lua_pop(L, 2);
     engine->setCommonData(key, std::move(value));
     return 0;
   }
@@ -159,7 +154,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     std::wstring key = DnhValue::toString(L, 1);
     auto defaultValue = DnhValue::get(L, 2);
-    lua_pop(L, 2);
     engine->getCommonData(key, std::move(defaultValue))->push(L);
     return 1;
   }
@@ -173,7 +167,6 @@ namespace bstorm {
   static int DeleteCommonData(lua_State* L) {
     Engine* engine = getEngine(L);
     std::wstring key = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     engine->deleteCommonData(key);
     return 0;
   }
@@ -183,7 +176,6 @@ namespace bstorm {
     std::wstring area = DnhValue::toString(L, 1);
     std::wstring key = DnhValue::toString(L, 2);
     auto value = DnhValue::get(L, 3);
-    lua_pop(L, 3);
     engine->setAreaCommonData(area, key, std::move(value));
     return 0;
   }
@@ -193,7 +185,6 @@ namespace bstorm {
     std::wstring area = DnhValue::toString(L, 1);
     std::wstring key = DnhValue::toString(L, 2);
     auto defaultValue = DnhValue::get(L, 3);
-    lua_pop(L, 3);
     engine->getAreaCommonData(area, key, std::move(defaultValue))->push(L);
     return 1;
   }
@@ -201,7 +192,6 @@ namespace bstorm {
   static int ClearAreaCommonData(lua_State* L) {
     Engine* engine = getEngine(L);
     std::wstring area = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     engine->clearAreaCommonData(area);
     return 0;
   }
@@ -210,7 +200,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     std::wstring area = DnhValue::toString(L, 1);
     std::wstring key = DnhValue::toString(L, 2);
-    lua_pop(L, 2);
     engine->deleteAreaCommonData(area, key);
     return 0;
   }
@@ -218,7 +207,6 @@ namespace bstorm {
   static int CreateCommonDataArea(lua_State* L) {
     Engine* engine = getEngine(L);
     std::wstring area = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     engine->createCommonDataArea(area);
     return 0;
   }
@@ -226,7 +214,6 @@ namespace bstorm {
   static int IsCommonDataAreaExists(lua_State* L) {
     Engine* engine = getEngine(L);
     std::wstring area = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     lua_pushboolean(L, engine->isCommonDataAreaExists(area));
     return 1;
   }
@@ -235,7 +222,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     std::wstring dst = DnhValue::toString(L, 1);
     std::wstring src = DnhValue::toString(L, 2);
-    lua_pop(L, 2);
     engine->copyCommonDataArea(dst, src);
     return 0;
   }
@@ -253,7 +239,6 @@ namespace bstorm {
   static int GetCommonDataValueKeyList(lua_State* L) {
     Engine* engine = getEngine(L);
     std::wstring area = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     DnhArray ret;
     for (const auto& key : engine->getCommonDataValueKeyList(area)) {
       ret.pushBack(std::make_unique<DnhArray>(key));
@@ -265,7 +250,6 @@ namespace bstorm {
   static int SaveCommonDataAreaA1(lua_State* L) {
     Engine* engine = getEngine(L);
     std::wstring area = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     lua_pushboolean(L, engine->saveCommonDataAreaA1(area));
     return 1;
   }
@@ -273,7 +257,6 @@ namespace bstorm {
   static int LoadCommonDataAreaA1(lua_State* L) {
     Engine* engine = getEngine(L);
     std::wstring area = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     lua_pushboolean(L, engine->loadCommonDataAreaA1(area));
     return 1;
   }
@@ -282,7 +265,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     std::wstring area = DnhValue::toString(L, 1);
     std::wstring saveFilePath = DnhValue::toString(L, 2);
-    lua_pop(L, 2);
     lua_pushboolean(L, engine->saveCommonDataAreaA2(area, saveFilePath));
     return 1;
   }
@@ -291,21 +273,18 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     std::wstring area = DnhValue::toString(L, 1);
     std::wstring saveFilePath = DnhValue::toString(L, 2);
-    lua_pop(L, 2);
     lua_pushboolean(L, engine->loadCommonDataAreaA2(area, saveFilePath));
     return 1;
   }
 
   static int SaveCommonDataAreaToReplayFile(lua_State* L) {
     Engine* engine = getEngine(L);
-    lua_pop(L, 1);
     lua_pushboolean(L, false);
     return 1;
   }
 
   static int LoadCommonDataAreaFromReplayFile(lua_State* L) {
     Engine* engine = getEngine(L);
-    lua_pop(L, 1);
     lua_pushboolean(L, false);
     return 1;
   }
@@ -313,7 +292,6 @@ namespace bstorm {
   static int LoadSound(lua_State* L) {
     Engine* engine = getEngine(L);
     auto path = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     engine->loadOrphanSound(path, getSourcePos(L));
     return 0;
   }
@@ -321,7 +299,6 @@ namespace bstorm {
   static int RemoveSound(lua_State* L) {
     Engine* engine = getEngine(L);
     auto path = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     engine->removeOrphanSound(path);
     return 0;
   }
@@ -331,7 +308,6 @@ namespace bstorm {
     auto path = DnhValue::toString(L, 1);
     double loopStartSec = DnhValue::toNum(L, 2);
     double loopEndSec = DnhValue::toNum(L, 3);
-    lua_pop(L, 3);
     engine->playBGM(path, loopStartSec, loopEndSec);
     return 0;
   }
@@ -339,7 +315,6 @@ namespace bstorm {
   static int PlaySE(lua_State* L) {
     Engine* engine = getEngine(L);
     auto path = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     engine->playSE(path);
     return 0;
   }
@@ -347,14 +322,13 @@ namespace bstorm {
   static int StopSound(lua_State* L) {
     Engine* engine = getEngine(L);
     auto path = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     engine->stopOrphanSound(path);
     return 0;
   }
 
   static int GetVirtualKeyState(lua_State* L) {
     Engine* engine = getEngine(L);
-    int vk = DnhValue::toInt(L, 1); lua_pop(L, 1);
+    int vk = DnhValue::toInt(L, 1);
     lua_pushnumber(L, engine->getVirtualKeyState(vk));
     return 1;
   }
@@ -363,7 +337,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int vk = DnhValue::toInt(L, 1);
     int state = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     engine->setVirtualKeyState(vk, state);
     return 0;
   }
@@ -373,7 +346,6 @@ namespace bstorm {
     int vk = DnhValue::toInt(L, 1);
     int k = DnhValue::toInt(L, 2);
     int btn = DnhValue::toInt(L, 3);
-    lua_pop(L, 3);
     engine->addVirtualKey(vk, k, btn);
     return 0;
   }
@@ -381,20 +353,19 @@ namespace bstorm {
   static int AddReplayTargetVirtualKey(lua_State* L) {
     // FUTURE : impl
     Engine* engine = getEngine(L);
-    lua_pop(L, 1);
     return 0;
   }
 
   static int GetKeyState(lua_State* L) {
     Engine* engine = getEngine(L);
-    int k = DnhValue::toInt(L, 1); lua_pop(L, 1);
+    int k = DnhValue::toInt(L, 1);
     lua_pushnumber(L, engine->getKeyState(k));
     return 1;
   }
 
   static int GetMouseState(lua_State* L) {
     Engine* engine = getEngine(L);
-    int btn = DnhValue::toInt(L, 1); lua_pop(L, 1);
+    int btn = DnhValue::toInt(L, 1);
     lua_pushnumber(L, engine->getMouseState(btn));
     return 1;
   }
@@ -419,14 +390,12 @@ namespace bstorm {
 
   static int SetSkipModeKey(lua_State* L) {
     // 廃止
-    lua_pop(L, 1);
     return 0;
   }
 
   static int CreateRenderTarget(lua_State* L) {
     Engine* engine = getEngine(L);
     std::wstring name = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     try {
       engine->createRenderTarget(name, 1024, 512, getSourcePos(L));
       lua_pushboolean(L, true);
@@ -445,7 +414,6 @@ namespace bstorm {
     int begin = DnhValue::toInt(L, 2);
     int end = DnhValue::toInt(L, 3);
     bool doClear = DnhValue::toBool(L, 4);
-    lua_pop(L, 4);
     engine->renderToTextureA1(name, begin, end, doClear);
     return 0;
   }
@@ -455,7 +423,6 @@ namespace bstorm {
     std::wstring name = DnhValue::toString(L, 1);
     int objId = DnhValue::toInt(L, 2);
     bool doClear = DnhValue::toBool(L, 3);
-    lua_pop(L, 3);
     engine->renderToTextureB1(name, objId, doClear);
     return 0;
   }
@@ -464,7 +431,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     std::wstring name = DnhValue::toString(L, 1);
     auto path = DnhValue::toString(L, 2);
-    lua_pop(L, 2);
     engine->saveRenderedTextureA1(name, path, getSourcePos(L));
     return 0;
   }
@@ -477,7 +443,6 @@ namespace bstorm {
     int t = DnhValue::toInt(L, 4);
     int r = DnhValue::toInt(L, 5);
     int b = DnhValue::toInt(L, 6);
-    lua_pop(L, 6);
     engine->saveRenderedTextureA2(name, path, l, t, r, b, getSourcePos(L));
     return 0;
   }
@@ -485,7 +450,6 @@ namespace bstorm {
   static int SaveSnapShotA1(lua_State* L) {
     Engine* engine = getEngine(L);
     auto path = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     engine->saveSnapShotA1(path, getSourcePos(L));
     return 0;
   }
@@ -497,7 +461,6 @@ namespace bstorm {
     int t = DnhValue::toInt(L, 3);
     int r = DnhValue::toInt(L, 4);
     int b = DnhValue::toInt(L, 5);
-    lua_pop(L, 5);
     engine->saveSnapShotA2(path, l, t, r, b, getSourcePos(L));
     return 0;
   }
@@ -506,7 +469,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int major = DnhValue::toInt(L, 1);
     int minor = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     lua_pushboolean(L, engine->isPixelShaderSupported(major, minor));
     return 1;
   }
@@ -516,7 +478,6 @@ namespace bstorm {
     int objId = DnhValue::toInt(L, 1);
     double begin = DnhValue::toNum(L, 2);
     double end = DnhValue::toNum(L, 3);
-    lua_pop(L, 3);
     if (auto obj = engine->getObject<ObjRender>(objId)) {
       engine->setShader((int)(begin * MAX_RENDER_PRIORITY), (int)(end * MAX_RENDER_PRIORITY), obj->getShader());
     }
@@ -528,7 +489,6 @@ namespace bstorm {
     int objId = DnhValue::toInt(L, 1);
     int begin = DnhValue::toInt(L, 2);
     int end = DnhValue::toInt(L, 3);
-    lua_pop(L, 3);
     if (auto obj = engine->getObject<ObjRender>(objId)) {
       engine->setShader(begin, end, obj->getShader());
     }
@@ -539,7 +499,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     double begin = DnhValue::toNum(L, 1);
     double end = DnhValue::toNum(L, 2);
-    lua_pop(L, 2);
     engine->resetShader((int)(begin * MAX_RENDER_PRIORITY), (int)(end * MAX_RENDER_PRIORITY));
     return 0;
   }
@@ -548,7 +507,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int begin = DnhValue::toInt(L, 1);
     int end = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     engine->resetShader(begin, end);
     return 0;
   }
@@ -556,7 +514,6 @@ namespace bstorm {
   static int LoadTextureInLoadThread(lua_State* L) {
     Engine* engine = getEngine(L);
     auto path = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     engine->loadTextureInThread(path, true, getSourcePos(L));
     return 0;
   }
@@ -568,7 +525,6 @@ namespace bstorm {
   static int RemoveTexture(lua_State* L) {
     Engine* engine = getEngine(L);
     auto path = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     engine->removeTextureReservedFlag(path);
     return 0;
   }
@@ -576,7 +532,6 @@ namespace bstorm {
   static int GetTextureWidth(lua_State* L) {
     Engine* engine = getEngine(L);
     std::wstring name = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     if (auto target = engine->getRenderTarget(name)) {
       lua_pushnumber(L, target->getWidth());
     } else {
@@ -595,7 +550,6 @@ namespace bstorm {
   static int GetTextureHeight(lua_State* L) {
     Engine* engine = getEngine(L);
     std::wstring name = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     if (auto target = engine->getRenderTarget(name)) {
       lua_pushnumber(L, target->getHeight());
     } else {
@@ -614,7 +568,6 @@ namespace bstorm {
   static int SetFogEnable(lua_State* L) {
     Engine* engine = getEngine(L);
     bool enable = DnhValue::toBool(L, 1);
-    lua_pop(L, 1);
     engine->setFogEnable(enable);
     return 0;
   }
@@ -626,7 +579,6 @@ namespace bstorm {
     int r = DnhValue::toInt(L, 3);
     int g = DnhValue::toInt(L, 4);
     int b = DnhValue::toInt(L, 5);
-    lua_pop(L, 5);
     engine->setFogParam(fogStart, fogEnd, r, g, b);
     return 0;
   }
@@ -641,7 +593,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int begin = DnhValue::toInt(L, 1);
     int end = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     engine->setInvalidRenderPriority(begin, end);
     return 0;
   }
@@ -649,7 +600,6 @@ namespace bstorm {
   static int GetReservedRenderTargetName(lua_State* L) {
     Engine* engine = getEngine(L);
     int n = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     DnhArray(engine->getReservedRenderTargetName(n)).push(L);
     return 1;
   }
@@ -658,7 +608,6 @@ namespace bstorm {
   static int SetCamera(lua_State* L) {
     Engine* engine = getEngine(L);
     double v = DnhValue::toNum(L, 1);
-    lua_pop(L, 1);
     (engine->*func)(v);
     return 0;
   }
@@ -672,7 +621,6 @@ namespace bstorm {
     double x = DnhValue::toNum(L, 1);
     double y = DnhValue::toNum(L, 2);
     double z = DnhValue::toNum(L, 3);
-    lua_pop(L, 3);
     engine->setCameraFocusXYZ(x, y, z);
     return 0;
   }
@@ -708,7 +656,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     double n = DnhValue::toNum(L, 1);
     double f = DnhValue::toNum(L, 2);
-    lua_pop(L, 2);
     engine->setCameraPerspectiveClip(n, f);
     return 0;
   }
@@ -717,7 +664,6 @@ namespace bstorm {
   static int Set2DCamera(lua_State* L) {
     Engine* engine = getEngine(L);
     float v = DnhValue::toNum(L, 1);
-    lua_pop(L, 1);
     (engine->*func)(v);
     return 0;
   }
@@ -752,7 +698,6 @@ namespace bstorm {
   static int LoadScript(lua_State* L) {
     Engine* engine = getEngine(L);
     std::wstring path = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     if (std::shared_ptr<Script> script = engine->loadScript(path, getScript(L)->getType(), SCRIPT_VERSION_PH3, getSourcePos(L))) {
       lua_pushnumber(L, (double)script->getID());
     }
@@ -762,7 +707,6 @@ namespace bstorm {
   static int LoadScriptInThread(lua_State* L) {
     Engine* engine = getEngine(L);
     std::wstring path = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     if (std::shared_ptr<Script> script = engine->loadScriptInThread(path, getScript(L)->getType(), SCRIPT_VERSION_PH3, getSourcePos(L))) {
       lua_pushnumber(L, (double)script->getID());
     }
@@ -772,7 +716,6 @@ namespace bstorm {
   static int StartScript(lua_State* L) {
     Engine* engine = getEngine(L);
     int scriptId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto script = engine->getScript(scriptId)) {
       script->start();
       script->runInitialize();
@@ -783,7 +726,6 @@ namespace bstorm {
   static int CloseScript(lua_State* L) {
     Engine* engine = getEngine(L);
     int scriptId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto script = engine->getScript(scriptId)) {
       script->close();
     }
@@ -793,7 +735,6 @@ namespace bstorm {
   static int IsCloseScript(lua_State* L) {
     Engine* engine = getEngine(L);
     int scriptId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto script = engine->getScript(scriptId)) {
       lua_pushboolean(L, script->isClosed());
     } else {
@@ -807,7 +748,6 @@ namespace bstorm {
     int scriptId = DnhValue::toInt(L, 1);
     int idx = DnhValue::toInt(L, 2);
     auto value = DnhValue::get(L, 3);
-    lua_pop(L, 3);
     if (auto script = engine->getScript(scriptId)) {
       script->setScriptArgument(idx, std::move(value));
     }
@@ -817,7 +757,6 @@ namespace bstorm {
   static int GetScriptArgument(lua_State* L) {
     Script* script = getScript(L);
     int idx = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     script->getScriptArgument(idx)->push(L);
     return 1;
   }
@@ -842,7 +781,6 @@ namespace bstorm {
     int b = DnhValue::toInt(L, 4);
     int priorityMin = DnhValue::toInt(L, 5);
     int priorityMax = DnhValue::toInt(L, 6);
-    lua_pop(L, 6);
     engine->setStgFrame(l, t, r, b);
     engine->reset2DCamera();
     engine->set2DCameraFocusX(engine->getStgFrameCenterWorldX());
@@ -861,7 +799,6 @@ namespace bstorm {
   static int AddScore(lua_State* L) {
     Engine* engine = getEngine(L);
     int64_t score = DnhValue::toNum(L, 1);
-    lua_pop(L, 1);
     engine->addScore(score);
     return 0;
   }
@@ -875,7 +812,6 @@ namespace bstorm {
   static int AddGraze(lua_State* L) {
     Engine* engine = getEngine(L);
     int64_t graze = DnhValue::toNum(L, 1);
-    lua_pop(L, 1);
     engine->addGraze(graze);
     return 0;
   }
@@ -889,7 +825,6 @@ namespace bstorm {
   static int AddPoint(lua_State* L) {
     Engine* engine = getEngine(L);
     int64_t point = DnhValue::toNum(L, 1);
-    lua_pop(L, 1);
     engine->addPoint(point);
     return 0;
   }
@@ -897,7 +832,6 @@ namespace bstorm {
   static int SetItemRenderPriorityI(lua_State *L) {
     Engine* engine = getEngine(L);
     int p = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     engine->setItemRenderPriority(p);
     return 0;
   }
@@ -905,7 +839,6 @@ namespace bstorm {
   static int SetShotRenderPriorityI(lua_State *L) {
     Engine* engine = getEngine(L);
     int p = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     engine->setShotRenderPriority(p);
     return 0;
   }
@@ -996,7 +929,6 @@ namespace bstorm {
   static int AddArchiveFile(lua_State* L) {
     // FUTURE : impl
     Engine* engine = getEngine(L);
-    lua_pop(L, 1);
     lua_pushboolean(L, false);
     return 1;
   }
@@ -1022,7 +954,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     double normalSpeed = DnhValue::toNum(L, 1);
     double slowSpeed = DnhValue::toNum(L, 2);
-    lua_pop(L, 2);
     if (auto player = engine->getPlayerObject()) {
       player->setNormalSpeed(normalSpeed);
       player->setSlowSpeed(slowSpeed);
@@ -1036,7 +967,6 @@ namespace bstorm {
     double top = DnhValue::toNum(L, 2);
     double right = DnhValue::toNum(L, 3);
     double bottom = DnhValue::toNum(L, 4);
-    lua_pop(L, 4);
     if (auto player = engine->getPlayerObject()) {
       player->setClip(left, top, right, bottom);
     }
@@ -1047,7 +977,6 @@ namespace bstorm {
   static int SetPlayerLife(lua_State* L) {
     Engine* engine = getEngine(L);
     double life = DnhValue::toNum(L, 1);
-    lua_pop(L, 1);
     if (auto player = engine->getPlayerObject()) {
       player->setLife(life);
     }
@@ -1057,7 +986,6 @@ namespace bstorm {
   static int SetPlayerSpell(lua_State* L) {
     Engine* engine = getEngine(L);
     double spell = DnhValue::toNum(L, 1);
-    lua_pop(L, 1);
     if (auto player = engine->getPlayerObject()) {
       player->setSpell(spell);
     }
@@ -1067,7 +995,6 @@ namespace bstorm {
   static int SetPlayerPower(lua_State* L) {
     Engine* engine = getEngine(L);
     double power = DnhValue::toNum(L, 1);
-    lua_pop(L, 1);
     if (auto player = engine->getPlayerObject()) {
       player->setPower(power);
     }
@@ -1077,7 +1004,6 @@ namespace bstorm {
   static int SetPlayerInvincibilityFrame(lua_State* L) {
     Engine* engine = getEngine(L);
     int frame = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto player = engine->getPlayerObject()) {
       player->setInvincibilityFrame(frame);
     }
@@ -1087,7 +1013,6 @@ namespace bstorm {
   static int SetPlayerDownStateFrame(lua_State* L) {
     Engine* engine = getEngine(L);
     int frame = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto player = engine->getPlayerObject()) {
       player->setDownStateFrame(frame);
     }
@@ -1097,7 +1022,6 @@ namespace bstorm {
   static int SetPlayerRebirthFrame(lua_State* L) {
     Engine* engine = getEngine(L);
     int frame = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto player = engine->getPlayerObject()) {
       player->setRebirthFrame(frame);
     }
@@ -1107,7 +1031,6 @@ namespace bstorm {
   static int SetPlayerRebirthLossFrame(lua_State* L) {
     Engine* engine = getEngine(L);
     int frame = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto player = engine->getPlayerObject()) {
       player->setRebirthLossFrame(frame);
     }
@@ -1117,7 +1040,6 @@ namespace bstorm {
   static int SetPlayerAutoItemCollectLine(lua_State* L) {
     Engine* engine = getEngine(L);
     double lineY = DnhValue::toNum(L, 1);
-    lua_pop(L, 1);
     if (auto player = engine->getPlayerObject()) {
       player->setAutoItemCollectLineY(lineY);
     }
@@ -1127,7 +1049,6 @@ namespace bstorm {
   static int SetForbidPlayerShot(lua_State* L) {
     Engine* engine = getEngine(L);
     bool forbid = DnhValue::toBool(L, 1);
-    lua_pop(L, 1);
     if (auto player = engine->getPlayerObject()) {
       player->setForbidPlayerShot(forbid);
     }
@@ -1137,7 +1058,6 @@ namespace bstorm {
   static int SetForbidPlayerSpell(lua_State* L) {
     Engine* engine = getEngine(L);
     bool forbid = DnhValue::toBool(L, 1);
-    lua_pop(L, 1);
     if (auto player = engine->getPlayerObject()) {
       player->setForbidPlayerSpell(forbid);
     }
@@ -1262,7 +1182,7 @@ namespace bstorm {
 
   static int GetAngleToPlayer(lua_State* L) {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1); lua_pop(L, 1);
+    int objId = DnhValue::toInt(L, 1);
     if (auto obj = engine->getObject<ObjRender>(objId)) {
       auto player = engine->getPlayerObject();
       double angle = !player ? 0 : D3DXToDegree(atan2(player->getMoveY() - obj->getY(), player->getMoveX() - obj->getX()));
@@ -1312,7 +1232,6 @@ namespace bstorm {
     double x = DnhValue::toNum(L, 1);
     double y = DnhValue::toNum(L, 2);
     int n = DnhValue::toInt(L, 3);
-    lua_pop(L, 3);
     auto enemies = engine->getObjectAll<ObjEnemy>();
     std::vector<Point2D> ps;
     getEnemyIntersectionPositionFromPoint(ps, enemies, Point2D((float)x, (float)y));
@@ -1375,7 +1294,6 @@ namespace bstorm {
   static int GetEnemyIntersectionPositionByIdA1(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     std::vector<Point2D> ps;
     if (auto obj = engine->getObject<ObjEnemy>(objId)) {
       getEnemyIntersectionPositionFromPoint(ps, { obj }, Point2D(obj->getX(), obj->getY()));
@@ -1389,7 +1307,6 @@ namespace bstorm {
     int objId = DnhValue::toInt(L, 1);
     float x = DnhValue::toNum(L, 2);
     float y = DnhValue::toNum(L, 3);
-    lua_pop(L, 3);
     std::vector<Point2D> ps;
     if (auto obj = engine->getObject<ObjEnemy>(objId)) {
       getEnemyIntersectionPositionFromPoint(ps, { obj }, Point2D(x, y));
@@ -1400,35 +1317,32 @@ namespace bstorm {
 
   static int LoadEnemyShotData(lua_State* L) {
     Engine* engine = getEngine(L);
-    std::wstring path = DnhValue::toString(L, 1); lua_pop(L, 1);
+    std::wstring path = DnhValue::toString(L, 1);
     engine->loadEnemyShotData(path, getSourcePos(L));
     return 0;
   }
 
   static int ReloadEnemyShotData(lua_State* L) {
     Engine* engine = getEngine(L);
-    std::wstring path = DnhValue::toString(L, 1); lua_pop(L, 1);
+    std::wstring path = DnhValue::toString(L, 1);
     engine->reloadEnemyShotData(path, getSourcePos(L));
     return 0;
   }
 
   static int atoi(lua_State* L) {
     auto str = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     lua_pushnumber(L, _wtoi64(str.c_str()));
     return 1;
   }
 
   static int ator(lua_State* L) {
     double r = DnhValue::toNum(L, 1);
-    lua_pop(L, 1);
     lua_pushnumber(L, r);
     return 1;
   }
 
   static int TrimString(lua_State* L) {
     auto str = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     trimSpace(str);
     DnhArray(str).push(L);
     return 1;
@@ -1437,7 +1351,6 @@ namespace bstorm {
   static int rtos(lua_State* L) {
     std::wstring format = DnhValue::toString(L, 1);
     double num = DnhValue::toNum(L, 2);
-    lua_pop(L, 2);
     std::vector<std::wstring> ss = split(format, L'.');
     int zeroCnt1 = 0;
     int zeroCnt2 = 0;
@@ -1460,7 +1373,6 @@ namespace bstorm {
   static int vtos(lua_State* L) {
     auto format = DnhValue::toString(L, 1);
     auto value = DnhValue::get(L, 2);
-    lua_pop(L, 2);
     std::remove_if(format.begin(), format.end(), [](const wchar_t& c) {
       switch (c) {
         case L'd': case L'f': case L's': case L'-': case L'.':
@@ -1489,7 +1401,6 @@ namespace bstorm {
   static int SplitString(lua_State* L) {
     auto str = DnhValue::toString(L, 1);
     auto delim = DnhValue::toString(L, 2);
-    lua_pop(L, 2);
     DnhArray arr;
     for (auto& s : split(str, delim)) {
       arr.pushBack(std::make_unique<DnhArray>(s));
@@ -1500,14 +1411,12 @@ namespace bstorm {
 
   static int GetFileDirectory(lua_State* L) {
     auto path = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     DnhArray(parentPath(path) + L"/").push(L);
     return 1;
   }
 
   static int GetFilePathList(lua_State* L) {
     auto dirPath = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     if (dirPath.empty()) {
       DnhArray(L"").push(L);
       return 1;
@@ -1530,7 +1439,6 @@ namespace bstorm {
 
   static int GetDirectoryList(lua_State* L) {
     auto dirPath = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     if (dirPath.empty()) {
       DnhArray(L"").push(L);
       return 1;
@@ -1555,7 +1463,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int target = DnhValue::toInt(L, 1);
     int behavior = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     engine->deleteShotAll(target, behavior);
     return 0;
   }
@@ -1567,7 +1474,6 @@ namespace bstorm {
     float x = DnhValue::toNum(L, 3);
     float y = DnhValue::toNum(L, 4);
     float r = DnhValue::toNum(L, 5);
-    lua_pop(L, 5);
     engine->deleteShotInCircle(target, behavior, x, y, r);
     return 0;
   }
@@ -1581,7 +1487,6 @@ namespace bstorm {
     double angle = DnhValue::toNum(L, 4);
     int graphic = DnhValue::toInt(L, 5);
     int delay = DnhValue::toInt(L, 6);
-    lua_pop(L, 6);
     if (auto shot = engine->createShotA1(x, y, speed, angle, graphic, delay, script->getType() == SCRIPT_TYPE_PLAYER)) {
       script->addAutoDeleteTargetObjectId(shot->getID());
       lua_pushnumber(L, shot->getID());
@@ -1602,7 +1507,6 @@ namespace bstorm {
     double maxSpeed = DnhValue::toNum(L, 6);
     int graphic = DnhValue::toInt(L, 7);
     int delay = DnhValue::toInt(L, 8);
-    lua_pop(L, 8);
     if (auto shot = engine->createShotA2(x, y, speed, angle, accel, maxSpeed, graphic, delay, script->getType() == SCRIPT_TYPE_PLAYER)) {
       script->addAutoDeleteTargetObjectId(shot->getID());
       lua_pushnumber(L, shot->getID());
@@ -1620,7 +1524,6 @@ namespace bstorm {
     double angle = DnhValue::toNum(L, 3);
     int graphic = DnhValue::toInt(L, 4);
     int delay = DnhValue::toInt(L, 5);
-    lua_pop(L, 5);
     if (auto shot = engine->createShotOA1(objId, speed, angle, graphic, delay, script->getType() == SCRIPT_TYPE_PLAYER)) {
       script->addAutoDeleteTargetObjectId(shot->getID());
       lua_pushnumber(L, shot->getID());
@@ -1639,7 +1542,6 @@ namespace bstorm {
     double speedY = DnhValue::toNum(L, 4);
     int graphic = DnhValue::toInt(L, 5);
     int delay = DnhValue::toInt(L, 6);
-    lua_pop(L, 6);
     if (auto shot = engine->createShotB1(x, y, speedX, speedY, graphic, delay, script->getType() == SCRIPT_TYPE_PLAYER)) {
       script->addAutoDeleteTargetObjectId(shot->getID());
       lua_pushnumber(L, shot->getID());
@@ -1662,7 +1564,6 @@ namespace bstorm {
     double maxSpeedY = DnhValue::toNum(L, 8);
     int graphic = DnhValue::toInt(L, 9);
     int delay = DnhValue::toInt(L, 10);
-    lua_pop(L, 10);
     if (auto shot = engine->createShotB2(x, y, speedX, speedY, accelX, accelY, maxSpeedX, maxSpeedY, graphic, delay, script->getType() == SCRIPT_TYPE_PLAYER)) {
       script->addAutoDeleteTargetObjectId(shot->getID());
       lua_pushnumber(L, shot->getID());
@@ -1680,7 +1581,6 @@ namespace bstorm {
     double speedY = DnhValue::toNum(L, 3);
     int graphic = DnhValue::toInt(L, 4);
     int delay = DnhValue::toInt(L, 5);
-    lua_pop(L, 5);
     if (auto shot = engine->createShotOB1(objId, speedX, speedY, graphic, delay, script->getType() == SCRIPT_TYPE_PLAYER)) {
       script->addAutoDeleteTargetObjectId(shot->getID());
       lua_pushnumber(L, shot->getID());
@@ -1701,7 +1601,6 @@ namespace bstorm {
     double laserWidth = DnhValue::toNum(L, 6);
     int graphic = DnhValue::toInt(L, 7);
     int delay = DnhValue::toInt(L, 8);
-    lua_pop(L, 8);
     if (auto laser = engine->createLooseLaserA1(x, y, speed, angle, laserLength, laserWidth, graphic, delay, script->getType() == SCRIPT_TYPE_PLAYER)) {
       script->addAutoDeleteTargetObjectId(laser->getID());
       lua_pushnumber(L, laser->getID());
@@ -1722,7 +1621,6 @@ namespace bstorm {
     int deleteFrame = DnhValue::toInt(L, 6);
     int graphic = DnhValue::toInt(L, 7);
     int delay = DnhValue::toInt(L, 8);
-    lua_pop(L, 8);
     if (auto laser = engine->createStraightLaserA1(x, y, angle, laserLength, laserWidth, deleteFrame, graphic, delay, script->getType() == SCRIPT_TYPE_PLAYER)) {
       script->addAutoDeleteTargetObjectId(laser->getID());
       lua_pushnumber(L, laser->getID());
@@ -1743,7 +1641,6 @@ namespace bstorm {
     double laserWidth = DnhValue::toNum(L, 6);
     int graphic = DnhValue::toInt(L, 7);
     int delay = DnhValue::toInt(L, 8);
-    lua_pop(L, 8);
     if (auto laser = engine->createCurveLaserA1(x, y, speed, angle, laserLength, laserWidth, graphic, delay, script->getType() == SCRIPT_TYPE_PLAYER)) {
       script->addAutoDeleteTargetObjectId(laser->getID());
       lua_pushnumber(L, laser->getID());
@@ -1758,7 +1655,6 @@ namespace bstorm {
     double x = DnhValue::toNum(L, 1);
     double y = DnhValue::toNum(L, 2);
     double r = DnhValue::toNum(L, 3);
-    lua_pop(L, 3);
     engine->setShotIntersectoinCicle(x, y, r);
     return 0;
   }
@@ -1770,7 +1666,6 @@ namespace bstorm {
     double x2 = DnhValue::toNum(L, 3);
     double y2 = DnhValue::toNum(L, 4);
     double width = DnhValue::toNum(L, 5);
-    lua_pop(L, 5);
     engine->setShotIntersectoinLine(x1, y1, x2, y2, width);
     return 0;
   }
@@ -1781,7 +1676,6 @@ namespace bstorm {
     double x = DnhValue::toNum(L, 1);
     double y = DnhValue::toNum(L, 2);
     double r = DnhValue::toNum(L, 3);
-    lua_pop(L, 3);
     DnhArray ids;
     for (auto& shot : engine->getShotInCircle(x, y, r, script->getType() == SCRIPT_TYPE_PLAYER ? TARGET_ENEMY : TARGET_PLAYER)) {
       if (shot) {
@@ -1798,7 +1692,6 @@ namespace bstorm {
     double y = DnhValue::toNum(L, 2);
     double r = DnhValue::toNum(L, 3);
     int target = DnhValue::toInt(L, 4);
-    lua_pop(L, 4);
     DnhArray ids;
     for (auto& shot : engine->getShotInCircle(x, y, r, target)) {
       if (shot) {
@@ -1811,7 +1704,7 @@ namespace bstorm {
 
   static int GetShotCount(lua_State* L) {
     Engine* engine = getEngine(L);
-    int target = DnhValue::toInt(L, 1); lua_pop(L, 1);
+    int target = DnhValue::toInt(L, 1);
     int cnt = 0;
     switch (target) {
       case TARGET_ALL:
@@ -1834,7 +1727,6 @@ namespace bstorm {
     double t = DnhValue::toNum(L, 2);
     double r = DnhValue::toNum(L, 3);
     double b = DnhValue::toNum(L, 4);
-    lua_pop(L, 4);
     engine->setShotAutoDeleteClip(l, t, r, b);
     return 0;
   }
@@ -1844,7 +1736,6 @@ namespace bstorm {
     int id = DnhValue::toInt(L, 1);
     bool isPlayerShot = DnhValue::toInt(L, 2) == TARGET_PLAYER;
     int infoType = DnhValue::toInt(L, 3);
-    lua_pop(L, 3);
     if (auto shotData = isPlayerShot ? engine->getPlayerShotData(id) : engine->getEnemyShotData(id)) {
       switch (infoType) {
         case INFO_RECT:
@@ -1884,7 +1775,6 @@ namespace bstorm {
   static int StartShotScript(lua_State* L) {
     Engine* engine = getEngine(L);
     auto path = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     engine->startShotScript(path, getSourcePos(L));
     return 0;
   }
@@ -1896,7 +1786,6 @@ namespace bstorm {
     double x = DnhValue::toNum(L, 2);
     double y = DnhValue::toNum(L, 3);
     int64_t score = DnhValue::toNum(L, 4);
-    lua_pop(L, 4);
     if (auto item = engine->createItemA1(type, x, y, score)) {
       script->addAutoDeleteTargetObjectId(item->getID());
       lua_pushnumber(L, item->getID());
@@ -1915,7 +1804,6 @@ namespace bstorm {
     double destX = DnhValue::toNum(L, 4);
     double destY = DnhValue::toNum(L, 5);
     int64_t score = DnhValue::toNum(L, 6);
-    lua_pop(L, 6);
     if (auto item = engine->createItemA2(type, x, y, destX, destY, score)) {
       script->addAutoDeleteTargetObjectId(item->getID());
       lua_pushnumber(L, item->getID());
@@ -1932,7 +1820,6 @@ namespace bstorm {
     double x = DnhValue::toNum(L, 2);
     double y = DnhValue::toNum(L, 3);
     int64_t score = DnhValue::toNum(L, 4);
-    lua_pop(L, 4);
     if (auto item = engine->createItemU1(itemDataId, x, y, score)) {
       script->addAutoDeleteTargetObjectId(item->getID());
       lua_pushnumber(L, item->getID());
@@ -1951,7 +1838,6 @@ namespace bstorm {
     double destX = DnhValue::toNum(L, 4);
     double destY = DnhValue::toNum(L, 5);
     int64_t score = DnhValue::toNum(L, 6);
-    lua_pop(L, 6);
     if (auto item = engine->createItemU2(itemDataId, x, y, destX, destY, score)) {
       script->addAutoDeleteTargetObjectId(item->getID());
       lua_pushnumber(L, item->getID());
@@ -1970,7 +1856,6 @@ namespace bstorm {
   static int CollectItemsByType(lua_State* L) {
     Engine* engine = getEngine(L);
     int type = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     engine->collectItemsByType(type);
     return 0;
   }
@@ -1980,7 +1865,6 @@ namespace bstorm {
     double x = DnhValue::toNum(L, 1);
     double y = DnhValue::toNum(L, 2);
     double r = DnhValue::toNum(L, 3);
-    lua_pop(L, 3);
     engine->collectItemsInCircle(x, y, r);
     return 0;
   }
@@ -1994,7 +1878,6 @@ namespace bstorm {
   static int StartItemScript(lua_State* L) {
     Engine* engine = getEngine(L);
     auto path = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     engine->startItemScript(path, getSourcePos(L));
     return 0;
   }
@@ -2002,7 +1885,6 @@ namespace bstorm {
   static int SetDefaultBonusItemEnable(lua_State* L) {
     Engine* engine = getEngine(L);
     bool enable = DnhValue::toBool(L, 1);
-    lua_pop(L, 1);
     engine->setDefaultBonusItemEnable(enable);
     return 0;
   }
@@ -2010,7 +1892,6 @@ namespace bstorm {
   static int LoadItemData(lua_State* L) {
     Engine* engine = getEngine(L);
     std::wstring path = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     engine->loadItemData(path, getSourcePos(L));
     return 0;
   }
@@ -2018,7 +1899,6 @@ namespace bstorm {
   static int ReloadItemData(lua_State* L) {
     Engine* engine = getEngine(L);
     std::wstring path = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     engine->reloadItemData(path, getSourcePos(L));
     return 0;
   }
@@ -2027,7 +1907,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
     int fps = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     engine->startSlow(fps, script->getType() == SCRIPT_TYPE_PLAYER);
     return 0;
   }
@@ -2035,7 +1914,6 @@ namespace bstorm {
   static int StopSlow(lua_State* L) {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
-    lua_pop(L, 1);
     engine->stopSlow(script->getType() == SCRIPT_TYPE_PLAYER);
     return 0;
   }
@@ -2049,7 +1927,6 @@ namespace bstorm {
     double cx = DnhValue::toNum(L, 6);
     double cy = DnhValue::toNum(L, 7);
     double r = DnhValue::toNum(L, 8);
-    lua_pop(L, 8);
     lua_pushboolean(L, isIntersectedLineCircle(x1, y1, x2, y2, width, cx, cy, r));
     return 1;
   }
@@ -2058,7 +1935,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId1 = DnhValue::toInt(L, 1);
     int objId2 = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     auto obj1 = engine->getObject<ObjCol>(objId1);
     auto obj2 = engine->getObject<ObjCol>(objId2);
     lua_pushboolean(L, obj1 && obj2 && obj1->isIntersected(obj2));
@@ -2069,7 +1945,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId1 = DnhValue::toInt(L, 1);
     int objId2 = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto obj1 = engine->getObject<ObjRender>(objId1)) {
       if (auto obj2 = engine->getObject<ObjRender>(objId2)) {
         float dx = obj1->getX() - obj2->getX();
@@ -2085,7 +1960,6 @@ namespace bstorm {
   static int GetObject2dPosition(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjRender>(objId)) {
       DnhArray(engine->get2DPosition(obj->getX(), obj->getY(), obj->getZ(), obj->isStgSceneObject())).push(L);
     } else {
@@ -2100,7 +1974,6 @@ namespace bstorm {
     float x = DnhValue::toNum(L, 1);
     float y = DnhValue::toNum(L, 2);
     float z = DnhValue::toNum(L, 3);
-    lua_pop(L, 3);
     DnhArray(engine->get2DPosition(x, y, z, script->isStgSceneScript())).push(L);
     return 1;
   }
@@ -2115,7 +1988,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
     auto result = DnhValue::get(L, 1);
-    lua_pop(L, 1);
     engine->setScriptResult(script->getID(), std::move(result));
     return 0;
   }
@@ -2123,14 +1995,12 @@ namespace bstorm {
   static int GetScriptResult(lua_State* L) {
     Engine* engine = getEngine(L);
     int scriptId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     engine->getScriptResult(scriptId)->push(L);
     return 1;
   }
 
   static int SetAutoDeleteObject(lua_State* L) {
     bool enable = DnhValue::toBool(L, 1);
-    lua_pop(L, 1);
     Script* script = getScript(L);
     script->setAutoDeleteObjectEnable(enable);
     return 0;
@@ -2141,7 +2011,6 @@ namespace bstorm {
     int scriptId = DnhValue::toInt(L, 1);
     int eventType = DnhValue::toInt(L, 2);
     auto arg = DnhValue::get(L, 3);
-    lua_pop(L, 3);
     if (auto script = engine->getScript(scriptId)) {
       auto args = std::make_unique<DnhArray>();
       args->pushBack(std::move(arg));
@@ -2154,7 +2023,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int eventType = DnhValue::toInt(L, 1);
     auto arg = DnhValue::get(L, 2);
-    lua_pop(L, 2);
     auto args = std::make_unique<DnhArray>();
     args->pushBack(std::move(arg));
     engine->notifyEventAll(eventType, args);
@@ -2165,7 +2033,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     auto path = DnhValue::toString(L, 1);
     int infoType = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     ScriptInfo info = engine->getScriptInfo(path, getSourcePos(L));
     switch (infoType) {
       case INFO_SCRIPT_TYPE:
@@ -2198,14 +2065,14 @@ namespace bstorm {
 
   static int Obj_Delete(lua_State* L) {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1); lua_pop(L, 1);
+    int objId = DnhValue::toInt(L, 1);
     engine->deleteObject(objId);
     return 0;
   }
 
   static int Obj_IsDeleted(lua_State* L) {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1); lua_pop(L, 1);
+    int objId = DnhValue::toInt(L, 1);
     lua_pushboolean(L, engine->isObjectDeleted(objId));
     return 1;
   }
@@ -2214,7 +2081,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     bool b = DnhValue::toBool(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjRender>(objId)) {
       obj->setVisible(b);
     }
@@ -2223,7 +2089,7 @@ namespace bstorm {
 
   static int Obj_IsVisible(lua_State* L) {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1); lua_pop(L, 1);
+    int objId = DnhValue::toInt(L, 1);
     auto obj = engine->getObject<ObjRender>(objId);
     lua_pushboolean(L, obj && obj->isVisible());
     return 1;
@@ -2233,7 +2099,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     double p = DnhValue::toNum(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjRender>(objId)) {
       engine->setObjectRenderPriority(obj, (int)(p * MAX_RENDER_PRIORITY));
     }
@@ -2244,7 +2109,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int p = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjRender>(objId)) {
       engine->setObjectRenderPriority(obj, p);
     }
@@ -2254,7 +2118,6 @@ namespace bstorm {
   static int Obj_GetRenderPriority(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     auto obj = engine->getObject<ObjRender>(objId);
     lua_pushnumber(L, obj ? 1.0 * obj->getRenderPriority() / MAX_RENDER_PRIORITY : 0);
     return 1;
@@ -2263,7 +2126,6 @@ namespace bstorm {
   static int Obj_GetRenderPriorityI(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     auto obj = engine->getObject<ObjRender>(objId);
     lua_pushnumber(L, obj ? obj->getRenderPriority() : 0);
     return 1;
@@ -2273,7 +2135,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     std::wstring key = DnhValue::toString(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<Obj>(objId)) {
       obj->getValue(key)->push(L);
       return 1;
@@ -2286,7 +2147,6 @@ namespace bstorm {
     int objId = DnhValue::toInt(L, 1);
     std::wstring key = DnhValue::toString(L, 2);
     auto defaultValue = DnhValue::get(L, 3);
-    lua_pop(L, 3);
     if (auto obj = engine->getObject<Obj>(objId)) {
       obj->getValueD(key, std::move(defaultValue))->push(L);
     } else {
@@ -2300,7 +2160,6 @@ namespace bstorm {
     int objId = DnhValue::toInt(L, 1);
     std::wstring key = DnhValue::toString(L, 2);
     auto value = DnhValue::get(L, 3);
-    lua_pop(L, 3);
     if (auto obj = engine->getObject<Obj>(objId)) {
       obj->setValue(key, std::move(value));
     }
@@ -2311,7 +2170,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     std::wstring key = DnhValue::toString(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<Obj>(objId)) {
       obj->deleteValue(key);
     }
@@ -2322,7 +2180,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     std::wstring key = DnhValue::toString(L, 2);
-    lua_pop(L, 2);
     auto obj = engine->getObject<Obj>(objId);
     lua_pushboolean(L, obj && obj->isValueExists(key));
     return 1;
@@ -2331,7 +2188,6 @@ namespace bstorm {
   static int Obj_GetType(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<Obj>(objId)) {
       lua_pushnumber(L, obj->getType());
     } else {
@@ -2345,7 +2201,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     float v = DnhValue::toNum(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjRender>(objId)) {
       ((obj.get())->*func)(v);
     }
@@ -2362,7 +2217,6 @@ namespace bstorm {
     double x = DnhValue::toNum(L, 2);
     double y = DnhValue::toNum(L, 3);
     double z = DnhValue::toNum(L, 4);
-    lua_pop(L, 4);
     if (auto obj = engine->getObject<ObjRender>(objId)) { obj->setPosition(x, y, z); }
     return 0;
   }
@@ -2377,7 +2231,6 @@ namespace bstorm {
     double rx = DnhValue::toNum(L, 2);
     double ry = DnhValue::toNum(L, 3);
     double rz = DnhValue::toNum(L, 4);
-    lua_pop(L, 4);
     if (auto obj = engine->getObject<ObjRender>(objId)) { obj->setAngleXYZ(rx, ry, rz); }
     return 0;
   }
@@ -2392,7 +2245,6 @@ namespace bstorm {
     double sx = DnhValue::toNum(L, 2);
     double sy = DnhValue::toNum(L, 3);
     double sz = DnhValue::toNum(L, 4);
-    lua_pop(L, 4);
     if (auto obj = engine->getObject<ObjRender>(objId)) { obj->setScaleXYZ(sx, sy, sz); }
     return 0;
   }
@@ -2403,7 +2255,6 @@ namespace bstorm {
     int r = DnhValue::toInt(L, 2);
     int g = DnhValue::toInt(L, 3);
     int b = DnhValue::toInt(L, 4);
-    lua_pop(L, 4);
     if (auto obj = engine->getObject<ObjRender>(objId)) {
       obj->setColor(r, g, b);
       // ObjPrimでObjSpriteList2Dでなければ全ての頂点に設定
@@ -2425,7 +2276,6 @@ namespace bstorm {
     int h = DnhValue::toInt(L, 2);
     int s = DnhValue::toInt(L, 3);
     int v = DnhValue::toInt(L, 4);
-    lua_pop(L, 4);
     if (auto obj = engine->getObject<ObjRender>(objId)) {
       obj->setColorHSV(h, s, v);
       // ObjPrimでObjSpriteList2Dでなければ全ての頂点に設定
@@ -2446,7 +2296,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int a = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjRender>(objId)) { obj->setAlpha(a); }
     if (auto obj = engine->getObject <ObjPrim>(objId)) {
       int vertexCnt = obj->getVertexCount();
@@ -2462,7 +2311,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int blendType = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjRender>(objId)) { obj->setBlendType(blendType); }
     return 0;
   }
@@ -2471,7 +2319,6 @@ namespace bstorm {
   static int ObjRender_Get(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     auto obj = engine->getObject<ObjRender>(objId);
     lua_pushnumber(L, obj ? ((obj.get())->*func)() : 0);
     return 1;
@@ -2490,7 +2337,6 @@ namespace bstorm {
   static int ObjRender_GetBlendType(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     auto obj = engine->getObject<ObjRender>(objId);
     lua_pushnumber(L, obj ? obj->getBlendType() : BLEND_NONE);
     return 1;
@@ -2500,7 +2346,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     bool enable = DnhValue::toBool(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjRender>(objId)) { obj->setZWrite(enable); }
     return 0;
   }
@@ -2509,7 +2354,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     bool enable = DnhValue::toBool(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjRender>(objId)) { obj->setZTest(enable); }
     return 0;
   }
@@ -2518,7 +2362,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     bool enable = DnhValue::toBool(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjRender>(objId)) { obj->setFogEnable(enable); }
     return 0;
   }
@@ -2527,20 +2370,18 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     bool enable = DnhValue::toBool(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjRender>(objId)) { obj->setPermitCamera(enable); }
     return 0;
   }
 
   static int ObjRender_SetCullingMode(lua_State* L) {
-    lua_pop(L, 2);
     return 0;
   }
 
   static int ObjPrim_Create(lua_State* L) {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
-    int type = DnhValue::toInt(L, 1); lua_pop(L, 1);
+    int type = DnhValue::toInt(L, 1);
     int objId = ID_INVALID;
     switch (type) {
       case OBJ_PRIMITIVE_2D:
@@ -2571,7 +2412,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int type = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjPrim>(objId)) {
       obj->setPrimitiveType(type);
     }
@@ -2582,7 +2422,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int cnt = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjPrim>(objId)) {
       obj->setVertexCount(cnt);
     }
@@ -2592,7 +2431,6 @@ namespace bstorm {
   static int ObjPrim_GetVertexCount(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     auto obj = engine->getObject<ObjPrim>(objId);
     lua_pushnumber(L, obj ? obj->getVertexCount() : 0);
     return 1;
@@ -2619,7 +2457,6 @@ namespace bstorm {
     double x = DnhValue::toNum(L, 3);
     double y = DnhValue::toNum(L, 4);
     double z = DnhValue::toNum(L, 5);
-    lua_pop(L, 5);
     if (auto obj = engine->getObject<ObjPrim>(objId)) {
       obj->setVertexPosition(vIdx, x, y, z);
     }
@@ -2630,7 +2467,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int vIdx = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     auto obj = engine->getObject<ObjPrim>(objId);
     float x = obj ? obj->getVertexPositionX(vIdx) : 0;
     float y = obj ? obj->getVertexPositionY(vIdx) : 0;
@@ -2649,7 +2485,6 @@ namespace bstorm {
     int vIdx = DnhValue::toInt(L, 2);
     double u = DnhValue::toNum(L, 3);
     double v = DnhValue::toNum(L, 4);
-    lua_pop(L, 4);
     if (auto obj = engine->getObject<ObjPrim>(objId)) { obj->setVertexUV(vIdx, u, v); }
     return 0;
   }
@@ -2660,7 +2495,6 @@ namespace bstorm {
     int vIdx = DnhValue::toInt(L, 2);
     double u = DnhValue::toNum(L, 3);
     double v = DnhValue::toNum(L, 4);
-    lua_pop(L, 4);
     if (auto obj = engine->getObject<ObjPrim>(objId)) { obj->setVertexUVT(vIdx, u, v); }
     return 0;
   }
@@ -2672,7 +2506,6 @@ namespace bstorm {
     int r = DnhValue::toInt(L, 3);
     int g = DnhValue::toInt(L, 4);
     int b = DnhValue::toInt(L, 5);
-    lua_pop(L, 5);
     if (auto obj = engine->getObject<ObjPrim>(objId)) { obj->setVertexColor(vIdx, r, g, b); }
     return 0;
   }
@@ -2682,7 +2515,6 @@ namespace bstorm {
     int objId = DnhValue::toInt(L, 1);
     int vIdx = DnhValue::toInt(L, 2);
     int a = DnhValue::toInt(L, 3);
-    lua_pop(L, 3);
     if (auto obj = engine->getObject<ObjPrim>(objId)) { obj->setVertexAlpha(vIdx, a); }
     return 0;
   }
@@ -2694,7 +2526,6 @@ namespace bstorm {
     double t = DnhValue::toNum(L, 3);
     double r = DnhValue::toNum(L, 4);
     double b = DnhValue::toNum(L, 5);
-    lua_pop(L, 5);
     if (auto obj = engine->getObject<ObjSprite2D>(objId)) {
       obj->setSourceRect(l, t, r, b);
     }
@@ -2708,7 +2539,6 @@ namespace bstorm {
     double t = DnhValue::toNum(L, 3);
     double r = DnhValue::toNum(L, 4);
     double b = DnhValue::toNum(L, 5);
-    lua_pop(L, 5);
     if (auto obj = engine->getObject<ObjSprite2D>(objId)) {
       obj->setDestRect(l, t, r, b);
     }
@@ -2717,7 +2547,7 @@ namespace bstorm {
 
   static int ObjSprite2D_SetDestCenter(lua_State* L) {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1); lua_pop(L, 1);
+    int objId = DnhValue::toInt(L, 1);
     if (auto obj = engine->getObject<ObjSprite2D>(objId)) {
       obj->setDestCenter();
     }
@@ -2731,7 +2561,6 @@ namespace bstorm {
     double t = DnhValue::toNum(L, 3);
     double r = DnhValue::toNum(L, 4);
     double b = DnhValue::toNum(L, 5);
-    lua_pop(L, 5);
     if (auto obj = engine->getObject<ObjSpriteList2D>(objId)) {
       obj->setSourceRect(l, t, r, b);
     }
@@ -2745,7 +2574,6 @@ namespace bstorm {
     double t = DnhValue::toNum(L, 3);
     double r = DnhValue::toNum(L, 4);
     double b = DnhValue::toNum(L, 5);
-    lua_pop(L, 5);
     if (auto obj = engine->getObject<ObjSpriteList2D>(objId)) {
       obj->setDestRect(l, t, r, b);
     }
@@ -2755,7 +2583,6 @@ namespace bstorm {
   static int ObjSpriteList2D_SetDestCenter(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjSpriteList2D>(objId)) {
       obj->setDestCenter();
     }
@@ -2765,7 +2592,6 @@ namespace bstorm {
   static int ObjSpriteList2D_AddVertex(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjSpriteList2D>(objId)) {
       obj->addVertex();
     }
@@ -2775,7 +2601,6 @@ namespace bstorm {
   static int ObjSpriteList2D_CloseVertex(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjSpriteList2D>(objId)) {
       obj->closeVertex();
     }
@@ -2785,7 +2610,6 @@ namespace bstorm {
   static int ObjSpriteList2D_ClearVertexCount(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjSpriteList2D>(objId)) {
       obj->clearVerexCount();
     }
@@ -2799,7 +2623,6 @@ namespace bstorm {
     double t = DnhValue::toNum(L, 3);
     double r = DnhValue::toNum(L, 4);
     double b = DnhValue::toNum(L, 5);
-    lua_pop(L, 5);
     if (auto obj = engine->getObject<ObjSprite3D>(objId)) {
       obj->setSourceRect(l, t, r, b);
     }
@@ -2813,7 +2636,6 @@ namespace bstorm {
     double t = DnhValue::toNum(L, 3);
     double r = DnhValue::toNum(L, 4);
     double b = DnhValue::toNum(L, 5);
-    lua_pop(L, 5);
     if (auto obj = engine->getObject<ObjSprite3D>(objId)) {
       obj->setDestRect(l, t, r, b);
     }
@@ -2827,7 +2649,6 @@ namespace bstorm {
     double t = DnhValue::toNum(L, 3);
     double r = DnhValue::toNum(L, 4);
     double b = DnhValue::toNum(L, 5);
-    lua_pop(L, 5);
     if (auto obj = engine->getObject<ObjSprite3D>(objId)) {
       obj->setSourceDestRect(l, t, r, b);
     }
@@ -2838,7 +2659,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     bool enable = DnhValue::toBool(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjSprite3D>(objId)) {
       obj->setBillboard(enable);
     }
@@ -2846,17 +2666,14 @@ namespace bstorm {
   }
 
   static int ObjTrajectory3D_SetComplementCount(lua_State* L) {
-    lua_pop(L, 2);
     return 0;
   }
 
   static int ObjTrajectory3D_SetAlphaVariation(lua_State* L) {
-    lua_pop(L, 2);
     return 0;
   }
 
   static int ObjTrajectory3D_SetInitialPoint(lua_State* L) {
-    lua_pop(L, 7);
     return 0;
   }
 
@@ -2877,7 +2694,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     auto path = DnhValue::toString(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjMesh>(objId)) {
       if (auto mesh = engine->loadMesh(path, getSourcePos(L))) {
         obj->setMesh(mesh);
@@ -2896,21 +2712,18 @@ namespace bstorm {
 
   static int ObjMesh_SetAnimation(lua_State* L) {
     // deprecated
-    lua_pop(L, 3);
     return 0;
   }
 
   static int ObjMesh_SetCoordinate2D(lua_State* L) {
     // FUTURE : impl
-    lua_pop(L, 2);
     return 0;
   }
 
   static int ObjMesh_GetPath(lua_State* L) {
     // deprecated
-    lua_pop(L, 1);
     lua_pushnumber(L, 0);
-    return 0;
+    return 1;
   }
 
   static int ObjText_Create(lua_State* L) {
@@ -2930,7 +2743,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     std::wstring text = DnhValue::toString(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjText>(objId)) {
       obj->setText(text);
     }
@@ -2941,7 +2753,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     std::wstring name = DnhValue::toString(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjText>(objId)) {
       obj->setFontName(name);
     }
@@ -2952,7 +2763,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int size = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjText>(objId)) {
       obj->setFontSize(size);
     }
@@ -2963,7 +2773,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     bool bold = DnhValue::toBool(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjText>(objId)) {
       obj->setFontBold(bold);
     }
@@ -2976,7 +2785,6 @@ namespace bstorm {
     int r = DnhValue::toInt(L, 2);
     int g = DnhValue::toInt(L, 3);
     int b = DnhValue::toInt(L, 4);
-    lua_pop(L, 4);
     if (auto obj = engine->getObject<ObjText>(objId)) {
       obj->setFontColorTop(r, g, b);
     }
@@ -2989,7 +2797,6 @@ namespace bstorm {
     int r = DnhValue::toInt(L, 2);
     int g = DnhValue::toInt(L, 3);
     int b = DnhValue::toInt(L, 4);
-    lua_pop(L, 4);
     if (auto obj = engine->getObject<ObjText>(objId)) {
       obj->setFontColorBottom(r, g, b);
     }
@@ -3000,7 +2807,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int width = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjText>(objId)) {
       obj->setFontBorderWidth(width);
     }
@@ -3011,7 +2817,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int t = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjText>(objId)) {
       obj->setFontBorderType(t);
     }
@@ -3024,7 +2829,6 @@ namespace bstorm {
     int r = DnhValue::toInt(L, 2);
     int g = DnhValue::toInt(L, 3);
     int b = DnhValue::toInt(L, 4);
-    lua_pop(L, 4);
     if (auto obj = engine->getObject<ObjText>(objId)) {
       obj->setFontBorderColor(r, g, b);
     }
@@ -3035,7 +2839,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int width = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjText>(objId)) {
       obj->setMaxWidth(width);
     }
@@ -3046,7 +2849,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int height = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjText>(objId)) {
       obj->setMaxHeight(height);
     }
@@ -3057,7 +2859,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int pitch = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjText>(objId)) {
       obj->setLinePitch(pitch);
     }
@@ -3068,7 +2869,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int pitch = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjText>(objId)) {
       obj->setSidePitch(pitch);
     }
@@ -3080,7 +2880,6 @@ namespace bstorm {
     int objId = DnhValue::toInt(L, 1);
     double x = DnhValue::toNum(L, 2);
     double y = DnhValue::toNum(L, 3);
-    lua_pop(L, 3);
     if (auto obj = engine->getObject<ObjText>(objId)) {
       obj->setTransCenter(x, y);
     }
@@ -3091,7 +2890,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     bool enable = DnhValue::toBool(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjText>(objId)) {
       obj->setAutoTransCenter(enable);
     }
@@ -3102,7 +2900,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int alignment = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjText>(objId)) {
       obj->setHorizontalAlignment(alignment);
     }
@@ -3113,7 +2910,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     bool enable = DnhValue::toBool(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjText>(objId)) {
       obj->setSyntacticAnalysis(enable);
     }
@@ -3123,7 +2919,6 @@ namespace bstorm {
   static int ObjText_GetTextLength(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     auto obj = engine->getObject<ObjText>(objId);
     lua_pushnumber(L, obj ? obj->getTextLength() : 0);
     return 1;
@@ -3132,7 +2927,6 @@ namespace bstorm {
   static int ObjText_GetTextLengthCU(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     auto obj = engine->getObject<ObjText>(objId);
     lua_pushnumber(L, obj ? obj->getTextLengthCU() : 0);
     return 1;
@@ -3141,7 +2935,6 @@ namespace bstorm {
   static int ObjText_GetTextLengthCUL(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjText>(objId)) {
       obj->generateFonts();
       auto cnts = obj->getTextLengthCUL();
@@ -3159,7 +2952,6 @@ namespace bstorm {
   static int ObjText_GetTotalWidth(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjText>(objId)) {
       obj->generateFonts();
       lua_pushnumber(L, obj->getTotalWidth());
@@ -3172,7 +2964,6 @@ namespace bstorm {
   static int ObjText_GetTotalHeight(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjText>(objId)) {
       obj->generateFonts();
       lua_pushnumber(L, obj->getTotalHeight());
@@ -3199,7 +2990,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     std::wstring path = DnhValue::toString(L, 2);
-    lua_pop(L, 2);
 
     if (auto obj = engine->getObject<ObjRender>(objId)) {
       auto shader = engine->createShader(path, false);
@@ -3219,7 +3009,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int shaderObjId = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjRender>(objId)) {
       auto shaderObj = engine->getObject<ObjRender>(shaderObjId);
       obj->setShaderO(shaderObj);
@@ -3230,7 +3019,6 @@ namespace bstorm {
   static int ObjShader_ResetShader(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjRender>(objId)) {
       obj->resetShader();
     }
@@ -3241,7 +3029,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     std::string technique = DnhValue::toStringU8(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjRender>(objId)) {
       obj->setShaderTechnique(technique);
     }
@@ -3256,7 +3043,6 @@ namespace bstorm {
     double y = DnhValue::toNum(L, 4);
     double z = DnhValue::toNum(L, 5);
     double w = DnhValue::toNum(L, 6);
-    lua_pop(L, 6);
     if (auto obj = engine->getObject<ObjRender>(objId)) {
       obj->setShaderVector(name, x, y, z, w);
     }
@@ -3268,7 +3054,6 @@ namespace bstorm {
     int objId = DnhValue::toInt(L, 1);
     std::string name = DnhValue::toStringU8(L, 2);
     double f = DnhValue::toNum(L, 3);
-    lua_pop(L, 3);
     if (auto obj = engine->getObject<ObjRender>(objId)) {
       obj->setShaderFloat(name, f);
     }
@@ -3280,7 +3065,6 @@ namespace bstorm {
     int objId = DnhValue::toInt(L, 1);
     std::string name = DnhValue::toStringU8(L, 2);
     auto value = DnhValue::get(L, 3);
-    lua_pop(L, 3);
     if (auto obj = engine->getObject<ObjRender>(objId)) {
       if (DnhArray* floatArray = dynamic_cast<DnhArray*>(value.get())) {
         size_t size = floatArray->getSize();
@@ -3299,7 +3083,6 @@ namespace bstorm {
     int objId = DnhValue::toInt(L, 1);
     std::string name = DnhValue::toStringU8(L, 2);
     std::wstring path = DnhValue::toString(L, 3);
-    lua_pop(L, 3);
     if (auto obj = engine->getObject<ObjRender>(objId)) {
       if (auto renderTarget = engine->getRenderTarget(toUnicode(name))) {
         obj->setShaderTexture(name, renderTarget);
@@ -3327,7 +3110,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     auto path = DnhValue::toString(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjSound>(objId)) {
       obj->setSound(nullptr);
       obj->setSound(engine->loadSound(path, getSourcePos(L)));
@@ -3338,7 +3120,6 @@ namespace bstorm {
   static int ObjSound_Play(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjSound>(objId)) {
       obj->play();
     }
@@ -3348,7 +3129,6 @@ namespace bstorm {
   static int ObjSound_Stop(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjSound>(objId)) {
       obj->stop();
     }
@@ -3359,7 +3139,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     float vol = DnhValue::toNum(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjSound>(objId)) {
       obj->setVolumeRate(vol);
     }
@@ -3370,7 +3149,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     float pan = DnhValue::toNum(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjSound>(objId)) {
       obj->setPanRate(pan);
     }
@@ -3381,7 +3159,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     float fade = DnhValue::toNum(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjSound>(objId)) {
       obj->setFade(fade);
     }
@@ -3392,7 +3169,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     bool enable = DnhValue::toBool(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjSound>(objId)) {
       obj->setLoopEnable(enable);
     }
@@ -3404,7 +3180,6 @@ namespace bstorm {
     int objId = DnhValue::toInt(L, 1);
     double start = (DWORD)DnhValue::toNum(L, 2);
     double end = (DWORD)DnhValue::toNum(L, 3);
-    lua_pop(L, 3);
     if (auto obj = engine->getObject<ObjSound>(objId)) {
       obj->setLoopTime(start, end);
     }
@@ -3416,7 +3191,6 @@ namespace bstorm {
     int objId = DnhValue::toInt(L, 1);
     DWORD start = (DWORD)DnhValue::toNum(L, 2);
     DWORD end = (DWORD)DnhValue::toNum(L, 3);
-    lua_pop(L, 3);
     if (auto obj = engine->getObject<ObjSound>(objId)) {
       obj->setLoopSampleCount(start, end);
     }
@@ -3427,7 +3201,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     bool enable = DnhValue::toBool(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjSound>(objId)) {
       obj->setRestartEnable(enable);
     }
@@ -3438,7 +3211,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int division = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjSound>(objId)) {
       obj->setSoundDivision(division == SOUND_SE ? ObjSound::SoundDivision::SE : ObjSound::SoundDivision::BGM);
     }
@@ -3448,7 +3220,6 @@ namespace bstorm {
   static int ObjSound_IsPlaying(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     auto obj = engine->getObject<ObjSound>(objId);
     lua_pushboolean(L, obj && obj->isPlaying());
     return 1;
@@ -3457,7 +3228,6 @@ namespace bstorm {
   static int ObjSound_GetVolumeRate(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     auto obj = engine->getObject<ObjSound>(objId);
     lua_pushnumber(L, obj ? obj->getVolumeRate() : 0);
     return 1;
@@ -3467,7 +3237,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
     int type = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     int objId = ID_INVALID;
     if (type == OBJ_FILE_TEXT) {
       objId = engine->createObjFileT()->getID();
@@ -3486,7 +3255,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     auto path = DnhValue::toString(L, 2);
-    lua_pop(L, 2);
     auto obj = engine->getObject<ObjFile>(objId);
     lua_pushboolean(L, obj && obj->open(path));
     return 1;
@@ -3496,7 +3264,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     auto path = DnhValue::toString(L, 2);
-    lua_pop(L, 2);
     auto obj = engine->getObject<ObjFile>(objId);
     lua_pushboolean(L, obj && obj->openNW(path));
     return 1;
@@ -3505,7 +3272,6 @@ namespace bstorm {
   static int ObjFile_Store(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjFile>(objId)) {
       obj->store();
     }
@@ -3515,7 +3281,6 @@ namespace bstorm {
   static int ObjFile_GetSize(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjFile>(objId)) {
       lua_pushnumber(L, obj->getSize());
     } else {
@@ -3527,7 +3292,6 @@ namespace bstorm {
   static int ObjFileT_GetLineCount(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjFileT>(objId)) {
       lua_pushnumber(L, obj->getLineCount());
     } else {
@@ -3540,7 +3304,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int lineNum = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjFileT>(objId)) {
       DnhArray(obj->getLineText(lineNum)).push(L);
     } else {
@@ -3554,7 +3317,6 @@ namespace bstorm {
     int objId = DnhValue::toInt(L, 1);
     int lineNum = DnhValue::toInt(L, 2);
     std::wstring delim = DnhValue::toString(L, 3);
-    lua_pop(L, 3);
     if (auto obj = engine->getObject<ObjFileT>(objId)) {
       DnhArray ret;
       for (const auto& s : obj->splitLineText(lineNum, delim)) {
@@ -3571,7 +3333,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     std::wstring line = DnhValue::toString(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjFileT>(objId)) {
       obj->addLine(line);
     }
@@ -3581,7 +3342,6 @@ namespace bstorm {
   static int ObjFileT_ClearLine(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjFileT>(objId)) {
       obj->clearLine();
     }
@@ -3592,7 +3352,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int endian = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjFileB>(objId)) {
       if (endian == ENDIAN_LITTLE) {
         obj->setByteOrder(false);
@@ -3606,7 +3365,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int code = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjFileB>(objId)) {
       switch (code) {
         case CODE_ACP:
@@ -3629,7 +3387,6 @@ namespace bstorm {
   static int ObjFileB_GetPointer(lua_State*L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjFileB>(objId)) {
       lua_pushnumber(L, obj->getPointer());
     } else {
@@ -3642,7 +3399,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int pos = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjFileB>(objId)) {
       obj->seek(pos);
     }
@@ -3652,7 +3408,6 @@ namespace bstorm {
   static int ObjFileB_ReadBoolean(lua_State*L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     auto obj = engine->getObject<ObjFileB>(objId);
     lua_pushboolean(L, obj && obj->readBoolean());
     return 1;
@@ -3661,7 +3416,6 @@ namespace bstorm {
   static int ObjFileB_ReadByte(lua_State*L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjFileB>(objId)) {
       lua_pushnumber(L, obj->readByte());
     } else {
@@ -3673,7 +3427,6 @@ namespace bstorm {
   static int ObjFileB_ReadShort(lua_State*L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjFileB>(objId)) {
       lua_pushnumber(L, obj->readShort());
     } else {
@@ -3685,7 +3438,6 @@ namespace bstorm {
   static int ObjFileB_ReadInteger(lua_State*L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjFileB>(objId)) {
       lua_pushnumber(L, obj->readInteger());
     } else {
@@ -3697,7 +3449,6 @@ namespace bstorm {
   static int ObjFileB_ReadLong(lua_State*L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjFileB>(objId)) {
       lua_pushnumber(L, obj->readLong());
     } else {
@@ -3709,7 +3460,6 @@ namespace bstorm {
   static int ObjFileB_ReadFloat(lua_State*L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjFileB>(objId)) {
       lua_pushnumber(L, obj->readFloat());
     } else {
@@ -3721,7 +3471,6 @@ namespace bstorm {
   static int ObjFileB_ReadDouble(lua_State*L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjFileB>(objId)) {
       lua_pushnumber(L, obj->readDouble());
     } else {
@@ -3734,7 +3483,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int size = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjFileB>(objId)) {
       DnhArray(obj->readString(size)).push(L);
     } else {
@@ -3748,7 +3496,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     float v = DnhValue::toNum(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjMove>(objId)) {
       ((obj.get())->*func)(v);
     }
@@ -3763,7 +3510,6 @@ namespace bstorm {
     int objId = DnhValue::toInt(L, 1);
     double x = DnhValue::toNum(L, 2);
     double y = DnhValue::toNum(L, 3);
-    lua_pop(L, 3);
     if (auto obj = engine->getObject<ObjMove>(objId)) {
       obj->setMovePosition(x, y);
     }
@@ -3782,7 +3528,6 @@ namespace bstorm {
     double x = DnhValue::toNum(L, 2);
     double y = DnhValue::toNum(L, 3);
     double speed = DnhValue::toNum(L, 4);
-    lua_pop(L, 4);
     if (auto obj = engine->getObject<ObjMove>(objId)) {
       obj->setDestAtSpeed(x, y, speed);
     }
@@ -3795,7 +3540,6 @@ namespace bstorm {
     double x = DnhValue::toNum(L, 2);
     double y = DnhValue::toNum(L, 3);
     int frame = DnhValue::toInt(L, 4);
-    lua_pop(L, 4);
     if (auto obj = engine->getObject<ObjMove>(objId)) {
       obj->setDestAtFrame(x, y, frame);
     }
@@ -3809,7 +3553,6 @@ namespace bstorm {
     double y = DnhValue::toNum(L, 3);
     double w = DnhValue::toNum(L, 4);
     double maxSpeed = DnhValue::toNum(L, 5);
-    lua_pop(L, 5);
     if (auto obj = engine->getObject<ObjMove>(objId)) {
       obj->setDestAtWeight(x, y, w, maxSpeed);
     }
@@ -3822,7 +3565,6 @@ namespace bstorm {
     int frame = DnhValue::toInt(L, 2);
     float speed = DnhValue::toNum(L, 3);
     float angle = DnhValue::toNum(L, 4);
-    lua_pop(L, 4);
     if (auto obj = engine->getObject<ObjMove>(objId)) {
       obj->addMovePattern(std::make_shared<MovePatternA>(frame, speed, angle, 0.0f, 0.0f, 0.0f, std::shared_ptr<ObjMove>(), std::shared_ptr<ShotData>()));
     }
@@ -3838,7 +3580,6 @@ namespace bstorm {
     float accel = DnhValue::toNum(L, 5);
     float angularVelocity = DnhValue::toNum(L, 6);
     float maxSpeed = DnhValue::toNum(L, 7);
-    lua_pop(L, 7);
     if (auto obj = engine->getObject<ObjMove>(objId)) {
       obj->addMovePattern(std::make_shared<MovePatternA>(frame, speed, angle, accel, angularVelocity, maxSpeed, std::shared_ptr<ObjMove>(), std::shared_ptr<ShotData>()));
     }
@@ -3855,7 +3596,6 @@ namespace bstorm {
     float angularVelocity = DnhValue::toNum(L, 6);
     float maxSpeed = DnhValue::toNum(L, 7);
     int shotDataId = DnhValue::toInt(L, 8);
-    lua_pop(L, 8);
     std::shared_ptr<ShotData> shotData;
     if (auto obj = engine->getObject<ObjShot>(objId)) {
       shotData = obj->isPlayerShot() ? engine->getPlayerShotData(shotDataId) : engine->getEnemyShotData(shotDataId);
@@ -3877,7 +3617,6 @@ namespace bstorm {
     float maxSpeed = DnhValue::toNum(L, 7);
     int baseObjId = DnhValue::toInt(L, 8);
     int shotDataId = DnhValue::toInt(L, 9);
-    lua_pop(L, 9);
     std::shared_ptr<ShotData> shotData;
     if (auto obj = engine->getObject<ObjShot>(objId)) {
       shotData = obj->isPlayerShot() ? engine->getPlayerShotData(shotDataId) : engine->getEnemyShotData(shotDataId);
@@ -3894,7 +3633,6 @@ namespace bstorm {
     int frame = DnhValue::toInt(L, 2);
     float speedX = DnhValue::toNum(L, 3);
     float speedY = DnhValue::toNum(L, 4);
-    lua_pop(L, 4);
     if (auto obj = engine->getObject<ObjMove>(objId)) {
       obj->addMovePattern(std::make_shared<MovePatternB>(frame, speedX, speedY, 0.0f, 0.0f, 0.0f, 0.0f, std::shared_ptr<ShotData>()));
     }
@@ -3911,7 +3649,6 @@ namespace bstorm {
     float accelY = DnhValue::toNum(L, 6);
     float maxSpeedX = DnhValue::toNum(L, 7);
     float maxSpeedY = DnhValue::toNum(L, 8);
-    lua_pop(L, 8);
     if (auto obj = engine->getObject<ObjMove>(objId)) {
       obj->addMovePattern(std::make_shared<MovePatternB>(frame, speedX, speedY, accelX, accelY, maxSpeedX, maxSpeedY, std::shared_ptr<ShotData>()));
     }
@@ -3929,7 +3666,6 @@ namespace bstorm {
     float maxSpeedX = DnhValue::toNum(L, 7);
     float maxSpeedY = DnhValue::toNum(L, 8);
     int shotDataId = DnhValue::toInt(L, 9);
-    lua_pop(L, 9);
     std::shared_ptr<ShotData> shotData;
     if (auto obj = engine->getObject<ObjShot>(objId)) {
       shotData = obj->isPlayerShot() ? engine->getPlayerShotData(shotDataId) : engine->getEnemyShotData(shotDataId);
@@ -3944,7 +3680,6 @@ namespace bstorm {
   static int ObjMove_Get(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     auto obj = engine->getObject<ObjMove>(objId);
     lua_pushnumber(L, obj ? ((obj.get())->*func)() : 0.0);
     return 1;
@@ -3958,7 +3693,7 @@ namespace bstorm {
   static int ObjEnemy_Create(lua_State* L) {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
-    int type = DnhValue::toInt(L, 1); lua_pop(L, 1);
+    int type = DnhValue::toInt(L, 1);
     int objId = ID_INVALID;
     if (type == OBJ_ENEMY) {
       if (auto enemy = engine->createObjEnemy()) {
@@ -3976,7 +3711,7 @@ namespace bstorm {
 
   static int ObjEnemy_Regist(lua_State* L) {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1); lua_pop(L, 1);
+    int objId = DnhValue::toInt(L, 1);
     if (auto obj = engine->getObject<ObjEnemy>(objId)) { obj->regist(); }
     return 0;
   }
@@ -3985,7 +3720,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int info = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     double ret = 0;
     if (auto obj = engine->getObject<ObjEnemy>(objId)) {
       if (info == INFO_LIFE) {
@@ -4006,7 +3740,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     double life = DnhValue::toNum(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjEnemy>(objId)) {
       obj->setLife(life);
     }
@@ -4017,7 +3750,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     double life = DnhValue::toNum(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjEnemy>(objId)) {
       obj->addLife(life);
     }
@@ -4029,7 +3761,6 @@ namespace bstorm {
     int objId = DnhValue::toInt(L, 1);
     double damageRateShot = DnhValue::toNum(L, 2);
     double damageRateSpell = DnhValue::toNum(L, 3);
-    lua_pop(L, 3);
     if (auto obj = engine->getObject<ObjEnemy>(objId)) {
       obj->setDamageRateShot(damageRateShot);
       obj->setDamageRateSpell(damageRateSpell);
@@ -4043,7 +3774,6 @@ namespace bstorm {
     double x = DnhValue::toNum(L, 2);
     double y = DnhValue::toNum(L, 3);
     double r = DnhValue::toNum(L, 4);
-    lua_pop(L, 4);
     if (auto obj = engine->getObject<ObjEnemy>(objId)) {
       obj->addTempIntersectionCircleToShot(x, y, r);
     }
@@ -4056,7 +3786,6 @@ namespace bstorm {
     double x = DnhValue::toNum(L, 2);
     double y = DnhValue::toNum(L, 3);
     double r = DnhValue::toNum(L, 4);
-    lua_pop(L, 4);
     if (auto obj = engine->getObject<ObjEnemy>(objId)) {
       obj->addTempIntersectionCircleToPlayer(x, y, r);
     }
@@ -4078,7 +3807,6 @@ namespace bstorm {
   static int ObjEnemyBossScene_Regist(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjEnemyBossScene>(objId)) {
       obj->regist(getSourcePos(L));
     }
@@ -4090,7 +3818,6 @@ namespace bstorm {
     int objId = DnhValue::toInt(L, 1);
     int step = DnhValue::toInt(L, 2);
     auto scriptPath = DnhValue::toString(L, 3);
-    lua_pop(L, 3);
     if (auto obj = engine->getObject<ObjEnemyBossScene>(objId)) {
       obj->add(step, scriptPath);
     }
@@ -4101,7 +3828,6 @@ namespace bstorm {
     // FUTURE : multi thread
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjEnemyBossScene>(objId)) {
       obj->loadInThread(getSourcePos(L));
     }
@@ -4112,7 +3838,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int info = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     auto obj = engine->getObject<ObjEnemyBossScene>(objId);
     switch (info) {
       case INFO_IS_SPELL:
@@ -4184,7 +3909,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int sec = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjEnemyBossScene>(objId)) {
       obj->setTimer(sec);
     }
@@ -4194,7 +3918,6 @@ namespace bstorm {
   static int ObjEnemyBossScene_StartSpell(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjEnemyBossScene>(objId)) {
       obj->startSpell();
     }
@@ -4206,7 +3929,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
     int shotType = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     int objId = ID_INVALID;
     bool isPlayerShot = script->getType() == SCRIPT_TYPE_PLAYER;
     switch (shotType) {
@@ -4230,7 +3952,7 @@ namespace bstorm {
 
   static int ObjShot_Regist(lua_State* L) {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1); lua_pop(L, 1);
+    int objId = DnhValue::toInt(L, 1);
     if (auto obj = engine->getObject<ObjShot>(objId)) {
       // NOTE : IsPermitPlayerShot == falseならregistしない, ObjShot_Registで作成したときのみ
       if (auto player = engine->getPlayerObject()) {
@@ -4247,7 +3969,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     bool autoDelete = DnhValue::toBool(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjShot>(objId)) { obj->setAutoDeleteEnable(autoDelete); }
     return 0;
   }
@@ -4255,7 +3976,6 @@ namespace bstorm {
   static int ObjShot_FadeDelete(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjShot>(objId)) { obj->fadeDelete(); }
     return 0;
   }
@@ -4264,7 +3984,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int deleteFrame = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjShot>(objId)) { obj->setDeleteFrame(deleteFrame); }
     return 0;
   }
@@ -4273,7 +3992,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     double damage = DnhValue::toNum(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjShot>(objId)) { obj->setDamage(damage); }
     return 0;
   }
@@ -4282,7 +4000,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int delay = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjShot>(objId)) { obj->setDelay(delay); }
     return 0;
   }
@@ -4291,7 +4008,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     bool spellResist = DnhValue::toBool(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjShot>(objId)) { obj->setSpellResist(spellResist); }
     return 0;
   }
@@ -4300,7 +4016,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int shotDataId = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjShot>(objId)) {
       if (obj->isPlayerShot()) {
         obj->setShotData(engine->getPlayerShotData(shotDataId));
@@ -4315,7 +4030,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int blendType = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjShot>(objId)) { obj->setSourceBlendType(blendType); }
     return 0;
   }
@@ -4324,7 +4038,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int penetration = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjShot>(objId)) { obj->setPenetration(penetration); }
     return 0;
   }
@@ -4333,7 +4046,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     bool eraseShot = DnhValue::toBool(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjShot>(objId)) { obj->setEraseShot(eraseShot); }
     return 0;
   }
@@ -4342,7 +4054,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     bool spellFactor = DnhValue::toBool(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjShot>(objId)) { obj->setSpellFactor(spellFactor); }
     return 0;
   }
@@ -4350,7 +4061,6 @@ namespace bstorm {
   static int ObjShot_ToItem(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjShot>(objId)) obj->toItem();
     return 0;
   }
@@ -4360,7 +4070,6 @@ namespace bstorm {
     int objId = DnhValue::toInt(L, 1);
     int addShotId = DnhValue::toInt(L, 2);
     int frame = DnhValue::toInt(L, 3);
-    lua_pop(L, 3);
     if (auto obj = engine->getObject<ObjShot>(objId)) obj->addShotA1(addShotId, frame);
     return 0;
   }
@@ -4372,7 +4081,6 @@ namespace bstorm {
     int frame = DnhValue::toInt(L, 3);
     float dist = DnhValue::toNum(L, 4);
     float angle = DnhValue::toNum(L, 5);
-    lua_pop(L, 5);
     if (auto obj = engine->getObject<ObjShot>(objId)) obj->addShotA2(addShotId, frame, dist, angle);
     return 0;
   }
@@ -4381,7 +4089,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     bool enable = DnhValue::toBool(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjShot>(objId)) obj->setIntersectionEnable(enable);
     return 0;
   }
@@ -4390,7 +4097,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     double r = DnhValue::toNum(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjShot>(objId)) obj->addTempIntersectionCircleA1(r);
     return 0;
   }
@@ -4401,7 +4107,6 @@ namespace bstorm {
     double x = DnhValue::toNum(L, 2);
     double y = DnhValue::toNum(L, 3);
     double r = DnhValue::toNum(L, 4);
-    lua_pop(L, 4);
     if (auto obj = engine->getObject<ObjShot>(objId)) obj->addTempIntersectionCircleA2(x, y, r);
     return 0;
   }
@@ -4414,7 +4119,6 @@ namespace bstorm {
     double x2 = DnhValue::toNum(L, 4);
     double y2 = DnhValue::toNum(L, 5);
     double width = DnhValue::toNum(L, 6);
-    lua_pop(L, 6);
     if (auto obj = engine->getObject<ObjShot>(objId)) obj->addTempIntersectionLine(x1, y1, x2, y2, width);
     return 0;
   }
@@ -4423,7 +4127,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     bool itemChange = DnhValue::toBool(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjShot>(objId)) obj->setItemChange(itemChange);
     return 0;
   }
@@ -4431,7 +4134,6 @@ namespace bstorm {
   static int ObjShot_GetDamage(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     auto obj = engine->getObject<ObjShot>(objId);
     lua_pushnumber(L, obj ? obj->getDamage() : 0);
     return 1;
@@ -4440,7 +4142,6 @@ namespace bstorm {
   static int ObjShot_GetPenetration(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     auto obj = engine->getObject<ObjShot>(objId);
     lua_pushnumber(L, obj ? obj->getPenetration() : 0);
     return 1;
@@ -4449,7 +4150,6 @@ namespace bstorm {
   static int ObjShot_GetDelay(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     auto obj = engine->getObject<ObjShot>(objId);
     lua_pushnumber(L, obj ? obj->getDelay() : 0);
     return 1;
@@ -4458,7 +4158,6 @@ namespace bstorm {
   static int ObjShot_IsSpellResist(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     auto obj = engine->getObject<ObjShot>(objId);
     lua_pushboolean(L, obj && obj->isSpellResistEnabled());
     return 1;
@@ -4467,7 +4166,6 @@ namespace bstorm {
   static int ObjShot_GetImageID(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjShot>(objId)) {
       if (const auto& shotData = obj->getShotData()) {
         lua_pushnumber(L, shotData->id);
@@ -4482,7 +4180,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     double length = DnhValue::toNum(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjLaser>(objId)) {
       obj->setLength(length);
     }
@@ -4493,7 +4190,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     double width = DnhValue::toNum(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjLaser>(objId)) {
       obj->setRenderWidth(width);
     }
@@ -4504,7 +4200,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     double width = DnhValue::toNum(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjLaser>(objId)) {
       obj->setIntersectionWidth(width);
     }
@@ -4515,7 +4210,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int frame = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjLaser>(objId)) {
       obj->setGrazeInvalidFrame(frame);
     }
@@ -4527,7 +4221,6 @@ namespace bstorm {
     int objId = DnhValue::toInt(L, 1);
     double head = DnhValue::toNum(L, 2);
     double tail = DnhValue::toNum(L, 3);
-    lua_pop(L, 3);
     if (auto obj = engine->getObject<ObjLooseLaser>(objId)) {
       obj->setInvalidLength(head, tail);
     }
@@ -4538,7 +4231,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     double dist = DnhValue::toNum(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjLaser>(objId)) {
       obj->setItemDistance(dist);
     }
@@ -4548,7 +4240,6 @@ namespace bstorm {
   static int ObjLaser_GetLength(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     auto obj = engine->getObject<ObjLaser>(objId);
     lua_pushnumber(L, obj ? obj->getLength() : 0);
     return 1;
@@ -4558,7 +4249,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     double angle = DnhValue::toNum(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjStLaser>(objId)) {
       obj->setLaserAngle(angle);
     }
@@ -4568,7 +4258,6 @@ namespace bstorm {
   static int ObjStLaser_GetAngle(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     auto obj = engine->getObject<ObjStLaser>(objId);
     lua_pushnumber(L, obj ? obj->getLaserAngle() : 0);
     return 1;
@@ -4578,7 +4267,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     bool source = DnhValue::toBool(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjStLaser>(objId)) {
       obj->setSource(source);
     }
@@ -4589,7 +4277,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     double decr = DnhValue::toNum(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjCrLaser>(objId)) {
       obj->setTipDecrement(decr);
     }
@@ -4600,7 +4287,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int itemDataId = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto item = engine->getObject<ObjItem>(objId)) {
       item->setItemData(engine->getItemData(objId));
     }
@@ -4611,7 +4297,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     bool enable = DnhValue::toBool(L, 2);
-    lua_pop(L, 2);
     if (auto item = engine->getObject<ObjItem>(objId)) {
       item->setRenderScoreEnable(enable);
     }
@@ -4622,7 +4307,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     bool enable = DnhValue::toBool(L, 2);
-    lua_pop(L, 2);
     if (auto item = engine->getObject<ObjItem>(objId)) {
       item->setAutoCollectEnable(enable);
     }
@@ -4633,7 +4317,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int pattern = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto item = engine->getObject<ObjItem>(objId)) {
       if (pattern == ITEM_MOVE_DOWN) {
         item->setMoveMode(std::make_shared<MoveModeItemDown>(2.5f));
@@ -4648,7 +4331,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     int info = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (auto item = engine->getObject<ObjItem>(objId)) {
       if (info == INFO_ITEM_SCORE) {
         lua_pushnumber(L, item->getScore());
@@ -4665,7 +4347,6 @@ namespace bstorm {
     double dy = DnhValue::toNum(L, 3);
     double r = DnhValue::toNum(L, 4);
     double dr = DnhValue::toNum(L, 5);
-    lua_pop(L, 5);
     if (auto obj = engine->getObject<ObjPlayer>(objId)) {
       obj->addIntersectionCircleA1(dx, dy, r, dr);
     }
@@ -4678,7 +4359,6 @@ namespace bstorm {
     double dx = DnhValue::toNum(L, 2);
     double dy = DnhValue::toNum(L, 3);
     double r = DnhValue::toNum(L, 4);
-    lua_pop(L, 4);
     if (auto obj = engine->getObject<ObjPlayer>(objId)) {
       obj->addIntersectionCircleA2(dx, dy, r);
     }
@@ -4688,7 +4368,6 @@ namespace bstorm {
   static int ObjPlayer_ClearIntersection(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     if (auto obj = engine->getObject<ObjPlayer>(objId)) {
       obj->clearIntersection();
     }
@@ -4698,7 +4377,6 @@ namespace bstorm {
   static int ObjCol_IsIntersected(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     auto obj = engine->getObject<ObjCol>(objId);
     lua_pushboolean(L, obj && obj->isIntersected());
     return 1;
@@ -4707,7 +4385,6 @@ namespace bstorm {
   static int ObjCol_GetListOfIntersectedEnemyID(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     DnhArray enemyIds;
     if (auto obj = engine->getObject<ObjCol>(objId)) {
       for (auto& isectP : obj->getCollideIntersections()) {
@@ -4727,7 +4404,6 @@ namespace bstorm {
   static int ObjCol_GetIntersectedCount(lua_State* L) {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     auto obj = engine->getObject<ObjCol>(objId);
     lua_pushnumber(L, obj ? obj->getIntersectedCount() : 0);
     return 1;
@@ -4744,14 +4420,13 @@ namespace bstorm {
   static int LoadPlayerShotData(lua_State* L) {
     Engine* engine = getEngine(L);
     std::wstring path = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     engine->loadPlayerShotData(path, getSourcePos(L));
     return 0;
   }
 
   static int ReloadPlayerShotData(lua_State* L) {
     Engine* engine = getEngine(L);
-    std::wstring path = DnhValue::toString(L, 1); lua_pop(L, 1);
+    std::wstring path = DnhValue::toString(L, 1);
     engine->reloadPlayerShotData(path, getSourcePos(L));
     return 0;
   }
@@ -4777,7 +4452,7 @@ namespace bstorm {
 
   static int ObjSpell_Regist(lua_State* L) {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1); lua_pop(L, 1);
+    int objId = DnhValue::toInt(L, 1);
     if (auto obj = engine->getObject<ObjSpell>(objId)) { obj->regist(); }
     return 0;
   }
@@ -4786,7 +4461,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     double damage = DnhValue::toNum(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjSpell>(objId)) { obj->setDamage(damage); }
     return 0;
   }
@@ -4795,7 +4469,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     bool eraseShot = DnhValue::toBool(L, 2);
-    lua_pop(L, 2);
     if (auto obj = engine->getObject<ObjSpell>(objId)) { obj->setEraseShotEnable(eraseShot); }
     return 0;
   }
@@ -4806,7 +4479,6 @@ namespace bstorm {
     double x = DnhValue::toNum(L, 2);
     double y = DnhValue::toNum(L, 3);
     double r = DnhValue::toNum(L, 4);
-    lua_pop(L, 4);
     if (auto obj = engine->getObject<ObjSpell>(objId)) {
       obj->addTempIntersectionCircle(x, y, r);
     }
@@ -4821,7 +4493,6 @@ namespace bstorm {
     double x2 = DnhValue::toNum(L, 4);
     double y2 = DnhValue::toNum(L, 5);
     double width = DnhValue::toNum(L, 6);
-    lua_pop(L, 6);
     if (auto obj = engine->getObject<ObjSpell>(objId)) {
       obj->addTempIntersectionLine(x1, y1, x2, y2, width);
     }
@@ -4831,7 +4502,6 @@ namespace bstorm {
   static int SetPauseScriptPath(lua_State* L) {
     Engine* engine = getEngine(L);
     auto path = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     engine->setPauseScriptPath(path);
     return 0;
   }
@@ -4839,7 +4509,6 @@ namespace bstorm {
   static int SetEndSceneScriptPath(lua_State* L) {
     Engine* engine = getEngine(L);
     auto path = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     engine->setEndSceneScriptPath(path);
     return 0;
   }
@@ -4847,7 +4516,6 @@ namespace bstorm {
   static int SetReplaySaveSceneScriptPath(lua_State* L) {
     Engine* engine = getEngine(L);
     auto path = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     engine->setReplaySaveSceneScriptPath(path);
     return 0;
   }
@@ -4862,7 +4530,6 @@ namespace bstorm {
     double damage = DnhValue::toNum(L, 5);
     int penetration = DnhValue::toInt(L, 6);
     int shotDataId = DnhValue::toInt(L, 7);
-    lua_pop(L, 7);
     if (auto shot = engine->createPlayerShotA1(x, y, speed, angle, damage, penetration, shotDataId)) {
       lua_pushnumber(L, shot->getID());
       script->addAutoDeleteTargetObjectId(shot->getID());
@@ -4882,7 +4549,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int targetEvent = DnhValue::toInt(L, 1);
     bool enable = DnhValue::toBool(L, 2);
-    lua_pop(L, 2);
     switch (targetEvent) {
       case EV_DELETE_SHOT_IMMEDIATE:
         engine->setDeleteShotImmediateEventOnShotScriptEnable(enable);
@@ -4924,7 +4590,6 @@ namespace bstorm {
   static int SetStageIndex(lua_State* L) {
     Engine* engine = getEngine(L);
     int idx = DnhValue::toInt(L, 1);
-    lua_pop(L, 1);
     engine->setStageIndex(idx);
     return 0;
   }
@@ -4932,7 +4597,6 @@ namespace bstorm {
   static int SetStageMainScript(lua_State* L) {
     Engine* engine = getEngine(L);
     auto path = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     engine->setStageMainScript(path, getSourcePos(L));
     return 0;
   }
@@ -4940,7 +4604,6 @@ namespace bstorm {
   static int SetStagePlayerScript(lua_State* L) {
     Engine* engine = getEngine(L);
     auto path = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     engine->setStagePlayerScript(path, getSourcePos(L));
     return 0;
   }
@@ -4948,7 +4611,6 @@ namespace bstorm {
   static int SetStageReplayFile(lua_State* L) {
     Engine* engine = getEngine(L);
     auto path = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     engine->setStageReplayFile(path);
     return 0;
   }
@@ -4968,7 +4630,6 @@ namespace bstorm {
   static int PauseStageScene(lua_State* L) {
     Engine* engine = getEngine(L);
     bool doPause = DnhValue::toBool(L, 1);
-    lua_pop(L, 1);
     engine->pauseStageScene(doPause);
     return 0;
   }
@@ -4995,7 +4656,6 @@ namespace bstorm {
     Engine* engine = getEngine(L);
     int idx = DnhValue::toInt(L, 1);
     int infoType = DnhValue::toInt(L, 2);
-    lua_pop(L, 2);
     if (idx >= 0 && idx < engine->getFreePlayerScriptCount()) {
       ScriptInfo info = engine->getFreePlayerScriptInfo(idx);
       switch (infoType) {
@@ -5039,27 +4699,23 @@ namespace bstorm {
 
   static int IsValidReplayIndex(lua_State* L) {
     // FUTURE : impl
-    lua_pop(L, 1);
     lua_pushboolean(L, false);
     return 1;
   }
 
   static int GetReplayInfo(lua_State* L) {
     // FUTURE : impl
-    lua_pop(L, 2);
     DnhArray(L"").push(L);
     return 1;
   }
 
   static int SetReplayInfo(lua_State* L) {
     // FUTURE : impl
-    lua_pop(L, 2);
     return 0;
   }
 
   static int SaveReplay(lua_State* L) {
     // FUTURE : impl
-    lua_pop(L, 2);
     return 0;
   }
 
@@ -5137,7 +4793,6 @@ namespace bstorm {
     lua_pushstring(L, key);
     lua_rawget(L, LUA_REGISTRYINDEX);
     void* p = lua_touserdata(L, -1);
-    lua_pop(L, 1);
     return p;
   }
 
@@ -5159,7 +4814,6 @@ namespace bstorm {
 
   int c_chartonum(lua_State* L) {
     std::wstring wstr = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     if (wstr.empty()) {
       lua_pushnumber(L, 0);
     } else {
@@ -5171,7 +4825,6 @@ namespace bstorm {
 
   int c_succchar(lua_State* L) {
     std::wstring wstr = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     if (wstr.empty()) {
       lua_pushstring(L, "");
     } else {
@@ -5185,7 +4838,6 @@ namespace bstorm {
 
   int c_predchar(lua_State* L) {
     std::wstring wstr = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
     if (wstr.empty()) {
       lua_pushstring(L, "");
     } else {
@@ -5199,7 +4851,6 @@ namespace bstorm {
 
   int __c_raiseerror(lua_State* L) {
     std::string msg = lua_tostring(L, 1);
-    lua_pop(L, 1);
     throw Log(Log::Level::LV_ERROR).setMessage(msg);
     return 0;
   }
