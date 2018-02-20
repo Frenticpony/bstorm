@@ -107,7 +107,12 @@ namespace bstorm {
     return version;
   }
 
-  void Script::close() { state = State::SCRIPT_CLOSED; }
+  void Script::close() {
+    std::lock_guard<std::recursive_mutex> lock(compileSection);
+    if (state != State::SCRIPT_COMPILE_FAILED) {
+      state = State::SCRIPT_CLOSED;
+    }
+  }
 
   bool Script::isClosed() const {
     return state == State::SCRIPT_CLOSED;
