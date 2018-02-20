@@ -1116,8 +1116,13 @@ namespace bstorm {
   }
 
   std::shared_ptr<Script> Engine::loadScript(const std::wstring & path, const std::wstring & type, const std::wstring & version, const std::shared_ptr<SourcePos>& srcPos) {
-    auto script = gameState->scriptManager->newScript(path, type, version, srcPos);
-    script->runLoading();
+    auto script = gameState->scriptManager->compile(path, type, version, srcPos);
+    script->load();
+    return script;
+  }
+
+  std::shared_ptr<Script> Engine::loadScriptInThread(const std::wstring & path, const std::wstring & type, const std::wstring & version, const std::shared_ptr<SourcePos>& srcPos) {
+    auto script = gameState->scriptManager->compileInThread(path, type, version, srcPos);
     return script;
   }
 
@@ -1361,6 +1366,7 @@ namespace bstorm {
     }
     auto shotScript = loadScript(path, SCRIPT_TYPE_SHOT_CUSTOM, gameState->stageMainScriptInfo.version, srcPos);
     gameState->shotScript = shotScript;
+    shotScript->start();
     shotScript->runInitialize();
   }
 
@@ -1483,6 +1489,7 @@ namespace bstorm {
     }
     auto itemScript = loadScript(path, SCRIPT_TYPE_ITEM_CUSTOM, gameState->stageMainScriptInfo.version, srcPos);
     gameState->itemScript = itemScript;
+    itemScript->start();
     itemScript->runInitialize();
   }
 
@@ -1532,9 +1539,9 @@ namespace bstorm {
     }
     gameState->packageStartTime = std::make_shared<TimePoint>();
     Logger::WriteLog(Log::Level::LV_INFO, "start package.");
-    auto script = gameState->scriptManager->newScript(gameState->packageMainScriptInfo.path, SCRIPT_TYPE_PACKAGE, gameState->packageMainScriptInfo.version, nullptr);
+    auto script = gameState->scriptManager->compile(gameState->packageMainScriptInfo.path, SCRIPT_TYPE_PACKAGE, gameState->packageMainScriptInfo.version, nullptr);
     gameState->packageMainScript = script;
-    script->runLoading();
+    script->start();
     script->runInitialize();
   }
 
@@ -1689,8 +1696,8 @@ namespace bstorm {
     }
 
     // #System
-    auto systemScript = gameState->scriptManager->newScript(gameState->stageMainScriptInfo.systemPath, SCRIPT_TYPE_STAGE, gameState->stageMainScriptInfo.version, srcPos);
-    systemScript->runLoading();
+    auto systemScript = gameState->scriptManager->compile(gameState->stageMainScriptInfo.systemPath, SCRIPT_TYPE_STAGE, gameState->stageMainScriptInfo.version, srcPos);
+    systemScript->start();
     systemScript->runInitialize();
 
     // Player
@@ -1702,9 +1709,9 @@ namespace bstorm {
     gameState->objLayerList->setRenderPriority(player, DEFAULT_PLAYER_RENDER_PRIORITY);
     gameState->playerObj = player;
 
-    auto playerScript = gameState->scriptManager->newScript(gameState->stagePlayerScriptInfo.path, SCRIPT_TYPE_PLAYER, gameState->stagePlayerScriptInfo.version, srcPos);
+    auto playerScript = gameState->scriptManager->compile(gameState->stagePlayerScriptInfo.path, SCRIPT_TYPE_PLAYER, gameState->stagePlayerScriptInfo.version, srcPos);
     gameState->stagePlayerScript = playerScript;
-    playerScript->runLoading();
+    playerScript->start();
     playerScript->runInitialize();
 
     // Main
@@ -1714,16 +1721,16 @@ namespace bstorm {
     } else if (gameState->stageMainScriptInfo.type == SCRIPT_TYPE_PLURAL) {
       stageMainScriptPath = SYSTEM_PLURAL_STAGE_PATH;
     }
-    auto stageMainScript = gameState->scriptManager->newScript(stageMainScriptPath, SCRIPT_TYPE_STAGE, gameState->stageMainScriptInfo.version, srcPos);
+    auto stageMainScript = gameState->scriptManager->compile(stageMainScriptPath, SCRIPT_TYPE_STAGE, gameState->stageMainScriptInfo.version, srcPos);
     gameState->stageMainScript = stageMainScript;
-    stageMainScript->runLoading();
+    stageMainScript->start();
     stageMainScript->runInitialize();
     gameState->stageStartTime = std::make_shared<TimePoint>();
 
     // #Background
     if (!gameState->stageMainScriptInfo.backgroundPath.empty() && gameState->stageMainScriptInfo.backgroundPath != L"DEFAULT") {
-      auto backgroundScript = gameState->scriptManager->newScript(gameState->stageMainScriptInfo.backgroundPath, SCRIPT_TYPE_STAGE, gameState->stageMainScriptInfo.version, srcPos);
-      backgroundScript->runLoading();
+      auto backgroundScript = gameState->scriptManager->compile(gameState->stageMainScriptInfo.backgroundPath, SCRIPT_TYPE_STAGE, gameState->stageMainScriptInfo.version, srcPos);
+      backgroundScript->start();
       backgroundScript->runInitialize();
     }
 

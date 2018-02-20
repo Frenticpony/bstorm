@@ -295,6 +295,7 @@ namespace bstorm {
     /* script */
     std::shared_ptr<Script> getScript(int scriptId) const;
     std::shared_ptr<Script> loadScript(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<SourcePos>& srcPos);
+    std::shared_ptr<Script> loadScriptInThread(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<SourcePos>& srcPos);
     void closeStgScene();
     void notifyEventAll(int eventType);
     void notifyEventAll(int eventType, const std::unique_ptr<DnhArray>& args);

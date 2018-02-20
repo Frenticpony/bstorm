@@ -26,13 +26,94 @@ namespace bstorm {
     L(NULL),
     path(canonicalPath(p)),
     type(type),
+    version(version),
     id(id),
+    compileSrcPos(srcPos),
     state(State::SCRIPT_NOT_COMPILED),
     luaStateBusy(false),
     stgSceneScript(type != SCRIPT_TYPE_PACKAGE),
     autoDeleteObjectEnable(false),
     engine(engine)
   {
+  }
+
+  Script::~Script() {
+    if (state != State::SCRIPT_NOT_COMPILED && state != State::SCRIPT_COMPILE_FAILED) {
+      runBuiltInSub("Finalize");
+
+      if (autoDeleteObjectEnable) {
+        for (auto objId : autoDeleteTargetObjIds) {
+          engine->deleteObject(objId);
+        }
+      }
+
+      Logger::WriteLog(std::move(
+        Log(Log::Level::LV_INFO)
+        .setMessage("release script.")
+        .setParam(Log::Param(Log::Param(Log::Param::Tag::SCRIPT, path)))));
+    }
+    if (L) lua_close(L);
+  }
+
+  Script::State Script::getState() const { return state; }
+
+  void Script::compile() {
+    std::lock_guard<std::recursive_mutex> lock(compileSection);
+    if (state == State::SCRIPT_NOT_COMPILED) {
+      try {
+        execCompile();
+      } catch (...) {
+        state = State::SCRIPT_COMPILE_FAILED;
+        throw;
+      }
+      state = State::SCRIPT_COMPILED;
+    }
+  }
+
+  void Script::compileInThread() {
+    std::lock_guard<std::recursive_mutex> lock(compileSection);
+    if (state == State::SCRIPT_NOT_COMPILED) {
+      std::thread compileThread([this]() {
+        std::lock_guard<std::recursive_mutex> lock(compileSection);
+        try {
+          execCompile();
+          state = State::SCRIPT_COMPILED;
+        } catch (Log& log) {
+          // LoadScriptInThreadの場合はScript内でエラーをキャッチできないのでここでsrcPosをセット
+          log.addSourcePos(compileSrcPos);
+          saveError(std::current_exception());
+          state = State::SCRIPT_COMPILE_FAILED;
+        } catch (...) {
+          state = State::SCRIPT_COMPILE_FAILED;
+        }
+      });
+      compileThread.detach();
+    }
+  }
+
+  int Script::getID() const {
+    return id;
+  }
+
+  const std::wstring & Script::getPath() const {
+    return path;
+  }
+
+  const std::wstring& Script::getType() const {
+    return type;
+  }
+
+  const std::wstring & Script::getVersion() const {
+    return version;
+  }
+
+  void Script::close() { state = State::SCRIPT_CLOSED; }
+
+  bool Script::isClosed() const {
+    return state == State::SCRIPT_CLOSED;
+  }
+
+  void Script::execCompile() {
     try {
       L = lua_open();
       // Lua標準API登録
@@ -67,14 +148,14 @@ namespace bstorm {
           Log(Log::Level::LV_DETAIL)
           .setMessage("parse start...")
           .setParam(Log::Param(Log::Param::Tag::SCRIPT, path))
-          .addSourcePos(srcPos)));
+          .addSourcePos(compileSrcPos)));
         TimePoint tp;
         program = parseDnhScript(path, globalEnv, true, std::make_shared<FileLoaderFromTextFile>());
         Logger::WriteLog(std::move(
           Log(Log::Level::LV_DETAIL)
           .setMessage("...parse complete " + std::to_string(tp.getElapsedMilliSec()) + " [ms].")
           .setParam(Log::Param(Log::Param::Tag::SCRIPT, path))
-          .addSourcePos(srcPos)));
+          .addSourcePos(compileSrcPos)));
       }
 
       // 静的エラー検査
@@ -98,14 +179,14 @@ namespace bstorm {
           Log(Log::Level::LV_DETAIL)
           .setMessage("codegen start...")
           .setParam(Log::Param(Log::Param::Tag::SCRIPT, path))
-          .addSourcePos(srcPos)));
+          .addSourcePos(compileSrcPos)));
         TimePoint tp;
         codeGen.generate(*program);
         Logger::WriteLog(std::move(
           Log(Log::Level::LV_DETAIL)
           .setMessage("...codegen complete " + std::to_string(tp.getElapsedMilliSec()) + " [ms].")
           .setParam(Log::Param(Log::Param::Tag::SCRIPT, path))
-          .addSourcePos(srcPos)));
+          .addSourcePos(compileSrcPos)));
         srcMap = codeGen.getSourceMap();
       }
 
@@ -119,7 +200,7 @@ namespace bstorm {
           Log(Log::Level::LV_DETAIL)
           .setMessage("compile start...")
           .setParam(Log::Param(Log::Param::Tag::SCRIPT, path))
-          .addSourcePos(srcPos)));
+          .addSourcePos(compileSrcPos)));
         TimePoint tp;
         int hasCompileError = luaL_loadstring(L, codeGen.getCode());
         if (hasCompileError) {
@@ -137,58 +218,28 @@ namespace bstorm {
             throw err;
           } else {
             throw Log(Log::Level::LV_ERROR)
-              .setMessage("unexpected compile error occured, please send a bug report.")
-              .setParam(Log::Param(Log::Param::Tag::TEXT, msg));
+              .setMessage("unexpected compile error occured, please send a bug report. (" + msg + ")")
+              .setParam(Log::Param(Log::Param::Tag::SCRIPT, path));
           }
         }
         Logger::WriteLog(std::move(
           Log(Log::Level::LV_DETAIL)
           .setMessage("...compile complete " + std::to_string(tp.getElapsedMilliSec()) + " [ms].")
           .setParam(Log::Param(Log::Param::Tag::SCRIPT, path))
-          .addSourcePos(srcPos)));
+          .addSourcePos(compileSrcPos)));
       }
-      // グローバル領域のコード実行
-      callLuaChunk();
-      state = State::SCRIPT_COMPILED;
     } catch (...) {
-      if (L) lua_close(L);
+      if (L) {
+        lua_close(L);
+        L = NULL;
+      }
+      saveError(std::current_exception());
       throw;
     }
   }
 
-  Script::~Script() {
-    runBuiltInSub("Finalize");
-
-    if (autoDeleteObjectEnable) {
-      for (auto objId : autoDeleteTargetObjIds) {
-        engine->deleteObject(objId);
-      }
-    }
-
-    if (L) lua_close(L);
-
-    Logger::WriteLog(std::move(
-      Log(Log::Level::LV_INFO)
-      .setMessage("release script.")
-      .setParam(Log::Param(Log::Param(Log::Param::Tag::SCRIPT, path)))));
-  }
-
-  Script::State Script::getState() const { return state; }
-
-  int Script::getID() const {
-    return id;
-  }
-
-  std::wstring Script::getType() const {
-    return type;
-  }
-
-  void Script::close() { state = State::SCRIPT_CLOSED; }
-
-  bool Script::isClosed() const { return state == State::SCRIPT_CLOSED; }
-
   void Script::runBuiltInSub(const std::string &name) {
-    if (!errLog) {
+    if (!err) {
       if (luaStateBusy) {
         lua_getglobal(L, (DNH_VAR_PREFIX + name).c_str());
       } else {
@@ -205,36 +256,59 @@ namespace bstorm {
       luaStateBusy = false;
       std::string msg = lua_tostring(L, -1);
       lua_pop(L, 1);
-      state = State::SCRIPT_CLOSED;
-      if (!errLog) {
-        errLog = std::make_shared<Log>(
-          Log(Log::Level::LV_ERROR)
-          .setMessage("unexpected script runtime error occured, please send a bug report.")
-          .setParam(Log::Param(Log::Param::Tag::TEXT, msg)));
+      if (!err) {
+        try {
+          throw Log(Log::Level::LV_ERROR)
+            .setMessage("unexpected script runtime error occured, please send a bug report.")
+            .setParam(Log::Param(Log::Param::Tag::TEXT, msg));
+        } catch (...) {
+          saveError(std::current_exception());
+        }
       }
-      throw *errLog;
+      state = State::SCRIPT_CLOSED;
+      rethrowError();
     }
     luaStateBusy = tmp;
   }
 
-  void Script::runLoading() {
-    if (state == State::SCRIPT_COMPILED) {
-      runBuiltInSub("Loading");
-      state = State::SCRIPT_LOADING_COMPLETE;
+  void Script::load() {
+    std::lock_guard<std::recursive_mutex> lock(compileSection);
+    switch (state) {
+      case State::SCRIPT_COMPILE_FAILED:
+        rethrowError();
+        break;
+      case State::SCRIPT_NOT_COMPILED:
+        compile(); // breakしない
+      case State::SCRIPT_COMPILED:
+        callLuaChunk(); // Main Chunk
+        runBuiltInSub("Loading");
+        Logger::WriteLog(std::move(
+          Log(Log::Level::LV_INFO)
+          .setMessage("load script.")
+          .setParam(Log::Param(Log::Param(Log::Param::Tag::SCRIPT, canonicalPath(path))))
+          .addSourcePos(compileSrcPos)));
+        state = State::SCRIPT_LOADING_COMPLETED;
+        break;
+    }
+  }
+
+  void Script::start() {
+    std::lock_guard<std::recursive_mutex> lock(compileSection);
+    load();
+    if (state == State::SCRIPT_LOADING_COMPLETED) {
+      state = State::SCRIPT_STARTED;
     }
   }
 
   void Script::runInitialize() {
-    if (state == State::SCRIPT_LOADING_COMPLETE) {
+    if (state == State::SCRIPT_STARTED) {
       runBuiltInSub("Initialize");
-      if (!isClosed()) {
-        state = State::SCRIPT_RUNNING;
-      }
+      state = State::SCRIPT_INITIALIZED;
     }
   }
 
   void Script::runMainLoop() {
-    if (state == State::SCRIPT_RUNNING) {
+    if (state == State::SCRIPT_INITIALIZED) {
       runBuiltInSub("MainLoop");
     }
   }
@@ -244,12 +318,21 @@ namespace bstorm {
   }
 
   void Script::notifyEvent(int eventType, const std::unique_ptr<DnhArray>& args) {
-    DnhReal((double)eventType).push(L);
-    lua_setglobal(L, "script_event_type");
-    args->push(L);
-    lua_setglobal(L, "script_event_args");
-    setScriptResult(std::make_unique<DnhNil>());
-    runBuiltInSub("Event");
+    switch (state) {
+      case State::SCRIPT_NOT_COMPILED:
+      case State::SCRIPT_COMPILE_FAILED:
+      case State::SCRIPT_COMPILED:
+      case State::SCRIPT_LOADING_COMPLETED:
+        break;
+      default:
+        DnhReal((double)eventType).push(L);
+        lua_setglobal(L, "script_event_type");
+        args->push(L);
+        lua_setglobal(L, "script_event_args");
+        setScriptResult(std::make_unique<DnhNil>());
+        runBuiltInSub("Event");
+        break;
+    }
   }
 
   bool Script::isStgSceneScript() const {
@@ -288,11 +371,18 @@ namespace bstorm {
   }
 
   std::shared_ptr<SourcePos> Script::getSourcePos(int line) {
+    std::lock_guard<std::recursive_mutex> lock(compileSection);
     return srcMap.getSourcePos(line);
   }
 
-  void Script::saveErrLog(const std::shared_ptr<Log>& log) {
-    errLog = log;
+  void Script::saveError(const std::exception_ptr& e) {
+    std::lock_guard<std::recursive_mutex> lock(compileSection);
+    err = e;
+  }
+
+  void Script::rethrowError() const {
+    std::lock_guard<std::recursive_mutex> lock(compileSection);
+    std::rethrow_exception(err);
   }
 
   ScriptManager::ScriptManager(Engine * engine) :
@@ -303,22 +393,41 @@ namespace bstorm {
 
   ScriptManager::~ScriptManager() {}
 
-  std::shared_ptr<Script> ScriptManager::newScript(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<SourcePos>& srcPos) {
+  std::shared_ptr<Script> ScriptManager::compile(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<SourcePos>& srcPos) {
     auto script = std::make_shared<Script>(path, type, version, idGen++, engine, srcPos);
+    script->compile();
     scriptList.push_back(script);
     scriptMap[script->getID()] = script;
-    Logger::WriteLog(std::move(
-      Log(Log::Level::LV_INFO)
-      .setMessage("load script.")
-      .setParam(Log::Param(Log::Param(Log::Param::Tag::SCRIPT, canonicalPath(path))))
-      .addSourcePos(srcPos)));
+    return script;
+  }
+
+  std::shared_ptr<Script> ScriptManager::compileInThread(const std::wstring & path, const std::wstring & type, const std::wstring & version, const std::shared_ptr<SourcePos>& srcPos) {
+    auto script = std::make_shared<Script>(path, type, version, idGen++, engine, srcPos);
+    script->compileInThread();
+    scriptList.push_back(script);
+    scriptMap[script->getID()] = script;
     return script;
   }
 
   void ScriptManager::runAll(bool ignoreStgSceneScript) {
+    // 未ロードのスクリプトがあれば1つだけロードする
+    bool notLoaded = true;
     for (auto& script : scriptList) {
-      if (!ignoreStgSceneScript || !script->isStgSceneScript()) {
-        script->runMainLoop();
+      switch (script->getState()) {
+        case Script::State::SCRIPT_COMPILED:
+          if (notLoaded) {
+            script->load();
+            notLoaded = false;
+          }
+          break;
+        case Script::State::SCRIPT_COMPILE_FAILED:
+          script->rethrowError();
+          break;
+        case Script::State::SCRIPT_INITIALIZED:
+          if (!(ignoreStgSceneScript && script->isStgSceneScript())) {
+            script->runMainLoop();
+          }
+          break;
       }
     }
   }
@@ -326,7 +435,8 @@ namespace bstorm {
   std::shared_ptr<Script> ScriptManager::get(int id) const {
     auto it = scriptMap.find(id);
     if (it != scriptMap.end()) {
-      if (!it->second->isClosed()) {
+      const auto& script = it->second;
+      if (!script->isClosed()) {
         return it->second;
       }
     }
@@ -344,7 +454,10 @@ namespace bstorm {
 
   void ScriptManager::notifyEventAll(int eventType, const std::unique_ptr<DnhArray>& args) {
     for (auto& script : scriptList) {
-      script->notifyEvent(eventType, args);
+      // NOTE: NotifyEventAllで送るとcloseされたスクリプトには届かない
+      if (!script->isClosed()) {
+        script->notifyEvent(eventType, args);
+      }
     }
   }
 

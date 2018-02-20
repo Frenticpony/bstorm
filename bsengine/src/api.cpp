@@ -554,20 +554,16 @@ namespace bstorm {
     return 0;
   }
 
-  static int LoadTexture(lua_State* L) {
-    Engine* engine = getEngine(L);
-    auto path = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
-    engine->loadTexture(path, true, getSourcePos(L));
-    return 0;
-  }
-
   static int LoadTextureInLoadThread(lua_State* L) {
     Engine* engine = getEngine(L);
     auto path = DnhValue::toString(L, 1);
     lua_pop(L, 1);
     engine->loadTextureInThread(path, true, getSourcePos(L));
     return 0;
+  }
+
+  static int LoadTexture(lua_State* L) {
+    return LoadTextureInLoadThread(L);
   }
 
   static int RemoveTexture(lua_State* L) {
@@ -765,8 +761,13 @@ namespace bstorm {
   }
 
   static int LoadScriptInThread(lua_State* L) {
-    // FUTURE : impl
-    return LoadScript(L);
+    Engine* engine = getEngine(L);
+    std::wstring path = DnhValue::toString(L, 1);
+    lua_pop(L, 1);
+    if (std::shared_ptr<Script> script = engine->loadScriptInThread(path, getScript(L)->getType(), SCRIPT_VERSION_PH3, getSourcePos(L))) {
+      lua_pushnumber(L, (double)script->getID());
+    }
+    return 1;
   }
 
   static int StartScript(lua_State* L) {
@@ -774,6 +775,7 @@ namespace bstorm {
     int scriptId = DnhValue::toInt(L, 1);
     lua_pop(L, 1);
     if (auto script = engine->getScript(scriptId)) {
+      script->start();
       script->runInitialize();
     }
     return 0;
@@ -5100,16 +5102,20 @@ namespace bstorm {
       Script* script = getScript(L);
       auto srcPos = getSourcePos(L);
       log.addSourcePos(srcPos);
-      script->saveErrLog(std::make_shared<Log>(log));
+      script->saveError(std::current_exception());
       lua_pushstring(L, "script_runtime_error");
     } catch (const std::exception& e) {
       int line = getCurrentLine(L);
       Script* script = getScript(L);
       auto srcPos = getSourcePos(L);
-      script->saveErrLog(
-        std::make_shared<Log>(std::move(Log(Log::Level::LV_ERROR)
-        .setMessage("unexpected script runtime error occured.")
-        .addSourcePos(srcPos))));
+      try {
+        throw Log(Log::Level::LV_ERROR)
+          .setMessage("unexpected script runtime error occured.")
+          .setParam(Log::Param(Log::Param::Tag::TEXT, e.what()))
+          .addSourcePos(srcPos);
+      } catch (...) {
+        script->saveError(std::current_exception());
+      }
       lua_pushstring(L, "unexpected_script_runtime_error");
     }
     return -1;
@@ -5732,7 +5738,7 @@ namespace bstorm {
     safe(GetMouseY, 0);
     safe(GetMouseMoveZ, 0);
     safe(SetSkipModeKey, 1);
-    unsafe(LoadTexture, 1);
+    safe(LoadTexture, 1);
     safe(LoadTextureInLoadThread, 1);
     safe(RemoveTexture, 1);
     safe(GetTextureWidth, 1);
@@ -5895,8 +5901,8 @@ namespace bstorm {
       unsafe(LoadEnemyShotData, 1);
       unsafe(ReloadEnemyShotData, 1);
 
-      unsafe(DeleteShotAll, 2); // ToItemがイベントを呼ぶのでUnsafe
-      unsafe(DeleteShotInCircle, 5); // ToItemがイベントを呼ぶのでUnsafe
+      unsafe(DeleteShotAll, 2); // notifyEvent
+      unsafe(DeleteShotInCircle, 5); // notifyEvent
       safe(CreateShotA1, 6);
       safe(CreateShotA2, 8);
       safe(CreateShotOA1, 5);
@@ -6139,11 +6145,11 @@ namespace bstorm {
 
       safe(ObjEnemyBossScene_Create, 0);
       unsafe(ObjEnemyBossScene_Regist, 1);
-      unsafe(ObjEnemyBossScene_Add, 3);
+      safe(ObjEnemyBossScene_Add, 3);
       unsafe(ObjEnemyBossScene_LoadInThread, 1);
-      unsafe(ObjEnemyBossScene_GetInfo, 2);
-      unsafe(ObjEnemyBossScene_SetSpellTimer, 2);
-      unsafe(ObjEnemyBossScene_StartSpell, 1);
+      safe(ObjEnemyBossScene_GetInfo, 2);
+      safe(ObjEnemyBossScene_SetSpellTimer, 2);
+      unsafe(ObjEnemyBossScene_StartSpell, 1); // notifyEvent
 
       safe(ObjShot_Create, 1);
       safe(ObjShot_Regist, 1);
@@ -6158,7 +6164,7 @@ namespace bstorm {
       safe(ObjShot_SetPenetration, 2);
       safe(ObjShot_SetEraseShot, 2);
       safe(ObjShot_SetSpellFactor, 2);
-      unsafe(ObjShot_ToItem, 1); // イベントが飛ぶのでunsafe
+      unsafe(ObjShot_ToItem, 1); // notifyEvent
       safe(ObjShot_AddShotA1, 3);
       safe(ObjShot_AddShotA2, 5);
       safe(ObjShot_SetIntersectionEnable, 2);
@@ -6203,7 +6209,7 @@ namespace bstorm {
 
     if (TypeIs(t_player)) {
       safe(CreatePlayerShotA1, 7);
-      unsafe(CallSpell, 0); // Eventが飛ぶのでunsafe
+      unsafe(CallSpell, 0); // notifyEvent
       unsafe(LoadPlayerShotData, 1);
       unsafe(ReloadPlayerShotData, 1);
       safe(GetSpellManageObject, 0);
@@ -6236,7 +6242,7 @@ namespace bstorm {
       safe(SetStageReplayFile, 1);
       safe(GetStageSceneState, 0);
       safe(GetStageSceneResult, 0);
-      unsafe(PauseStageScene, 1); // ポーズイベントが飛ぶのでunsafe
+      unsafe(PauseStageScene, 1); // notifyEvent
       safe(TerminateStageScene, 0);
 
       safe(GetLoadFreePlayerScriptList, 0);

@@ -83,7 +83,7 @@ static void checkDupDef(DnhParseContext* ctx, const DnhParser::location_type& yy
     auto prevDef = ctx->env->table[name];
     auto prevDefLine = std::to_string(prevDef->srcPos->line);
     auto prevDefPath = toUTF8(*prevDef->srcPos->filename);
-    auto msg = "'" + prevDef->name + "' : found a duplicate definition (previous definition was on line " + prevDefLine + " of " + prevDefPath + ".";
+    auto msg = "found a duplicate definition of '" + prevDef->name + "' (previous definition was at line " + prevDefLine + " in " + prevDefPath + ").";
     throw Log(Log::Level::LV_ERROR)
       .setMessage(msg)
       .addSourcePos(std::make_shared<SourcePos>(yylloc.begin));

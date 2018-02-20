@@ -12,7 +12,7 @@ namespace bstorm {
   ObjEnemyBossScene::ObjEnemyBossScene(const std::shared_ptr<GameState>& gameState) :
     Obj(gameState),
     registerFlag(false),
-    currentStep(-1),
+    currentStep(0),
     currentPhase(-1),
     playerSpellCount(0),
     playerShootDownCount(0),
@@ -21,6 +21,7 @@ namespace bstorm {
     lastEnemyBossY(0)
   {
     setType(OBJ_ENEMY_BOSS_SCENE);
+    steps[0] = std::vector<Phase>();
   }
 
   void ObjEnemyBossScene::update() {
@@ -58,46 +59,10 @@ namespace bstorm {
   }
 
   void ObjEnemyBossScene::regist(const std::shared_ptr<SourcePos>& srcPos) {
-    auto state = getGameState();
-    if (!state) return;
     if (registerFlag) {
       return;
     }
     loadInThread(srcPos);
-    for (auto& entry : steps) {
-      for (auto& phase : entry.second) {
-        if (auto script = state->scriptManager->get(phase.scriptId)) {
-          script->notifyEvent(EV_REQUEST_LIFE);
-          if (script->getScriptResult()->getType() == DnhValue::Type::NIL) {
-            Logger::WriteLog(Log::Level::LV_WARN, "enemy life hasn't been returned from @Event, set a default value 2000.");
-            phase.maxLife = phase.life = 2000.0f;
-          } else {
-            phase.maxLife = phase.life = std::max(0.0, script->getScriptResult()->toNum());
-          }
-
-          script->notifyEvent(EV_REQUEST_TIMER);
-          if (script->getScriptResult()->getType() == DnhValue::Type::NIL) {
-            phase.timerF = -1; // 無制限
-          } else {
-            // NOTE: double値を60倍してから切り捨てる
-            phase.timerF = (int)(script->getScriptResult()->toNum() * 60);
-            phase.orgTimerF = phase.timerF;
-          }
-
-          script->notifyEvent(EV_REQUEST_IS_SPELL);
-          phase.isSpell = script->getScriptResult()->toBool();
-
-          script->notifyEvent(EV_REQUEST_SPELL_SCORE);
-          phase.spellScore = script->getScriptResult()->toInt();
-
-          script->notifyEvent(EV_REQUEST_IS_LAST_SPELL);
-          phase.isLastSpell = script->getScriptResult()->toBool();
-
-          script->notifyEvent(EV_REQUEST_IS_DURABLE_SPELL);
-          phase.isDurableSpell = script->getScriptResult()->toBool();
-        }
-      }
-    }
     if (!loadNext()) {
       die();
     }
@@ -120,13 +85,7 @@ namespace bstorm {
     for (auto& entry : steps) {
       for (auto& phase : entry.second) {
         if (phase.scriptId < 0)
-          phase.scriptId = state->scriptManager->newScript(phase.path, SCRIPT_TYPE_SINGLE, state->stageMainScriptInfo.version, srcPos)->getID();
-      }
-    }
-    if (steps.count(0) != 0 && !steps[0].empty()) {
-      auto script = state->scriptManager->get(steps[0][0].scriptId);
-      if (script && script->getState() == Script::State::SCRIPT_COMPILED) {
-        script->runLoading();
+          phase.scriptId = state->scriptManager->compileInThread(phase.path, SCRIPT_TYPE_SINGLE, state->stageMainScriptInfo.version, srcPos)->getID();
       }
     }
   }
@@ -288,7 +247,7 @@ namespace bstorm {
   }
 
   bool ObjEnemyBossScene::existPhase() const {
-    if (currentStep < 0 || steps.count(currentStep) == 0) return false;
+    if (steps.count(currentStep) == 0) return false;
     if (currentPhase < 0 || currentPhase >= steps.at(currentStep).size()) return false;
     return true;
   }
@@ -302,43 +261,71 @@ namespace bstorm {
   }
 
   bool ObjEnemyBossScene::loadNext() {
-    if (currentStep < 0) {
-      currentStep = 0;
-      currentPhase = -1;
-    }
-    if (steps.count(currentStep) == 0) {
-      return false;
-    }
+    auto state = getGameState();
+    if (!state) return false;
+
     currentPhase++;
     if (currentPhase >= steps[currentStep].size()) {
       currentStep++;
       currentPhase = 0;
-      if (steps.count(currentStep) == 0) {
-        return false;
+    }
+
+    if (!existPhase()) { return false; }
+
+    if (currentPhase == 0) {
+      // new step
+      for (auto& phase : steps[currentStep]) {
+        // ステップ内の全てのフェーズのスクリプトを開始させる
+        if (auto script = state->scriptManager->get(phase.scriptId)) {
+          // コンパイルと@Loadingが終了してなければブロックして完了させる
+          script->start();
+
+          script->notifyEvent(EV_REQUEST_LIFE);
+          if (script->getScriptResult()->getType() == DnhValue::Type::NIL) {
+            Logger::WriteLog(Log::Level::LV_WARN, "enemy life hasn't been setted in @Event, set a default value 2000.");
+            phase.maxLife = phase.life = 2000.0f;
+          } else {
+            phase.maxLife = phase.life = std::max(0.0, script->getScriptResult()->toNum());
+          }
+
+          script->notifyEvent(EV_REQUEST_TIMER);
+          if (script->getScriptResult()->getType() == DnhValue::Type::NIL) {
+            phase.timerF = -1; // 無制限
+          } else {
+            // NOTE: double値を60倍してから切り捨てる
+            phase.timerF = (int)(script->getScriptResult()->toNum() * 60);
+            phase.orgTimerF = phase.timerF;
+          }
+
+          script->notifyEvent(EV_REQUEST_IS_SPELL);
+          phase.isSpell = script->getScriptResult()->toBool();
+
+          script->notifyEvent(EV_REQUEST_SPELL_SCORE);
+          phase.spellScore = script->getScriptResult()->toInt();
+
+          script->notifyEvent(EV_REQUEST_IS_LAST_SPELL);
+          phase.isLastSpell = script->getScriptResult()->toBool();
+
+          script->notifyEvent(EV_REQUEST_IS_DURABLE_SPELL);
+          phase.isDurableSpell = script->getScriptResult()->toBool();
+        }
       }
     }
+
     playerSpellCount = playerShootDownCount = 0;
     const Phase& phase = getCurrentPhase();
-    if (auto state = getGameState()) {
-      if (auto script = state->scriptManager->get(phase.scriptId)) {
-        if (script->getState() == Script::State::SCRIPT_COMPILED) {
-          script->runLoading();
-        }
-        if (script->getState() == Script::State::SCRIPT_LOADING_COMPLETE) {
-          auto boss = state->objTable->create<ObjEnemy>(true, state);
-          state->objLayerList->setRenderPriority(boss, DEFAULT_ENEMY_RENDER_PRIORITY);
-          boss->regist();
-          boss->setMovePosition(lastEnemyBossX, lastEnemyBossY);
-          boss->setLife(getCurrentLife());
-          enemyBossObj = boss;
-          script->runInitialize();
-          state->scriptManager->notifyEventAll(EV_START_BOSS_STEP);
-          return true;
-        }
-      }
+
+    if (auto script = state->scriptManager->get(phase.scriptId)) {
+      auto boss = state->objTable->create<ObjEnemy>(true, state);
+      state->objLayerList->setRenderPriority(boss, DEFAULT_ENEMY_RENDER_PRIORITY);
+      boss->regist();
+      boss->setMovePosition(lastEnemyBossX, lastEnemyBossY);
+      boss->setLife(getCurrentLife());
+      enemyBossObj = boss;
+      script->runInitialize();
+      state->scriptManager->notifyEventAll(EV_START_BOSS_STEP);
     }
-    return false;
+
+    return true;
   }
-
-
 }

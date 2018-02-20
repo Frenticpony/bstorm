@@ -6,6 +6,9 @@
 #include <utility>
 #include <unordered_set>
 #include <unordered_map>
+#include <exception>
+#include <atomic>
+#include <mutex>
 #include <luajit/lua.hpp>
 
 #include <bstorm/non_copyable.hpp>
@@ -18,26 +21,34 @@ namespace bstorm {
   class DnhArray;
   class ScriptManager;
   extern const std::unordered_set<std::wstring> ignoreScriptExts;
+
   class Script : private NonCopyable {
   public:
     enum class State {
-      SCRIPT_NOT_COMPILED,
-      SCRIPT_COMPILED,
-      SCRIPT_LOADING_COMPLETE,
-      SCRIPT_RUNNING,
-      SCRIPT_TERMINATED,
-      SCRIPT_CLOSED
+      SCRIPT_NOT_COMPILED, // コンパイル前 or コンパイル中
+      SCRIPT_COMPILED, // コンパイル完了
+      SCRIPT_COMPILE_FAILED, // コンパイル失敗
+      SCRIPT_LOADING_COMPLETED, // トップレベル & @Loading完了
+      SCRIPT_STARTED, // 実行開始 -- イベント受理開始
+      SCRIPT_INITIALIZED, // @Initialize完了
+      SCRIPT_CLOSED // 終了(実行時エラー含む)
     };
-    Script(const std::wstring& path, const std::wstring& type, const std::wstring& version, int id, Engine* engine, const std::shared_ptr<SourcePos>& srcPos);
+    Script(const std::wstring& path, const std::wstring& type, const std::wstring& version, int id, Engine* engine, const std::shared_ptr<SourcePos>& compileSrcPos);
     ~Script();
-    int getID() const;
-    std::wstring getType() const;
-    State getState() const;
+    void compile();
+    void compileInThread();
     void close();
     bool isClosed() const;
+    int getID() const;
+    const std::wstring& getPath() const;
+    const std::wstring& getType() const;
+    const std::wstring& getVersion() const;
+    State getState() const;
     std::shared_ptr<SourcePos> getSourcePos(int line);
-    void saveErrLog(const std::shared_ptr<Log>& log);
-    void runLoading();
+    void saveError(const std::exception_ptr& e);
+    void rethrowError() const;
+    void load();
+    void start();
     void runInitialize();
     void runMainLoop();
     void notifyEvent(int eventType);
@@ -51,29 +62,33 @@ namespace bstorm {
     int getScriptArgumentount() const;
     std::unique_ptr<DnhValue> getScriptArgument(int idx);
   private:
+    void execCompile();
     void runBuiltInSub(const std::string &name);
     void callLuaChunk();
     lua_State* L;
-    std::wstring path;
-    std::wstring type;
-    int id;
-    State state;
+    const std::wstring path;
+    const std::wstring type;
+    const std::wstring version;
+    const int id;
+    const bool stgSceneScript;
+    const std::shared_ptr<SourcePos> compileSrcPos; // コンパイルを開始した場所
+    std::atomic<State> state;
     SourceMap srcMap;
-    bool stgSceneScript;
     bool luaStateBusy;
-    std::shared_ptr<Log> errLog;
+    std::exception_ptr err;
     std::vector<int> autoDeleteTargetObjIds;
     std::unordered_map<int, std::unique_ptr<DnhValue>> scriptArgs;
     bool autoDeleteObjectEnable;
+    mutable std::recursive_mutex compileSection;
     Engine* engine;
-    friend ScriptManager;
   };
 
   class ScriptManager {
   public:
     ScriptManager(Engine* engine);
     ~ScriptManager();
-    std::shared_ptr<Script> ScriptManager::newScript(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<SourcePos>& srcPos);
+    std::shared_ptr<Script> compile(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<SourcePos>& srcPos);
+    std::shared_ptr<Script> compileInThread(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<SourcePos>& srcPos);
     void runAll(bool ignoreStgSceneScript);
     std::shared_ptr<Script> get(int id) const;
     void notifyEventAll(int eventType);
