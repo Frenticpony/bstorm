@@ -121,14 +121,13 @@ namespace bstorm {
 
   static int WriteLog(lua_State* L) {
     Engine* engine = getEngine(L);
-    std::wstring msg = DnhValue::toString(L, 1);
-    lua_pop(L, 1);
-    engine->writeLog(msg, getSourcePos(L));
+    std::string msg = DnhValue::toStringU8(L, 1);
+    engine->writeLog(std::move(msg), getSourcePos(L));
     return 0;
   }
 
   static int RaiseError(lua_State* L) {
-    std::wstring msg = DnhValue::toString(L, 1); lua_pop(L, 1);
+    std::wstring msg = DnhValue::toString(L, 1);
     throw Log(Log::Level::LV_ERROR)
       .setMessage("RaiseError.")
       .setParam(Log::Param(Log::Param::Tag::TEXT, toUTF8(msg)));

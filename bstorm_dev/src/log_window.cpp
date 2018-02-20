@@ -47,7 +47,7 @@ namespace bstorm {
   void LogWindow::log(Log&& lg) {
     logs[validIdx(headIdx + logCnt)] = std::move(lg);
     if (logCnt != MaxLogCnt) {
-      logCnt++;
+      ++logCnt;
     } else {
       headIdx = validIdx(headIdx + 1);
     }

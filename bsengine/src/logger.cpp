@@ -159,6 +159,7 @@ namespace bstorm {
   }
 
   static void logToFile(const Log& lg, std::ofstream& file) {
+    if (lg.getLevel() == Log::Level::LV_USER) return;
     {
       // date
       std::string date(23, '\0');

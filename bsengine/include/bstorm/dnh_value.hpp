@@ -33,6 +33,7 @@ namespace bstorm {
     static int toInt(lua_State* L, int idx) { return (int)toNum(L, idx); }
     static bool toBool(lua_State* L, int idx);
     static std::wstring toString(lua_State* L, int idx);
+    static std::string toStringU8(lua_State* L, int idx);
   protected:
     Type type;
   };

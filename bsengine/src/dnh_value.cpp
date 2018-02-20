@@ -17,8 +17,8 @@ namespace bstorm {
       {
         size_t size = lua_objlen(L, idx);
         std::unique_ptr<DnhArray> arr = std::make_unique<DnhArray>();
-        for (int i = 0; i < size; i++) {
-          lua_rawgeti(L, idx, i + 1);
+        for (int i = 1; i <= size; i++) {
+          lua_rawgeti(L, idx, i);
           arr->pushBack(DnhValue::get(L, -1));
           lua_pop(L, 1);
         }
@@ -104,6 +104,40 @@ namespace bstorm {
 
   std::wstring DnhValue::toString(lua_State*L, int idx) {
     return DnhValue::get(L, idx)->toString();
+  }
+
+  std::string DnhValue::toStringU8(lua_State * L, int idx) {
+    switch (lua_type(L, idx)) {
+      case LUA_TNUMBER:
+        return std::to_string(lua_tonumber(L, idx));
+      case LUA_TSTRING:
+        return lua_tostring(L, idx);
+      case LUA_TBOOLEAN:
+        return lua_toboolean(L, idx) ? "true" : "false";
+      case LUA_TTABLE:
+      {
+        const size_t size = lua_objlen(L, idx);
+        if (size == 0) return "";
+        lua_rawgeti(L, idx, 1);
+        const bool isStr = lua_type(L, -1) == LUA_TSTRING;
+        lua_pop(L, 1);
+        if (isStr) {
+          std::string ret;
+          for (int i = 1; i <= size; i++) {
+            lua_rawgeti(L, idx, i);
+            ret += lua_tostring(L, -1);
+            lua_pop(L, 1);
+          }
+          return ret;
+        } else {
+          return toUTF8(toString(L, idx));
+        }
+      }
+      case LUA_TNIL:
+        return "(VOID)";
+      default:
+        return "ILLEGAL";
+    }
   }
 
   DnhReal::DnhReal(double num) : value(num) {

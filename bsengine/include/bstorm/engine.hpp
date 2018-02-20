@@ -100,7 +100,7 @@ namespace bstorm {
     int getMouseY();
     int getMouseMoveZ();
     /* logging function */
-    void writeLog(const std::wstring& msg, const std::shared_ptr<SourcePos>& srcPos);
+    void writeLog(const std::string&& msg, const std::shared_ptr<SourcePos>& srcPos);
     /* time */
     std::wstring getCurrentDateTimeS();
     float getCurrentFps() const;

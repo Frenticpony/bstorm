@@ -276,10 +276,10 @@ namespace bstorm {
     return gameState->inputDevice->getMouseMoveZ();
   }
 
-  void Engine::writeLog(const std::wstring & msg, const std::shared_ptr<SourcePos>& srcPos) {
+  void Engine::writeLog(const std::string && msg, const std::shared_ptr<SourcePos>& srcPos) {
     Logger::WriteLog(std::move(
       Log(Log::Level::LV_USER)
-      .setMessage(msg)
+      .setMessage(std::move(msg))
       .addSourcePos(srcPos)));
   }
 
