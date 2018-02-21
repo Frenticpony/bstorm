@@ -50,20 +50,20 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
   LONG screenHeight = 480;
   std::wstring windowTitle = L"bstorm "  BSTORM_VERSION_W;
   std::wstring packageMainScriptPath;
-  std::shared_ptr<Logger> logger;
-
-  try {
-    Logger::Init(std::make_shared<FileLogger>(logFilePath, nullptr));
-  } catch (Log& log) {
-    OutputDebugStringA(log.toString().c_str());
-    Logger::Shutdown();
-    Logger::Init(std::make_shared<DummyLogger>());
-  }
+  Logger::Init(std::make_shared<DummyLogger>());
 
   HWND hWnd = NULL;
   MSG msg;
   try {
     conf::BstormConfig config = loadBstormConfig(configFilePath, useBinaryFormat, IDR_HTML1);
+
+    if (config.options.saveLogFile) {
+      try {
+        Logger::Init(std::make_shared<FileLogger>(logFilePath, nullptr));
+      } catch (Log& log) {
+        OutputDebugStringA(log.toString().c_str());
+      }
+    }
 
     windowWidth = config.windowConfig.windowWidth;
     windowHeight = config.windowConfig.windowHeight;

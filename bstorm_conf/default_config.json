@@ -78,7 +78,7 @@
     },
     "options": {
         "hide_mouse_cursor": false,
-        "save_log_file": true
+        "save_log_file": false
     },
     "window_config": {
         "full_screen": false,

@@ -68,26 +68,21 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
   LONG screenHeight = 480;
   std::wstring windowTitle = L"bstorm [dev] "  BSTORM_VERSION_W;
   std::wstring packageMainScriptPath;
-  bool logToFile = true;
-
   auto logWindow = std::make_shared<LogWindow>();
-  if (logToFile) {
-    try {
-      Logger::Init(std::make_shared<FileLogger>(logFilePath, logWindow));
-    } catch (Log& log) {
-      log.setLevel(Log::Level::LV_WARN);
-      logWindow->log(log);
-      Logger::Shutdown();
-      Logger::Init(logWindow);
-    }
-  } else {
-    Logger::Init(logWindow);
-  }
+  Logger::Init(logWindow);
 
   HWND hWnd = NULL;
   MSG msg;
   try {
     conf::BstormConfig config = loadBstormConfig(configFilePath, useBinaryFormat, IDR_HTML1);
+    if (config.options.saveLogFile) {
+      try {
+        Logger::Init(std::make_shared<FileLogger>(logFilePath, logWindow));
+      } catch (Log& log) {
+        log.setLevel(Log::Level::LV_WARN);
+        logWindow->log(log);
+      }
+    }
 
     {
       // th_dnh.def読み込み

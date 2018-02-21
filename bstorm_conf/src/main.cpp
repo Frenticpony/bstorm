@@ -257,7 +257,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
             }
           }
         } else if (selectedTab == Tab::OPTION) {
-
+          ImGui::Checkbox(u8"output log to file (ログをファイルに出力)", &config.options.saveLogFile);
         }
         ImGui::End();
 #ifdef _DEBUG
