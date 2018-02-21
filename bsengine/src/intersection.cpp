@@ -254,7 +254,7 @@ namespace bstorm {
         isInitialized = true;
       }
       D3DXMATRIX world = rotScaleTrans(params.Circle.x, params.Circle.y, 0, 0, 0, 0, params.Circle.r, params.Circle.r, 1);
-      renderer->renderPrim2D(D3DPT_TRIANGLEFAN, vertices.size(), vertices.data(), NULL, BLEND_ALPHA, world, std::shared_ptr<Shader>(), permitCamera);
+      renderer->renderPrim2D(D3DPT_TRIANGLEFAN, vertices.size(), vertices.data(), NULL, BLEND_ALPHA, world, std::shared_ptr<Shader>(), permitCamera, true);
     } else if (type == Type::RECT) {
       static std::array<Vertex, 4> vertices;
       for (auto& v : vertices) {
@@ -271,7 +271,7 @@ namespace bstorm {
       vertices[3].y = rect[2].y;
       D3DXMATRIX world;
       D3DXMatrixIdentity(&world);
-      renderer->renderPrim2D(D3DPT_TRIANGLESTRIP, vertices.size(), vertices.data(), NULL, BLEND_ALPHA, world, std::shared_ptr<Shader>(), permitCamera);
+      renderer->renderPrim2D(D3DPT_TRIANGLESTRIP, vertices.size(), vertices.data(), NULL, BLEND_ALPHA, world, std::shared_ptr<Shader>(), permitCamera, true);
     }
   }
 

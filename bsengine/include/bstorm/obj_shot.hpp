@@ -203,7 +203,7 @@ namespace bstorm {
     ObjStLaser(bool isPlayerShot, const std::shared_ptr<GameState>& gameState);
     void update() override;
     void render() override;
-    virtual Point2D getTail() const override;
+    Point2D getTail() const override;
     float getLaserAngle() const;
     void setLaserAngle(float angle);
     bool hasSource() const;
@@ -211,7 +211,7 @@ namespace bstorm {
     float getRenderLength() const override;
   private:
     float laserAngle;
-    bool laserSource;
+    bool laserSourceEnable;
     float laserWidthScale;
   };
 

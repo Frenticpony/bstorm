@@ -148,7 +148,7 @@ namespace bstorm {
                                        shotData->rect);
 
         if (auto state = getGameState()) {
-          state->renderer->renderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData->texture->getTexture(), shotBlend, world, getAppliedShader(), isPermitCamera());
+          state->renderer->renderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData->texture->getTexture(), shotBlend, world, getAppliedShader(), isPermitCamera(), true);
         }
       }
       renderIntersection();
@@ -778,7 +778,7 @@ namespace bstorm {
       D3DXMATRIX world = rotScaleTrans(centerX, centerY, 0.0f, 0.0f, 0.0f, angle + 90.0f, width / rectWidth, length / rectHeight, 1.0f);
 
       if (auto state = getGameState()) {
-        state->renderer->renderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData->texture->getTexture(), laserBlend, world, getAppliedShader(), isPermitCamera());
+        state->renderer->renderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData->texture->getTexture(), laserBlend, world, getAppliedShader(), isPermitCamera(), false);
       }
     }
   }
@@ -794,7 +794,7 @@ namespace bstorm {
   ObjStLaser::ObjStLaser(bool isPlayerShot, const std::shared_ptr<GameState>& gameState) :
     ObjLooseLaser(isPlayerShot, gameState),
     laserAngle(270),
-    laserSource(true),
+    laserSourceEnable(true),
     laserWidthScale(0)
   {
     setType(OBJ_STRAIGHT_LASER);
@@ -823,7 +823,7 @@ namespace bstorm {
   void ObjStLaser::render() {
     if (isRegistered()) {
       if (const auto& shotData = getShotData()) {
-        if (laserSource && !isFadeDeleteStarted()) {
+        if (laserSourceEnable && !isFadeDeleteStarted()) {
           // レーザー源の描画
           auto vertices = rectToVertices(toD3DCOLOR(shotData->delayColor, 0xff), shotData->texture->getWidth(), shotData->texture->getHeight(), shotData->delayRect);
 
@@ -831,7 +831,7 @@ namespace bstorm {
           const Point2D head = getHead();
           float rectWidth = abs(vertices[0].x - vertices[1].x);
           float rectHeight = abs(vertices[0].y - vertices[2].y);
-          float renderWidth = getRenderWidth() * 1.3f; // レーザーの幅よりちょっと大きい
+          float renderWidth = getRenderWidth() * 1.3125f; // レーザーの幅よりちょっと大きい
           auto world = rotScaleTrans(head.x, head.y, 0.0f,
                                      0.0f, 0.0f, getLaserAngle() - 90.0f,
                                      renderWidth / rectWidth, renderWidth / rectHeight, 1.0f);
@@ -840,7 +840,7 @@ namespace bstorm {
           // NOTE :  delay_renderは使用しない
           int laserBlend = getSourceBlendType() == BLEND_NONE ? BLEND_ADD_ARGB : getSourceBlendType();
           if (auto state = getGameState()) {
-            state->renderer->renderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData->texture->getTexture(), laserBlend, world, getAppliedShader(), isPermitCamera());
+            state->renderer->renderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData->texture->getTexture(), laserBlend, world, getAppliedShader(), isPermitCamera(), false);
           }
         }
         // 遅延時間時は予告線
@@ -868,11 +868,11 @@ namespace bstorm {
   }
 
   bool ObjStLaser::hasSource() const {
-    return laserSource;
+    return laserSourceEnable;
   }
 
   void ObjStLaser::setSource(bool source) {
-    laserSource = source;
+    laserSourceEnable = source;
   }
 
   float ObjStLaser::getRenderLength() const {
@@ -959,7 +959,7 @@ namespace bstorm {
           // ShotDataのrenderは使わない
           if (auto state = getGameState()) {
             int laserBlend = getBlendType() == BLEND_NONE ? BLEND_ADD_ARGB : getBlendType();
-            state->renderer->renderPrim2D(D3DPT_TRIANGLESTRIP, trail.size() - tailPos, &trail[tailPos], shotData->texture->getTexture(), laserBlend, world, getAppliedShader(), isPermitCamera());
+            state->renderer->renderPrim2D(D3DPT_TRIANGLESTRIP, trail.size() - tailPos, &trail[tailPos], shotData->texture->getTexture(), laserBlend, world, getAppliedShader(), isPermitCamera(), false);
           }
         }
       }

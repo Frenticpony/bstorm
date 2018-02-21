@@ -18,7 +18,7 @@ namespace bstorm {
     // デバイスロストやライブラリによってデバイスの状態が書き換えられた場合も呼ぶ必要がある
     // 一連の描画の前に1回呼べばよい
     void initRenderState();
-    void renderPrim2D(D3DPRIMITIVETYPE primType, int vertexCount, const Vertex* vertices, IDirect3DTexture9* texture, int blendType, const D3DXMATRIX& worldMatrix, const std::shared_ptr<Shader>& pixelShader, bool permitCamera);
+    void renderPrim2D(D3DPRIMITIVETYPE primType, int vertexCount, const Vertex* vertices, IDirect3DTexture9* texture, int blendType, const D3DXMATRIX& worldMatrix, const std::shared_ptr<Shader>& pixelShader, bool permitCamera, bool insertHalfPixelOffset);
     void renderPrim3D(D3DPRIMITIVETYPE primType, int vertexCount, const Vertex* vertices, IDirect3DTexture9* texture, int blendType, const D3DXMATRIX& worldMatrix, const std::shared_ptr<Shader>& pixelShader, bool zWriteEnable, bool zTestEnable, bool useFog, bool billboardEnable);
     void renderMesh(const std::shared_ptr<Mesh>& mesh, const D3DCOLORVALUE& col, int blendType, const D3DXMATRIX& worldMatrix, const std::shared_ptr<Shader>& pixelShader, bool zWriteEnable, bool zTestEnable, bool useFog);
     void setViewProjMatrix2D(const D3DXMATRIX& view, const D3DXMATRIX& proj);
@@ -43,6 +43,7 @@ namespace bstorm {
     D3DXMATRIX viewProjMatrix3D;
     D3DXMATRIX billboardViewProjMatrix3D;
     D3DXMATRIX forbidCameraViewProjMatrix2D;
+    D3DXMATRIX halfPixelOffsetMatrix;
     bool fogEnable;
     float fogStart;
     float fogEnd;

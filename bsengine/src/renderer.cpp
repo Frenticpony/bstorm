@@ -25,7 +25,6 @@ static const char prim2DVertexShaderSrc[] =
 "};"
 "VS_OUTPUT main(VS_INPUT In) {"
 "  VS_OUTPUT Out;"
-"  In.pos.xy -= 0.5;" //half pixel offset
 "  Out.pos = mul(mul(In.pos, worldMatrix), viewProjMatrix);"
 "  Out.pos.z = 0;"
 "  Out.diffuse = In.diffuse;"
@@ -129,6 +128,8 @@ namespace bstorm {
       safe_release(error);
       throw;
     }
+
+    D3DXMatrixTranslation(&halfPixelOffsetMatrix, -0.5f, -0.5f, 0.0f);
   }
 
   Renderer::~Renderer() {
@@ -172,7 +173,7 @@ namespace bstorm {
     }
   }
 
-  void Renderer::renderPrim2D(D3DPRIMITIVETYPE primType, int vertexCount, const Vertex* vertices, IDirect3DTexture9* texture, int blendType, const D3DXMATRIX & worldMatrix, const std::shared_ptr<Shader>& pixelShader, bool permitCamera) {
+  void Renderer::renderPrim2D(D3DPRIMITIVETYPE primType, int vertexCount, const Vertex* vertices, IDirect3DTexture9* texture, int blendType, const D3DXMATRIX & worldMatrix, const std::shared_ptr<Shader>& pixelShader, bool permitCamera, bool insertHalfPixelOffset) {
     // disable z-buffer-write, z-test, fog
     d3DDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
     d3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
@@ -182,7 +183,7 @@ namespace bstorm {
     // set vertex shader
     d3DDevice->SetVertexShader(prim2DVertexShader);
     // set shader constant
-    d3DDevice->SetVertexShaderConstantF(0, (const float*)&worldMatrix, 4);
+    d3DDevice->SetVertexShaderConstantF(0, (const float*)&(insertHalfPixelOffset ? (halfPixelOffsetMatrix * worldMatrix) : worldMatrix), 4);
     d3DDevice->SetVertexShaderConstantF(4, (const float*)&(permitCamera ? viewProjMatrix2D : forbidCameraViewProjMatrix2D), 4);
     // set vertex format
     d3DDevice->SetFVF(Vertex::Format);

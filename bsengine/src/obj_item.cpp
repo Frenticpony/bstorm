@@ -184,7 +184,7 @@ namespace bstorm {
 
       auto vertices = rectToVertices(renderColor, itemData->texture->getWidth(), itemData->texture->getHeight(), rect);
       if (auto state = getGameState()) {
-        state->renderer->renderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), itemData->texture->getTexture(), itemBlend, world, getAppliedShader(), isPermitCamera());
+        state->renderer->renderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), itemData->texture->getTexture(), itemBlend, world, getAppliedShader(), isPermitCamera(), true);
       }
     }
     ObjCol::renderIntersection(isPermitCamera());

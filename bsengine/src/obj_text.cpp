@@ -90,7 +90,7 @@ namespace bstorm {
     vertices[2].y = vertices[3].y = font->getHeight();
 
     if (auto state = getGameState()) {
-      state->renderer->renderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), font->getTexture(), getBlendType(), world, getAppliedShader(), isPermitCamera());
+      state->renderer->renderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), font->getTexture(), getBlendType(), world, getAppliedShader(), isPermitCamera(), true);
     }
   }
 
