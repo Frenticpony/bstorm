@@ -244,6 +244,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
         }
       }
     }
+  } catch (Log& log) {
+    Logger::WriteLog(log);
+    MessageBoxW(hWnd, toUnicode(log.toString()).c_str(), L"Engine Error", MB_OK);
   } catch (const std::exception& e) {
     Logger::WriteLog(Log::Level::LV_ERROR, e.what());
     MessageBoxW(hWnd, toUnicode(e.what()).c_str(), L"Unexpected Error", MB_OK);

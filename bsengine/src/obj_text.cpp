@@ -84,11 +84,10 @@ namespace bstorm {
     vertices[1].u = vertices[3].u = 1.0f * font->getWidth() / font->getTextureWidth();
     vertices[2].v = vertices[3].v = 1.0f * font->getHeight() / font->getTextureHeight();
 
-    // 0.5 (for half pixel offset)
-    vertices[0].x = vertices[2].x = -0.5;
-    vertices[0].y = vertices[1].y = -0.5;
-    vertices[1].x = vertices[3].x = font->getWidth() - 0.5f;
-    vertices[2].y = vertices[3].y = font->getHeight() - 0.5f;
+    vertices[0].x = vertices[2].x = 0;
+    vertices[0].y = vertices[1].y = 0;
+    vertices[1].x = vertices[3].x = font->getWidth();
+    vertices[2].y = vertices[3].y = font->getHeight();
 
     if (auto state = getGameState()) {
       state->renderer->renderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), font->getTexture(), getBlendType(), world, getAppliedShader(), isPermitCamera());

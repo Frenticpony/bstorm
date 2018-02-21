@@ -25,6 +25,7 @@ static const char prim2DVertexShaderSrc[] =
 "};"
 "VS_OUTPUT main(VS_INPUT In) {"
 "  VS_OUTPUT Out;"
+"  In.pos.xy -= 0.5;" //half pixel offset
 "  Out.pos = mul(mul(In.pos, worldMatrix), viewProjMatrix);"
 "  Out.pos.z = 0;"
 "  Out.diffuse = In.diffuse;"

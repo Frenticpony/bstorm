@@ -165,11 +165,6 @@ namespace bstorm {
   }
 
   void ObjSprite2D::setDestRect(float left, float top, float right, float bottom) {
-    // 0.5 (for half pixel offset)
-    left -= 0.5f;
-    top -= 0.5f;
-    right -= 0.5f;
-    bottom -= 0.5f;
     setVertexPosition(0, left, top, 0);
     setVertexPosition(1, right, top, 0);
     setVertexPosition(2, left, bottom, 0);
@@ -237,11 +232,10 @@ namespace bstorm {
   }
 
   void ObjSpriteList2D::setDestRect(float left, float top, float right, float bottom) {
-    // 0.5 (for half pixel offset)
-    dstRectLeft = left - 0.5f;
-    dstRectTop = top - 0.5f;
-    dstRectRight = right - 0.5f;
-    dstRectBottom = bottom - 0.5f;
+    dstRectLeft = left;
+    dstRectTop = top;
+    dstRectRight = right;
+    dstRectBottom = bottom;
   }
 
   void ObjSpriteList2D::setDestCenter() {
@@ -349,7 +343,7 @@ namespace bstorm {
   }
 
   void ObjSprite3D::setDestRect(float left, float top, float right, float bottom) {
-    // 0.5 (for half pixel offset)
+    // 弾幕風の仕様で-0.5
     left -= 0.5f;
     top -= 0.5f;
     right -= 0.5f;
