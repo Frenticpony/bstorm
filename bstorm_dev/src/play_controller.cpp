@@ -39,6 +39,10 @@ namespace bstorm {
     }
   }
 
+  void PlayController::close() {
+    engine->reset(screenWidth, screenHeight);
+  }
+
   void PlayController::reload() {
     try {
       if (mainScript.type == SCRIPT_TYPE_PACKAGE) {
@@ -120,5 +124,8 @@ namespace bstorm {
   void PlayController::setPlayerInvincibleEnable(bool enable) {
     playerInvincibleEnable = enable;
     engine->setForcePlayerInvincibleEnable(enable);
+  }
+  const ScriptInfo& PlayController::getMainScriptInfo() const {
+    return mainScript;
   }
 }

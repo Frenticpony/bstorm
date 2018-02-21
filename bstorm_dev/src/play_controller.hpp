@@ -12,6 +12,7 @@ namespace bstorm {
     PlayController(const std::shared_ptr<Engine>& engine);
     void tick();
     void pause(bool doPause);
+    void close();
     void reload();
     bool isPaused() const;
     int getPlaySpeed() const;
@@ -24,6 +25,7 @@ namespace bstorm {
     void setRenderIntersectionEnable(bool enable);
     bool isPlayerInvincibleEnabled() const;
     void setPlayerInvincibleEnable(bool enable);
+    const ScriptInfo& getMainScriptInfo() const;
   private:
     std::shared_ptr<Engine> engine;
     ScriptInfo mainScript;

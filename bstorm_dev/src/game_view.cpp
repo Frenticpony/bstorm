@@ -3,6 +3,7 @@
 #include <IconsFontAwesome_c.h>
 
 #include <bstorm/render_target.hpp>
+#include <bstorm/util.hpp>
 
 #include "play_controller.hpp"
 #include "game_view.hpp"
@@ -80,11 +81,11 @@ namespace bstorm {
       }
       {
         ImGui::PopStyleVar();
-        const float optionSpace = 149.0f;
-        const float controllerSpace = 69.0f;
+        const float optionSpace = 150.0f;
+        const float controllerSpace = 94.0f;
         // 調整用
-        //ImGui::SliderFloat("option Space", &optionSpace, 0, 1000);
-        //ImGui::SliderFloat("controller Space", &controllerSpace, 0, 1000);
+        //ImGui::DragFloat("option Space", &optionSpace, 0, 1000);
+        //ImGui::DragFloat("controller Space", &controllerSpace, 0, 1000);
 
         // tool bar
         ImGui::BeginGroup();
@@ -92,7 +93,24 @@ namespace bstorm {
           // info text
           ImGui::BeginGroup();
           ImGui::Text(" elapsed: %lld (%.1f fps)", playController->getElapsedFrame(), ImGui::GetIO().Framerate);
-          ImGui::Text(playController->isPackageFinished() ? " select package" : playController->isPaused() ? " pause" : " running");
+
+          {
+            const ScriptInfo& mainScriptInfo = playController->getMainScriptInfo();
+            auto scriptName = mainScriptInfo.title.empty() ? toUTF8(mainScriptInfo.path) : toUTF8(mainScriptInfo.title);
+            if (playController->isPackageFinished()) {
+              if (scriptName.empty()) {
+                ImGui::Text(" select script.");
+              } else {
+                ImGui::Text((" ready: " + scriptName).c_str());
+              }
+            } else {
+              if (playController->isPaused()) {
+                ImGui::Text((" pause: " + scriptName).c_str());
+              } else {
+                ImGui::Text((" running: " + scriptName).c_str());
+              }
+            }
+          }
           ImGui::EndGroup();
         }
         ImGui::SameLine(ImGui::GetContentRegionAvailWidth() - optionSpace - controllerSpace);
@@ -120,8 +138,9 @@ namespace bstorm {
             if (ImGui::Button(ICON_FA_REFRESH)) {
               playController->reload();
             }
-            if (ImGui::IsItemHovered()) {
-              ImGui::SetTooltip("reload package");
+            ImGui::SameLine();
+            if (ImGui::Button(ICON_FA_STOP)) {
+              playController->close();
             }
             ImGui::SameLine();
             if (playController->isPaused()) {
