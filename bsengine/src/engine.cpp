@@ -103,7 +103,7 @@ namespace bstorm {
           } else {
             gameState->stageSceneResult = STAGE_RESULT_PLAYER_DOWN;
           }
-          renderToTextureA1(TRANSITION_RENDER_TARGET_NAME, 0, MAX_RENDER_PRIORITY, true);
+          renderToTextureA1(getTransitionRenderTargetName(), 0, MAX_RENDER_PRIORITY, true);
           gameState->objTable->deleteStgSceneObject();
           gameState->scriptManager->closeStgSceneScript();
           gameState->stageMainScript.reset();
@@ -171,7 +171,7 @@ namespace bstorm {
     resetCamera();
 
     renderTargets.clear();
-    createRenderTarget(TRANSITION_RENDER_TARGET_NAME, getScreenWidth(), getScreenHeight(), nullptr);
+    createRenderTarget(getTransitionRenderTargetName(), getScreenWidth(), getScreenHeight(), nullptr);
     createRenderTarget(getReservedRenderTargetName(0), 1024, 512, nullptr);
     createRenderTarget(getReservedRenderTargetName(1), 1024, 512, nullptr);
     createRenderTarget(getReservedRenderTargetName(2), 1024, 512, nullptr);
