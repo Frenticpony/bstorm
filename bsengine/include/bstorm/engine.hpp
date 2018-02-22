@@ -99,6 +99,7 @@ namespace bstorm {
     int getMouseY();
     int getMouseMoveZ();
     void setMousePostionProvider(const std::shared_ptr<MousePositionProvider>& provider);
+    void setInputEnable(bool enable);
     /* logging function */
     void writeLog(const std::string&& msg, const std::shared_ptr<SourcePos>& srcPos);
     /* time */

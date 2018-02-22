@@ -31,9 +31,9 @@ namespace bstorm {
     auto windowFlags = ImGuiWindowFlags_NoResize |
       ImGuiWindowFlags_NoScrollbar |
       ImGuiWindowFlags_MenuBar |
-      ImGuiWindowFlags_NoScrollWithMouse |
-      ImGuiWindowFlags_NoTitleBar;
+      ImGuiWindowFlags_NoScrollWithMouse;
     if (ImGui::Begin("Game View", NULL, windowFlags)) {
+      playController->setInputEnable(ImGui::IsWindowFocused());
       {
         // menu bar
         ImGui::PopStyleVar();

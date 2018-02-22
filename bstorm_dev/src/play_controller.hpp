@@ -25,6 +25,7 @@ namespace bstorm {
     void setRenderIntersectionEnable(bool enable);
     bool isPlayerInvincibleEnabled() const;
     void setPlayerInvincibleEnable(bool enable);
+    void setInputEnable(bool enable);
     const ScriptInfo& getMainScriptInfo() const;
   private:
     std::shared_ptr<Engine> engine;
@@ -37,5 +38,6 @@ namespace bstorm {
     int screenHeight;
     bool renderIntersectionEnable;
     bool playerInvincibleEnable;
+    bool inputEnable;
   };
 }

@@ -35,7 +35,8 @@ namespace bstorm {
     padInputState(NULL),
     prevPadInputState(NULL),
     mouseMoveZ(0),
-    mousePosProvider(mousePosProvider)
+    mousePosProvider(mousePosProvider),
+    inputEnable(false)
   {
     try {
       if (FAILED(DirectInput8Create(GetModuleHandle(NULL), DIRECTINPUT_VERSION, IID_IDirectInput8, (LPVOID *)&dInput, NULL))) {
@@ -149,11 +150,13 @@ namespace bstorm {
   }
 
   KeyState InputDevice::getKeyState(Key k) {
+    if (!inputEnable) return KEY_FREE;
     if (k < 0 || k > 255) return KEY_FREE;
     return ((prevKeyInputStates[k] >> 6) | (keyInputStates[k] >> 7));
   }
 
   KeyState InputDevice::getMouseState(MouseButton btn) const {
+    if (!inputEnable) return KEY_FREE;
     if (btn < 0 || btn > 2) return KEY_FREE;
     //MOUSE_LEFT = 0;
     //MOUSE_RIGHT = 1;
@@ -162,6 +165,7 @@ namespace bstorm {
   }
 
   KeyState InputDevice::getPadButtonState(PadButton btn) const {
+    if (!inputEnable) return KEY_FREE;
     // 0-3は十字キー用
     switch (btn) {
       case 0: // left
@@ -180,6 +184,7 @@ namespace bstorm {
   }
 
   int InputDevice::getMouseX(int screenWidth, int screenHeight) const {
+    if (!inputEnable) return 0;
     int x = 0;
     int y;
     if (mousePosProvider) {
@@ -189,6 +194,7 @@ namespace bstorm {
   }
 
   int InputDevice::getMouseY(int screenWidth, int screenHeight) const {
+    if (!inputEnable) return 0;
     int x;
     int y = 0;
     if (mousePosProvider) {
@@ -198,11 +204,16 @@ namespace bstorm {
   }
 
   int InputDevice::getMouseMoveZ() const {
+    if (!inputEnable) return 0;
     return mouseMoveZ;
   }
 
   void InputDevice::setMousePositionProvider(const std::shared_ptr<MousePositionProvider>& provider) {
     mousePosProvider = provider;
+  }
+
+  void InputDevice::setInputEnable(bool enable) {
+    inputEnable = enable;
   }
 
   void InputDevice::initPadDevice() {

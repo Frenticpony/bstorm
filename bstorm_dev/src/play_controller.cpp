@@ -12,7 +12,8 @@ namespace bstorm {
     screenWidth(engine->getScreenWidth()),
     screenHeight(engine->getScreenHeight()),
     renderIntersectionEnable(false),
-    playerInvincibleEnable(false)
+    playerInvincibleEnable(false),
+    inputEnable(false)
   {
   }
 
@@ -77,6 +78,7 @@ namespace bstorm {
     }
     engine->setRenderIntersectionEnable(renderIntersectionEnable);
     engine->setForcePlayerInvincibleEnable(playerInvincibleEnable);
+    engine->setInputEnable(inputEnable);
   }
 
   bool PlayController::isPaused() const {
@@ -121,10 +123,17 @@ namespace bstorm {
   bool PlayController::isPlayerInvincibleEnabled() const {
     return playerInvincibleEnable;
   }
+
   void PlayController::setPlayerInvincibleEnable(bool enable) {
     playerInvincibleEnable = enable;
     engine->setForcePlayerInvincibleEnable(enable);
   }
+
+  void PlayController::setInputEnable(bool enable) {
+    inputEnable = enable;
+    engine->setInputEnable(enable);
+  }
+
   const ScriptInfo& PlayController::getMainScriptInfo() const {
     return mainScript;
   }

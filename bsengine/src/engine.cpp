@@ -269,6 +269,10 @@ namespace bstorm {
     gameState->inputDevice->setMousePositionProvider(mousePosProvider);
   }
 
+  void Engine::setInputEnable(bool enable) {
+    gameState->inputDevice->setInputEnable(enable);
+  }
+
   void Engine::writeLog(const std::string && msg, const std::shared_ptr<SourcePos>& srcPos) {
     Logger::WriteLog(std::move(
       Log(Log::Level::LV_USER)

@@ -40,6 +40,7 @@ namespace bstorm {
     int getMouseY(int screenWidth, int screenHeight) const;
     int getMouseMoveZ() const;
     void setMousePositionProvider(const std::shared_ptr<MousePositionProvider>& provider);
+    void setInputEnable(bool enable);
     static constexpr int MaxKey = 255;
     static constexpr int MaxPadButton = 255;
   private:
@@ -57,5 +58,6 @@ namespace bstorm {
     DIJOYSTATE* prevPadInputState;
     int mouseMoveZ;
     std::shared_ptr<MousePositionProvider> mousePosProvider;
+    bool inputEnable;
   };
 }
