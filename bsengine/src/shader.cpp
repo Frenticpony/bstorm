@@ -11,7 +11,9 @@ namespace bstorm {
     ID3DXBuffer* buf = NULL;
     if (FAILED(D3DXCreateEffectFromFile(d3DDevice, path.c_str(), NULL, NULL, precompiled ? D3DXSHADER_SKIPVALIDATION : 0, NULL, &(this->effect), &buf))) {
       buf->Release();
-      throw Log(Log::Level::LV_ERROR).setMessage(((char*)(buf->GetBufferPointer())));
+      throw Log(Log::Level::LV_ERROR)
+        .setMessage(((char*)(buf->GetBufferPointer())))
+        .setParam(Log::Param(Log::Param::Tag::SHADER, path));
     }
     safe_release(buf);
   }

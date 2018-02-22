@@ -190,6 +190,7 @@ namespace bstorm {
                 case Log::Param::Tag::SCRIPT:
                 case Log::Param::Tag::SOUND:
                 case Log::Param::Tag::RENDER_TARGET:
+                case Log::Param::Tag::SHADER:
                   color = IM_COL32(0x00, 0x85, 0xFF, 0xFF);
                   break;
                 default:

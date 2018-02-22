@@ -33,7 +33,8 @@ namespace bstorm {
         ENEMY_SHOT_DATA,
         ITEM_DATA,
         SCRIPT,
-        RENDER_TARGET
+        RENDER_TARGET,
+        SHADER
       };
       Param(Tag tag, const std::string& text);
       Param(Tag tag, const std::wstring& text);
