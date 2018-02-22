@@ -26,9 +26,9 @@
 #include <bstorm/game_state.hpp>
 
 namespace bstorm {
-  GameState::GameState(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevice9* d3DDevice, const std::shared_ptr<Renderer>& renderer, const std::shared_ptr<conf::KeyConfig>& keyConfig, const std::shared_ptr<int>& screenPosX, const std::shared_ptr<int>& screenPosY, const std::shared_ptr<int>& gameViewWidth, const std::shared_ptr<int>& gameViewHeight, Engine* engine) :
+  GameState::GameState(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevice9* d3DDevice, const std::shared_ptr<Renderer>& renderer, const std::shared_ptr<conf::KeyConfig>& keyConfig, const std::shared_ptr<MousePositionProvider>& mousePosProvider, Engine* engine) :
     fpsCounter(std::make_shared<FpsCounter>()),
-    inputDevice(std::make_shared<InputDevice>(hWnd, screenPosX, screenPosY, screenWidth, screenHeight, gameViewWidth, gameViewHeight)),
+    inputDevice(std::make_shared<InputDevice>(hWnd, mousePosProvider)),
     keyAssign(std::make_shared<KeyAssign>()),
     vKeyInputSource(std::make_shared<RealDeviceInputSource>(inputDevice, keyAssign)),
     soundDevice(std::make_shared<SoundDevice>(hWnd)),

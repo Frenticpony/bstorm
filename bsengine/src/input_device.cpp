@@ -26,7 +26,7 @@ namespace bstorm {
     return DIENUM_CONTINUE;
   }
 
-  InputDevice::InputDevice(HWND hWnd, const std::shared_ptr<int>& screenPosX, const std::shared_ptr<int>& screenPosY, int screenWidth, int screenHeight, const std::shared_ptr<int>& gameViewWidth, const std::shared_ptr<int>& gameViewHeight) :
+  InputDevice::InputDevice(HWND hWnd, const std::shared_ptr<MousePositionProvider>& mousePosProvider) :
     hWnd(hWnd),
     dInput(NULL),
     keyboardDevice(NULL),
@@ -35,12 +35,7 @@ namespace bstorm {
     padInputState(NULL),
     prevPadInputState(NULL),
     mouseMoveZ(0),
-    screenPosX(screenPosX),
-    screenPosY(screenPosY),
-    screenWidth(screenWidth),
-    screenHeight(screenHeight),
-    gameViewWidth(gameViewWidth),
-    gameViewHeight(gameViewHeight)
+    mousePosProvider(mousePosProvider)
   {
     try {
       if (FAILED(DirectInput8Create(GetModuleHandle(NULL), DIRECTINPUT_VERSION, IID_IDirectInput8, (LPVOID *)&dInput, NULL))) {
@@ -184,55 +179,30 @@ namespace bstorm {
     }
   }
 
-  void InputDevice::setScreenPos(const std::shared_ptr<int>& posX, const std::shared_ptr<int>& posY) {
-    screenPosX = posX;
-    screenPosY = posY;
-  }
-
-  void InputDevice::setGameViewSize(const std::shared_ptr<int>& width, const std::shared_ptr<int>& height) {
-    gameViewWidth = width;
-    gameViewHeight = height;
-  }
-
-  void InputDevice::getMousePos(int& x, int& y) const {
-    POINT point;
-    x = 0; y = 0;
-    if (GetCursorPos(&point)) {
-      if (ScreenToClient(hWnd, &point)) {
-        if (screenPosX) { point.x -= *screenPosX; }
-        if (screenPosY) { point.y -= *screenPosY; }
-        int windowWidth = screenWidth;
-        int windowHeight = screenHeight;
-        if (gameViewWidth && gameViewHeight) {
-          windowWidth = *gameViewWidth;
-          windowHeight = *gameViewHeight;
-        } else {
-          RECT clientRect;
-          if (GetClientRect(hWnd, &clientRect)) {
-            windowWidth = clientRect.right;
-            windowHeight = clientRect.bottom;
-          }
-        }
-        point.x = 1.0f * point.x * screenWidth / windowWidth;
-        point.y = 1.0f * point.y * screenHeight / windowHeight;
-        x = point.x; y = point.y;
-      }
+  int InputDevice::getMouseX(int screenWidth, int screenHeight) const {
+    int x = 0;
+    int y;
+    if (mousePosProvider) {
+      mousePosProvider->getMousePos(screenWidth, screenHeight, x, y);
     }
-  }
-
-  int InputDevice::getMouseX() const {
-    int x, y;
-    getMousePos(x, y);
     return x;
   }
 
-  int InputDevice::getMouseY() const {
-    int x, y;
-    getMousePos(x, y);
+  int InputDevice::getMouseY(int screenWidth, int screenHeight) const {
+    int x;
+    int y = 0;
+    if (mousePosProvider) {
+      mousePosProvider->getMousePos(screenWidth, screenHeight, x, y);
+    }
     return y;
   }
+
   int InputDevice::getMouseMoveZ() const {
     return mouseMoveZ;
+  }
+
+  void InputDevice::setMousePositionProvider(const std::shared_ptr<MousePositionProvider>& provider) {
+    mousePosProvider = provider;
   }
 
   void InputDevice::initPadDevice() {
@@ -270,6 +240,27 @@ namespace bstorm {
     if (FAILED(padDevice->EnumObjects(enumAxesCallback, padDevice, DIDFT_AXIS))) {
       safe_release(padDevice);
       return;
+    }
+  }
+
+  WinMousePositionProvider::WinMousePositionProvider(HWND hWnd) : hWnd(hWnd) {
+  }
+
+  void WinMousePositionProvider::getMousePos(int screenWidth, int screenHeight, int & x, int & y) {
+    POINT point;
+    x = 0; y = 0;
+    if (GetCursorPos(&point)) {
+      if (ScreenToClient(hWnd, &point)) {
+        int windowWidth = screenWidth;
+        int windowHeight = screenHeight;
+        RECT clientRect;
+        if (GetClientRect(hWnd, &clientRect)) {
+          windowWidth = clientRect.right;
+          windowHeight = clientRect.bottom;
+        }
+        x = 1.0f * point.x * screenWidth / windowWidth;
+        y = 1.0f * point.y * screenHeight / windowHeight;
+      }
     }
   }
 }

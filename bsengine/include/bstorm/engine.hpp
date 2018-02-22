@@ -14,6 +14,7 @@ namespace bstorm {
   class LostableGraphicResource;
   class LostableGraphicResourceManager;
   class KeyAssign;
+  class MousePositionProvider;
   class Renderer;
   class RenderTarget;
   class Shader;
@@ -75,8 +76,6 @@ namespace bstorm {
     void reset(int screenWidth, int screenHeight);
     int getScreenWidth() const;
     int getScreenHeight() const;
-    void setScreenPos(const std::shared_ptr<int>& posX, const std::shared_ptr<int>& posY);
-    void setGameViewSize(const std::shared_ptr<int>& width, const std::shared_ptr<int>& height);
     bool isRenderIntersectionEnabled() const;
     void setRenderIntersectionEnable(bool enable);
     bool isForcePlayerInvincibleEnabled() const;
@@ -99,6 +98,7 @@ namespace bstorm {
     int getMouseX();
     int getMouseY();
     int getMouseMoveZ();
+    void setMousePostionProvider(const std::shared_ptr<MousePositionProvider>& provider);
     /* logging function */
     void writeLog(const std::string&& msg, const std::shared_ptr<SourcePos>& srcPos);
     /* time */
@@ -383,11 +383,8 @@ namespace bstorm {
     HWND hWnd;
     std::unique_ptr<GraphicDevice> graphicDevice;
     std::unique_ptr<LostableGraphicResourceManager> lostableGraphicResourceManager;
-    std::shared_ptr<int> screenPosX;
-    std::shared_ptr<int> screenPosY;
-    std::shared_ptr<int> gameViewWidth;
-    std::shared_ptr<int> gameViewHeight;
     std::shared_ptr<conf::KeyConfig> defaultKeyConfig;
+    std::shared_ptr<MousePositionProvider> mousePosProvider;
     std::shared_ptr<Renderer> renderer;
     std::unordered_map<std::wstring, std::shared_ptr<RenderTarget>> renderTargets;
     std::shared_ptr<GameState> gameState;

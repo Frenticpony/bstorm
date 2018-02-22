@@ -24,6 +24,7 @@
 #include "camera_browser.hpp"
 #include "object_browser.hpp"
 #include "game_view.hpp"
+#include "game_view_mouse_position_provider.hpp"
 #include "play_controller.hpp"
 
 using namespace bstorm;
@@ -128,8 +129,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
     auto engine = std::make_shared<Engine>(hWnd, screenWidth, screenHeight, std::make_shared<conf::KeyConfig>(config.keyConfig));
     auto playController = std::make_shared<PlayController>(engine);
     auto gameView = std::make_shared<GameView>(windowWidth / 2 - 320, 60, 640, 480, playController);
-    engine->setScreenPos(gameView->getViewPosX(), gameView->getViewPosY());
-    engine->setGameViewSize(gameView->getViewWidth(), gameView->getViewHeight());
+    auto gameViewMousePosProvider = std::make_shared<GameViewMousePositionProvider>(hWnd);
+    gameViewMousePosProvider->setScreenPos(gameView->getViewPosX(), gameView->getViewPosY());
+    gameViewMousePosProvider->setGameViewSize(gameView->getViewWidth(), gameView->getViewHeight());
+    engine->setMousePostionProvider(gameViewMousePosProvider);
 
     ImGui_ImplDX9_Init(hWnd, engine->getGraphicDevice());
     {

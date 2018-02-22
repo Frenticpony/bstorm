@@ -103,6 +103,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
     UpdateWindow(hWnd);
 
     auto engine = std::make_shared<Engine>(hWnd, screenWidth, screenHeight, std::make_shared<conf::KeyConfig>(config.keyConfig));
+    engine->setMousePostionProvider(std::make_shared<WinMousePositionProvider>(hWnd));
 
     if (packageMainScriptPath.empty()) {
       throw Log(Log::Level::LV_ERROR).setMessage("package main script not specified.");

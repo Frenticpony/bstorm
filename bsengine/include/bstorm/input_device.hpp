@@ -13,21 +13,33 @@ struct IDirectInputDevice8;
 struct DIJOYSTATE;
 
 namespace bstorm {
+  class MousePositionProvider {
+  public:
+    virtual ~MousePositionProvider() {};
+    virtual void getMousePos(int screenWidth, int screenHeight, int &x, int &y) = 0;
+  };
+
+  class WinMousePositionProvider : public MousePositionProvider {
+  public:
+    WinMousePositionProvider(HWND hWnd);
+    void getMousePos(int screenWidth, int screenHeight, int &x, int &y) override;
+  private:
+    HWND hWnd;
+  };
+
   class InputDevice : private NonCopyable {
   public:
-    InputDevice(HWND hWnd, const std::shared_ptr<int>& screenPosX, const std::shared_ptr<int>& screenPosY, int screenWidth, int screenHeight, const std::shared_ptr<int>& gameViewWidth, const std::shared_ptr<int>& gameViewHeight);
+    InputDevice(HWND hWnd, const std::shared_ptr<MousePositionProvider>& mousePosProvider);
     ~InputDevice();
     void updateInputState();
     void resetInputState();
     KeyState getKeyState(Key key);
     KeyState getMouseState(MouseButton btn) const;
     KeyState getPadButtonState(PadButton btn) const;
-    void setScreenPos(const std::shared_ptr<int>& posX, const std::shared_ptr<int>& posY);
-    void setGameViewSize(const std::shared_ptr<int>& width, const std::shared_ptr<int>& height);
-    void getMousePos(int& x, int& y) const;
-    int getMouseX() const;
-    int getMouseY() const;
+    int getMouseX(int screenWidth, int screenHeight) const;
+    int getMouseY(int screenWidth, int screenHeight) const;
     int getMouseMoveZ() const;
+    void setMousePositionProvider(const std::shared_ptr<MousePositionProvider>& provider);
     static constexpr int MaxKey = 255;
     static constexpr int MaxPadButton = 255;
   private:
@@ -44,11 +56,6 @@ namespace bstorm {
     DIJOYSTATE* padInputState;
     DIJOYSTATE* prevPadInputState;
     int mouseMoveZ;
-    std::shared_ptr<int> screenPosX;
-    std::shared_ptr<int> screenPosY;
-    int screenWidth;
-    int screenHeight;
-    std::shared_ptr<int> gameViewWidth;
-    std::shared_ptr<int> gameViewHeight;
+    std::shared_ptr<MousePositionProvider> mousePosProvider;
   };
 }

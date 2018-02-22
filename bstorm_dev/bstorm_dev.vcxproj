@@ -183,6 +183,7 @@
     <ClCompile Include="src\camera_browser.cpp" />
     <ClCompile Include="src\common_data_browser.cpp" />
     <ClCompile Include="src\game_view.cpp" />
+    <ClCompile Include="src\game_view_mouse_position_provider.cpp" />
     <ClCompile Include="src\object_browser.cpp" />
     <ClCompile Include="src\play_controller.cpp" />
     <ClCompile Include="src\resource_monitor.cpp" />
@@ -194,6 +195,7 @@
     <ClCompile Include="src\util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\game_view_mouse_position_provider.hpp" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\camera_browser.hpp" />
     <ClInclude Include="src\common_data_browser.hpp" />

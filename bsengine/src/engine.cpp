@@ -166,7 +166,7 @@ namespace bstorm {
 
   void Engine::reset(int screenWidth, int screenHeight) {
     Logger::SetEnable(false);
-    gameState = std::make_shared<GameState>(screenWidth, screenHeight, getWindowHandle(), getGraphicDevice(), renderer, defaultKeyConfig, screenPosX, screenPosY, gameViewWidth, gameViewHeight, this);
+    gameState = std::make_shared<GameState>(screenWidth, screenHeight, getWindowHandle(), getGraphicDevice(), renderer, defaultKeyConfig, mousePosProvider, this);
     reset2DCamera();
     resetCamera();
 
@@ -186,18 +186,6 @@ namespace bstorm {
 
   int Engine::getScreenHeight() const {
     return gameState->screenHeight;
-  }
-
-  void Engine::setScreenPos(const std::shared_ptr<int>& posX, const std::shared_ptr<int>& posY) {
-    screenPosX = posX;
-    screenPosY = posY;
-    gameState->inputDevice->setScreenPos(posX, posY);
-  }
-
-  void Engine::setGameViewSize(const std::shared_ptr<int>& width, const std::shared_ptr<int>& height) {
-    gameViewWidth = width;
-    gameViewHeight = height;
-    gameState->inputDevice->setGameViewSize(width, height);
   }
 
   bool Engine::isRenderIntersectionEnabled() const {
@@ -265,15 +253,20 @@ namespace bstorm {
   }
 
   int Engine::getMouseX() {
-    return gameState->inputDevice->getMouseX();
+    return gameState->inputDevice->getMouseX(getScreenWidth(), getScreenHeight());
   }
 
   int Engine::getMouseY() {
-    return gameState->inputDevice->getMouseY();
+    return gameState->inputDevice->getMouseY(getScreenWidth(), getScreenHeight());
   }
 
   int Engine::getMouseMoveZ() {
     return gameState->inputDevice->getMouseMoveZ();
+  }
+
+  void Engine::setMousePostionProvider(const std::shared_ptr<MousePositionProvider>& provider) {
+    mousePosProvider = provider;
+    gameState->inputDevice->setMousePositionProvider(mousePosProvider);
   }
 
   void Engine::writeLog(const std::string && msg, const std::shared_ptr<SourcePos>& srcPos) {
