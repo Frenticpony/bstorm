@@ -32,7 +32,8 @@ namespace bstorm {
   void InputDoubleRow(const char* name, const char* id, double* f);
   void InputStringRow(const char* name, const char* id, size_t limit, std::string& str);
   void SliderFloatRow(const char* name, const char* id, float* f, float min, float max);
-  void SliderAngleRow(const char* name, const char* id, float* f);
+  void DragFloatRow(const char* name, const char* id, float* f, float speed, float min, float max);
+  void DragAngleRow(const char* name, const char* id, float* f);
   void CheckboxRow(const char* name, const char* id, bool* b);
   void ComboRow(const char* name, const char* id, int* i, const char* items);
   void ColorEdit3Row(const char* name, const char* id, float* color);

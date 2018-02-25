@@ -222,6 +222,13 @@ namespace bstorm {
   void SliderAngleRow(const char * name, const char * id, float * f) {
     SliderFloatRow(name, id, f, -180.f, 180.f);
   }
+  void DragFloatRow(const char * name, const char * id, float * f, float speed, float min, float max) {
+    ImGui::AlignFirstTextHeightToWidgets();
+    ImGui::Text(name); ImGui::NextColumn(); ImGui::PushItemWidth(-1); ImGui::DragFloat(id, f, speed, min, max); ImGui::PopItemWidth(); ImGui::NextColumn();
+  }
+  void DragAngleRow(const char * name, const char * id, float * f) {
+    DragFloatRow(name, id, f, 1, -360, 360);
+  }
   void CheckboxRow(const char * name, const char * id, bool * b) {
     ImGui::AlignFirstTextHeightToWidgets();
     ImGui::Text(name); ImGui::NextColumn(); ImGui::PushItemWidth(-1); ImGui::Checkbox(id, b); ImGui::PopItemWidth(); ImGui::NextColumn();

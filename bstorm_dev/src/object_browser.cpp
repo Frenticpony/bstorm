@@ -108,11 +108,11 @@ namespace bstorm {
             float angleX = objRender->getAngleX();
             float angleY = objRender->getAngleY();
             float angleZ = objRender->getAngleZ();
-            SliderAngleRow("angle-x", "##angleX", &angleX);
+            DragAngleRow("angle-x", "##angleX", &angleX);
             ImGui::Separator();
-            SliderAngleRow("angle-y", "##angleY", &angleY);
+            DragAngleRow("angle-y", "##angleY", &angleY);
             ImGui::Separator();
-            SliderAngleRow("angle-z", "##angleZ", &angleZ);
+            DragAngleRow("angle-z", "##angleZ", &angleZ);
             objRender->setAngleXYZ(angleX, angleY, angleZ);
           }
           ImGui::Separator();
@@ -300,7 +300,7 @@ namespace bstorm {
           {
             float angle = objMove->getAngle();
             if (auto modeA = std::dynamic_pointer_cast<MoveModeA>(mode)) {
-              SliderAngleRow("angle", "##moveAngle", &angle);
+              DragAngleRow("angle", "##moveAngle", &angle);
               modeA->setAngle(angle);
             } else {
               ViewFloatRow("angle", angle);
@@ -785,7 +785,7 @@ namespace bstorm {
           ImGui::Separator();
           {
             float laserAngle = objStLaser->getLaserAngle();
-            SliderAngleRow("laser-angle", "##stLaserLaserAngle", &laserAngle);
+            DragAngleRow("laser-angle", "##stLaserLaserAngle", &laserAngle);
             objStLaser->setLaserAngle(laserAngle);
           }
           ImGui::Separator();

@@ -29,7 +29,7 @@ namespace bstorm {
     ImGui::Separator();
     {
       float angleZ = camera2D.getAngleZ();
-      SliderAngleRow("angle-z", "##camera2DAngleZ", &angleZ);
+      DragAngleRow("angle-z", "##camera2DAngleZ", &angleZ);
       camera2D.setAngleZ(angleZ);
     }
     ImGui::Separator();
@@ -96,31 +96,31 @@ namespace bstorm {
     ImGui::Separator();
     {
       float azimuthAngle = camera3D.getAzimuthAngle();
-      SliderAngleRow("azimuth-angle", "##camera3DAzimuthAngle", &azimuthAngle);
+      DragAngleRow("azimuth-angle", "##camera3DAzimuthAngle", &azimuthAngle);
       camera3D.setAzimuthAngle(azimuthAngle);
     }
     ImGui::Separator();
     {
       float elevationAngle = camera3D.getElevationAngle();
-      SliderAngleRow("elevation-angle", "##camera3DElevationAngle", &elevationAngle);
+      DragAngleRow("elevation-angle", "##camera3DElevationAngle", &elevationAngle);
       camera3D.setElevationAngle(elevationAngle);
     }
     ImGui::Separator();
     {
       float yaw = camera3D.getYaw();
-      SliderAngleRow("yaw", "##camera3DYaw", &yaw);
+      DragAngleRow("yaw", "##camera3DYaw", &yaw);
       camera3D.setYaw(yaw);
     }
     ImGui::Separator();
     {
       float pitch = camera3D.getPitch();
-      SliderAngleRow("pitch", "##camera3DPitch", &pitch);
+      DragAngleRow("pitch", "##camera3DPitch", &pitch);
       camera3D.setPitch(pitch);
     }
     ImGui::Separator();
     {
       float roll = camera3D.getRoll();
-      SliderAngleRow("roll", "##camera3DRoll", &roll);
+      DragAngleRow("roll", "##camera3DRoll", &roll);
       camera3D.setRoll(roll);
     }
     ImGui::Separator();
