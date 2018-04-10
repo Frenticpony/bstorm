@@ -1,12 +1,12 @@
 [submodule "imgui"]
 	path = imgui
-	url = ssh://github.com/ocornut/imgui.git
+	url = https://github.com/ocornut/imgui.git
 [submodule "bsengine/tool/reflex"]
 	path = bsengine/tool/reflex
-	url = ssh://github.com/Genivia/RE-flex.git
+	url = https://github.com/Genivia/RE-flex.git
 [submodule "bstorm/IconFontCppHeaders"]
 	path = IconFontCppHeaders
-	url = ssh://github.com/juliettef/IconFontCppHeaders.git
+	url = https://github.com/juliettef/IconFontCppHeaders.git
 [submodule "json"]
 	path = json
-	url = ssh://github.com/nlohmann/json
+	url = https://github.com/nlohmann/json

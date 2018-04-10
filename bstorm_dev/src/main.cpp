@@ -120,7 +120,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
     UpdateWindow(hWnd);
 
     auto scriptExplorer = std::make_shared<ScriptExplorer>(windowWidth * 990 / 1280, 19, windowWidth * (1280 - 990) / 1280, windowHeight - 19);
-    logWindow->setInitWindowPos(0, windowHeight * 550 / 720, windowWidth * 990 / 1280, windowHeight * 172 / 720);
+    logWindow->setInitWindowPos(0, windowHeight * 640 / 900, windowWidth * 1240 / 1600, windowHeight * 259 / 900);
     auto resourceMonitor = std::make_shared<ResourceMonitor>(0, 19, 300, 530);
     auto commonDataBrowser = std::make_shared<CommonDataBrowser>(300, 19, 300, 530);
     auto userDefDataBrowser = std::make_shared<UserDefDataBrowser>(600, 19, 300, 530);
@@ -134,6 +134,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
     gameViewMousePosProvider->setGameViewSize(gameView->getViewWidth(), gameView->getViewHeight());
     engine->setMousePostionProvider(gameViewMousePosProvider);
 
+
+    ImGui::CreateContext();
     ImGui_ImplDX9_Init(hWnd, engine->getGraphicDevice());
     {
       // フォント設定
@@ -227,7 +229,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
         ImGui::ShowFontSelector("font selector");
         ImGui::ShowUserGuide();
 #endif
+        ImGui::EndFrame();
         ImGui::Render();
+        ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
         d3DDevice->EndScene();
         switch (d3DDevice->Present(NULL, NULL, NULL, NULL)) {
           case D3DERR_DEVICELOST:
@@ -256,5 +260,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
   }
   Logger::Shutdown();
   ImGui_ImplDX9_Shutdown();
+  ImGui::DestroyContext();
   return (int)msg.wParam;
 }
