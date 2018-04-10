@@ -8,6 +8,7 @@
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/render_target.hpp>
 #include <bstorm/config.hpp>
+#include <bstorm/const.hpp>
 #include <bstorm/th_dnh_def.hpp>
 
 #include <imgui.h>
@@ -15,7 +16,6 @@
 #include <IconsFontAwesome_c.h>
 #include "../../glyph_ranges_ja.hpp"
 #include "../../version.hpp"
-#include "../resource.h"
 #include "log_window.hpp"
 #include "script_explorer.hpp"
 #include "resource_monitor.hpp"
@@ -75,7 +75,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
   HWND hWnd = NULL;
   MSG msg;
   try {
-    conf::BstormConfig config = loadBstormConfig(configFilePath, useBinaryFormat, IDR_HTML1);
+    conf::BstormConfig config = loadBstormConfig(configFilePath, useBinaryFormat, DEFAULT_CONFIG_PATH);
     if (config.options.saveLogFile) {
       try {
         Logger::Init(std::make_shared<FileLogger>(logFilePath, logWindow));

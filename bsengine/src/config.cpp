@@ -9,7 +9,7 @@
 #include "../../version.hpp"
 
 namespace bstorm {
-  conf::BstormConfig loadBstormConfig(const std::string & path, bool isBinaryFormat, int defaultConfigResourceId) noexcept(false) {
+  conf::BstormConfig loadBstormConfig(const std::string & path, bool isBinaryFormat, const std::string& defaultConfigPath) noexcept(false) {
     conf::BstormConfig config;
     try {
       if (FILE* fp = fopen(path.c_str(), "r")) {
@@ -26,8 +26,11 @@ namespace bstorm {
           configFileIn.close();
         }
       } else {
-        std::string defaultConfigText = readResourceText(defaultConfigResourceId);
-        config = conf::json::parse(defaultConfigText);
+        std::ifstream configFileIn(defaultConfigPath);
+        conf::json j;
+        configFileIn >> j;
+        config = j;
+        configFileIn.close();
       }
     } catch (...) {
       throw Log(Log::Level::LV_ERROR)

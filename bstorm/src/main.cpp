@@ -8,10 +8,10 @@
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/render_target.hpp>
 #include <bstorm/config.hpp>
+#include <bstorm/const.hpp>
 #include <bstorm/th_dnh_def.hpp>
 
 #include "../../version.hpp"
-#include "../resource.h"
 
 using namespace bstorm;
 
@@ -55,7 +55,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
   HWND hWnd = NULL;
   MSG msg;
   try {
-    conf::BstormConfig config = loadBstormConfig(configFilePath, useBinaryFormat, IDR_HTML1);
+    conf::BstormConfig config = loadBstormConfig(configFilePath, useBinaryFormat, DEFAULT_CONFIG_PATH);
 
     if (config.options.saveLogFile) {
       try {

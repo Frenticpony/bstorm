@@ -247,19 +247,4 @@ namespace bstorm {
     }
     return includeePath;
   }
-
-  std::string readResourceText(int resourceId) {
-    HINSTANCE hInstance = GetModuleHandle(NULL);
-    if (HRSRC hResource = FindResource(hInstance, MAKEINTRESOURCE(resourceId), RT_HTML)) {
-      if (DWORD resourceSize = SizeofResource(hInstance, hResource)) {
-        if (HGLOBAL hMem = LoadResource(hInstance, hResource)) {
-          if (LPVOID pMem = LockResource(hMem)) {
-            return std::string((char*)pMem, resourceSize);
-          }
-          FreeResource(hMem);
-        }
-      }
-    }
-    return "";
-  }
 }

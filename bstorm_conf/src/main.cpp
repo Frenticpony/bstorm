@@ -10,13 +10,13 @@
 #include <bstorm/key_name_map.hpp>
 #include <bstorm/logger.hpp>
 #include <bstorm/config.hpp>
+#include <bstorm/const.hpp>
 #include <bstorm/util.hpp>
 
 #include "../../imgui/examples/directx9_example/imgui_impl_dx9.h"
 #include "../../IconFontCppHeaders/IconsFontAwesome_c.h"
 #include "../../glyph_ranges_ja.hpp"
 #include "../../version.hpp"
-#include "../resource.h"
 
 using namespace bstorm;
 
@@ -154,7 +154,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
       }
     }
 
-    conf::BstormConfig config = loadBstormConfig(configFilePath, useBinaryFormat, IDR_HTML1);
+    conf::BstormConfig config = loadBstormConfig(configFilePath, useBinaryFormat, DEFAULT_CONFIG_PATH);
 
     /* message loop */
     while (true) {
