@@ -36,7 +36,7 @@ namespace bstorm {
     prevPadInputState(NULL),
     mouseMoveZ(0),
     mousePosProvider(mousePosProvider),
-    inputEnable(false)
+    inputEnable(true)
   {
     try {
       if (FAILED(DirectInput8Create(GetModuleHandle(NULL), DIRECTINPUT_VERSION, IID_IDirectInput8, (LPVOID *)&dInput, NULL))) {
