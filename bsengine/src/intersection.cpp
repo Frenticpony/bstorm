@@ -253,7 +253,7 @@ namespace bstorm {
         }
         isInitialized = true;
       }
-      D3DXMATRIX world = rotScaleTrans(params.Circle.x, params.Circle.y, 0, 0, 0, 0, params.Circle.r, params.Circle.r, 1);
+      D3DXMATRIX world = scaleRotTrans(params.Circle.x, params.Circle.y, 0, 0, 0, 0, params.Circle.r, params.Circle.r, 1);
       renderer->renderPrim2D(D3DPT_TRIANGLEFAN, vertices.size(), vertices.data(), NULL, BLEND_ALPHA, world, std::shared_ptr<Shader>(), permitCamera, false);
     } else if (type == Type::RECT) {
       static std::array<Vertex, 4> vertices;

@@ -107,7 +107,7 @@ namespace bstorm {
 
         /* 配置 */
         // NOTE : fixedAngleじゃないなら移動方向に向ける
-        D3DXMATRIX world = rotScaleTrans(getX(), getY(), 0.0f,
+        D3DXMATRIX world = scaleRotTrans(getX(), getY(), 0.0f,
                                          getAngleX(), getAngleY(), getAngleZ() + (shotData->fixedAngle ? 0.0f : getAngle() + 90.0f),
                                          isDelay() ? delayScale : getScaleX(), isDelay() ? delayScale : getScaleY(), 1.0f);
 
@@ -775,7 +775,7 @@ namespace bstorm {
       /* 配置 */
       float rectWidth = abs(vertices[0].x - vertices[1].x);
       float rectHeight = abs(vertices[0].y - vertices[2].y);
-      D3DXMATRIX world = rotScaleTrans(centerX, centerY, 0.0f, 0.0f, 0.0f, angle + 90.0f, width / rectWidth, length / rectHeight, 1.0f);
+      D3DXMATRIX world = scaleRotTrans(centerX, centerY, 0.0f, 0.0f, 0.0f, angle + 90.0f, width / rectWidth, length / rectHeight, 1.0f);
 
       if (auto state = getGameState()) {
         state->renderer->renderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData->texture->getTexture(), laserBlend, world, getAppliedShader(), isPermitCamera(), false);
@@ -832,7 +832,7 @@ namespace bstorm {
           float rectWidth = abs(vertices[0].x - vertices[1].x);
           float rectHeight = abs(vertices[0].y - vertices[2].y);
           float renderWidth = getRenderWidth() * 1.3125f; // レーザーの幅よりちょっと大きい
-          auto world = rotScaleTrans(head.x, head.y, 0.0f,
+          auto world = scaleRotTrans(head.x, head.y, 0.0f,
                                      0.0f, 0.0f, getLaserAngle() - 90.0f,
                                      renderWidth / rectWidth, renderWidth / rectHeight, 1.0f);
 

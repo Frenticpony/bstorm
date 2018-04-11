@@ -266,10 +266,10 @@ namespace bstorm {
           }
           for (int k = 0; k < cnt; k++) {
             auto bodyFont = bodyFonts[idx];
-            // 初めに中心座標を原点に持ってきてから回転・拡大したのち元の位置に戻す
-            D3DXMATRIX trans = rotScaleTrans(colX + bodyFont->getPrintOffsetX() - centerX, lineY + bodyFont->getPrintOffsetY() - centerY, getZ(), 0, 0, 0, 1, 1, 1);
-            D3DXMATRIX rotScale = rotScaleTrans(centerX, centerY, 0, getAngleX(), getAngleY(), getAngleZ(), getScaleX(), getScaleY(), getScaleZ());
-            D3DXMATRIX world = trans * rotScale;
+            // 初めに中心座標を原点に持ってきてから拡大・回転したのち元の位置に戻す
+            D3DXMATRIX trans = scaleRotTrans(colX + bodyFont->getPrintOffsetX() - centerX, lineY + bodyFont->getPrintOffsetY() - centerY, getZ(), 0, 0, 0, 1, 1, 1);
+            D3DXMATRIX scaleRot = scaleRotTrans(centerX, centerY, 0, getAngleX(), getAngleY(), getAngleZ(), getScaleX(), getScaleY(), getScaleZ());
+            D3DXMATRIX world = trans * scaleRot;
             renderFont(bodyFont, world);
             if (ruby != rubyFonts.end()) {
               if (ruby->begin == idx) {
@@ -288,8 +288,8 @@ namespace bstorm {
                   const int rubyY = lineY - ruby->text[0]->getNextLineOffsetY();
                   float rubyX = colX;
                   for (auto rubyFont : ruby->text) {
-                    D3DXMATRIX trans = rotScaleTrans(rubyX + rubyFont->getPrintOffsetX() - centerX, rubyY + rubyFont->getPrintOffsetY() - centerY, getZ(), 0, 0, 0, 1, 1, 1);
-                    D3DXMATRIX world = trans * rotScale;
+                    D3DXMATRIX trans = scaleRotTrans(rubyX + rubyFont->getPrintOffsetX() - centerX, rubyY + rubyFont->getPrintOffsetY() - centerY, getZ(), 0, 0, 0, 1, 1, 1);
+                    D3DXMATRIX world = trans * scaleRot;
                     renderFont(rubyFont, world);
                     rubyX += rubyFont->getRightCharOffsetX() + rubySidePitch;
                   }

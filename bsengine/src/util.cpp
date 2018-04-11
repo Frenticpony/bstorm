@@ -156,7 +156,7 @@ namespace bstorm {
     s.erase(it_right, s.end());
   }
 
-  D3DXMATRIX rotScaleTrans(float x, float y, float z, float rx, float ry, float rz, float sx, float sy, float sz) {
+  D3DXMATRIX scaleRotTrans(float x, float y, float z, float rx, float ry, float rz, float sx, float sy, float sz) {
     D3DXMATRIX mat;
     //回転
     D3DXMatrixRotationYawPitchRoll(&mat, D3DXToRadian(ry), D3DXToRadian(rx), D3DXToRadian(rz));

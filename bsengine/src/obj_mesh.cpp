@@ -21,7 +21,7 @@ namespace bstorm {
   void ObjMesh::render() {
     if (mesh) {
       if (auto gameState = getGameState()) {
-        D3DXMATRIX world = rotScaleTrans(getX(), getY(), getZ(), getAngleX(), getAngleY(), getAngleZ(), getScaleX(), getScaleY(), getScaleZ());
+        D3DXMATRIX world = scaleRotTrans(getX(), getY(), getZ(), getAngleX(), getAngleY(), getAngleZ(), getScaleX(), getScaleY(), getScaleZ());
         const auto& rgb = getColor();
         D3DCOLORVALUE col = D3DCOLORVALUE{ rgb.getR() / 255.0f, rgb.getG() / 255.0f, rgb.getB() / 255.0f, getAlpha() / 255.0f };
         gameState->renderer->renderMesh(mesh, col, getBlendType(), world, getAppliedShader(), isZWriteEnabled(), isZTestEnabled(), isFogEnabled());

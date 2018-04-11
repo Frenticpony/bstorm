@@ -143,7 +143,7 @@ namespace bstorm {
   }
 
   void ObjPrim2D::render() {
-    D3DXMATRIX world = rotScaleTrans(getX(), getY(), getZ(), getAngleX(), getAngleY(), getAngleZ(), getScaleX(), getScaleY(), getScaleZ());
+    D3DXMATRIX world = scaleRotTrans(getX(), getY(), getZ(), getAngleX(), getAngleY(), getAngleZ(), getScaleX(), getScaleY(), getScaleZ());
     if (auto state = getGameState()) {
       state->renderer->renderPrim2D(getD3DPrimitiveType(), vertices.size(), vertices.data(), getD3DTexture(), getBlendType(), world, getAppliedShader(), isPermitCamera(), true);
     }
@@ -255,7 +255,7 @@ namespace bstorm {
     // 1 4-5
 
     // 座標変換
-    D3DXMATRIX mat = rotScaleTrans(getX(), getY(), getZ(), getAngleX(), getAngleY(), getAngleZ(), getScaleX(), getScaleY(), getScaleZ());
+    D3DXMATRIX mat = scaleRotTrans(getX(), getY(), getZ(), getAngleX(), getAngleY(), getAngleZ(), getScaleX(), getScaleY(), getScaleZ());
     D3DXMATRIX vecs;
     // 1行目:左上
     // 2行目:左下
@@ -316,7 +316,7 @@ namespace bstorm {
   }
 
   void ObjPrim3D::render() {
-    D3DXMATRIX world = rotScaleTrans(getX(), getY(), getZ(), getAngleX(), getAngleY(), getAngleZ(), getScaleX(), getScaleY(), getScaleZ());
+    D3DXMATRIX world = scaleRotTrans(getX(), getY(), getZ(), getAngleX(), getAngleY(), getAngleZ(), getScaleX(), getScaleY(), getScaleZ());
     if (auto state = getGameState()) {
       state->renderer->renderPrim3D(getD3DPrimitiveType(), vertices.size(), vertices.data(), getD3DTexture(), getBlendType(), world, getAppliedShader(), isZWriteEnabled(), isZTestEnabled(), isFogEnabled(), isBillboardEnabled());
     }

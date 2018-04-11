@@ -136,7 +136,7 @@ namespace bstorm {
 
       bool isOut = getY() <= 0;
       /* 配置 */
-      D3DXMATRIX world = rotScaleTrans(getX(), isOut ? ((itemData->out.bottom - itemData->out.top) / 2.0f) : getY(), 0, getAngleX(), getAngleY(), getAngleZ(), getScaleX() * itemScale, getScaleY() * itemScale, 1.0f);
+      D3DXMATRIX world = scaleRotTrans(getX(), isOut ? ((itemData->out.bottom - itemData->out.top) / 2.0f) : getY(), 0, getAngleX(), getAngleY(), getAngleZ(), getScaleX() * itemScale, getScaleY() * itemScale, 1.0f);
 
       const auto& rect = isOut ? itemData->out
         : (animationIdx >= 0 && animationIdx < itemData->animationData.size()) ? itemData->animationData[animationIdx].rect

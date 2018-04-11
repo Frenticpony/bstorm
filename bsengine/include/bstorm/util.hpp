@@ -101,7 +101,7 @@ namespace bstorm {
   void getDirs(const std::wstring& dir, std::vector<std::wstring>& dirList, bool doRecursive);
   void getDirsRecursively(const std::wstring& dir, std::vector<std::wstring>& dirList);
 
-  D3DXMATRIX rotScaleTrans(float x, float y, float z, float rx, float ry, float rz, float sx, float sy, float sz);
+  D3DXMATRIX scaleRotTrans(float x, float y, float z, float rx, float ry, float rz, float sx, float sy, float sz);
   std::array<Vertex, 4> rectToVertices(D3DCOLOR color, int textureWidth, int textureHeight, const Rect<int> &rect);
 
   inline int nextPow2(int x) {
