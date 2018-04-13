@@ -1,5 +1,6 @@
-#include <bstorm/util.hpp>
 #include <bstorm/logger.hpp>
+
+#include <bstorm/util.hpp>
 
 namespace bstorm {
   void Logger::WriteLog(Log& lg) {

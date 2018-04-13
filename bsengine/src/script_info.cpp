@@ -1,5 +1,6 @@
-#include <bstorm/dnh_const.hpp>
 #include <bstorm/script_info.hpp>
+
+#include <bstorm/dnh_const.hpp>
 
 namespace bstorm {
   int getScriptTypeConstFromName(const std::wstring& name) {

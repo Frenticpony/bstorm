@@ -1,8 +1,4 @@
-﻿#pragma once
-
-#include <algorithm>
-#include <imgui.h>
-#include <IconsFontAwesome_c.h>
+﻿#include "resource_monitor.hpp"
 
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/util.hpp>
@@ -12,7 +8,9 @@
 #include <bstorm/game_state.hpp>
 #include <bstorm/engine.hpp>
 
-#include "resource_monitor.hpp"
+#include <algorithm>
+#include <imgui.h>
+#include <IconsFontAwesome_c.h>
 
 namespace bstorm {
   static void drawRect(float offsetX, float offsetY, const Rect<int>& rect, ImU32 color) {

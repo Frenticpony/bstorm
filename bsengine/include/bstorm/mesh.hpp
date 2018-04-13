@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <memory>
+#include <unordered_map>
 #include <d3dx9.h>
 
 namespace bstorm {

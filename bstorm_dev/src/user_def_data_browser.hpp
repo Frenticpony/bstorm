@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <memory>
+
 namespace bstorm {
   class Engine;
   class ShotData;

@@ -1,5 +1,6 @@
-﻿#include <bstorm/util.hpp>
-#include <bstorm/sem_checker.hpp>
+﻿#include <bstorm/sem_checker.hpp>
+
+#include <bstorm/util.hpp>
 
 namespace bstorm {
   static Log invalid_return(const std::shared_ptr<SourcePos>& srcPos) {

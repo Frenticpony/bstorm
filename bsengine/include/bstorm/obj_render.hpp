@@ -1,14 +1,15 @@
 ﻿#pragma once
 
+#include <bstorm/type.hpp>
+#include <bstorm/const.hpp>
+#include <bstorm/obj.hpp>
+
 #include <array>
 #include <memory>
 #include <string>
 #include <vector>
+#include <list>
 #include <d3d9.h>
-
-#include <bstorm/type.hpp>
-#include <bstorm/const.hpp>
-#include <bstorm/obj.hpp>
 
 namespace bstorm {
   class Shader;

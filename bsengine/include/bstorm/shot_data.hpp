@@ -1,13 +1,13 @@
 ﻿#pragma once
 
+#include <bstorm/type.hpp>
+#include <bstorm/file_loader.hpp>
+
 #include <memory>
 #include <map>
 #include <string>
 #include <unordered_set>
 #include <unordered_map>
-
-#include <bstorm/type.hpp>
-#include <bstorm/file_loader.hpp>
 
 namespace bstorm {
   struct ShotCollision {

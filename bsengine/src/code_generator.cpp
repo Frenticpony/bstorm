@@ -1,6 +1,7 @@
-﻿#include <bstorm/const.hpp>
+﻿#include <bstorm/code_generator.hpp>
+
+#include <bstorm/const.hpp>
 #include <bstorm/util.hpp>
-#include <bstorm/code_generator.hpp>
 
 namespace bstorm {
   static std::string varname(const std::string& name) {

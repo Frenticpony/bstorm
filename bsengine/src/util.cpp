@@ -1,8 +1,7 @@
-﻿#include <sstream>
-#include <regex>
-#include <vector>
+﻿#include <bstorm/util.hpp>
 
-#include <bstorm/util.hpp>
+#include <sstream>
+#include <regex>
 
 namespace bstorm {
   D3DCOLOR toD3DCOLOR(const ColorRGB& rgb, int alpha) {

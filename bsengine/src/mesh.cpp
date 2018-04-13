@@ -1,7 +1,4 @@
-#include <unordered_map>
-#include <unordered_set>
-#include <array>
-#include <d3dx9.h>
+#include <bstorm/mesh.hpp>
 
 #include <bstorm/util.hpp>
 #include <bstorm/logger.hpp>
@@ -9,7 +6,11 @@
 #include <bstorm/mqo.hpp>
 #include <bstorm/file_loader.hpp>
 #include <bstorm/parser.hpp>
-#include <bstorm/mesh.hpp>
+
+#include <unordered_map>
+#include <unordered_set>
+#include <array>
+#include <d3dx9.h>
 
 namespace bstorm {
   static inline D3DXVECTOR3 toD3DXVECTOR3(const MqoVec3& vec) {

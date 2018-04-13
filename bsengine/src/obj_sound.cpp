@@ -1,6 +1,7 @@
-﻿#include <bstorm/dnh_const.hpp>
+﻿#include <bstorm/obj_sound.hpp>
+
+#include <bstorm/dnh_const.hpp>
 #include <bstorm/sound_device.hpp>
-#include <bstorm/obj_sound.hpp>
 #include <bstorm/game_state.hpp>
 
 namespace bstorm {

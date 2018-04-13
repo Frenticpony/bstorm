@@ -1,14 +1,12 @@
 ﻿#pragma once
 
+#include <bstorm/non_copyable.hpp>
+
 #include <windows.h>
 #include <unordered_map>
 #include <string>
 #include <memory>
-
-#include <bstorm/non_copyable.hpp>
-
-struct IDirectSound8;
-struct IDirectSoundBuffer8;
+#include <dsound.h>
 
 namespace bstorm {
   IDirectSoundBuffer8* readWaveFile(const std::wstring& path, IDirectSound8* dSound);

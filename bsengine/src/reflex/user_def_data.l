@@ -5,13 +5,13 @@
 %option dotall
 
 %top{
-#include <string>
-#include <memory>
-
 #include <bstorm/util.hpp>
 #include <bstorm/logger.hpp>
 #include <bstorm/source_map.hpp>
 #include <bstorm/file_loader.hpp>
+
+#include <string>
+#include <memory>
 %}
 
 %init {

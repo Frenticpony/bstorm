@@ -1,5 +1,6 @@
-#include <bstorm/node.hpp>
 #include <bstorm/env.hpp>
+
+#include <bstorm/node.hpp>
 
 namespace bstorm {
   std::shared_ptr<NodeDef> Env::findDef(const std::string & name) const {

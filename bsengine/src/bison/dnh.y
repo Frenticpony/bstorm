@@ -35,11 +35,12 @@ namespace bstorm {
 }
 
 %code { // dnh.tab.cpp after #include dnh.tab.hpp
-#include <regex>
+#include "../reflex/dnh_lexer.hpp"
+
 #include <bstorm/logger.hpp>
 #include <bstorm/util.hpp>
 
-#include "../reflex/dnh_lexer.hpp"
+#include <regex>
 
 using namespace bstorm;
 

@@ -1,12 +1,12 @@
 ﻿#pragma once
 
-#include <string>
-#include <stack>
-#include <unordered_map>
-
 #include <bstorm/env.hpp>
 #include <bstorm/node.hpp>
 #include <bstorm/source_map.hpp>
+
+#include <string>
+#include <stack>
+#include <unordered_map>
 
 namespace bstorm {
   class CodeGenerator : public NodeTraverser {

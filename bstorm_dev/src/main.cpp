@@ -1,5 +1,13 @@
-﻿#include <crtdbg.h>
-#include <string>
+﻿#include "log_window.hpp"
+#include "script_explorer.hpp"
+#include "resource_monitor.hpp"
+#include "common_data_browser.hpp"
+#include "user_def_data_browser.hpp"
+#include "camera_browser.hpp"
+#include "object_browser.hpp"
+#include "game_view.hpp"
+#include "game_view_mouse_position_provider.hpp"
+#include "play_controller.hpp"
 
 #include <bstorm/logger.hpp>
 #include <bstorm/engine.hpp>
@@ -10,22 +18,14 @@
 #include <bstorm/config.hpp>
 #include <bstorm/const.hpp>
 #include <bstorm/th_dnh_def.hpp>
+#include "../../version.hpp"
 
+#include "../../glyph_ranges_ja.hpp"
 #include <imgui.h>
 #include "../../imgui/examples/directx9_example/imgui_impl_dx9.h"
 #include <IconsFontAwesome_c.h>
-#include "../../glyph_ranges_ja.hpp"
-#include "../../version.hpp"
-#include "log_window.hpp"
-#include "script_explorer.hpp"
-#include "resource_monitor.hpp"
-#include "common_data_browser.hpp"
-#include "user_def_data_browser.hpp"
-#include "camera_browser.hpp"
-#include "object_browser.hpp"
-#include "game_view.hpp"
-#include "game_view_mouse_position_provider.hpp"
-#include "play_controller.hpp"
+#include <crtdbg.h>
+#include <string>
 
 using namespace bstorm;
 

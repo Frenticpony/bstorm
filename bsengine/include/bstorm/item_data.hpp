@@ -1,17 +1,17 @@
 ﻿#pragma once
 
+#include <bstorm/type.hpp>
+
 #include <string>
 #include <memory>
 #include <map>
 #include <unordered_set>
 #include <unordered_map>
 
-#include <bstorm/type.hpp>
-#include <bstorm/file_loader.hpp>
-
 namespace bstorm {
   struct SourcePos;
   class Texture;
+  class FileLoader;
   class ItemData {
   public:
     ItemData();

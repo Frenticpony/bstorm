@@ -1,4 +1,4 @@
-﻿#include <exception>
+﻿#include <bstorm/script.hpp>
 
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/const.hpp>
@@ -15,7 +15,7 @@
 #include <bstorm/logger.hpp>
 #include <bstorm/engine.hpp>
 #include <bstorm/fps_counter.hpp>
-#include <bstorm/script.hpp>
+#include <exception>
 
 #include "runtime.h"
 

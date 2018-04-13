@@ -1,9 +1,10 @@
-﻿#include <algorithm>
+﻿#include <bstorm/obj_move.hpp>
 
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/util.hpp>
-#include <bstorm/obj_move.hpp>
 #include <bstorm/obj_shot.hpp>
+
+#include <algorithm>
 
 namespace bstorm {
   ObjMove::ObjMove(ObjRender *obj) :
@@ -11,6 +12,16 @@ namespace bstorm {
     mode(std::make_shared<MoveModeA>())
   {
   }
+
+  float ObjMove::getMoveX() const { return obj->getX(); }
+
+  void ObjMove::setMoveX(float x) { obj->setX(x); }
+
+  float ObjMove::getMoveY() const { return obj->getY(); }
+
+  void ObjMove::setMoveY(float y) { obj->setY(y); }
+
+  void ObjMove::setMovePosition(float x, float y) { obj->setPosition(x, y, obj->getZ()); }
 
   float ObjMove::getSpeed() const {
     return mode->getSpeed();

@@ -1,6 +1,7 @@
 ﻿#pragma once
 
-#include <bstorm/obj_render.hpp>
+#include <memory>
+#include <list>
 
 namespace bstorm {
   class MoveMode {
@@ -93,6 +94,7 @@ namespace bstorm {
     float sinAngle;
   };
 
+  class ObjRender;
   class ObjMove;
   class MovePattern {
   public:
@@ -138,11 +140,11 @@ namespace bstorm {
   class ObjMove {
   public:
     ObjMove(ObjRender *obj);
-    float getMoveX() const { return obj->getX(); }
-    void setMoveX(float x) { obj->setX(x); }
-    float getMoveY() const { return obj->getY(); }
-    void setMoveY(float y) { obj->setY(y); }
-    void setMovePosition(float x, float y) { obj->setPosition(x, y, obj->getZ()); }
+    float getMoveX() const;
+    void setMoveX(float x);
+    float getMoveY() const;
+    void setMoveY(float y);
+    void setMovePosition(float x, float y);
     float getSpeed() const;
     void setSpeed(float speed);
     float getAngle() const;

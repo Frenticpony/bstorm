@@ -1,13 +1,14 @@
 ﻿#pragma once
 
+#include <bstorm/type.hpp>
+
 #include <string>
 #include <array>
+#include <vector>
 #include <windows.h>
 #include <algorithm>
 #include <unordered_set>
 #include <d3dx9.h>
-
-#include <bstorm/type.hpp>
 
 namespace bstorm {
   template <class T>
@@ -101,6 +102,7 @@ namespace bstorm {
   void getDirs(const std::wstring& dir, std::vector<std::wstring>& dirList, bool doRecursive);
   void getDirsRecursively(const std::wstring& dir, std::vector<std::wstring>& dirList);
 
+  // 拡大、回転、移動の順番で掛けた行列を作る
   D3DXMATRIX scaleRotTrans(float x, float y, float z, float rx, float ry, float rz, float sx, float sy, float sz);
   std::array<Vertex, 4> rectToVertices(D3DCOLOR color, int textureWidth, int textureHeight, const Rect<int> &rect);
 

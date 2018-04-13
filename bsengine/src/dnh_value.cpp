@@ -1,5 +1,6 @@
-﻿#include <bstorm/util.hpp>
-#include <bstorm/dnh_value.hpp>
+﻿#include <bstorm/dnh_value.hpp>
+
+#include <bstorm/util.hpp>
 
 namespace bstorm {
   std::unique_ptr<DnhValue> DnhValue::get(lua_State* L, int idx) {

@@ -1,13 +1,12 @@
 ﻿#pragma once
 
-#include <list>
-#include <deque>
-
 #include <bstorm/type.hpp>
 #include <bstorm/obj_render.hpp>
 #include <bstorm/obj_move.hpp>
 #include <bstorm/obj_col.hpp>
-#include <bstorm/intersection.hpp>
+
+#include <list>
+#include <deque>
 
 namespace bstorm {
   class ShotData;

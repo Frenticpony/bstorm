@@ -1,6 +1,4 @@
-﻿#include <memory>
-#include <imgui.h>
-#include <IconsFontAwesome_c.h>
+﻿#include "script_explorer.hpp"
 
 #include <bstorm/file_loader.hpp>
 #include <bstorm/script_info.hpp>
@@ -10,7 +8,9 @@
 #include <bstorm/const.hpp>
 #include <bstorm/script.hpp>
 
-#include "script_explorer.hpp"
+#include <memory>
+#include <imgui.h>
+#include <IconsFontAwesome_c.h>
 
 static std::string join(const std::vector<std::string>& ss, const std::string& delim) {
   std::string ret; ret.reserve(128);

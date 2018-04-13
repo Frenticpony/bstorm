@@ -1,6 +1,7 @@
-﻿#include <bstorm/dnh_const.hpp>
+﻿#include <bstorm/obj_file.hpp>
+
+#include <bstorm/dnh_const.hpp>
 #include <bstorm/util.hpp>
-#include <bstorm/obj_file.hpp>
 
 namespace bstorm {
   ObjFile::ObjFile(const std::shared_ptr<GameState>& state) : Obj(state)

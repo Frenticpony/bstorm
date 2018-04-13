@@ -1,6 +1,4 @@
-﻿#include <cstdio>
-
-#include "reflex/dnh_lexer.hpp"
+﻿#include "reflex/dnh_lexer.hpp"
 #include "bison/dnh.tab.hpp"
 #include "reflex/user_def_data_lexer.hpp"
 #include "bison/user_def_data.tab.hpp"
@@ -16,6 +14,8 @@
 #include <bstorm/item_data.hpp>
 #include <bstorm/mqo.hpp>
 #include <bstorm/parser.hpp>
+
+#include <cstdio>
 
 namespace bstorm {
   std::shared_ptr<NodeBlock> parseDnhScript(const std::wstring& filePath, const std::shared_ptr<Env>& globalEnv, bool expandInclude, const std::shared_ptr<FileLoader>& loader) {

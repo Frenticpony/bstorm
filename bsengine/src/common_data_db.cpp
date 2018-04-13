@@ -1,10 +1,11 @@
-﻿#include <cstdint>
-#include <sstream>
-#include <fstream>
+﻿#include <bstorm/common_data_db.hpp>
 
 #include <bstorm/util.hpp>
 #include <bstorm/dnh_value.hpp>
-#include <bstorm/common_data_db.hpp>
+
+#include <cstdint>
+#include <sstream>
+#include <fstream>
 
 namespace bstorm {
   CommonDataDB::CommonDataDB() {

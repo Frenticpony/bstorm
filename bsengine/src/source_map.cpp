@@ -1,5 +1,6 @@
-#include <bstorm/util.hpp>
 #include <bstorm/source_map.hpp>
+
+#include <bstorm/util.hpp>
 
 namespace bstorm {
   std::string SourcePos::toString() const {

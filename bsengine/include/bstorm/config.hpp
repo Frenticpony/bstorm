@@ -1,7 +1,8 @@
 #pragma once
 
-#include <string>
 #include "../../json/single_include/nlohmann/json.hpp"
+
+#include <string>
 
 namespace bstorm {
   namespace conf {

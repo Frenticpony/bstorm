@@ -1,13 +1,14 @@
-﻿#include <array>
-#include <deque>
-#include <algorithm>
-#include <d3dx9.h>
+﻿#include <bstorm/intersection.hpp>
 
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/type.hpp>
 #include <bstorm/util.hpp>
 #include <bstorm/renderer.hpp>
-#include <bstorm/intersection.hpp>
+
+#include <array>
+#include <deque>
+#include <algorithm>
+#include <d3dx9.h>
 
 namespace bstorm {
 

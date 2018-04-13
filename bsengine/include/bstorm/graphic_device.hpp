@@ -1,12 +1,12 @@
 ﻿#pragma once
 
+#include <bstorm/non_copyable.hpp>
+
 #include <windows.h>
 #include <d3d9.h>
 
-#include <bstorm/non_copyable.hpp>
-
 namespace bstorm {
-  class GraphicDevice {
+  class GraphicDevice : private NonCopyable {
   public:
     GraphicDevice(HWND hWnd);
     ~GraphicDevice();
@@ -16,8 +16,8 @@ namespace bstorm {
     DWORD getBackBufferWidth() const;
     DWORD getBackBufferHeight() const;
   private:
-    IDirect3D9 *d3D;
-    IDirect3DDevice9 *d3DDevice;
+    IDirect3D9* d3D;
+    IDirect3DDevice9* d3DDevice;
     IDirect3DSurface9* backBufferSurface;
     IDirect3DSurface9* backBufferDepthStencilSurface;
     D3DPRESENT_PARAMETERS presentParams;

@@ -1,7 +1,6 @@
-﻿#pragma once
-
-#include <algorithm>
-#include <imgui.h>
+﻿#include "util.hpp"
+#include "resource_monitor.hpp"
+#include "user_def_data_browser.hpp"
 
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/texture.hpp>
@@ -11,9 +10,8 @@
 #include <bstorm/game_state.hpp>
 #include <bstorm/engine.hpp>
 
-#include "util.hpp"
-#include "resource_monitor.hpp"
-#include "user_def_data_browser.hpp"
+#include <algorithm>
+#include <imgui.h>
 
 namespace bstorm {
   void drawShotDataInfo(const std::shared_ptr<ShotData>& shotData) {

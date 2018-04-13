@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <bstorm/obj_render.hpp>
+
 #include <d3dx9.h>
 
 namespace bstorm {

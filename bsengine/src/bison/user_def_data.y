@@ -11,12 +11,13 @@
 %parse-param { bstorm::UserDefDataParseContext* ctx }
 
 %code requires {
-#include <string>
-#include <memory>
 #include <bstorm/shot_data.hpp>
 #include <bstorm/item_data.hpp>
 #include <bstorm/type.hpp>
 #include <bstorm/source_map.hpp>
+
+#include <string>
+#include <memory>
 
 namespace bstorm {
   class UserDefDataLexer;
@@ -49,13 +50,13 @@ namespace bstorm {
 }
 
 %code { // dnh.tab.cpp after #include dnh.tab.hpp
-#include <algorithm>
+#include "../reflex/user_def_data_lexer.hpp"
 
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/util.hpp>
 #include <bstorm/logger.hpp>
 
-#include "../reflex/user_def_data_lexer.hpp"
+#include <algorithm>
 
 using namespace bstorm;
 

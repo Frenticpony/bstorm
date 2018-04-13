@@ -1,9 +1,8 @@
 #pragma once
 
-#include <memory>
-#include <vector>
-
 #include <bstorm/obj_render.hpp>
+
+#include <memory>
 
 namespace bstorm {
   class Mesh;

@@ -1,10 +1,10 @@
 ﻿#pragma once
 
+#include <bstorm/env.hpp>
+
 #include <string>
 #include <unordered_map>
 #include <luajit/lua.hpp>
-
-#include <bstorm/env.hpp>
 
 namespace bstorm {
   struct SourcePos;

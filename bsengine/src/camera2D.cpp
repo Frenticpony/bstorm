@@ -1,6 +1,6 @@
-﻿#include <algorithm>
+﻿#include <bstorm/camera2D.hpp>
 
-#include <bstorm/camera2D.hpp>
+#include <algorithm>
 
 namespace bstorm {
   Camera2D::Camera2D() : focusX(0), focusY(0), angle(0), scaleX(1), scaleY(1) {}

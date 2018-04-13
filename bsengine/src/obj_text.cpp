@@ -1,4 +1,4 @@
-﻿#include <algorithm>
+﻿#include <bstorm/obj_text.hpp>
 
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/util.hpp>
@@ -6,7 +6,8 @@
 #include <bstorm/texture.hpp>
 #include <bstorm/renderer.hpp>
 #include <bstorm/game_state.hpp>
-#include <bstorm/obj_text.hpp>
+
+#include <algorithm>
 
 namespace bstorm {
   ObjText::ObjText(const std::shared_ptr<GameState>& state) :

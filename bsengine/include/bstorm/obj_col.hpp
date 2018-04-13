@@ -2,6 +2,7 @@
 
 #include <deque>
 #include <vector>
+#include <memory>
 
 namespace bstorm {
   class Intersection;

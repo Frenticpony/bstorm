@@ -1,22 +1,21 @@
-#include <windows.h>
-#include <string>
-#include <cstdio>
-#include <clocale>
-#include <fstream>
-#include <d3d9.h>
-#include <imgui.h>
-
 #include <bstorm/input_device.hpp>
 #include <bstorm/key_name_map.hpp>
 #include <bstorm/logger.hpp>
 #include <bstorm/config.hpp>
 #include <bstorm/const.hpp>
 #include <bstorm/util.hpp>
+#include "../../version.hpp"
 
-#include "../../imgui/examples/directx9_example/imgui_impl_dx9.h"
 #include "../../IconFontCppHeaders/IconsFontAwesome_c.h"
 #include "../../glyph_ranges_ja.hpp"
-#include "../../version.hpp"
+#include <string>
+#include <cstdio>
+#include <clocale>
+#include <fstream>
+#include <d3d9.h>
+#include <imgui.h>
+#include "../../imgui/examples/directx9_example/imgui_impl_dx9.h"
+#include <windows.h>
 
 using namespace bstorm;
 

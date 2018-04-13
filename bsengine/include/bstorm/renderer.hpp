@@ -4,8 +4,6 @@
 #include <array>
 #include <memory>
 
-#include <bstorm/const.hpp>
-
 namespace bstorm {
   struct Vertex;
   class Shader;

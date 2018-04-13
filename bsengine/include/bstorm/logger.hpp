@@ -1,13 +1,13 @@
 ﻿#pragma once
 
+#include <bstorm/source_map.hpp>
+
 #include <string>
 #include <memory>
 #include <vector>
 #include <fstream>
 #include <mutex>
 #include <windows.h>
-
-#include <bstorm/source_map.hpp>
 
 namespace bstorm {
   class Log {

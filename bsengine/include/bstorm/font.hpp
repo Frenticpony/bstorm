@@ -1,13 +1,13 @@
 ﻿#pragma once
 
+#include <bstorm/type.hpp>
+#include <bstorm/non_copyable.hpp>
+
 #include <windows.h>
 #include <string>
 #include <memory>
 #include <unordered_map>
 #include <d3d9.h>
-
-#include <bstorm/type.hpp>
-#include <bstorm/non_copyable.hpp>
 
 namespace bstorm {
   struct FontParams {

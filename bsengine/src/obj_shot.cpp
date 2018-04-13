@@ -1,5 +1,4 @@
-﻿#include <algorithm>
-#include <d3dx9.h>
+﻿#include <bstorm/obj_shot.hpp>
 
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/util.hpp>
@@ -15,7 +14,9 @@
 #include <bstorm/auto_delete_clip.hpp>
 #include <bstorm/rand_generator.hpp>
 #include <bstorm/game_state.hpp>
-#include <bstorm/obj_shot.hpp>
+
+#include <algorithm>
+#include <d3dx9.h>
 
 namespace bstorm {
   ShotCounter::ShotCounter() :

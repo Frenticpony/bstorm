@@ -1,8 +1,7 @@
-#pragma once
+#include <bstorm/real_device_input_source.hpp>
 
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/input_device.hpp>
-#include <bstorm/real_device_input_source.hpp>
 
 namespace bstorm {
   void KeyAssign::addVirtualKey(VirtualKey vkey, Key key, PadButton padButton) {

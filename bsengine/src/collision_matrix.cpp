@@ -1,10 +1,11 @@
-﻿#include <bstorm/dnh_const.hpp>
+﻿#include <bstorm/collision_matrix.hpp>
+
+#include <bstorm/dnh_const.hpp>
 #include <bstorm/obj_enemy.hpp>
 #include <bstorm/obj_shot.hpp>
 #include <bstorm/obj_item.hpp>
 #include <bstorm/obj_player.hpp>
 #include <bstorm/obj_spell.hpp>
-#include <bstorm/collision_matrix.hpp>
 
 namespace bstorm {
   ShotIntersection::ShotIntersection(float x, float y, float r, ObjShot *shot, bool isTmpIntersection) :

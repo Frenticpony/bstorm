@@ -1,7 +1,8 @@
 #pragma once
 
-#include <unordered_map>
 #include <bstorm/dnh_const.hpp>
+
+#include <unordered_map>
 
 namespace bstorm {
   const std::unordered_map<int, const char*> DIKeyNameMap{

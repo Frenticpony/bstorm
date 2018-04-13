@@ -1,6 +1,8 @@
-﻿#include <windows.h>
+﻿#pragma once
 
 #include <bstorm/obj.hpp>
+
+#include <windows.h>
 
 namespace bstorm {
   class SoundDevice;

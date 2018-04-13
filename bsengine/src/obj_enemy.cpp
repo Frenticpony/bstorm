@@ -1,11 +1,12 @@
-﻿#include <bstorm/dnh_const.hpp>
+﻿#include <bstorm/obj_enemy.hpp>
+
+#include <bstorm/dnh_const.hpp>
 #include <bstorm/const.hpp>
 #include <bstorm/util.hpp>
 #include <bstorm/obj_enemy_boss_scene.hpp>
 #include <bstorm/collision_matrix.hpp>
 #include <bstorm/intersection.hpp>
 #include <bstorm/game_state.hpp>
-#include <bstorm/obj_enemy.hpp>
 
 namespace bstorm {
   ObjEnemy::ObjEnemy(bool isBoss, const std::shared_ptr<GameState>& gameState) :

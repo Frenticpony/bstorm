@@ -1,11 +1,11 @@
 ﻿#pragma once
 
+#include <bstorm/non_copyable.hpp>
+#include <bstorm/lostable_graphic_resource.hpp>
+
 #include <string>
 #include <memory>
 #include <d3dx9.h>
-
-#include <bstorm/non_copyable.hpp>
-#include <bstorm/lostable_graphic_resource.hpp>
 
 namespace bstorm {
   class Shader : private NonCopyable, public LostableGraphicResource {

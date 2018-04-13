@@ -1,11 +1,11 @@
 ﻿#pragma once
 
-#include <vector>
-#include <stack>
-
 #include <bstorm/env.hpp>
 #include <bstorm/node.hpp>
 #include <bstorm/logger.hpp>
+
+#include <vector>
+#include <stack>
 
 namespace bstorm {
   class SemChecker : public NodeTraverser {

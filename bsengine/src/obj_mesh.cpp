@@ -1,10 +1,10 @@
-#include <d3d9.h>
-
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/util.hpp>
 #include <bstorm/renderer.hpp>
 #include <bstorm/game_state.hpp>
 #include <bstorm/obj_mesh.hpp>
+
+#include <d3d9.h>
 
 namespace bstorm {
   ObjMesh::ObjMesh(const std::shared_ptr<GameState>& gameState) :

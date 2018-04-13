@@ -1,9 +1,10 @@
-#include <iterator>
+#include <bstorm/obj_col.hpp>
 
 #include <bstorm/intersection.hpp>
 #include <bstorm/collision_matrix.hpp>
 #include <bstorm/game_state.hpp>
-#include <bstorm/obj_col.hpp>
+
+#include <iterator>
 
 namespace bstorm {
   ObjCol::ObjCol(const std::shared_ptr<GameState>& gameState) : gameState(gameState) { }

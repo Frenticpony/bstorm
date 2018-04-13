@@ -1,16 +1,14 @@
 ﻿#pragma once
 
+#include <bstorm/non_copyable.hpp>
+#include <bstorm/type.hpp>
+
 #include <windows.h>
 #include <unordered_map>
 #include <array>
 #include <memory>
-
-#include <bstorm/non_copyable.hpp>
-#include <bstorm/type.hpp>
-
-struct IDirectInput8;
-struct IDirectInputDevice8;
-struct DIJOYSTATE;
+#define	DIRECTINPUT_VERSION 0x0800
+#include <dinput.h>
 
 namespace bstorm {
   class MousePositionProvider {

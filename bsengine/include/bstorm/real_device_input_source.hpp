@@ -2,6 +2,9 @@
 
 #include <bstorm/virtual_key_input_source.hpp>
 
+#include <unordered_map>
+#include <memory>
+
 namespace bstorm {
   class InputDevice;
 

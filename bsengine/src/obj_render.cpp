@@ -1,5 +1,7 @@
 ﻿#include <vector>
 
+#include <bstorm/obj_render.hpp>
+
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/util.hpp>
 #include <bstorm/shader.hpp>
@@ -8,7 +10,6 @@
 #include <bstorm/obj_shot.hpp>
 #include <bstorm/shot_data.hpp>
 #include <bstorm/game_state.hpp>
-#include <bstorm/obj_render.hpp>
 
 namespace bstorm {
   ObjRender::ObjRender(const std::shared_ptr<GameState>& gameState) :

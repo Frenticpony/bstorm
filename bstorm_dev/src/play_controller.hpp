@@ -1,9 +1,9 @@
 #pragma once
 
+#include <bstorm/script_info.hpp>
+
 #include <string>
 #include <memory>
-
-#include <bstorm/script_info.hpp>
 
 namespace bstorm {
   class Engine;

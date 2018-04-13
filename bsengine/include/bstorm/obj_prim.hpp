@@ -1,11 +1,11 @@
 ﻿#pragma once
 
+#include <bstorm/type.hpp>
+#include <bstorm/obj_render.hpp>
+
 #include <memory>
 #include <vector>
 #include <d3d9.h>
-
-#include <bstorm/type.hpp>
-#include <bstorm/obj_render.hpp>
 
 struct IDirect3DTexture9;
 namespace bstorm {

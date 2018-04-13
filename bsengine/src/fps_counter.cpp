@@ -1,5 +1,6 @@
-#include <Windows.h>
 #include <bstorm/fps_counter.hpp>
+
+#include <windows.h>
 
 static DWORD getTimeMilliSec() {
   timeBeginPeriod(1);

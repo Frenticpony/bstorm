@@ -1,5 +1,4 @@
-﻿#include <exception>
-#include <ctime>
+﻿#include <bstorm/engine.hpp>
 
 #include <bstorm/util.hpp>
 #include <bstorm/const.hpp>
@@ -47,7 +46,9 @@
 #include <bstorm/script.hpp>
 #include <bstorm/config.hpp>
 #include <bstorm/game_state.hpp>
-#include <bstorm/engine.hpp>
+
+#include <exception>
+#include <ctime>
 
 #undef VK_LEFT
 #undef VK_RIGHT

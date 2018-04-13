@@ -1,13 +1,13 @@
 ﻿#pragma once
 
+#include <bstorm/script_info.hpp>
+
 #include <string>
 #include <map>
 #include <vector>
 #include <array>
 #include <mutex>
 #include <thread>
-
-#include <bstorm/script_info.hpp>
 
 namespace bstorm {
   class ScriptExplorer {

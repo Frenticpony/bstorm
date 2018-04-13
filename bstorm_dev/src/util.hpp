@@ -1,8 +1,9 @@
 ﻿#pragma once
 
+#include <bstorm/type.hpp>
+
 #include <memory>
 #include <string>
-#include <bstorm/type.hpp>
 
 namespace bstorm {
   class Texture;

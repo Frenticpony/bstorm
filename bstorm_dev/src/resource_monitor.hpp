@@ -1,8 +1,9 @@
 ﻿#pragma once
 
-#include <vector>
-
 #include <bstorm/type.hpp>
+
+#include <memory>
+#include <vector>
 
 namespace bstorm {
   class Engine;

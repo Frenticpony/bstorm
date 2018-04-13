@@ -1,10 +1,11 @@
+#include <bstorm/th_dnh_def.hpp>
+
+#include <bstorm/util.hpp>
+
 #include <fstream>
 #include <locale>
 #include <regex>
 #include <sstream>
-
-#include <bstorm/util.hpp>
-#include <bstorm/th_dnh_def.hpp>
 
 namespace bstorm {
   ThDnhDef loadThDnhDef(const std::string & path) {

@@ -1,12 +1,11 @@
-﻿#include <dsound.h>
-#include <mmsystem.h>
-
-#include <vorbis/codec.h>
-#include <vorbis/vorbisfile.h>
+﻿#include <bstorm/sound_device.hpp>
 
 #include <bstorm/util.hpp>
 #include <bstorm/logger.hpp>
-#include <bstorm/sound_device.hpp>
+
+#include <mmsystem.h>
+#include <vorbis/codec.h>
+#include <vorbis/vorbisfile.h>
 
 namespace bstorm {
   IDirectSoundBuffer8 * SoundDataLoaderFromSoundFile::loadSoundData(const std::wstring & path, IDirectSound8 * dSound) {

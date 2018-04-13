@@ -1,10 +1,10 @@
 ﻿#pragma once
 
+#include <bstorm/non_copyable.hpp>
+
 #include <map>
 #include <unordered_map>
 #include <memory>
-
-#include <bstorm/non_copyable.hpp>
 
 namespace bstorm {
   class DnhValue;

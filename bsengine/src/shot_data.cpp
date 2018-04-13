@@ -1,11 +1,12 @@
-﻿#include <algorithm>
+﻿#include <bstorm/shot_data.hpp>
 
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/parser.hpp>
 #include <bstorm/util.hpp>
 #include <bstorm/texture.hpp>
 #include <bstorm/logger.hpp>
-#include <bstorm/shot_data.hpp>
+
+#include <algorithm>
 
 namespace bstorm {
   ShotData::ShotData() :

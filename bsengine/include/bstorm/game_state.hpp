@@ -1,15 +1,14 @@
 ﻿#pragma once
 
+#include <bstorm/type.hpp>
+#include <bstorm/script_info.hpp>
+
 #include <memory>
 #include <unordered_map>
 #include <vector>
 #include <string>
 #include <windows.h>
-
-#include <bstorm/type.hpp>
-#include <bstorm/script_info.hpp>
-
-struct IDirect3DDevice9;
+#include <d3d9.h>
 
 namespace bstorm {
   class FpsCounter;

@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <bstorm/non_copyable.hpp>
+
 #include <string>
 #include <memory>
 #include <unordered_map>
@@ -7,8 +9,6 @@
 #include <mutex>
 #include <thread>
 #include <atomic>
-
-#include <bstorm/non_copyable.hpp>
 
 namespace bstorm {
   IDirect3DTexture9* loadTextureFromFile(const std::wstring& path, IDirect3DDevice9*) noexcept(true);

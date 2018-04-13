@@ -1,8 +1,9 @@
-﻿#include <exception>
+﻿#include <bstorm/render_target.hpp>
 
 #include <bstorm/util.hpp>
 #include <bstorm/logger.hpp>
-#include <bstorm/render_target.hpp>
+
+#include <exception>
 
 namespace bstorm {
   RenderTarget::RenderTarget(const std::wstring& name, int width, int height, IDirect3DDevice9* d3DDevice) :

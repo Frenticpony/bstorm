@@ -1,13 +1,13 @@
 ﻿#pragma once
 
+#include <bstorm/type.hpp>
+
 #include <memory>
 #include <string>
 #include <map>
 #include <unordered_map>
 #include <windows.h>
 #include <d3d9.h>
-
-#include <bstorm/type.hpp>
 
 namespace bstorm {
   class GraphicDevice;

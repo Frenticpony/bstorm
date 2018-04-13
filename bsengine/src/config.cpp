@@ -1,12 +1,12 @@
-#include <fstream>
-#include <cstdio>
-#include <windows.h>
+#include <bstorm/config.hpp>
 
 #include <bstorm/util.hpp>
 #include <bstorm/logger.hpp>
-#include <bstorm/config.hpp>
-
 #include "../../version.hpp"
+
+#include <fstream>
+#include <cstdio>
+#include <windows.h>
 
 namespace bstorm {
   conf::BstormConfig loadBstormConfig(const std::string & path, bool isBinaryFormat, const std::string& defaultConfigPath) noexcept(false) {

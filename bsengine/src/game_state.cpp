@@ -1,4 +1,6 @@
-﻿#include <bstorm/dnh_const.hpp>
+﻿#include <bstorm/game_state.hpp>
+
+#include <bstorm/dnh_const.hpp>
 #include <bstorm/fps_counter.hpp>
 #include <bstorm/input_device.hpp>
 #include <bstorm/real_device_input_source.hpp>
@@ -23,7 +25,6 @@
 #include <bstorm/auto_delete_clip.hpp>
 #include <bstorm/rand_generator.hpp>
 #include <bstorm/config.hpp>
-#include <bstorm/game_state.hpp>
 
 namespace bstorm {
   GameState::GameState(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevice9* d3DDevice, const std::shared_ptr<Renderer>& renderer, const std::shared_ptr<conf::KeyConfig>& keyConfig, const std::shared_ptr<MousePositionProvider>& mousePosProvider, Engine* engine) :

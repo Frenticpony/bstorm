@@ -1,4 +1,4 @@
-﻿#include <exception>
+﻿#include <bstorm/api.hpp>
 
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/const.hpp>
@@ -27,7 +27,8 @@
 #include <bstorm/logger.hpp>
 #include <bstorm/dnh_value.hpp>
 #include <bstorm/engine.hpp>
-#include <bstorm/api.hpp>
+
+#include <exception>
 
 #undef VK_LEFT
 #undef VK_RIGHT

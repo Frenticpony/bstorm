@@ -1,6 +1,7 @@
-﻿#include <bstorm/util.hpp>
+﻿#include <bstorm/graphic_device.hpp>
+
+#include <bstorm/util.hpp>
 #include <bstorm/logger.hpp>
-#include <bstorm/graphic_device.hpp>
 
 namespace bstorm {
   GraphicDevice::GraphicDevice(HWND hWnd) :

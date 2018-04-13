@@ -1,8 +1,9 @@
 ﻿#include <exception>
 
+#include <bstorm/shader.hpp>
+
 #include <bstorm/util.hpp>
 #include <bstorm/logger.hpp>
-#include <bstorm/shader.hpp>
 
 namespace bstorm {
   Shader::Shader(const std::wstring& path, bool precompiled, IDirect3DDevice9* d3DDevice) :

@@ -1,9 +1,6 @@
-﻿#include <cstdio>
-#include <string>
-#include <algorithm>
-#include <imgui.h>
-#include <bstorm/dnh_const.hpp>
+﻿#include "util.hpp"
 
+#include <bstorm/dnh_const.hpp>
 #include <bstorm/const.hpp>
 #include <bstorm/texture.hpp>
 #include <bstorm/intersection.hpp>
@@ -11,7 +8,10 @@
 #include <bstorm/obj_move.hpp>
 #include <bstorm/obj_item.hpp>
 
-#include "util.hpp"
+#include <cstdio>
+#include <string>
+#include <algorithm>
+#include <imgui.h>
 
 namespace bstorm {
   const char* getBlendTypeName(int blendType) {

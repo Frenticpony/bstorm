@@ -1,12 +1,12 @@
 ﻿#pragma once
 
+#include <bstorm/type.hpp>
+
 #include <string>
 #include <vector>
 #include <memory>
 #include <iostream>
 #include <luajit/lua.hpp>
-
-#include <bstorm/type.hpp>
 
 namespace bstorm {
   class DnhValue {

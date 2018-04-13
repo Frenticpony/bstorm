@@ -1,4 +1,6 @@
-﻿#include <bstorm/dnh_const.hpp>
+﻿#include <bstorm/obj_enemy_boss_scene.hpp>
+
+#include <bstorm/dnh_const.hpp>
 #include <bstorm/const.hpp>
 #include <bstorm/util.hpp>
 #include <bstorm/logger.hpp>
@@ -6,7 +8,6 @@
 #include <bstorm/dnh_value.hpp>
 #include <bstorm/obj_enemy.hpp>
 #include <bstorm/game_state.hpp>
-#include <bstorm/obj_enemy_boss_scene.hpp>
 
 namespace bstorm {
   ObjEnemyBossScene::ObjEnemyBossScene(const std::shared_ptr<GameState>& gameState) :

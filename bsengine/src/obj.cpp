@@ -1,6 +1,7 @@
-﻿#include <bstorm/dnh_const.hpp>
+﻿#include <bstorm/obj.hpp>
+
+#include <bstorm/dnh_const.hpp>
 #include <bstorm/dnh_value.hpp>
-#include <bstorm/obj.hpp>
 
 namespace bstorm {
   Obj::Obj(const std::shared_ptr<GameState>& state) :

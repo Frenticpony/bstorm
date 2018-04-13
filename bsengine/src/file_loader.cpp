@@ -1,7 +1,6 @@
-﻿#pragma once
+﻿#include <bstorm/file_loader.hpp>
 
 #include <windows.h>
-#include <bstorm/file_loader.hpp>
 
 namespace bstorm {
   FILE* FileLoaderFromTextFile::openFile(const std::wstring& path) {

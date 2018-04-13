@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include <vector>
 #include <bstorm/obj_prim.hpp>
 #include <bstorm/obj_col.hpp>
 

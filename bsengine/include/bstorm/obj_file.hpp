@@ -1,11 +1,11 @@
 ﻿#pragma once
 
+#include <bstorm/obj.hpp>
+
 #include <fstream>
 #include <memory>
 #include <string>
 #include <vector>
-
-#include <bstorm/obj.hpp>
 
 namespace bstorm {
   class ObjFile : public Obj {

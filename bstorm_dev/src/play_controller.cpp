@@ -1,8 +1,8 @@
+#include "play_controller.hpp"
+
 #include <bstorm/const.hpp>
 #include <bstorm/logger.hpp>
 #include <bstorm/engine.hpp>
-
-#include "play_controller.hpp"
 
 namespace bstorm {
   PlayController::PlayController(const std::shared_ptr<Engine>& engine) :

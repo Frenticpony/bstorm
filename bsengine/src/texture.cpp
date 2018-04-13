@@ -1,8 +1,9 @@
-﻿#include <d3dx9.h>
+﻿#include <bstorm/texture.hpp>
 
 #include <bstorm/util.hpp>
 #include <bstorm/logger.hpp>
-#include <bstorm/texture.hpp>
+
+#include <d3dx9.h>
 
 namespace bstorm {
   Texture::Texture(const std::wstring& path, IDirect3DTexture9* d3DTexture) :

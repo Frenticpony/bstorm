@@ -1,7 +1,9 @@
-﻿#pragma once
+﻿#include "object_browser.hpp"
 
-#include <unordered_set>
-#include <imgui.h>
+#include "IconsFontAwesome_c.h"
+#include "util.hpp"
+#include "resource_monitor.hpp"
+#include "user_def_data_browser.hpp"
 
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/util.hpp>
@@ -25,11 +27,8 @@
 #include <bstorm/game_state.hpp>
 #include <bstorm/engine.hpp>
 
-#include "IconsFontAwesome_c.h"
-#include "util.hpp"
-#include "resource_monitor.hpp"
-#include "user_def_data_browser.hpp"
-#include "object_browser.hpp"
+#include <unordered_set>
+#include <imgui.h>
 
 namespace bstorm {
   static const char blendTypeList[] = "NONE\0ALPHA\0ADD\0ADD_ARGB\0MULTIPLY\0SUBTRACT\0SHADOW\0INV_DESTRGB\0";

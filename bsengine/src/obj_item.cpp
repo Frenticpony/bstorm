@@ -1,4 +1,6 @@
-﻿#include <bstorm/dnh_const.hpp>
+﻿#include <bstorm/obj_item.hpp>
+
+#include <bstorm/dnh_const.hpp>
 #include <bstorm/const.hpp>
 #include <bstorm/util.hpp>
 #include <bstorm/collision_matrix.hpp>
@@ -9,7 +11,6 @@
 #include <bstorm/obj_player.hpp>
 #include <bstorm/obj_prim.hpp>
 #include <bstorm/game_state.hpp>
-#include <bstorm/obj_item.hpp>
 
 namespace bstorm {
   ObjItem::ObjItem(int itemType, const std::shared_ptr<GameState>& gameState) :

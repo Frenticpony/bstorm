@@ -1,7 +1,8 @@
 ﻿#pragma once
 
-#include <memory>
 #include <bstorm/type.hpp>
+
+#include <memory>
 
 namespace bstorm {
   class AutoDeleteClip {

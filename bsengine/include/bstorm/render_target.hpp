@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include <string>
-#include <d3d9.h>
-
 #include <bstorm/non_copyable.hpp>
 #include <bstorm/lostable_graphic_resource.hpp>
+
+#include <string>
+#include <d3d9.h>
 
 namespace bstorm {
   class RenderTarget : private NonCopyable, public LostableGraphicResource {

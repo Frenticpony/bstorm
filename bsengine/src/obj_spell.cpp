@@ -1,8 +1,9 @@
-﻿#include <bstorm/dnh_const.hpp>
+﻿#include <bstorm/obj_spell.hpp>
+
+#include <bstorm/dnh_const.hpp>
 #include <bstorm/intersection.hpp>
 #include <bstorm/collision_matrix.hpp>
 #include <bstorm/game_state.hpp>
-#include <bstorm/obj_spell.hpp>
 
 namespace bstorm {
   ObjSpell::ObjSpell(const std::shared_ptr<GameState>& gameState) :

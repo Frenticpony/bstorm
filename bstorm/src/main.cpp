@@ -1,7 +1,4 @@
-﻿#include <crtdbg.h>
-#include <string>
-
-#include <bstorm/logger.hpp>
+﻿#include <bstorm/logger.hpp>
 #include <bstorm/engine.hpp>
 #include <bstorm/util.hpp>
 #include <bstorm/input_device.hpp>
@@ -12,6 +9,9 @@
 #include <bstorm/th_dnh_def.hpp>
 
 #include "../../version.hpp"
+
+#include <crtdbg.h>
+#include <string>
 
 using namespace bstorm;
 

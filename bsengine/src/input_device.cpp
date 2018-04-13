@@ -1,11 +1,9 @@
-﻿#define	DIRECTINPUT_VERSION 0x0800
-#include <dinput.h>
+﻿#include <bstorm/input_device.hpp>
 
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/const.hpp>
 #include <bstorm/util.hpp>
 #include <bstorm/logger.hpp>
-#include <bstorm/input_device.hpp>
 
 namespace bstorm {
   static BOOL CALLBACK enumAxesCallback(LPCDIDEVICEOBJECTINSTANCE pdidoi, LPVOID dev) {

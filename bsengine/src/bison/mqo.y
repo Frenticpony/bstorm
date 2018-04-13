@@ -11,10 +11,11 @@
 %lex-param { bstorm::MqoParseContext* ctx }
 
 %code requires { // top mqo.tab.hpp
+#include <bstorm/mqo.hpp>
 #include <bstorm/source_map.hpp>
+
 #include <string>
 #include <memory>
-#include <bstorm/mqo.hpp>
 
 namespace bstorm {
   class MqoLexer;

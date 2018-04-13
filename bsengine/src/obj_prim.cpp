@@ -1,4 +1,4 @@
-﻿#include <d3dx9.h>
+﻿#include <bstorm/obj_prim.hpp>
 
 #include <bstorm/type.hpp>
 #include <bstorm/dnh_const.hpp>
@@ -7,7 +7,8 @@
 #include <bstorm/render_target.hpp>
 #include <bstorm/renderer.hpp>
 #include <bstorm/game_state.hpp>
-#include <bstorm/obj_prim.hpp>
+
+#include <d3dx9.h>
 
 static bool isValidIndex(int i, const std::vector<bstorm::Vertex>& v) {
   return i >= 0 && i < v.size();

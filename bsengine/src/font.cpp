@@ -1,6 +1,7 @@
-﻿#include <bstorm/dnh_const.hpp>
+﻿#include <bstorm/font.hpp>
+
+#include <bstorm/dnh_const.hpp>
 #include <bstorm/util.hpp>
-#include <bstorm/font.hpp>
 
 namespace bstorm {
   FontParams::FontParams() :

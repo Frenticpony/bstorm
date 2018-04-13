@@ -1,4 +1,6 @@
-﻿#include <bstorm/dnh_const.hpp>
+﻿#include <bstorm/obj_player.hpp>
+
+#include <bstorm/dnh_const.hpp>
 #include <bstorm/virtual_key_input_source.hpp>
 #include <bstorm/script.hpp>
 #include <bstorm/intersection.hpp>
@@ -10,7 +12,6 @@
 #include <bstorm/item_data.hpp>
 #include <bstorm/dnh_value.hpp>
 #include <bstorm/game_state.hpp>
-#include <bstorm/obj_player.hpp>
 
 #undef VK_RIGHT
 #undef VK_LEFT

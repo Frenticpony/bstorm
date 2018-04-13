@@ -1,5 +1,8 @@
 ﻿#pragma once
 
+#include <bstorm/non_copyable.hpp>
+#include <bstorm/code_generator.hpp>
+
 #include <string>
 #include <memory>
 #include <vector>
@@ -10,9 +13,6 @@
 #include <atomic>
 #include <mutex>
 #include <luajit/lua.hpp>
-
-#include <bstorm/non_copyable.hpp>
-#include <bstorm/code_generator.hpp>
 
 namespace bstorm {
   class Log;
