@@ -8,12 +8,14 @@
 #include <unordered_set>
 #include <unordered_map>
 
-namespace bstorm {
-  struct SourcePos;
-  class Texture;
-  class FileLoader;
-  class ItemData {
-  public:
+namespace bstorm
+{
+struct SourcePos;
+class Texture;
+class FileLoader;
+class ItemData
+{
+public:
     ItemData();
     int id;
     int type;
@@ -22,18 +24,20 @@ namespace bstorm {
     int render;
     AnimationData animationData;
     std::shared_ptr<Texture> texture;
-  };
+};
 
-  class UserItemData {
-  public:
+class UserItemData
+{
+public:
     std::wstring path;
     std::wstring imagePath;
     std::unordered_map<int, ItemData> dataMap;
-  };
+};
 
-  class TextureCache;
-  class ItemDataTable {
-  public:
+class TextureCache;
+class ItemDataTable
+{
+public:
     ItemDataTable();
     ~ItemDataTable();
     void add(const std::shared_ptr<ItemData>& data);
@@ -44,8 +48,8 @@ namespace bstorm {
     /* backdoor */
     template <typename T>
     void backDoor() const {}
-  private:
+private:
     std::unordered_set<std::wstring> loadedPaths;
     std::map<int, std::shared_ptr<ItemData>> table;
-  };
+};
 }

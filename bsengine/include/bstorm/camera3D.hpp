@@ -2,9 +2,11 @@
 
 #include <d3dx9.h>
 
-namespace bstorm {
-  class Camera3D {
-  public:
+namespace bstorm
+{
+class Camera3D
+{
+public:
     Camera3D();
     void setFocusX(float fx) { focusX = fx; }
     void setFocusY(float fy) { focusY = fy; }
@@ -33,7 +35,7 @@ namespace bstorm {
     float getFarPerspectiveClip() const { return farClip; }
     void generateViewMatrix(D3DXMATRIX& viewMatrix, D3DXMATRIX& billboardMatrix) const;
     void generateProjMatrix(float screenWidth, float screenHeight, float cameraScreenX, float cameraScreenY, D3DXMATRIX& projMatrix) const;
-  private:
+private:
     float focusX;
     float focusY;
     float focusZ;
@@ -45,5 +47,5 @@ namespace bstorm {
     float roll;
     float nearClip;
     float farClip;
-  };
+};
 }

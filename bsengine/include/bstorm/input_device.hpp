@@ -10,23 +10,27 @@
 #define	DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 
-namespace bstorm {
-  class MousePositionProvider {
-  public:
+namespace bstorm
+{
+class MousePositionProvider
+{
+public:
     virtual ~MousePositionProvider() {};
     virtual void getMousePos(int screenWidth, int screenHeight, int &x, int &y) = 0;
-  };
+};
 
-  class WinMousePositionProvider : public MousePositionProvider {
-  public:
+class WinMousePositionProvider : public MousePositionProvider
+{
+public:
     WinMousePositionProvider(HWND hWnd);
     void getMousePos(int screenWidth, int screenHeight, int &x, int &y) override;
-  private:
+private:
     HWND hWnd;
-  };
+};
 
-  class InputDevice : private NonCopyable {
-  public:
+class InputDevice : private NonCopyable
+{
+public:
     InputDevice(HWND hWnd, const std::shared_ptr<MousePositionProvider>& mousePosProvider);
     ~InputDevice();
     void updateInputState();
@@ -41,7 +45,7 @@ namespace bstorm {
     void setInputEnable(bool enable);
     static constexpr int MaxKey = 255;
     static constexpr int MaxPadButton = 255;
-  private:
+private:
     void initPadDevice();
     HWND hWnd;
     IDirectInput8* dInput;
@@ -57,5 +61,5 @@ namespace bstorm {
     int mouseMoveZ;
     std::shared_ptr<MousePositionProvider> mousePosProvider;
     bool inputEnable;
-  };
+};
 }

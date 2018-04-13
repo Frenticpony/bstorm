@@ -2,24 +2,26 @@
 
 #include <memory>
 
-namespace bstorm {
-  class Engine;
-  class ObjectBrowser {
-  public:
+namespace bstorm
+{
+class Engine;
+class ObjectBrowser
+{
+public:
     ObjectBrowser(int x, int y, int width, int height);
     ~ObjectBrowser();
     void draw(const std::shared_ptr<Engine>& engine);
     bool isOpened() const { return openFlag; }
     void setOpen(bool b) { openFlag = b; }
-  private:
+private:
     int iniLeft;
     int iniTop;
     int iniWidth;
     int iniHeight;
     bool openFlag;
-  };
+};
 
-  class Obj;
-  class ObjectLayerList;
-  void drawObjEditArea(const std::shared_ptr<Obj>& obj,std::shared_ptr<ObjectLayerList>& layerList);
+class Obj;
+class ObjectLayerList;
+void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLayerList>& layerList);
 }

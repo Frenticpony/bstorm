@@ -2,11 +2,13 @@
 
 #include <bstorm/obj.hpp>
 
-namespace bstorm {
-  struct SourcePos;
-  class ObjEnemy;
-  class ObjEnemyBossScene : public Obj {
-  public:
+namespace bstorm
+{
+struct SourcePos;
+class ObjEnemy;
+class ObjEnemyBossScene : public Obj
+{
+public:
     ObjEnemyBossScene(const std::shared_ptr<GameState>& gameState);
     void update() override;
     void regist(const std::shared_ptr<SourcePos>& srcPos);
@@ -35,20 +37,21 @@ namespace bstorm {
     void addPlayerSpellCount(int c);
     void addPlayerShootDownCount(int c);
     std::shared_ptr<ObjEnemy> getEnemyBossObject() const;
-  protected:
-    // Phase: 独立したライフを持つ単位
-    struct Phase {
-      Phase(const std::wstring& path);
-      std::wstring path;
-      int scriptId;
-      double life;
-      double maxLife;
-      int timerF;
-      int orgTimerF;
-      int64_t spellScore;
-      bool isSpell;
-      bool isLastSpell;
-      bool isDurableSpell;
+protected:
+  // Phase: 独立したライフを持つ単位
+    struct Phase
+    {
+        Phase(const std::wstring& path);
+        std::wstring path;
+        int scriptId;
+        double life;
+        double maxLife;
+        int timerF;
+        int orgTimerF;
+        int64_t spellScore;
+        bool isSpell;
+        bool isLastSpell;
+        bool isDurableSpell;
     };
     bool loadNext();
     const Phase& getCurrentPhase() const;
@@ -65,5 +68,5 @@ namespace bstorm {
     std::weak_ptr<ObjEnemy> enemyBossObj;
     float lastEnemyBossX;
     float lastEnemyBossY;
-  };
+};
 }

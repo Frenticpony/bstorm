@@ -6,33 +6,39 @@
 #include <vector>
 #include <memory>
 
-namespace bstorm {
-  struct MqoVec2 {
+namespace bstorm
+{
+struct MqoVec2
+{
     float x;
     float y;
-  };
+};
 
-  struct MqoVec3 {
+struct MqoVec3
+{
     float x;
     float y;
     float z;
-  };
+};
 
-  struct MqoColor4 {
+struct MqoColor4
+{
     float r;
     float g;
     float b;
     float a;
-  };
+};
 
-  // ライト
-  struct MqoLight {
+// ライト
+struct MqoLight
+{
     MqoVec3 dir = { 0.408, 0.408, 0.816 };
     MqoColor4 color = MqoColor4{ 1.0f, 1.0f, 1.0f, 1.0f };
-  };
+};
 
-  // 一つだけのシーン
-  struct MqoScene {
+// 一つだけのシーン
+struct MqoScene
+{
     MqoVec3 pos = MqoVec3{ 0, 0, 1500 };
     MqoVec3 lookat = MqoVec3{ 0, 0, 0 };
     float head = -0.5236;
@@ -44,10 +50,11 @@ namespace bstorm {
     float frontclip = 225.00002;
     float backclip = 45000;
     std::vector<MqoLight> dirlights;
-  };
+};
 
-  // 材質
-  struct MqoMaterial {
+// 材質
+struct MqoMaterial
+{
     // 材質名
     std::wstring name;
     // シェーダー種類
@@ -83,10 +90,11 @@ namespace bstorm {
     MqoVec3 proj_pos = MqoVec3{ 0, 0, 0 };
     MqoVec3 proj_scale = MqoVec3{ 1, 1, 1 };
     MqoVec3 proj_angle = MqoVec3{ 0, 0, 0 };
-  };
+};
 
-  // 1つの面
-  struct MqoFace {
+// 1つの面
+struct MqoFace
+{
     // 頂点インデックス
     std::vector<int> vertexIndices;
     // 材質インデックス
@@ -95,10 +103,11 @@ namespace bstorm {
     std::vector<MqoVec2> uvs;
     std::vector<MqoColor4> cols;
     std::vector<float> crss;
-  };
+};
 
-  // オブジェクト
-  struct MqoObject {
+// オブジェクト
+struct MqoObject
+{
     std::wstring name;
     int uid = -1;
     int depth = 0;
@@ -123,14 +132,15 @@ namespace bstorm {
     int lathe_seg;
     std::vector<MqoVec3> vertices;
     std::vector<MqoFace> faces;
-  };
+};
 
-  struct Mqo {
+struct Mqo
+{
     std::wstring path;
     float version = 1.0;
     MqoScene scene;
     std::vector<MqoMaterial> materials;
     std::vector<MqoObject> objects;
-  };
+};
 
 }

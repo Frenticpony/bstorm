@@ -4,12 +4,14 @@
 #include <array>
 #include <memory>
 
-namespace bstorm {
-  struct Vertex;
-  class Shader;
-  class Mesh;
-  class Renderer {
-  public:
+namespace bstorm
+{
+struct Vertex;
+class Shader;
+class Mesh;
+class Renderer
+{
+public:
     Renderer(IDirect3DDevice9*);
     ~Renderer();
     // NOTE : initRenderState : 描画デバイスの初期化を行う
@@ -29,8 +31,8 @@ namespace bstorm {
     void disableScissorTest();
     void setFogEnable(bool enable);
     void setFogParam(float fogStart, float fogEnd, int r, int g, int b);
-  private:
-    IDirect3DDevice9* d3DDevice;
+private:
+    IDirect3DDevice9 * d3DDevice;
     IDirect3DVertexShader9* prim2DVertexShader;
     IDirect3DVertexShader9* prim3DVertexShader;
     IDirect3DVertexShader9* meshVertexShader;
@@ -46,5 +48,5 @@ namespace bstorm {
     float fogStart;
     float fogEnd;
     D3DCOLOR fogColor;
-  };
+};
 }

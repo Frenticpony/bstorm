@@ -9,8 +9,10 @@
 #include <unordered_map>
 #include <d3d9.h>
 
-namespace bstorm {
-  struct FontParams {
+namespace bstorm
+{
+struct FontParams
+{
     FontParams();
     FontParams(const std::wstring& fontName, int size, int weight, const ColorRGB& topColor, const ColorRGB& bottomColor, int borderType, int borderWidth, const ColorRGB& borderColor, wchar_t c);
     std::wstring fontName;
@@ -25,21 +27,26 @@ namespace bstorm {
     bool operator==(const FontParams& params) const;
     bool operator!=(const FontParams& params) const;
     size_t hashValue() const;
-  };
+};
 }
 
-namespace std {
-  template<>
-  struct hash<bstorm::FontParams> {
-    size_t operator()(const bstorm::FontParams& params) const {
-      return params.hashValue();
+namespace std
+{
+template<>
+struct hash<bstorm::FontParams>
+{
+    size_t operator()(const bstorm::FontParams& params) const
+    {
+        return params.hashValue();
     }
-  };
+};
 }
 
-namespace bstorm {
-  class Font : private NonCopyable {
-  public:
+namespace bstorm
+{
+class Font : private NonCopyable
+{
+public:
     Font(const FontParams& params, HWND hWnd, IDirect3DDevice9* d3DDevice, int borderedFontQuality);
     ~Font();
     int getWidth() const { return width; }
@@ -52,7 +59,7 @@ namespace bstorm {
     int getNextLineOffsetY() const { return nextLineOffsetY; }
     IDirect3DTexture9* getTexture() const { return texture; }
     const FontParams& getParams() const { return params; }
-  private:
+private:
     FontParams params;
     IDirect3DTexture9 *texture; // セル
     int width;  // セルの幅
@@ -64,10 +71,11 @@ namespace bstorm {
     int nextLineOffsetY; // 次の行までの距離
     int textureWidth;
     int textureHeight;
-  };
+};
 
-  class FontCache {
-  public:
+class FontCache
+{
+public:
     FontCache(HWND hWnd, IDirect3DDevice9* d3DDevice);
     std::shared_ptr<Font> create(const FontParams& params);
     void setBorderedFontQuality(int q); // 1 ~ 4
@@ -75,12 +83,12 @@ namespace bstorm {
     // backdoor
     template <typename T>
     void backDoor() const {}
-  private:
+private:
     HWND hWnd;
     IDirect3DDevice9* d3DDevice;
     std::unordered_map<FontParams, std::shared_ptr<Font>> fontMap;
     int borderedFontQuality;
-  };
+};
 
-  bool installFont(const std::wstring& path);
+bool installFont(const std::wstring& path);
 }

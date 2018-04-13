@@ -2,9 +2,11 @@
 
 #include <d3dx9.h>
 
-namespace bstorm {
-  class Camera2D {
-  public:
+namespace bstorm
+{
+class Camera2D
+{
+public:
     Camera2D();
     ~Camera2D() {};
     void generateViewMatrix(D3DXMATRIX& mat) const;
@@ -23,11 +25,11 @@ namespace bstorm {
     float getRatioX() const { return scaleX; }
     float getRatioY() const { return scaleY; }
     void reset(float fx, float fy);
-  private:
+private:
     float focusX; // カメラの中心に持ってきたいワールド座標
     float focusY; // カメラの中心に持ってきたいワールド座標
     float angle;
     float scaleX;
     float scaleY;
-  };
+};
 }

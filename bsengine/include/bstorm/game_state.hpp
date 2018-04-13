@@ -10,45 +10,47 @@
 #include <windows.h>
 #include <d3d9.h>
 
-namespace bstorm {
-  class FpsCounter;
-  class TimePoint;
-  class MousePositionProvider;
-  class InputDevice;
-  class VirtualKeyInputSource;
-  class KeyAssign;
-  class SoundDevice;
-  class SoundBuffer;
-  class Renderer;
-  class ObjectTable;
-  class ObjectLayerList;
-  class CollisionDetector;
-  class Intersection;
-  class FileLoader;
-  class TextureCache;
-  class FontCache;
-  class MeshCache;
-  class Camera2D;
-  class Camera3D;
-  class CommonDataDB;
-  class Script;
-  class ScriptManager;
-  class GlobalPlayerParams;
-  class ObjPlayer;
-  class ObjEnemyBossScene;
-  class ObjSpellManage;
-  class ShotDataTable;
-  class ItemDataTable;
-  class ShotCounter;
-  class AutoDeleteClip;
-  class RandGenerator;
-  class ItemScoreTextSpawner;
-  class DefaultBonusItemSpawner;
-  class AutoItemCollectionManager;
-  class Engine;
-  namespace conf { struct KeyConfig; }
-  class GameState {
-  public:
+namespace bstorm
+{
+class FpsCounter;
+class TimePoint;
+class MousePositionProvider;
+class InputDevice;
+class VirtualKeyInputSource;
+class KeyAssign;
+class SoundDevice;
+class SoundBuffer;
+class Renderer;
+class ObjectTable;
+class ObjectLayerList;
+class CollisionDetector;
+class Intersection;
+class FileLoader;
+class TextureCache;
+class FontCache;
+class MeshCache;
+class Camera2D;
+class Camera3D;
+class CommonDataDB;
+class Script;
+class ScriptManager;
+class GlobalPlayerParams;
+class ObjPlayer;
+class ObjEnemyBossScene;
+class ObjSpellManage;
+class ShotDataTable;
+class ItemDataTable;
+class ShotCounter;
+class AutoDeleteClip;
+class RandGenerator;
+class ItemScoreTextSpawner;
+class DefaultBonusItemSpawner;
+class AutoItemCollectionManager;
+class Engine;
+namespace conf { struct KeyConfig; }
+class GameState
+{
+public:
     GameState(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevice9* d3DDevice, const std::shared_ptr<Renderer>& renderer, const std::shared_ptr<conf::KeyConfig>& keyConfig, const std::shared_ptr<MousePositionProvider>& mousePosProvider, Engine* engine);
     std::shared_ptr<FpsCounter> fpsCounter;
     std::shared_ptr<InputDevice> inputDevice;
@@ -110,5 +112,5 @@ namespace bstorm {
     bool renderIntersectionEnable;
     bool forcePlayerInvincibleEnable;
     bool defaultBonusItemEnable;
-  };
+};
 }

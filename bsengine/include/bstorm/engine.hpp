@@ -9,61 +9,64 @@
 #include <windows.h>
 #include <d3d9.h>
 
-namespace bstorm {
-  class GraphicDevice;
-  class LostableGraphicResource;
-  class LostableGraphicResourceManager;
-  class KeyAssign;
-  class MousePositionProvider;
-  class Renderer;
-  class RenderTarget;
-  class Shader;
-  class Texture;
-  class Font;
-  class Mesh;
-  class DnhValue;
-  class DnhArray;
-  class Obj;
-  class ObjRender;
-  class ObjShader;
-  class ObjPrim2D;
-  class ObjSprite2D;
-  class ObjSpriteList2D;
-  class ObjPrim3D;
-  class ObjSprite3D;
-  class ObjMesh;
-  class ObjText;
-  class ObjSound;
-  class ObjFileT;
-  class ObjFileB;
-  class ObjShot;
-  class ObjLooseLaser;
-  class ObjStLaser;
-  class ObjCrLaser;
-  class ObjEnemy;
-  class ObjEnemyBossScene;
-  class ObjSpell;
-  class ObjSpellManage;
-  class ObjItem;
-  class ObjPlayer;
-  class ShotData;
-  class ItemData;
-  class ScriptInfo;
-  class Script;
-  class SoundBuffer;
-  class GameState;
-  struct SourcePos;
-  namespace conf { struct KeyConfig; }
-  class Engine {
-  public:
+namespace bstorm
+{
+class GraphicDevice;
+class LostableGraphicResource;
+class LostableGraphicResourceManager;
+class KeyAssign;
+class MousePositionProvider;
+class Renderer;
+class RenderTarget;
+class Shader;
+class Texture;
+class Font;
+class Mesh;
+class DnhValue;
+class DnhArray;
+class Obj;
+class ObjRender;
+class ObjShader;
+class ObjPrim2D;
+class ObjSprite2D;
+class ObjSpriteList2D;
+class ObjPrim3D;
+class ObjSprite3D;
+class ObjMesh;
+class ObjText;
+class ObjSound;
+class ObjFileT;
+class ObjFileB;
+class ObjShot;
+class ObjLooseLaser;
+class ObjStLaser;
+class ObjCrLaser;
+class ObjEnemy;
+class ObjEnemyBossScene;
+class ObjSpell;
+class ObjSpellManage;
+class ObjItem;
+class ObjPlayer;
+class ShotData;
+class ItemData;
+class ScriptInfo;
+class Script;
+class SoundBuffer;
+class GameState;
+struct SourcePos;
+namespace conf { struct KeyConfig; }
+class Engine
+{
+public:
     Engine(HWND hWnd, int screenWidth, int screenHeight, const std::shared_ptr<conf::KeyConfig>& defaultKeyConfig);
     virtual ~Engine();
     void addLostableGraphicResource(const std::shared_ptr<LostableGraphicResource>& resource);
     template <class T, class... Args>
-    std::shared_ptr<LostableGraphicResource> createLostableGraphicResource(Args... args) {
-      auto resource = std::make_shared<T>(args...);
-      addLostableGraphicResource(resource);
-      return resource;
+    std::shared_ptr<LostableGraphicResource> createLostableGraphicResource(Args... args)
+    {
+        auto resource = std::make_shared<T>(args...);
+        addLostableGraphicResource(resource);
+        return resource;
     }
     HWND getWindowHandle() const;
     /* engine control */
@@ -240,19 +243,23 @@ namespace bstorm {
     std::shared_ptr<ItemData> getItemData(int id) const;
     /* object */
     template <class T>
-    std::shared_ptr<T> getObject(int id) const {
-      return std::dynamic_pointer_cast<T>(getObj(id));
+    std::shared_ptr<T> getObject(int id) const
+    {
+        return std::dynamic_pointer_cast<T>(getObj(id));
     };
 
     template <class T>
-    std::vector <std::shared_ptr<T>> getObjectAll() const {
-      std::vector <std::shared_ptr<T>> objs;
-      for (const auto& entry : getObjAll()) {
-        if (auto obj = std::dynamic_pointer_cast<T>(entry.second)) {
-          objs.push_back(obj);
+    std::vector <std::shared_ptr<T>> getObjectAll() const
+    {
+        std::vector <std::shared_ptr<T>> objs;
+        for (const auto& entry : getObjAll())
+        {
+            if (auto obj = std::dynamic_pointer_cast<T>(entry.second))
+            {
+                objs.push_back(obj);
+            }
         }
-      }
-      return objs;
+        return objs;
     }
     std::shared_ptr<ObjPlayer> getPlayerObject() const;
     std::shared_ptr<ObjEnemy> getEnemyBossObject() const;
@@ -377,7 +384,7 @@ namespace bstorm {
     /* backdoor */
     template <typename T>
     void backDoor() {}
-  protected:
+protected:
     void renderToTexture(const std::wstring& renderTargetName, int begin, int end, int objId, bool doClear, bool renderToBackBuffer, bool checkInvalidRenderPriority, bool checkVisibleFlag);
     std::shared_ptr<Obj> getObj(int id) const;
     const std::map<int, std::shared_ptr<Obj>>& getObjAll() const;
@@ -389,5 +396,5 @@ namespace bstorm {
     std::shared_ptr<Renderer> renderer;
     std::unordered_map<std::wstring, std::shared_ptr<RenderTarget>> renderTargets;
     std::shared_ptr<GameState> gameState;
-  };
+};
 }

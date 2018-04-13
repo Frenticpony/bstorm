@@ -8,10 +8,12 @@
 
 // NOTE : keyListの順番が辞書順である必要があるのでunorderedじゃないmapを使う
 
-namespace bstorm {
-  class DnhValue;
-  class CommonDataDB {
-  public:
+namespace bstorm
+{
+class DnhValue;
+class CommonDataDB
+{
+public:
     typedef std::wstring DataKey;
     typedef std::wstring DataAreaName;
     typedef std::map<DataKey, std::unique_ptr<DnhValue>> CommonDataArea;
@@ -37,7 +39,7 @@ namespace bstorm {
     static constexpr wchar_t* DefaultDataAreaName = L"";
     template <typename T>
     void backDoor() const {}
-  private:
+private:
     std::map<DataAreaName, CommonDataArea> areaTable;
-  };
+};
 }

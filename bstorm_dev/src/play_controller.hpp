@@ -5,10 +5,12 @@
 #include <string>
 #include <memory>
 
-namespace bstorm {
-  class Engine;
-  class PlayController {
-  public:
+namespace bstorm
+{
+class Engine;
+class PlayController
+{
+public:
     PlayController(const std::shared_ptr<Engine>& engine);
     void tick();
     void pause(bool doPause);
@@ -27,7 +29,7 @@ namespace bstorm {
     void setPlayerInvincibleEnable(bool enable);
     void setInputEnable(bool enable);
     const ScriptInfo& getMainScriptInfo() const;
-  private:
+private:
     std::shared_ptr<Engine> engine;
     ScriptInfo mainScript;
     ScriptInfo playerScript;
@@ -39,5 +41,5 @@ namespace bstorm {
     bool renderIntersectionEnable;
     bool playerInvincibleEnable;
     bool inputEnable;
-  };
+};
 }

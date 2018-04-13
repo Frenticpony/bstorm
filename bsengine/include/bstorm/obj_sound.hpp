@@ -4,14 +4,17 @@
 
 #include <windows.h>
 
-namespace bstorm {
-  class SoundDevice;
-  class SoundBuffer;
-  class ObjSound : public Obj {
-  public:
-    enum class SoundDivision {
-      BGM,
-      SE
+namespace bstorm
+{
+class SoundDevice;
+class SoundBuffer;
+class ObjSound : public Obj
+{
+public:
+    enum class SoundDivision
+    {
+        BGM,
+        SE
     };
     ObjSound(const std::shared_ptr<GameState>& gameState);
     ~ObjSound();
@@ -29,10 +32,10 @@ namespace bstorm {
     void setSoundDivision(SoundDivision division);
     bool isPlaying() const;
     float getVolumeRate() const;
-  private:
+private:
     std::shared_ptr<SoundBuffer> soundBuffer;
     bool restartEnable;
     float fadeRatePerSec;
     SoundDivision division;
-  };
+};
 }

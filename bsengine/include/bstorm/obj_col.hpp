@@ -4,11 +4,13 @@
 #include <vector>
 #include <memory>
 
-namespace bstorm {
-  class Intersection;
-  class GameState;
-  class ObjCol {
-  public:
+namespace bstorm
+{
+class Intersection;
+class GameState;
+class ObjCol
+{
+public:
     ObjCol(const std::shared_ptr<GameState>& gameState);
     ~ObjCol();
     const std::deque<std::shared_ptr<Intersection>>& getIntersections() const { return isects; }
@@ -26,10 +28,10 @@ namespace bstorm {
     bool isIntersected() const;
     int getIntersectedCount() const;
     std::vector<std::weak_ptr<Intersection>> getCollideIntersections() const;
-  private:
+private:
     std::deque<std::shared_ptr<Intersection>> isects;
     std::vector<std::shared_ptr<Intersection>> tempIsects; // í«â¡óp
     std::vector<std::shared_ptr<Intersection>> oldTempIsects; // ï€éùóp
     std::weak_ptr<GameState> gameState;
-  };
+};
 }

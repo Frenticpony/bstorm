@@ -1,8 +1,5 @@
 ﻿#pragma once
 
-#include <bstorm/non_copyable.hpp>
-#include <bstorm/code_generator.hpp>
-
 #include <string>
 #include <memory>
 #include <vector>
@@ -14,24 +11,30 @@
 #include <mutex>
 #include <luajit/lua.hpp>
 
-namespace bstorm {
-  class Log;
-  class Engine;
-  class DnhValue;
-  class DnhArray;
-  class ScriptManager;
-  extern const std::unordered_set<std::wstring> ignoreScriptExts;
+#include <bstorm/non_copyable.hpp>
+#include <bstorm/code_generator.hpp>
 
-  class Script : private NonCopyable {
-  public:
-    enum class State {
-      SCRIPT_NOT_COMPILED, // コンパイル前 or コンパイル中
-      SCRIPT_COMPILED, // コンパイル完了
-      SCRIPT_COMPILE_FAILED, // コンパイル失敗
-      SCRIPT_LOADING_COMPLETED, // トップレベル & @Loading完了
-      SCRIPT_STARTED, // 実行開始 -- イベント受理開始
-      SCRIPT_INITIALIZED, // @Initialize完了
-      SCRIPT_CLOSED // 終了(実行時エラー含む)
+namespace bstorm
+{
+class Log;
+class Engine;
+class DnhValue;
+class DnhArray;
+class ScriptManager;
+extern const std::unordered_set<std::wstring> ignoreScriptExts;
+
+class Script : private NonCopyable
+{
+public:
+    enum class State
+    {
+        SCRIPT_NOT_COMPILED, // コンパイル前 or コンパイル中
+        SCRIPT_COMPILED, // コンパイル完了
+        SCRIPT_COMPILE_FAILED, // コンパイル失敗
+        SCRIPT_LOADING_COMPLETED, // トップレベル & @Loading完了
+        SCRIPT_STARTED, // 実行開始 -- イベント受理開始
+        SCRIPT_INITIALIZED, // @Initialize完了
+        SCRIPT_CLOSED // 終了(実行時エラー含む)
     };
     Script(const std::wstring& path, const std::wstring& type, const std::wstring& version, int id, Engine* engine, const std::shared_ptr<SourcePos>& compileSrcPos);
     ~Script();
@@ -61,7 +64,7 @@ namespace bstorm {
     void setScriptArgument(int idx, std::unique_ptr<DnhValue>&& value);
     int getScriptArgumentount() const;
     std::unique_ptr<DnhValue> getScriptArgument(int idx);
-  private:
+private:
     void execCompile();
     void runBuiltInSub(const std::string &name);
     void callLuaChunk();
@@ -81,10 +84,11 @@ namespace bstorm {
     bool autoDeleteObjectEnable;
     mutable std::recursive_mutex compileSection;
     Engine* engine;
-  };
+};
 
-  class ScriptManager {
-  public:
+class ScriptManager
+{
+public:
     ScriptManager(Engine* engine);
     ~ScriptManager();
     std::shared_ptr<Script> compile(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<SourcePos>& srcPos);
@@ -98,11 +102,11 @@ namespace bstorm {
     std::unique_ptr<DnhValue> getScriptResult(int scriptId) const;
     void setScriptResult(int scriptId, std::unique_ptr<DnhValue>&& value);
     void clearScriptResult();
-  private:
-    Engine* engine;
+private:
+    Engine * engine;
     int idGen;
     std::list<std::shared_ptr<Script>> scriptList;
     std::unordered_map <int, std::shared_ptr<Script>> scriptMap;
     std::unordered_map<int, std::unique_ptr<DnhValue>> scriptResults;
-  };
+};
 }

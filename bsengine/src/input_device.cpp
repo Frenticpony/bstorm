@@ -5,8 +5,10 @@
 #include <bstorm/util.hpp>
 #include <bstorm/logger.hpp>
 
-namespace bstorm {
-  static BOOL CALLBACK enumAxesCallback(LPCDIDEVICEOBJECTINSTANCE pdidoi, LPVOID dev) {
+namespace bstorm
+{
+static BOOL CALLBACK enumAxesCallback(LPCDIDEVICEOBJECTINSTANCE pdidoi, LPVOID dev)
+{
     DIPROPRANGE diprg;
 
     diprg.diph.dwSize = sizeof(DIPROPRANGE);
@@ -18,13 +20,14 @@ namespace bstorm {
 
     IDirectInputDevice8* padDevice = (IDirectInputDevice8*)dev;
 
-    if (FAILED(padDevice->SetProperty(DIPROP_RANGE, &diprg.diph))) {
-      return DIENUM_STOP;
+    if (FAILED(padDevice->SetProperty(DIPROP_RANGE, &diprg.diph)))
+    {
+        return DIENUM_STOP;
     }
     return DIENUM_CONTINUE;
-  }
+}
 
-  InputDevice::InputDevice(HWND hWnd, const std::shared_ptr<MousePositionProvider>& mousePosProvider) :
+InputDevice::InputDevice(HWND hWnd, const std::shared_ptr<MousePositionProvider>& mousePosProvider) :
     hWnd(hWnd),
     dInput(NULL),
     keyboardDevice(NULL),
@@ -35,77 +38,89 @@ namespace bstorm {
     mouseMoveZ(0),
     mousePosProvider(mousePosProvider),
     inputEnable(true)
-  {
-    try {
-      if (FAILED(DirectInput8Create(GetModuleHandle(NULL), DIRECTINPUT_VERSION, IID_IDirectInput8, (LPVOID *)&dInput, NULL))) {
-        throw Log(Log::Level::LV_ERROR).setMessage("failed to init input device.");
-      }
-
-      auto keyboardInitFailed = Log(Log::Level::LV_ERROR).setMessage("failed to init keyboard.");
-      auto mouseInitFailed = Log(Log::Level::LV_ERROR).setMessage("failed to init mouse.");
-
-      // init keyboard
-      if (FAILED(dInput->CreateDevice(GUID_SysKeyboard, &keyboardDevice, NULL))) {
-        throw keyboardInitFailed;
-      }
-
-      if (FAILED(keyboardDevice->SetDataFormat(&c_dfDIKeyboard))) {
-        throw keyboardInitFailed;
-      }
-
-      if (FAILED(keyboardDevice->SetCooperativeLevel(hWnd, DISCL_NONEXCLUSIVE | DISCL_FOREGROUND))) {
-        throw keyboardInitFailed;
-      }
-
-      // init mouse
-      if (FAILED(dInput->CreateDevice(GUID_SysMouse, &mouseDevice, NULL))) {
-        throw mouseInitFailed;
-      }
-
-      if (FAILED(mouseDevice->SetDataFormat(&c_dfDIMouse))) {
-        throw mouseInitFailed;
-      }
-
-      if (FAILED(mouseDevice->SetCooperativeLevel(hWnd, DISCL_NONEXCLUSIVE | DISCL_FOREGROUND))) {
-        throw mouseInitFailed;
-      }
-
-      {
-        DIPROPDWORD diprop;
-        diprop.diph.dwSize = sizeof(diprop);
-        diprop.diph.dwHeaderSize = sizeof(diprop.diph);
-        diprop.diph.dwObj = 0;
-        diprop.diph.dwHow = DIPH_DEVICE;
-        diprop.dwData = DIPROPAXISMODE_REL;	// 相対軸
-
-        if (FAILED(mouseDevice->SetProperty(DIPROP_AXISMODE, &diprop.diph))) {
-          throw mouseInitFailed;
+{
+    try
+    {
+        if (FAILED(DirectInput8Create(GetModuleHandle(NULL), DIRECTINPUT_VERSION, IID_IDirectInput8, (LPVOID *)&dInput, NULL)))
+        {
+            throw Log(Log::Level::LV_ERROR).setMessage("failed to init input device.");
         }
-      }
 
-      initPadDevice();
-      resetInputState();
-    } catch (...) {
-      safe_delete(padInputState);
-      safe_delete(prevPadInputState);
-      safe_release(keyboardDevice);
-      safe_release(mouseDevice);
-      safe_release(padDevice);
-      safe_release(dInput);
-      throw;
+        auto keyboardInitFailed = Log(Log::Level::LV_ERROR).setMessage("failed to init keyboard.");
+        auto mouseInitFailed = Log(Log::Level::LV_ERROR).setMessage("failed to init mouse.");
+
+        // init keyboard
+        if (FAILED(dInput->CreateDevice(GUID_SysKeyboard, &keyboardDevice, NULL)))
+        {
+            throw keyboardInitFailed;
+        }
+
+        if (FAILED(keyboardDevice->SetDataFormat(&c_dfDIKeyboard)))
+        {
+            throw keyboardInitFailed;
+        }
+
+        if (FAILED(keyboardDevice->SetCooperativeLevel(hWnd, DISCL_NONEXCLUSIVE | DISCL_FOREGROUND)))
+        {
+            throw keyboardInitFailed;
+        }
+
+        // init mouse
+        if (FAILED(dInput->CreateDevice(GUID_SysMouse, &mouseDevice, NULL)))
+        {
+            throw mouseInitFailed;
+        }
+
+        if (FAILED(mouseDevice->SetDataFormat(&c_dfDIMouse)))
+        {
+            throw mouseInitFailed;
+        }
+
+        if (FAILED(mouseDevice->SetCooperativeLevel(hWnd, DISCL_NONEXCLUSIVE | DISCL_FOREGROUND)))
+        {
+            throw mouseInitFailed;
+        }
+
+        {
+            DIPROPDWORD diprop;
+            diprop.diph.dwSize = sizeof(diprop);
+            diprop.diph.dwHeaderSize = sizeof(diprop.diph);
+            diprop.diph.dwObj = 0;
+            diprop.diph.dwHow = DIPH_DEVICE;
+            diprop.dwData = DIPROPAXISMODE_REL;	// 相対軸
+
+            if (FAILED(mouseDevice->SetProperty(DIPROP_AXISMODE, &diprop.diph)))
+            {
+                throw mouseInitFailed;
+            }
+        }
+
+        initPadDevice();
+        resetInputState();
+    } catch (...)
+    {
+        safe_delete(padInputState);
+        safe_delete(prevPadInputState);
+        safe_release(keyboardDevice);
+        safe_release(mouseDevice);
+        safe_release(padDevice);
+        safe_release(dInput);
+        throw;
     }
-  }
+}
 
-  InputDevice::~InputDevice() {
+InputDevice::~InputDevice()
+{
     delete padInputState;
     delete prevPadInputState;
     keyboardDevice->Release();
     mouseDevice->Release();
     safe_release(padDevice);
     dInput->Release();
-  }
+}
 
-  void InputDevice::updateInputState() {
+void InputDevice::updateInputState()
+{
     keyboardDevice->Poll();
     while (keyboardDevice->Acquire() == DIERR_INPUTLOST);
 
@@ -118,22 +133,26 @@ namespace bstorm {
     DIMOUSESTATE mouseInputState;
     mouseDevice->GetDeviceState(sizeof(mouseInputState), &mouseInputState);
     std::swap(prevMouseButtonInputStates, mouseButtonInputStates);
-    for (int i = 0; i < 4; i++) {
-      mouseButtonInputStates[i] = mouseInputState.rgbButtons[i];
+    for (int i = 0; i < 4; i++)
+    {
+        mouseButtonInputStates[i] = mouseInputState.rgbButtons[i];
     }
     mouseMoveZ = mouseInputState.lZ;
 
-    if (padDevice) {
-      padDevice->Poll();
-      while (padDevice->Acquire() == DIERR_INPUTLOST);
-      std::swap(prevPadInputState, padInputState);
-      padDevice->GetDeviceState(sizeof(DIJOYSTATE), padInputState);
-    } else {
-      initPadDevice();
+    if (padDevice)
+    {
+        padDevice->Poll();
+        while (padDevice->Acquire() == DIERR_INPUTLOST);
+        std::swap(prevPadInputState, padInputState);
+        padDevice->GetDeviceState(sizeof(DIJOYSTATE), padInputState);
+    } else
+    {
+        initPadDevice();
     }
-  }
+}
 
-  void InputDevice::resetInputState() {
+void InputDevice::resetInputState()
+{
     keyInputStates.fill(0);
     prevKeyInputStates.fill(0);
     mouseButtonInputStates.fill(0);
@@ -145,131 +164,153 @@ namespace bstorm {
     memset(padInputState, 0, sizeof(DIJOYSTATE));
     memset(prevPadInputState, 0, sizeof(DIJOYSTATE));
     mouseMoveZ = 0;
-  }
+}
 
-  KeyState InputDevice::getKeyState(Key k) {
+KeyState InputDevice::getKeyState(Key k)
+{
     if (!inputEnable) return KEY_FREE;
     if (k < 0 || k > 255) return KEY_FREE;
     return ((prevKeyInputStates[k] >> 6) | (keyInputStates[k] >> 7));
-  }
+}
 
-  KeyState InputDevice::getMouseState(MouseButton btn) const {
+KeyState InputDevice::getMouseState(MouseButton btn) const
+{
     if (!inputEnable) return KEY_FREE;
     if (btn < 0 || btn > 2) return KEY_FREE;
     //MOUSE_LEFT = 0;
     //MOUSE_RIGHT = 1;
     //MOUSE_MIDDLE = 2;
     return ((prevMouseButtonInputStates[btn] >> 6) | (mouseButtonInputStates[btn] >> 7));
-  }
+}
 
-  KeyState InputDevice::getPadButtonState(PadButton btn) const {
+KeyState InputDevice::getPadButtonState(PadButton btn) const
+{
     if (!inputEnable) return KEY_FREE;
     // 0-3は十字キー用
-    switch (btn) {
-      case 0: // left
-        return ((prevPadInputState->lX < 0) << 1) | (padInputState->lX < 0);
-      case 1: // right
-        return ((prevPadInputState->lX > 0) << 1) | (padInputState->lX > 0);
-      case 2: // up
-        return ((prevPadInputState->lY < 0) << 1) | (padInputState->lY < 0);
-      case 3: // down
-        return ((prevPadInputState->lY > 0) << 1) | (padInputState->lY > 0);
-      default:
-        btn -= 4;
-        if (btn < 0 || btn > 31) return KEY_FREE;
-        return ((prevPadInputState->rgbButtons[btn] >> 6) | (padInputState->rgbButtons[btn] >> 7));
+    switch (btn)
+    {
+        case 0: // left
+            return ((prevPadInputState->lX < 0) << 1) | (padInputState->lX < 0);
+        case 1: // right
+            return ((prevPadInputState->lX > 0) << 1) | (padInputState->lX > 0);
+        case 2: // up
+            return ((prevPadInputState->lY < 0) << 1) | (padInputState->lY < 0);
+        case 3: // down
+            return ((prevPadInputState->lY > 0) << 1) | (padInputState->lY > 0);
+        default:
+            btn -= 4;
+            if (btn < 0 || btn > 31) return KEY_FREE;
+            return ((prevPadInputState->rgbButtons[btn] >> 6) | (padInputState->rgbButtons[btn] >> 7));
     }
-  }
+}
 
-  int InputDevice::getMouseX(int screenWidth, int screenHeight) const {
+int InputDevice::getMouseX(int screenWidth, int screenHeight) const
+{
     if (!inputEnable) return 0;
     int x = 0;
     int y;
-    if (mousePosProvider) {
-      mousePosProvider->getMousePos(screenWidth, screenHeight, x, y);
+    if (mousePosProvider)
+    {
+        mousePosProvider->getMousePos(screenWidth, screenHeight, x, y);
     }
     return x;
-  }
+}
 
-  int InputDevice::getMouseY(int screenWidth, int screenHeight) const {
+int InputDevice::getMouseY(int screenWidth, int screenHeight) const
+{
     if (!inputEnable) return 0;
     int x;
     int y = 0;
-    if (mousePosProvider) {
-      mousePosProvider->getMousePos(screenWidth, screenHeight, x, y);
+    if (mousePosProvider)
+    {
+        mousePosProvider->getMousePos(screenWidth, screenHeight, x, y);
     }
     return y;
-  }
+}
 
-  int InputDevice::getMouseMoveZ() const {
+int InputDevice::getMouseMoveZ() const
+{
     if (!inputEnable) return 0;
     return mouseMoveZ;
-  }
+}
 
-  void InputDevice::setMousePositionProvider(const std::shared_ptr<MousePositionProvider>& provider) {
+void InputDevice::setMousePositionProvider(const std::shared_ptr<MousePositionProvider>& provider)
+{
     mousePosProvider = provider;
-  }
+}
 
-  void InputDevice::setInputEnable(bool enable) {
+void InputDevice::setInputEnable(bool enable)
+{
     inputEnable = enable;
-  }
+}
 
-  void InputDevice::initPadDevice() {
+void InputDevice::initPadDevice()
+{
     safe_release(padDevice);
     // init pad
-    if (FAILED(dInput->CreateDevice(GUID_Joystick, &padDevice, NULL))) {
-      safe_release(padDevice);
-      return;
+    if (FAILED(dInput->CreateDevice(GUID_Joystick, &padDevice, NULL)))
+    {
+        safe_release(padDevice);
+        return;
     }
 
-    if (FAILED(padDevice->SetDataFormat(&c_dfDIJoystick))) {
-      safe_release(padDevice);
-      return;
+    if (FAILED(padDevice->SetDataFormat(&c_dfDIJoystick)))
+    {
+        safe_release(padDevice);
+        return;
     }
 
-    if (FAILED(padDevice->SetCooperativeLevel(hWnd, DISCL_NONEXCLUSIVE | DISCL_FOREGROUND))) {
-      safe_release(padDevice);
-      return;
+    if (FAILED(padDevice->SetCooperativeLevel(hWnd, DISCL_NONEXCLUSIVE | DISCL_FOREGROUND)))
+    {
+        safe_release(padDevice);
+        return;
     }
 
     {
-      DIPROPDWORD diprop;
-      diprop.diph.dwSize = sizeof(diprop);
-      diprop.diph.dwHeaderSize = sizeof(diprop.diph);
-      diprop.diph.dwObj = 0;
-      diprop.diph.dwHow = DIPH_DEVICE;
-      diprop.dwData = DIPROPAXISMODE_ABS;	// 絶対軸
+        DIPROPDWORD diprop;
+        diprop.diph.dwSize = sizeof(diprop);
+        diprop.diph.dwHeaderSize = sizeof(diprop.diph);
+        diprop.diph.dwObj = 0;
+        diprop.diph.dwHow = DIPH_DEVICE;
+        diprop.dwData = DIPROPAXISMODE_ABS;	// 絶対軸
 
-      if (FAILED(padDevice->SetProperty(DIPROP_AXISMODE, &diprop.diph))) {
+        if (FAILED(padDevice->SetProperty(DIPROP_AXISMODE, &diprop.diph)))
+        {
+            safe_release(padDevice);
+            return;
+        }
+    }
+
+    if (FAILED(padDevice->EnumObjects(enumAxesCallback, padDevice, DIDFT_AXIS)))
+    {
         safe_release(padDevice);
         return;
-      }
     }
+}
 
-    if (FAILED(padDevice->EnumObjects(enumAxesCallback, padDevice, DIDFT_AXIS))) {
-      safe_release(padDevice);
-      return;
-    }
-  }
+WinMousePositionProvider::WinMousePositionProvider(HWND hWnd) : hWnd(hWnd)
+{
+}
 
-  WinMousePositionProvider::WinMousePositionProvider(HWND hWnd) : hWnd(hWnd) {
-  }
-
-  void WinMousePositionProvider::getMousePos(int screenWidth, int screenHeight, int & x, int & y) {
+void WinMousePositionProvider::getMousePos(int screenWidth, int screenHeight, int & x, int & y)
+{
     POINT point;
     x = 0; y = 0;
-    if (GetCursorPos(&point)) {
-      if (ScreenToClient(hWnd, &point)) {
-        int windowWidth = screenWidth;
-        int windowHeight = screenHeight;
-        RECT clientRect;
-        if (GetClientRect(hWnd, &clientRect)) {
-          windowWidth = clientRect.right;
-          windowHeight = clientRect.bottom;
+    if (GetCursorPos(&point))
+    {
+        if (ScreenToClient(hWnd, &point))
+        {
+            int windowWidth = screenWidth;
+            int windowHeight = screenHeight;
+            RECT clientRect;
+            if (GetClientRect(hWnd, &clientRect))
+            {
+                windowWidth = clientRect.right;
+                windowHeight = clientRect.bottom;
+            }
+            x = 1.0f * point.x * screenWidth / windowWidth;
+            y = 1.0f * point.y * screenHeight / windowHeight;
         }
-        x = 1.0f * point.x * screenWidth / windowWidth;
-        y = 1.0f * point.y * screenHeight / windowHeight;
-      }
     }
-  }
+}
 }

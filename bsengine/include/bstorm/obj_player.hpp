@@ -4,14 +4,16 @@
 #include <bstorm/obj_move.hpp>
 #include <bstorm/obj_col.hpp>
 
-namespace bstorm {
-  class Intersection;
-  class PlayerIntersectionToItem;
-  class ObjItem;
-  class ObjShot;
+namespace bstorm
+{
+class Intersection;
+class PlayerIntersectionToItem;
+class ObjItem;
+class ObjShot;
 
-  class GlobalPlayerParams {
-  public:
+class GlobalPlayerParams
+{
+public:
     GlobalPlayerParams();
     double life;
     double spell;
@@ -19,10 +21,11 @@ namespace bstorm {
     int64_t score;
     int64_t graze;
     int64_t point;
-  };
+};
 
-  class ObjPlayer : public ObjSprite2D, public ObjMove, public ObjCol {
-  public:
+class ObjPlayer : public ObjSprite2D, public ObjMove, public ObjCol
+{
+public:
     ObjPlayer(const std::shared_ptr<GameState>& gameState, const std::shared_ptr<GlobalPlayerParams>& globalParams);
     ~ObjPlayer();
     void update() override;
@@ -71,7 +74,7 @@ namespace bstorm {
     void callSpell();
     void getItem(int itemObjId);
     bool isGrazeEnabled() const;
-  protected:
+protected:
     void transIntersection(float dx, float dy);
     bool isInvincible() const;
     void shootDown();
@@ -100,5 +103,5 @@ namespace bstorm {
     std::vector<double> currentFrameGrazeObjIds;
     std::vector<Point2D> currentFrameGrazeShotPoints;
     std::shared_ptr<PlayerIntersectionToItem> isectToItem;
-  };
+};
 }

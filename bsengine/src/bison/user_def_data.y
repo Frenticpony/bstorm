@@ -10,7 +10,8 @@
 %lex-param   { bstorm::UserDefDataParseContext* ctx }
 %parse-param { bstorm::UserDefDataParseContext* ctx }
 
-%code requires {
+%code requires
+{
 #include <bstorm/shot_data.hpp>
 #include <bstorm/item_data.hpp>
 #include <bstorm/type.hpp>
@@ -19,37 +20,40 @@
 #include <string>
 #include <memory>
 
-namespace bstorm {
-  class UserDefDataLexer;
-  struct UserDefDataParseContext {
-      UserDefDataParseContext(const std::shared_ptr<UserShotData>& data, UserDefDataLexer* lexer) :
+namespace bstorm
+{
+class UserDefDataLexer;
+struct UserDefDataParseContext
+{
+    UserDefDataParseContext(const std::shared_ptr<UserShotData>& data, UserDefDataLexer* lexer) :
         userShotData(data),
         lexer(lexer) {}
-      UserDefDataParseContext(const std::shared_ptr<UserItemData>& data, UserDefDataLexer* lexer) :
+    UserDefDataParseContext(const std::shared_ptr<UserItemData>& data, UserDefDataLexer* lexer) :
         userItemData(data),
         lexer(lexer) {}
-      std::shared_ptr<UserShotData> userShotData;
-      std::shared_ptr<UserItemData> userItemData;
-      std::wstring tmpStr;
-      AnimationData animationData;
-      ShotData shotData;
-      ItemData itemData;
-      UserDefDataLexer* lexer;
-  };
+    std::shared_ptr<UserShotData> userShotData;
+    std::shared_ptr<UserItemData> userItemData;
+    std::wstring tmpStr;
+    AnimationData animationData;
+    ShotData shotData;
+    ItemData itemData;
+    UserDefDataLexer* lexer;
+};
 
-  struct Int3 {
-    int a; int b; int c;
-  };
-  struct Int4 {
-    int a; int b; int c; int d;
-  };
-  struct Int5 {
-    int a; int b; int c; int d; int e;
-  };
+struct Int3 {
+  int a; int b; int c;
+};
+struct Int4 {
+  int a; int b; int c; int d;
+};
+struct Int5 {
+  int a; int b; int c; int d; int e;
+};
 }
 }
 
-%code { // dnh.tab.cpp after #include dnh.tab.hpp
+%code
+{ // dnh.tab.cpp after #include dnh.tab.hpp
 #include "../reflex/user_def_data_lexer.hpp"
 
 #include <bstorm/dnh_const.hpp>
@@ -60,44 +64,46 @@ namespace bstorm {
 
 using namespace bstorm;
 
-static int yylex(UserDefDataParser::semantic_type* yylval,  UserDefDataParser::location_type* yylloc, UserDefDataParseContext* ctx) {
-  auto lexer = ctx->lexer;
-  auto tk = lexer->userdefdatalex();
-  switch(tk) {
-    case UserDefDataParser::token_type::TK_TRUE:
-      yylval->boolean = true;
-      break;
-    case UserDefDataParser::token_type::TK_FALSE:
-      yylval->boolean = false;
-      break;
-    case UserDefDataParser::token_type::TK_NUM:
-      yylval->num = std::stof(lexer->getWString());
-      break;
-    case UserDefDataParser::token_type::TK_STR:
-      ctx->tmpStr = lexer->getWString();
-      break;
-  }
-  yylloc->begin = lexer->getSourcePos();
-  return tk;
+static int yylex(UserDefDataParser::semantic_type* yylval,  UserDefDataParser::location_type* yylloc, UserDefDataParseContext* ctx)
+{
+    auto lexer = ctx->lexer;
+    auto tk = lexer->userdefdatalex();
+    switch(tk)
+    {
+        case UserDefDataParser::token_type::TK_TRUE:
+            yylval->boolean = true;
+            break;
+        case UserDefDataParser::token_type::TK_FALSE:
+            yylval->boolean = false;
+            break;
+        case UserDefDataParser::token_type::TK_NUM:
+            yylval->num = std::stof(lexer->getWString());
+            break;
+        case UserDefDataParser::token_type::TK_STR:
+            ctx->tmpStr = lexer->getWString();
+            break;
+    }
+    yylloc->begin = lexer->getSourcePos();
+    return tk;
 }
 
 void UserDefDataParser::error(const UserDefDataParser::location_type& yylloc, const std::string &msg) {
-  throw Log(Log::Level::LV_ERROR)
-    .setMessage(msg)
-    .addSourcePos(std::make_shared<SourcePos>(yylloc.begin));
+    throw Log(Log::Level::LV_ERROR)
+      .setMessage(msg)
+      .addSourcePos(std::make_shared<SourcePos>(yylloc.begin));
+}
 }
 
-}
-
-%union {
-  int id;
-  int blend;
-  bool boolean;
-  float num;
-  Int3 rgb;
-  Int4 rect;
-  Int5 anim_clip;
-  ShotCollision collision;
+%union
+{
+    int id;
+    int blend;
+    bool boolean;
+    float num;
+    Int3 rgb;
+    Int4 rect;
+    Int5 anim_clip;
+    ShotCollision collision;
 }
 
 /* header */
@@ -177,18 +183,21 @@ stmts                        : none
 
 stmt                         : shot-data-struct
                              {
-                               if (ctx->userShotData) {
-                                 ctx->userShotData->dataMap[ctx->shotData.id] = ctx->shotData;
+                               if (ctx->userShotData)
+                               {
+                                   ctx->userShotData->dataMap[ctx->shotData.id] = ctx->shotData;
                                }
                              }
                              | item-data-struct
                              {
-                               if (ctx->userItemData) {
-                                   if (ctx->itemData.type == ID_INVALID) {
-                                     ctx->itemData.type = ctx->itemData.id;
-                                   }
-                                   ctx->userItemData->dataMap[ctx->itemData.id] = ctx->itemData;
-                               }
+                                 if (ctx->userItemData)
+                                 {
+                                     if (ctx->itemData.type == ID_INVALID)
+                                     {
+                                         ctx->itemData.type = ctx->itemData.id;
+                                     }
+                                     ctx->userItemData->dataMap[ctx->itemData.id] = ctx->itemData;
+                                 }
                              }
                              | TK_P_SHOT_IMAGE  TK_EQ TK_STR { if (ctx->userShotData) { ctx->userShotData->imagePath = ctx->tmpStr; } }
                              | TK_P_DELAY_RECT  TK_EQ rect   { if (ctx->userShotData) { ctx->userShotData->delayRect = Rect<int>($3.a, $3.b, $3.c, $3.d); } }

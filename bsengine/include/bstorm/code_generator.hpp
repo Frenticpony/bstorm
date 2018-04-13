@@ -8,14 +8,17 @@
 #include <stack>
 #include <unordered_map>
 
-namespace bstorm {
-  class CodeGenerator : public NodeTraverser {
-  public:
+namespace bstorm
+{
+class CodeGenerator : public NodeTraverser
+{
+public:
     CodeGenerator();
-    void generate(Node& n) {
-      code.clear();
-      code.reserve(4096);
-      n.traverse(*this);
+    void generate(Node& n)
+    {
+        code.clear();
+        code.reserve(4096);
+        n.traverse(*this);
     }
     SourceMap getSourceMap() const { return srcMap; }
     const char* getCode() const { return code.c_str(); }
@@ -85,7 +88,7 @@ namespace bstorm {
     void traverse(NodeCase&);
     void traverse(NodeAlternative&);
     void traverse(NodeHeader&);
-  protected:
+protected:
     void addCode(const std::wstring& s);
     void addCode(const std::string& s);
     void newLine();
@@ -108,5 +111,5 @@ namespace bstorm {
     int indentLevel;
     int outputLine;
     bool isLineHead;
-  };
+};
 }

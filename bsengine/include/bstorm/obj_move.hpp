@@ -3,17 +3,20 @@
 #include <memory>
 #include <list>
 
-namespace bstorm {
-  class MoveMode {
-  public:
+namespace bstorm
+{
+class MoveMode
+{
+public:
     virtual ~MoveMode();
     virtual void move(float& x, float& y) = 0;
     virtual float getSpeed() const = 0;
     virtual float getAngle() const = 0;
-  };
+};
 
-  class MoveModeA : public MoveMode {
-  public:
+class MoveModeA : public MoveMode
+{
+public:
     MoveModeA();
     void move(float& x, float& y) override;
     float getSpeed() const override { return speed; }
@@ -26,16 +29,17 @@ namespace bstorm {
     void setMaxSpeed(float v) { maxSpeed = v; }
     float getAngularVelocity() const { return angularVelocity; }
     void setAngularVelocity(float v) { angularVelocity = v; }
-  private:
+private:
     float speed;
     float angle;
     float accel;
     float maxSpeed;
     float angularVelocity;
-  };
+};
 
-  class MoveModeB : public MoveMode {
-  public:
+class MoveModeB : public MoveMode
+{
+public:
     MoveModeB(float speedX, float speedY, float accelX, float accelY, float maxSpeedX, float maxSpeedY);
     void move(float& x, float& y) override;
     float getAngle() const override;
@@ -52,37 +56,39 @@ namespace bstorm {
     void setMaxSpeedX(float v) { maxSpeedX = v; }
     float getMaxSpeedY() const { return maxSpeedY; }
     void setMaxSpeedY(float v) { maxSpeedY = v; }
-  private:
+private:
     float speedX;
     float speedY;
     float accelX;
     float accelY;
     float maxSpeedX;
     float maxSpeedY;
-  };
+};
 
-  class MoveModeAtFrame : public MoveMode {
-  public:
+class MoveModeAtFrame : public MoveMode
+{
+public:
     MoveModeAtFrame(int frame, float speed, float angle);
     void move(float& x, float& y) override;
     float getAngle() const override { return angle; }
     float getSpeed() const override { return speed; }
-  private:
+private:
     int frame;
     float speed;
     float angle;
     bool isTimeUp;
     float cosAngle;
     float sinAngle;
-  };
+};
 
-  class MoveModeAtWeight : public MoveMode {
-  public:
+class MoveModeAtWeight : public MoveMode
+{
+public:
     MoveModeAtWeight(float destX, float destY, float angle, float weight, float maxSpeed);
     void move(float& x, float& y) override;
     float getAngle() const override { return angle; }
     float getSpeed() const override { return speed; }
-  private:
+private:
     float destX;
     float destY;
     float speed;
@@ -92,27 +98,29 @@ namespace bstorm {
     bool isArrived;
     float cosAngle;
     float sinAngle;
-  };
+};
 
-  class ObjRender;
-  class ObjMove;
-  class MovePattern {
-  public:
+class ObjRender;
+class ObjMove;
+class MovePattern
+{
+public:
     MovePattern(int timer);
     virtual ~MovePattern();
     virtual void apply(ObjMove* move, ObjRender* obj) = 0;
     void tickTimerCount() { timer--; }
     int getTiemrCount() const { return timer; }
-  protected:
+protected:
     int timer;
-  };
+};
 
-  class ShotData;
-  class MovePatternA : public MovePattern {
-  public:
+class ShotData;
+class MovePatternA : public MovePattern
+{
+public:
     MovePatternA(int frame, float speed, float angle, float accel, float angularVelocity, float maxSpeed, const std::shared_ptr<ObjMove>& baseObj, const std::shared_ptr<ShotData>& shotData);
     void apply(ObjMove* move, ObjRender* obj) override;
-  private:
+private:
     float speed;
     float angle;
     float accel;
@@ -121,13 +129,14 @@ namespace bstorm {
     std::weak_ptr<ObjMove> baseObj;
     std::weak_ptr<ShotData> shotData;
     int shotDataId;
-  };
+};
 
-  class MovePatternB : public MovePattern {
-  public:
+class MovePatternB : public MovePattern
+{
+public:
     MovePatternB(int frame, float speedX, float speedY, float accelX, float accelY, float maxSpeedX, float maxSpeedY, const std::shared_ptr<ShotData>& shotData);
     void apply(ObjMove* move, ObjRender* obj) override;
-  private:
+private:
     float speedX;
     float speedY;
     float accelX;
@@ -135,10 +144,11 @@ namespace bstorm {
     float maxSpeedX;
     float maxSpeedY;
     std::weak_ptr<ShotData> shotData;
-  };
+};
 
-  class ObjMove {
-  public:
+class ObjMove
+{
+public:
     ObjMove(ObjRender *obj);
     float getMoveX() const;
     void setMoveX(float x);
@@ -158,11 +168,11 @@ namespace bstorm {
     const std::shared_ptr<MoveMode>& getMoveMode() const;
     void setMoveMode(const std::shared_ptr<MoveMode>& mode);
     void addMovePattern(const std::shared_ptr<MovePattern>& pattern);
-  protected:
+protected:
     void move();
-  private:
+private:
     std::shared_ptr<MoveMode> mode;
     std::list<std::shared_ptr<MovePattern>> patterns;
     ObjRender *obj;
-  };
+};
 };

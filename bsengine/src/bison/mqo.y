@@ -10,16 +10,19 @@
 %parse-param { bstorm::MqoParseContext* ctx }
 %lex-param { bstorm::MqoParseContext* ctx }
 
-%code requires { // top mqo.tab.hpp
+%code requires
+{ // top mqo.tab.hpp
 #include <bstorm/mqo.hpp>
 #include <bstorm/source_map.hpp>
 
 #include <string>
 #include <memory>
 
-namespace bstorm {
-  class MqoLexer;
-  struct MqoParseContext {
+namespace bstorm
+{
+class MqoLexer;
+struct MqoParseContext
+{
     MqoParseContext(MqoLexer* lexer) : mqo(std::make_shared<Mqo>()), lexer(lexer) {}
     std::shared_ptr<Mqo> mqo;
     MqoLight light;
@@ -28,12 +31,13 @@ namespace bstorm {
     MqoFace face;
     MqoObject object;
     std::wstring tmpStr;
-	  MqoLexer* lexer;
-  };
+    MqoLexer* lexer;
+};
 }
 }
 
-%code { // mqo.tab.cpp after #include mqo.tab.hpp
+%code
+{ // mqo.tab.cpp after #include mqo.tab.hpp
 #include <bstorm/logger.hpp>
 #include <bstorm/util.hpp>
 
@@ -41,43 +45,48 @@ namespace bstorm {
 
 using namespace bstorm;
 
-static int yylex(MqoParser::semantic_type *yylval, MqoParser::location_type* yylloc, MqoParseContext* ctx) {
-  auto lexer = ctx->lexer;
-  auto tk = lexer->mqolex();
-  switch(tk) {
-     case MqoParser::token_type::TK_NUM:
-       yylval->num = lexer->getNumber();
-       break;
-     case MqoParser::token_type::TK_STR:
-       ctx->tmpStr = lexer->getWString();
-       break;
-  }
-  yylloc->begin.filename = lexer->getFilePath();
-  yylloc->begin.line = lexer->lineno();
-  yylloc->begin.column = lexer->columno() + 1;
-  return tk;
+static int yylex(MqoParser::semantic_type *yylval, MqoParser::location_type* yylloc, MqoParseContext* ctx)
+{
+    auto lexer = ctx->lexer;
+    auto tk = lexer->mqolex();
+    switch(tk)
+    {
+        case MqoParser::token_type::TK_NUM:
+            yylval->num = lexer->getNumber();
+            break;
+        case MqoParser::token_type::TK_STR:
+            ctx->tmpStr = lexer->getWString();
+            break;
+    }
+    yylloc->begin.filename = lexer->getFilePath();
+    yylloc->begin.line = lexer->lineno();
+    yylloc->begin.column = lexer->columno() + 1;
+    return tk;
 }
 
-void MqoParser::error(const MqoParser::location_type& yylloc, const std::string& msg) {
-  throw Log(Log::Level::LV_ERROR)
-    .setMessage(msg)
-    .addSourcePos(std::make_shared<SourcePos>(yylloc.begin));
+void MqoParser::error(const MqoParser::location_type& yylloc, const std::string& msg)
+{
+    throw Log(Log::Level::LV_ERROR)
+      .setMessage(msg)
+      .addSourcePos(std::make_shared<SourcePos>(yylloc.begin));
 }
 
-static MqoColor4 toMqoColor4(uint32_t col) {
-  float r = (col & 0x000000ff) / 255.0f;
-  float g = (col & 0x0000ff00) / 255.0f;
-  float b = (col & 0x00ff0000) / 255.0f;
-  float a = (col & 0xff000000) / 255.0f;
-  return MqoColor4{r, g, b, a};
+static MqoColor4 toMqoColor4(uint32_t col)
+{
+    float r = (col & 0x000000ff) / 255.0f;
+    float g = (col & 0x0000ff00) / 255.0f;
+    float b = (col & 0x00ff0000) / 255.0f;
+    float a = (col & 0xff000000) / 255.0f;
+    return MqoColor4{r, g, b, a};
 }
 }
 
-%union {
-  double num;
-  MqoVec2 vec2;
-  MqoVec3 vec3;
-  MqoColor4 col4;
+%union
+{
+    double num;
+    MqoVec2 vec2;
+    MqoVec3 vec3;
+    MqoColor4 col4;
 }
 
 /* keyword */

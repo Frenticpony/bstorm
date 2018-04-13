@@ -1,12 +1,14 @@
 ﻿#pragma once
 
-namespace bstorm {
-  class NonCopyable {
-  protected:
+namespace bstorm
+{
+class NonCopyable
+{
+protected:
     NonCopyable() {}
     ~NonCopyable() {}
-  private:
+private:
     void operator =(const NonCopyable& src);
     NonCopyable(const NonCopyable& src);
-  };
+};
 }

@@ -11,69 +11,79 @@
 
 #include "common_data_browser.hpp"
 
-namespace bstorm {
-  template <>
-  void CommonDataDB::backDoor<CommonDataBrowser>() const {
+namespace bstorm
+{
+template <>
+void CommonDataDB::backDoor<CommonDataBrowser>() const
+{
     static CommonDataDB::DataAreaName selectedArea;
     {
-      // common data area list
-      ImGui::Text("Data Area");
-      ImGui::BeginChild("CommonDataAreaList", ImVec2(-1, ImGui::GetContentRegionAvail().y * 0.1), true, ImGuiWindowFlags_HorizontalScrollbar);
-      for (const auto& entry : areaTable) {
-        const CommonDataDB::DataAreaName& areaName = entry.first;
-        std::string label = areaName.empty() ? "[default]" : toUTF8(areaName);
-        if (ImGui::Selectable(label.c_str(), selectedArea == areaName)) {
-          selectedArea = areaName;
+        // common data area list
+        ImGui::Text("Data Area");
+        ImGui::BeginChild("CommonDataAreaList", ImVec2(-1, ImGui::GetContentRegionAvail().y * 0.1), true, ImGuiWindowFlags_HorizontalScrollbar);
+        for (const auto& entry : areaTable)
+        {
+            const CommonDataDB::DataAreaName& areaName = entry.first;
+            std::string label = areaName.empty() ? "[default]" : toUTF8(areaName);
+            if (ImGui::Selectable(label.c_str(), selectedArea == areaName))
+            {
+                selectedArea = areaName;
+            }
         }
-      }
-      ImGui::EndChild();
+        ImGui::EndChild();
     }
     {
-      // key-value list
-      ImGui::BeginChild("CommonDataKeyValueList", ImVec2(-1, -1), true, ImGuiWindowFlags_HorizontalScrollbar);
-      auto it = areaTable.find(selectedArea);
-      if (it != areaTable.end()) {
-        const auto& area = it->second;
-        ImGui::Columns(2, "key-value-list");
-        ImGui::Text("Key"); ImGui::NextColumn(); ImGui::Text("Value"); ImGui::NextColumn();
-        ImGui::Separator();
-        for (auto& entry : area) {
-          const auto& key = entry.first;
-          const auto& value = entry.second;
-          if (ImGui::GetColumnIndex() == 0) {
+        // key-value list
+        ImGui::BeginChild("CommonDataKeyValueList", ImVec2(-1, -1), true, ImGuiWindowFlags_HorizontalScrollbar);
+        auto it = areaTable.find(selectedArea);
+        if (it != areaTable.end())
+        {
+            const auto& area = it->second;
+            ImGui::Columns(2, "key-value-list");
+            ImGui::Text("Key"); ImGui::NextColumn(); ImGui::Text("Value"); ImGui::NextColumn();
             ImGui::Separator();
-          }
-          ImGui::Text(toUTF8(key).c_str()); ImGui::NextColumn(); ImGui::Text(toUTF8(value->toString()).c_str()); ImGui::NextColumn();
+            for (auto& entry : area)
+            {
+                const auto& key = entry.first;
+                const auto& value = entry.second;
+                if (ImGui::GetColumnIndex() == 0)
+                {
+                    ImGui::Separator();
+                }
+                ImGui::Text(toUTF8(key).c_str()); ImGui::NextColumn(); ImGui::Text(toUTF8(value->toString()).c_str()); ImGui::NextColumn();
+            }
+            ImGui::Columns(1);
+            ImGui::Separator();
         }
-        ImGui::Columns(1);
-        ImGui::Separator();
-      }
-      ImGui::EndChild();
+        ImGui::EndChild();
     }
-  }
+}
 
-  template <>
-  void Engine::backDoor<CommonDataBrowser>() {
+template <>
+void Engine::backDoor<CommonDataBrowser>()
+{
     gameState->commonDataDB->backDoor<CommonDataBrowser>();
-  }
+}
 
-  CommonDataBrowser::CommonDataBrowser(int left, int top, int width, int height) :
+CommonDataBrowser::CommonDataBrowser(int left, int top, int width, int height) :
     iniLeft(left),
     iniTop(top),
     iniWidth(width),
     iniHeight(height),
     openFlag(false)
-  {
-  }
-  CommonDataBrowser::~CommonDataBrowser() { }
+{
+}
+CommonDataBrowser::~CommonDataBrowser() {}
 
-  void CommonDataBrowser::draw(const std::shared_ptr<Engine>& engine) {
+void CommonDataBrowser::draw(const std::shared_ptr<Engine>& engine)
+{
     if (!isOpened()) return;
     ImGui::SetNextWindowPos(ImVec2(iniLeft, iniTop), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(iniWidth, iniHeight), ImGuiCond_FirstUseEver);
-    if (ImGui::Begin("Common Data", &openFlag, ImGuiWindowFlags_ResizeFromAnySide)) {
-      engine->backDoor<CommonDataBrowser>();
+    if (ImGui::Begin("Common Data", &openFlag, ImGuiWindowFlags_ResizeFromAnySide))
+    {
+        engine->backDoor<CommonDataBrowser>();
     }
     ImGui::End();
-  }
+}
 }

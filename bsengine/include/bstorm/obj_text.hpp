@@ -4,11 +4,13 @@
 
 #include <d3dx9.h>
 
-namespace bstorm {
-  class Font;
-  class FontCache;
-  class ObjText : public ObjRender {
-  public:
+namespace bstorm
+{
+class Font;
+class FontCache;
+class ObjText : public ObjRender
+{
+public:
     ObjText(const std::shared_ptr<GameState>& state);
     ~ObjText();
     void update() override;
@@ -57,18 +59,21 @@ namespace bstorm {
     void generateFonts();
     const std::vector<std::shared_ptr<Font>>& getBodyFonts() const;
     template <typename T>
-    struct Ruby {
-      Ruby(int begin, int end, const T& text) :
-        begin(begin),
-        end(end),
-        text(text) {}
-      int begin;
-      int end;
-      T text;
+    struct Ruby
+    {
+        Ruby(int begin, int end, const T& text) :
+            begin(begin),
+            end(end),
+            text(text)
+        {
+        }
+        int begin;
+        int end;
+        T text;
     };
     const std::vector<Ruby<std::vector<std::shared_ptr<Font>>>>& getRubyFonts() const;
     static void parseRubiedString(const std::wstring& src, std::wstring& bodyText, std::vector<Ruby<std::wstring>>& rubies);
-  protected:
+protected:
     int getNextLineOffsetY() const;
     void renderFont(const std::shared_ptr<Font>& font, const D3DXMATRIX& worldMatrix);
     std::wstring text;
@@ -94,5 +99,5 @@ namespace bstorm {
     bool fontParamModified;
     std::vector<std::shared_ptr<Font>> bodyFonts;
     std::vector<Ruby<std::vector<std::shared_ptr<Font>>>> rubyFonts;
-  };
+};
 }

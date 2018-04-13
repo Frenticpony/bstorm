@@ -11,13 +11,15 @@
 #include <list>
 #include <d3d9.h>
 
-namespace bstorm {
-  class Shader;
-  class Texture;
-  class RenderTarget;
-  class ObjectLayerList;
-  class ObjRender : public Obj {
-  public:
+namespace bstorm
+{
+class Shader;
+class Texture;
+class RenderTarget;
+class ObjectLayerList;
+class ObjRender : public Obj
+{
+public:
     ObjRender(const std::shared_ptr<GameState>& gameState);
     ~ObjRender();
     virtual void render() = 0;
@@ -30,11 +32,12 @@ namespace bstorm {
     void setX(float x) { transIntersection(x - this->x, 0); this->x = x; }
     void setY(float y) { transIntersection(0, y - this->y); this->y = y; }
     void setZ(float z) { this->z = z; }
-    void setPosition(float x, float y, float z) {
-      transIntersection(x - this->x, y - this->y);
-      this->x = x;
-      this->y = y;
-      this->z = z;
+    void setPosition(float x, float y, float z)
+    {
+        transIntersection(x - this->x, y - this->y);
+        this->x = x;
+        this->y = y;
+        this->z = z;
     }
     float getAngleX() const { return angleX; }
     float getAngleY() const { return angleY; }
@@ -42,10 +45,11 @@ namespace bstorm {
     void setAngleX(float angleX) { this->angleX = angleX; }
     void setAngleY(float angleY) { this->angleY = angleY; }
     void setAngleZ(float angleZ) { this->angleZ = angleZ; }
-    void setAngleXYZ(float angleX, float angleY, float angleZ) {
-      this->angleX = angleX;
-      this->angleY = angleY;
-      this->angleZ = angleZ;
+    void setAngleXYZ(float angleX, float angleY, float angleZ)
+    {
+        this->angleX = angleX;
+        this->angleY = angleY;
+        this->angleZ = angleZ;
     }
     float getScaleX() const { return scaleX; }
     float getScaleY() const { return scaleY; }
@@ -53,10 +57,11 @@ namespace bstorm {
     void setScaleX(float scaleX) { this->scaleX = scaleX; }
     void setScaleY(float scaleY) { this->scaleY = scaleY; }
     void setScaleZ(float scaleZ) { this->scaleZ = scaleZ; }
-    void setScaleXYZ(float scaleX, float scaleY, float scaleZ) {
-      this->scaleX = scaleX;
-      this->scaleY = scaleY;
-      this->scaleZ = scaleZ;
+    void setScaleXYZ(float scaleX, float scaleY, float scaleZ)
+    {
+        this->scaleX = scaleX;
+        this->scaleY = scaleY;
+        this->scaleZ = scaleZ;
     }
     const ColorRGB& getColor() const { return rgb; }
     int getAlpha() const { return alpha; }
@@ -84,10 +89,10 @@ namespace bstorm {
     void setShaderFloatArray(const std::string& name, const std::vector<float>& fs);
     void setShaderTexture(const std::string& name, const std::shared_ptr<Texture>& texture);
     void setShaderTexture(const std::string& name, const std::shared_ptr<RenderTarget>& renderTarget);
-  protected:
+protected:
     std::shared_ptr<Shader> getAppliedShader() const;
     virtual void transIntersection(float dx, float dy) {}
-  private:
+private:
     bool visibleFlag;
     int priority;
     float x;
@@ -109,18 +114,20 @@ namespace bstorm {
     std::list<std::weak_ptr<ObjRender>>::iterator posInLayer;
     std::shared_ptr<Shader> shader;
     friend ObjectLayerList;
-  };
+};
 
-  class ObjShader : public ObjRender {
-  public:
+class ObjShader : public ObjRender
+{
+public:
     ObjShader(const std::shared_ptr<GameState>& gameState);
     ~ObjShader();
     void update() override {}
     void render() override {};
-  };
+};
 
-  class ObjectLayerList {
-  public:
+class ObjectLayerList
+{
+public:
     ObjectLayerList();
     ~ObjectLayerList();
     void setRenderPriority(const std::shared_ptr<ObjRender>& obj, int p);
@@ -140,7 +147,7 @@ namespace bstorm {
     bool isInvalidRenderPriority(int p) const;
     void setInvalidRenderPriority(int min, int max);
     void clearInvalidRenderPriority();
-  private:
+private:
     void remove(const std::shared_ptr<ObjRender>& obj);
     std::array<std::list<std::weak_ptr<ObjRender>>, MAX_RENDER_PRIORITY + 1> layers;
     std::array<std::shared_ptr<Shader>, MAX_RENDER_PRIORITY + 1> layerShaders;
@@ -151,5 +158,5 @@ namespace bstorm {
     int stgFrameRenderPriorityMax;
     int invalidRenderPriorityMin;
     int invalidRenderPriorityMax;
-  };
+};
 }

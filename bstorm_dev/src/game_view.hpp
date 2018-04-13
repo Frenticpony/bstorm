@@ -2,11 +2,13 @@
 
 #include <memory>
 
-namespace bstorm {
-  class RenderTarget;
-  class PlayController;
-  class GameView {
-  public:
+namespace bstorm
+{
+class RenderTarget;
+class PlayController;
+class GameView
+{
+public:
     GameView(int iniLeft, int iniTop, int iniWidth, int iniHeight, const std::shared_ptr<PlayController>& playController);
     ~GameView();
     void draw(const std::shared_ptr<RenderTarget>& renderTarget);
@@ -14,7 +16,7 @@ namespace bstorm {
     std::shared_ptr<int> getViewPosY() const;
     std::shared_ptr<int> getViewWidth() const;
     std::shared_ptr<int> getViewHeight() const;
-  private:
+private:
     int iniLeft;
     int iniTop;
     int iniWidth;
@@ -24,5 +26,5 @@ namespace bstorm {
     std::shared_ptr<int> viewWidth;
     std::shared_ptr<int> viewHeight;
     std::shared_ptr<PlayController> playController;
-  };
+};
 }

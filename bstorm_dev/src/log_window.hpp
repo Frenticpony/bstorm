@@ -3,9 +3,11 @@
 #include <bstorm/logger.hpp>
 #include <array>
 
-namespace bstorm {
-  class LogWindow : public Logger {
-  public:
+namespace bstorm
+{
+class LogWindow : public Logger
+{
+public:
     using Logger::log;
     LogWindow();
     ~LogWindow();
@@ -14,7 +16,7 @@ namespace bstorm {
     void log(Log&& lg) override;
     void draw();
     void clear();
-  private:
+private:
     static constexpr int MaxFilterInputSize = 65;
     std::array<char, MaxFilterInputSize> filterInput;
     int validIdx(int idx) const;
@@ -32,5 +34,5 @@ namespace bstorm {
     static constexpr int MaxLogCnt = 1 << 11; // power of 2
     int headIdx;
     std::array<Log, MaxLogCnt> logs;
-  };
+};
 }

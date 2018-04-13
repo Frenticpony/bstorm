@@ -10,31 +10,35 @@
 %parse-param { bstorm::DnhParseContext* ctx }
 %lex-param { bstorm::DnhParseContext* ctx }
 
-%code requires { // top dnh.tab.hpp
+%code requires
+{ // top dnh.tab.hpp
 #include <bstorm/source_map.hpp>
 #include <bstorm/node.hpp>
 
-namespace bstorm {
-  class DnhLexer;
-  struct DnhParseContext {
+namespace bstorm
+{
+class DnhLexer;
+struct DnhParseContext
+{
     DnhParseContext(DnhLexer* lexer, bool expandInclude) :
-      env(std::make_shared<Env>()),
-      lexer(lexer),
-      expandInclude(expandInclude){}
+        env(std::make_shared<Env>()),
+        lexer(lexer),
+        expandInclude(expandInclude){}
     DnhParseContext(const std::shared_ptr<Env>& globalEnv, DnhLexer* lexer, bool expandInclude) :
-      env(globalEnv ? globalEnv : std::make_shared<Env>()),
-      lexer(lexer),
-      expandInclude(expandInclude){}
+        env(globalEnv ? globalEnv : std::make_shared<Env>()),
+        lexer(lexer),
+        expandInclude(expandInclude){}
     std::shared_ptr<Env> env;
     std::shared_ptr<NodeBlock> result;
     std::vector<NodeHeader> headers;
     const bool expandInclude;
-	  DnhLexer* lexer;
-  };
+    DnhLexer* lexer;
+};
 }
 }
 
-%code { // dnh.tab.cpp after #include dnh.tab.hpp
+%code
+{ // dnh.tab.cpp after #include dnh.tab.hpp
 #include "../reflex/dnh_lexer.hpp"
 
 #include <bstorm/logger.hpp>
@@ -44,30 +48,33 @@ namespace bstorm {
 
 using namespace bstorm;
 
-static int yylex(DnhParser::semantic_type *yylval, DnhParser::location_type* yylloc, DnhParseContext* ctx) {
-  auto lexer = ctx->lexer;
-  auto tk = lexer->dnhlex();
-  switch(tk) {
-     case DnhParser::token_type::TK_NUM:
-     case DnhParser::token_type::TK_IDENT:
-       yylval->str = new std::string(lexer->getString());
-       break;
-     case DnhParser::token_type::TK_HEADER:
-     case DnhParser::token_type::TK_STR:
-       yylval->wstr = new std::wstring(lexer->getWString());
-       break;
-     case DnhParser::token_type::TK_CHAR:
-       yylval->wchar = lexer->getWChar();
-       break;
-  }
-  yylloc->begin = lexer->getSourcePos();
-  return tk;
+static int yylex(DnhParser::semantic_type *yylval, DnhParser::location_type* yylloc, DnhParseContext* ctx)
+{
+    auto lexer = ctx->lexer;
+    auto tk = lexer->dnhlex();
+    switch(tk)
+    {
+        case DnhParser::token_type::TK_NUM:
+        case DnhParser::token_type::TK_IDENT:
+            yylval->str = new std::string(lexer->getString());
+            break;
+        case DnhParser::token_type::TK_HEADER:
+        case DnhParser::token_type::TK_STR:
+            yylval->wstr = new std::wstring(lexer->getWString());
+            break;
+        case DnhParser::token_type::TK_CHAR:
+            yylval->wchar = lexer->getWChar();
+            break;
+    }
+    yylloc->begin = lexer->getSourcePos();
+    return tk;
 }
 
-void DnhParser::error(const DnhParser::location_type& yylloc, const std::string& msg) {
-  throw Log(Log::Level::LV_ERROR)
-    .setMessage(msg)
-    .addSourcePos(std::make_shared<SourcePos>(yylloc.begin));
+void DnhParser::error(const DnhParser::location_type& yylloc, const std::string& msg)
+{
+    throw Log(Log::Level::LV_ERROR)
+      .setMessage(msg)
+      .addSourcePos(std::make_shared<SourcePos>(yylloc.begin));
 }
 
 static std::shared_ptr<NodeExp> exp(NodeExp* exp) { return std::shared_ptr<NodeExp>(exp); }
@@ -75,44 +82,49 @@ static std::shared_ptr<NodeStmt> stmt(NodeStmt* stmt) { return std::shared_ptr<N
 static std::shared_ptr<NodeLeftVal> leftval(NodeLeftVal* leftval) { return std::shared_ptr<NodeLeftVal>(leftval); }
 static std::shared_ptr<NodeBlock> block(NodeBlock* block) { return std::shared_ptr<NodeBlock>(block); }
 
-static void fixPos(Node *node, const DnhParser::location_type& yylloc) {
-  node->srcPos = std::make_shared<SourcePos>(yylloc.begin);
+static void fixPos(Node *node, const DnhParser::location_type& yylloc)
+{
+    node->srcPos = std::make_shared<SourcePos>(yylloc.begin);
 }
 
-static void checkDupDef(DnhParseContext* ctx, const DnhParser::location_type& yylloc, const std::string& name) {
-  if (ctx->env->table.count(name) != 0) {
-    auto prevDef = ctx->env->table[name];
-    auto prevDefLine = std::to_string(prevDef->srcPos->line);
-    auto prevDefPath = toUTF8(*prevDef->srcPos->filename);
-    auto msg = "found a duplicate definition of '" + prevDef->name + "' (previous definition was at line " + prevDefLine + " in " + prevDefPath + ").";
-    throw Log(Log::Level::LV_ERROR)
-      .setMessage(msg)
-      .addSourcePos(std::make_shared<SourcePos>(yylloc.begin));
-  }
+static void checkDupDef(DnhParseContext* ctx, const DnhParser::location_type& yylloc, const std::string& name)
+{
+    if (ctx->env->table.count(name) != 0)
+    {
+        auto prevDef = ctx->env->table[name];
+        auto prevDefLine = std::to_string(prevDef->srcPos->line);
+        auto prevDefPath = toUTF8(*prevDef->srcPos->filename);
+        auto msg = "found a duplicate definition of '" + prevDef->name + "' (previous definition was at line " + prevDefLine + " in " + prevDefPath + ").";
+        throw Log(Log::Level::LV_ERROR)
+          .setMessage(msg)
+          .addSourcePos(std::make_shared<SourcePos>(yylloc.begin));
+    }
 }
 
-static void addDef(DnhParseContext* ctx, NodeDef* def) {
-  ctx->env->table[def->name] = std::shared_ptr<NodeDef>(def);
+static void addDef(DnhParseContext* ctx, NodeDef* def)
+{
+    ctx->env->table[def->name] = std::shared_ptr<NodeDef>(def);
 }
 }
 
-%union {
-  std::vector<std::shared_ptr<NodeStmt>> *stmts;
-  std::vector<std::shared_ptr<NodeExp>> *exps;
-  std::vector<std::shared_ptr<NodeElseIf>> *elsifs;
-  std::vector<std::shared_ptr<NodeCase>> *cases;
-  std::vector<std::wstring> *wstrs;
-  std::vector<std::string> *strs;
-  NodeRange *range;
-  NodeBlock *block;
-  NodeElseIf *elsif;
-  NodeCase *case_;
-  NodeLeftVal *leftval;
-  NodeStmt *stmt;
-  NodeExp *exp;
-  std::wstring *wstr;
-  std::string *str;
-  wchar_t wchar;
+%union
+{
+    std::vector<std::shared_ptr<NodeStmt>> *stmts;
+    std::vector<std::shared_ptr<NodeExp>> *exps;
+    std::vector<std::shared_ptr<NodeElseIf>> *elsifs;
+    std::vector<std::shared_ptr<NodeCase>> *cases;
+    std::vector<std::wstring> *wstrs;
+    std::vector<std::string> *strs;
+    NodeRange *range;
+    NodeBlock *block;
+    NodeElseIf *elsif;
+    NodeCase *case_;
+    NodeLeftVal *leftval;
+    NodeStmt *stmt;
+    NodeExp *exp;
+    std::wstring *wstr;
+    std::string *str;
+    wchar_t wchar;
 }
 
 %destructor { delete $$; } <stmts>
@@ -246,17 +258,18 @@ static void addDef(DnhParseContext* ctx, NodeDef* def) {
 %%
 program            : stmts TK_EOF
                       {
-                        ctx->result = std::make_shared<NodeBlock>(ctx->env->table, *$1);
-                        ctx->result->srcPos = std::make_shared<SourcePos>(SourcePos({1, 1, ctx->lexer->getCurrentFilePath()}));
-                        delete($1);
+                          ctx->result = std::make_shared<NodeBlock>(ctx->env->table, *$1);
+                          ctx->result->srcPos = std::make_shared<SourcePos>(SourcePos({1, 1, ctx->lexer->getCurrentFilePath()}));
+                          delete($1);
                       }
 
 stmts              : single-stmt
                        {
-                         if ($1) {
-                           $$ = new std::vector<std::shared_ptr<NodeStmt>>{stmt($1)};
+                         if ($1)
+                         {
+                             $$ = new std::vector<std::shared_ptr<NodeStmt>>{stmt($1)};
                          } else {
-                           $$ = new std::vector<std::shared_ptr<NodeStmt>>();
+                             $$ = new std::vector<std::shared_ptr<NodeStmt>>();
                          }
                        }
                    | stmts1 single-stmt { $$ = $1; if ($2) { $1->push_back(stmt($2)); } }
@@ -266,10 +279,12 @@ stmts1             : term-by-single TK_SEMI { $$ = $1; }
 
 term-by-single     : single-stmt
                        {
-                         if ($1) {
-                           $$ = new std::vector<std::shared_ptr<NodeStmt>>{stmt($1)};
-                         } else {
-                           $$ = new std::vector<std::shared_ptr<NodeStmt>>();
+                         if ($1)
+                         {
+                             $$ = new std::vector<std::shared_ptr<NodeStmt>>{stmt($1)};
+                         } else
+                         {
+                             $$ = new std::vector<std::shared_ptr<NodeStmt>>();
                          }
                        }
                    | stmts1 single-stmt { $$ = $1; if ($2) { $1->push_back(stmt($2)); } }
@@ -305,10 +320,10 @@ new-scope           : { auto newEnv = std::make_shared<Env>(); newEnv->parent = 
 
 block              : TK_LBRACE stmts TK_RBRACE
                        {
-                         $$ = new NodeBlock(ctx->env->table, *$2);
-                         fixPos($$, @1);
-                         delete($2);
-                         ctx->env = ctx->env->parent;
+                           $$ = new NodeBlock(ctx->env->table, *$2);
+                           fixPos($$, @1);
+                           delete($2);
+                           ctx->env = ctx->env->parent;
                        }
 
 
@@ -335,18 +350,19 @@ sub-def            : TK_SUB TK_IDENT { checkDupDef(ctx, @2, *$2); } new-scope op
 
 func-def           : TK_FUNCTION TK_IDENT { checkDupDef(ctx, @2, *$2); } new-scope opt-params
                        {
-                         if (ctx->env->table.count("result") == 0) {
-                           auto result = new NodeVarDecl("result");
-                           fixPos(result, @1);
-                           addDef(ctx, result);
+                         if (ctx->env->table.count("result") == 0)
+                         {
+                             auto result = new NodeVarDecl("result");
+                             fixPos(result, @1);
+                             addDef(ctx, result);
                          }
                        }
                        block
                        {
-                         auto def = new NodeFuncDef(*$2, *$5, block($7));
-                         fixPos(def, @1);
-                         addDef(ctx, def);
-                         delete($2); delete($5);
+                           auto def = new NodeFuncDef(*$2, *$5, block($7));
+                           fixPos(def, @1);
+                           addDef(ctx, def);
+                           delete($2); delete($5);
                        }
 
 task-def           : TK_TASK TK_IDENT { checkDupDef(ctx, @2, *$2); } new-scope opt-params block { auto def = new NodeTaskDef(*$2, *$5, block($6)); fixPos(def, @1); addDef(ctx, def); delete($2); delete($5); }
@@ -405,26 +421,28 @@ loop-body          : TK_LOOP block { $$ = $2; }
 
 header             : TK_HEADER TK_LBRACKET header-params TK_RBRACKET
                        {
-                         auto header = new NodeHeader(*$1, *$3);
-                         fixPos(header, @1);
-                         ctx->headers.push_back(*header);
-                         $$ = header;
-                         delete $1; delete $3;
-                       }
-                   | TK_HEADER TK_STR
-                       {
-                         auto name = *$1;
-                         auto param = *$2; 
-                         if (ctx->expandInclude && name == L"include") {
-                           $$ = NULL;
-                           ctx->lexer->pushInclude(param);
-                         } else {
-                           auto header = new NodeHeader(name, {param});
+                           auto header = new NodeHeader(*$1, *$3);
                            fixPos(header, @1);
                            ctx->headers.push_back(*header);
                            $$ = header;
-                         }
-                         delete $1; delete $2;
+                           delete $1; delete $3;
+                       }
+                   | TK_HEADER TK_STR
+                       {
+                           auto name = *$1;
+                           auto param = *$2; 
+                           if (ctx->expandInclude && name == L"include")
+                           {
+                               $$ = NULL;
+                               ctx->lexer->pushInclude(param);
+                           } else
+                           {
+                               auto header = new NodeHeader(name, {param});
+                               fixPos(header, @1);
+                               ctx->headers.push_back(*header);
+                               $$ = header;
+                           }
+                           delete $1; delete $2;
                        }
 
 ignored-header     : TK_IGNORED_HEADER TK_LBRACKET header-params TK_RBRACKET { $$ = NULL; delete $3; }
@@ -509,9 +527,9 @@ lit                : TK_NUM   { $$ = new NodeNum(*$1);  fixPos($$, @1); delete $
                    | TK_CHAR  { $$ = new NodeChar($1); fixPos($$, @1); }
                    | TK_STR
                        {
-                         // escape: \x -> x
-                         $$ = new NodeStr(std::regex_replace(*$1, std::wregex(L"\\\\(.)"), L"$1"));  fixPos($$, @1);
-                         delete $1 ;
+                           // escape: \x -> x
+                           $$ = new NodeStr(std::regex_replace(*$1, std::wregex(L"\\\\(.)"), L"$1"));  fixPos($$, @1);
+                           delete $1 ;
                        }
                    | array
 

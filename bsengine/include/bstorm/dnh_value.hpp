@@ -8,15 +8,18 @@
 #include <iostream>
 #include <luajit/lua.hpp>
 
-namespace bstorm {
-  class DnhValue {
-  public:
-    enum class Type {
-      REAL = 0,
-      CHAR = 1,
-      BOOL = 2,
-      ARRAY = 3,
-      NIL = 0xaa
+namespace bstorm
+{
+class DnhValue
+{
+public:
+    enum class Type
+    {
+        REAL = 0,
+        CHAR = 1,
+        BOOL = 2,
+        ARRAY = 3,
+        NIL = 0xaa
     };
     virtual ~DnhValue() {};
     Type getType() const { return type; }
@@ -34,12 +37,13 @@ namespace bstorm {
     static bool toBool(lua_State* L, int idx);
     static std::wstring toString(lua_State* L, int idx);
     static std::string toStringU8(lua_State* L, int idx);
-  protected:
+protected:
     Type type;
-  };
+};
 
-  class DnhReal : public DnhValue {
-  public:
+class DnhReal : public DnhValue
+{
+public:
     DnhReal(double num);
     double toNum() const override;
     bool toBool() const override;
@@ -47,12 +51,13 @@ namespace bstorm {
     void push(lua_State* L) const override;
     void serialize(std::ostream& out) const override;
     std::unique_ptr<DnhValue> clone() const override;
-  private:
+private:
     double value;
-  };
+};
 
-  class DnhChar : public DnhValue {
-  public:
+class DnhChar : public DnhValue
+{
+public:
     DnhChar(wchar_t c);
     double toNum() const override;
     bool toBool() const override;
@@ -60,12 +65,13 @@ namespace bstorm {
     void push(lua_State* L) const override;
     void serialize(std::ostream& out) const override;
     std::unique_ptr<DnhValue> clone() const override;
-  private:
+private:
     wchar_t value;
-  };
+};
 
-  class DnhBool : public DnhValue {
-  public:
+class DnhBool : public DnhValue
+{
+public:
     DnhBool(bool b);
     double toNum() const override;
     bool toBool() const override;
@@ -73,12 +79,13 @@ namespace bstorm {
     void push(lua_State* L) const override;
     void serialize(std::ostream& out) const override;
     std::unique_ptr<DnhValue> clone() const override;
-  private:
+private:
     bool value;
-  };
+};
 
-  class DnhArray : public DnhValue {
-  public:
+class DnhArray : public DnhValue
+{
+public:
     DnhArray();
     DnhArray(std::vector<std::unique_ptr<DnhValue>>&& a);
     DnhArray(const std::wstring& s);
@@ -94,12 +101,13 @@ namespace bstorm {
     void push(lua_State* L) const override;
     void serialize(std::ostream& out) const override;
     std::unique_ptr<DnhValue> clone() const override;
-  private:
+private:
     std::vector<std::unique_ptr<DnhValue>> values;
-  };
+};
 
-  class DnhNil : public DnhValue {
-  public:
+class DnhNil : public DnhValue
+{
+public:
     DnhNil();
     double toNum() const override;
     bool toBool() const override;
@@ -107,5 +115,5 @@ namespace bstorm {
     void push(lua_State* L) const override;
     void serialize(std::ostream& out) const override;
     std::unique_ptr<DnhValue> clone() const override;
-  };
+};
 }

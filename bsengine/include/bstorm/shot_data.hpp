@@ -9,16 +9,19 @@
 #include <unordered_set>
 #include <unordered_map>
 
-namespace bstorm {
-  struct ShotCollision {
+namespace bstorm
+{
+struct ShotCollision
+{
     float r;
     float x;
     float y;
-  };
+};
 
-  class Texture;
-  class ShotData {
-  public:
+class Texture;
+class ShotData
+{
+public:
     ShotData();
     int id;
     Rect<int> rect;
@@ -37,13 +40,14 @@ namespace bstorm {
     std::vector<ShotCollision> collisions;
     AnimationData animationData;
     std::shared_ptr<Texture> texture;
-  };
+};
 
-  class UserShotData {
-  public:
+class UserShotData
+{
+public:
     UserShotData() :
-      delayRect(0, 0, 0, 0),
-      delayColor(0xff, 0xff, 0xff)
+        delayRect(0, 0, 0, 0),
+        delayColor(0xff, 0xff, 0xff)
     {
     }
     std::wstring path;
@@ -51,15 +55,17 @@ namespace bstorm {
     Rect<int> delayRect;
     ColorRGB delayColor;
     std::unordered_map<int, ShotData> dataMap;
-  };
+};
 
-  struct SourcePos;
-  class TextureCache;
-  class ShotDataTable {
-  public:
-    enum class Type {
-      PLAYER,
-      ENEMY
+struct SourcePos;
+class TextureCache;
+class ShotDataTable
+{
+public:
+    enum class Type
+    {
+        PLAYER,
+        ENEMY
     };
     static const char* getTypeName(Type type);
     ShotDataTable(Type type);
@@ -73,9 +79,9 @@ namespace bstorm {
     /* backdoor */
     template <typename T>
     void backDoor() const {}
-  private:
+private:
     Type type;
     std::unordered_set<std::wstring> loadedPaths;
     std::map<int, std::shared_ptr<ShotData>> table;
-  };
+};
 }

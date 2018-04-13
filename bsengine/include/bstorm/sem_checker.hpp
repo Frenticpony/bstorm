@@ -7,9 +7,11 @@
 #include <vector>
 #include <stack>
 
-namespace bstorm {
-  class SemChecker : public NodeTraverser {
-  public:
+namespace bstorm
+{
+class SemChecker : public NodeTraverser
+{
+public:
     std::vector<Log> check(Node& n);
     void traverse(NodeNum&);
     void traverse(NodeChar&);
@@ -77,7 +79,7 @@ namespace bstorm {
     void traverse(NodeCase&);
     void traverse(NodeAlternative&);
     void traverse(NodeHeader&);
-  protected:
+protected:
     bool inFunc() const;
     bool inLoop() const;
     std::vector<Log> errors;
@@ -87,5 +89,5 @@ namespace bstorm {
     void checkMonoOp(NodeMonoOp& exp);
     void checkBinOp(NodeBinOp& exp);
     void checkAssign(NodeAssign& stmt);
-  };
+};
 }

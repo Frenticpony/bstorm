@@ -20,40 +20,46 @@
 
 %class{
 public :
-  void setLoader(const std::shared_ptr<FileLoader>& loader) {
-    this->loader = loader;
-  }
-  void setInputSource(const std::wstring& path) {
-    filePath = std::make_shared<std::wstring>(canonicalPath(path));
-    fp = loader->openFile(*filePath);
-    if (fp == NULL) {
-      throw Log(Log::Level::LV_ERROR).setMessage("can't open file.")
-        .setParam(Log::Param(Log::Param::Tag::TEXT, path));
+    void setLoader(const std::shared_ptr<FileLoader>& loader)
+    {
+        this->loader = loader;
     }
-    in(fp);
-  }
-  std::shared_ptr<std::wstring> getFilePath() const {
-    if (filePath) return filePath;
-    return std::make_shared<std::wstring>(L"");
-  }
-
-  SourcePos getSourcePos() const {
-    return {(int)lineno(), (int)columno() + 1, getFilePath()};
-  }
-  std::wstring getWString() const {
-    return v_wstr;
-  }
-
-  ~UserDefDataLexer() {
-    if (fp) {
-      loader->closeFile(*getFilePath(), fp);
+    void setInputSource(const std::wstring& path)
+    {
+        filePath = std::make_shared<std::wstring>(canonicalPath(path));
+        fp = loader->openFile(*filePath);
+        if (fp == NULL)
+        {
+            throw Log(Log::Level::LV_ERROR).setMessage("can't open file.")
+              .setParam(Log::Param(Log::Param::Tag::TEXT, path));
+        }
+        in(fp);
     }
-  }
+    std::shared_ptr<std::wstring> getFilePath() const
+    {
+        if (filePath) return filePath;
+        return std::make_shared<std::wstring>(L"");
+    }
+    SourcePos getSourcePos() const
+    {
+        return {(int)lineno(), (int)columno() + 1, getFilePath()};
+    }
+    std::wstring getWString() const
+    {
+      return v_wstr;
+    }
+    ~UserDefDataLexer()
+    {
+        if (fp)
+        {
+            loader->closeFile(*getFilePath(), fp);
+        }
+    }
 protected :
-  std::wstring v_wstr;
-  std::shared_ptr<std::wstring> filePath;
-  FILE* fp;
-  std::shared_ptr<FileLoader> loader;
+    std::wstring v_wstr;
+    std::shared_ptr<std::wstring> filePath;
+    FILE* fp;
+    std::shared_ptr<FileLoader> loader;
 %}
 
 %{
@@ -134,12 +140,10 @@ newline \r?\n
 }
 
 . {
-  throw Log(Log::Level::LV_ERROR).setMessage("found illegal token.")
-    .setParam(Log::Param(Log::Param::Tag::TEXT, str()))
-    .addSourcePos(std::make_shared<SourcePos>(getSourcePos()));
+    throw Log(Log::Level::LV_ERROR).setMessage("found illegal token.")
+      .setParam(Log::Param(Log::Param::Tag::TEXT, str()))
+      .addSourcePos(std::make_shared<SourcePos>(getSourcePos()));
 }
 
-<<EOF>> {
-  return tk::TK_EOF;
-}
+<<EOF>> { return tk::TK_EOF; }
 %%

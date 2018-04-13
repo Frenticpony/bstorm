@@ -9,24 +9,27 @@
 #include <mutex>
 #include <thread>
 
-namespace bstorm {
-  class ScriptExplorer {
-  public:
+namespace bstorm
+{
+class ScriptExplorer
+{
+public:
     ScriptExplorer(int left, int top, int width, int height);
     ~ScriptExplorer();
     void draw();
     // ディレクトリーツリー表示用のデータ構造
-    struct TreeView {
-      TreeView() : isOpen(true) {}
-      std::string name;
-      std::string uniq;
-      bool isOpen;
-      std::map<std::string, TreeView> children;
-      bool isLeaf() const { return children.empty(); }
+    struct TreeView
+    {
+        TreeView() : isOpen(true) {}
+        std::string name;
+        std::string uniq;
+        bool isOpen;
+        std::map<std::string, TreeView> children;
+        bool isLeaf() const { return children.empty(); }
     };
     ScriptInfo getSelectedMainScript() const;
     ScriptInfo getSelectedPlayerScript() const;
-  private:
+private:
     static constexpr int MaxFilterInputSize = 65;
     std::array<char, MaxFilterInputSize> filterInputMain;
     std::array<char, MaxFilterInputSize> filterInputPlayer;
@@ -48,5 +51,5 @@ namespace bstorm {
     std::thread reloadThread; // Don't join.
     mutable std::mutex memberAccessSection;
     mutable std::mutex reloadSection;
-  };
+};
 }

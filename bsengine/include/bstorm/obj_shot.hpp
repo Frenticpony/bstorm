@@ -8,19 +8,22 @@
 #include <list>
 #include <deque>
 
-namespace bstorm {
-  class ShotData;
-  class ShotIntersection;
+namespace bstorm
+{
+class ShotData;
+class ShotIntersection;
 
-  class ShotCounter {
-  public:
+class ShotCounter
+{
+public:
     ShotCounter();
     int playerShotCount;
     int enemyShotCount;
-  };
+};
 
-  class ObjShot : public ObjRender, public ObjMove, public ObjCol {
-  public:
+class ObjShot : public ObjRender, public ObjMove, public ObjCol
+{
+public:
     ObjShot(bool isPlayerShot, const std::shared_ptr<GameState>& gameState);
     ~ObjShot();
 
@@ -86,26 +89,28 @@ namespace bstorm {
     virtual bool isGrazeEnabled() const;
 
     // spawn
-    class AddedShot {
+    class AddedShot
+    {
     public:
-      AddedShot(int objId, int frame);
-      AddedShot(int objId, int frame, float dist, float angle);
-      enum class Type {
-        A1,
-        A2
-      };
-      const Type type;
-      const int objId;
-      int frame;
-      const float dist;
-      const float angle;
+        AddedShot(int objId, int frame);
+        AddedShot(int objId, int frame, float dist, float angle);
+        enum class Type
+        {
+            A1,
+            A2
+        };
+        const Type type;
+        const int objId;
+        int frame;
+        const float dist;
+        const float angle;
     };
     void addShotA1(int shotObjId, int frame);
     void addShotA2(int shotObjId, int frame, float dist, float angle);
     int getFrameCountForAddShot() const;
     const std::list<AddedShot>& getAddedShot() const;
     virtual void generateDefaultBonusItem();
-  protected:
+protected:
     void transIntersection(float dx, float dy) override;
     void renderIntersection();
     void checkAutoDelete(float x, float y);
@@ -117,7 +122,7 @@ namespace bstorm {
     std::shared_ptr<ShotData> shotData;
     bool grazeInvalidFlag;
     bool useTempIntersectionFlag;
-  private:
+private:
     const bool playerShotFlag;
     bool registerFlag;
     bool useDeleteFrameFlag;
@@ -140,10 +145,11 @@ namespace bstorm {
     int animationIdx;
     std::list<AddedShot> addedShots;
     int addedShotFrameCnt;
-  };
+};
 
-  class ObjLaser : public ObjShot {
-  public:
+class ObjLaser : public ObjShot
+{
+public:
     ObjLaser(bool isPlayerShot, const std::shared_ptr<GameState>& gameState);
     void setShotData(const std::shared_ptr<ShotData>& shotData) override;
     bool isGrazeEnabled() const override;
@@ -159,10 +165,10 @@ namespace bstorm {
     float getGrazeInvalidTimer() const;
     float getItemDistance() const;
     void setItemDistance(float distance);
-  protected:
+protected:
     void transIntersection(float dx, float dy) override {}
     void tickGrazeInvalidTimer();
-  private:
+private:
     float length;
     float renderWidth;
     float intersectionWidth;
@@ -170,10 +176,11 @@ namespace bstorm {
     int grazeInvalidFrame;
     int grazeInvalidTimer;
     float itemDistance;
-  };
+};
 
-  class ObjLooseLaser : public ObjLaser {
-  public:
+class ObjLooseLaser : public ObjLaser
+{
+public:
     ObjLooseLaser(bool isPlayerShot, const std::shared_ptr<GameState>& gameState);
     void update() override;
     void render() override;
@@ -186,19 +193,20 @@ namespace bstorm {
     virtual Point2D getHead() const;
     virtual Point2D getTail() const;
     virtual float getRenderLength() const;
-  protected:
+protected:
     void updateIntersection();
     void renderLaser(float width, float length, float angle);
-  private:
+private:
     void extend();
     bool defaultInvalidLengthEnable;
     float invalidLengthHead;
     float invalidLengthTail;
     float renderLength; // レーザーの描画時の長さ, 不変条件 : 常に正
-  };
+};
 
-  class ObjStLaser : public ObjLooseLaser {
-  public:
+class ObjStLaser : public ObjLooseLaser
+{
+public:
     ObjStLaser(bool isPlayerShot, const std::shared_ptr<GameState>& gameState);
     void update() override;
     void render() override;
@@ -208,14 +216,15 @@ namespace bstorm {
     bool hasSource() const;
     void setSource(bool hasSource);
     float getRenderLength() const override;
-  private:
+private:
     float laserAngle;
     bool laserSourceEnable;
     float laserWidthScale;
-  };
+};
 
-  class ObjCrLaser : public ObjLaser {
-  public:
+class ObjCrLaser : public ObjLaser
+{
+public:
     ObjCrLaser(bool isPlayerShot, const std::shared_ptr<GameState>& gameState);
     void update() override;
     void render() override;
@@ -224,7 +233,7 @@ namespace bstorm {
     float getTipDecrement() const;
     void setTipDecrement(float dec);
     int getLaserNodeCount() const;
-  protected:
+protected:
     void fixVertexDistance(float width);
     void extend(float x, float y);
     std::vector<Vertex> trail;
@@ -236,5 +245,5 @@ namespace bstorm {
     float headX;
     float headY;
     float tipDecrement;
-  };
+};
 }

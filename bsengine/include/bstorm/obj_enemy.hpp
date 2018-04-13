@@ -5,10 +5,12 @@
 #include <bstorm/obj_move.hpp>
 #include <bstorm/obj_col.hpp>
 
-namespace bstorm {
-  class Intersection;
-  class ObjEnemy : public ObjSprite2D, public ObjMove, public ObjCol {
-  public:
+namespace bstorm
+{
+class Intersection;
+class ObjEnemy : public ObjSprite2D, public ObjMove, public ObjCol
+{
+public:
     ObjEnemy(bool isBoss, const std::shared_ptr<GameState>& gameState);
     ~ObjEnemy();
     void update() override;
@@ -30,7 +32,7 @@ namespace bstorm {
     void addTempIntersectionCircleToPlayer(float x, float y, float r);
     void addShotDamage(double damage);
     void addSpellDamage(double damage);
-  protected:
+protected:
     bool registerFlag;
     const bool bossFlag;
     double life;
@@ -39,5 +41,5 @@ namespace bstorm {
     int shotHitCount;
     int prevFrameShotHitCount;
     std::vector<Point2D> prevTempIsectToShotPositions;
-  };
+};
 }

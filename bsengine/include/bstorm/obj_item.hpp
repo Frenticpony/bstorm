@@ -11,11 +11,13 @@
 #include <tuple>
 #include <vector>
 
-namespace bstorm {
-  class ItemData;
-  class ItemIntersection;
-  class ObjItem : public ObjRender, public ObjMove, public ObjCol {
-  public:
+namespace bstorm
+{
+class ItemData;
+class ItemIntersection;
+class ObjItem : public ObjRender, public ObjMove, public ObjCol
+{
+public:
     ObjItem(int itemType, const std::shared_ptr<GameState>& gameState);
     ~ObjItem();
     void update() override;
@@ -35,7 +37,7 @@ namespace bstorm {
     bool isObtained() const;
     void obtained();
     bool isScoreItem() const;
-  protected:
+protected:
     void transIntersection(float dx, float dy) override;
     void updateAnimationPosition();
     int itemType;
@@ -47,41 +49,45 @@ namespace bstorm {
     int autoDeleteClipBottom;
     float autoCollectSpeed;
     int obtainedFlag;
-  private:
+private:
     int64_t score;
     int animationFrameCnt;
     int animationIdx;
     std::shared_ptr<ItemData> itemData;
-  };
+};
 
-  class ObjItemScoreText : public ObjSpriteList2D, public ObjMove {
-  public:
+class ObjItemScoreText : public ObjSpriteList2D, public ObjMove
+{
+public:
     ObjItemScoreText(int64_t score, const std::shared_ptr<Texture>& texture, const std::shared_ptr<GameState>& gameState);
     ~ObjItemScoreText();
     void update() override;
     void render() override;
-  protected:
+protected:
     int scoreTextDeleteTimer;
     int scoreTextAlpha;
-  };
+};
 
-  class ItemScoreTextSpawner {
-  public:
+class ItemScoreTextSpawner
+{
+public:
     ItemScoreTextSpawner();
     virtual ~ItemScoreTextSpawner();
     virtual void spawn(float x, float y, int64_t score, const std::shared_ptr<GameState>& gameState);
-  };
+};
 
-  class DefaultBonusItemSpawner {
-  public:
+class DefaultBonusItemSpawner
+{
+public:
     DefaultBonusItemSpawner();
     virtual ~DefaultBonusItemSpawner();
     virtual void spawn(float x, float y, const std::shared_ptr<GameState>& gameState);
-  };
+};
 
-  class ObjItem;
-  class AutoItemCollectionManager {
-  public:
+class ObjItem;
+class AutoItemCollectionManager
+{
+public:
     AutoItemCollectionManager();
     void collectAllItems();
     void collectItemsByType(int itemType);
@@ -90,31 +96,33 @@ namespace bstorm {
     bool isAutoCollectTarget(int itemType, float itemX, float itemY) const;
     bool isAutoCollectCanceled() const;
     void reset();
-  private:
+private:
     bool autoItemCollectCancelFlag;
     std::unordered_set<int> autoItemCollectTargetTypes;
     std::vector<std::tuple<float, float, float>> circles;
-  };
+};
 
-  class MoveModeItemDown : public MoveMode {
-  public:
+class MoveModeItemDown : public MoveMode
+{
+public:
     MoveModeItemDown(float initSpeed);
     void move(float& x, float& y) override;
     float getAngle() const override { return 0; }
     float getSpeed() const override { return 0; }
-  private:
+private:
     float speed;
-  };
+};
 
-  class ObjMove;
-  class MoveModeItemDest : public MoveMode {
-  public:
+class ObjMove;
+class MoveModeItemDest : public MoveMode
+{
+public:
     MoveModeItemDest(float destX, float destY, ObjMove* obj);
     void move(float& x, float& y) override;
     float getAngle() const override { return 0; }
     float getSpeed() const override { return 0; }
-  private:
-    ObjMove* obj;
+private:
+    ObjMove * obj;
     float speed;
     float frame;
     float lastX;
@@ -123,27 +131,29 @@ namespace bstorm {
     float destY;
     float cosAngle;
     float sinAngle;
-  };
+};
 
-  class ObjPlayer;
-  class MoveModeItemToPlayer : public MoveMode {
-  public:
+class ObjPlayer;
+class MoveModeItemToPlayer : public MoveMode
+{
+public:
     MoveModeItemToPlayer(float speed, const std::shared_ptr<ObjPlayer>& player);
     void move(float& x, float& y) override;
     float getAngle() const override { return 0; }
     float getSpeed() const override { return 0; }
-  private:
+private:
     float speed;
     std::weak_ptr<ObjPlayer> targetPlayer;
-  };
+};
 
-  class MoveModeHoverItemScoreText : public MoveMode {
-  public:
+class MoveModeHoverItemScoreText : public MoveMode
+{
+public:
     MoveModeHoverItemScoreText(float speed);
     void move(float& x, float& y) override;
     float getAngle() const override { return 0; }
     float getSpeed() const override { return 0; }
-  private:
+private:
     float speed;
-  };
+};
 }

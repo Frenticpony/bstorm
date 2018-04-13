@@ -26,8 +26,9 @@
 #include <bstorm/rand_generator.hpp>
 #include <bstorm/config.hpp>
 
-namespace bstorm {
-  GameState::GameState(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevice9* d3DDevice, const std::shared_ptr<Renderer>& renderer, const std::shared_ptr<conf::KeyConfig>& keyConfig, const std::shared_ptr<MousePositionProvider>& mousePosProvider, Engine* engine) :
+namespace bstorm
+{
+GameState::GameState(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevice9* d3DDevice, const std::shared_ptr<Renderer>& renderer, const std::shared_ptr<conf::KeyConfig>& keyConfig, const std::shared_ptr<MousePositionProvider>& mousePosProvider, Engine* engine) :
     fpsCounter(std::make_shared<FpsCounter>()),
     inputDevice(std::make_shared<InputDevice>(hWnd, mousePosProvider)),
     keyAssign(std::make_shared<KeyAssign>()),
@@ -76,9 +77,10 @@ namespace bstorm {
     renderIntersectionEnable(false),
     forcePlayerInvincibleEnable(false),
     defaultBonusItemEnable(true)
-  {
-    for (const auto& keyMap : keyConfig->keyMaps) {
-      keyAssign->addVirtualKey(keyMap.vkey, keyMap.key, keyMap.pad);
+{
+    for (const auto& keyMap : keyConfig->keyMaps)
+    {
+        keyAssign->addVirtualKey(keyMap.vkey, keyMap.key, keyMap.pad);
     }
-  }
+}
 }

@@ -17,8 +17,10 @@
 
 #include <cstdio>
 
-namespace bstorm {
-  std::shared_ptr<NodeBlock> parseDnhScript(const std::wstring& filePath, const std::shared_ptr<Env>& globalEnv, bool expandInclude, const std::shared_ptr<FileLoader>& loader) {
+namespace bstorm
+{
+std::shared_ptr<NodeBlock> parseDnhScript(const std::wstring& filePath, const std::shared_ptr<Env>& globalEnv, bool expandInclude, const std::shared_ptr<FileLoader>& loader)
+{
     DnhLexer lexer;
     lexer.setLoader(loader);
     lexer.pushInclude(filePath);
@@ -27,8 +29,9 @@ namespace bstorm {
     parser.parse();
     lexer.popInclude();
     return ctx.result;
-  }
-  ScriptInfo scanDnhScriptInfo(const std::wstring & filePath, const std::shared_ptr<FileLoader>& loader) {
+}
+ScriptInfo scanDnhScriptInfo(const std::wstring & filePath, const std::shared_ptr<FileLoader>& loader)
+{
     DnhLexer lexer;
     lexer.setLoader(loader);
     lexer.pushInclude(filePath);
@@ -41,42 +44,56 @@ namespace bstorm {
     info.id = info.path;
     info.type = SCRIPT_TYPE_UNKNOWN;
     info.version = SCRIPT_VERSION_PH3;
-    for (const auto& header : ctx.headers) {
-      if (header.params.empty()) continue;
-      if (header.name == L"TouhouDanmakufu") {
-        info.type = header.params[0];
-      } else if (header.name == L"std::wstring") {
-        info.version = header.params[0];
-      } else if (header.name == L"ID") {
-        info.id = header.params[0];
-      } else if (header.name == L"Title") {
-        info.title = header.params[0];
-      } else if (header.name == L"Text") {
-        info.text = header.params[0];
-      } else if (header.name == L"Image") {
-        info.imagePath = header.params[0];
-      } else if (header.name == L"System") {
-        info.systemPath = header.params[0];
-      } else if (header.name == L"Background") {
-        info.backgroundPath = header.params[0];
-      } else if (header.name == L"BGM") {
-        info.bgmPath = header.params[0];
-      } else if (header.name == L"Player") {
-        info.playerScripts = header.params;
-      } else if (header.name == L"ReplayName") {
-        info.replayName = header.params[0];
-      }
+    for (const auto& header : ctx.headers)
+    {
+        if (header.params.empty()) continue;
+        if (header.name == L"TouhouDanmakufu")
+        {
+            info.type = header.params[0];
+        } else if (header.name == L"std::wstring")
+        {
+            info.version = header.params[0];
+        } else if (header.name == L"ID")
+        {
+            info.id = header.params[0];
+        } else if (header.name == L"Title")
+        {
+            info.title = header.params[0];
+        } else if (header.name == L"Text")
+        {
+            info.text = header.params[0];
+        } else if (header.name == L"Image")
+        {
+            info.imagePath = header.params[0];
+        } else if (header.name == L"System")
+        {
+            info.systemPath = header.params[0];
+        } else if (header.name == L"Background")
+        {
+            info.backgroundPath = header.params[0];
+        } else if (header.name == L"BGM")
+        {
+            info.bgmPath = header.params[0];
+        } else if (header.name == L"Player")
+        {
+            info.playerScripts = header.params;
+        } else if (header.name == L"ReplayName")
+        {
+            info.replayName = header.params[0];
+        }
     }
     info.imagePath = expandIncludePath(info.path, info.imagePath);
     info.systemPath = expandIncludePath(info.path, info.systemPath);
     info.backgroundPath = expandIncludePath(info.path, info.backgroundPath);
     info.bgmPath = expandIncludePath(info.path, info.bgmPath);
-    for (auto& playerPath : info.playerScripts) {
-      playerPath = expandIncludePath(info.path, playerPath);
+    for (auto& playerPath : info.playerScripts)
+    {
+        playerPath = expandIncludePath(info.path, playerPath);
     }
     return info;
-  }
-  std::shared_ptr<UserShotData> parseUserShotData(const std::wstring& filePath, const std::shared_ptr<FileLoader>& loader) {
+}
+std::shared_ptr<UserShotData> parseUserShotData(const std::wstring& filePath, const std::shared_ptr<FileLoader>& loader)
+{
     auto userShotData = std::make_shared<UserShotData>();
     UserDefDataLexer lexer;
     lexer.setLoader(loader);
@@ -88,8 +105,9 @@ namespace bstorm {
     parser.parse();
     userShotData->imagePath = expandIncludePath(userShotData->path, userShotData->imagePath);
     return userShotData;
-  }
-  std::shared_ptr<UserItemData> parseUserItemData(const std::wstring & filePath, const std::shared_ptr<FileLoader>& loader) {
+}
+std::shared_ptr<UserItemData> parseUserItemData(const std::wstring & filePath, const std::shared_ptr<FileLoader>& loader)
+{
     auto userItemData = std::make_shared<UserItemData>();
     UserDefDataLexer lexer;
     lexer.setLoader(loader);
@@ -100,8 +118,9 @@ namespace bstorm {
     parser.parse();
     userItemData->imagePath = expandIncludePath(userItemData->path, userItemData->imagePath);
     return userItemData;
-  }
-  std::shared_ptr<Mqo> parseMqo(const std::wstring & filePath, const std::shared_ptr<FileLoader>& loader) {
+}
+std::shared_ptr<Mqo> parseMqo(const std::wstring & filePath, const std::shared_ptr<FileLoader>& loader)
+{
     MqoLexer lexer;
     lexer.setLoader(loader);
     lexer.setInputSource(filePath);
@@ -110,5 +129,5 @@ namespace bstorm {
     parser.parse();
     ctx.mqo->path = canonicalPath(filePath);
     return ctx.mqo;
-  }
+}
 }

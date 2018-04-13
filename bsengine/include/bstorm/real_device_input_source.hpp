@@ -5,20 +5,23 @@
 #include <unordered_map>
 #include <memory>
 
-namespace bstorm {
-  class InputDevice;
+namespace bstorm
+{
+class InputDevice;
 
-  class KeyAssign {
-  public:
+class KeyAssign
+{
+public:
     void addVirtualKey(VirtualKey vkey, Key key, PadButton padButton);
     Key getAssignedKey(VirtualKey vkey) const;
     PadButton getAssignedPadButton(VirtualKey vkey) const;
-  private:
+private:
     std::unordered_map<VirtualKey, std::pair<Key, PadButton>> keyMap;
-  };
+};
 
-  class RealDeviceInputSource : public VirtualKeyInputSource {
-  public:
+class RealDeviceInputSource : public VirtualKeyInputSource
+{
+public:
     RealDeviceInputSource(const std::shared_ptr<InputDevice>& inputDevice, const std::shared_ptr<KeyAssign>& keyAssign);
     ~RealDeviceInputSource() override;
     KeyState getVirtualKeyState(VirtualKey vkey) override;
@@ -26,5 +29,5 @@ namespace bstorm {
     std::unordered_map<VirtualKey, KeyState> directSettedVirtualKeyStates;
     std::shared_ptr<KeyAssign> keyAssign;
     std::shared_ptr<InputDevice> inputDevice;
-  };
+};
 }

@@ -7,21 +7,24 @@
 #include <string>
 #include <vector>
 
-namespace bstorm {
-  class ObjFile : public Obj {
-  public:
+namespace bstorm
+{
+class ObjFile : public Obj
+{
+public:
     ObjFile(const std::shared_ptr<GameState>& state);
     ~ObjFile();
     virtual bool open(const std::wstring& path) = 0;
     virtual bool openNW(const std::wstring& path) = 0;
     virtual void store() = 0;
     int getSize();
-  protected:
+protected:
     std::fstream file;
-  };
+};
 
-  class ObjFileT : public ObjFile {
-  public:
+class ObjFileT : public ObjFile
+{
+public:
     ObjFileT(const std::shared_ptr<GameState>& state);
     void update() override;
     bool open(const std::wstring& path);
@@ -32,17 +35,19 @@ namespace bstorm {
     void addLine(const std::wstring& str);
     void clearLine();
     std::vector<std::wstring> splitLineText(int lineNum, const std::wstring& delimiter) const;
-  protected:
+protected:
     std::vector<std::wstring> lines;
-  };
+};
 
-  class ObjFileB : public ObjFile {
-  public:
-    enum class Encoding {
-      ACP,
-      UTF8,
-      UTF16LE,
-      UTF16BE
+class ObjFileB : public ObjFile
+{
+public:
+    enum class Encoding
+    {
+        ACP,
+        UTF8,
+        UTF16LE,
+        UTF16BE
     };
     ObjFileB(const std::shared_ptr<GameState>& state);
     void update() override;
@@ -61,8 +66,8 @@ namespace bstorm {
     float readFloat();
     double readDouble();
     std::wstring readString(int size);
-  protected:
+protected:
     Encoding code;
     bool useBE;
-  };
+};
 }
