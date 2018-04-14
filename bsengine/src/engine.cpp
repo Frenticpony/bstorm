@@ -2089,10 +2089,18 @@ void Engine::startStageScene(const std::shared_ptr<SourcePos>& srcPos)
     // #BGM
     if (!gameState->stageMainScriptInfo.bgmPath.empty() && gameState->stageMainScriptInfo.bgmPath != L"DEFAULT")
     {
-        loadOrphanSound(gameState->stageMainScriptInfo.bgmPath, nullptr);
-        auto& bgm = gameState->orphanSounds[canonicalPath(gameState->packageMainScriptInfo.bgmPath)];
-        bgm->setLoopEnable(true);
-        bgm->play();
+        try
+        {
+            loadOrphanSound(gameState->stageMainScriptInfo.bgmPath, nullptr); // TODO: #BGMヘッダのSourcePosを与える
+            auto& bgm = gameState->orphanSounds[canonicalPath(gameState->packageMainScriptInfo.bgmPath)];
+            bgm->setLoopEnable(true);
+            bgm->play();
+        } catch (Log& log)
+        {
+            log.setLevel(Log::Level::LV_WARN);
+            log.addSourcePos(srcPos);
+            Logger::WriteLog(log);
+        }
     }
 }
 
