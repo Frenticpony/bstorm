@@ -59,7 +59,7 @@ static const char prim3DVertexShaderSrc[] =
 
 static const char meshVertexShaderSrc[] =
 "float4x4 worldViewProjMatrix : register(c0);"
-"float4x4 worldMatrix : register(c4);"
+"float4x4 normalMatrix : register(c4);"
 "float4 materialAmbient : register(c8);"
 "float4 materialDiffuse : register(c9);"
 "float4 lightDir : register(c10);"
@@ -79,7 +79,7 @@ static const char meshVertexShaderSrc[] =
 "VS_OUTPUT main(VS_INPUT In) {"
 "  VS_OUTPUT Out;"
 "  Out.pos = mul(In.pos, worldViewProjMatrix);"
-"  In.normal = normalize(mul(In.normal, worldMatrix));"
+"  In.normal = normalize(mul(In.normal, normalMatrix));"
 "  Out.diffuse.xyz = materialAmbient.xyz + max(0.0f, dot(In.normal, lightDir.xyz)) * materialDiffuse.xyz;"
 "  Out.diffuse.w = materialAmbient.w * materialDiffuse.w;"
 "  Out.texCoord0 = In.texCoord0;"
@@ -285,9 +285,24 @@ void Renderer::renderMesh(const std::shared_ptr<Mesh>& mesh, const D3DCOLORVALUE
     // set vertex shader
     d3DDevice->SetVertexShader(meshVertexShader);
     // set shader constant
-    const D3DXMATRIX worldViewProjMatrix = worldMatrix * viewProjMatrix3D;
-    d3DDevice->SetVertexShaderConstantF(0, (const float*)&worldViewProjMatrix, 4);
-    d3DDevice->SetVertexShaderConstantF(4, (const float*)&worldMatrix, 4);
+    {
+        const D3DXMATRIX worldViewProjMatrix = worldMatrix * viewProjMatrix3D;
+        d3DDevice->SetVertexShaderConstantF(0, (const float*)&worldViewProjMatrix, 4);
+    }
+    {
+        D3DXMATRIX normalMatrix = worldMatrix;
+        normalMatrix._41 = normalMatrix._42 = normalMatrix._43 = 0.0f; // 平行移動成分を消去
+        if (D3DXMatrixInverse(&normalMatrix, NULL, &normalMatrix))
+        {
+            D3DXMatrixTranspose(&normalMatrix, &normalMatrix);
+        } else
+        {
+            // 非正則のとき
+            // とりあえず単位行列入れておく
+            D3DXMatrixIdentity(&normalMatrix);
+        }
+        d3DDevice->SetVertexShaderConstantF(4, (const float*)&normalMatrix, 4);
+    }
     d3DDevice->SetVertexShaderConstantF(12, &fogStart, 1);
     d3DDevice->SetVertexShaderConstantF(13, &fogEnd, 1);
     // set vertex format
@@ -300,7 +315,7 @@ void Renderer::renderMesh(const std::shared_ptr<Mesh>& mesh, const D3DCOLORVALUE
         d3DDevice->SetVertexShaderConstantF(8, (const float*)&amb, 1);
         d3DDevice->SetVertexShaderConstantF(9, (const float*)&dif, 1);
         // set light dir
-        D3DXVECTOR4 lightDir = { -0.5, -0.4, -0.5, 0 };
+        D3DXVECTOR4 lightDir = { 0, -1, -1, 0 };
         D3DXVec4Normalize(&lightDir, &lightDir);
         d3DDevice->SetVertexShaderConstantF(10, (const float*)&lightDir, 1);
         // set texture
