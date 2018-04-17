@@ -17,11 +17,15 @@
 #include <bstorm/fps_counter.hpp>
 #include <exception>
 
+#include <cassert>
+
 #include "runtime.h"
 
 namespace bstorm
 {
 const std::unordered_set<std::wstring> ignoreScriptExts{ L".png", L".jpg", L".jpeg", L".bmp", L".gif", L".dds", L".hdr", L".dib", L".pfm", L".tif", L".tiff", L".ttf", L".otf", L".mqo", L".mp3", L".mp4", L".avi", L".ogg", L".wav", L".wave", L".def", L".dat", L".fx", L".exe" };
+
+// NOTE: 必ずメンバ関数の冒頭でlockを行う。compile中に他の動作をすることはないのでロックして損はない。
 
 Script::Script(const std::wstring& p, const std::wstring& type, const std::wstring& version, int id, Engine* engine, const std::shared_ptr<SourcePos>& srcPos) :
     L(NULL),
@@ -40,6 +44,13 @@ Script::Script(const std::wstring& p, const std::wstring& type, const std::wstri
 
 Script::~Script()
 {
+    // NOTE: ここでロックを取ってはいけない。サブスレッドより先にロックを取るとデッドロックされる。
+    // compileThreadはメインスレッドで代入されているので、アクセスにロックは必要ない
+    while (compileThread.joinable())
+    {
+        Sleep(1);
+    }
+
     if (state != State::SCRIPT_NOT_COMPILED && state != State::SCRIPT_COMPILE_FAILED)
     {
         runBuiltInSub("Finalize");
@@ -64,29 +75,34 @@ Script::State Script::getState() const { return state; }
 
 void Script::compile()
 {
-    std::lock_guard<std::recursive_mutex> lock(compileSection);
+    std::lock_guard<std::recursive_mutex> lock(criticalSection);
     if (state == State::SCRIPT_NOT_COMPILED)
     {
         try
         {
             execCompile();
+            state = State::SCRIPT_COMPILED;
         } catch (...)
         {
             state = State::SCRIPT_COMPILE_FAILED;
             throw;
         }
-        state = State::SCRIPT_COMPILED;
     }
 }
 
 void Script::compileInThread()
 {
-    std::lock_guard<std::recursive_mutex> lock(compileSection);
-    if (state == State::SCRIPT_NOT_COMPILED)
+    std::lock_guard<std::recursive_mutex> lock(criticalSection);
+    if (compileThread.joinable())
     {
-        std::thread compileThread([this]()
+        return;
+    }
+    compileThread = std::thread([this]()
+    {
+        std::lock_guard<std::recursive_mutex> lock(criticalSection);
+        // ロックが獲得される前にInThreadでないcompileが実行される可能性があるのでかならずロックしてからNOT_COMPILEDかどうか調べよ。
+        if (state == State::SCRIPT_NOT_COMPILED)
         {
-            std::lock_guard<std::recursive_mutex> lock(compileSection);
             try
             {
                 execCompile();
@@ -101,9 +117,9 @@ void Script::compileInThread()
             {
                 state = State::SCRIPT_COMPILE_FAILED;
             }
-        });
+        }
         compileThread.detach();
-    }
+    });
 }
 
 int Script::getID() const
@@ -128,7 +144,7 @@ const std::wstring & Script::getVersion() const
 
 void Script::close()
 {
-    std::lock_guard<std::recursive_mutex> lock(compileSection);
+    std::lock_guard<std::recursive_mutex> lock(criticalSection);
     if (state != State::SCRIPT_COMPILE_FAILED)
     {
         state = State::SCRIPT_CLOSED;
@@ -142,6 +158,8 @@ bool Script::isClosed() const
 
 void Script::execCompile()
 {
+    std::lock_guard<std::recursive_mutex> lock(criticalSection);
+    assert(state == State::SCRIPT_NOT_COMPILED);
     try
     {
         L = lua_open();
@@ -281,6 +299,7 @@ void Script::execCompile()
 
 void Script::runBuiltInSub(const std::string &name)
 {
+    std::lock_guard<std::recursive_mutex> lock(criticalSection);
     if (!err)
     {
         if (luaStateBusy)
@@ -296,6 +315,7 @@ void Script::runBuiltInSub(const std::string &name)
 
 void Script::callLuaChunk()
 {
+    std::lock_guard<std::recursive_mutex> lock(criticalSection);
     bool tmp = luaStateBusy;
     luaStateBusy = true;
     if (lua_pcall(L, 0, 0, 0) != 0)
@@ -323,7 +343,7 @@ void Script::callLuaChunk()
 
 void Script::load()
 {
-    std::lock_guard<std::recursive_mutex> lock(compileSection);
+    std::lock_guard<std::recursive_mutex> lock(criticalSection);
     switch (state)
     {
         case State::SCRIPT_COMPILE_FAILED:
@@ -346,7 +366,7 @@ void Script::load()
 
 void Script::start()
 {
-    std::lock_guard<std::recursive_mutex> lock(compileSection);
+    std::lock_guard<std::recursive_mutex> lock(criticalSection);
     load();
     if (state == State::SCRIPT_LOADING_COMPLETED)
     {
@@ -356,6 +376,7 @@ void Script::start()
 
 void Script::runInitialize()
 {
+    std::lock_guard<std::recursive_mutex> lock(criticalSection);
     if (state == State::SCRIPT_STARTED)
     {
         runBuiltInSub("Initialize");
@@ -365,6 +386,7 @@ void Script::runInitialize()
 
 void Script::runMainLoop()
 {
+    std::lock_guard<std::recursive_mutex> lock(criticalSection);
     if (state == State::SCRIPT_INITIALIZED)
     {
         runBuiltInSub("MainLoop");
@@ -373,11 +395,13 @@ void Script::runMainLoop()
 
 void Script::notifyEvent(int eventType)
 {
+    std::lock_guard<std::recursive_mutex> lock(criticalSection);
     notifyEvent(eventType, std::make_unique<DnhArray>(L""));
 }
 
 void Script::notifyEvent(int eventType, const std::unique_ptr<DnhArray>& args)
 {
+    std::lock_guard<std::recursive_mutex> lock(criticalSection);
     switch (state)
     {
         case State::SCRIPT_NOT_COMPILED:
@@ -403,11 +427,13 @@ bool Script::isStgSceneScript() const
 
 void Script::setAutoDeleteObjectEnable(bool enable)
 {
+    std::lock_guard<std::recursive_mutex> lock(criticalSection);
     autoDeleteObjectEnable = enable;
 }
 
 void Script::addAutoDeleteTargetObjectId(int id)
 {
+    std::lock_guard<std::recursive_mutex> lock(criticalSection);
     if (id != ID_INVALID)
     {
         autoDeleteTargetObjIds.push_back(id);
@@ -421,11 +447,13 @@ std::unique_ptr<DnhValue> Script::getScriptResult() const
 
 void Script::setScriptResult(std::unique_ptr<DnhValue>&& value)
 {
+    std::lock_guard<std::recursive_mutex> lock(criticalSection);
     engine->setScriptResult(getID(), std::move(value));
 }
 
 void Script::setScriptArgument(int idx, std::unique_ptr<DnhValue>&& value)
 {
+    std::lock_guard<std::recursive_mutex> lock(criticalSection);
     scriptArgs[idx] = std::move(value);
 }
 
@@ -436,25 +464,26 @@ int Script::getScriptArgumentount() const
 
 std::unique_ptr<DnhValue> Script::getScriptArgument(int idx)
 {
+    std::lock_guard<std::recursive_mutex> lock(criticalSection);
     if (scriptArgs.count(idx) == 0) return std::make_unique<DnhNil>();
     return scriptArgs[idx]->clone();
 }
 
 std::shared_ptr<SourcePos> Script::getSourcePos(int line)
 {
-    std::lock_guard<std::recursive_mutex> lock(compileSection);
+    std::lock_guard<std::recursive_mutex> lock(criticalSection);
     return srcMap.getSourcePos(line);
 }
 
 void Script::saveError(const std::exception_ptr& e)
 {
-    std::lock_guard<std::recursive_mutex> lock(compileSection);
+    std::lock_guard<std::recursive_mutex> lock(criticalSection);
     err = e;
 }
 
 void Script::rethrowError() const
 {
-    std::lock_guard<std::recursive_mutex> lock(compileSection);
+    std::lock_guard<std::recursive_mutex> lock(criticalSection);
     std::rethrow_exception(err);
 }
 

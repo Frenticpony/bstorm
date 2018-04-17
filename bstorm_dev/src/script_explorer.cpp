@@ -143,7 +143,11 @@ ScriptExplorer::ScriptExplorer(int left, int top, int width, int height) :
 
 ScriptExplorer::~ScriptExplorer()
 {
-    while (isLoadingNow()) Sleep(1);
+    // スレッド終了まで待つ
+    while (isLoadingNow())
+    {
+        Sleep(1);
+    }
 }
 
 void ScriptExplorer::draw()
@@ -322,7 +326,6 @@ bool ScriptExplorer::isLoadingNow() const
 
 void ScriptExplorer::reload()
 {
-    std::lock_guard<std::mutex> lock(reloadSection);
     if (isLoadingNow()) return; // 既にロード中なら無視
     reloadThread = std::thread([this]()
     {
@@ -375,10 +378,7 @@ void ScriptExplorer::reload()
             mainScriptTreeView = createTreeView(mainScripts);
             playerScriptTreeView = createTreeView(playerScripts);
         }
-        {
-            std::lock_guard<std::mutex> lock(reloadSection);
-            reloadThread.detach();
-        }
+        reloadThread.detach();
     });
 }
 }

@@ -50,6 +50,5 @@ private:
     std::wstring selectedPlayerScriptPath;
     std::thread reloadThread; // Don't join.
     mutable std::mutex memberAccessSection;
-    mutable std::mutex reloadSection;
 };
 }

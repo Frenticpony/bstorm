@@ -7,7 +7,6 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <exception>
-#include <atomic>
 #include <mutex>
 #include <luajit/lua.hpp>
 
@@ -75,14 +74,15 @@ private:
     const int id;
     const bool stgSceneScript;
     const std::shared_ptr<SourcePos> compileSrcPos; // コンパイルを開始した場所
-    std::atomic<State> state;
+    State state;
     SourceMap srcMap;
     bool luaStateBusy;
     std::exception_ptr err;
     std::vector<int> autoDeleteTargetObjIds;
     std::unordered_map<int, std::unique_ptr<DnhValue>> scriptArgs;
     bool autoDeleteObjectEnable;
-    mutable std::recursive_mutex compileSection;
+    mutable std::recursive_mutex criticalSection;
+    std::thread compileThread;
     Engine* engine;
 };
 
