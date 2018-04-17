@@ -38,15 +38,7 @@ void LogWindow::setInitWindowPos(int left, int top, int width, int height)
 
 void LogWindow::log(Log& lg)
 {
-    logs[validIdx(headIdx + logCnt)] = lg;
-    if (logCnt != MaxLogCnt)
-    {
-        logCnt++;
-    } else
-    {
-        headIdx = validIdx(headIdx + 1);
-    }
-    scrollToBottom = true;
+    log(std::move(Log(lg)));
 }
 
 void LogWindow::log(Log&& lg)
