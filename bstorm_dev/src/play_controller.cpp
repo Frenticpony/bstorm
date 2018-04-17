@@ -52,6 +52,7 @@ void PlayController::pause(bool doPause)
 void PlayController::close()
 {
     engine->reset(screenWidth, screenHeight);
+    pause(true);
 }
 
 void PlayController::reload()
