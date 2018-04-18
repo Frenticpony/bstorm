@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include <d3dx9.h>
+struct D3DXMATRIX;
 
 namespace bstorm
 {
@@ -9,27 +9,27 @@ class Camera2D
 public:
     Camera2D();
     ~Camera2D() {};
-    void generateViewMatrix(D3DXMATRIX& mat) const;
-    // スクリーンの幅と高さ、スクリーン座標でのcameraの位置を与える
-    void generateProjMatrix(float screenWidth, float screenHeight, float cameraScreenX, float cameraScreenY, D3DXMATRIX& mat) const;
-    void setFocusX(float fx) { focusX = fx; }
-    void setFocusY(float fy) { focusY = fy; }
-    void setAngleZ(float rot) { angle = rot; }
-    void setRatio(float s) { setRatioX(s); setRatioY(s); }
-    void setRatioX(float sx) { scaleX = sx; }
-    void setRatioY(float sy) { scaleY = sy; }
-    float getX() const { return focusX; }
-    float getY() const { return focusY; }
-    float getAngleZ() const { return angle; }
-    float getRatio()  const;
-    float getRatioX() const { return scaleX; }
-    float getRatioY() const { return scaleY; }
-    void reset(float fx, float fy);
+    void SetFocusX(float fx) { focusX_ = fx; }
+    void SetFocusY(float fy) { focusY_ = fy; }
+    void SetAngleZ(float rotZ) { angleZ_ = rotZ; }
+    void SetRatio(float r) { SetRatioX(r); SetRatioY(r); }
+    void SetRatioX(float rx) { ratioX_ = rx; }
+    void SetRatioY(float ry) { ratioY_ = ry; }
+    float GetX() const { return focusX_; }
+    float GetY() const { return focusY_; }
+    float GetAngleZ() const { return angleZ_; }
+    float GetRatio() const; // max(RatioX, RatioY)
+    float GetRatioX() const { return ratioX_; }
+    float GetRatioY() const { return ratioY_; }
+    void Reset(float focusX, float focusY);
+    void GenerateViewMatrix(D3DXMATRIX* view) const;
+    void GenerateProjMatrix(D3DXMATRIX* proj, float screenWidth, float screenHeight, float cameraScreenX, float cameraScreenY) const;
 private:
-    float focusX; // カメラの中心に持ってきたいワールド座標
-    float focusY; // カメラの中心に持ってきたいワールド座標
-    float angle;
-    float scaleX;
-    float scaleY;
+    // focus: カメラの中心に持ってきたいワールド座標
+    float focusX_;
+    float focusY_;
+    float angleZ_;
+    float ratioX_;
+    float ratioY_;
 };
 }

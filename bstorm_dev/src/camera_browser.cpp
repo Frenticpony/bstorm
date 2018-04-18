@@ -18,33 +18,33 @@ static void drawCamera2DInfo(Camera2D& camera2D)
     ImGui::Separator();
     ImGui::Separator();
     {
-        float focusX = camera2D.getX();
+        float focusX = camera2D.GetX();
         InputFloatRow("focus-x", "##camera2DFocusX", &focusX);
-        camera2D.setFocusX(focusX);
+        camera2D.SetFocusX(focusX);
     }
     ImGui::Separator();
     {
-        float focusY = camera2D.getY();
+        float focusY = camera2D.GetY();
         InputFloatRow("focus-y", "##camera2DFocusY", &focusY);
-        camera2D.setFocusY(focusY);
+        camera2D.SetFocusY(focusY);
     }
     ImGui::Separator();
     {
-        float angleZ = camera2D.getAngleZ();
+        float angleZ = camera2D.GetAngleZ();
         DragAngleRow("angle-z", "##camera2DAngleZ", &angleZ);
-        camera2D.setAngleZ(angleZ);
+        camera2D.SetAngleZ(angleZ);
     }
     ImGui::Separator();
     {
-        float ratioX = camera2D.getRatioX();
+        float ratioX = camera2D.GetRatioX();
         InputFloatRow("ratio-x", "##camera2DRatioX", &ratioX);
-        camera2D.setRatioX(ratioX);
+        camera2D.SetRatioX(ratioX);
     }
     ImGui::Separator();
     {
-        float ratioY = camera2D.getRatioY();
+        float ratioY = camera2D.GetRatioY();
         InputFloatRow("ratio-y", "##camera2DRatioY", &ratioY);
-        camera2D.setRatioY(ratioY);
+        camera2D.SetRatioY(ratioY);
     }
     ImGui::Columns(1);
     ImGui::Separator();

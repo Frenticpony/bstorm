@@ -351,11 +351,11 @@ void Renderer::setViewProjMatrix2D(const D3DXMATRIX& view, const D3DXMATRIX& pro
 void Renderer::setForbidCameraViewProjMatrix2D(int screenWidth, int screenHeight)
 {
     Camera2D camera2D;
-    camera2D.reset(0, 0);
+    camera2D.Reset(0, 0);
     D3DXMATRIX forbidCameraViewMatrix2D;
     D3DXMATRIX forbidCameraProjMatrix2D;
-    camera2D.generateViewMatrix(forbidCameraViewMatrix2D);
-    camera2D.generateProjMatrix(screenWidth, screenHeight, 0, 0, forbidCameraProjMatrix2D);
+    camera2D.GenerateViewMatrix(&forbidCameraViewMatrix2D);
+    camera2D.GenerateProjMatrix(&forbidCameraProjMatrix2D, screenWidth, screenHeight, 0, 0);
     forbidCameraViewProjMatrix2D = forbidCameraViewMatrix2D * forbidCameraProjMatrix2D;
 }
 

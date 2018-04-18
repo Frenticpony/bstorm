@@ -1,35 +1,45 @@
 ﻿#include <bstorm/camera2D.hpp>
 
 #include <algorithm>
+#include <d3dx9.h>
 
 namespace bstorm
 {
-Camera2D::Camera2D() : focusX(0), focusY(0), angle(0), scaleX(1), scaleY(1) {}
-
-void Camera2D::generateViewMatrix(D3DXMATRIX& view) const
+Camera2D::Camera2D()
 {
-    D3DXMATRIX rot, scale;
-    D3DXMatrixLookAtLH(&view, &D3DXVECTOR3(focusX, focusY, 1), &D3DXVECTOR3(focusX, focusY, 0), &D3DXVECTOR3(0, -1, 0));
-    D3DXMatrixRotationZ(&rot, D3DXToRadian(-angle));
-    D3DXMatrixScaling(&scale, scaleX, scaleY, 1);
-    view = view * scale * rot;
+    Reset(0.0f, 0.0f);
 }
 
-void Camera2D::generateProjMatrix(float screenWidth, float screenHeight, float cameraScreenX, float cameraScreenY, D3DXMATRIX& proj) const
+float Camera2D::GetRatio() const { return std::max(GetRatioX(), GetRatioY()); }
+
+void Camera2D::Reset(float focusX, float focusY)
 {
-    D3DXMATRIX trans;
-    D3DXMatrixTranslation(&trans, -screenWidth / 2.0f + cameraScreenX, screenHeight / 2.0f - cameraScreenY, 0.0f);
-    D3DXMatrixScaling(&proj, 2.0f / screenWidth, 2.0f / screenHeight, 1.0f);
-    proj = trans * proj;
+    SetFocusX(focusX);
+    SetFocusY(focusY);
+    SetAngleZ(0.0f);
+    SetRatio(1.0f);
 }
 
-float Camera2D::getRatio() const { return std::max(getRatioX(), getRatioY()); }
-
-void Camera2D::reset(float fx, float fy)
+void Camera2D::GenerateViewMatrix(D3DXMATRIX* view) const
 {
-    setFocusX(fx);
-    setFocusY(fy);
-    setAngleZ(0);
-    setRatio(1);
+    // カメラ中心に変換してから拡大して回転
+    D3DXMATRIX rot;
+    D3DXMatrixLookAtLH(view, &D3DXVECTOR3(focusX_, focusY_, 1.0f), &D3DXVECTOR3(focusX_, focusY_, 0.0f), &D3DXVECTOR3(0.0f, -1.0f, 0.0f));
+    D3DXMatrixRotationZ(&rot, D3DXToRadian(-angleZ_));
+    rot._11 *= ratioX_; rot._12 *= ratioX_;
+    rot._21 *= ratioY_; rot._22 *= ratioY_;
+    *view = (*view) * rot;
+}
+
+void Camera2D::GenerateProjMatrix(D3DXMATRIX* proj, float screenWidth, float screenHeight, float cameraScreenX, float cameraScreenY) const
+{
+    // 移動してから拡大
+    const float tx = -screenWidth / 2.0f + cameraScreenX;
+    const float ty = screenHeight / 2.0f - cameraScreenY;
+    const float sx = 2.0f / screenWidth;
+    const float sy = 2.0f / screenHeight;
+    D3DXMatrixScaling(proj, sx, sy, 1.0f);
+    proj->_41 = sx * tx;
+    proj->_42 = sy * ty;
 }
 }
