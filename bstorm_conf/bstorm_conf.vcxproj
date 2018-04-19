@@ -89,7 +89,7 @@
       <WarningLevel>Level1</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>NOMINMAX;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\DxSDK\Include;$(SolutionDir)bsengine\include;$(SolutionDir)imgui;$(SolutionDir)IconFontCppHeader;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\DxSDK\Include;$(SolutionDir)bsengine\src;$(SolutionDir)imgui;$(SolutionDir)IconFontCppHeader;</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <CompileAs>CompileAsCpp</CompileAs>
@@ -111,7 +111,7 @@
       <WarningLevel>Level1</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>NOMINMAX;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\DxSDK\Include;$(SolutionDir)bsengine\include;$(SolutionDir)imgui;$(SolutionDir)IconFontCppHeader;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\DxSDK\Include;$(SolutionDir)bsengine\src;$(SolutionDir)imgui;$(SolutionDir)IconFontCppHeader;</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <CompileAs>CompileAsCpp</CompileAs>
@@ -135,7 +135,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NOMINMAX;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\DxSDK\Include;$(SolutionDir)bsengine\include;$(SolutionDir)imgui;$(SolutionDir)IconFontCppHeader;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\DxSDK\Include;$(SolutionDir)bsengine\src;$(SolutionDir)imgui;$(SolutionDir)IconFontCppHeader;</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -161,7 +161,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NOMINMAX;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\DxSDK\Include;$(SolutionDir)bsengine\include;$(SolutionDir)imgui;$(SolutionDir)IconFontCppHeader;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\DxSDK\Include;$(SolutionDir)bsengine\src;$(SolutionDir)imgui;$(SolutionDir)IconFontCppHeader;</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
