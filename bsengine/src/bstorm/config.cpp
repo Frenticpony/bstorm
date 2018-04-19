@@ -2,7 +2,7 @@
 
 #include <bstorm/util.hpp>
 #include <bstorm/logger.hpp>
-#include "../../version.hpp"
+#include <bstorm/version.hpp>
 
 #include <fstream>
 #include <cstdio>

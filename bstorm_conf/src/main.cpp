@@ -4,7 +4,7 @@
 #include <bstorm/config.hpp>
 #include <bstorm/const.hpp>
 #include <bstorm/util.hpp>
-#include "../../version.hpp"
+#include <bstorm/version.hpp>
 
 #include "../../IconFontCppHeaders/IconsFontAwesome_c.h"
 #include "../../glyph_ranges_ja.hpp"

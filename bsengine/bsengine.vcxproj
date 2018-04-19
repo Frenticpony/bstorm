@@ -79,6 +79,7 @@
     <ClInclude Include="src\bstorm\th_dnh_def.hpp" />
     <ClInclude Include="src\bstorm\type.hpp" />
     <ClInclude Include="src\bstorm\util.hpp" />
+    <ClInclude Include="src\bstorm\version.hpp" />
     <ClInclude Include="src\bstorm\virtual_key_input_source.hpp" />
     <ClInclude Include="src\bison\dnh.tab.hpp" />
     <ClInclude Include="src\bison\mqo.tab.hpp" />

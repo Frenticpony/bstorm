@@ -18,7 +18,7 @@
 #include <bstorm/config.hpp>
 #include <bstorm/const.hpp>
 #include <bstorm/th_dnh_def.hpp>
-#include "../../version.hpp"
+#include <bstorm/version.hpp>
 
 #include "../../glyph_ranges_ja.hpp"
 #include <imgui.h>
