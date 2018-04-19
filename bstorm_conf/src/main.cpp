@@ -6,16 +6,16 @@
 #include <bstorm/util.hpp>
 #include <bstorm/version.hpp>
 
-#include "../../IconFontCppHeaders/IconsFontAwesome_c.h"
-#include "../../glyph_ranges_ja.hpp"
 #include <string>
 #include <cstdio>
 #include <clocale>
 #include <fstream>
 #include <d3d9.h>
+#include <windows.h>
 #include <imgui.h>
 #include "../../imgui/examples/directx9_example/imgui_impl_dx9.h"
-#include <windows.h>
+#include "../../IconFontCppHeaders/IconsFontAwesome_c.h"
+#include "../../fonts/ja/glyph_ranges_ja.hpp"
 
 using namespace bstorm;
 

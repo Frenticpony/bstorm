@@ -20,12 +20,12 @@
 #include <bstorm/th_dnh_def.hpp>
 #include <bstorm/version.hpp>
 
-#include "../../glyph_ranges_ja.hpp"
-#include <imgui.h>
-#include "../../imgui/examples/directx9_example/imgui_impl_dx9.h"
-#include <IconsFontAwesome_c.h>
 #include <crtdbg.h>
 #include <string>
+#include <imgui.h>
+#include "../../imgui/examples/directx9_example/imgui_impl_dx9.h"
+#include "../../fonts/ja/glyph_ranges_ja.hpp"
+#include <IconsFontAwesome_c.h>
 
 using namespace bstorm;
 
