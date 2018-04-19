@@ -935,87 +935,87 @@ float Engine::get2DCameraRatioY() const
 
 void Engine::setCommonData(const std::wstring & key, std::unique_ptr<DnhValue>&& value)
 {
-    gameState->commonDataDB->setCommonData(key, std::move(value));
+    gameState->commonDataDB->SetCommonData(key, std::move(value));
 }
 
 std::unique_ptr<DnhValue> Engine::getCommonData(const std::wstring & key, std::unique_ptr<DnhValue>&& defaultValue) const
 {
-    return gameState->commonDataDB->getCommonData(key, std::move(defaultValue));
+    return gameState->commonDataDB->GetCommonData(key, std::move(defaultValue));
 }
 
 void Engine::clearCommonData()
 {
-    gameState->commonDataDB->clearCommonData();
+    gameState->commonDataDB->ClearCommonData();
 }
 
 void Engine::deleteCommonData(const std::wstring & key)
 {
-    gameState->commonDataDB->deleteCommonData(key);
+    gameState->commonDataDB->DeleteCommonData(key);
 }
 
 void Engine::setAreaCommonData(const std::wstring & areaName, const std::wstring & key, std::unique_ptr<DnhValue>&& value)
 {
-    gameState->commonDataDB->setAreaCommonData(areaName, key, std::move(value));
+    gameState->commonDataDB->SetAreaCommonData(areaName, key, std::move(value));
 }
 
 std::unique_ptr<DnhValue> Engine::getAreaCommonData(const std::wstring & areaName, const std::wstring & key, std::unique_ptr<DnhValue>&& value) const
 {
-    return gameState->commonDataDB->getAreaCommonData(areaName, key, std::move(value));
+    return gameState->commonDataDB->GetAreaCommonData(areaName, key, std::move(value));
 }
 
 void Engine::clearAreaCommonData(const std::wstring & areaName)
 {
-    gameState->commonDataDB->clearAreaCommonData(areaName);
+    gameState->commonDataDB->ClearAreaCommonData(areaName);
 }
 
 void Engine::deleteAreaCommonData(const std::wstring & areaName, const std::wstring & key)
 {
-    gameState->commonDataDB->deleteAreaCommonData(areaName, key);
+    gameState->commonDataDB->DeleteAreaCommonData(areaName, key);
 }
 
 void Engine::createCommonDataArea(const std::wstring & areaName)
 {
-    gameState->commonDataDB->createCommonDataArea(areaName);
+    gameState->commonDataDB->CreateCommonDataArea(areaName);
 }
 
 bool Engine::isCommonDataAreaExists(const std::wstring & areaName) const
 {
-    return gameState->commonDataDB->isCommonDataAreaExists(areaName);
+    return gameState->commonDataDB->IsCommonDataAreaExists(areaName);
 }
 
 void Engine::copyCommonDataArea(const std::wstring & dest, const std::wstring & src)
 {
-    gameState->commonDataDB->copyCommonDataArea(dest, src);
+    gameState->commonDataDB->CopyCommonDataArea(dest, src);
 }
 
 std::vector<std::wstring> Engine::getCommonDataAreaKeyList() const
 {
-    return gameState->commonDataDB->getCommonDataAreaKeyList();
+    return gameState->commonDataDB->GetCommonDataAreaKeyList();
 }
 
 std::vector<std::wstring> Engine::getCommonDataValueKeyList(const std::wstring & areaName) const
 {
-    return gameState->commonDataDB->getCommonDataValueKeyList(areaName);
+    return gameState->commonDataDB->GetCommonDataValueKeyList(areaName);
 }
 
 bool Engine::saveCommonDataAreaA1(const std::wstring & areaName) const
 {
-    return gameState->commonDataDB->saveCommonDataArea(areaName, getDefaultCommonDataSavePath(areaName));
+    return gameState->commonDataDB->SaveCommonDataArea(areaName, getDefaultCommonDataSavePath(areaName));
 }
 
 bool Engine::loadCommonDataAreaA1(const std::wstring & areaName)
 {
-    return gameState->commonDataDB->loadCommonDataArea(areaName, getDefaultCommonDataSavePath(areaName));
+    return gameState->commonDataDB->LoadCommonDataArea(areaName, getDefaultCommonDataSavePath(areaName));
 }
 
 bool Engine::saveCommonDataAreaA2(const std::wstring & areaName, const std::wstring & path) const
 {
-    return gameState->commonDataDB->saveCommonDataArea(areaName, path);
+    return gameState->commonDataDB->SaveCommonDataArea(areaName, path);
 }
 
 bool Engine::loadCommonDataAreaA2(const std::wstring & areaName, const std::wstring & path)
 {
-    return gameState->commonDataDB->loadCommonDataArea(areaName, path);
+    return gameState->commonDataDB->LoadCommonDataArea(areaName, path);
 }
 
 std::wstring Engine::getDefaultCommonDataSavePath(const std::wstring & areaName) const

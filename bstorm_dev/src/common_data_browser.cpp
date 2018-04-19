@@ -13,8 +13,7 @@
 
 namespace bstorm
 {
-template <>
-void CommonDataDB::backDoor<CommonDataBrowser>() const
+static void DrawCommonDataInfo(const std::map<CommonDataDB::DataAreaName, CommonDataDB::CommonDataArea>& areaTable)
 {
     static CommonDataDB::DataAreaName selectedArea;
     {
@@ -62,7 +61,8 @@ void CommonDataDB::backDoor<CommonDataBrowser>() const
 template <>
 void Engine::backDoor<CommonDataBrowser>()
 {
-    gameState->commonDataDB->backDoor<CommonDataBrowser>();
+    const auto& areaTable = gameState->commonDataDB->GetCommonDataAreaTable();
+    DrawCommonDataInfo(areaTable);
 }
 
 CommonDataBrowser::CommonDataBrowser(int left, int top, int width, int height) :
