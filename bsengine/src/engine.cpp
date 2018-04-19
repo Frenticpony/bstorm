@@ -743,52 +743,52 @@ void Engine::setFogParam(float fogStart, float fogEnd, int r, int g, int b)
 
 void Engine::setCameraFocusX(float x)
 {
-    gameState->camera3D->setFocusX(x);
+    gameState->camera3D->SetFocusX(x);
 }
 
 void Engine::setCameraFocusY(float y)
 {
-    gameState->camera3D->setFocusY(y);
+    gameState->camera3D->SetFocusY(y);
 }
 
 void Engine::setCameraFocusZ(float z)
 {
-    gameState->camera3D->setFocusZ(z);
+    gameState->camera3D->SetFocusZ(z);
 }
 
 void Engine::setCameraFocusXYZ(float x, float y, float z)
 {
-    gameState->camera3D->setFocusXYZ(x, y, z);
+    gameState->camera3D->SetFocusXYZ(x, y, z);
 }
 
 void Engine::setCameraRadius(float r)
 {
-    gameState->camera3D->setRadius(r);
+    gameState->camera3D->SetRadius(r);
 }
 
 void Engine::setCameraAzimuthAngle(float angle)
 {
-    gameState->camera3D->setAzimuthAngle(angle);
+    gameState->camera3D->SetAzimuthAngle(angle);
 }
 
 void Engine::setCameraElevationAngle(float angle)
 {
-    gameState->camera3D->setElevationAngle(angle);
+    gameState->camera3D->SetElevationAngle(angle);
 }
 
 void Engine::setCameraYaw(float yaw)
 {
-    gameState->camera3D->setYaw(yaw);
+    gameState->camera3D->SetYaw(yaw);
 }
 
 void Engine::setCameraPitch(float pitch)
 {
-    gameState->camera3D->setPitch(pitch);
+    gameState->camera3D->SetPitch(pitch);
 }
 
 void Engine::setCameraRoll(float roll)
 {
-    gameState->camera3D->setRoll(roll);
+    gameState->camera3D->SetRoll(roll);
 }
 
 void Engine::resetCamera()
@@ -805,67 +805,67 @@ void Engine::resetCamera()
 
 float Engine::getCameraX() const
 {
-    return gameState->camera3D->getX();
+    return gameState->camera3D->GetX();
 }
 
 float Engine::getCameraY() const
 {
-    return gameState->camera3D->getY();
+    return gameState->camera3D->GetY();
 }
 
 float Engine::getCameraZ() const
 {
-    return gameState->camera3D->getZ();
+    return gameState->camera3D->GetZ();
 }
 
 float Engine::getCameraFocusX() const
 {
-    return gameState->camera3D->getFocusX();
+    return gameState->camera3D->GetFocusX();
 }
 
 float Engine::getCameraFocusY() const
 {
-    return gameState->camera3D->getFocusY();
+    return gameState->camera3D->GetFocusY();
 }
 
 float Engine::getCameraFocusZ() const
 {
-    return gameState->camera3D->getFocusZ();
+    return gameState->camera3D->GetFocusZ();
 }
 
 float Engine::getCameraRadius() const
 {
-    return gameState->camera3D->getRadius();
+    return gameState->camera3D->GetRadius();
 }
 
 float Engine::getCameraAzimuthAngle() const
 {
-    return gameState->camera3D->getAzimuthAngle();
+    return gameState->camera3D->GetAzimuthAngle();
 }
 
 float Engine::getCameraElevationAngle() const
 {
-    return gameState->camera3D->getElevationAngle();
+    return gameState->camera3D->GetElevationAngle();
 }
 
 float Engine::getCameraYaw() const
 {
-    return gameState->camera3D->getYaw();
+    return gameState->camera3D->GetYaw();
 }
 
 float Engine::getCameraPitch() const
 {
-    return gameState->camera3D->getPitch();
+    return gameState->camera3D->GetPitch();
 }
 
 float Engine::getCameraRoll() const
 {
-    return gameState->camera3D->getRoll();
+    return gameState->camera3D->GetRoll();
 }
 
 void Engine::setCameraPerspectiveClip(float nearClip, float farClip)
 {
-    return gameState->camera3D->setPerspectiveClip(nearClip, farClip);
+    return gameState->camera3D->SetPerspectiveClip(nearClip, farClip);
 }
 
 void Engine::set2DCameraFocusX(float x)
@@ -1883,13 +1883,13 @@ void Engine::setReplaySaveSceneScriptPath(const std::wstring & path)
 Point2D Engine::get2DPosition(float x, float y, float z, bool isStgScene)
 {
     D3DXMATRIX view, proj, viewport, billboard;
-    gameState->camera3D->generateViewMatrix(view, billboard);
+    gameState->camera3D->GenerateViewMatrix(&view, &billboard);
     if (isStgScene)
     {
-        gameState->camera3D->generateProjMatrix(getScreenWidth(), getScreenHeight(), getStgFrameCenterScreenX(), getStgFrameCenterScreenY(), proj);
+        gameState->camera3D->GenerateProjMatrix(&proj, getScreenWidth(), getScreenHeight(), getStgFrameCenterScreenX(), getStgFrameCenterScreenY());
     } else
     {
-        gameState->camera3D->generateProjMatrix(getScreenWidth(), getScreenHeight(), getScreenWidth() / 2.0f, getScreenHeight() / 2.0f, proj);
+        gameState->camera3D->GenerateProjMatrix(&proj, getScreenWidth(), getScreenHeight(), getScreenWidth() / 2.0f, getScreenHeight() / 2.0f);
     }
     {
         D3DXMatrixScaling(&viewport, getScreenWidth() / 2.0f, -getScreenHeight() / 2.0f, 1.0f);
@@ -2133,7 +2133,7 @@ void Engine::renderToTexture(const std::wstring& name, int begin, int end, int o
     auto obj = gameState->objTable->get<ObjRender>(objId);
     if (obj && checkVisibleFlag && !obj->isVisible()) return;
 
-    gameState->camera3D->generateViewMatrix(viewMatrix3D, billboardMatrix);
+    gameState->camera3D->GenerateViewMatrix(&viewMatrix3D, &billboardMatrix);
 
     // [0, stgFrameMin]
     {
@@ -2145,7 +2145,7 @@ void Engine::renderToTexture(const std::wstring& name, int begin, int end, int o
         renderer->setViewProjMatrix2D(viewMatrix2D, projMatrix2D);
 
         // set 3D matrix
-        gameState->camera3D->generateProjMatrix(getScreenWidth(), getScreenHeight(), getScreenWidth() / 2.0f, getScreenHeight() / 2.0f, projMatrix3D);
+        gameState->camera3D->GenerateProjMatrix(&projMatrix3D, getScreenWidth(), getScreenHeight(), getScreenWidth() / 2.0f, getScreenHeight() / 2.0f);
         renderer->setViewProjMatrix3D(viewMatrix3D, projMatrix3D, billboardMatrix);
         for (int p = 0; p < getStgFrameRenderPriorityMin(); p++)
         {
@@ -2186,7 +2186,7 @@ void Engine::renderToTexture(const std::wstring& name, int begin, int end, int o
         }
 
         // set 3D matrix
-        gameState->camera3D->generateProjMatrix(getScreenWidth(), getScreenHeight(), getStgFrameCenterScreenX(), getStgFrameCenterScreenY(), projMatrix3D);
+        gameState->camera3D->GenerateProjMatrix(&projMatrix3D, getScreenWidth(), getScreenHeight(), getStgFrameCenterScreenX(), getStgFrameCenterScreenY());
         renderer->setViewProjMatrix3D(viewMatrix3D, projMatrix3D, billboardMatrix);
 
         for (int p = getStgFrameRenderPriorityMin(); p <= getStgFrameRenderPriorityMax(); p++)
@@ -2225,7 +2225,7 @@ void Engine::renderToTexture(const std::wstring& name, int begin, int end, int o
         renderer->setViewProjMatrix2D(viewMatrix2D, projMatrix2D);
 
         // set 3D matrix
-        gameState->camera3D->generateProjMatrix(getScreenWidth(), getScreenHeight(), getScreenWidth() / 2.0f, getScreenHeight() / 2.0f, projMatrix3D);
+        gameState->camera3D->GenerateProjMatrix(&projMatrix3D, getScreenWidth(), getScreenHeight(), getScreenWidth() / 2.0f, getScreenHeight() / 2.0f);
         renderer->setViewProjMatrix3D(viewMatrix3D, projMatrix3D, billboardMatrix);
         for (int p = getStgFrameRenderPriorityMax() + 1; p <= MAX_RENDER_PRIORITY; p++)
         {

@@ -59,78 +59,78 @@ static void drawCamera3DInfo(Camera3D& camera3D)
     ImGui::Separator();
     ImGui::Separator();
     {
-        float x = camera3D.getX();
+        float x = camera3D.GetX();
         ViewFloatRow("x", x);
     }
     ImGui::Separator();
     {
-        float y = camera3D.getY();
+        float y = camera3D.GetY();
         ViewFloatRow("y", y);
     }
     ImGui::Separator();
     {
-        float z = camera3D.getZ();
+        float z = camera3D.GetZ();
         ViewFloatRow("z", z);
     }
     ImGui::Separator();
     {
-        float focusX = camera3D.getFocusX();
+        float focusX = camera3D.GetFocusX();
         InputFloatRow("focus-x", "##camera3DFocusX", &focusX);
-        camera3D.setFocusX(focusX);
+        camera3D.SetFocusX(focusX);
     }
     ImGui::Separator();
     {
-        float focusY = camera3D.getFocusY();
+        float focusY = camera3D.GetFocusY();
         InputFloatRow("focus-y", "##camera3DFocusY", &focusY);
-        camera3D.setFocusY(focusY);
+        camera3D.SetFocusY(focusY);
     }
     ImGui::Separator();
     {
-        float focusZ = camera3D.getFocusZ();
+        float focusZ = camera3D.GetFocusZ();
         InputFloatRow("focus-z", "##camera3DFocusZ", &focusZ);
-        camera3D.setFocusZ(focusZ);
+        camera3D.SetFocusZ(focusZ);
     }
     ImGui::Separator();
     {
-        float radius = camera3D.getRadius();
+        float radius = camera3D.GetRadius();
         InputFloatRow("radius", "##camera3DRadious", &radius);
-        camera3D.setRadius(radius);
+        camera3D.SetRadius(radius);
     }
     ImGui::Separator();
     {
-        float azimuthAngle = camera3D.getAzimuthAngle();
+        float azimuthAngle = camera3D.GetAzimuthAngle();
         DragAngleRow("azimuth-angle", "##camera3DAzimuthAngle", &azimuthAngle);
-        camera3D.setAzimuthAngle(azimuthAngle);
+        camera3D.SetAzimuthAngle(azimuthAngle);
     }
     ImGui::Separator();
     {
-        float elevationAngle = camera3D.getElevationAngle();
+        float elevationAngle = camera3D.GetElevationAngle();
         DragAngleRow("elevation-angle", "##camera3DElevationAngle", &elevationAngle);
-        camera3D.setElevationAngle(elevationAngle);
+        camera3D.SetElevationAngle(elevationAngle);
     }
     ImGui::Separator();
     {
-        float yaw = camera3D.getYaw();
+        float yaw = camera3D.GetYaw();
         DragAngleRow("yaw", "##camera3DYaw", &yaw);
-        camera3D.setYaw(yaw);
+        camera3D.SetYaw(yaw);
     }
     ImGui::Separator();
     {
-        float pitch = camera3D.getPitch();
+        float pitch = camera3D.GetPitch();
         DragAngleRow("pitch", "##camera3DPitch", &pitch);
-        camera3D.setPitch(pitch);
+        camera3D.SetPitch(pitch);
     }
     ImGui::Separator();
     {
-        float roll = camera3D.getRoll();
+        float roll = camera3D.GetRoll();
         DragAngleRow("roll", "##camera3DRoll", &roll);
-        camera3D.setRoll(roll);
+        camera3D.SetRoll(roll);
     }
     ImGui::Separator();
     {
-        float clips[2] = { camera3D.getNearPerspectiveClip(), camera3D.getFarPerspectiveClip() };
+        float clips[2] = { camera3D.GetNearPerspectiveClip(), camera3D.GetFarPerspectiveClip() };
         InputFloat2Row("clip", "##camera3DClip", clips);
-        camera3D.setPerspectiveClip(clips[0], clips[1]);
+        camera3D.SetPerspectiveClip(clips[0], clips[1]);
     }
     ImGui::Columns(1);
     ImGui::Separator();

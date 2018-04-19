@@ -1,59 +1,72 @@
 ﻿#include <bstorm/camera3D.hpp>
 
+#include <d3dx9.h>
+
 namespace bstorm
 {
 Camera3D::Camera3D() :
-    focusX(0),
-    focusY(0),
-    focusZ(0),
-    radius(0),
-    azimuthAngle(0),
-    elevationAngle(0),
-    yaw(0),
-    pitch(0),
-    roll(0),
-    nearClip(0),
-    farClip(1000)
+    focusX_(0.0f),
+    focusY_(0.0f),
+    focusZ_(0.0f),
+    radius_(500.0f),
+    azimuthAngle_(15.0f),
+    elevationAngle_(45.0f),
+    yaw_(0.0f),
+    pitch_(0.0f),
+    roll_(0.0f),
+    nearClip_(10.0f),
+    farClip_(2000.0f)
 {
 }
 
-float Camera3D::getX() const
+float Camera3D::GetX() const
 {
-    return focusX + radius * cos(D3DXToRadian(elevationAngle)) * cos(D3DXToRadian(azimuthAngle));
+    return focusX_ + radius_ * cos(D3DXToRadian(elevationAngle_)) * cos(D3DXToRadian(azimuthAngle_));
 }
 
-float Camera3D::getY() const
+float Camera3D::GetY() const
 {
-    return focusY + radius * sin(D3DXToRadian(elevationAngle));
+    return focusY_ + radius_ * sin(D3DXToRadian(elevationAngle_));
 }
 
-float Camera3D::getZ() const
+float Camera3D::GetZ() const
 {
-    return focusZ + radius * cos(D3DXToRadian(elevationAngle)) * sin(D3DXToRadian(azimuthAngle));
+    return focusZ_ + radius_ * cos(D3DXToRadian(elevationAngle_)) * sin(D3DXToRadian(azimuthAngle_));
 }
 
-void Camera3D::generateViewMatrix(D3DXMATRIX& view, D3DXMATRIX& billboard) const
+void Camera3D::GenerateViewMatrix(D3DXMATRIX* view, D3DXMATRIX* billboard) const
 {
-    D3DXMATRIX trans, rotYawPitch, rotYawPitchRoll;
-    D3DXMatrixRotationYawPitchRoll(&rotYawPitch, D3DXToRadian(yaw), D3DXToRadian(pitch), 0);
-    D3DXMatrixRotationYawPitchRoll(&rotYawPitchRoll, D3DXToRadian(yaw), D3DXToRadian(pitch), D3DXToRadian(roll));
-    const D3DXVECTOR3 eye = D3DXVECTOR3(getX(), getY(), getZ());
-    const D3DXVECTOR3 focus = D3DXVECTOR3(focusX, focusY, focusZ);
-    D3DXVECTOR3 gaze = focus - eye;
+    D3DXMATRIX rotYawPitch, rotYawPitchRoll;
+    D3DXMatrixRotationYawPitchRoll(&rotYawPitch, D3DXToRadian(yaw_), D3DXToRadian(pitch_), 0);
+    D3DXMatrixRotationYawPitchRoll(&rotYawPitchRoll, D3DXToRadian(yaw_), D3DXToRadian(pitch_), D3DXToRadian(roll_));
+
+    // eye: カメラ位置
+    const D3DXVECTOR3 eye = D3DXVECTOR3(GetX(), GetY(), GetZ());
+
+    // at: 注視点
+    const D3DXVECTOR3 focus = D3DXVECTOR3(focusX_, focusY_, focusZ_);
+    D3DXVECTOR3 gaze = focus - eye; // 視線
     D3DXVec3TransformCoord(&gaze, &gaze, &rotYawPitch);
     const D3DXVECTOR3 at = eye + gaze;
-    D3DXVECTOR3 up = D3DXVECTOR3(0, 1, 0);
+
+    // up: 上方
+    D3DXVECTOR3 up = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
     D3DXVec3TransformCoord(&up, &up, &rotYawPitchRoll);
-    D3DXMatrixLookAtLH(&view, &eye, &at, &up);
-    D3DXMatrixLookAtLH(&billboard, &D3DXVECTOR3(0, 0, 0), &gaze, &up);
-    D3DXMatrixInverse(&billboard, NULL, &billboard);
+
+    // ビュー行列
+    D3DXMatrixLookAtLH(view, &eye, &at, &up);
+
+    // ビルボード行列行列
+    D3DXMatrixLookAtLH(billboard, &D3DXVECTOR3(0.0f, 0.0f, 0.0f), &gaze, &up);
+    D3DXMatrixInverse(billboard, NULL, billboard);
 }
 
-void Camera3D::generateProjMatrix(float screenWidth, float screenHeight, float cameraScreenX, float cameraScreenY, D3DXMATRIX& projMatrix) const
+void Camera3D::GenerateProjMatrix(D3DXMATRIX* proj, float screenWidth, float screenHeight, float cameraScreenX, float cameraScreenY) const
 {
-    D3DXMatrixPerspectiveFovLH(&projMatrix, D3DXToRadian(47.925), screenWidth / screenHeight, nearClip, farClip);
-    D3DXMATRIX trans;
-    D3DXMatrixTranslation(&trans, (-screenWidth / 2.0 + cameraScreenX) * 2.0 / screenWidth, (screenHeight / 2.0 - cameraScreenY) * 2.0 / screenHeight, 0);
-    projMatrix = projMatrix * trans;
+    // 射影行列作成 → 移動
+    D3DXMatrixPerspectiveFovLH(proj, D3DXToRadian(47.925), screenWidth / screenHeight, nearClip_, farClip_);
+    const float tx = (-screenWidth / 2.0f + cameraScreenX) * 2.0f / screenWidth;
+    const float ty = (screenHeight / 2.0f - cameraScreenY) * 2.0f / screenHeight;
+    proj->_31 = tx; proj->_32 = ty;
 }
 }

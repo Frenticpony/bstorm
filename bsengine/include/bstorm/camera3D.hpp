@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include <d3dx9.h>
+struct D3DXMATRIX;
 
 namespace bstorm
 {
@@ -8,44 +8,45 @@ class Camera3D
 {
 public:
     Camera3D();
-    void setFocusX(float fx) { focusX = fx; }
-    void setFocusY(float fy) { focusY = fy; }
-    void setFocusZ(float fz) { focusZ = fz; }
-    void setFocusXYZ(float fx, float fy, float fz) { setFocusX(fx); setFocusY(fy); setFocusZ(fz); }
-    void setRadius(float r) { radius = r; }
-    void setAzimuthAngle(float angle) { azimuthAngle = angle; }
-    void setElevationAngle(float angle) { elevationAngle = angle; }
-    void setYaw(float yaw) { this->yaw = yaw; }
-    void setPitch(float pitch) { this->pitch = pitch; }
-    void setRoll(float roll) { this->roll = roll; }
-    void setPerspectiveClip(float zn, float zf) { nearClip = zn; farClip = zf; }
-    float getFocusX() const { return focusX; }
-    float getFocusY() const { return focusY; }
-    float getFocusZ() const { return focusZ; }
-    float getX() const;
-    float getY() const;
-    float getZ() const;
-    float getRadius() const { return radius; }
-    float getAzimuthAngle() const { return azimuthAngle; }
-    float getElevationAngle() const { return elevationAngle; }
-    float getYaw() const { return yaw; }
-    float getPitch() const { return pitch; }
-    float getRoll() const { return roll; }
-    float getNearPerspectiveClip() const { return nearClip; }
-    float getFarPerspectiveClip() const { return farClip; }
-    void generateViewMatrix(D3DXMATRIX& viewMatrix, D3DXMATRIX& billboardMatrix) const;
-    void generateProjMatrix(float screenWidth, float screenHeight, float cameraScreenX, float cameraScreenY, D3DXMATRIX& projMatrix) const;
+    ~Camera3D() {}
+    void SetFocusX(float fx) { focusX_ = fx; }
+    void SetFocusY(float fy) { focusY_ = fy; }
+    void SetFocusZ(float fz) { focusZ_ = fz; }
+    void SetFocusXYZ(float fx, float fy, float fz) { SetFocusX(fx); SetFocusY(fy); SetFocusZ(fz); }
+    void SetRadius(float r) { radius_ = r; }
+    void SetAzimuthAngle(float angle) { azimuthAngle_ = angle; }
+    void SetElevationAngle(float angle) { elevationAngle_ = angle; }
+    void SetYaw(float angle) { yaw_ = angle; }
+    void SetPitch(float angle) { pitch_ = angle; }
+    void SetRoll(float angle) { roll_ = angle; }
+    void SetPerspectiveClip(float zn, float zf) { nearClip_ = zn; farClip_ = zf; }
+    float GetFocusX() const { return focusX_; }
+    float GetFocusY() const { return focusY_; }
+    float GetFocusZ() const { return focusZ_; }
+    float GetX() const;
+    float GetY() const;
+    float GetZ() const;
+    float GetRadius() const { return radius_; }
+    float GetAzimuthAngle() const { return azimuthAngle_; }
+    float GetElevationAngle() const { return elevationAngle_; }
+    float GetYaw() const { return yaw_; }
+    float GetPitch() const { return pitch_; }
+    float GetRoll() const { return roll_; }
+    float GetNearPerspectiveClip() const { return nearClip_; }
+    float GetFarPerspectiveClip() const { return farClip_; }
+    void GenerateViewMatrix(D3DXMATRIX* view, D3DXMATRIX* billboard) const; // billboard: 物体をカメラ正面に向かせるための行列
+    void GenerateProjMatrix(D3DXMATRIX* proj, float screenWidth, float screenHeight, float cameraScreenX, float cameraScreenY) const;
 private:
-    float focusX;
-    float focusY;
-    float focusZ;
-    float radius;
-    float azimuthAngle;
-    float elevationAngle;
-    float yaw;
-    float pitch;
-    float roll;
-    float nearClip;
-    float farClip;
+    float focusX_;
+    float focusY_;
+    float focusZ_;
+    float radius_;
+    float azimuthAngle_;
+    float elevationAngle_;
+    float yaw_;
+    float pitch_;
+    float roll_;
+    float nearClip_;
+    float farClip_;
 };
 }
