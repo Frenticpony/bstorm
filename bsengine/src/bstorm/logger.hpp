@@ -100,8 +100,15 @@ class DummyLogger : public Logger
 public:
     DummyLogger() {}
 private:
-    void log(Log& lg) override {};
-    void log(Log&& lg) override {};
+    void log(Log& lg) override
+    {
+        log(std::move(Log(lg)));
+    };
+    void log(Log&& lg) override
+    {
+        OutputDebugStringA(lg.ToString().c_str());
+        OutputDebugStringA("\n");
+    };
 };
 
 class FileLogger : public Logger

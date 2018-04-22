@@ -10,7 +10,7 @@
 
 namespace bstorm
 {
-conf::BstormConfig loadBstormConfig(const std::string & path, bool isBinaryFormat, const std::string& defaultConfigPath) noexcept(false)
+conf::BstormConfig LoadBstormConfig(const std::string & path, bool isBinaryFormat)
 {
     conf::BstormConfig config;
     try
@@ -33,21 +33,16 @@ conf::BstormConfig loadBstormConfig(const std::string & path, bool isBinaryForma
             }
         } else
         {
-            std::ifstream configFileIn(defaultConfigPath);
-            conf::json j;
-            configFileIn >> j;
-            config = j;
-            configFileIn.close();
+            Logger::WriteLog(Log::Level::LV_WARN, "can't open config file, load default settings.");
         }
     } catch (...)
     {
-        throw Log(Log::Level::LV_ERROR)
-            .setMessage("can't load uncompatible config file: " + path + " (hint: please delete it, and try again.)");
+        Logger::WriteLog(Log::Level::LV_WARN, "failed to load config file, load default settings.");
     }
     return config;
 }
 
-bool saveBstormConfig(const std::string & path, bool isBinaryFormat, conf::BstormConfig config)
+bool SaveBstormConfig(const std::string & path, bool isBinaryFormat, conf::BstormConfig config)
 {
     config.generatedBy = BSTORM_VERSION;
     if (isBinaryFormat)

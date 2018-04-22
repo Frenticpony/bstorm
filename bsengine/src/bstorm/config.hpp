@@ -1,13 +1,25 @@
 #pragma once
 
+#include <bstorm/version.hpp>
+#include <bstorm/dnh_const.hpp>
+#include <bstorm/logger.hpp>
+
 #include "../../json/single_include/nlohmann/json.hpp"
 
 #include <string>
+
+#undef VK_LEFT
+#undef VK_RIGHT
+#undef VK_UP
+#undef VK_DOWN
+#undef VK_CANCEL
+#undef VK_PAUSE
 
 namespace bstorm
 {
 namespace conf
 {
+
 using nlohmann::json;
 
 struct KeyMap
@@ -20,32 +32,60 @@ struct KeyMap
 
 struct KeyConfig
 {
-    std::vector<struct KeyMap> keyMaps;
+    std::vector<struct KeyMap> keyMaps{
+        { u8"Left (←)", VK_LEFT, KEY_LEFT, 0 },
+    { u8"Right (→)", VK_RIGHT, KEY_RIGHT, 1 },
+    { u8"Up (↑)", VK_UP, KEY_UP, 2 },
+    { u8"Down (↓)", VK_DOWN, KEY_DOWN, 3 },
+    { u8"Decide (決定)", VK_OK, KEY_Z, 5 },
+    { u8"Cancel (キャンセル)", VK_CANCEL, KEY_X, 6 },
+    { u8"Shot (ショット)", VK_SHOT, KEY_Z, 5 },
+    { u8"Bomb (ボム)", VK_BOMB, KEY_X, 6 },
+    { u8"SlowMove (低速移動)", VK_SLOWMOVE, KEY_LSHIFT, 7 },
+    { u8"User1 (ユーザ定義1)", VK_USER1, KEY_C, 8 },
+    { u8"User2 (ユーザ定義2)", VK_USER2, KEY_V, 9 },
+    { u8"Pause (一時停止)", VK_PAUSE, KEY_ESCAPE, 10 }
+    };
 };
 
 struct Options
 {
-    bool hideMouseCursor;
-    bool saveLogFile;
+    bool hideMouseCursor = false;
+    bool saveLogFile = false;
 };
 
 struct WindowConfig
 {
-    bool fullScreen;
-    int64_t windowHeight;
-    int64_t windowWidth;
+    bool fullScreen = false;
+    int64_t windowWidth = 640;
+    int64_t windowHeight = 480;
 };
 
 struct BstormConfig
 {
-    int64_t configVersion;
-    std::string generatedBy;
+    std::string generatedBy = BSTORM_VERSION;
     struct KeyConfig keyConfig;
     struct Options options;
     struct WindowConfig windowConfig;
 };
 
-inline json get_untyped(const json &j, const char *property)
+template <typename T>
+void read_value(const char* name, T& dst, const json& j, bool rethrowException = false)
+{
+    try
+    {
+        dst = j.at(name).get<T>();
+    } catch (const std::exception& e)
+    {
+        if (rethrowException)
+        {
+            throw;
+        }
+        Logger::WriteLog(Log::Level::LV_WARN, "config property '" + std::string(name) + "' can't load from file, set a default value.");
+    }
+}
+
+inline json get_untyped(const json& j, const char *property)
 {
     if (j.find(property) != j.end())
     {
@@ -56,10 +96,10 @@ inline json get_untyped(const json &j, const char *property)
 
 inline void from_json(const json& _j, struct KeyMap& _x)
 {
-    _x.actionName = _j.at("action_name").get<std::string>();
-    _x.vkey = _j.at("vkey").get<int64_t>();
-    _x.key = _j.at("key").get<int64_t>();
-    _x.pad = _j.at("pad").get<int64_t>();
+    read_value<std::string>("action_name", _x.actionName, _j, true);
+    read_value<int64_t>("vkey", _x.vkey, _j, true);
+    read_value<int64_t>("key", _x.key, _j, true);
+    read_value<int64_t>("pad", _x.pad, _j, true);
 }
 
 inline void to_json(json& _j, const struct KeyMap& _x)
@@ -73,7 +113,7 @@ inline void to_json(json& _j, const struct KeyMap& _x)
 
 inline void from_json(const json& _j, struct KeyConfig& _x)
 {
-    _x.keyMaps = _j.at("key_maps").get<std::vector<struct KeyMap>>();
+    read_value<std::vector<struct KeyMap>>("key_maps", _x.keyMaps, _j);
 }
 
 inline void to_json(json& _j, const struct KeyConfig& _x)
@@ -84,8 +124,8 @@ inline void to_json(json& _j, const struct KeyConfig& _x)
 
 inline void from_json(const json& _j, struct Options& _x)
 {
-    _x.hideMouseCursor = _j.at("hide_mouse_cursor").get<bool>();
-    _x.saveLogFile = _j.at("save_log_file").get<bool>();
+    read_value<bool>("hide_mouse_cursor", _x.hideMouseCursor, _j);
+    read_value<bool>("save_log_file", _x.saveLogFile, _j);
 }
 
 inline void to_json(json& _j, const struct Options& _x)
@@ -97,25 +137,25 @@ inline void to_json(json& _j, const struct Options& _x)
 
 inline void from_json(const json& _j, struct WindowConfig& _x)
 {
-    _x.fullScreen = _j.at("full_screen").get<bool>();
-    _x.windowHeight = _j.at("window_height").get<int64_t>();
-    _x.windowWidth = _j.at("window_width").get<int64_t>();
+    read_value<bool>("full_screen", _x.fullScreen, _j);
+    read_value<int64_t>("window_width", _x.windowWidth, _j);
+    read_value<int64_t>("window_height", _x.windowHeight, _j);
 }
 
 inline void to_json(json& _j, const struct WindowConfig& _x)
 {
     _j = json::object();
     _j["full_screen"] = _x.fullScreen;
-    _j["window_height"] = _x.windowHeight;
     _j["window_width"] = _x.windowWidth;
+    _j["window_height"] = _x.windowHeight;
 }
 
 inline void from_json(const json& _j, struct BstormConfig& _x)
 {
-    _x.generatedBy = _j.at("generated_by").get<std::string>();
-    _x.keyConfig = _j.at("key_config").get<struct KeyConfig>();
-    _x.options = _j.at("options").get<struct Options>();
-    _x.windowConfig = _j.at("window_config").get<struct WindowConfig>();
+    read_value<std::string>("generated_by", _x.generatedBy, _j);
+    read_value<struct KeyConfig>("key_config", _x.keyConfig, _j);
+    read_value<struct Options>("options", _x.options, _j);
+    read_value<struct WindowConfig>("window_config", _x.windowConfig, _j);
 }
 
 inline void to_json(json& _j, const struct BstormConfig& _x)
@@ -127,6 +167,7 @@ inline void to_json(json& _j, const struct BstormConfig& _x)
     _j["window_config"] = _x.windowConfig;
 }
 }
-conf::BstormConfig loadBstormConfig(const std::string& path, bool isBinaryFormat, const std::string& defaultConfigResourceId) noexcept(false);
-bool saveBstormConfig(const std::string& path, bool isBinaryFormat, conf::BstormConfig config);
+
+conf::BstormConfig LoadBstormConfig(const std::string& path, bool isBinaryFormat);
+bool SaveBstormConfig(const std::string& path, bool isBinaryFormat, conf::BstormConfig config);
 }

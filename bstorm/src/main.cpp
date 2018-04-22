@@ -59,7 +59,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
     MSG msg;
     try
     {
-        conf::BstormConfig config = loadBstormConfig(configFilePath, useBinaryFormat, DEFAULT_CONFIG_PATH);
+        conf::BstormConfig config = LoadBstormConfig(configFilePath, useBinaryFormat);
 
         if (config.options.saveLogFile)
         {

@@ -26,7 +26,6 @@ constexpr wchar_t* DEFAULT_PACKAGE_ARGS_COMMON_DATA_AREA_NAME = L"__DEFAULT_PACK
 constexpr wchar_t* SYSTEM_STG_DIGIT_IMG_PATH = L"resource/img/System_Stg_Digit.png";
 constexpr wchar_t* SYSTEM_SINGLE_STAGE_PATH = L"resource/script/System_SingleStage.txt";
 constexpr wchar_t* SYSTEM_PLURAL_STAGE_PATH = L"resource/script/System_PluralStage.txt";
-constexpr char* DEFAULT_CONFIG_PATH = "resource/config/default_config.json";
 
 constexpr char* DNH_RUNTIME_NAME = "runtime.lua";
 

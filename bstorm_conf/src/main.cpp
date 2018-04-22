@@ -66,6 +66,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
     std::setlocale(LC_ALL, "C");
 
+    Logger::Init(std::make_shared<DummyLogger>());
+
     /* create window */
     HWND hWnd = NULL;
     WNDCLASSEX windowClass;
@@ -133,6 +135,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
 
         {
             /* init imgui */
+            ImGui::CreateContext();
             ImGui_ImplDX9_Init(hWnd, d3DDevice);
             ImGuiIO& io = ImGui::GetIO();
 
@@ -163,7 +166,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
             }
         }
 
-        conf::BstormConfig config = loadBstormConfig(configFilePath, useBinaryFormat, DEFAULT_CONFIG_PATH);
+        conf::BstormConfig config = LoadBstormConfig(configFilePath, useBinaryFormat);
 
         /* message loop */
         while (true)
@@ -295,7 +298,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
                 ImGui::ShowFontSelector("font selector");
                 ImGui::ShowUserGuide();
 #endif
+                ImGui::EndFrame();
                 ImGui::Render();
+                ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
                 d3DDevice->EndScene();
                 switch (d3DDevice->Present(NULL, NULL, NULL, NULL))
                 {
@@ -317,18 +322,18 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
             }
         }
         /* save config */
-        saveBstormConfig(configFilePath, useBinaryFormat, config);
+        SaveBstormConfig(configFilePath, useBinaryFormat, config);
     } catch (Log& log)
     {
-        MessageBoxW(hWnd, toUnicode(log.ToString()).c_str(), L"Engine Error", MB_OK);
+        MessageBoxW(hWnd, toUnicode(log.ToString()).c_str(), L"Error", MB_OK);
     } catch (const std::exception& e)
     {
-        Logger::WriteLog(Log::Level::LV_ERROR, e.what());
         MessageBoxW(hWnd, toUnicode(e.what()).c_str(), L"Unexpected Error", MB_OK);
     }
 
     // clean
     ImGui_ImplDX9_Shutdown();
+    ImGui::DestroyContext();
     d3DDevice->Release();
     d3D->Release();
     UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
