@@ -24,7 +24,7 @@ public:
     void deleteValue(const std::wstring& key);
     bool isValueExists(const std::wstring& key) const;
     int getID() const { return id; }
-    Type getType() const { return type; }
+    Type GetType() const { return type; }
     bool isDead() const { return deadFlag; }
     bool isStgSceneObject() const { return stgSceneObj; }
     void setStgSceneObject(bool b) { stgSceneObj = b; }
@@ -49,7 +49,7 @@ public:
     ObjectTable();
     ~ObjectTable();
     template <class T>
-    std::shared_ptr<T> get(int id)
+    std::shared_ptr<T> Get(int id)
     {
         auto it = table.find(id);
         if (it != table.end() && !it->second->isDead())

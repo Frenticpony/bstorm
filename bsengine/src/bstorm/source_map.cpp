@@ -4,7 +4,7 @@
 
 namespace bstorm
 {
-std::string SourcePos::toString() const
+std::string SourcePos::ToString() const
 {
     return toUTF8(*filename) + ":" + std::to_string(line) + ((column >= 0) ? (":" + std::to_string(column)) : "");
 }

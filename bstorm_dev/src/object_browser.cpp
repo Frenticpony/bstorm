@@ -47,7 +47,7 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
             ImGui::Separator();
             ViewIntRow("id", obj->getID());
             ImGui::Separator();
-            ViewTextRow("type", getObjTypeName(obj->getType()));
+            ViewTextRow("type", getObjTypeName(obj->GetType()));
             ImGui::Separator();
             ViewBoolRow("dead", obj->isDead());
             ImGui::Separator();
@@ -60,7 +60,7 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                 for (const auto& entry : properties)
                 {
                     auto name = toUTF8(entry.first);
-                    auto value = toUTF8(entry.second->toString());
+                    auto value = toUTF8(entry.second->ToString());
                     ImGui::Separator();
                     ImGui::Bullet(); ViewTextRow(name.c_str(), value.c_str());
                 }
@@ -1072,15 +1072,15 @@ void Engine::backDoor<ObjectBrowser>()
         auto id = entry.first;
         ImGui::PushID(id);
         const auto& obj = entry.second;
-        auto type = obj->getType();
+        auto type = obj->GetType();
         auto nameProp = obj->getValue(L"name");
         std::string name;
-        if (nameProp->getType() != DnhValue::Type::NIL)
+        if (nameProp->GetType() != DnhValue::Type::NIL)
         {
-            name = toUTF8(nameProp->toString());
+            name = toUTF8(nameProp->ToString());
         } else
         {
-            name = getObjTypeName(obj->getType());
+            name = getObjTypeName(obj->GetType());
         }
         std::string label = name;
         if (ImGui::Selectable(label.c_str(), selectedId == id))

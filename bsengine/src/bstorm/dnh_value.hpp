@@ -21,66 +21,67 @@ public:
         ARRAY = 3,
         NIL = 0xaa
     };
+    DnhValue(Type t) : type_(t) {}
     virtual ~DnhValue() {};
-    Type getType() const { return type; }
-    virtual double toNum() const = 0;
-    int toInt() const { return (int)toNum(); }
-    virtual bool toBool() const = 0;
-    virtual std::wstring toString() const = 0;
-    virtual void push(lua_State* L) const = 0;
-    virtual void serialize(std::ostream& out) const = 0;
-    virtual std::unique_ptr<DnhValue> clone() const = 0;
-    static std::unique_ptr<DnhValue> get(lua_State*L, int idx);
-    static std::unique_ptr<DnhValue> deserialize(std::istream& stream);
-    static double toNum(lua_State* L, int idx);
-    static int toInt(lua_State* L, int idx) { return (int)toNum(L, idx); }
-    static bool toBool(lua_State* L, int idx);
-    static std::wstring toString(lua_State* L, int idx);
-    static std::string toStringU8(lua_State* L, int idx);
-protected:
-    Type type;
+    Type GetType() const { return type_; }
+    virtual double ToNum() const = 0;
+    int ToInt() const { return (int)ToNum(); }
+    virtual bool ToBool() const = 0;
+    virtual std::wstring ToString() const = 0;
+    virtual void Push(lua_State* L) const = 0;
+    virtual void Serialize(std::ostream& out) const = 0;
+    virtual std::unique_ptr<DnhValue> Clone() const = 0;
+    static std::unique_ptr<DnhValue> Get(lua_State*L, int idx);
+    static std::unique_ptr<DnhValue> Deserialize(std::istream& stream);
+    static double ToNum(lua_State* L, int idx);
+    static int ToInt(lua_State* L, int idx) { return (int)ToNum(L, idx); }
+    static bool ToBool(lua_State* L, int idx);
+    static std::wstring ToString(lua_State* L, int idx);
+    static std::string ToStringU8(lua_State* L, int idx);
+private:
+    const Type type_;
 };
 
 class DnhReal : public DnhValue
 {
 public:
     DnhReal(double num);
-    double toNum() const override;
-    bool toBool() const override;
-    std::wstring toString() const override;
-    void push(lua_State* L) const override;
-    void serialize(std::ostream& out) const override;
-    std::unique_ptr<DnhValue> clone() const override;
+    double ToNum() const override;
+    bool ToBool() const override;
+    std::wstring ToString() const override;
+    void Push(lua_State* L) const override;
+    void Serialize(std::ostream& out) const override;
+    std::unique_ptr<DnhValue> Clone() const override;
 private:
-    double value;
+    double value_;
 };
 
 class DnhChar : public DnhValue
 {
 public:
     DnhChar(wchar_t c);
-    double toNum() const override;
-    bool toBool() const override;
-    std::wstring toString() const override;
-    void push(lua_State* L) const override;
-    void serialize(std::ostream& out) const override;
-    std::unique_ptr<DnhValue> clone() const override;
+    double ToNum() const override;
+    bool ToBool() const override;
+    std::wstring ToString() const override;
+    void Push(lua_State* L) const override;
+    void Serialize(std::ostream& out) const override;
+    std::unique_ptr<DnhValue> Clone() const override;
 private:
-    wchar_t value;
+    wchar_t value_;
 };
 
 class DnhBool : public DnhValue
 {
 public:
     DnhBool(bool b);
-    double toNum() const override;
-    bool toBool() const override;
-    std::wstring toString() const override;
-    void push(lua_State* L) const override;
-    void serialize(std::ostream& out) const override;
-    std::unique_ptr<DnhValue> clone() const override;
+    double ToNum() const override;
+    bool ToBool() const override;
+    std::wstring ToString() const override;
+    void Push(lua_State* L) const override;
+    void Serialize(std::ostream& out) const override;
+    std::unique_ptr<DnhValue> Clone() const override;
 private:
-    bool value;
+    bool value_;
 };
 
 class DnhArray : public DnhValue
@@ -92,28 +93,28 @@ public:
     DnhArray(const std::vector<double>& ns);
     DnhArray(const Point2D& p);
     DnhArray(const std::vector<Point2D>& ps);
-    size_t getSize() const;
-    void pushBack(std::unique_ptr<DnhValue>&& v);
-    double toNum() const override;
-    bool toBool() const override;
-    std::wstring toString() const override;
-    std::unique_ptr<DnhValue> index(int idx) const;
-    void push(lua_State* L) const override;
-    void serialize(std::ostream& out) const override;
-    std::unique_ptr<DnhValue> clone() const override;
+    size_t GetSize() const;
+    void PushBack(std::unique_ptr<DnhValue>&& v);
+    double ToNum() const override;
+    bool ToBool() const override;
+    std::wstring ToString() const override;
+    std::unique_ptr<DnhValue> Index(int idx) const;
+    void Push(lua_State* L) const override;
+    void Serialize(std::ostream& out) const override;
+    std::unique_ptr<DnhValue> Clone() const override;
 private:
-    std::vector<std::unique_ptr<DnhValue>> values;
+    std::vector<std::unique_ptr<DnhValue>> values_;
 };
 
 class DnhNil : public DnhValue
 {
 public:
     DnhNil();
-    double toNum() const override;
-    bool toBool() const override;
-    std::wstring toString() const override;
-    void push(lua_State* L) const override;
-    void serialize(std::ostream& out) const override;
-    std::unique_ptr<DnhValue> clone() const override;
+    double ToNum() const override;
+    bool ToBool() const override;
+    std::wstring ToString() const override;
+    void Push(lua_State* L) const override;
+    void Serialize(std::ostream& out) const override;
+    std::unique_ptr<DnhValue> Clone() const override;
 };
 }

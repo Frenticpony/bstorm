@@ -25,7 +25,7 @@ public:
     FpsCounter();
     ~FpsCounter();
     void update();
-    float get() const;
+    float Get() const;
     float getStable() const;
 private:
     static constexpr int SampleCnt = 64; // power of 2

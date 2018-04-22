@@ -279,7 +279,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
     } catch (Log& log)
     {
         Logger::WriteLog(log);
-        MessageBoxW(hWnd, toUnicode(log.toString()).c_str(), L"Engine Error", MB_OK);
+        MessageBoxW(hWnd, toUnicode(log.ToString()).c_str(), L"Engine Error", MB_OK);
     } catch (const std::exception& e)
     {
         Logger::WriteLog(Log::Level::LV_ERROR, e.what());

@@ -26,7 +26,7 @@ std::unique_ptr<DnhValue> Obj::getValueD(const std::wstring& key, std::unique_pt
     auto it = properties.find(key);
     if (it != properties.end())
     {
-        return it->second->clone();
+        return it->second->Clone();
     }
     return std::move(defaultValue);
 }

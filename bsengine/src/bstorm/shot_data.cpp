@@ -114,7 +114,7 @@ bool ShotDataTable::isLoaded(const std::wstring & path) const
     return loadedPaths.count(canonicalPath(path)) != 0;
 }
 
-std::shared_ptr<ShotData> ShotDataTable::get(int id) const
+std::shared_ptr<ShotData> ShotDataTable::Get(int id) const
 {
     auto it = table.find(id);
     if (it != table.end())
@@ -124,7 +124,7 @@ std::shared_ptr<ShotData> ShotDataTable::get(int id) const
     return nullptr;
 }
 
-ShotDataTable::Type ShotDataTable::getType() const
+ShotDataTable::Type ShotDataTable::GetType() const
 {
     return type;
 }

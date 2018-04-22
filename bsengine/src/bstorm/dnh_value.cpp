@@ -4,7 +4,7 @@
 
 namespace bstorm
 {
-std::unique_ptr<DnhValue> DnhValue::get(lua_State* L, int idx)
+std::unique_ptr<DnhValue> DnhValue::Get(lua_State* L, int idx)
 {
     switch (lua_type(L, idx))
     {
@@ -24,7 +24,7 @@ std::unique_ptr<DnhValue> DnhValue::get(lua_State* L, int idx)
             for (int i = 1; i <= size; i++)
             {
                 lua_rawgeti(L, idx, i);
-                arr->pushBack(DnhValue::get(L, -1));
+                arr->PushBack(DnhValue::Get(L, -1));
                 lua_pop(L, 1);
             }
             return std::move(arr);
@@ -34,7 +34,7 @@ std::unique_ptr<DnhValue> DnhValue::get(lua_State* L, int idx)
     }
 }
 
-std::unique_ptr<DnhValue> DnhValue::deserialize(std::istream& in)
+std::unique_ptr<DnhValue> DnhValue::Deserialize(std::istream& in)
 {
     uint32_t header;
     in.read((char*)&header, sizeof(header));
@@ -65,7 +65,7 @@ std::unique_ptr<DnhValue> DnhValue::deserialize(std::istream& in)
             in.read((char*)&length, sizeof(length));
             for (int i = 0; i < length; i++)
             {
-                arr->pushBack(DnhValue::deserialize(in));
+                arr->PushBack(DnhValue::Deserialize(in));
             }
             return std::move(arr);
         }
@@ -73,7 +73,7 @@ std::unique_ptr<DnhValue> DnhValue::deserialize(std::istream& in)
             return std::make_unique<DnhNil>();
     }
 }
-double DnhValue::toNum(lua_State* L, int idx)
+double DnhValue::ToNum(lua_State* L, int idx)
 {
     switch (lua_type(L, idx))
     {
@@ -87,13 +87,13 @@ double DnhValue::toNum(lua_State* L, int idx)
         case LUA_TBOOLEAN:
             return (double)lua_toboolean(L, idx);
         case LUA_TTABLE:
-            return _wtof(DnhValue::toString(L, idx).c_str());
+            return _wtof(DnhValue::ToString(L, idx).c_str());
         default:
             return 0;
     }
 }
 
-bool DnhValue::toBool(lua_State* L, int idx)
+bool DnhValue::ToBool(lua_State* L, int idx)
 {
     switch (lua_type(L, idx))
     {
@@ -114,12 +114,12 @@ bool DnhValue::toBool(lua_State* L, int idx)
     }
 }
 
-std::wstring DnhValue::toString(lua_State*L, int idx)
+std::wstring DnhValue::ToString(lua_State*L, int idx)
 {
-    return DnhValue::get(L, idx)->toString();
+    return DnhValue::Get(L, idx)->ToString();
 }
 
-std::string DnhValue::toStringU8(lua_State * L, int idx)
+std::string DnhValue::ToStringU8(lua_State * L, int idx)
 {
     switch (lua_type(L, idx))
     {
@@ -148,7 +148,7 @@ std::string DnhValue::toStringU8(lua_State * L, int idx)
                 return ret;
             } else
             {
-                return toUTF8(toString(L, idx));
+                return toUTF8(ToString(L, idx));
             }
         }
         case LUA_TNIL:
@@ -158,179 +158,219 @@ std::string DnhValue::toStringU8(lua_State * L, int idx)
     }
 }
 
-DnhReal::DnhReal(double num) : value(num)
+DnhReal::DnhReal(double num) :
+    DnhValue(Type::REAL),
+    value_(num)
+
 {
-    type = Type::REAL;
 }
 
-double DnhReal::toNum() const { return value; }
-bool DnhReal::toBool() const { return value != 0; }
-std::wstring DnhReal::toString() const { return std::to_wstring(value); }
-void DnhReal::push(lua_State * L) const { lua_pushnumber(L, value); }
-void DnhReal::serialize(std::ostream & out) const
+double DnhReal::ToNum() const { return value_; }
+
+bool DnhReal::ToBool() const { return value_ != 0; }
+
+std::wstring DnhReal::ToString() const { return std::to_wstring(value_); }
+
+void DnhReal::Push(lua_State * L) const { lua_pushnumber(L, value_); }
+
+void DnhReal::Serialize(std::ostream & out) const
 {
-    uint32_t header = (uint32_t)getType();
+    uint32_t header = (uint32_t)GetType();
     out.write((char*)&header, sizeof(header));
-    out.write((char*)&value, sizeof(value));
-}
-std::unique_ptr<DnhValue> DnhReal::clone() const
-{
-    return std::make_unique<DnhReal>(value);
+    out.write((char*)&value_, sizeof(value_));
 }
 
-DnhChar::DnhChar(wchar_t c) : value(c)
+std::unique_ptr<DnhValue> DnhReal::Clone() const
 {
-    type = Type::CHAR;
+    return std::make_unique<DnhReal>(value_);
 }
-double DnhChar::toNum() const { return (double)value; }
-bool DnhChar::toBool() const { return value != L'\0'; }
-std::wstring DnhChar::toString() const { return std::wstring{ value }; }
-void DnhChar::push(lua_State * L) const { lua_pushstring(L, toUTF8(std::wstring{ value }).c_str()); }
-void DnhChar::serialize(std::ostream & out) const
+
+DnhChar::DnhChar(wchar_t c) :
+    DnhValue(Type::CHAR),
+    value_(c)
 {
-    uint32_t header = (uint32_t)getType();
+}
+
+double DnhChar::ToNum() const { return (double)value_; }
+
+bool DnhChar::ToBool() const { return value_ != L'\0'; }
+
+std::wstring DnhChar::ToString() const { return std::wstring{ value_ }; }
+
+void DnhChar::Push(lua_State * L) const { lua_pushstring(L, toUTF8(std::wstring{ value_ }).c_str()); }
+
+void DnhChar::Serialize(std::ostream & out) const
+{
+    uint32_t header = (uint32_t)GetType();
     out.write((char*)&header, sizeof(header));
-    out.write((char*)&value, sizeof(value));
-}
-std::unique_ptr<DnhValue> DnhChar::clone() const
-{
-    return std::make_unique<DnhChar>(value);
+    out.write((char*)&value_, sizeof(value_));
 }
 
-DnhBool::DnhBool(bool b) : value(b)
+std::unique_ptr<DnhValue> DnhChar::Clone() const
 {
-    type = Type::BOOL;
+    return std::make_unique<DnhChar>(value_);
 }
-double DnhBool::toNum() const { return (double)value; }
-bool DnhBool::toBool() const { return value; }
-std::wstring DnhBool::toString() const { return value ? L"true" : L"false"; }
-void DnhBool::push(lua_State * L) const { lua_pushboolean(L, (int)value); }
-void DnhBool::serialize(std::ostream & out) const
+
+DnhBool::DnhBool(bool b) :
+    DnhValue(Type::BOOL),
+    value_(b)
 {
-    uint32_t header = (uint32_t)getType();
+}
+
+double DnhBool::ToNum() const { return (double)value_; }
+
+bool DnhBool::ToBool() const { return value_; }
+
+std::wstring DnhBool::ToString() const { return value_ ? L"true" : L"false"; }
+
+void DnhBool::Push(lua_State * L) const { lua_pushboolean(L, (int)value_); }
+
+void DnhBool::Serialize(std::ostream & out) const
+{
+    uint32_t header = (uint32_t)GetType();
     out.write((char*)&header, sizeof(header));
-    out.write((char*)&value, sizeof(value));
-}
-std::unique_ptr<DnhValue> DnhBool::clone() const
-{
-    return std::make_unique<DnhBool>(value);
+    out.write((char*)&value_, sizeof(value_));
 }
 
-DnhArray::DnhArray()
+std::unique_ptr<DnhValue> DnhBool::Clone() const
 {
-    type = Type::ARRAY;
+    return std::make_unique<DnhBool>(value_);
 }
+
+DnhArray::DnhArray() :
+    DnhValue(Type::ARRAY)
+{
+}
+
 DnhArray::DnhArray(std::vector<std::unique_ptr<DnhValue>>&& a) :
-    values(std::move(a))
+    DnhValue(Type::ARRAY),
+    values_(std::move(a))
 {
-    type = Type::ARRAY;
 }
-DnhArray::DnhArray(const std::wstring & s)
+
+DnhArray::DnhArray(const std::wstring & s) :
+    DnhValue(Type::ARRAY)
 {
     for (wchar_t c : s)
     {
-        values.push_back(std::make_unique<DnhChar>(c));
+        values_.push_back(std::make_unique<DnhChar>(c));
     }
-    type = Type::ARRAY;
 }
-DnhArray::DnhArray(const std::vector<double>& ns)
+
+DnhArray::DnhArray(const std::vector<double>& ns) :
+    DnhValue(Type::ARRAY)
 {
     for (double n : ns)
     {
-        pushBack(std::make_unique<DnhReal>(n));
+        PushBack(std::make_unique<DnhReal>(n));
     }
-    type = Type::ARRAY;
 }
-DnhArray::DnhArray(const Point2D & p)
+
+DnhArray::DnhArray(const Point2D & p) :
+    DnhValue(Type::ARRAY)
 {
-    pushBack(std::make_unique<DnhReal>(p.x));
-    pushBack(std::make_unique<DnhReal>(p.y));
-    type = Type::ARRAY;
+    PushBack(std::make_unique<DnhReal>(p.x));
+    PushBack(std::make_unique<DnhReal>(p.y));
 }
-DnhArray::DnhArray(const std::vector<Point2D>& ps)
+
+DnhArray::DnhArray(const std::vector<Point2D>& ps) :
+    DnhValue(Type::ARRAY)
 {
     for (const auto& p : ps)
     {
-        pushBack(std::make_unique<DnhArray>(p));
+        PushBack(std::make_unique<DnhArray>(p));
     }
-    type = Type::ARRAY;
 }
-size_t DnhArray::getSize() const { return values.size(); }
-void DnhArray::pushBack(std::unique_ptr<DnhValue>&& v)
+
+size_t DnhArray::GetSize() const { return values_.size(); }
+
+void DnhArray::PushBack(std::unique_ptr<DnhValue>&& v)
 {
-    values.push_back(std::move(v));
+    values_.push_back(std::move(v));
 }
-double DnhArray::toNum() const { return _wtof(toString().c_str()); }
-bool DnhArray::toBool() const { return getSize() != 0; }
-std::wstring DnhArray::toString() const
+
+double DnhArray::ToNum() const { return _wtof(ToString().c_str()); }
+
+bool DnhArray::ToBool() const { return GetSize() != 0; }
+
+std::wstring DnhArray::ToString() const
 {
-    // 空         =>
+    // 空         => 空文字列
     // 文字列     => abc
     // それ以外   => [1, 2, 3]
-    size_t size = getSize();
+    size_t size = GetSize();
     if (size == 0) return L"";
     std::wstring result;
-    bool notStr = values[0]->getType() != Type::CHAR;
+    bool notStr = values_[0]->GetType() != Type::CHAR;
     if (notStr) result += L"[";
     for (size_t i = 0; i < size; i++)
     {
         if (notStr && i != 0) result += L",";
-        result += values[i]->toString();
+        result += values_[i]->ToString();
     }
     if (notStr) result += L"]";
     return result;
 }
-std::unique_ptr<DnhValue> DnhArray::index(int idx) const
+
+std::unique_ptr<DnhValue> DnhArray::Index(int idx) const
 {
-    if (idx < 0 || idx >= getSize())
+    if (idx < 0 || idx >= GetSize())
     {
         return std::unique_ptr<DnhValue>();
     }
-    return values[idx]->clone();
+    return values_[idx]->Clone();
 }
-void DnhArray::push(lua_State * L) const
+
+void DnhArray::Push(lua_State * L) const
 {
-    size_t size = getSize();
+    size_t size = GetSize();
     lua_createtable(L, size, 0);
     for (size_t i = 0; i < size; i++)
     {
-        values[i]->push(L);
+        values_[i]->Push(L);
         lua_rawseti(L, -2, i + 1);
     }
 }
-void DnhArray::serialize(std::ostream & out) const
+
+void DnhArray::Serialize(std::ostream & out) const
 {
-    uint32_t header = (uint32_t)getType();
+    uint32_t header = (uint32_t)GetType();
     out.write((char*)&header, sizeof(header));
-    uint32_t length = getSize();
+    uint32_t length = GetSize();
     out.write((char*)&length, sizeof(length));
     for (auto i = 0; i < length; i++)
     {
-        values[i]->serialize(out);
+        values_[i]->Serialize(out);
     }
 }
-std::unique_ptr<DnhValue> DnhArray::clone() const
+
+std::unique_ptr<DnhValue> DnhArray::Clone() const
 {
     std::unique_ptr<DnhArray> a = std::make_unique<DnhArray>();
-    for (const auto& v : values) a->pushBack(v->clone());
+    for (const auto& v : values_) a->PushBack(v->Clone());
     return std::move(a);
 }
 
-DnhNil::DnhNil()
+DnhNil::DnhNil() :
+    DnhValue(Type::NIL)
 {
-    type = Type::NIL;
 }
 
-double DnhNil::toNum() const { return 0; }
-bool DnhNil::toBool() const { return false; }
-std::wstring DnhNil::toString() const { return L"(VOID)"; }
-void DnhNil::push(lua_State * L) const { lua_pushnil(L); }
-void DnhNil::serialize(std::ostream & out) const
+double DnhNil::ToNum() const { return 0; }
+
+bool DnhNil::ToBool() const { return false; }
+
+std::wstring DnhNil::ToString() const { return L"(VOID)"; }
+
+void DnhNil::Push(lua_State * L) const { lua_pushnil(L); }
+
+void DnhNil::Serialize(std::ostream & out) const
 {
-    uint32_t header = (uint32_t)getType();
+    uint32_t header = (uint32_t)GetType();
     out.write((char*)&header, sizeof(header));
 }
-std::unique_ptr<DnhValue> DnhNil::clone() const
+
+std::unique_ptr<DnhValue> DnhNil::Clone() const
 {
     return std::make_unique<DnhNil>();
 }

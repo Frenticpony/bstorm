@@ -11,7 +11,7 @@ struct SourcePos
     int line;
     int column;
     std::shared_ptr<std::wstring> filename;
-    std::string toString() const;
+    std::string ToString() const;
 };
 
 struct SourceLoc

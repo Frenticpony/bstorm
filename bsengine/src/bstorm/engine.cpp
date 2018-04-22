@@ -1060,17 +1060,17 @@ void Engine::reloadItemData(const std::wstring & path, const std::shared_ptr<Sou
 
 std::shared_ptr<ShotData> Engine::getPlayerShotData(int id) const
 {
-    return gameState->playerShotDataTable->get(id);
+    return gameState->playerShotDataTable->Get(id);
 }
 
 std::shared_ptr<ShotData> Engine::getEnemyShotData(int id) const
 {
-    return gameState->enemyShotDataTable->get(id);
+    return gameState->enemyShotDataTable->Get(id);
 }
 
 std::shared_ptr<ItemData> Engine::getItemData(int id) const
 {
-    return gameState->itemDataTable->get(id);
+    return gameState->itemDataTable->Get(id);
 }
 
 std::shared_ptr<ObjText> Engine::createObjText()
@@ -1331,7 +1331,7 @@ std::shared_ptr<ObjItem> Engine::createObjItem(int itemType)
 
 std::shared_ptr<Script> Engine::getScript(int scriptId) const
 {
-    return gameState->scriptManager->get(scriptId);
+    return gameState->scriptManager->Get(scriptId);
 }
 
 std::shared_ptr<Script> Engine::loadScript(const std::wstring & path, const std::wstring & type, const std::wstring & version, const std::shared_ptr<SourcePos>& srcPos)
@@ -2132,7 +2132,7 @@ void Engine::renderToTexture(const std::wstring& name, int begin, int end, int o
     begin = std::max(begin, 0);
     end = std::min(end, MAX_RENDER_PRIORITY);
 
-    auto obj = gameState->objTable->get<ObjRender>(objId);
+    auto obj = gameState->objTable->Get<ObjRender>(objId);
     if (obj && checkVisibleFlag && !obj->isVisible()) return;
 
     gameState->camera3D->GenerateViewMatrix(&viewMatrix3D, &billboardMatrix);
@@ -2249,7 +2249,7 @@ void Engine::renderToTexture(const std::wstring& name, int begin, int end, int o
 
 std::shared_ptr<Obj> Engine::getObj(int id) const
 {
-    return gameState->objTable->get<Obj>(id);
+    return gameState->objTable->Get<Obj>(id);
 }
 
 const std::map<int, std::shared_ptr<Obj>>& Engine::getObjAll() const

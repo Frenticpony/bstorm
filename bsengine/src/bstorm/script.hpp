@@ -43,7 +43,7 @@ public:
     bool isClosed() const;
     int getID() const;
     const std::wstring& getPath() const;
-    const std::wstring& getType() const;
+    const std::wstring& GetType() const;
     const std::wstring& getVersion() const;
     State getState() const;
     std::shared_ptr<SourcePos> getSourcePos(int line);
@@ -94,7 +94,7 @@ public:
     std::shared_ptr<Script> compile(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<SourcePos>& srcPos);
     std::shared_ptr<Script> compileInThread(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<SourcePos>& srcPos);
     void runAll(bool ignoreStgSceneScript);
-    std::shared_ptr<Script> get(int id) const;
+    std::shared_ptr<Script> Get(int id) const;
     void notifyEventAll(int eventType);
     void notifyEventAll(int eventType, const std::unique_ptr<DnhArray>& args);
     void cleanClosedScript();

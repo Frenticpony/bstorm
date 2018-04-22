@@ -839,7 +839,7 @@ static void collideEnemyShotWithPlayerEraseShot(const std::shared_ptr<Intersecti
             {
                 if (isShotIntersectionEnabled(enemyShotIsect) && isShotIntersectionEnabled(playerShotIsect))
                 {
-                    if (playerShot->getType() == OBJ_SHOT)
+                    if (playerShot->GetType() == OBJ_SHOT)
                     {
                         playerShot->setPenetration(playerShot->getPenetration() - 1);
                     }
@@ -912,7 +912,7 @@ static void collidePlayerShotWithEnemyIntersectionToShot(const std::shared_ptr<I
         {
             if (auto enemy = enemyIsectToShot->GetEnemy().lock())
             {
-                if (playerShot->getType() == OBJ_SHOT)
+                if (playerShot->GetType() == OBJ_SHOT)
                 {
                     playerShot->setPenetration(playerShot->getPenetration() - 1);
                 }

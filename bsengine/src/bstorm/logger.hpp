@@ -59,7 +59,7 @@ public:
     Log& setParam(Param&& param);
     Log& addSourcePos(const std::shared_ptr<SourcePos>& srcPos);
     Log& setLevel(Level level);
-    std::string toString() const;
+    std::string ToString() const;
     Level getLevel() const { return level; }
     const std::string& getMessage() const { return msg; }
     const std::shared_ptr<Param>& getParam() const { return param; }

@@ -49,7 +49,7 @@ static void DrawCommonDataInfo(const std::map<CommonDataDB::DataAreaName, Common
                 {
                     ImGui::Separator();
                 }
-                ImGui::Text(toUTF8(key).c_str()); ImGui::NextColumn(); ImGui::Text(toUTF8(value->toString()).c_str()); ImGui::NextColumn();
+                ImGui::Text(toUTF8(key).c_str()); ImGui::NextColumn(); ImGui::Text(toUTF8(value->ToString()).c_str()); ImGui::NextColumn();
             }
             ImGui::Columns(1);
             ImGui::Separator();

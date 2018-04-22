@@ -236,7 +236,7 @@ void LogWindow::draw()
                             ImGui::BeginTooltip();
                             for (const auto& srcPos : srcPosStack)
                             {
-                                ImGui::Text(srcPos.toString().c_str());
+                                ImGui::Text(srcPos.ToString().c_str());
                             }
                             ImGui::EndTooltip();
                         }
@@ -250,7 +250,7 @@ void LogWindow::draw()
                     if (ImGui::Button(ICON_FA_CLIPBOARD))
                     {
                         ImGui::LogToClipboard();
-                        ImGui::LogText(log.toString().c_str());
+                        ImGui::LogText(log.ToString().c_str());
                         ImGui::LogFinish();
                     }
                     ImGui::PopStyleVar();

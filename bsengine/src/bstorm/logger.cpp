@@ -154,7 +154,7 @@ Log & Log::setLevel(Level level)
     return *this;
 }
 
-std::string Log::toString() const
+std::string Log::ToString() const
 {
     std::string s;
     s += msg;
@@ -164,7 +164,7 @@ std::string Log::toString() const
     }
     if (!srcPosStack.empty())
     {
-        s += " @ " + srcPosStack[0].toString();
+        s += " @ " + srcPosStack[0].ToString();
     }
     return s;
 }
@@ -201,7 +201,7 @@ static void logToFile(const Log& lg, std::ofstream& file)
         // level tag
         file << "[" << Log::getLevelName(lg.getLevel()) << "] ";
     }
-    file << lg.toString() << std::endl;
+    file << lg.ToString() << std::endl;
 }
 
 void FileLogger::log(Log& lg)

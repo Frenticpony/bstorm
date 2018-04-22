@@ -117,7 +117,7 @@ void ObjShot::render()
             float delayScale = 2.0f - (23.0f - std::min(23, getDelay())) / 16.0f; // delay=23から32Fで0になるように設定
 
             // カーブレーザーのときは遅延光がちょっと大きい
-            if (getType() == OBJ_CURVE_LASER)
+            if (GetType() == OBJ_CURVE_LASER)
             {
                 delayScale *= 1.8f; // 値は適当
             }
@@ -403,7 +403,7 @@ void ObjShot::addShotA1(int shotObjId, int frame)
     if (isDead()) return;
     if (auto state = getGameState())
     {
-        if (auto shot = state->objTable->get<ObjShot>(shotObjId))
+        if (auto shot = state->objTable->Get<ObjShot>(shotObjId))
         {
             shot->registerFlag = false;
             addedShots.emplace_back(shotObjId, frame);
@@ -416,7 +416,7 @@ void ObjShot::addShotA2(int shotObjId, int frame, float dist, float angle)
     if (isDead()) return;
     if (auto state = getGameState())
     {
-        if (auto shot = state->objTable->get<ObjShot>(shotObjId))
+        if (auto shot = state->objTable->Get<ObjShot>(shotObjId))
         {
             shot->registerFlag = false;
             addedShots.emplace_back(shotObjId, frame, dist, angle);
@@ -451,8 +451,8 @@ void ObjShot::toItem()
         {
             // EV_DELETE_SHOT_TO_ITEM 
             auto evArgs = std::make_unique<DnhArray>();
-            evArgs->pushBack(std::make_unique<DnhReal>(getID()));
-            evArgs->pushBack(std::make_unique<DnhArray>(Point2D(getX(), getY())));
+            evArgs->PushBack(std::make_unique<DnhReal>(getID()));
+            evArgs->PushBack(std::make_unique<DnhArray>(Point2D(getX(), getY())));
             if (auto itemScript = gameState->itemScript.lock())
             {
                 itemScript->notifyEvent(EV_DELETE_SHOT_TO_ITEM, evArgs);
@@ -492,8 +492,8 @@ void ObjShot::deleteImmediate()
             if (auto shotScript = gameState->shotScript.lock())
             {
                 auto evArgs = std::make_unique<DnhArray>();
-                evArgs->pushBack(std::make_unique<DnhReal>(getID()));
-                evArgs->pushBack(std::make_unique<DnhArray>(Point2D(getX(), getY())));
+                evArgs->PushBack(std::make_unique<DnhReal>(getID()));
+                evArgs->PushBack(std::make_unique<DnhArray>(Point2D(getX(), getY())));
                 shotScript->notifyEvent(EV_DELETE_SHOT_IMMEDIATE, evArgs);
             }
         }
@@ -614,7 +614,7 @@ void ObjShot::tickAddedShotFrameCount()
         {
             if (auto state = getGameState())
             {
-                if (auto shot = state->objTable->get<ObjShot>(it->objId))
+                if (auto shot = state->objTable->Get<ObjShot>(it->objId))
                 {
                     float dx = 0;
                     float dy = 0;
@@ -665,8 +665,8 @@ void ObjShot::tickFadeDeleteTimer()
                 if (auto shotScript = gameState->shotScript.lock())
                 {
                     auto evArgs = std::make_unique<DnhArray>();
-                    evArgs->pushBack(std::make_unique<DnhReal>(getID()));
-                    evArgs->pushBack(std::make_unique<DnhArray>(Point2D{ getX(), getY() }));
+                    evArgs->PushBack(std::make_unique<DnhReal>(getID()));
+                    evArgs->PushBack(std::make_unique<DnhArray>(Point2D{ getX(), getY() }));
                     shotScript->notifyEvent(EV_DELETE_SHOT_FADE, evArgs);
                 }
             }

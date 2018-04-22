@@ -131,7 +131,7 @@ const std::wstring & Script::getPath() const
     return path;
 }
 
-const std::wstring& Script::getType() const
+const std::wstring& Script::GetType() const
 {
     return type;
 }
@@ -409,9 +409,9 @@ void Script::notifyEvent(int eventType, const std::unique_ptr<DnhArray>& args)
         case State::SCRIPT_LOADING_COMPLETED:
             break;
         default:
-            DnhReal((double)eventType).push(L);
+            DnhReal((double)eventType).Push(L);
             lua_setglobal(L, "script_event_type");
-            args->push(L);
+            args->Push(L);
             lua_setglobal(L, "script_event_args");
             setScriptResult(std::make_unique<DnhNil>());
             runBuiltInSub("Event");
@@ -465,7 +465,7 @@ std::unique_ptr<DnhValue> Script::getScriptArgument(int idx)
 {
     std::lock_guard<std::recursive_mutex> lock(criticalSection);
     if (scriptArgs.count(idx) == 0) return std::make_unique<DnhNil>();
-    return scriptArgs[idx]->clone();
+    return scriptArgs[idx]->Clone();
 }
 
 std::shared_ptr<SourcePos> Script::getSourcePos(int line)
@@ -540,7 +540,7 @@ void ScriptManager::runAll(bool ignoreStgSceneScript)
     }
 }
 
-std::shared_ptr<Script> ScriptManager::get(int id) const
+std::shared_ptr<Script> ScriptManager::Get(int id) const
 {
     auto it = scriptMap.find(id);
     if (it != scriptMap.end())
@@ -608,7 +608,7 @@ std::unique_ptr<DnhValue> ScriptManager::getScriptResult(int scriptId) const
     auto it = scriptResults.find(scriptId);
     if (it != scriptResults.end())
     {
-        return it->second->clone();
+        return it->second->Clone();
     }
     return std::make_unique<DnhNil>();
 }

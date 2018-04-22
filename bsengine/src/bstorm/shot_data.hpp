@@ -74,8 +74,8 @@ public:
     void load(const std::wstring& path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos);
     void reload(const std::wstring& path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos);
     bool isLoaded(const std::wstring& path) const;
-    std::shared_ptr<ShotData> get(int id) const;
-    Type getType() const;
+    std::shared_ptr<ShotData> Get(int id) const;
+    Type GetType() const;
     /* backdoor */
     template <typename T>
     void backDoor() const {}

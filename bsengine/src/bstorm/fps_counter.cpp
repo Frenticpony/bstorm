@@ -59,7 +59,7 @@ void FpsCounter::update()
     if (milliSecPerFrameIdx == 0) { stableFps = fps; }
 }
 
-float FpsCounter::get() const
+float FpsCounter::Get() const
 {
     return fps;
 }

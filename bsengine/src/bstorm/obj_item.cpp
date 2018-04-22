@@ -35,7 +35,7 @@ ObjItem::ObjItem(int itemType, const std::shared_ptr<GameState>& gameState) :
 
     if (itemType != ITEM_USER)
     {
-        itemData = gameState->itemDataTable->get(itemType);
+        itemData = gameState->itemDataTable->Get(itemType);
     }
 }
 

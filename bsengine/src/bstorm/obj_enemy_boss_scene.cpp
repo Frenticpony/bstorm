@@ -330,43 +330,43 @@ bool ObjEnemyBossScene::loadNext()
         for (auto& phase : steps[currentStep])
         {
             // ステップ内の全てのフェーズのスクリプトを開始させる
-            if (auto script = state->scriptManager->get(phase.scriptId))
+            if (auto script = state->scriptManager->Get(phase.scriptId))
             {
                 // コンパイルと@Loadingが終了してなければブロックして完了させる
                 script->start();
 
                 script->notifyEvent(EV_REQUEST_LIFE);
-                if (script->getScriptResult()->getType() == DnhValue::Type::NIL)
+                if (script->getScriptResult()->GetType() == DnhValue::Type::NIL)
                 {
                     Logger::WriteLog(Log::Level::LV_WARN, "enemy life hasn't been setted in @Event, set a default value 2000.");
                     phase.maxLife = phase.life = 2000.0f;
                 } else
                 {
-                    phase.maxLife = phase.life = std::max(0.0, script->getScriptResult()->toNum());
+                    phase.maxLife = phase.life = std::max(0.0, script->getScriptResult()->ToNum());
                 }
 
                 script->notifyEvent(EV_REQUEST_TIMER);
-                if (script->getScriptResult()->getType() == DnhValue::Type::NIL)
+                if (script->getScriptResult()->GetType() == DnhValue::Type::NIL)
                 {
                     phase.timerF = -1; // 無制限
                 } else
                 {
                     // NOTE: double値を60倍してから切り捨てる
-                    phase.timerF = (int)(script->getScriptResult()->toNum() * 60);
+                    phase.timerF = (int)(script->getScriptResult()->ToNum() * 60);
                     phase.orgTimerF = phase.timerF;
                 }
 
                 script->notifyEvent(EV_REQUEST_IS_SPELL);
-                phase.isSpell = script->getScriptResult()->toBool();
+                phase.isSpell = script->getScriptResult()->ToBool();
 
                 script->notifyEvent(EV_REQUEST_SPELL_SCORE);
-                phase.spellScore = script->getScriptResult()->toInt();
+                phase.spellScore = script->getScriptResult()->ToInt();
 
                 script->notifyEvent(EV_REQUEST_IS_LAST_SPELL);
-                phase.isLastSpell = script->getScriptResult()->toBool();
+                phase.isLastSpell = script->getScriptResult()->ToBool();
 
                 script->notifyEvent(EV_REQUEST_IS_DURABLE_SPELL);
-                phase.isDurableSpell = script->getScriptResult()->toBool();
+                phase.isDurableSpell = script->getScriptResult()->ToBool();
             }
         }
     }
@@ -374,7 +374,7 @@ bool ObjEnemyBossScene::loadNext()
     playerSpellCount = playerShootDownCount = 0;
     const Phase& phase = getCurrentPhase();
 
-    if (auto script = state->scriptManager->get(phase.scriptId))
+    if (auto script = state->scriptManager->Get(phase.scriptId))
     {
         auto boss = state->objTable->create<ObjEnemy>(true, state);
         state->objLayerList->setRenderPriority(boss, DEFAULT_ENEMY_RENDER_PRIORITY);

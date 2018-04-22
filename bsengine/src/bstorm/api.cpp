@@ -40,49 +40,49 @@ namespace bstorm
 {
 static int GetModuleDirectory(lua_State* L)
 {
-    DnhArray(L"./").push(L);
+    DnhArray(L"./").Push(L);
     return 1;
 }
 
 static int GetMainStgScriptPath(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    DnhArray(engine->getMainStgScriptPath()).push(L);
+    DnhArray(engine->getMainStgScriptPath()).Push(L);
     return 1;
 }
 
 static int GetMainStgScriptDirectory(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    DnhArray(engine->getMainStgScriptDirectory()).push(L);
+    DnhArray(engine->getMainStgScriptDirectory()).Push(L);
     return 1;
 }
 
 static int GetMainPackageScriptPath(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    DnhArray(engine->getMainPackageScriptPath()).push(L);
+    DnhArray(engine->getMainPackageScriptPath()).Push(L);
     return 1;
 }
 
 static int GetScriptPathList(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    auto dirPath = DnhValue::toString(L, 1);
-    int scriptType = DnhValue::toInt(L, 2);
+    auto dirPath = DnhValue::ToString(L, 1);
+    int scriptType = DnhValue::ToInt(L, 2);
     DnhArray pathList;
     for (const auto& info : engine->getScriptList(dirPath, scriptType, false))
     {
-        pathList.pushBack(std::make_unique<DnhArray>(info.path));
+        pathList.PushBack(std::make_unique<DnhArray>(info.path));
     }
-    pathList.push(L);
+    pathList.Push(L);
     return 1;
 }
 
 static int GetCurrentDateTimeS(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    DnhArray(engine->getCurrentDateTimeS()).push(L);
+    DnhArray(engine->getCurrentDateTimeS()).Push(L);
     return 1;
 }
 
@@ -111,15 +111,15 @@ static int GetCurrentFps(lua_State* L)
 static int InstallFont(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    auto path = DnhValue::toString(L, 1);
+    auto path = DnhValue::ToString(L, 1);
     lua_pushboolean(L, engine->installFont(path, getSourcePos(L)));
     return 1;
 }
 
 static int ToString(lua_State* L)
 {
-    auto str = DnhValue::toString(L, 1);
-    DnhArray(str).push(L);
+    auto str = DnhValue::ToString(L, 1);
+    DnhArray(str).Push(L);
     return 1;
 }
 
@@ -133,14 +133,14 @@ static int GetReplayFps(lua_State* L)
 static int WriteLog(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::string msg = DnhValue::toStringU8(L, 1);
+    std::string msg = DnhValue::ToStringU8(L, 1);
     engine->writeLog(std::move(msg), getSourcePos(L));
     return 0;
 }
 
 static int RaiseError(lua_State* L)
 {
-    std::string msg = DnhValue::toStringU8(L, 1);
+    std::string msg = DnhValue::ToStringU8(L, 1);
     throw Log(Log::Level::LV_ERROR)
         .setMessage("RaiseError.")
         .setParam(Log::Param(Log::Param::Tag::TEXT, std::move(msg)));
@@ -149,8 +149,8 @@ static int RaiseError(lua_State* L)
 
 static int assert(lua_State* L)
 {
-    bool cond = DnhValue::toBool(L, 1);
-    std::string msg = DnhValue::toStringU8(L, 2);
+    bool cond = DnhValue::ToBool(L, 1);
+    std::string msg = DnhValue::ToStringU8(L, 2);
     if (!cond)
     {
         throw Log(Log::Level::LV_ERROR)
@@ -163,8 +163,8 @@ static int assert(lua_State* L)
 static int SetCommonData(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring key = DnhValue::toString(L, 1);
-    auto value = DnhValue::get(L, 2);
+    std::wstring key = DnhValue::ToString(L, 1);
+    auto value = DnhValue::Get(L, 2);
     engine->setCommonData(key, std::move(value));
     return 0;
 }
@@ -172,9 +172,9 @@ static int SetCommonData(lua_State* L)
 static int GetCommonData(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring key = DnhValue::toString(L, 1);
-    auto defaultValue = DnhValue::get(L, 2);
-    engine->getCommonData(key, std::move(defaultValue))->push(L);
+    std::wstring key = DnhValue::ToString(L, 1);
+    auto defaultValue = DnhValue::Get(L, 2);
+    engine->getCommonData(key, std::move(defaultValue))->Push(L);
     return 1;
 }
 
@@ -188,7 +188,7 @@ static int ClearCommonData(lua_State* L)
 static int DeleteCommonData(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring key = DnhValue::toString(L, 1);
+    std::wstring key = DnhValue::ToString(L, 1);
     engine->deleteCommonData(key);
     return 0;
 }
@@ -196,9 +196,9 @@ static int DeleteCommonData(lua_State* L)
 static int SetAreaCommonData(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring area = DnhValue::toString(L, 1);
-    std::wstring key = DnhValue::toString(L, 2);
-    auto value = DnhValue::get(L, 3);
+    std::wstring area = DnhValue::ToString(L, 1);
+    std::wstring key = DnhValue::ToString(L, 2);
+    auto value = DnhValue::Get(L, 3);
     engine->setAreaCommonData(area, key, std::move(value));
     return 0;
 }
@@ -206,17 +206,17 @@ static int SetAreaCommonData(lua_State* L)
 static int GetAreaCommonData(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring area = DnhValue::toString(L, 1);
-    std::wstring key = DnhValue::toString(L, 2);
-    auto defaultValue = DnhValue::get(L, 3);
-    engine->getAreaCommonData(area, key, std::move(defaultValue))->push(L);
+    std::wstring area = DnhValue::ToString(L, 1);
+    std::wstring key = DnhValue::ToString(L, 2);
+    auto defaultValue = DnhValue::Get(L, 3);
+    engine->getAreaCommonData(area, key, std::move(defaultValue))->Push(L);
     return 1;
 }
 
 static int ClearAreaCommonData(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring area = DnhValue::toString(L, 1);
+    std::wstring area = DnhValue::ToString(L, 1);
     engine->clearAreaCommonData(area);
     return 0;
 }
@@ -224,8 +224,8 @@ static int ClearAreaCommonData(lua_State* L)
 static int DeleteAreaCommonData(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring area = DnhValue::toString(L, 1);
-    std::wstring key = DnhValue::toString(L, 2);
+    std::wstring area = DnhValue::ToString(L, 1);
+    std::wstring key = DnhValue::ToString(L, 2);
     engine->deleteAreaCommonData(area, key);
     return 0;
 }
@@ -233,7 +233,7 @@ static int DeleteAreaCommonData(lua_State* L)
 static int CreateCommonDataArea(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring area = DnhValue::toString(L, 1);
+    std::wstring area = DnhValue::ToString(L, 1);
     engine->createCommonDataArea(area);
     return 0;
 }
@@ -241,7 +241,7 @@ static int CreateCommonDataArea(lua_State* L)
 static int IsCommonDataAreaExists(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring area = DnhValue::toString(L, 1);
+    std::wstring area = DnhValue::ToString(L, 1);
     lua_pushboolean(L, engine->isCommonDataAreaExists(area));
     return 1;
 }
@@ -249,8 +249,8 @@ static int IsCommonDataAreaExists(lua_State* L)
 static int CopyCommonDataArea(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring dst = DnhValue::toString(L, 1);
-    std::wstring src = DnhValue::toString(L, 2);
+    std::wstring dst = DnhValue::ToString(L, 1);
+    std::wstring src = DnhValue::ToString(L, 2);
     engine->copyCommonDataArea(dst, src);
     return 0;
 }
@@ -261,29 +261,29 @@ static int GetCommonDataAreaKeyList(lua_State* L)
     DnhArray ret;
     for (const auto& key : engine->getCommonDataAreaKeyList())
     {
-        ret.pushBack(std::make_unique<DnhArray>(key));
+        ret.PushBack(std::make_unique<DnhArray>(key));
     }
-    ret.push(L);
+    ret.Push(L);
     return 1;
 }
 
 static int GetCommonDataValueKeyList(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring area = DnhValue::toString(L, 1);
+    std::wstring area = DnhValue::ToString(L, 1);
     DnhArray ret;
     for (const auto& key : engine->getCommonDataValueKeyList(area))
     {
-        ret.pushBack(std::make_unique<DnhArray>(key));
+        ret.PushBack(std::make_unique<DnhArray>(key));
     }
-    ret.push(L);
+    ret.Push(L);
     return 1;
 }
 
 static int SaveCommonDataAreaA1(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring area = DnhValue::toString(L, 1);
+    std::wstring area = DnhValue::ToString(L, 1);
     lua_pushboolean(L, engine->saveCommonDataAreaA1(area));
     return 1;
 }
@@ -291,7 +291,7 @@ static int SaveCommonDataAreaA1(lua_State* L)
 static int LoadCommonDataAreaA1(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring area = DnhValue::toString(L, 1);
+    std::wstring area = DnhValue::ToString(L, 1);
     lua_pushboolean(L, engine->loadCommonDataAreaA1(area));
     return 1;
 }
@@ -299,8 +299,8 @@ static int LoadCommonDataAreaA1(lua_State* L)
 static int SaveCommonDataAreaA2(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring area = DnhValue::toString(L, 1);
-    std::wstring saveFilePath = DnhValue::toString(L, 2);
+    std::wstring area = DnhValue::ToString(L, 1);
+    std::wstring saveFilePath = DnhValue::ToString(L, 2);
     lua_pushboolean(L, engine->saveCommonDataAreaA2(area, saveFilePath));
     return 1;
 }
@@ -308,8 +308,8 @@ static int SaveCommonDataAreaA2(lua_State* L)
 static int LoadCommonDataAreaA2(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring area = DnhValue::toString(L, 1);
-    std::wstring saveFilePath = DnhValue::toString(L, 2);
+    std::wstring area = DnhValue::ToString(L, 1);
+    std::wstring saveFilePath = DnhValue::ToString(L, 2);
     lua_pushboolean(L, engine->loadCommonDataAreaA2(area, saveFilePath));
     return 1;
 }
@@ -331,7 +331,7 @@ static int LoadCommonDataAreaFromReplayFile(lua_State* L)
 static int LoadSound(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    auto path = DnhValue::toString(L, 1);
+    auto path = DnhValue::ToString(L, 1);
     engine->loadOrphanSound(path, getSourcePos(L));
     return 0;
 }
@@ -339,7 +339,7 @@ static int LoadSound(lua_State* L)
 static int RemoveSound(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    auto path = DnhValue::toString(L, 1);
+    auto path = DnhValue::ToString(L, 1);
     engine->removeOrphanSound(path);
     return 0;
 }
@@ -347,9 +347,9 @@ static int RemoveSound(lua_State* L)
 static int PlayBGM(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    auto path = DnhValue::toString(L, 1);
-    double loopStartSec = DnhValue::toNum(L, 2);
-    double loopEndSec = DnhValue::toNum(L, 3);
+    auto path = DnhValue::ToString(L, 1);
+    double loopStartSec = DnhValue::ToNum(L, 2);
+    double loopEndSec = DnhValue::ToNum(L, 3);
     engine->playBGM(path, loopStartSec, loopEndSec);
     return 0;
 }
@@ -357,7 +357,7 @@ static int PlayBGM(lua_State* L)
 static int PlaySE(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    auto path = DnhValue::toString(L, 1);
+    auto path = DnhValue::ToString(L, 1);
     engine->playSE(path);
     return 0;
 }
@@ -365,7 +365,7 @@ static int PlaySE(lua_State* L)
 static int StopSound(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    auto path = DnhValue::toString(L, 1);
+    auto path = DnhValue::ToString(L, 1);
     engine->stopOrphanSound(path);
     return 0;
 }
@@ -373,7 +373,7 @@ static int StopSound(lua_State* L)
 static int GetVirtualKeyState(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int vk = DnhValue::toInt(L, 1);
+    int vk = DnhValue::ToInt(L, 1);
     lua_pushnumber(L, engine->getVirtualKeyState(vk));
     return 1;
 }
@@ -381,8 +381,8 @@ static int GetVirtualKeyState(lua_State* L)
 static int SetVirtualKeyState(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int vk = DnhValue::toInt(L, 1);
-    int state = DnhValue::toInt(L, 2);
+    int vk = DnhValue::ToInt(L, 1);
+    int state = DnhValue::ToInt(L, 2);
     engine->setVirtualKeyState(vk, state);
     return 0;
 }
@@ -390,9 +390,9 @@ static int SetVirtualKeyState(lua_State* L)
 static int AddVirtualKey(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int vk = DnhValue::toInt(L, 1);
-    int k = DnhValue::toInt(L, 2);
-    int btn = DnhValue::toInt(L, 3);
+    int vk = DnhValue::ToInt(L, 1);
+    int k = DnhValue::ToInt(L, 2);
+    int btn = DnhValue::ToInt(L, 3);
     engine->addVirtualKey(vk, k, btn);
     return 0;
 }
@@ -407,7 +407,7 @@ static int AddReplayTargetVirtualKey(lua_State* L)
 static int GetKeyState(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int k = DnhValue::toInt(L, 1);
+    int k = DnhValue::ToInt(L, 1);
     lua_pushnumber(L, engine->getKeyState(k));
     return 1;
 }
@@ -415,7 +415,7 @@ static int GetKeyState(lua_State* L)
 static int GetMouseState(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int btn = DnhValue::toInt(L, 1);
+    int btn = DnhValue::ToInt(L, 1);
     lua_pushnumber(L, engine->getMouseState(btn));
     return 1;
 }
@@ -450,7 +450,7 @@ static int SetSkipModeKey(lua_State* L)
 static int CreateRenderTarget(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring name = DnhValue::toString(L, 1);
+    std::wstring name = DnhValue::ToString(L, 1);
     try
     {
         engine->createRenderTarget(name, 1024, 512, getSourcePos(L));
@@ -468,10 +468,10 @@ static int CreateRenderTarget(lua_State* L)
 static int RenderToTextureA1(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring name = DnhValue::toString(L, 1);
-    int begin = DnhValue::toInt(L, 2);
-    int end = DnhValue::toInt(L, 3);
-    bool doClear = DnhValue::toBool(L, 4);
+    std::wstring name = DnhValue::ToString(L, 1);
+    int begin = DnhValue::ToInt(L, 2);
+    int end = DnhValue::ToInt(L, 3);
+    bool doClear = DnhValue::ToBool(L, 4);
     engine->renderToTextureA1(name, begin, end, doClear);
     return 0;
 }
@@ -479,9 +479,9 @@ static int RenderToTextureA1(lua_State* L)
 static int RenderToTextureB1(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring name = DnhValue::toString(L, 1);
-    int objId = DnhValue::toInt(L, 2);
-    bool doClear = DnhValue::toBool(L, 3);
+    std::wstring name = DnhValue::ToString(L, 1);
+    int objId = DnhValue::ToInt(L, 2);
+    bool doClear = DnhValue::ToBool(L, 3);
     engine->renderToTextureB1(name, objId, doClear);
     return 0;
 }
@@ -489,8 +489,8 @@ static int RenderToTextureB1(lua_State* L)
 static int SaveRenderedTextureA1(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring name = DnhValue::toString(L, 1);
-    auto path = DnhValue::toString(L, 2);
+    std::wstring name = DnhValue::ToString(L, 1);
+    auto path = DnhValue::ToString(L, 2);
     engine->saveRenderedTextureA1(name, path, getSourcePos(L));
     return 0;
 }
@@ -498,12 +498,12 @@ static int SaveRenderedTextureA1(lua_State* L)
 static int SaveRenderedTextureA2(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring name = DnhValue::toString(L, 1);
-    auto path = DnhValue::toString(L, 2);
-    int l = DnhValue::toInt(L, 3);
-    int t = DnhValue::toInt(L, 4);
-    int r = DnhValue::toInt(L, 5);
-    int b = DnhValue::toInt(L, 6);
+    std::wstring name = DnhValue::ToString(L, 1);
+    auto path = DnhValue::ToString(L, 2);
+    int l = DnhValue::ToInt(L, 3);
+    int t = DnhValue::ToInt(L, 4);
+    int r = DnhValue::ToInt(L, 5);
+    int b = DnhValue::ToInt(L, 6);
     engine->saveRenderedTextureA2(name, path, l, t, r, b, getSourcePos(L));
     return 0;
 }
@@ -511,7 +511,7 @@ static int SaveRenderedTextureA2(lua_State* L)
 static int SaveSnapShotA1(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    auto path = DnhValue::toString(L, 1);
+    auto path = DnhValue::ToString(L, 1);
     engine->saveSnapShotA1(path, getSourcePos(L));
     return 0;
 }
@@ -519,11 +519,11 @@ static int SaveSnapShotA1(lua_State* L)
 static int SaveSnapShotA2(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    auto path = DnhValue::toString(L, 1);
-    int l = DnhValue::toInt(L, 2);
-    int t = DnhValue::toInt(L, 3);
-    int r = DnhValue::toInt(L, 4);
-    int b = DnhValue::toInt(L, 5);
+    auto path = DnhValue::ToString(L, 1);
+    int l = DnhValue::ToInt(L, 2);
+    int t = DnhValue::ToInt(L, 3);
+    int r = DnhValue::ToInt(L, 4);
+    int b = DnhValue::ToInt(L, 5);
     engine->saveSnapShotA2(path, l, t, r, b, getSourcePos(L));
     return 0;
 }
@@ -531,8 +531,8 @@ static int SaveSnapShotA2(lua_State* L)
 static int IsPixelShaderSupported(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int major = DnhValue::toInt(L, 1);
-    int minor = DnhValue::toInt(L, 2);
+    int major = DnhValue::ToInt(L, 1);
+    int minor = DnhValue::ToInt(L, 2);
     lua_pushboolean(L, engine->isPixelShaderSupported(major, minor));
     return 1;
 }
@@ -540,9 +540,9 @@ static int IsPixelShaderSupported(lua_State* L)
 static int SetShader(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double begin = DnhValue::toNum(L, 2);
-    double end = DnhValue::toNum(L, 3);
+    int objId = DnhValue::ToInt(L, 1);
+    double begin = DnhValue::ToNum(L, 2);
+    double end = DnhValue::ToNum(L, 3);
     if (auto obj = engine->getObject<ObjRender>(objId))
     {
         engine->setShader((int)(begin * MAX_RENDER_PRIORITY), (int)(end * MAX_RENDER_PRIORITY), obj->getShader());
@@ -553,9 +553,9 @@ static int SetShader(lua_State* L)
 static int SetShaderI(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int begin = DnhValue::toInt(L, 2);
-    int end = DnhValue::toInt(L, 3);
+    int objId = DnhValue::ToInt(L, 1);
+    int begin = DnhValue::ToInt(L, 2);
+    int end = DnhValue::ToInt(L, 3);
     if (auto obj = engine->getObject<ObjRender>(objId))
     {
         engine->setShader(begin, end, obj->getShader());
@@ -566,8 +566,8 @@ static int SetShaderI(lua_State* L)
 static int ResetShader(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    double begin = DnhValue::toNum(L, 1);
-    double end = DnhValue::toNum(L, 2);
+    double begin = DnhValue::ToNum(L, 1);
+    double end = DnhValue::ToNum(L, 2);
     engine->resetShader((int)(begin * MAX_RENDER_PRIORITY), (int)(end * MAX_RENDER_PRIORITY));
     return 0;
 }
@@ -575,8 +575,8 @@ static int ResetShader(lua_State* L)
 static int ResetShaderI(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int begin = DnhValue::toInt(L, 1);
-    int end = DnhValue::toInt(L, 2);
+    int begin = DnhValue::ToInt(L, 1);
+    int end = DnhValue::ToInt(L, 2);
     engine->resetShader(begin, end);
     return 0;
 }
@@ -584,7 +584,7 @@ static int ResetShaderI(lua_State* L)
 static int LoadTextureInLoadThread(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    auto path = DnhValue::toString(L, 1);
+    auto path = DnhValue::ToString(L, 1);
     engine->loadTextureInThread(path, true, getSourcePos(L));
     return 0;
 }
@@ -597,7 +597,7 @@ static int LoadTexture(lua_State* L)
 static int RemoveTexture(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    auto path = DnhValue::toString(L, 1);
+    auto path = DnhValue::ToString(L, 1);
     engine->removeTextureReservedFlag(path);
     return 0;
 }
@@ -605,7 +605,7 @@ static int RemoveTexture(lua_State* L)
 static int GetTextureWidth(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring name = DnhValue::toString(L, 1);
+    std::wstring name = DnhValue::ToString(L, 1);
     if (auto target = engine->getRenderTarget(name))
     {
         lua_pushnumber(L, target->getWidth());
@@ -628,7 +628,7 @@ static int GetTextureWidth(lua_State* L)
 static int GetTextureHeight(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring name = DnhValue::toString(L, 1);
+    std::wstring name = DnhValue::ToString(L, 1);
     if (auto target = engine->getRenderTarget(name))
     {
         lua_pushnumber(L, target->getHeight());
@@ -651,7 +651,7 @@ static int GetTextureHeight(lua_State* L)
 static int SetFogEnable(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    bool enable = DnhValue::toBool(L, 1);
+    bool enable = DnhValue::ToBool(L, 1);
     engine->setFogEnable(enable);
     return 0;
 }
@@ -659,11 +659,11 @@ static int SetFogEnable(lua_State* L)
 static int SetFogParam(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    double fogStart = DnhValue::toNum(L, 1);
-    double fogEnd = DnhValue::toNum(L, 2);
-    int r = DnhValue::toInt(L, 3);
-    int g = DnhValue::toInt(L, 4);
-    int b = DnhValue::toInt(L, 5);
+    double fogStart = DnhValue::ToNum(L, 1);
+    double fogEnd = DnhValue::ToNum(L, 2);
+    int r = DnhValue::ToInt(L, 3);
+    int g = DnhValue::ToInt(L, 4);
+    int b = DnhValue::ToInt(L, 5);
     engine->setFogParam(fogStart, fogEnd, r, g, b);
     return 0;
 }
@@ -678,8 +678,8 @@ static int ClearInvalidRenderPriority(lua_State* L)
 static int SetInvalidRenderPriorityA1(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int begin = DnhValue::toInt(L, 1);
-    int end = DnhValue::toInt(L, 2);
+    int begin = DnhValue::ToInt(L, 1);
+    int end = DnhValue::ToInt(L, 2);
     engine->setInvalidRenderPriority(begin, end);
     return 0;
 }
@@ -687,8 +687,8 @@ static int SetInvalidRenderPriorityA1(lua_State* L)
 static int GetReservedRenderTargetName(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int n = DnhValue::toInt(L, 1);
-    DnhArray(engine->getReservedRenderTargetName(n)).push(L);
+    int n = DnhValue::ToInt(L, 1);
+    DnhArray(engine->getReservedRenderTargetName(n)).Push(L);
     return 1;
 }
 
@@ -696,7 +696,7 @@ template <void (Engine::*func)(float)>
 static int SetCamera(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    double v = DnhValue::toNum(L, 1);
+    double v = DnhValue::ToNum(L, 1);
     (engine->*func)(v);
     return 0;
 }
@@ -708,9 +708,9 @@ static int SetCameraFocusZ(lua_State* L) { return SetCamera<&Engine::setCameraFo
 static int SetCameraFocusXYZ(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    double x = DnhValue::toNum(L, 1);
-    double y = DnhValue::toNum(L, 2);
-    double z = DnhValue::toNum(L, 3);
+    double x = DnhValue::ToNum(L, 1);
+    double y = DnhValue::ToNum(L, 2);
+    double z = DnhValue::ToNum(L, 3);
     engine->setCameraFocusXYZ(x, y, z);
     return 0;
 }
@@ -746,8 +746,8 @@ static int GetCameraRoll(lua_State* L) { return GetCamera<&Engine::getCameraRoll
 static int SetCameraPerspectiveClip(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    double n = DnhValue::toNum(L, 1);
-    double f = DnhValue::toNum(L, 2);
+    double n = DnhValue::ToNum(L, 1);
+    double f = DnhValue::ToNum(L, 2);
     engine->setCameraPerspectiveClip(n, f);
     return 0;
 }
@@ -756,7 +756,7 @@ template <void (Engine::*func)(float)>
 static int Set2DCamera(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    float v = DnhValue::toNum(L, 1);
+    float v = DnhValue::ToNum(L, 1);
     (engine->*func)(v);
     return 0;
 }
@@ -793,8 +793,8 @@ static int Get2DCameraRatioY(lua_State* L) { return Get2DCamera<&Engine::get2DCa
 static int LoadScript(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring path = DnhValue::toString(L, 1);
-    if (std::shared_ptr<Script> script = engine->loadScript(path, getScript(L)->getType(), SCRIPT_VERSION_PH3, getSourcePos(L)))
+    std::wstring path = DnhValue::ToString(L, 1);
+    if (std::shared_ptr<Script> script = engine->loadScript(path, getScript(L)->GetType(), SCRIPT_VERSION_PH3, getSourcePos(L)))
     {
         lua_pushnumber(L, (double)script->getID());
     }
@@ -804,8 +804,8 @@ static int LoadScript(lua_State* L)
 static int LoadScriptInThread(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring path = DnhValue::toString(L, 1);
-    if (std::shared_ptr<Script> script = engine->loadScriptInThread(path, getScript(L)->getType(), SCRIPT_VERSION_PH3, getSourcePos(L)))
+    std::wstring path = DnhValue::ToString(L, 1);
+    if (std::shared_ptr<Script> script = engine->loadScriptInThread(path, getScript(L)->GetType(), SCRIPT_VERSION_PH3, getSourcePos(L)))
     {
         lua_pushnumber(L, (double)script->getID());
     }
@@ -815,7 +815,7 @@ static int LoadScriptInThread(lua_State* L)
 static int StartScript(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int scriptId = DnhValue::toInt(L, 1);
+    int scriptId = DnhValue::ToInt(L, 1);
     if (auto script = engine->getScript(scriptId))
     {
         script->start();
@@ -827,7 +827,7 @@ static int StartScript(lua_State* L)
 static int CloseScript(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int scriptId = DnhValue::toInt(L, 1);
+    int scriptId = DnhValue::ToInt(L, 1);
     if (auto script = engine->getScript(scriptId))
     {
         script->close();
@@ -838,7 +838,7 @@ static int CloseScript(lua_State* L)
 static int IsCloseScript(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int scriptId = DnhValue::toInt(L, 1);
+    int scriptId = DnhValue::ToInt(L, 1);
     if (auto script = engine->getScript(scriptId))
     {
         lua_pushboolean(L, script->isClosed());
@@ -852,9 +852,9 @@ static int IsCloseScript(lua_State* L)
 static int SetScriptArgument(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int scriptId = DnhValue::toInt(L, 1);
-    int idx = DnhValue::toInt(L, 2);
-    auto value = DnhValue::get(L, 3);
+    int scriptId = DnhValue::ToInt(L, 1);
+    int idx = DnhValue::ToInt(L, 2);
+    auto value = DnhValue::Get(L, 3);
     if (auto script = engine->getScript(scriptId))
     {
         script->setScriptArgument(idx, std::move(value));
@@ -865,8 +865,8 @@ static int SetScriptArgument(lua_State* L)
 static int GetScriptArgument(lua_State* L)
 {
     Script* script = getScript(L);
-    int idx = DnhValue::toInt(L, 1);
-    script->getScriptArgument(idx)->push(L);
+    int idx = DnhValue::ToInt(L, 1);
+    script->getScriptArgument(idx)->Push(L);
     return 1;
 }
 
@@ -887,12 +887,12 @@ static int CloseStgScene(lua_State* L)
 static int SetStgFrame(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int l = DnhValue::toInt(L, 1);
-    int t = DnhValue::toInt(L, 2);
-    int r = DnhValue::toInt(L, 3);
-    int b = DnhValue::toInt(L, 4);
-    int priorityMin = DnhValue::toInt(L, 5);
-    int priorityMax = DnhValue::toInt(L, 6);
+    int l = DnhValue::ToInt(L, 1);
+    int t = DnhValue::ToInt(L, 2);
+    int r = DnhValue::ToInt(L, 3);
+    int b = DnhValue::ToInt(L, 4);
+    int priorityMin = DnhValue::ToInt(L, 5);
+    int priorityMax = DnhValue::ToInt(L, 6);
     engine->setStgFrame(l, t, r, b);
     engine->reset2DCamera();
     engine->set2DCameraFocusX(engine->getStgFrameCenterWorldX());
@@ -912,7 +912,7 @@ static int GetScore(lua_State* L)
 static int AddScore(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int64_t score = DnhValue::toNum(L, 1);
+    int64_t score = DnhValue::ToNum(L, 1);
     engine->addScore(score);
     return 0;
 }
@@ -927,7 +927,7 @@ static int GetGraze(lua_State* L)
 static int AddGraze(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int64_t graze = DnhValue::toNum(L, 1);
+    int64_t graze = DnhValue::ToNum(L, 1);
     engine->addGraze(graze);
     return 0;
 }
@@ -942,7 +942,7 @@ static int GetPoint(lua_State* L)
 static int AddPoint(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int64_t point = DnhValue::toNum(L, 1);
+    int64_t point = DnhValue::ToNum(L, 1);
     engine->addPoint(point);
     return 0;
 }
@@ -950,7 +950,7 @@ static int AddPoint(lua_State* L)
 static int SetItemRenderPriorityI(lua_State *L)
 {
     Engine* engine = getEngine(L);
-    int p = DnhValue::toInt(L, 1);
+    int p = DnhValue::ToInt(L, 1);
     engine->setItemRenderPriority(p);
     return 0;
 }
@@ -958,7 +958,7 @@ static int SetItemRenderPriorityI(lua_State *L)
 static int SetShotRenderPriorityI(lua_State *L)
 {
     Engine* engine = getEngine(L);
-    int p = DnhValue::toInt(L, 1);
+    int p = DnhValue::ToInt(L, 1);
     engine->setShotRenderPriority(p);
     return 0;
 }
@@ -1091,8 +1091,8 @@ static int GetPlayerScriptID(lua_State* L)
 static int SetPlayerSpeed(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    double normalSpeed = DnhValue::toNum(L, 1);
-    double slowSpeed = DnhValue::toNum(L, 2);
+    double normalSpeed = DnhValue::ToNum(L, 1);
+    double slowSpeed = DnhValue::ToNum(L, 2);
     if (auto player = engine->getPlayerObject())
     {
         player->setNormalSpeed(normalSpeed);
@@ -1104,10 +1104,10 @@ static int SetPlayerSpeed(lua_State* L)
 static int SetPlayerClip(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    double left = DnhValue::toNum(L, 1);
-    double top = DnhValue::toNum(L, 2);
-    double right = DnhValue::toNum(L, 3);
-    double bottom = DnhValue::toNum(L, 4);
+    double left = DnhValue::ToNum(L, 1);
+    double top = DnhValue::ToNum(L, 2);
+    double right = DnhValue::ToNum(L, 3);
+    double bottom = DnhValue::ToNum(L, 4);
     if (auto player = engine->getPlayerObject())
     {
         player->setClip(left, top, right, bottom);
@@ -1119,7 +1119,7 @@ static int SetPlayerClip(lua_State* L)
 static int SetPlayerLife(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    double life = DnhValue::toNum(L, 1);
+    double life = DnhValue::ToNum(L, 1);
     if (auto player = engine->getPlayerObject())
     {
         player->setLife(life);
@@ -1130,7 +1130,7 @@ static int SetPlayerLife(lua_State* L)
 static int SetPlayerSpell(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    double spell = DnhValue::toNum(L, 1);
+    double spell = DnhValue::ToNum(L, 1);
     if (auto player = engine->getPlayerObject())
     {
         player->setSpell(spell);
@@ -1141,7 +1141,7 @@ static int SetPlayerSpell(lua_State* L)
 static int SetPlayerPower(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    double power = DnhValue::toNum(L, 1);
+    double power = DnhValue::ToNum(L, 1);
     if (auto player = engine->getPlayerObject())
     {
         player->setPower(power);
@@ -1152,7 +1152,7 @@ static int SetPlayerPower(lua_State* L)
 static int SetPlayerInvincibilityFrame(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int frame = DnhValue::toInt(L, 1);
+    int frame = DnhValue::ToInt(L, 1);
     if (auto player = engine->getPlayerObject())
     {
         player->setInvincibilityFrame(frame);
@@ -1163,7 +1163,7 @@ static int SetPlayerInvincibilityFrame(lua_State* L)
 static int SetPlayerDownStateFrame(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int frame = DnhValue::toInt(L, 1);
+    int frame = DnhValue::ToInt(L, 1);
     if (auto player = engine->getPlayerObject())
     {
         player->setDownStateFrame(frame);
@@ -1174,7 +1174,7 @@ static int SetPlayerDownStateFrame(lua_State* L)
 static int SetPlayerRebirthFrame(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int frame = DnhValue::toInt(L, 1);
+    int frame = DnhValue::ToInt(L, 1);
     if (auto player = engine->getPlayerObject())
     {
         player->setRebirthFrame(frame);
@@ -1185,7 +1185,7 @@ static int SetPlayerRebirthFrame(lua_State* L)
 static int SetPlayerRebirthLossFrame(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int frame = DnhValue::toInt(L, 1);
+    int frame = DnhValue::ToInt(L, 1);
     if (auto player = engine->getPlayerObject())
     {
         player->setRebirthLossFrame(frame);
@@ -1196,7 +1196,7 @@ static int SetPlayerRebirthLossFrame(lua_State* L)
 static int SetPlayerAutoItemCollectLine(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    double lineY = DnhValue::toNum(L, 1);
+    double lineY = DnhValue::ToNum(L, 1);
     if (auto player = engine->getPlayerObject())
     {
         player->setAutoItemCollectLineY(lineY);
@@ -1207,7 +1207,7 @@ static int SetPlayerAutoItemCollectLine(lua_State* L)
 static int SetForbidPlayerShot(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    bool forbid = DnhValue::toBool(L, 1);
+    bool forbid = DnhValue::ToBool(L, 1);
     if (auto player = engine->getPlayerObject())
     {
         player->setForbidPlayerShot(forbid);
@@ -1218,7 +1218,7 @@ static int SetForbidPlayerShot(lua_State* L)
 static int SetForbidPlayerSpell(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    bool forbid = DnhValue::toBool(L, 1);
+    bool forbid = DnhValue::ToBool(L, 1);
     if (auto player = engine->getPlayerObject())
     {
         player->setForbidPlayerSpell(forbid);
@@ -1245,10 +1245,10 @@ static int GetPlayerSpeed(lua_State* L)
     if (auto player = engine->getPlayerObject())
     {
         Point2D speeds{ player->getNormalSpeed(), player->getSlowSpeed() };
-        DnhArray(speeds).push(L);
+        DnhArray(speeds).Push(L);
     } else
     {
-        DnhArray(Point2D(0.0f, 0.0f)).push(L);
+        DnhArray(Point2D(0.0f, 0.0f)).Push(L);
     }
     return 1;
 }
@@ -1262,7 +1262,7 @@ static int GetPlayerClip(lua_State* L)
     clipRect.push_back(!player ? 0 : player->getClipTop());
     clipRect.push_back(!player ? 0 : player->getClipRight());
     clipRect.push_back(!player ? 0 : player->getClipBottom());
-    DnhArray(clipRect).push(L);
+    DnhArray(clipRect).Push(L);
     return 1;
 }
 
@@ -1364,7 +1364,7 @@ static int GetPlayerY(lua_State* L)
 static int GetAngleToPlayer(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjRender>(objId))
     {
         auto player = engine->getPlayerObject();
@@ -1380,14 +1380,14 @@ static int GetAngleToPlayer(lua_State* L)
 static int GetPlayerID(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    DnhArray(engine->getPlayerID()).push(L);
+    DnhArray(engine->getPlayerID()).Push(L);
     return 1;
 }
 
 static int GetPlayerReplayName(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    DnhArray(engine->getPlayerReplayName()).push(L);
+    DnhArray(engine->getPlayerReplayName()).Push(L);
     return 1;
 }
 
@@ -1421,14 +1421,14 @@ static void getEnemyIntersectionPositionFromPoint(std::vector<Point2D>& ps, cons
 static int GetEnemyIntersectionPosition(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    double x = DnhValue::toNum(L, 1);
-    double y = DnhValue::toNum(L, 2);
-    int n = DnhValue::toInt(L, 3);
+    double x = DnhValue::ToNum(L, 1);
+    double y = DnhValue::ToNum(L, 2);
+    int n = DnhValue::ToInt(L, 3);
     auto enemies = engine->getObjectAll<ObjEnemy>();
     std::vector<Point2D> ps;
     getEnemyIntersectionPositionFromPoint(ps, enemies, Point2D((float)x, (float)y));
     if (ps.size() > n) { ps.resize(n); }
-    DnhArray(ps).push(L);
+    DnhArray(ps).Push(L);
     return 1;
 }
 
@@ -1445,10 +1445,10 @@ static int GetEnemyBossObjectID(lua_State* L)
     Engine* engine = getEngine(L);
     if (auto boss = engine->getEnemyBossObject())
     {
-        DnhArray(std::vector<double>{(double)boss->getID()}).push(L);
+        DnhArray(std::vector<double>{(double)boss->getID()}).Push(L);
     } else
     {
-        DnhArray().push(L);
+        DnhArray().Push(L);
     }
     return 1;
 }
@@ -1459,9 +1459,9 @@ static int GetAllEnemyID(lua_State* L)
     DnhArray ids;
     for (const auto& enemy : engine->getObjectAll<ObjEnemy>())
     {
-        ids.pushBack(std::make_unique<DnhReal>((double)enemy->getID()));
+        ids.PushBack(std::make_unique<DnhReal>((double)enemy->getID()));
     }
-    ids.push(L);
+    ids.Push(L);
     return 1;
 }
 
@@ -1473,10 +1473,10 @@ static int GetIntersectionRegistedEnemyID(lua_State* L)
     {
         if (!enemy->getAllIntersectionToShotPosition().empty())
         {
-            ids.pushBack(std::make_unique<DnhReal>((double)enemy->getID()));
+            ids.PushBack(std::make_unique<DnhReal>((double)enemy->getID()));
         }
     }
-    ids.push(L);
+    ids.Push(L);
     return 1;
 }
 
@@ -1488,45 +1488,45 @@ static int GetAllEnemyIntersectionPosition(lua_State* L)
     {
         for (const auto& pos : enemy->getAllIntersectionToShotPosition())
         {
-            poss.pushBack(std::make_unique<DnhArray>(pos));
+            poss.PushBack(std::make_unique<DnhArray>(pos));
         }
     }
-    poss.push(L);
+    poss.Push(L);
     return 1;
 }
 
 static int GetEnemyIntersectionPositionByIdA1(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     std::vector<Point2D> ps;
     if (auto obj = engine->getObject<ObjEnemy>(objId))
     {
         getEnemyIntersectionPositionFromPoint(ps, { obj }, Point2D(obj->getX(), obj->getY()));
     }
-    DnhArray(ps).push(L);
+    DnhArray(ps).Push(L);
     return 1;
 }
 
 static int GetEnemyIntersectionPositionByIdA2(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    float x = DnhValue::toNum(L, 2);
-    float y = DnhValue::toNum(L, 3);
+    int objId = DnhValue::ToInt(L, 1);
+    float x = DnhValue::ToNum(L, 2);
+    float y = DnhValue::ToNum(L, 3);
     std::vector<Point2D> ps;
     if (auto obj = engine->getObject<ObjEnemy>(objId))
     {
         getEnemyIntersectionPositionFromPoint(ps, { obj }, Point2D(x, y));
     }
-    DnhArray(ps).push(L);
+    DnhArray(ps).Push(L);
     return 1;
 }
 
 static int LoadEnemyShotData(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring path = DnhValue::toString(L, 1);
+    std::wstring path = DnhValue::ToString(L, 1);
     engine->loadEnemyShotData(path, getSourcePos(L));
     return 0;
 }
@@ -1534,37 +1534,37 @@ static int LoadEnemyShotData(lua_State* L)
 static int ReloadEnemyShotData(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring path = DnhValue::toString(L, 1);
+    std::wstring path = DnhValue::ToString(L, 1);
     engine->reloadEnemyShotData(path, getSourcePos(L));
     return 0;
 }
 
 static int atoi(lua_State* L)
 {
-    auto str = DnhValue::toString(L, 1);
+    auto str = DnhValue::ToString(L, 1);
     lua_pushnumber(L, _wtoi64(str.c_str()));
     return 1;
 }
 
 static int ator(lua_State* L)
 {
-    double r = DnhValue::toNum(L, 1);
+    double r = DnhValue::ToNum(L, 1);
     lua_pushnumber(L, r);
     return 1;
 }
 
 static int TrimString(lua_State* L)
 {
-    auto str = DnhValue::toString(L, 1);
+    auto str = DnhValue::ToString(L, 1);
     trimSpace(str);
-    DnhArray(str).push(L);
+    DnhArray(str).Push(L);
     return 1;
 }
 
 static int rtos(lua_State* L)
 {
-    std::wstring format = DnhValue::toString(L, 1);
-    double num = DnhValue::toNum(L, 2);
+    std::wstring format = DnhValue::ToString(L, 1);
+    double num = DnhValue::ToNum(L, 2);
     std::vector<std::wstring> ss = split(format, L'.');
     int zeroCnt1 = 0;
     int zeroCnt2 = 0;
@@ -1583,14 +1583,14 @@ static int rtos(lua_State* L)
     std::wstring buf(zeroCnt1 + zeroCnt2 + 32, L'\0'); // それなりに大きく
     swprintf_s(&buf[0], buf.size(), &printfFormat[0], num);
     // c_strして別のwstringを作ることで無駄なヌル文字を消去
-    DnhArray(std::wstring(buf.c_str())).push(L);
+    DnhArray(std::wstring(buf.c_str())).Push(L);
     return 1;
 }
 
 static int vtos(lua_State* L)
 {
-    auto format = DnhValue::toString(L, 1);
-    auto value = DnhValue::get(L, 2);
+    auto format = DnhValue::ToString(L, 1);
+    auto value = DnhValue::Get(L, 2);
     std::remove_if(format.begin(), format.end(), [](const wchar_t& c)
     {
         switch (c)
@@ -1607,47 +1607,47 @@ static int vtos(lua_State* L)
     std::wstring buf(1024, L'\0');
     if (format.find(L'd') != std::string::npos)
     {
-        swprintf_s(&buf[0], buf.size(), &format[0], value->toInt());
+        swprintf_s(&buf[0], buf.size(), &format[0], value->ToInt());
     } else if (format.find(L'f') != std::string::npos)
     {
-        swprintf_s(&buf[0], buf.size(), &format[0], value->toNum());
+        swprintf_s(&buf[0], buf.size(), &format[0], value->ToNum());
     } else if (format.find(L's') != std::string::npos)
     {
-        swprintf_s(&buf[0], buf.size(), &format[0], value->toString().c_str());
+        swprintf_s(&buf[0], buf.size(), &format[0], value->ToString().c_str());
     } else
     {
         buf = L"error format";
     }
-    DnhArray(std::wstring(buf.c_str())).push(L);
+    DnhArray(std::wstring(buf.c_str())).Push(L);
     return 1;
 }
 
 static int SplitString(lua_State* L)
 {
-    auto str = DnhValue::toString(L, 1);
-    auto delim = DnhValue::toString(L, 2);
+    auto str = DnhValue::ToString(L, 1);
+    auto delim = DnhValue::ToString(L, 2);
     DnhArray arr;
     for (auto& s : split(str, delim))
     {
-        arr.pushBack(std::make_unique<DnhArray>(s));
+        arr.PushBack(std::make_unique<DnhArray>(s));
     }
-    arr.push(L);
+    arr.Push(L);
     return 1;
 }
 
 static int GetFileDirectory(lua_State* L)
 {
-    auto path = DnhValue::toString(L, 1);
-    DnhArray(parentPath(path) + L"/").push(L);
+    auto path = DnhValue::ToString(L, 1);
+    DnhArray(parentPath(path) + L"/").Push(L);
     return 1;
 }
 
 static int GetFilePathList(lua_State* L)
 {
-    auto dirPath = DnhValue::toString(L, 1);
+    auto dirPath = DnhValue::ToString(L, 1);
     if (dirPath.empty())
     {
-        DnhArray(L"").push(L);
+        DnhArray(L"").Push(L);
         return 1;
     }
 
@@ -1662,18 +1662,18 @@ static int GetFilePathList(lua_State* L)
     DnhArray ret;
     for (const auto& path : pathList)
     {
-        ret.pushBack(std::make_unique<DnhArray>(path));
+        ret.PushBack(std::make_unique<DnhArray>(path));
     }
-    ret.push(L);
+    ret.Push(L);
     return 1;
 }
 
 static int GetDirectoryList(lua_State* L)
 {
-    auto dirPath = DnhValue::toString(L, 1);
+    auto dirPath = DnhValue::ToString(L, 1);
     if (dirPath.empty())
     {
-        DnhArray(L"").push(L);
+        DnhArray(L"").Push(L);
         return 1;
     }
 
@@ -1688,17 +1688,17 @@ static int GetDirectoryList(lua_State* L)
     DnhArray ret;
     for (const auto& dir : dirList)
     {
-        ret.pushBack(std::make_unique<DnhArray>(concatPath(dir, L"")));
+        ret.PushBack(std::make_unique<DnhArray>(concatPath(dir, L"")));
     }
-    ret.push(L);
+    ret.Push(L);
     return 1;
 }
 
 static int DeleteShotAll(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int target = DnhValue::toInt(L, 1);
-    int behavior = DnhValue::toInt(L, 2);
+    int target = DnhValue::ToInt(L, 1);
+    int behavior = DnhValue::ToInt(L, 2);
     engine->deleteShotAll(target, behavior);
     return 0;
 }
@@ -1706,11 +1706,11 @@ static int DeleteShotAll(lua_State* L)
 static int DeleteShotInCircle(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int target = DnhValue::toInt(L, 1);
-    int behavior = DnhValue::toInt(L, 2);
-    float x = DnhValue::toNum(L, 3);
-    float y = DnhValue::toNum(L, 4);
-    float r = DnhValue::toNum(L, 5);
+    int target = DnhValue::ToInt(L, 1);
+    int behavior = DnhValue::ToInt(L, 2);
+    float x = DnhValue::ToNum(L, 3);
+    float y = DnhValue::ToNum(L, 4);
+    float r = DnhValue::ToNum(L, 5);
     engine->deleteShotInCircle(target, behavior, x, y, r);
     return 0;
 }
@@ -1719,13 +1719,13 @@ static int CreateShotA1(lua_State* L)
 {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
-    double x = DnhValue::toNum(L, 1);
-    double y = DnhValue::toNum(L, 2);
-    double speed = DnhValue::toNum(L, 3);
-    double angle = DnhValue::toNum(L, 4);
-    int graphic = DnhValue::toInt(L, 5);
-    int delay = DnhValue::toInt(L, 6);
-    if (auto shot = engine->createShotA1(x, y, speed, angle, graphic, delay, script->getType() == SCRIPT_TYPE_PLAYER))
+    double x = DnhValue::ToNum(L, 1);
+    double y = DnhValue::ToNum(L, 2);
+    double speed = DnhValue::ToNum(L, 3);
+    double angle = DnhValue::ToNum(L, 4);
+    int graphic = DnhValue::ToInt(L, 5);
+    int delay = DnhValue::ToInt(L, 6);
+    if (auto shot = engine->createShotA1(x, y, speed, angle, graphic, delay, script->GetType() == SCRIPT_TYPE_PLAYER))
     {
         script->addAutoDeleteTargetObjectId(shot->getID());
         lua_pushnumber(L, shot->getID());
@@ -1740,15 +1740,15 @@ static int CreateShotA2(lua_State* L)
 {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
-    double x = DnhValue::toNum(L, 1);
-    double y = DnhValue::toNum(L, 2);
-    double speed = DnhValue::toNum(L, 3);
-    double angle = DnhValue::toNum(L, 4);
-    double accel = DnhValue::toNum(L, 5);
-    double maxSpeed = DnhValue::toNum(L, 6);
-    int graphic = DnhValue::toInt(L, 7);
-    int delay = DnhValue::toInt(L, 8);
-    if (auto shot = engine->createShotA2(x, y, speed, angle, accel, maxSpeed, graphic, delay, script->getType() == SCRIPT_TYPE_PLAYER))
+    double x = DnhValue::ToNum(L, 1);
+    double y = DnhValue::ToNum(L, 2);
+    double speed = DnhValue::ToNum(L, 3);
+    double angle = DnhValue::ToNum(L, 4);
+    double accel = DnhValue::ToNum(L, 5);
+    double maxSpeed = DnhValue::ToNum(L, 6);
+    int graphic = DnhValue::ToInt(L, 7);
+    int delay = DnhValue::ToInt(L, 8);
+    if (auto shot = engine->createShotA2(x, y, speed, angle, accel, maxSpeed, graphic, delay, script->GetType() == SCRIPT_TYPE_PLAYER))
     {
         script->addAutoDeleteTargetObjectId(shot->getID());
         lua_pushnumber(L, shot->getID());
@@ -1763,12 +1763,12 @@ static int CreateShotOA1(lua_State* L)
 {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
-    int objId = DnhValue::toInt(L, 1);
-    double speed = DnhValue::toNum(L, 2);
-    double angle = DnhValue::toNum(L, 3);
-    int graphic = DnhValue::toInt(L, 4);
-    int delay = DnhValue::toInt(L, 5);
-    if (auto shot = engine->createShotOA1(objId, speed, angle, graphic, delay, script->getType() == SCRIPT_TYPE_PLAYER))
+    int objId = DnhValue::ToInt(L, 1);
+    double speed = DnhValue::ToNum(L, 2);
+    double angle = DnhValue::ToNum(L, 3);
+    int graphic = DnhValue::ToInt(L, 4);
+    int delay = DnhValue::ToInt(L, 5);
+    if (auto shot = engine->createShotOA1(objId, speed, angle, graphic, delay, script->GetType() == SCRIPT_TYPE_PLAYER))
     {
         script->addAutoDeleteTargetObjectId(shot->getID());
         lua_pushnumber(L, shot->getID());
@@ -1783,13 +1783,13 @@ static int CreateShotB1(lua_State* L)
 {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
-    double x = DnhValue::toNum(L, 1);
-    double y = DnhValue::toNum(L, 2);
-    double speedX = DnhValue::toNum(L, 3);
-    double speedY = DnhValue::toNum(L, 4);
-    int graphic = DnhValue::toInt(L, 5);
-    int delay = DnhValue::toInt(L, 6);
-    if (auto shot = engine->createShotB1(x, y, speedX, speedY, graphic, delay, script->getType() == SCRIPT_TYPE_PLAYER))
+    double x = DnhValue::ToNum(L, 1);
+    double y = DnhValue::ToNum(L, 2);
+    double speedX = DnhValue::ToNum(L, 3);
+    double speedY = DnhValue::ToNum(L, 4);
+    int graphic = DnhValue::ToInt(L, 5);
+    int delay = DnhValue::ToInt(L, 6);
+    if (auto shot = engine->createShotB1(x, y, speedX, speedY, graphic, delay, script->GetType() == SCRIPT_TYPE_PLAYER))
     {
         script->addAutoDeleteTargetObjectId(shot->getID());
         lua_pushnumber(L, shot->getID());
@@ -1804,17 +1804,17 @@ static int CreateShotB2(lua_State* L)
 {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
-    double x = DnhValue::toNum(L, 1);
-    double y = DnhValue::toNum(L, 2);
-    double speedX = DnhValue::toNum(L, 3);
-    double speedY = DnhValue::toNum(L, 4);
-    double accelX = DnhValue::toNum(L, 5);
-    double accelY = DnhValue::toNum(L, 6);
-    double maxSpeedX = DnhValue::toNum(L, 7);
-    double maxSpeedY = DnhValue::toNum(L, 8);
-    int graphic = DnhValue::toInt(L, 9);
-    int delay = DnhValue::toInt(L, 10);
-    if (auto shot = engine->createShotB2(x, y, speedX, speedY, accelX, accelY, maxSpeedX, maxSpeedY, graphic, delay, script->getType() == SCRIPT_TYPE_PLAYER))
+    double x = DnhValue::ToNum(L, 1);
+    double y = DnhValue::ToNum(L, 2);
+    double speedX = DnhValue::ToNum(L, 3);
+    double speedY = DnhValue::ToNum(L, 4);
+    double accelX = DnhValue::ToNum(L, 5);
+    double accelY = DnhValue::ToNum(L, 6);
+    double maxSpeedX = DnhValue::ToNum(L, 7);
+    double maxSpeedY = DnhValue::ToNum(L, 8);
+    int graphic = DnhValue::ToInt(L, 9);
+    int delay = DnhValue::ToInt(L, 10);
+    if (auto shot = engine->createShotB2(x, y, speedX, speedY, accelX, accelY, maxSpeedX, maxSpeedY, graphic, delay, script->GetType() == SCRIPT_TYPE_PLAYER))
     {
         script->addAutoDeleteTargetObjectId(shot->getID());
         lua_pushnumber(L, shot->getID());
@@ -1829,12 +1829,12 @@ static int CreateShotOB1(lua_State* L)
 {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
-    int objId = DnhValue::toInt(L, 1);
-    double speedX = DnhValue::toNum(L, 2);
-    double speedY = DnhValue::toNum(L, 3);
-    int graphic = DnhValue::toInt(L, 4);
-    int delay = DnhValue::toInt(L, 5);
-    if (auto shot = engine->createShotOB1(objId, speedX, speedY, graphic, delay, script->getType() == SCRIPT_TYPE_PLAYER))
+    int objId = DnhValue::ToInt(L, 1);
+    double speedX = DnhValue::ToNum(L, 2);
+    double speedY = DnhValue::ToNum(L, 3);
+    int graphic = DnhValue::ToInt(L, 4);
+    int delay = DnhValue::ToInt(L, 5);
+    if (auto shot = engine->createShotOB1(objId, speedX, speedY, graphic, delay, script->GetType() == SCRIPT_TYPE_PLAYER))
     {
         script->addAutoDeleteTargetObjectId(shot->getID());
         lua_pushnumber(L, shot->getID());
@@ -1849,15 +1849,15 @@ static int CreateLooseLaserA1(lua_State* L)
 {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
-    double x = DnhValue::toNum(L, 1);
-    double y = DnhValue::toNum(L, 2);
-    double speed = DnhValue::toNum(L, 3);
-    double angle = DnhValue::toNum(L, 4);
-    double laserLength = DnhValue::toNum(L, 5);
-    double laserWidth = DnhValue::toNum(L, 6);
-    int graphic = DnhValue::toInt(L, 7);
-    int delay = DnhValue::toInt(L, 8);
-    if (auto laser = engine->createLooseLaserA1(x, y, speed, angle, laserLength, laserWidth, graphic, delay, script->getType() == SCRIPT_TYPE_PLAYER))
+    double x = DnhValue::ToNum(L, 1);
+    double y = DnhValue::ToNum(L, 2);
+    double speed = DnhValue::ToNum(L, 3);
+    double angle = DnhValue::ToNum(L, 4);
+    double laserLength = DnhValue::ToNum(L, 5);
+    double laserWidth = DnhValue::ToNum(L, 6);
+    int graphic = DnhValue::ToInt(L, 7);
+    int delay = DnhValue::ToInt(L, 8);
+    if (auto laser = engine->createLooseLaserA1(x, y, speed, angle, laserLength, laserWidth, graphic, delay, script->GetType() == SCRIPT_TYPE_PLAYER))
     {
         script->addAutoDeleteTargetObjectId(laser->getID());
         lua_pushnumber(L, laser->getID());
@@ -1872,15 +1872,15 @@ static int CreateStraightLaserA1(lua_State* L)
 {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
-    double x = DnhValue::toNum(L, 1);
-    double y = DnhValue::toNum(L, 2);
-    double angle = DnhValue::toNum(L, 3);
-    double laserLength = DnhValue::toNum(L, 4);
-    double laserWidth = DnhValue::toNum(L, 5);
-    int deleteFrame = DnhValue::toInt(L, 6);
-    int graphic = DnhValue::toInt(L, 7);
-    int delay = DnhValue::toInt(L, 8);
-    if (auto laser = engine->createStraightLaserA1(x, y, angle, laserLength, laserWidth, deleteFrame, graphic, delay, script->getType() == SCRIPT_TYPE_PLAYER))
+    double x = DnhValue::ToNum(L, 1);
+    double y = DnhValue::ToNum(L, 2);
+    double angle = DnhValue::ToNum(L, 3);
+    double laserLength = DnhValue::ToNum(L, 4);
+    double laserWidth = DnhValue::ToNum(L, 5);
+    int deleteFrame = DnhValue::ToInt(L, 6);
+    int graphic = DnhValue::ToInt(L, 7);
+    int delay = DnhValue::ToInt(L, 8);
+    if (auto laser = engine->createStraightLaserA1(x, y, angle, laserLength, laserWidth, deleteFrame, graphic, delay, script->GetType() == SCRIPT_TYPE_PLAYER))
     {
         script->addAutoDeleteTargetObjectId(laser->getID());
         lua_pushnumber(L, laser->getID());
@@ -1895,15 +1895,15 @@ static int CreateCurveLaserA1(lua_State* L)
 {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
-    double x = DnhValue::toNum(L, 1);
-    double y = DnhValue::toNum(L, 2);
-    double speed = DnhValue::toNum(L, 3);
-    double angle = DnhValue::toNum(L, 4);
-    double laserLength = DnhValue::toNum(L, 5);
-    double laserWidth = DnhValue::toNum(L, 6);
-    int graphic = DnhValue::toInt(L, 7);
-    int delay = DnhValue::toInt(L, 8);
-    if (auto laser = engine->createCurveLaserA1(x, y, speed, angle, laserLength, laserWidth, graphic, delay, script->getType() == SCRIPT_TYPE_PLAYER))
+    double x = DnhValue::ToNum(L, 1);
+    double y = DnhValue::ToNum(L, 2);
+    double speed = DnhValue::ToNum(L, 3);
+    double angle = DnhValue::ToNum(L, 4);
+    double laserLength = DnhValue::ToNum(L, 5);
+    double laserWidth = DnhValue::ToNum(L, 6);
+    int graphic = DnhValue::ToInt(L, 7);
+    int delay = DnhValue::ToInt(L, 8);
+    if (auto laser = engine->createCurveLaserA1(x, y, speed, angle, laserLength, laserWidth, graphic, delay, script->GetType() == SCRIPT_TYPE_PLAYER))
     {
         script->addAutoDeleteTargetObjectId(laser->getID());
         lua_pushnumber(L, laser->getID());
@@ -1917,9 +1917,9 @@ static int CreateCurveLaserA1(lua_State* L)
 static int SetShotIntersectionCircle(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    double x = DnhValue::toNum(L, 1);
-    double y = DnhValue::toNum(L, 2);
-    double r = DnhValue::toNum(L, 3);
+    double x = DnhValue::ToNum(L, 1);
+    double y = DnhValue::ToNum(L, 2);
+    double r = DnhValue::ToNum(L, 3);
     engine->setShotIntersectoinCicle(x, y, r);
     return 0;
 }
@@ -1927,11 +1927,11 @@ static int SetShotIntersectionCircle(lua_State* L)
 static int SetShotIntersectionLine(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    double x1 = DnhValue::toNum(L, 1);
-    double y1 = DnhValue::toNum(L, 2);
-    double x2 = DnhValue::toNum(L, 3);
-    double y2 = DnhValue::toNum(L, 4);
-    double width = DnhValue::toNum(L, 5);
+    double x1 = DnhValue::ToNum(L, 1);
+    double y1 = DnhValue::ToNum(L, 2);
+    double x2 = DnhValue::ToNum(L, 3);
+    double y2 = DnhValue::ToNum(L, 4);
+    double width = DnhValue::ToNum(L, 5);
     engine->setShotIntersectoinLine(x1, y1, x2, y2, width);
     return 0;
 }
@@ -1940,44 +1940,44 @@ static int GetShotIdInCircleA1(lua_State* L)
 {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
-    double x = DnhValue::toNum(L, 1);
-    double y = DnhValue::toNum(L, 2);
-    double r = DnhValue::toNum(L, 3);
+    double x = DnhValue::ToNum(L, 1);
+    double y = DnhValue::ToNum(L, 2);
+    double r = DnhValue::ToNum(L, 3);
     DnhArray ids;
-    for (auto& shot : engine->getShotInCircle(x, y, r, script->getType() == SCRIPT_TYPE_PLAYER ? TARGET_ENEMY : TARGET_PLAYER))
+    for (auto& shot : engine->getShotInCircle(x, y, r, script->GetType() == SCRIPT_TYPE_PLAYER ? TARGET_ENEMY : TARGET_PLAYER))
     {
         if (shot)
         {
-            ids.pushBack(std::make_unique<DnhReal>((double)shot->getID()));
+            ids.PushBack(std::make_unique<DnhReal>((double)shot->getID()));
         }
     }
-    ids.push(L);
+    ids.Push(L);
     return 1;
 }
 
 static int GetShotIdInCircleA2(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    double x = DnhValue::toNum(L, 1);
-    double y = DnhValue::toNum(L, 2);
-    double r = DnhValue::toNum(L, 3);
-    int target = DnhValue::toInt(L, 4);
+    double x = DnhValue::ToNum(L, 1);
+    double y = DnhValue::ToNum(L, 2);
+    double r = DnhValue::ToNum(L, 3);
+    int target = DnhValue::ToInt(L, 4);
     DnhArray ids;
     for (auto& shot : engine->getShotInCircle(x, y, r, target))
     {
         if (shot)
         {
-            ids.pushBack(std::make_unique<DnhReal>((double)shot->getID()));
+            ids.PushBack(std::make_unique<DnhReal>((double)shot->getID()));
         }
     }
-    ids.push(L);
+    ids.Push(L);
     return 1;
 }
 
 static int GetShotCount(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int target = DnhValue::toInt(L, 1);
+    int target = DnhValue::ToInt(L, 1);
     int cnt = 0;
     switch (target)
     {
@@ -1998,10 +1998,10 @@ static int GetShotCount(lua_State* L)
 static int SetShotAutoDeleteClip(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    double l = DnhValue::toNum(L, 1);
-    double t = DnhValue::toNum(L, 2);
-    double r = DnhValue::toNum(L, 3);
-    double b = DnhValue::toNum(L, 4);
+    double l = DnhValue::ToNum(L, 1);
+    double t = DnhValue::ToNum(L, 2);
+    double r = DnhValue::ToNum(L, 3);
+    double b = DnhValue::ToNum(L, 4);
     engine->setShotAutoDeleteClip(l, t, r, b);
     return 0;
 }
@@ -2009,18 +2009,18 @@ static int SetShotAutoDeleteClip(lua_State* L)
 static int GetShotDataInfoA1(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int id = DnhValue::toInt(L, 1);
-    bool isPlayerShot = DnhValue::toInt(L, 2) == TARGET_PLAYER;
-    int infoType = DnhValue::toInt(L, 3);
+    int id = DnhValue::ToInt(L, 1);
+    bool isPlayerShot = DnhValue::ToInt(L, 2) == TARGET_PLAYER;
+    int infoType = DnhValue::ToInt(L, 3);
     if (auto shotData = isPlayerShot ? engine->getPlayerShotData(id) : engine->getEnemyShotData(id))
     {
         switch (infoType)
         {
             case INFO_RECT:
-                DnhArray(std::vector<double>{(double)shotData->rect.left, (double)shotData->rect.top, (double)shotData->rect.left, (double)shotData->rect.bottom}).push(L);
+                DnhArray(std::vector<double>{(double)shotData->rect.left, (double)shotData->rect.top, (double)shotData->rect.left, (double)shotData->rect.bottom}).Push(L);
                 break;
             case INFO_DELAY_COLOR:
-                DnhArray(std::vector<double>{(double)shotData->delayColor.getR(), (double)shotData->delayColor.getG(), (double)shotData->delayColor.getB()}).push(L);
+                DnhArray(std::vector<double>{(double)shotData->delayColor.getR(), (double)shotData->delayColor.getG(), (double)shotData->delayColor.getB()}).Push(L);
                 break;
             case INFO_BLEND:
                 lua_pushnumber(L, shotData->render);
@@ -2039,9 +2039,9 @@ static int GetShotDataInfoA1(lua_State* L)
                 DnhArray colList;
                 for (const auto& col : shotData->collisions)
                 {
-                    colList.pushBack(std::make_unique<DnhArray>(std::vector<double>{col.r, col.x, col.y}));
+                    colList.PushBack(std::make_unique<DnhArray>(std::vector<double>{col.r, col.x, col.y}));
                 }
-                colList.push(L);
+                colList.Push(L);
             }
             break;
             default:
@@ -2056,7 +2056,7 @@ static int GetShotDataInfoA1(lua_State* L)
 static int StartShotScript(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    auto path = DnhValue::toString(L, 1);
+    auto path = DnhValue::ToString(L, 1);
     engine->startShotScript(path, getSourcePos(L));
     return 0;
 }
@@ -2065,10 +2065,10 @@ static int CreateItemA1(lua_State* L)
 {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
-    int type = DnhValue::toInt(L, 1);
-    double x = DnhValue::toNum(L, 2);
-    double y = DnhValue::toNum(L, 3);
-    int64_t score = DnhValue::toNum(L, 4);
+    int type = DnhValue::ToInt(L, 1);
+    double x = DnhValue::ToNum(L, 2);
+    double y = DnhValue::ToNum(L, 3);
+    int64_t score = DnhValue::ToNum(L, 4);
     if (auto item = engine->createItemA1(type, x, y, score))
     {
         script->addAutoDeleteTargetObjectId(item->getID());
@@ -2084,12 +2084,12 @@ static int CreateItemA2(lua_State* L)
 {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
-    int type = DnhValue::toInt(L, 1);
-    double x = DnhValue::toNum(L, 2);
-    double y = DnhValue::toNum(L, 3);
-    double destX = DnhValue::toNum(L, 4);
-    double destY = DnhValue::toNum(L, 5);
-    int64_t score = DnhValue::toNum(L, 6);
+    int type = DnhValue::ToInt(L, 1);
+    double x = DnhValue::ToNum(L, 2);
+    double y = DnhValue::ToNum(L, 3);
+    double destX = DnhValue::ToNum(L, 4);
+    double destY = DnhValue::ToNum(L, 5);
+    int64_t score = DnhValue::ToNum(L, 6);
     if (auto item = engine->createItemA2(type, x, y, destX, destY, score))
     {
         script->addAutoDeleteTargetObjectId(item->getID());
@@ -2105,10 +2105,10 @@ static int CreateItemU1(lua_State* L)
 {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
-    int itemDataId = DnhValue::toInt(L, 1);
-    double x = DnhValue::toNum(L, 2);
-    double y = DnhValue::toNum(L, 3);
-    int64_t score = DnhValue::toNum(L, 4);
+    int itemDataId = DnhValue::ToInt(L, 1);
+    double x = DnhValue::ToNum(L, 2);
+    double y = DnhValue::ToNum(L, 3);
+    int64_t score = DnhValue::ToNum(L, 4);
     if (auto item = engine->createItemU1(itemDataId, x, y, score))
     {
         script->addAutoDeleteTargetObjectId(item->getID());
@@ -2124,12 +2124,12 @@ static int CreateItemU2(lua_State* L)
 {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
-    int itemDataId = DnhValue::toInt(L, 1);
-    double x = DnhValue::toNum(L, 2);
-    double y = DnhValue::toNum(L, 3);
-    double destX = DnhValue::toNum(L, 4);
-    double destY = DnhValue::toNum(L, 5);
-    int64_t score = DnhValue::toNum(L, 6);
+    int itemDataId = DnhValue::ToInt(L, 1);
+    double x = DnhValue::ToNum(L, 2);
+    double y = DnhValue::ToNum(L, 3);
+    double destX = DnhValue::ToNum(L, 4);
+    double destY = DnhValue::ToNum(L, 5);
+    int64_t score = DnhValue::ToNum(L, 6);
     if (auto item = engine->createItemU2(itemDataId, x, y, destX, destY, score))
     {
         script->addAutoDeleteTargetObjectId(item->getID());
@@ -2151,7 +2151,7 @@ static int CollectAllItems(lua_State* L)
 static int CollectItemsByType(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int type = DnhValue::toInt(L, 1);
+    int type = DnhValue::ToInt(L, 1);
     engine->collectItemsByType(type);
     return 0;
 }
@@ -2159,9 +2159,9 @@ static int CollectItemsByType(lua_State* L)
 static int CollectItemsInCircle(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    double x = DnhValue::toNum(L, 1);
-    double y = DnhValue::toNum(L, 2);
-    double r = DnhValue::toNum(L, 3);
+    double x = DnhValue::ToNum(L, 1);
+    double y = DnhValue::ToNum(L, 2);
+    double r = DnhValue::ToNum(L, 3);
     engine->collectItemsInCircle(x, y, r);
     return 0;
 }
@@ -2176,7 +2176,7 @@ static int CancelCollectItems(lua_State* L)
 static int StartItemScript(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    auto path = DnhValue::toString(L, 1);
+    auto path = DnhValue::ToString(L, 1);
     engine->startItemScript(path, getSourcePos(L));
     return 0;
 }
@@ -2184,7 +2184,7 @@ static int StartItemScript(lua_State* L)
 static int SetDefaultBonusItemEnable(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    bool enable = DnhValue::toBool(L, 1);
+    bool enable = DnhValue::ToBool(L, 1);
     engine->setDefaultBonusItemEnable(enable);
     return 0;
 }
@@ -2192,7 +2192,7 @@ static int SetDefaultBonusItemEnable(lua_State* L)
 static int LoadItemData(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring path = DnhValue::toString(L, 1);
+    std::wstring path = DnhValue::ToString(L, 1);
     engine->loadItemData(path, getSourcePos(L));
     return 0;
 }
@@ -2200,7 +2200,7 @@ static int LoadItemData(lua_State* L)
 static int ReloadItemData(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring path = DnhValue::toString(L, 1);
+    std::wstring path = DnhValue::ToString(L, 1);
     engine->reloadItemData(path, getSourcePos(L));
     return 0;
 }
@@ -2209,8 +2209,8 @@ static int StartSlow(lua_State* L)
 {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
-    int fps = DnhValue::toInt(L, 2);
-    engine->startSlow(fps, script->getType() == SCRIPT_TYPE_PLAYER);
+    int fps = DnhValue::ToInt(L, 2);
+    engine->startSlow(fps, script->GetType() == SCRIPT_TYPE_PLAYER);
     return 0;
 }
 
@@ -2218,20 +2218,20 @@ static int StopSlow(lua_State* L)
 {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
-    engine->stopSlow(script->getType() == SCRIPT_TYPE_PLAYER);
+    engine->stopSlow(script->GetType() == SCRIPT_TYPE_PLAYER);
     return 0;
 }
 
 static int IsIntersected_Line_Circle(lua_State* L)
 {
-    double x1 = DnhValue::toNum(L, 1);
-    double y1 = DnhValue::toNum(L, 2);
-    double x2 = DnhValue::toNum(L, 3);
-    double y2 = DnhValue::toNum(L, 4);
-    double width = DnhValue::toNum(L, 5);
-    double cx = DnhValue::toNum(L, 6);
-    double cy = DnhValue::toNum(L, 7);
-    double r = DnhValue::toNum(L, 8);
+    double x1 = DnhValue::ToNum(L, 1);
+    double y1 = DnhValue::ToNum(L, 2);
+    double x2 = DnhValue::ToNum(L, 3);
+    double y2 = DnhValue::ToNum(L, 4);
+    double width = DnhValue::ToNum(L, 5);
+    double cx = DnhValue::ToNum(L, 6);
+    double cy = DnhValue::ToNum(L, 7);
+    double r = DnhValue::ToNum(L, 8);
     lua_pushboolean(L, IsIntersectedLineCircle(x1, y1, x2, y2, width, cx, cy, r));
     return 1;
 }
@@ -2239,8 +2239,8 @@ static int IsIntersected_Line_Circle(lua_State* L)
 static int IsIntersected_Obj_Obj(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId1 = DnhValue::toInt(L, 1);
-    int objId2 = DnhValue::toInt(L, 2);
+    int objId1 = DnhValue::ToInt(L, 1);
+    int objId2 = DnhValue::ToInt(L, 2);
     auto obj1 = engine->getObject<ObjCol>(objId1);
     auto obj2 = engine->getObject<ObjCol>(objId2);
     lua_pushboolean(L, obj1 && obj2 && obj1->isIntersected(obj2));
@@ -2250,8 +2250,8 @@ static int IsIntersected_Obj_Obj(lua_State* L)
 static int GetObjectDistance(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId1 = DnhValue::toInt(L, 1);
-    int objId2 = DnhValue::toInt(L, 2);
+    int objId1 = DnhValue::ToInt(L, 1);
+    int objId2 = DnhValue::ToInt(L, 2);
     if (auto obj1 = engine->getObject<ObjRender>(objId1))
     {
         if (auto obj2 = engine->getObject<ObjRender>(objId2))
@@ -2269,13 +2269,13 @@ static int GetObjectDistance(lua_State* L)
 static int GetObject2dPosition(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjRender>(objId))
     {
-        DnhArray(engine->get2DPosition(obj->getX(), obj->getY(), obj->getZ(), obj->isStgSceneObject())).push(L);
+        DnhArray(engine->get2DPosition(obj->getX(), obj->getY(), obj->getZ(), obj->isStgSceneObject())).Push(L);
     } else
     {
-        DnhArray(Point2D(0, 0)).push(L);
+        DnhArray(Point2D(0, 0)).Push(L);
     }
     return 1;
 }
@@ -2284,10 +2284,10 @@ static int Get2dPosition(lua_State* L)
 {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
-    float x = DnhValue::toNum(L, 1);
-    float y = DnhValue::toNum(L, 2);
-    float z = DnhValue::toNum(L, 3);
-    DnhArray(engine->get2DPosition(x, y, z, script->isStgSceneScript())).push(L);
+    float x = DnhValue::ToNum(L, 1);
+    float y = DnhValue::ToNum(L, 2);
+    float z = DnhValue::ToNum(L, 3);
+    DnhArray(engine->get2DPosition(x, y, z, script->isStgSceneScript())).Push(L);
     return 1;
 }
 
@@ -2302,7 +2302,7 @@ static int SetScriptResult(lua_State* L)
 {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
-    auto result = DnhValue::get(L, 1);
+    auto result = DnhValue::Get(L, 1);
     engine->setScriptResult(script->getID(), std::move(result));
     return 0;
 }
@@ -2310,14 +2310,14 @@ static int SetScriptResult(lua_State* L)
 static int GetScriptResult(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int scriptId = DnhValue::toInt(L, 1);
-    engine->getScriptResult(scriptId)->push(L);
+    int scriptId = DnhValue::ToInt(L, 1);
+    engine->getScriptResult(scriptId)->Push(L);
     return 1;
 }
 
 static int SetAutoDeleteObject(lua_State* L)
 {
-    bool enable = DnhValue::toBool(L, 1);
+    bool enable = DnhValue::ToBool(L, 1);
     Script* script = getScript(L);
     script->setAutoDeleteObjectEnable(enable);
     return 0;
@@ -2326,13 +2326,13 @@ static int SetAutoDeleteObject(lua_State* L)
 static int NotifyEvent(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int scriptId = DnhValue::toInt(L, 1);
-    int eventType = DnhValue::toInt(L, 2);
-    auto arg = DnhValue::get(L, 3);
+    int scriptId = DnhValue::ToInt(L, 1);
+    int eventType = DnhValue::ToInt(L, 2);
+    auto arg = DnhValue::Get(L, 3);
     if (auto script = engine->getScript(scriptId))
     {
         auto args = std::make_unique<DnhArray>();
-        args->pushBack(std::move(arg));
+        args->PushBack(std::move(arg));
         script->notifyEvent(eventType, args);
     }
     return 0;
@@ -2341,10 +2341,10 @@ static int NotifyEvent(lua_State* L)
 static int NotifyEventAll(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int eventType = DnhValue::toInt(L, 1);
-    auto arg = DnhValue::get(L, 2);
+    int eventType = DnhValue::ToInt(L, 1);
+    auto arg = DnhValue::Get(L, 2);
     auto args = std::make_unique<DnhArray>();
-    args->pushBack(std::move(arg));
+    args->PushBack(std::move(arg));
     engine->notifyEventAll(eventType, args);
     return 0;
 }
@@ -2352,8 +2352,8 @@ static int NotifyEventAll(lua_State* L)
 static int GetScriptInfoA1(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    auto path = DnhValue::toString(L, 1);
-    int infoType = DnhValue::toInt(L, 2);
+    auto path = DnhValue::ToString(L, 1);
+    int infoType = DnhValue::ToInt(L, 2);
     ScriptInfo info = engine->getScriptInfo(path, getSourcePos(L));
     switch (infoType)
     {
@@ -2361,22 +2361,22 @@ static int GetScriptInfoA1(lua_State* L)
             lua_pushnumber(L, getScriptTypeConstFromName(info.type));
             break;
         case INFO_SCRIPT_PATH:
-            DnhArray(info.path).push(L);
+            DnhArray(info.path).Push(L);
             break;
         case INFO_SCRIPT_ID:
-            DnhArray(info.id).push(L);
+            DnhArray(info.id).Push(L);
             break;
         case INFO_SCRIPT_TITLE:
-            DnhArray(info.title).push(L);
+            DnhArray(info.title).Push(L);
             break;
         case INFO_SCRIPT_TEXT:
-            DnhArray(info.text).push(L);
+            DnhArray(info.text).Push(L);
             break;
         case INFO_SCRIPT_IMAGE:
-            DnhArray(info.imagePath).push(L);
+            DnhArray(info.imagePath).Push(L);
             break;
         case INFO_SCRIPT_REPLAY_NAME:
-            DnhArray(info.replayName).push(L);
+            DnhArray(info.replayName).Push(L);
             break;
         default:
             lua_pushnumber(L, -1);
@@ -2388,7 +2388,7 @@ static int GetScriptInfoA1(lua_State* L)
 static int Obj_Delete(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     engine->deleteObject(objId);
     return 0;
 }
@@ -2396,7 +2396,7 @@ static int Obj_Delete(lua_State* L)
 static int Obj_IsDeleted(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     lua_pushboolean(L, engine->isObjectDeleted(objId));
     return 1;
 }
@@ -2404,8 +2404,8 @@ static int Obj_IsDeleted(lua_State* L)
 static int Obj_SetVisible(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    bool b = DnhValue::toBool(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    bool b = DnhValue::ToBool(L, 2);
     if (auto obj = engine->getObject<ObjRender>(objId))
     {
         obj->setVisible(b);
@@ -2416,7 +2416,7 @@ static int Obj_SetVisible(lua_State* L)
 static int Obj_IsVisible(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     auto obj = engine->getObject<ObjRender>(objId);
     lua_pushboolean(L, obj && obj->isVisible());
     return 1;
@@ -2425,8 +2425,8 @@ static int Obj_IsVisible(lua_State* L)
 static int Obj_SetRenderPriority(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double p = DnhValue::toNum(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    double p = DnhValue::ToNum(L, 2);
     if (auto obj = engine->getObject<ObjRender>(objId))
     {
         engine->setObjectRenderPriority(obj, (int)(p * MAX_RENDER_PRIORITY));
@@ -2437,8 +2437,8 @@ static int Obj_SetRenderPriority(lua_State* L)
 static int Obj_SetRenderPriorityI(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int p = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int p = DnhValue::ToInt(L, 2);
     if (auto obj = engine->getObject<ObjRender>(objId))
     {
         engine->setObjectRenderPriority(obj, p);
@@ -2449,7 +2449,7 @@ static int Obj_SetRenderPriorityI(lua_State* L)
 static int Obj_GetRenderPriority(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     auto obj = engine->getObject<ObjRender>(objId);
     lua_pushnumber(L, obj ? 1.0 * obj->getRenderPriority() / MAX_RENDER_PRIORITY : 0);
     return 1;
@@ -2458,7 +2458,7 @@ static int Obj_GetRenderPriority(lua_State* L)
 static int Obj_GetRenderPriorityI(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     auto obj = engine->getObject<ObjRender>(objId);
     lua_pushnumber(L, obj ? obj->getRenderPriority() : 0);
     return 1;
@@ -2467,11 +2467,11 @@ static int Obj_GetRenderPriorityI(lua_State* L)
 static int Obj_GetValue(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    std::wstring key = DnhValue::toString(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    std::wstring key = DnhValue::ToString(L, 2);
     if (auto obj = engine->getObject<Obj>(objId))
     {
-        obj->getValue(key)->push(L);
+        obj->getValue(key)->Push(L);
         return 1;
     }
     return 0;
@@ -2480,15 +2480,15 @@ static int Obj_GetValue(lua_State* L)
 static int Obj_GetValueD(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    std::wstring key = DnhValue::toString(L, 2);
-    auto defaultValue = DnhValue::get(L, 3);
+    int objId = DnhValue::ToInt(L, 1);
+    std::wstring key = DnhValue::ToString(L, 2);
+    auto defaultValue = DnhValue::Get(L, 3);
     if (auto obj = engine->getObject<Obj>(objId))
     {
-        obj->getValueD(key, std::move(defaultValue))->push(L);
+        obj->getValueD(key, std::move(defaultValue))->Push(L);
     } else
     {
-        defaultValue->push(L);
+        defaultValue->Push(L);
     }
     return 1;
 }
@@ -2496,9 +2496,9 @@ static int Obj_GetValueD(lua_State* L)
 static int Obj_SetValue(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    std::wstring key = DnhValue::toString(L, 2);
-    auto value = DnhValue::get(L, 3);
+    int objId = DnhValue::ToInt(L, 1);
+    std::wstring key = DnhValue::ToString(L, 2);
+    auto value = DnhValue::Get(L, 3);
     if (auto obj = engine->getObject<Obj>(objId))
     {
         obj->setValue(key, std::move(value));
@@ -2509,8 +2509,8 @@ static int Obj_SetValue(lua_State* L)
 static int Obj_DeleteValue(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    std::wstring key = DnhValue::toString(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    std::wstring key = DnhValue::ToString(L, 2);
     if (auto obj = engine->getObject<Obj>(objId))
     {
         obj->deleteValue(key);
@@ -2521,8 +2521,8 @@ static int Obj_DeleteValue(lua_State* L)
 static int Obj_IsValueExists(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    std::wstring key = DnhValue::toString(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    std::wstring key = DnhValue::ToString(L, 2);
     auto obj = engine->getObject<Obj>(objId);
     lua_pushboolean(L, obj && obj->isValueExists(key));
     return 1;
@@ -2531,10 +2531,10 @@ static int Obj_IsValueExists(lua_State* L)
 static int Obj_GetType(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<Obj>(objId))
     {
-        lua_pushnumber(L, obj->getType());
+        lua_pushnumber(L, obj->GetType());
     } else
     {
         lua_pushnumber(L, -1);
@@ -2546,8 +2546,8 @@ template <void (ObjRender::*func)(float)>
 static int ObjRender_Set(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    float v = DnhValue::toNum(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    float v = DnhValue::ToNum(L, 2);
     if (auto obj = engine->getObject<ObjRender>(objId))
     {
         ((obj.get())->*func)(v);
@@ -2562,10 +2562,10 @@ static int ObjRender_SetZ(lua_State* L) { return ObjRender_Set<&ObjRender::setZ>
 static int ObjRender_SetPosition(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double x = DnhValue::toNum(L, 2);
-    double y = DnhValue::toNum(L, 3);
-    double z = DnhValue::toNum(L, 4);
+    int objId = DnhValue::ToInt(L, 1);
+    double x = DnhValue::ToNum(L, 2);
+    double y = DnhValue::ToNum(L, 3);
+    double z = DnhValue::ToNum(L, 4);
     if (auto obj = engine->getObject<ObjRender>(objId)) { obj->setPosition(x, y, z); }
     return 0;
 }
@@ -2577,10 +2577,10 @@ static int ObjRender_SetAngleZ(lua_State* L) { return ObjRender_Set<&ObjRender::
 static int ObjRender_SetAngleXYZ(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double rx = DnhValue::toNum(L, 2);
-    double ry = DnhValue::toNum(L, 3);
-    double rz = DnhValue::toNum(L, 4);
+    int objId = DnhValue::ToInt(L, 1);
+    double rx = DnhValue::ToNum(L, 2);
+    double ry = DnhValue::ToNum(L, 3);
+    double rz = DnhValue::ToNum(L, 4);
     if (auto obj = engine->getObject<ObjRender>(objId)) { obj->setAngleXYZ(rx, ry, rz); }
     return 0;
 }
@@ -2592,10 +2592,10 @@ static int ObjRender_SetScaleZ(lua_State* L) { return ObjRender_Set<&ObjRender::
 static int ObjRender_SetScaleXYZ(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double sx = DnhValue::toNum(L, 2);
-    double sy = DnhValue::toNum(L, 3);
-    double sz = DnhValue::toNum(L, 4);
+    int objId = DnhValue::ToInt(L, 1);
+    double sx = DnhValue::ToNum(L, 2);
+    double sy = DnhValue::ToNum(L, 3);
+    double sz = DnhValue::ToNum(L, 4);
     if (auto obj = engine->getObject<ObjRender>(objId)) { obj->setScaleXYZ(sx, sy, sz); }
     return 0;
 }
@@ -2603,10 +2603,10 @@ static int ObjRender_SetScaleXYZ(lua_State* L)
 static int ObjRender_SetColor(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int r = DnhValue::toInt(L, 2);
-    int g = DnhValue::toInt(L, 3);
-    int b = DnhValue::toInt(L, 4);
+    int objId = DnhValue::ToInt(L, 1);
+    int r = DnhValue::ToInt(L, 2);
+    int g = DnhValue::ToInt(L, 3);
+    int b = DnhValue::ToInt(L, 4);
     if (auto obj = engine->getObject<ObjRender>(objId))
     {
         obj->setColor(r, g, b);
@@ -2629,10 +2629,10 @@ static int ObjRender_SetColor(lua_State* L)
 static int ObjRender_SetColorHSV(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int h = DnhValue::toInt(L, 2);
-    int s = DnhValue::toInt(L, 3);
-    int v = DnhValue::toInt(L, 4);
+    int objId = DnhValue::ToInt(L, 1);
+    int h = DnhValue::ToInt(L, 2);
+    int s = DnhValue::ToInt(L, 3);
+    int v = DnhValue::ToInt(L, 4);
     if (auto obj = engine->getObject<ObjRender>(objId))
     {
         obj->setColorHSV(h, s, v);
@@ -2656,8 +2656,8 @@ static int ObjRender_SetColorHSV(lua_State* L)
 static int ObjRender_SetAlpha(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int a = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int a = DnhValue::ToInt(L, 2);
     if (auto obj = engine->getObject<ObjRender>(objId)) { obj->setAlpha(a); }
     if (auto obj = engine->getObject <ObjPrim>(objId))
     {
@@ -2674,8 +2674,8 @@ static int ObjRender_SetAlpha(lua_State* L)
 static int ObjRender_SetBlendType(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int blendType = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int blendType = DnhValue::ToInt(L, 2);
     if (auto obj = engine->getObject<ObjRender>(objId)) { obj->setBlendType(blendType); }
     return 0;
 }
@@ -2684,7 +2684,7 @@ template <float (ObjRender::*func)() const>
 static int ObjRender_Get(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     auto obj = engine->getObject<ObjRender>(objId);
     lua_pushnumber(L, obj ? ((obj.get())->*func)() : 0);
     return 1;
@@ -2703,7 +2703,7 @@ static int ObjRender_GetScaleZ(lua_State* L) { return ObjRender_Get<&ObjRender::
 static int ObjRender_GetBlendType(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     auto obj = engine->getObject<ObjRender>(objId);
     lua_pushnumber(L, obj ? obj->getBlendType() : BLEND_NONE);
     return 1;
@@ -2712,8 +2712,8 @@ static int ObjRender_GetBlendType(lua_State* L)
 static int ObjRender_SetZWrite(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    bool enable = DnhValue::toBool(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    bool enable = DnhValue::ToBool(L, 2);
     if (auto obj = engine->getObject<ObjRender>(objId)) { obj->setZWrite(enable); }
     return 0;
 }
@@ -2721,8 +2721,8 @@ static int ObjRender_SetZWrite(lua_State* L)
 static int ObjRender_SetZTest(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    bool enable = DnhValue::toBool(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    bool enable = DnhValue::ToBool(L, 2);
     if (auto obj = engine->getObject<ObjRender>(objId)) { obj->setZTest(enable); }
     return 0;
 }
@@ -2730,8 +2730,8 @@ static int ObjRender_SetZTest(lua_State* L)
 static int ObjRender_SetFogEnable(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    bool enable = DnhValue::toBool(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    bool enable = DnhValue::ToBool(L, 2);
     if (auto obj = engine->getObject<ObjRender>(objId)) { obj->setFogEnable(enable); }
     return 0;
 }
@@ -2739,8 +2739,8 @@ static int ObjRender_SetFogEnable(lua_State* L)
 static int ObjRender_SetPermitCamera(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    bool enable = DnhValue::toBool(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    bool enable = DnhValue::ToBool(L, 2);
     if (auto obj = engine->getObject<ObjRender>(objId)) { obj->setPermitCamera(enable); }
     return 0;
 }
@@ -2754,7 +2754,7 @@ static int ObjPrim_Create(lua_State* L)
 {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
-    int type = DnhValue::toInt(L, 1);
+    int type = DnhValue::ToInt(L, 1);
     int objId = ID_INVALID;
     switch (type)
     {
@@ -2786,8 +2786,8 @@ static int ObjPrim_Create(lua_State* L)
 static int ObjPrim_SetPrimitiveType(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int type = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int type = DnhValue::ToInt(L, 2);
     if (auto obj = engine->getObject<ObjPrim>(objId))
     {
         obj->setPrimitiveType(type);
@@ -2798,8 +2798,8 @@ static int ObjPrim_SetPrimitiveType(lua_State* L)
 static int ObjPrim_SetVertexCount(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int cnt = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int cnt = DnhValue::ToInt(L, 2);
     if (auto obj = engine->getObject<ObjPrim>(objId))
     {
         obj->setVertexCount(cnt);
@@ -2810,7 +2810,7 @@ static int ObjPrim_SetVertexCount(lua_State* L)
 static int ObjPrim_GetVertexCount(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     auto obj = engine->getObject<ObjPrim>(objId);
     lua_pushnumber(L, obj ? obj->getVertexCount() : 0);
     return 1;
@@ -2819,8 +2819,8 @@ static int ObjPrim_GetVertexCount(lua_State* L)
 static int ObjPrim_SetTexture(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    std::wstring name = DnhValue::toString(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    std::wstring name = DnhValue::ToString(L, 2);
     if (auto obj = engine->getObject<ObjPrim>(objId))
     {
         if (auto renderTarget = engine->getRenderTarget(name))
@@ -2837,11 +2837,11 @@ static int ObjPrim_SetTexture(lua_State* L)
 static int ObjPrim_SetVertexPosition(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int vIdx = DnhValue::toInt(L, 2);
-    double x = DnhValue::toNum(L, 3);
-    double y = DnhValue::toNum(L, 4);
-    double z = DnhValue::toNum(L, 5);
+    int objId = DnhValue::ToInt(L, 1);
+    int vIdx = DnhValue::ToInt(L, 2);
+    double x = DnhValue::ToNum(L, 3);
+    double y = DnhValue::ToNum(L, 4);
+    double z = DnhValue::ToNum(L, 5);
     if (auto obj = engine->getObject<ObjPrim>(objId))
     {
         obj->setVertexPosition(vIdx, x, y, z);
@@ -2852,27 +2852,27 @@ static int ObjPrim_SetVertexPosition(lua_State* L)
 static int ObjPrim_GetVertexPosition(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int vIdx = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int vIdx = DnhValue::ToInt(L, 2);
     auto obj = engine->getObject<ObjPrim>(objId);
     float x = obj ? obj->getVertexPositionX(vIdx) : 0;
     float y = obj ? obj->getVertexPositionY(vIdx) : 0;
     float z = obj ? obj->getVertexPositionZ(vIdx) : 0;
     DnhArray ret;
-    ret.pushBack(std::make_unique<DnhReal>(x));
-    ret.pushBack(std::make_unique<DnhReal>(y));
-    ret.pushBack(std::make_unique<DnhReal>(z));
-    ret.push(L);
+    ret.PushBack(std::make_unique<DnhReal>(x));
+    ret.PushBack(std::make_unique<DnhReal>(y));
+    ret.PushBack(std::make_unique<DnhReal>(z));
+    ret.Push(L);
     return 1;
 }
 
 static int ObjPrim_SetVertexUV(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int vIdx = DnhValue::toInt(L, 2);
-    double u = DnhValue::toNum(L, 3);
-    double v = DnhValue::toNum(L, 4);
+    int objId = DnhValue::ToInt(L, 1);
+    int vIdx = DnhValue::ToInt(L, 2);
+    double u = DnhValue::ToNum(L, 3);
+    double v = DnhValue::ToNum(L, 4);
     if (auto obj = engine->getObject<ObjPrim>(objId)) { obj->setVertexUV(vIdx, u, v); }
     return 0;
 }
@@ -2880,10 +2880,10 @@ static int ObjPrim_SetVertexUV(lua_State* L)
 static int ObjPrim_SetVertexUVT(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int vIdx = DnhValue::toInt(L, 2);
-    double u = DnhValue::toNum(L, 3);
-    double v = DnhValue::toNum(L, 4);
+    int objId = DnhValue::ToInt(L, 1);
+    int vIdx = DnhValue::ToInt(L, 2);
+    double u = DnhValue::ToNum(L, 3);
+    double v = DnhValue::ToNum(L, 4);
     if (auto obj = engine->getObject<ObjPrim>(objId)) { obj->setVertexUVT(vIdx, u, v); }
     return 0;
 }
@@ -2891,11 +2891,11 @@ static int ObjPrim_SetVertexUVT(lua_State* L)
 static int ObjPrim_SetVertexColor(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int vIdx = DnhValue::toInt(L, 2);
-    int r = DnhValue::toInt(L, 3);
-    int g = DnhValue::toInt(L, 4);
-    int b = DnhValue::toInt(L, 5);
+    int objId = DnhValue::ToInt(L, 1);
+    int vIdx = DnhValue::ToInt(L, 2);
+    int r = DnhValue::ToInt(L, 3);
+    int g = DnhValue::ToInt(L, 4);
+    int b = DnhValue::ToInt(L, 5);
     if (auto obj = engine->getObject<ObjPrim>(objId)) { obj->setVertexColor(vIdx, r, g, b); }
     return 0;
 }
@@ -2903,9 +2903,9 @@ static int ObjPrim_SetVertexColor(lua_State* L)
 static int ObjPrim_SetVertexAlpha(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int vIdx = DnhValue::toInt(L, 2);
-    int a = DnhValue::toInt(L, 3);
+    int objId = DnhValue::ToInt(L, 1);
+    int vIdx = DnhValue::ToInt(L, 2);
+    int a = DnhValue::ToInt(L, 3);
     if (auto obj = engine->getObject<ObjPrim>(objId)) { obj->setVertexAlpha(vIdx, a); }
     return 0;
 }
@@ -2913,11 +2913,11 @@ static int ObjPrim_SetVertexAlpha(lua_State* L)
 static int ObjSprite2D_SetSourceRect(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double l = DnhValue::toNum(L, 2);
-    double t = DnhValue::toNum(L, 3);
-    double r = DnhValue::toNum(L, 4);
-    double b = DnhValue::toNum(L, 5);
+    int objId = DnhValue::ToInt(L, 1);
+    double l = DnhValue::ToNum(L, 2);
+    double t = DnhValue::ToNum(L, 3);
+    double r = DnhValue::ToNum(L, 4);
+    double b = DnhValue::ToNum(L, 5);
     if (auto obj = engine->getObject<ObjSprite2D>(objId))
     {
         obj->setSourceRect(l, t, r, b);
@@ -2928,11 +2928,11 @@ static int ObjSprite2D_SetSourceRect(lua_State* L)
 static int ObjSprite2D_SetDestRect(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double l = DnhValue::toNum(L, 2);
-    double t = DnhValue::toNum(L, 3);
-    double r = DnhValue::toNum(L, 4);
-    double b = DnhValue::toNum(L, 5);
+    int objId = DnhValue::ToInt(L, 1);
+    double l = DnhValue::ToNum(L, 2);
+    double t = DnhValue::ToNum(L, 3);
+    double r = DnhValue::ToNum(L, 4);
+    double b = DnhValue::ToNum(L, 5);
     if (auto obj = engine->getObject<ObjSprite2D>(objId))
     {
         obj->setDestRect(l, t, r, b);
@@ -2943,7 +2943,7 @@ static int ObjSprite2D_SetDestRect(lua_State* L)
 static int ObjSprite2D_SetDestCenter(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjSprite2D>(objId))
     {
         obj->setDestCenter();
@@ -2954,11 +2954,11 @@ static int ObjSprite2D_SetDestCenter(lua_State* L)
 static int ObjSpriteList2D_SetSourceRect(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double l = DnhValue::toNum(L, 2);
-    double t = DnhValue::toNum(L, 3);
-    double r = DnhValue::toNum(L, 4);
-    double b = DnhValue::toNum(L, 5);
+    int objId = DnhValue::ToInt(L, 1);
+    double l = DnhValue::ToNum(L, 2);
+    double t = DnhValue::ToNum(L, 3);
+    double r = DnhValue::ToNum(L, 4);
+    double b = DnhValue::ToNum(L, 5);
     if (auto obj = engine->getObject<ObjSpriteList2D>(objId))
     {
         obj->setSourceRect(l, t, r, b);
@@ -2969,11 +2969,11 @@ static int ObjSpriteList2D_SetSourceRect(lua_State* L)
 static int ObjSpriteList2D_SetDestRect(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double l = DnhValue::toNum(L, 2);
-    double t = DnhValue::toNum(L, 3);
-    double r = DnhValue::toNum(L, 4);
-    double b = DnhValue::toNum(L, 5);
+    int objId = DnhValue::ToInt(L, 1);
+    double l = DnhValue::ToNum(L, 2);
+    double t = DnhValue::ToNum(L, 3);
+    double r = DnhValue::ToNum(L, 4);
+    double b = DnhValue::ToNum(L, 5);
     if (auto obj = engine->getObject<ObjSpriteList2D>(objId))
     {
         obj->setDestRect(l, t, r, b);
@@ -2984,7 +2984,7 @@ static int ObjSpriteList2D_SetDestRect(lua_State* L)
 static int ObjSpriteList2D_SetDestCenter(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjSpriteList2D>(objId))
     {
         obj->setDestCenter();
@@ -2995,7 +2995,7 @@ static int ObjSpriteList2D_SetDestCenter(lua_State* L)
 static int ObjSpriteList2D_AddVertex(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjSpriteList2D>(objId))
     {
         obj->addVertex();
@@ -3006,7 +3006,7 @@ static int ObjSpriteList2D_AddVertex(lua_State* L)
 static int ObjSpriteList2D_CloseVertex(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjSpriteList2D>(objId))
     {
         obj->closeVertex();
@@ -3017,7 +3017,7 @@ static int ObjSpriteList2D_CloseVertex(lua_State* L)
 static int ObjSpriteList2D_ClearVertexCount(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjSpriteList2D>(objId))
     {
         obj->clearVerexCount();
@@ -3028,11 +3028,11 @@ static int ObjSpriteList2D_ClearVertexCount(lua_State* L)
 static int ObjSprite3D_SetSourceRect(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double l = DnhValue::toNum(L, 2);
-    double t = DnhValue::toNum(L, 3);
-    double r = DnhValue::toNum(L, 4);
-    double b = DnhValue::toNum(L, 5);
+    int objId = DnhValue::ToInt(L, 1);
+    double l = DnhValue::ToNum(L, 2);
+    double t = DnhValue::ToNum(L, 3);
+    double r = DnhValue::ToNum(L, 4);
+    double b = DnhValue::ToNum(L, 5);
     if (auto obj = engine->getObject<ObjSprite3D>(objId))
     {
         obj->setSourceRect(l, t, r, b);
@@ -3043,11 +3043,11 @@ static int ObjSprite3D_SetSourceRect(lua_State* L)
 static int ObjSprite3D_SetDestRect(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double l = DnhValue::toNum(L, 2);
-    double t = DnhValue::toNum(L, 3);
-    double r = DnhValue::toNum(L, 4);
-    double b = DnhValue::toNum(L, 5);
+    int objId = DnhValue::ToInt(L, 1);
+    double l = DnhValue::ToNum(L, 2);
+    double t = DnhValue::ToNum(L, 3);
+    double r = DnhValue::ToNum(L, 4);
+    double b = DnhValue::ToNum(L, 5);
     if (auto obj = engine->getObject<ObjSprite3D>(objId))
     {
         obj->setDestRect(l, t, r, b);
@@ -3058,11 +3058,11 @@ static int ObjSprite3D_SetDestRect(lua_State* L)
 static int ObjSprite3D_SetSourceDestRect(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double l = DnhValue::toNum(L, 2);
-    double t = DnhValue::toNum(L, 3);
-    double r = DnhValue::toNum(L, 4);
-    double b = DnhValue::toNum(L, 5);
+    int objId = DnhValue::ToInt(L, 1);
+    double l = DnhValue::ToNum(L, 2);
+    double t = DnhValue::ToNum(L, 3);
+    double r = DnhValue::ToNum(L, 4);
+    double b = DnhValue::ToNum(L, 5);
     if (auto obj = engine->getObject<ObjSprite3D>(objId))
     {
         obj->setSourceDestRect(l, t, r, b);
@@ -3073,8 +3073,8 @@ static int ObjSprite3D_SetSourceDestRect(lua_State* L)
 static int ObjSprite3D_SetBillboard(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    bool enable = DnhValue::toBool(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    bool enable = DnhValue::ToBool(L, 2);
     if (auto obj = engine->getObject<ObjSprite3D>(objId))
     {
         obj->setBillboard(enable);
@@ -3116,8 +3116,8 @@ static int ObjMesh_Create(lua_State* L)
 static int ObjMesh_Load(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    auto path = DnhValue::toString(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    auto path = DnhValue::ToString(L, 2);
     if (auto obj = engine->getObject<ObjMesh>(objId))
     {
         if (auto mesh = engine->loadMesh(path, getSourcePos(L)))
@@ -3176,8 +3176,8 @@ static int ObjText_Create(lua_State* L)
 static int ObjText_SetText(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    std::wstring text = DnhValue::toString(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    std::wstring text = DnhValue::ToString(L, 2);
     if (auto obj = engine->getObject<ObjText>(objId))
     {
         obj->setText(text);
@@ -3188,8 +3188,8 @@ static int ObjText_SetText(lua_State* L)
 static int ObjText_SetFontType(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    std::wstring name = DnhValue::toString(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    std::wstring name = DnhValue::ToString(L, 2);
     if (auto obj = engine->getObject<ObjText>(objId))
     {
         obj->setFontName(name);
@@ -3200,8 +3200,8 @@ static int ObjText_SetFontType(lua_State* L)
 static int ObjText_SetFontSize(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int size = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int size = DnhValue::ToInt(L, 2);
     if (auto obj = engine->getObject<ObjText>(objId))
     {
         obj->setFontSize(size);
@@ -3212,8 +3212,8 @@ static int ObjText_SetFontSize(lua_State* L)
 static int ObjText_SetFontBold(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    bool bold = DnhValue::toBool(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    bool bold = DnhValue::ToBool(L, 2);
     if (auto obj = engine->getObject<ObjText>(objId))
     {
         obj->setFontBold(bold);
@@ -3224,10 +3224,10 @@ static int ObjText_SetFontBold(lua_State* L)
 static int ObjText_SetFontColorTop(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int r = DnhValue::toInt(L, 2);
-    int g = DnhValue::toInt(L, 3);
-    int b = DnhValue::toInt(L, 4);
+    int objId = DnhValue::ToInt(L, 1);
+    int r = DnhValue::ToInt(L, 2);
+    int g = DnhValue::ToInt(L, 3);
+    int b = DnhValue::ToInt(L, 4);
     if (auto obj = engine->getObject<ObjText>(objId))
     {
         obj->setFontColorTop(r, g, b);
@@ -3238,10 +3238,10 @@ static int ObjText_SetFontColorTop(lua_State* L)
 static int ObjText_SetFontColorBottom(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int r = DnhValue::toInt(L, 2);
-    int g = DnhValue::toInt(L, 3);
-    int b = DnhValue::toInt(L, 4);
+    int objId = DnhValue::ToInt(L, 1);
+    int r = DnhValue::ToInt(L, 2);
+    int g = DnhValue::ToInt(L, 3);
+    int b = DnhValue::ToInt(L, 4);
     if (auto obj = engine->getObject<ObjText>(objId))
     {
         obj->setFontColorBottom(r, g, b);
@@ -3252,8 +3252,8 @@ static int ObjText_SetFontColorBottom(lua_State* L)
 static int ObjText_SetFontBorderWidth(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int width = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int width = DnhValue::ToInt(L, 2);
     if (auto obj = engine->getObject<ObjText>(objId))
     {
         obj->setFontBorderWidth(width);
@@ -3264,8 +3264,8 @@ static int ObjText_SetFontBorderWidth(lua_State* L)
 static int ObjText_SetFontBorderType(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int t = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int t = DnhValue::ToInt(L, 2);
     if (auto obj = engine->getObject<ObjText>(objId))
     {
         obj->setFontBorderType(t);
@@ -3276,10 +3276,10 @@ static int ObjText_SetFontBorderType(lua_State* L)
 static int ObjText_SetFontBorderColor(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int r = DnhValue::toInt(L, 2);
-    int g = DnhValue::toInt(L, 3);
-    int b = DnhValue::toInt(L, 4);
+    int objId = DnhValue::ToInt(L, 1);
+    int r = DnhValue::ToInt(L, 2);
+    int g = DnhValue::ToInt(L, 3);
+    int b = DnhValue::ToInt(L, 4);
     if (auto obj = engine->getObject<ObjText>(objId))
     {
         obj->setFontBorderColor(r, g, b);
@@ -3290,8 +3290,8 @@ static int ObjText_SetFontBorderColor(lua_State* L)
 static int ObjText_SetMaxWidth(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int width = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int width = DnhValue::ToInt(L, 2);
     if (auto obj = engine->getObject<ObjText>(objId))
     {
         obj->setMaxWidth(width);
@@ -3302,8 +3302,8 @@ static int ObjText_SetMaxWidth(lua_State* L)
 static int ObjText_SetMaxHeight(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int height = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int height = DnhValue::ToInt(L, 2);
     if (auto obj = engine->getObject<ObjText>(objId))
     {
         obj->setMaxHeight(height);
@@ -3314,8 +3314,8 @@ static int ObjText_SetMaxHeight(lua_State* L)
 static int ObjText_SetLinePitch(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int pitch = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int pitch = DnhValue::ToInt(L, 2);
     if (auto obj = engine->getObject<ObjText>(objId))
     {
         obj->setLinePitch(pitch);
@@ -3326,8 +3326,8 @@ static int ObjText_SetLinePitch(lua_State* L)
 static int ObjText_SetSidePitch(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int pitch = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int pitch = DnhValue::ToInt(L, 2);
     if (auto obj = engine->getObject<ObjText>(objId))
     {
         obj->setSidePitch(pitch);
@@ -3338,9 +3338,9 @@ static int ObjText_SetSidePitch(lua_State* L)
 static int ObjText_SetTransCenter(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double x = DnhValue::toNum(L, 2);
-    double y = DnhValue::toNum(L, 3);
+    int objId = DnhValue::ToInt(L, 1);
+    double x = DnhValue::ToNum(L, 2);
+    double y = DnhValue::ToNum(L, 3);
     if (auto obj = engine->getObject<ObjText>(objId))
     {
         obj->setTransCenter(x, y);
@@ -3351,8 +3351,8 @@ static int ObjText_SetTransCenter(lua_State* L)
 static int ObjText_SetAutoTransCenter(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    bool enable = DnhValue::toBool(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    bool enable = DnhValue::ToBool(L, 2);
     if (auto obj = engine->getObject<ObjText>(objId))
     {
         obj->setAutoTransCenter(enable);
@@ -3363,8 +3363,8 @@ static int ObjText_SetAutoTransCenter(lua_State* L)
 static int ObjText_SetHorizontalAlignment(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int alignment = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int alignment = DnhValue::ToInt(L, 2);
     if (auto obj = engine->getObject<ObjText>(objId))
     {
         obj->setHorizontalAlignment(alignment);
@@ -3375,8 +3375,8 @@ static int ObjText_SetHorizontalAlignment(lua_State* L)
 static int ObjText_SetSyntacticAnalysis(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    bool enable = DnhValue::toBool(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    bool enable = DnhValue::ToBool(L, 2);
     if (auto obj = engine->getObject<ObjText>(objId))
     {
         obj->setSyntacticAnalysis(enable);
@@ -3387,7 +3387,7 @@ static int ObjText_SetSyntacticAnalysis(lua_State* L)
 static int ObjText_GetTextLength(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     auto obj = engine->getObject<ObjText>(objId);
     lua_pushnumber(L, obj ? obj->getTextLength() : 0);
     return 1;
@@ -3396,7 +3396,7 @@ static int ObjText_GetTextLength(lua_State* L)
 static int ObjText_GetTextLengthCU(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     auto obj = engine->getObject<ObjText>(objId);
     lua_pushnumber(L, obj ? obj->getTextLengthCU() : 0);
     return 1;
@@ -3405,7 +3405,7 @@ static int ObjText_GetTextLengthCU(lua_State* L)
 static int ObjText_GetTextLengthCUL(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjText>(objId))
     {
         obj->generateFonts();
@@ -3413,9 +3413,9 @@ static int ObjText_GetTextLengthCUL(lua_State* L)
         DnhArray ret;
         for (auto cnt : cnts)
         {
-            ret.pushBack(std::make_unique<DnhReal>((double)cnt));
+            ret.PushBack(std::make_unique<DnhReal>((double)cnt));
         }
-        ret.push(L);
+        ret.Push(L);
         return 1;
     } else
     {
@@ -3426,7 +3426,7 @@ static int ObjText_GetTextLengthCUL(lua_State* L)
 static int ObjText_GetTotalWidth(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjText>(objId))
     {
         obj->generateFonts();
@@ -3441,7 +3441,7 @@ static int ObjText_GetTotalWidth(lua_State* L)
 static int ObjText_GetTotalHeight(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjText>(objId))
     {
         obj->generateFonts();
@@ -3472,8 +3472,8 @@ static int ObjShader_Create(lua_State* L)
 static int ObjShader_SetShaderF(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    std::wstring path = DnhValue::toString(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    std::wstring path = DnhValue::ToString(L, 2);
 
     if (auto obj = engine->getObject<ObjRender>(objId))
     {
@@ -3496,8 +3496,8 @@ static int ObjShader_SetShaderF(lua_State* L)
 static int ObjShader_SetShaderO(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int shaderObjId = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int shaderObjId = DnhValue::ToInt(L, 2);
     if (auto obj = engine->getObject<ObjRender>(objId))
     {
         auto shaderObj = engine->getObject<ObjRender>(shaderObjId);
@@ -3509,7 +3509,7 @@ static int ObjShader_SetShaderO(lua_State* L)
 static int ObjShader_ResetShader(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjRender>(objId))
     {
         obj->resetShader();
@@ -3520,8 +3520,8 @@ static int ObjShader_ResetShader(lua_State* L)
 static int ObjShader_SetTechnique(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    std::string technique = DnhValue::toStringU8(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    std::string technique = DnhValue::ToStringU8(L, 2);
     if (auto obj = engine->getObject<ObjRender>(objId))
     {
         obj->setShaderTechnique(technique);
@@ -3532,12 +3532,12 @@ static int ObjShader_SetTechnique(lua_State* L)
 static int ObjShader_SetVector(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    std::string name = DnhValue::toStringU8(L, 2);
-    double x = DnhValue::toNum(L, 3);
-    double y = DnhValue::toNum(L, 4);
-    double z = DnhValue::toNum(L, 5);
-    double w = DnhValue::toNum(L, 6);
+    int objId = DnhValue::ToInt(L, 1);
+    std::string name = DnhValue::ToStringU8(L, 2);
+    double x = DnhValue::ToNum(L, 3);
+    double y = DnhValue::ToNum(L, 4);
+    double z = DnhValue::ToNum(L, 5);
+    double w = DnhValue::ToNum(L, 6);
     if (auto obj = engine->getObject<ObjRender>(objId))
     {
         obj->setShaderVector(name, x, y, z, w);
@@ -3548,9 +3548,9 @@ static int ObjShader_SetVector(lua_State* L)
 static int ObjShader_SetFloat(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    std::string name = DnhValue::toStringU8(L, 2);
-    double f = DnhValue::toNum(L, 3);
+    int objId = DnhValue::ToInt(L, 1);
+    std::string name = DnhValue::ToStringU8(L, 2);
+    double f = DnhValue::ToNum(L, 3);
     if (auto obj = engine->getObject<ObjRender>(objId))
     {
         obj->setShaderFloat(name, f);
@@ -3561,18 +3561,18 @@ static int ObjShader_SetFloat(lua_State* L)
 static int ObjShader_SetFloatArray(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    std::string name = DnhValue::toStringU8(L, 2);
-    auto value = DnhValue::get(L, 3);
+    int objId = DnhValue::ToInt(L, 1);
+    std::string name = DnhValue::ToStringU8(L, 2);
+    auto value = DnhValue::Get(L, 3);
     if (auto obj = engine->getObject<ObjRender>(objId))
     {
         if (DnhArray* floatArray = dynamic_cast<DnhArray*>(value.get()))
         {
-            size_t size = floatArray->getSize();
+            size_t size = floatArray->GetSize();
             std::vector<float> fs(size);
             for (int i = 0; i < size; i++)
             {
-                fs[i] = (float)floatArray->index(i)->toNum();
+                fs[i] = (float)floatArray->Index(i)->ToNum();
             }
             obj->setShaderFloatArray(name, fs);
         }
@@ -3583,9 +3583,9 @@ static int ObjShader_SetFloatArray(lua_State* L)
 static int ObjShader_SetTexture(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    std::string name = DnhValue::toStringU8(L, 2);
-    std::wstring path = DnhValue::toString(L, 3);
+    int objId = DnhValue::ToInt(L, 1);
+    std::string name = DnhValue::ToStringU8(L, 2);
+    std::wstring path = DnhValue::ToString(L, 3);
     if (auto obj = engine->getObject<ObjRender>(objId))
     {
         if (auto renderTarget = engine->getRenderTarget(toUnicode(name)))
@@ -3618,8 +3618,8 @@ static int ObjSound_Create(lua_State* L)
 static int ObjSound_Load(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    auto path = DnhValue::toString(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    auto path = DnhValue::ToString(L, 2);
     if (auto obj = engine->getObject<ObjSound>(objId))
     {
         obj->setSound(nullptr);
@@ -3631,7 +3631,7 @@ static int ObjSound_Load(lua_State* L)
 static int ObjSound_Play(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjSound>(objId))
     {
         obj->play();
@@ -3642,7 +3642,7 @@ static int ObjSound_Play(lua_State* L)
 static int ObjSound_Stop(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjSound>(objId))
     {
         obj->stop();
@@ -3653,8 +3653,8 @@ static int ObjSound_Stop(lua_State* L)
 static int ObjSound_SetVolumeRate(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    float vol = DnhValue::toNum(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    float vol = DnhValue::ToNum(L, 2);
     if (auto obj = engine->getObject<ObjSound>(objId))
     {
         obj->setVolumeRate(vol);
@@ -3665,8 +3665,8 @@ static int ObjSound_SetVolumeRate(lua_State* L)
 static int ObjSound_SetPanRate(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    float pan = DnhValue::toNum(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    float pan = DnhValue::ToNum(L, 2);
     if (auto obj = engine->getObject<ObjSound>(objId))
     {
         obj->setPanRate(pan);
@@ -3677,8 +3677,8 @@ static int ObjSound_SetPanRate(lua_State* L)
 static int ObjSound_SetFade(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    float fade = DnhValue::toNum(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    float fade = DnhValue::ToNum(L, 2);
     if (auto obj = engine->getObject<ObjSound>(objId))
     {
         obj->setFade(fade);
@@ -3689,8 +3689,8 @@ static int ObjSound_SetFade(lua_State* L)
 static int ObjSound_SetLoopEnable(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    bool enable = DnhValue::toBool(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    bool enable = DnhValue::ToBool(L, 2);
     if (auto obj = engine->getObject<ObjSound>(objId))
     {
         obj->setLoopEnable(enable);
@@ -3701,9 +3701,9 @@ static int ObjSound_SetLoopEnable(lua_State* L)
 static int ObjSound_SetLoopTime(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double start = (DWORD)DnhValue::toNum(L, 2);
-    double end = (DWORD)DnhValue::toNum(L, 3);
+    int objId = DnhValue::ToInt(L, 1);
+    double start = (DWORD)DnhValue::ToNum(L, 2);
+    double end = (DWORD)DnhValue::ToNum(L, 3);
     if (auto obj = engine->getObject<ObjSound>(objId))
     {
         obj->setLoopTime(start, end);
@@ -3714,9 +3714,9 @@ static int ObjSound_SetLoopTime(lua_State* L)
 static int ObjSound_SetLoopSampleCount(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    DWORD start = (DWORD)DnhValue::toNum(L, 2);
-    DWORD end = (DWORD)DnhValue::toNum(L, 3);
+    int objId = DnhValue::ToInt(L, 1);
+    DWORD start = (DWORD)DnhValue::ToNum(L, 2);
+    DWORD end = (DWORD)DnhValue::ToNum(L, 3);
     if (auto obj = engine->getObject<ObjSound>(objId))
     {
         obj->setLoopSampleCount(start, end);
@@ -3727,8 +3727,8 @@ static int ObjSound_SetLoopSampleCount(lua_State* L)
 static int ObjSound_SetRestartEnable(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    bool enable = DnhValue::toBool(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    bool enable = DnhValue::ToBool(L, 2);
     if (auto obj = engine->getObject<ObjSound>(objId))
     {
         obj->setRestartEnable(enable);
@@ -3739,8 +3739,8 @@ static int ObjSound_SetRestartEnable(lua_State* L)
 static int ObjSound_SetSoundDivision(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int division = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int division = DnhValue::ToInt(L, 2);
     if (auto obj = engine->getObject<ObjSound>(objId))
     {
         obj->setSoundDivision(division == SOUND_SE ? ObjSound::SoundDivision::SE : ObjSound::SoundDivision::BGM);
@@ -3751,7 +3751,7 @@ static int ObjSound_SetSoundDivision(lua_State* L)
 static int ObjSound_IsPlaying(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     auto obj = engine->getObject<ObjSound>(objId);
     lua_pushboolean(L, obj && obj->isPlaying());
     return 1;
@@ -3760,7 +3760,7 @@ static int ObjSound_IsPlaying(lua_State* L)
 static int ObjSound_GetVolumeRate(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     auto obj = engine->getObject<ObjSound>(objId);
     lua_pushnumber(L, obj ? obj->getVolumeRate() : 0);
     return 1;
@@ -3770,7 +3770,7 @@ static int ObjFile_Create(lua_State* L)
 {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
-    int type = DnhValue::toInt(L, 1);
+    int type = DnhValue::ToInt(L, 1);
     int objId = ID_INVALID;
     if (type == OBJ_FILE_TEXT)
     {
@@ -3791,8 +3791,8 @@ static int ObjFile_Create(lua_State* L)
 static int ObjFile_Open(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    auto path = DnhValue::toString(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    auto path = DnhValue::ToString(L, 2);
     auto obj = engine->getObject<ObjFile>(objId);
     lua_pushboolean(L, obj && obj->open(path));
     return 1;
@@ -3801,8 +3801,8 @@ static int ObjFile_Open(lua_State* L)
 static int ObjFile_OpenNW(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    auto path = DnhValue::toString(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    auto path = DnhValue::ToString(L, 2);
     auto obj = engine->getObject<ObjFile>(objId);
     lua_pushboolean(L, obj && obj->openNW(path));
     return 1;
@@ -3811,7 +3811,7 @@ static int ObjFile_OpenNW(lua_State* L)
 static int ObjFile_Store(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjFile>(objId))
     {
         obj->store();
@@ -3822,7 +3822,7 @@ static int ObjFile_Store(lua_State* L)
 static int ObjFile_GetSize(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjFile>(objId))
     {
         lua_pushnumber(L, obj->getSize());
@@ -3836,7 +3836,7 @@ static int ObjFile_GetSize(lua_State* L)
 static int ObjFileT_GetLineCount(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjFileT>(objId))
     {
         lua_pushnumber(L, obj->getLineCount());
@@ -3850,14 +3850,14 @@ static int ObjFileT_GetLineCount(lua_State* L)
 static int ObjFileT_GetLineText(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int lineNum = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int lineNum = DnhValue::ToInt(L, 2);
     if (auto obj = engine->getObject<ObjFileT>(objId))
     {
-        DnhArray(obj->getLineText(lineNum)).push(L);
+        DnhArray(obj->getLineText(lineNum)).Push(L);
     } else
     {
-        DnhArray(L"").push(L);
+        DnhArray(L"").Push(L);
     }
     return 1;
 }
@@ -3865,20 +3865,20 @@ static int ObjFileT_GetLineText(lua_State* L)
 static int ObjFileT_SplitLineText(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int lineNum = DnhValue::toInt(L, 2);
-    std::wstring delim = DnhValue::toString(L, 3);
+    int objId = DnhValue::ToInt(L, 1);
+    int lineNum = DnhValue::ToInt(L, 2);
+    std::wstring delim = DnhValue::ToString(L, 3);
     if (auto obj = engine->getObject<ObjFileT>(objId))
     {
         DnhArray ret;
         for (const auto& s : obj->splitLineText(lineNum, delim))
         {
-            ret.pushBack(std::make_unique<DnhArray>(s));
+            ret.PushBack(std::make_unique<DnhArray>(s));
         }
-        ret.push(L);
+        ret.Push(L);
     } else
     {
-        DnhArray().push(L);
+        DnhArray().Push(L);
     }
     return 1;
 }
@@ -3886,8 +3886,8 @@ static int ObjFileT_SplitLineText(lua_State* L)
 static int ObjFileT_AddLine(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    std::wstring line = DnhValue::toString(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    std::wstring line = DnhValue::ToString(L, 2);
     if (auto obj = engine->getObject<ObjFileT>(objId))
     {
         obj->addLine(line);
@@ -3898,7 +3898,7 @@ static int ObjFileT_AddLine(lua_State* L)
 static int ObjFileT_ClearLine(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjFileT>(objId))
     {
         obj->clearLine();
@@ -3909,8 +3909,8 @@ static int ObjFileT_ClearLine(lua_State* L)
 static int ObjFileB_SetByteOrder(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int endian = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int endian = DnhValue::ToInt(L, 2);
     if (auto obj = engine->getObject<ObjFileB>(objId))
     {
         if (endian == ENDIAN_LITTLE)
@@ -3926,8 +3926,8 @@ static int ObjFileB_SetByteOrder(lua_State* L)
 static int ObjFileB_SetCharacterCode(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int code = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int code = DnhValue::ToInt(L, 2);
     if (auto obj = engine->getObject<ObjFileB>(objId))
     {
         switch (code)
@@ -3952,7 +3952,7 @@ static int ObjFileB_SetCharacterCode(lua_State* L)
 static int ObjFileB_GetPointer(lua_State*L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjFileB>(objId))
     {
         lua_pushnumber(L, obj->getPointer());
@@ -3966,8 +3966,8 @@ static int ObjFileB_GetPointer(lua_State*L)
 static int ObjFileB_Seek(lua_State*L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int pos = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int pos = DnhValue::ToInt(L, 2);
     if (auto obj = engine->getObject<ObjFileB>(objId))
     {
         obj->seek(pos);
@@ -3978,7 +3978,7 @@ static int ObjFileB_Seek(lua_State*L)
 static int ObjFileB_ReadBoolean(lua_State*L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     auto obj = engine->getObject<ObjFileB>(objId);
     lua_pushboolean(L, obj && obj->readBoolean());
     return 1;
@@ -3987,7 +3987,7 @@ static int ObjFileB_ReadBoolean(lua_State*L)
 static int ObjFileB_ReadByte(lua_State*L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjFileB>(objId))
     {
         lua_pushnumber(L, obj->readByte());
@@ -4001,7 +4001,7 @@ static int ObjFileB_ReadByte(lua_State*L)
 static int ObjFileB_ReadShort(lua_State*L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjFileB>(objId))
     {
         lua_pushnumber(L, obj->readShort());
@@ -4015,7 +4015,7 @@ static int ObjFileB_ReadShort(lua_State*L)
 static int ObjFileB_ReadInteger(lua_State*L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjFileB>(objId))
     {
         lua_pushnumber(L, obj->readInteger());
@@ -4029,7 +4029,7 @@ static int ObjFileB_ReadInteger(lua_State*L)
 static int ObjFileB_ReadLong(lua_State*L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjFileB>(objId))
     {
         lua_pushnumber(L, obj->readLong());
@@ -4043,7 +4043,7 @@ static int ObjFileB_ReadLong(lua_State*L)
 static int ObjFileB_ReadFloat(lua_State*L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjFileB>(objId))
     {
         lua_pushnumber(L, obj->readFloat());
@@ -4057,7 +4057,7 @@ static int ObjFileB_ReadFloat(lua_State*L)
 static int ObjFileB_ReadDouble(lua_State*L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjFileB>(objId))
     {
         lua_pushnumber(L, obj->readDouble());
@@ -4071,14 +4071,14 @@ static int ObjFileB_ReadDouble(lua_State*L)
 static int ObjFileB_ReadString(lua_State*L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int size = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int size = DnhValue::ToInt(L, 2);
     if (auto obj = engine->getObject<ObjFileB>(objId))
     {
-        DnhArray(obj->readString(size)).push(L);
+        DnhArray(obj->readString(size)).Push(L);
     } else
     {
-        DnhArray(L"").push(L);
+        DnhArray(L"").Push(L);
     }
     return 1;
 }
@@ -4087,8 +4087,8 @@ template <void (ObjMove::*func)(float)>
 static int ObjMove_Set(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    float v = DnhValue::toNum(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    float v = DnhValue::ToNum(L, 2);
     if (auto obj = engine->getObject<ObjMove>(objId))
     {
         ((obj.get())->*func)(v);
@@ -4102,9 +4102,9 @@ static int ObjMove_SetY(lua_State* L) { return ObjMove_Set<&ObjMove::setMoveY>(L
 static int ObjMove_SetPosition(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double x = DnhValue::toNum(L, 2);
-    double y = DnhValue::toNum(L, 3);
+    int objId = DnhValue::ToInt(L, 1);
+    double x = DnhValue::ToNum(L, 2);
+    double y = DnhValue::ToNum(L, 3);
     if (auto obj = engine->getObject<ObjMove>(objId))
     {
         obj->setMovePosition(x, y);
@@ -4121,10 +4121,10 @@ static int ObjMove_SetAngularVelocity(lua_State* L) { return ObjMove_Set<&ObjMov
 static int ObjMove_SetDestAtSpeed(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double x = DnhValue::toNum(L, 2);
-    double y = DnhValue::toNum(L, 3);
-    double speed = DnhValue::toNum(L, 4);
+    int objId = DnhValue::ToInt(L, 1);
+    double x = DnhValue::ToNum(L, 2);
+    double y = DnhValue::ToNum(L, 3);
+    double speed = DnhValue::ToNum(L, 4);
     if (auto obj = engine->getObject<ObjMove>(objId))
     {
         obj->setDestAtSpeed(x, y, speed);
@@ -4135,10 +4135,10 @@ static int ObjMove_SetDestAtSpeed(lua_State* L)
 static int ObjMove_SetDestAtFrame(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double x = DnhValue::toNum(L, 2);
-    double y = DnhValue::toNum(L, 3);
-    int frame = DnhValue::toInt(L, 4);
+    int objId = DnhValue::ToInt(L, 1);
+    double x = DnhValue::ToNum(L, 2);
+    double y = DnhValue::ToNum(L, 3);
+    int frame = DnhValue::ToInt(L, 4);
     if (auto obj = engine->getObject<ObjMove>(objId))
     {
         obj->setDestAtFrame(x, y, frame);
@@ -4149,11 +4149,11 @@ static int ObjMove_SetDestAtFrame(lua_State* L)
 static int ObjMove_SetDestAtWeight(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double x = DnhValue::toNum(L, 2);
-    double y = DnhValue::toNum(L, 3);
-    double w = DnhValue::toNum(L, 4);
-    double maxSpeed = DnhValue::toNum(L, 5);
+    int objId = DnhValue::ToInt(L, 1);
+    double x = DnhValue::ToNum(L, 2);
+    double y = DnhValue::ToNum(L, 3);
+    double w = DnhValue::ToNum(L, 4);
+    double maxSpeed = DnhValue::ToNum(L, 5);
     if (auto obj = engine->getObject<ObjMove>(objId))
     {
         obj->setDestAtWeight(x, y, w, maxSpeed);
@@ -4164,10 +4164,10 @@ static int ObjMove_SetDestAtWeight(lua_State* L)
 static int ObjMove_AddPatternA1(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int frame = DnhValue::toInt(L, 2);
-    float speed = DnhValue::toNum(L, 3);
-    float angle = DnhValue::toNum(L, 4);
+    int objId = DnhValue::ToInt(L, 1);
+    int frame = DnhValue::ToInt(L, 2);
+    float speed = DnhValue::ToNum(L, 3);
+    float angle = DnhValue::ToNum(L, 4);
     if (auto obj = engine->getObject<ObjMove>(objId))
     {
         obj->addMovePattern(std::make_shared<MovePatternA>(frame, speed, angle, 0.0f, 0.0f, 0.0f, std::shared_ptr<ObjMove>(), std::shared_ptr<ShotData>()));
@@ -4178,13 +4178,13 @@ static int ObjMove_AddPatternA1(lua_State* L)
 static int ObjMove_AddPatternA2(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int frame = DnhValue::toInt(L, 2);
-    float speed = DnhValue::toNum(L, 3);
-    float angle = DnhValue::toNum(L, 4);
-    float accel = DnhValue::toNum(L, 5);
-    float angularVelocity = DnhValue::toNum(L, 6);
-    float maxSpeed = DnhValue::toNum(L, 7);
+    int objId = DnhValue::ToInt(L, 1);
+    int frame = DnhValue::ToInt(L, 2);
+    float speed = DnhValue::ToNum(L, 3);
+    float angle = DnhValue::ToNum(L, 4);
+    float accel = DnhValue::ToNum(L, 5);
+    float angularVelocity = DnhValue::ToNum(L, 6);
+    float maxSpeed = DnhValue::ToNum(L, 7);
     if (auto obj = engine->getObject<ObjMove>(objId))
     {
         obj->addMovePattern(std::make_shared<MovePatternA>(frame, speed, angle, accel, angularVelocity, maxSpeed, std::shared_ptr<ObjMove>(), std::shared_ptr<ShotData>()));
@@ -4195,14 +4195,14 @@ static int ObjMove_AddPatternA2(lua_State* L)
 static int ObjMove_AddPatternA3(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int frame = DnhValue::toInt(L, 2);
-    float speed = DnhValue::toNum(L, 3);
-    float angle = DnhValue::toNum(L, 4);
-    float accel = DnhValue::toNum(L, 5);
-    float angularVelocity = DnhValue::toNum(L, 6);
-    float maxSpeed = DnhValue::toNum(L, 7);
-    int shotDataId = DnhValue::toInt(L, 8);
+    int objId = DnhValue::ToInt(L, 1);
+    int frame = DnhValue::ToInt(L, 2);
+    float speed = DnhValue::ToNum(L, 3);
+    float angle = DnhValue::ToNum(L, 4);
+    float accel = DnhValue::ToNum(L, 5);
+    float angularVelocity = DnhValue::ToNum(L, 6);
+    float maxSpeed = DnhValue::ToNum(L, 7);
+    int shotDataId = DnhValue::ToInt(L, 8);
     std::shared_ptr<ShotData> shotData;
     if (auto obj = engine->getObject<ObjShot>(objId))
     {
@@ -4218,15 +4218,15 @@ static int ObjMove_AddPatternA3(lua_State* L)
 static int ObjMove_AddPatternA4(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int frame = DnhValue::toInt(L, 2);
-    float speed = DnhValue::toNum(L, 3);
-    float angle = DnhValue::toNum(L, 4);
-    float accel = DnhValue::toNum(L, 5);
-    float angularVelocity = DnhValue::toNum(L, 6);
-    float maxSpeed = DnhValue::toNum(L, 7);
-    int baseObjId = DnhValue::toInt(L, 8);
-    int shotDataId = DnhValue::toInt(L, 9);
+    int objId = DnhValue::ToInt(L, 1);
+    int frame = DnhValue::ToInt(L, 2);
+    float speed = DnhValue::ToNum(L, 3);
+    float angle = DnhValue::ToNum(L, 4);
+    float accel = DnhValue::ToNum(L, 5);
+    float angularVelocity = DnhValue::ToNum(L, 6);
+    float maxSpeed = DnhValue::ToNum(L, 7);
+    int baseObjId = DnhValue::ToInt(L, 8);
+    int shotDataId = DnhValue::ToInt(L, 9);
     std::shared_ptr<ShotData> shotData;
     if (auto obj = engine->getObject<ObjShot>(objId))
     {
@@ -4242,10 +4242,10 @@ static int ObjMove_AddPatternA4(lua_State* L)
 static int ObjMove_AddPatternB1(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int frame = DnhValue::toInt(L, 2);
-    float speedX = DnhValue::toNum(L, 3);
-    float speedY = DnhValue::toNum(L, 4);
+    int objId = DnhValue::ToInt(L, 1);
+    int frame = DnhValue::ToInt(L, 2);
+    float speedX = DnhValue::ToNum(L, 3);
+    float speedY = DnhValue::ToNum(L, 4);
     if (auto obj = engine->getObject<ObjMove>(objId))
     {
         obj->addMovePattern(std::make_shared<MovePatternB>(frame, speedX, speedY, 0.0f, 0.0f, 0.0f, 0.0f, std::shared_ptr<ShotData>()));
@@ -4256,14 +4256,14 @@ static int ObjMove_AddPatternB1(lua_State* L)
 static int ObjMove_AddPatternB2(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int frame = DnhValue::toInt(L, 2);
-    float speedX = DnhValue::toNum(L, 3);
-    float speedY = DnhValue::toNum(L, 4);
-    float accelX = DnhValue::toNum(L, 5);
-    float accelY = DnhValue::toNum(L, 6);
-    float maxSpeedX = DnhValue::toNum(L, 7);
-    float maxSpeedY = DnhValue::toNum(L, 8);
+    int objId = DnhValue::ToInt(L, 1);
+    int frame = DnhValue::ToInt(L, 2);
+    float speedX = DnhValue::ToNum(L, 3);
+    float speedY = DnhValue::ToNum(L, 4);
+    float accelX = DnhValue::ToNum(L, 5);
+    float accelY = DnhValue::ToNum(L, 6);
+    float maxSpeedX = DnhValue::ToNum(L, 7);
+    float maxSpeedY = DnhValue::ToNum(L, 8);
     if (auto obj = engine->getObject<ObjMove>(objId))
     {
         obj->addMovePattern(std::make_shared<MovePatternB>(frame, speedX, speedY, accelX, accelY, maxSpeedX, maxSpeedY, std::shared_ptr<ShotData>()));
@@ -4274,15 +4274,15 @@ static int ObjMove_AddPatternB2(lua_State* L)
 static int ObjMove_AddPatternB3(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int frame = DnhValue::toInt(L, 2);
-    float speedX = DnhValue::toNum(L, 3);
-    float speedY = DnhValue::toNum(L, 4);
-    float accelX = DnhValue::toNum(L, 5);
-    float accelY = DnhValue::toNum(L, 6);
-    float maxSpeedX = DnhValue::toNum(L, 7);
-    float maxSpeedY = DnhValue::toNum(L, 8);
-    int shotDataId = DnhValue::toInt(L, 9);
+    int objId = DnhValue::ToInt(L, 1);
+    int frame = DnhValue::ToInt(L, 2);
+    float speedX = DnhValue::ToNum(L, 3);
+    float speedY = DnhValue::ToNum(L, 4);
+    float accelX = DnhValue::ToNum(L, 5);
+    float accelY = DnhValue::ToNum(L, 6);
+    float maxSpeedX = DnhValue::ToNum(L, 7);
+    float maxSpeedY = DnhValue::ToNum(L, 8);
+    int shotDataId = DnhValue::ToInt(L, 9);
     std::shared_ptr<ShotData> shotData;
     if (auto obj = engine->getObject<ObjShot>(objId))
     {
@@ -4299,7 +4299,7 @@ template <float (ObjMove::*func)() const>
 static int ObjMove_Get(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     auto obj = engine->getObject<ObjMove>(objId);
     lua_pushnumber(L, obj ? ((obj.get())->*func)() : 0.0);
     return 1;
@@ -4314,7 +4314,7 @@ static int ObjEnemy_Create(lua_State* L)
 {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
-    int type = DnhValue::toInt(L, 1);
+    int type = DnhValue::ToInt(L, 1);
     int objId = ID_INVALID;
     if (type == OBJ_ENEMY)
     {
@@ -4337,7 +4337,7 @@ static int ObjEnemy_Create(lua_State* L)
 static int ObjEnemy_Regist(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjEnemy>(objId)) { obj->regist(); }
     return 0;
 }
@@ -4345,8 +4345,8 @@ static int ObjEnemy_Regist(lua_State* L)
 static int ObjEnemy_GetInfo(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int info = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int info = DnhValue::ToInt(L, 2);
     double ret = 0;
     if (auto obj = engine->getObject<ObjEnemy>(objId))
     {
@@ -4371,8 +4371,8 @@ static int ObjEnemy_GetInfo(lua_State* L)
 static int ObjEnemy_SetLife(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double life = DnhValue::toNum(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    double life = DnhValue::ToNum(L, 2);
     if (auto obj = engine->getObject<ObjEnemy>(objId))
     {
         obj->setLife(life);
@@ -4383,8 +4383,8 @@ static int ObjEnemy_SetLife(lua_State* L)
 static int ObjEnemy_AddLife(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double life = DnhValue::toNum(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    double life = DnhValue::ToNum(L, 2);
     if (auto obj = engine->getObject<ObjEnemy>(objId))
     {
         obj->addLife(life);
@@ -4395,9 +4395,9 @@ static int ObjEnemy_AddLife(lua_State* L)
 static int ObjEnemy_SetDamageRate(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double damageRateShot = DnhValue::toNum(L, 2);
-    double damageRateSpell = DnhValue::toNum(L, 3);
+    int objId = DnhValue::ToInt(L, 1);
+    double damageRateShot = DnhValue::ToNum(L, 2);
+    double damageRateSpell = DnhValue::ToNum(L, 3);
     if (auto obj = engine->getObject<ObjEnemy>(objId))
     {
         obj->setDamageRateShot(damageRateShot);
@@ -4409,10 +4409,10 @@ static int ObjEnemy_SetDamageRate(lua_State* L)
 static int ObjEnemy_SetIntersectionCircleToShot(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double x = DnhValue::toNum(L, 2);
-    double y = DnhValue::toNum(L, 3);
-    double r = DnhValue::toNum(L, 4);
+    int objId = DnhValue::ToInt(L, 1);
+    double x = DnhValue::ToNum(L, 2);
+    double y = DnhValue::ToNum(L, 3);
+    double r = DnhValue::ToNum(L, 4);
     if (auto obj = engine->getObject<ObjEnemy>(objId))
     {
         obj->addTempIntersectionCircleToShot(x, y, r);
@@ -4423,10 +4423,10 @@ static int ObjEnemy_SetIntersectionCircleToShot(lua_State* L)
 static int ObjEnemy_SetIntersectionCircleToPlayer(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double x = DnhValue::toNum(L, 2);
-    double y = DnhValue::toNum(L, 3);
-    double r = DnhValue::toNum(L, 4);
+    int objId = DnhValue::ToInt(L, 1);
+    double x = DnhValue::ToNum(L, 2);
+    double y = DnhValue::ToNum(L, 3);
+    double r = DnhValue::ToNum(L, 4);
     if (auto obj = engine->getObject<ObjEnemy>(objId))
     {
         obj->addTempIntersectionCircleToPlayer(x, y, r);
@@ -4452,7 +4452,7 @@ static int ObjEnemyBossScene_Create(lua_State* L)
 static int ObjEnemyBossScene_Regist(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjEnemyBossScene>(objId))
     {
         obj->regist(getSourcePos(L));
@@ -4463,9 +4463,9 @@ static int ObjEnemyBossScene_Regist(lua_State* L)
 static int ObjEnemyBossScene_Add(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int step = DnhValue::toInt(L, 2);
-    auto scriptPath = DnhValue::toString(L, 3);
+    int objId = DnhValue::ToInt(L, 1);
+    int step = DnhValue::ToInt(L, 2);
+    auto scriptPath = DnhValue::ToString(L, 3);
     if (auto obj = engine->getObject<ObjEnemyBossScene>(objId))
     {
         obj->add(step, scriptPath);
@@ -4477,7 +4477,7 @@ static int ObjEnemyBossScene_LoadInThread(lua_State* L)
 {
     // FUTURE : multi thread
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjEnemyBossScene>(objId))
     {
         obj->loadInThread(getSourcePos(L));
@@ -4488,8 +4488,8 @@ static int ObjEnemyBossScene_LoadInThread(lua_State* L)
 static int ObjEnemyBossScene_GetInfo(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int info = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int info = DnhValue::ToInt(L, 2);
     auto obj = engine->getObject<ObjEnemyBossScene>(objId);
     switch (info)
     {
@@ -4542,10 +4542,10 @@ static int ObjEnemyBossScene_GetInfo(lua_State* L)
             {
                 for (double rate : obj->getActiveStepLifeRateList())
                 {
-                    result.pushBack(std::make_unique<DnhReal>(rate));
+                    result.PushBack(std::make_unique<DnhReal>(rate));
                 }
             }
-            result.push(L);
+            result.Push(L);
         }
         break;
         case INFO_CURRENT_LIFE:
@@ -4563,8 +4563,8 @@ static int ObjEnemyBossScene_GetInfo(lua_State* L)
 static int ObjEnemyBossScene_SetSpellTimer(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int sec = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int sec = DnhValue::ToInt(L, 2);
     if (auto obj = engine->getObject<ObjEnemyBossScene>(objId))
     {
         obj->setTimer(sec);
@@ -4575,7 +4575,7 @@ static int ObjEnemyBossScene_SetSpellTimer(lua_State* L)
 static int ObjEnemyBossScene_StartSpell(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjEnemyBossScene>(objId))
     {
         obj->startSpell();
@@ -4588,9 +4588,9 @@ static int ObjShot_Create(lua_State* L)
 {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
-    int shotType = DnhValue::toInt(L, 1);
+    int shotType = DnhValue::ToInt(L, 1);
     int objId = ID_INVALID;
-    bool isPlayerShot = script->getType() == SCRIPT_TYPE_PLAYER;
+    bool isPlayerShot = script->GetType() == SCRIPT_TYPE_PLAYER;
     switch (shotType)
     {
         case OBJ_SHOT:
@@ -4614,7 +4614,7 @@ static int ObjShot_Create(lua_State* L)
 static int ObjShot_Regist(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjShot>(objId))
     {
         // NOTE : IsPermitPlayerShot == falseならregistしない, ObjShot_Registで作成したときのみ
@@ -4633,8 +4633,8 @@ static int ObjShot_Regist(lua_State* L)
 static int ObjShot_SetAutoDelete(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    bool autoDelete = DnhValue::toBool(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    bool autoDelete = DnhValue::ToBool(L, 2);
     if (auto obj = engine->getObject<ObjShot>(objId)) { obj->setAutoDeleteEnable(autoDelete); }
     return 0;
 }
@@ -4642,7 +4642,7 @@ static int ObjShot_SetAutoDelete(lua_State* L)
 static int ObjShot_FadeDelete(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjShot>(objId)) { obj->fadeDelete(); }
     return 0;
 }
@@ -4650,8 +4650,8 @@ static int ObjShot_FadeDelete(lua_State* L)
 static int ObjShot_SetDeleteFrame(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int deleteFrame = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int deleteFrame = DnhValue::ToInt(L, 2);
     if (auto obj = engine->getObject<ObjShot>(objId)) { obj->setDeleteFrame(deleteFrame); }
     return 0;
 }
@@ -4659,8 +4659,8 @@ static int ObjShot_SetDeleteFrame(lua_State* L)
 static int ObjShot_SetDamage(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double damage = DnhValue::toNum(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    double damage = DnhValue::ToNum(L, 2);
     if (auto obj = engine->getObject<ObjShot>(objId)) { obj->setDamage(damage); }
     return 0;
 }
@@ -4668,8 +4668,8 @@ static int ObjShot_SetDamage(lua_State* L)
 static int ObjShot_SetDelay(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int delay = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int delay = DnhValue::ToInt(L, 2);
     if (auto obj = engine->getObject<ObjShot>(objId)) { obj->setDelay(delay); }
     return 0;
 }
@@ -4677,8 +4677,8 @@ static int ObjShot_SetDelay(lua_State* L)
 static int ObjShot_SetSpellResist(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    bool spellResist = DnhValue::toBool(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    bool spellResist = DnhValue::ToBool(L, 2);
     if (auto obj = engine->getObject<ObjShot>(objId)) { obj->setSpellResistEnable(spellResist); }
     return 0;
 }
@@ -4686,8 +4686,8 @@ static int ObjShot_SetSpellResist(lua_State* L)
 static int ObjShot_SetGraphic(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int shotDataId = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int shotDataId = DnhValue::ToInt(L, 2);
     if (auto obj = engine->getObject<ObjShot>(objId))
     {
         if (obj->isPlayerShot())
@@ -4704,8 +4704,8 @@ static int ObjShot_SetGraphic(lua_State* L)
 static int ObjShot_SetSourceBlendType(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int blendType = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int blendType = DnhValue::ToInt(L, 2);
     if (auto obj = engine->getObject<ObjShot>(objId)) { obj->setSourceBlendType(blendType); }
     return 0;
 }
@@ -4713,8 +4713,8 @@ static int ObjShot_SetSourceBlendType(lua_State* L)
 static int ObjShot_SetPenetration(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int penetration = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int penetration = DnhValue::ToInt(L, 2);
     if (auto obj = engine->getObject<ObjShot>(objId)) { obj->setPenetration(penetration); }
     return 0;
 }
@@ -4722,8 +4722,8 @@ static int ObjShot_SetPenetration(lua_State* L)
 static int ObjShot_SetEraseShot(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    bool eraseShot = DnhValue::toBool(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    bool eraseShot = DnhValue::ToBool(L, 2);
     if (auto obj = engine->getObject<ObjShot>(objId)) { obj->setEraseShotEnable(eraseShot); }
     return 0;
 }
@@ -4731,8 +4731,8 @@ static int ObjShot_SetEraseShot(lua_State* L)
 static int ObjShot_SetSpellFactor(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    bool spellFactor = DnhValue::toBool(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    bool spellFactor = DnhValue::ToBool(L, 2);
     if (auto obj = engine->getObject<ObjShot>(objId)) { obj->setSpellFactor(spellFactor); }
     return 0;
 }
@@ -4740,7 +4740,7 @@ static int ObjShot_SetSpellFactor(lua_State* L)
 static int ObjShot_ToItem(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjShot>(objId)) obj->toItem();
     return 0;
 }
@@ -4748,9 +4748,9 @@ static int ObjShot_ToItem(lua_State* L)
 static int ObjShot_AddShotA1(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int addShotId = DnhValue::toInt(L, 2);
-    int frame = DnhValue::toInt(L, 3);
+    int objId = DnhValue::ToInt(L, 1);
+    int addShotId = DnhValue::ToInt(L, 2);
+    int frame = DnhValue::ToInt(L, 3);
     if (auto obj = engine->getObject<ObjShot>(objId)) obj->addShotA1(addShotId, frame);
     return 0;
 }
@@ -4758,11 +4758,11 @@ static int ObjShot_AddShotA1(lua_State* L)
 static int ObjShot_AddShotA2(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int addShotId = DnhValue::toInt(L, 2);
-    int frame = DnhValue::toInt(L, 3);
-    float dist = DnhValue::toNum(L, 4);
-    float angle = DnhValue::toNum(L, 5);
+    int objId = DnhValue::ToInt(L, 1);
+    int addShotId = DnhValue::ToInt(L, 2);
+    int frame = DnhValue::ToInt(L, 3);
+    float dist = DnhValue::ToNum(L, 4);
+    float angle = DnhValue::ToNum(L, 5);
     if (auto obj = engine->getObject<ObjShot>(objId)) obj->addShotA2(addShotId, frame, dist, angle);
     return 0;
 }
@@ -4770,8 +4770,8 @@ static int ObjShot_AddShotA2(lua_State* L)
 static int ObjShot_SetIntersectionEnable(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    bool enable = DnhValue::toBool(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    bool enable = DnhValue::ToBool(L, 2);
     if (auto obj = engine->getObject<ObjShot>(objId)) obj->setIntersectionEnable(enable);
     return 0;
 }
@@ -4779,8 +4779,8 @@ static int ObjShot_SetIntersectionEnable(lua_State* L)
 static int ObjShot_SetIntersectionCircleA1(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double r = DnhValue::toNum(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    double r = DnhValue::ToNum(L, 2);
     if (auto obj = engine->getObject<ObjShot>(objId)) obj->addTempIntersectionCircleA1(r);
     return 0;
 }
@@ -4788,10 +4788,10 @@ static int ObjShot_SetIntersectionCircleA1(lua_State* L)
 static int ObjShot_SetIntersectionCircleA2(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double x = DnhValue::toNum(L, 2);
-    double y = DnhValue::toNum(L, 3);
-    double r = DnhValue::toNum(L, 4);
+    int objId = DnhValue::ToInt(L, 1);
+    double x = DnhValue::ToNum(L, 2);
+    double y = DnhValue::ToNum(L, 3);
+    double r = DnhValue::ToNum(L, 4);
     if (auto obj = engine->getObject<ObjShot>(objId)) obj->addTempIntersectionCircleA2(x, y, r);
     return 0;
 }
@@ -4799,12 +4799,12 @@ static int ObjShot_SetIntersectionCircleA2(lua_State* L)
 static int ObjShot_SetIntersectionLine(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double x1 = DnhValue::toNum(L, 2);
-    double y1 = DnhValue::toNum(L, 3);
-    double x2 = DnhValue::toNum(L, 4);
-    double y2 = DnhValue::toNum(L, 5);
-    double width = DnhValue::toNum(L, 6);
+    int objId = DnhValue::ToInt(L, 1);
+    double x1 = DnhValue::ToNum(L, 2);
+    double y1 = DnhValue::ToNum(L, 3);
+    double x2 = DnhValue::ToNum(L, 4);
+    double y2 = DnhValue::ToNum(L, 5);
+    double width = DnhValue::ToNum(L, 6);
     if (auto obj = engine->getObject<ObjShot>(objId)) obj->addTempIntersectionLine(x1, y1, x2, y2, width);
     return 0;
 }
@@ -4812,8 +4812,8 @@ static int ObjShot_SetIntersectionLine(lua_State* L)
 static int ObjShot_SetItemChange(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    bool itemChange = DnhValue::toBool(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    bool itemChange = DnhValue::ToBool(L, 2);
     if (auto obj = engine->getObject<ObjShot>(objId)) obj->setItemChange(itemChange);
     return 0;
 }
@@ -4821,7 +4821,7 @@ static int ObjShot_SetItemChange(lua_State* L)
 static int ObjShot_GetDamage(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     auto obj = engine->getObject<ObjShot>(objId);
     lua_pushnumber(L, obj ? obj->getDamage() : 0);
     return 1;
@@ -4830,7 +4830,7 @@ static int ObjShot_GetDamage(lua_State* L)
 static int ObjShot_GetPenetration(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     auto obj = engine->getObject<ObjShot>(objId);
     lua_pushnumber(L, obj ? obj->getPenetration() : 0);
     return 1;
@@ -4839,7 +4839,7 @@ static int ObjShot_GetPenetration(lua_State* L)
 static int ObjShot_GetDelay(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     auto obj = engine->getObject<ObjShot>(objId);
     lua_pushnumber(L, obj ? obj->getDelay() : 0);
     return 1;
@@ -4848,7 +4848,7 @@ static int ObjShot_GetDelay(lua_State* L)
 static int ObjShot_IsSpellResist(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     auto obj = engine->getObject<ObjShot>(objId);
     lua_pushboolean(L, obj && obj->isSpellResistEnabled());
     return 1;
@@ -4857,7 +4857,7 @@ static int ObjShot_IsSpellResist(lua_State* L)
 static int ObjShot_GetImageID(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjShot>(objId))
     {
         if (const auto& shotData = obj->getShotData())
@@ -4873,8 +4873,8 @@ static int ObjShot_GetImageID(lua_State* L)
 static int ObjLaser_SetLength(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double length = DnhValue::toNum(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    double length = DnhValue::ToNum(L, 2);
     if (auto obj = engine->getObject<ObjLaser>(objId))
     {
         obj->setLength(length);
@@ -4885,8 +4885,8 @@ static int ObjLaser_SetLength(lua_State* L)
 static int ObjLaser_SetRenderWidth(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double width = DnhValue::toNum(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    double width = DnhValue::ToNum(L, 2);
     if (auto obj = engine->getObject<ObjLaser>(objId))
     {
         obj->setRenderWidth(width);
@@ -4897,8 +4897,8 @@ static int ObjLaser_SetRenderWidth(lua_State* L)
 static int ObjLaser_SetIntersectionWidth(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double width = DnhValue::toNum(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    double width = DnhValue::ToNum(L, 2);
     if (auto obj = engine->getObject<ObjLaser>(objId))
     {
         obj->setIntersectionWidth(width);
@@ -4909,8 +4909,8 @@ static int ObjLaser_SetIntersectionWidth(lua_State* L)
 static int ObjLaser_SetGrazeInvalidFrame(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int frame = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int frame = DnhValue::ToInt(L, 2);
     if (auto obj = engine->getObject<ObjLaser>(objId))
     {
         obj->setGrazeInvalidFrame(frame);
@@ -4921,9 +4921,9 @@ static int ObjLaser_SetGrazeInvalidFrame(lua_State* L)
 static int ObjLaser_SetInvalidLength(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double head = DnhValue::toNum(L, 2);
-    double tail = DnhValue::toNum(L, 3);
+    int objId = DnhValue::ToInt(L, 1);
+    double head = DnhValue::ToNum(L, 2);
+    double tail = DnhValue::ToNum(L, 3);
     if (auto obj = engine->getObject<ObjLooseLaser>(objId))
     {
         obj->setInvalidLength(head, tail);
@@ -4934,8 +4934,8 @@ static int ObjLaser_SetInvalidLength(lua_State* L)
 static int ObjLaser_SetItemDistance(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double dist = DnhValue::toNum(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    double dist = DnhValue::ToNum(L, 2);
     if (auto obj = engine->getObject<ObjLaser>(objId))
     {
         obj->setItemDistance(dist);
@@ -4946,7 +4946,7 @@ static int ObjLaser_SetItemDistance(lua_State* L)
 static int ObjLaser_GetLength(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     auto obj = engine->getObject<ObjLaser>(objId);
     lua_pushnumber(L, obj ? obj->getLength() : 0);
     return 1;
@@ -4955,8 +4955,8 @@ static int ObjLaser_GetLength(lua_State* L)
 static int ObjStLaser_SetAngle(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double angle = DnhValue::toNum(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    double angle = DnhValue::ToNum(L, 2);
     if (auto obj = engine->getObject<ObjStLaser>(objId))
     {
         obj->setLaserAngle(angle);
@@ -4967,7 +4967,7 @@ static int ObjStLaser_SetAngle(lua_State* L)
 static int ObjStLaser_GetAngle(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     auto obj = engine->getObject<ObjStLaser>(objId);
     lua_pushnumber(L, obj ? obj->getLaserAngle() : 0);
     return 1;
@@ -4976,8 +4976,8 @@ static int ObjStLaser_GetAngle(lua_State* L)
 static int ObjStLaser_SetSource(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    bool source = DnhValue::toBool(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    bool source = DnhValue::ToBool(L, 2);
     if (auto obj = engine->getObject<ObjStLaser>(objId))
     {
         obj->setSource(source);
@@ -4988,8 +4988,8 @@ static int ObjStLaser_SetSource(lua_State* L)
 static int ObjCrLaser_SetTipDecrement(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double decr = DnhValue::toNum(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    double decr = DnhValue::ToNum(L, 2);
     if (auto obj = engine->getObject<ObjCrLaser>(objId))
     {
         obj->setTipDecrement(decr);
@@ -5000,8 +5000,8 @@ static int ObjCrLaser_SetTipDecrement(lua_State* L)
 static int ObjItem_SetItemID(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int itemDataId = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int itemDataId = DnhValue::ToInt(L, 2);
     if (auto item = engine->getObject<ObjItem>(objId))
     {
         item->setItemData(engine->getItemData(objId));
@@ -5012,8 +5012,8 @@ static int ObjItem_SetItemID(lua_State* L)
 static int ObjItem_SetRenderScoreEnable(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    bool enable = DnhValue::toBool(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    bool enable = DnhValue::ToBool(L, 2);
     if (auto item = engine->getObject<ObjItem>(objId))
     {
         item->setRenderScoreEnable(enable);
@@ -5024,8 +5024,8 @@ static int ObjItem_SetRenderScoreEnable(lua_State* L)
 static int ObjItem_SetAutoCollectEnable(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    bool enable = DnhValue::toBool(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    bool enable = DnhValue::ToBool(L, 2);
     if (auto item = engine->getObject<ObjItem>(objId))
     {
         item->setAutoCollectEnable(enable);
@@ -5036,8 +5036,8 @@ static int ObjItem_SetAutoCollectEnable(lua_State* L)
 static int ObjItem_SetDefinedMovePatternA1(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int pattern = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int pattern = DnhValue::ToInt(L, 2);
     if (auto item = engine->getObject<ObjItem>(objId))
     {
         if (pattern == ITEM_MOVE_DOWN)
@@ -5054,8 +5054,8 @@ static int ObjItem_SetDefinedMovePatternA1(lua_State* L)
 static int ObjItem_GetInfo(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    int info = DnhValue::toInt(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    int info = DnhValue::ToInt(L, 2);
     if (auto item = engine->getObject<ObjItem>(objId))
     {
         if (info == INFO_ITEM_SCORE)
@@ -5070,11 +5070,11 @@ static int ObjItem_GetInfo(lua_State* L)
 static int ObjPlayer_AddIntersectionCircleA1(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double dx = DnhValue::toNum(L, 2);
-    double dy = DnhValue::toNum(L, 3);
-    double r = DnhValue::toNum(L, 4);
-    double dr = DnhValue::toNum(L, 5);
+    int objId = DnhValue::ToInt(L, 1);
+    double dx = DnhValue::ToNum(L, 2);
+    double dy = DnhValue::ToNum(L, 3);
+    double r = DnhValue::ToNum(L, 4);
+    double dr = DnhValue::ToNum(L, 5);
     if (auto obj = engine->getObject<ObjPlayer>(objId))
     {
         obj->addIntersectionCircleA1(dx, dy, r, dr);
@@ -5085,10 +5085,10 @@ static int ObjPlayer_AddIntersectionCircleA1(lua_State* L)
 static int ObjPlayer_AddIntersectionCircleA2(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double dx = DnhValue::toNum(L, 2);
-    double dy = DnhValue::toNum(L, 3);
-    double r = DnhValue::toNum(L, 4);
+    int objId = DnhValue::ToInt(L, 1);
+    double dx = DnhValue::ToNum(L, 2);
+    double dy = DnhValue::ToNum(L, 3);
+    double r = DnhValue::ToNum(L, 4);
     if (auto obj = engine->getObject<ObjPlayer>(objId))
     {
         obj->addIntersectionCircleA2(dx, dy, r);
@@ -5099,7 +5099,7 @@ static int ObjPlayer_AddIntersectionCircleA2(lua_State* L)
 static int ObjPlayer_ClearIntersection(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjPlayer>(objId))
     {
         obj->clearIntersection();
@@ -5110,7 +5110,7 @@ static int ObjPlayer_ClearIntersection(lua_State* L)
 static int ObjCol_IsIntersected(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     auto obj = engine->getObject<ObjCol>(objId);
     lua_pushboolean(L, obj && obj->isIntersected());
     return 1;
@@ -5119,7 +5119,7 @@ static int ObjCol_IsIntersected(lua_State* L)
 static int ObjCol_GetListOfIntersectedEnemyID(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     DnhArray enemyIds;
     if (auto obj = engine->getObject<ObjCol>(objId))
     {
@@ -5131,26 +5131,26 @@ static int ObjCol_GetListOfIntersectedEnemyID(lua_State* L)
                 {
                     if (auto enemy = enemyIsectToShot->GetEnemy().lock())
                     {
-                        enemyIds.pushBack(std::make_unique<DnhReal>(enemy->getID()));
+                        enemyIds.PushBack(std::make_unique<DnhReal>(enemy->getID()));
                     }
                 } else if (auto enemyIsectToPlayer = std::dynamic_pointer_cast<EnemyIntersectionToPlayer>(isect))
                 {
                     if (auto enemy = enemyIsectToPlayer->GetEnemy().lock())
                     {
-                        enemyIds.pushBack(std::make_unique<DnhReal>(enemy->getID()));
+                        enemyIds.PushBack(std::make_unique<DnhReal>(enemy->getID()));
                     }
                 }
             }
         }
     }
-    enemyIds.push(L);
+    enemyIds.Push(L);
     return 1;
 }
 
 static int ObjCol_GetIntersectedCount(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     auto obj = engine->getObject<ObjCol>(objId);
     lua_pushnumber(L, obj ? obj->getIntersectedCount() : 0);
     return 1;
@@ -5169,7 +5169,7 @@ static int CallSpell(lua_State* L)
 static int LoadPlayerShotData(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring path = DnhValue::toString(L, 1);
+    std::wstring path = DnhValue::ToString(L, 1);
     engine->loadPlayerShotData(path, getSourcePos(L));
     return 0;
 }
@@ -5177,7 +5177,7 @@ static int LoadPlayerShotData(lua_State* L)
 static int ReloadPlayerShotData(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    std::wstring path = DnhValue::toString(L, 1);
+    std::wstring path = DnhValue::ToString(L, 1);
     engine->reloadPlayerShotData(path, getSourcePos(L));
     return 0;
 }
@@ -5208,7 +5208,7 @@ static int ObjSpell_Create(lua_State* L)
 static int ObjSpell_Regist(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
+    int objId = DnhValue::ToInt(L, 1);
     if (auto obj = engine->getObject<ObjSpell>(objId)) { obj->regist(); }
     return 0;
 }
@@ -5216,8 +5216,8 @@ static int ObjSpell_Regist(lua_State* L)
 static int ObjSpell_SetDamage(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double damage = DnhValue::toNum(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    double damage = DnhValue::ToNum(L, 2);
     if (auto obj = engine->getObject<ObjSpell>(objId)) { obj->setDamage(damage); }
     return 0;
 }
@@ -5225,8 +5225,8 @@ static int ObjSpell_SetDamage(lua_State* L)
 static int ObjSpell_SetEraseShot(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    bool eraseShot = DnhValue::toBool(L, 2);
+    int objId = DnhValue::ToInt(L, 1);
+    bool eraseShot = DnhValue::ToBool(L, 2);
     if (auto obj = engine->getObject<ObjSpell>(objId)) { obj->setEraseShotEnable(eraseShot); }
     return 0;
 }
@@ -5234,10 +5234,10 @@ static int ObjSpell_SetEraseShot(lua_State* L)
 static int ObjSpell_SetIntersectionCircle(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double x = DnhValue::toNum(L, 2);
-    double y = DnhValue::toNum(L, 3);
-    double r = DnhValue::toNum(L, 4);
+    int objId = DnhValue::ToInt(L, 1);
+    double x = DnhValue::ToNum(L, 2);
+    double y = DnhValue::ToNum(L, 3);
+    double r = DnhValue::ToNum(L, 4);
     if (auto obj = engine->getObject<ObjSpell>(objId))
     {
         obj->addTempIntersectionCircle(x, y, r);
@@ -5248,12 +5248,12 @@ static int ObjSpell_SetIntersectionCircle(lua_State* L)
 static int ObjSpell_SetIntersectionLine(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int objId = DnhValue::toInt(L, 1);
-    double x1 = DnhValue::toNum(L, 2);
-    double y1 = DnhValue::toNum(L, 3);
-    double x2 = DnhValue::toNum(L, 4);
-    double y2 = DnhValue::toNum(L, 5);
-    double width = DnhValue::toNum(L, 6);
+    int objId = DnhValue::ToInt(L, 1);
+    double x1 = DnhValue::ToNum(L, 2);
+    double y1 = DnhValue::ToNum(L, 3);
+    double x2 = DnhValue::ToNum(L, 4);
+    double y2 = DnhValue::ToNum(L, 5);
+    double width = DnhValue::ToNum(L, 6);
     if (auto obj = engine->getObject<ObjSpell>(objId))
     {
         obj->addTempIntersectionLine(x1, y1, x2, y2, width);
@@ -5264,7 +5264,7 @@ static int ObjSpell_SetIntersectionLine(lua_State* L)
 static int SetPauseScriptPath(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    auto path = DnhValue::toString(L, 1);
+    auto path = DnhValue::ToString(L, 1);
     engine->setPauseScriptPath(path);
     return 0;
 }
@@ -5272,7 +5272,7 @@ static int SetPauseScriptPath(lua_State* L)
 static int SetEndSceneScriptPath(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    auto path = DnhValue::toString(L, 1);
+    auto path = DnhValue::ToString(L, 1);
     engine->setEndSceneScriptPath(path);
     return 0;
 }
@@ -5280,7 +5280,7 @@ static int SetEndSceneScriptPath(lua_State* L)
 static int SetReplaySaveSceneScriptPath(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    auto path = DnhValue::toString(L, 1);
+    auto path = DnhValue::ToString(L, 1);
     engine->setReplaySaveSceneScriptPath(path);
     return 0;
 }
@@ -5289,13 +5289,13 @@ static int CreatePlayerShotA1(lua_State* L)
 {
     Engine* engine = getEngine(L);
     Script* script = getScript(L);
-    double x = DnhValue::toNum(L, 1);
-    double y = DnhValue::toNum(L, 2);
-    double speed = DnhValue::toNum(L, 3);
-    double angle = DnhValue::toNum(L, 4);
-    double damage = DnhValue::toNum(L, 5);
-    int penetration = DnhValue::toInt(L, 6);
-    int shotDataId = DnhValue::toInt(L, 7);
+    double x = DnhValue::ToNum(L, 1);
+    double y = DnhValue::ToNum(L, 2);
+    double speed = DnhValue::ToNum(L, 3);
+    double angle = DnhValue::ToNum(L, 4);
+    double damage = DnhValue::ToNum(L, 5);
+    int penetration = DnhValue::ToInt(L, 6);
+    int shotDataId = DnhValue::ToInt(L, 7);
     if (auto shot = engine->createPlayerShotA1(x, y, speed, angle, damage, penetration, shotDataId))
     {
         lua_pushnumber(L, shot->getID());
@@ -5310,15 +5310,15 @@ static int CreatePlayerShotA1(lua_State* L)
 static int GetTransitionRenderTargetName(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    DnhArray(engine->getTransitionRenderTargetName()).push(L);
+    DnhArray(engine->getTransitionRenderTargetName()).Push(L);
     return 1;
 }
 
 static int SetShotDeleteEventEnable(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int targetEvent = DnhValue::toInt(L, 1);
-    bool enable = DnhValue::toBool(L, 2);
+    int targetEvent = DnhValue::ToInt(L, 1);
+    bool enable = DnhValue::ToBool(L, 2);
     switch (targetEvent)
     {
         case EV_DELETE_SHOT_IMMEDIATE:
@@ -5365,7 +5365,7 @@ static int StartStageScene(lua_State* L)
 static int SetStageIndex(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int idx = DnhValue::toInt(L, 1);
+    int idx = DnhValue::ToInt(L, 1);
     engine->setStageIndex(idx);
     return 0;
 }
@@ -5373,7 +5373,7 @@ static int SetStageIndex(lua_State* L)
 static int SetStageMainScript(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    auto path = DnhValue::toString(L, 1);
+    auto path = DnhValue::ToString(L, 1);
     engine->setStageMainScript(path, getSourcePos(L));
     return 0;
 }
@@ -5381,7 +5381,7 @@ static int SetStageMainScript(lua_State* L)
 static int SetStagePlayerScript(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    auto path = DnhValue::toString(L, 1);
+    auto path = DnhValue::ToString(L, 1);
     engine->setStagePlayerScript(path, getSourcePos(L));
     return 0;
 }
@@ -5389,7 +5389,7 @@ static int SetStagePlayerScript(lua_State* L)
 static int SetStageReplayFile(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    auto path = DnhValue::toString(L, 1);
+    auto path = DnhValue::ToString(L, 1);
     engine->setStageReplayFile(path);
     return 0;
 }
@@ -5411,7 +5411,7 @@ static int GetStageSceneResult(lua_State* L)
 static int PauseStageScene(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    bool doPause = DnhValue::toBool(L, 1);
+    bool doPause = DnhValue::ToBool(L, 1);
     engine->pauseStageScene(doPause);
     return 0;
 }
@@ -5440,33 +5440,33 @@ static int GetFreePlayerScriptCount(lua_State* L)
 static int GetFreePlayerScriptInfo(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int idx = DnhValue::toInt(L, 1);
-    int infoType = DnhValue::toInt(L, 2);
+    int idx = DnhValue::ToInt(L, 1);
+    int infoType = DnhValue::ToInt(L, 2);
     if (idx >= 0 && idx < engine->getFreePlayerScriptCount())
     {
         ScriptInfo info = engine->getFreePlayerScriptInfo(idx);
         switch (infoType)
         {
             case INFO_SCRIPT_PATH:
-                DnhArray(info.path).push(L);
+                DnhArray(info.path).Push(L);
                 break;
             case INFO_SCRIPT_ID:
-                DnhArray(info.id).push(L);
+                DnhArray(info.id).Push(L);
                 break;
             case INFO_SCRIPT_TITLE:
-                DnhArray(info.title).push(L);
+                DnhArray(info.title).Push(L);
                 break;
             case INFO_SCRIPT_TEXT:
-                DnhArray(info.text).push(L);
+                DnhArray(info.text).Push(L);
                 break;
             case INFO_SCRIPT_IMAGE:
-                DnhArray(info.imagePath).push(L);
+                DnhArray(info.imagePath).Push(L);
                 break;
             case INFO_SCRIPT_REPLAY_NAME:
-                DnhArray(info.replayName).push(L);
+                DnhArray(info.replayName).Push(L);
                 break;
             default:
-                DnhArray(L"").push(L);
+                DnhArray(L"").Push(L);
                 break;
         }
         return 1;
@@ -5483,7 +5483,7 @@ static int LoadReplayList(lua_State* L)
 static int GetValidReplayIndices(lua_State* L)
 {
     // FUTURE : impl
-    DnhArray(L"").push(L);
+    DnhArray(L"").Push(L);
     return 1;
 }
 
@@ -5497,7 +5497,7 @@ static int IsValidReplayIndex(lua_State* L)
 static int GetReplayInfo(lua_State* L)
 {
     // FUTURE : impl
-    DnhArray(L"").push(L);
+    DnhArray(L"").Push(L);
     return 1;
 }
 
@@ -5625,7 +5625,7 @@ void setScript(lua_State* L, Script* p)
 
 int c_chartonum(lua_State* L)
 {
-    std::wstring wstr = DnhValue::toString(L, 1);
+    std::wstring wstr = DnhValue::ToString(L, 1);
     if (wstr.empty())
     {
         lua_pushnumber(L, 0);
@@ -5639,7 +5639,7 @@ int c_chartonum(lua_State* L)
 
 int c_succchar(lua_State* L)
 {
-    std::wstring wstr = DnhValue::toString(L, 1);
+    std::wstring wstr = DnhValue::ToString(L, 1);
     if (wstr.empty())
     {
         lua_pushstring(L, "");
@@ -5655,7 +5655,7 @@ int c_succchar(lua_State* L)
 
 int c_predchar(lua_State* L)
 {
-    std::wstring wstr = DnhValue::toString(L, 1);
+    std::wstring wstr = DnhValue::ToString(L, 1);
     if (wstr.empty())
     {
         lua_pushstring(L, "");

@@ -74,9 +74,9 @@ void ObjPlayer::update()
                 {
                     // notify EV_GRAZE
                     auto grazeInfo = std::make_unique<DnhArray>();
-                    grazeInfo->pushBack(std::make_unique<DnhReal>((double)currentFrameGrazeCnt));
-                    grazeInfo->pushBack(std::make_unique<DnhArray>(currentFrameGrazeObjIds));
-                    grazeInfo->pushBack(std::make_unique<DnhArray>(currentFrameGrazeShotPoints));
+                    grazeInfo->PushBack(std::make_unique<DnhReal>((double)currentFrameGrazeCnt));
+                    grazeInfo->PushBack(std::make_unique<DnhArray>(currentFrameGrazeObjIds));
+                    grazeInfo->PushBack(std::make_unique<DnhArray>(currentFrameGrazeShotPoints));
                     playerScript->notifyEvent(EV_GRAZE, grazeInfo);
                 }
             }
@@ -246,7 +246,7 @@ void ObjPlayer::addGraze(int shotObjId, int64_t graze)
 {
     if (auto gameState = getGameState())
     {
-        if (auto shot = gameState->objTable->get<ObjShot>(shotObjId))
+        if (auto shot = gameState->objTable->Get<ObjShot>(shotObjId))
         {
             globalParams->graze += graze;
             currentFrameGrazeCnt += graze;
@@ -377,7 +377,7 @@ void ObjPlayer::callSpell()
     {
         gameState->spellManageObj = gameState->objTable->create<ObjSpellManage>(gameState);
         playerScript->notifyEvent(EV_REQUEST_SPELL);
-        if (playerScript->getScriptResult()->toBool())
+        if (playerScript->getScriptResult()->ToBool())
         {
             // スペル発動
             if (auto bossScene = gameState->enemyBossSceneObj.lock())
@@ -406,7 +406,7 @@ void ObjPlayer::getItem(int itemObjId)
 {
     if (auto gameState = getGameState())
     {
-        if (auto item = gameState->objTable->get<ObjItem>(itemObjId))
+        if (auto item = gameState->objTable->Get<ObjItem>(itemObjId))
         {
             if (item->isScoreItem())
             {

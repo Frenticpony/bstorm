@@ -56,7 +56,7 @@ std::unique_ptr<DnhValue> CommonDataDB::GetAreaCommonData(const DataAreaName& ar
         const auto itArea = area.find(key);
         if (itArea != area.end())
         {
-            return itArea->second->clone();
+            return itArea->second->Clone();
         }
     }
     return std::move(defaultValue);
@@ -109,7 +109,7 @@ void CommonDataDB::CopyCommonDataArea(const DataAreaName& dest, const DataAreaNa
         // 全てclone
         for (const auto& entry : srcArea)
         {
-            destArea[entry.first] = entry.second->clone();
+            destArea[entry.first] = entry.second->Clone();
         }
         areaTable_[dest] = std::move(destArea);
     }
@@ -157,7 +157,7 @@ static void writeCommonDataDataSection(const CommonDataDB::DataKey& key, const s
     std::string keySJIS = toMultiByte<932>(key);
     uint32_t keySize = keySJIS.size();
     std::ostringstream elemStream;
-    value->serialize(elemStream);
+    value->Serialize(elemStream);
     std::string elem = elemStream.str();
     uint32_t elemSize = elem.size();
     uint32_t keyName_sizeSize = keySize + 5;
@@ -225,7 +225,7 @@ static void readCommonDataDataSection(CommonDataDB::CommonDataArea& area, std::i
         in.read(&keyName[0], keySize);
         // skip element size
         in.ignore(sizeof(uint32_t));
-        auto value = DnhValue::deserialize(in);
+        auto value = DnhValue::Deserialize(in);
         area[fromMultiByte<932>(keyName)] = std::move(value);
     } else
     {
