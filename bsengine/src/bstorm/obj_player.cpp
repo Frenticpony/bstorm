@@ -4,7 +4,6 @@
 #include <bstorm/virtual_key_input_source.hpp>
 #include <bstorm/script.hpp>
 #include <bstorm/intersection.hpp>
-#include <bstorm/collision_matrix.hpp>
 #include <bstorm/obj_enemy_boss_scene.hpp>
 #include <bstorm/obj_shot.hpp>
 #include <bstorm/obj_item.hpp>
@@ -56,7 +55,6 @@ ObjPlayer::ObjPlayer(const std::shared_ptr<GameState>& gameState, const std::sha
     currentFrameGrazeCnt(0)
 {
     setType(OBJ_PLAYER);
-    isectToItem = gameState->colDetector->create<PlayerIntersectionToItem>(getX(), getY(), this);
     initPosition();
 }
 
@@ -138,8 +136,8 @@ void ObjPlayer::addIntersectionCircleA1(float dx, float dy, float r, float dr)
 {
     if (auto gameState = getGameState())
     {
-        ObjCol::pushIntersection(gameState->colDetector->create<PlayerIntersection>(getX() + dx, getY() + dy, r, this));
-        ObjCol::pushIntersection(gameState->colDetector->create<PlayerGrazeIntersection>(getX() + dx, getY() + dy, r + dr, this));
+        ObjCol::pushIntersection(gameState->colDetector->Create<PlayerIntersection>(getX() + dx, getY() + dy, r, shared_from_this()));
+        ObjCol::pushIntersection(gameState->colDetector->Create<PlayerGrazeIntersection>(getX() + dx, getY() + dy, r + dr, shared_from_this()));
     }
 }
 
@@ -147,7 +145,15 @@ void ObjPlayer::addIntersectionCircleA2(float dx, float dy, float r)
 {
     if (auto gameState = getGameState())
     {
-        ObjCol::pushIntersection(gameState->colDetector->create<PlayerGrazeIntersection>(getX() + dx, getY() + dy, r, this));
+        ObjCol::pushIntersection(gameState->colDetector->Create<PlayerGrazeIntersection>(getX() + dx, getY() + dy, r, shared_from_this()));
+    }
+}
+
+void ObjPlayer::addIntersectionToItem()
+{
+    if (auto gameState = getGameState())
+    {
+        isectToItem = gameState->colDetector->Create<PlayerIntersectionToItem>(getX(), getY(), shared_from_this());
     }
 }
 
@@ -279,7 +285,7 @@ void ObjPlayer::transIntersection(float dx, float dy)
         ObjCol::transIntersection(dx, dy);
         if (isectToItem)
         {
-            gameState->colDetector->trans(isectToItem, dx, dy);
+            gameState->colDetector->Trans(isectToItem, dx, dy);
         }
     }
 }

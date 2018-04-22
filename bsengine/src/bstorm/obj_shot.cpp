@@ -9,7 +9,6 @@
 #include <bstorm/obj_player.hpp>
 #include <bstorm/obj_item.hpp>
 #include <bstorm/intersection.hpp>
-#include <bstorm/collision_matrix.hpp>
 #include <bstorm/shot_data.hpp>
 #include <bstorm/auto_delete_clip.hpp>
 #include <bstorm/rand_generator.hpp>
@@ -231,7 +230,7 @@ void ObjShot::setAngularVelocity(float angularVelocity)
 
 bool ObjShot::isSpellResistEnabled() const { return spellResistEnable; }
 
-void ObjShot::setSpellResist(bool enable) { spellResistEnable = enable; }
+void ObjShot::setSpellResistEnable(bool enable) { spellResistEnable = enable; }
 
 bool ObjShot::isSpellFactorEnabled() const { return spellFactorEnable; }
 
@@ -239,7 +238,29 @@ void ObjShot::setSpellFactor(bool enable) { spellFactorEnable = enable; }
 
 bool ObjShot::isEraseShotEnabled() const { return eraseShotEnable; }
 
-void ObjShot::setEraseShot(bool erase) { eraseShotEnable = erase; }
+void ObjShot::setEraseShotEnable(bool enable)
+{
+    eraseShotEnable = enable;
+    if (isPlayerShot())
+    {
+        // 既に作られている判定に弾消し属性を付与
+        for (auto& isect : ObjCol::getIntersections())
+        {
+            if (auto shotIsect = std::dynamic_pointer_cast<ShotIntersection>(isect))
+            {
+                shotIsect->SetEraseShotEnable(enable);
+            }
+        }
+
+        for (auto& isect : ObjCol::getTempIntersections())
+        {
+            if (auto shotIsect = std::dynamic_pointer_cast<ShotIntersection>(isect))
+            {
+                shotIsect->SetEraseShotEnable(enable);
+            }
+        }
+    }
+}
 
 bool ObjShot::isItemChangeEnabled() const
 {
@@ -264,7 +285,7 @@ void ObjShot::addIntersection(const std::shared_ptr<ShotIntersection>& isect)
     {
         if (auto state = getGameState())
         {
-            state->colDetector->add(isect);
+            state->colDetector->Add(isect);
         }
         ObjCol::pushIntersection(isect);
     }
@@ -279,9 +300,24 @@ void ObjShot::addTempIntersection(const std::shared_ptr<ShotIntersection>& isect
     }
     if (auto state = getGameState())
     {
-        state->colDetector->add(isect);
+        state->colDetector->Add(isect);
     }
     ObjCol::addTempIntersection(isect);
+}
+
+void ObjShot::addIntersectionCircleA1(float r)
+{
+    addIntersectionCircleA2(getX(), getY(), r);
+}
+
+void ObjShot::addIntersectionCircleA2(float x, float y, float r)
+{
+    addIntersection(std::make_shared<ShotIntersection>(x, y, r, shared_from_this(), false));
+}
+
+void ObjShot::addIntersectionLine(float x1, float y1, float x2, float y2, float width)
+{
+    addIntersection(std::make_shared<ShotIntersection>(x1, y1, x2, y2, width, shared_from_this(), false));
 }
 
 void ObjShot::addTempIntersectionCircleA1(float r)
@@ -291,12 +327,12 @@ void ObjShot::addTempIntersectionCircleA1(float r)
 
 void ObjShot::addTempIntersectionCircleA2(float x, float y, float r)
 {
-    addTempIntersection(std::make_shared<ShotIntersection>(x, y, r, this, true));
+    addTempIntersection(std::make_shared<ShotIntersection>(x, y, r, shared_from_this(), true));
 }
 
 void ObjShot::addTempIntersectionLine(float x1, float y1, float x2, float y2, float width)
 {
-    addTempIntersection(std::make_shared<ShotIntersection>(x1, y1, x2, y2, width, this, true));
+    addTempIntersection(std::make_shared<ShotIntersection>(x1, y1, x2, y2, width, shared_from_this(), true));
 }
 
 bool ObjShot::isIntersectionEnabled() const
@@ -340,9 +376,7 @@ void ObjShot::setShotData(const std::shared_ptr<ShotData>& data)
                 {
                     for (const auto& col : shotData->collisions)
                     {
-                        auto isect = std::make_shared<ShotIntersection>(getX() + col.x, getY() + col.y, col.r, this, false);
-                        state->colDetector->add(isect);
-                        ObjCol::pushIntersection(isect);
+                        addIntersectionCircleA2(getX() + col.x, getY() + col.y, col.r);
                     }
                 }
                 if (shotData->useAngularVelocityRand)
@@ -679,7 +713,7 @@ ObjLaser::ObjLaser(bool isPlayerShot, const std::shared_ptr<GameState>& gameStat
     grazeInvalidTimer(0),
     itemDistance(25)
 {
-    setSpellResist(true);
+    setSpellResistEnable(true);
     setPenetration(1 << 24);
 }
 
@@ -917,7 +951,7 @@ void ObjLooseLaser::updateIntersection()
             float isectTailY = sinDir * getInvalidLengthTail() + tail.y;
             float isectHeadX = -cosDir * getInvalidLengthHead() + head.x;
             float isectHeadY = -sinDir * getInvalidLengthHead() + head.y;
-            addIntersection(std::make_shared<ShotIntersection>(isectTailX, isectTailY, isectHeadX, isectHeadY, getIntersectionWidth(), this, false));
+            addIntersectionLine(isectTailX, isectTailY, isectHeadX, isectHeadY, getIntersectionWidth());
         }
     }
 }
@@ -1256,10 +1290,7 @@ void ObjCrLaser::extend(float x, float y)
         totalLaserLength += laserNodeLength;
         laserNodeLengthList.push_back(laserNodeLength);
 
-        if (!useTempIntersectionFlag)
-        {
-            addIntersection(std::make_shared<ShotIntersection>(headX, headY, x, y, getIntersectionWidth(), this, false));
-        }
+        addIntersectionLine(headX, headY, x, y, getIntersectionWidth());
 
         // カーブレーザーの場合
         // length : レーザーを構成する頂点の組の数

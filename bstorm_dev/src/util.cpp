@@ -4,7 +4,6 @@
 #include <bstorm/const.hpp>
 #include <bstorm/texture.hpp>
 #include <bstorm/intersection.hpp>
-#include <bstorm/collision_matrix.hpp>
 #include <bstorm/obj_move.hpp>
 #include <bstorm/obj_item.hpp>
 
@@ -107,7 +106,8 @@ const char * getCollisionGroupName(CollisionGroup colGroup)
     switch (colGroup)
     {
         case COL_GRP_ENEMY_SHOT: return "ENEMY_SHOT";
-        case COL_GRP_PLAYER_SHOT: return "PLAYER_SHOT";
+        case COL_GRP_PLAYER_ERASE_SHOT: return "PLAYER_ERASE_SHOT";
+        case COL_GRP_PLAYER_NON_ERASE_SHOT: return "PLAYER_NON_ERASE_SHOT";
         case COL_GRP_PLAYER: return "PLAYER";
         case COL_GRP_PLAYER_GRAZE: return "PLAYER_GRAZE";
         case COL_GRP_ENEMY_TO_SHOT: return "ENEMY_TO_SHOT";
@@ -148,27 +148,27 @@ void drawIntersectionInfo(const std::shared_ptr<Intersection>& isect)
     if (!isect) return;
     {
         ImGui::BeginGroup();
-        ImGui::BulletText("collision-group : %s", getCollisionGroupName(isect->getCollisionGroup()));
-        ImGui::BulletText("tree-index      : %d", isect->getTreeIndex());
+        ImGui::BulletText("collision-group : %s", getCollisionGroupName(isect->GetCollisionGroup()));
+        ImGui::BulletText("tree-index      : %d", isect->GetTreeIndex());
         ImGui::EndGroup();
     }
     ImGui::SameLine();
     {
         ImGui::BeginGroup();
-        const Shape& shape = isect->getShape();
-        auto shapeType = shape.getType();
+        const Shape& shape = isect->GetShape();
+        auto shapeType = shape.GetType();
         ImGui::BulletText("shape    : %s", shapeType == Shape::Type::CIRCLE ? "Circle" : "Line");
         if (shapeType == Shape::Type::CIRCLE)
         {
             float x, y, r;
-            shape.getCircle(x, y, r);
+            shape.GetCircle(x, y, r);
             ImGui::BulletText("center-x : %f", x);
             ImGui::BulletText("center-y : %f", y);
             ImGui::BulletText("radius   : %f", r);
         } else if (shapeType == Shape::Type::RECT)
         {
             float x1, y1, x2, y2, width;
-            shape.getRect(x1, y1, x2, y2, width);
+            shape.GetRect(x1, y1, x2, y2, width);
             ImGui::BulletText("begin-x : %f", x1);
             ImGui::BulletText("begin-y : %f", y1);
             ImGui::BulletText("end-x   : %f", x2);

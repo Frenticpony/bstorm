@@ -12,6 +12,9 @@
 
 namespace bstorm
 {
+constexpr uint8_t COLLISION_DETECTOR_MAX_LEVEL = 5;
+
+
 class FpsCounter;
 class TimePoint;
 class MousePositionProvider;

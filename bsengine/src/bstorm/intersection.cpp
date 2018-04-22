@@ -4,24 +4,31 @@
 #include <bstorm/type.hpp>
 #include <bstorm/util.hpp>
 #include <bstorm/renderer.hpp>
+#include <bstorm/obj_enemy.hpp>
+#include <bstorm/obj_shot.hpp>
+#include <bstorm/obj_item.hpp>
+#include <bstorm/obj_player.hpp>
+#include <bstorm/obj_spell.hpp>
 
 #include <array>
 #include <deque>
 #include <algorithm>
 #include <d3dx9.h>
+#include <cassert>
 
 namespace bstorm
 {
 
-// 頂点の順番
-// 必ず時計回りになる
-// [0] (x1, y1) [1]
-//  |            |
-// [3] (x2, y2) [2]
-static std::array<Point2D, 4> lineToRect(float x1, float y1, float x2, float y2, float width)
+// Rect = std::array<Point2D, 4>
+// 頂点の順番は以下の通り ([0] = (x1, y1), [2] = (x2, y2)
+// [0] - [1]
+//  |     |
+// [3] - [2]
+
+static std::array<Point2D, 4> LineToRect(float x1, float y1, float x2, float y2, float width)
 {
-    const float halfWidth = width / 2;
-    const float normalDir = atan2(y2 - y1, x2 - x1) + D3DX_PI / 2;
+    const float halfWidth = width / 2.0f;
+    const float normalDir = atan2(y2 - y1, x2 - x1) + D3DX_PI / 2.0f;
     const float dx = halfWidth * cos(normalDir);
     const float dy = halfWidth * sin(normalDir);
     return std::array<Point2D, 4>{Point2D(x1 + dx, y1 + dy),
@@ -31,26 +38,25 @@ static std::array<Point2D, 4> lineToRect(float x1, float y1, float x2, float y2,
 }
 
 BoundingBox::BoundingBox() :
-    left(0),
-    top(0),
-    right(0),
-    bottom(0)
+    left_(0.0f),
+    top_(0.0f),
+    right_(0.0f),
+    bottom_(0.0f)
 {
 }
 
 BoundingBox::BoundingBox(float l, float t, float r, float b) :
-    left(l),
-    top(t),
-    right(r),
-    bottom(b)
+    left_(l),
+    top_(t),
+    right_(r),
+    bottom_(b)
 {
 }
 
-bool BoundingBox::isIntersected(const BoundingBox& other) const
+bool BoundingBox::IsIntersected(const BoundingBox& other) const
 {
-    return left <= other.right && top <= other.bottom && other.left <= right && other.top <= bottom;
+    return left_ <= other.right_ && top_ <= other.bottom_ && other.left_ <= right_ && other.top_ <= bottom_;
 }
-
 
 // 外積
 static inline float cross2(float x1, float y1, float x2, float y2)
@@ -65,7 +71,7 @@ static inline float dot2(float x1, float y1, float x2, float y2)
 }
 
 // 線分と線分の交差判定
-static bool isIntersectedSegmentSegment(const Point2D& a, const Point2D& b, const Point2D& c, const Point2D& d)
+static bool IsIntersectedSegmentSegment(const Point2D& a, const Point2D& b, const Point2D& c, const Point2D& d)
 {
     // x : cross
     // * : multiply
@@ -87,11 +93,11 @@ static bool isIntersectedSegmentSegment(const Point2D& a, const Point2D& b, cons
     float cp3 = cross2(acX, acY, abX, abY);
     float cp4 = cross2(adX, adY, abX, abY);
 
-    return cp1 * cp2 <= 0 && cp3 * cp4 <= 0;
+    return cp1 * cp2 <= 0.0f && cp3 * cp4 <= 0.0f;
 }
 
 // 点が矩形内にあるかどうか判定
-static bool isPointInRect(const Point2D& p, const std::array<Point2D, 4>& rect)
+static bool IsPointInRect(const Point2D& p, const std::array<Point2D, 4>& rect)
 {
     const Point2D& a = rect[0];
     const Point2D& b = rect[1];
@@ -119,10 +125,10 @@ static bool isPointInRect(const Point2D& p, const std::array<Point2D, 4>& rect)
     float cp4 = cross2(dpX, dpY, daX, daY);
     // 全て負なら矩形内に含まれる
     // 矩形は必ず時計回りなので全て正の場合を調べる必要はない
-    return cp1 <= 0 && cp2 <= 0 && cp3 <= 0 && cp4 <= 0;
+    return cp1 <= 0.0f && cp2 <= 0.0f && cp3 <= 0.0f && cp4 <= 0.0f;
 }
 
-static bool isIntersectedCircleSegment(float cx, float cy, float r, const Point2D& a, const Point2D& b)
+static bool IsIntersectedCircleSegment(float cx, float cy, float r, const Point2D& a, const Point2D& b)
 {
     float abX = b.x - a.x;
     float abY = b.y - a.y;
@@ -133,125 +139,137 @@ static bool isIntersectedCircleSegment(float cx, float cy, float r, const Point2
     // d : 円の中心からABを通る直線への垂線の長さ
     float d = abs(cross2(abX, abY, acX, acY)) / std::hypotf(abX, abY);
     if (d > r) return false;
-    if (dot2(abX, abY, acX, acY) * dot2(abX, abY, bcX, bcY) <= 0) return true;
+    if (dot2(abX, abY, acX, acY) * dot2(abX, abY, bcX, bcY) <= 0.0f) return true;
     return std::hypotf(acX, acY) <= r || std::hypotf(bcX, bcY) <= r;
 }
 
 // 弾幕風のLine = Rect
-bool isIntersectedLineCircle(float x1, float y1, float x2, float y2, float width, float cx, float cy, float r)
+bool IsIntersectedLineCircle(float x1, float y1, float x2, float y2, float width, float cx, float cy, float r)
 {
-    const auto rect = lineToRect(x1, y1, x2, y2, width);
+    const auto rect = LineToRect(x1, y1, x2, y2, width);
     // 円が矩形の辺と交わっている場合
     for (int i = 0; i < 4; i++)
     {
-        if (isIntersectedCircleSegment(cx, cy, r, rect[i], rect[(i + 1) & 3])) return true;
+        if (IsIntersectedCircleSegment(cx, cy, r, rect[i], rect[(i + 1) & 3])) return true;
     }
     // 円が矩形に入っている場合
-    return isPointInRect(Point2D(cx, cy), rect);
+    return IsPointInRect(Point2D(cx, cy), rect);
 }
 
 Shape::Shape(float x, float y, float r) :
-    type(Type::CIRCLE)
+    type_(Type::CIRCLE)
 {
-    params.Circle.x = x;
-    params.Circle.y = y;
-    params.Circle.r = r;
-    updateBoundingBox();
+    params_.Circle.x = x;
+    params_.Circle.y = y;
+    params_.Circle.r = r;
+    UpdateBoundingBox();
 }
 
 Shape::Shape(float x1, float y1, float x2, float y2, float width) :
-    type(Type::RECT)
+    type_(Type::RECT)
 {
-    params.Rect.x1 = x1;
-    params.Rect.y1 = y1;
-    params.Rect.x2 = x2;
-    params.Rect.y2 = y2;
-    params.Rect.width = width;
-    updateBoundingBox();
+    params_.Rect.x1 = x1;
+    params_.Rect.y1 = y1;
+    params_.Rect.x2 = x2;
+    params_.Rect.y2 = y2;
+    params_.Rect.width = width;
+    UpdateBoundingBox();
 }
 
-bool Shape::isIntersected(const Shape& other) const
+bool Shape::IsIntersected(const Shape& other) const
 {
-    if (!boundingBox.isIntersected(other.boundingBox)) return false;
-    if (type == Type::CIRCLE && other.type == Type::CIRCLE)
+    if (!boundingBox_.IsIntersected(other.boundingBox_))
     {
-        float dx = params.Circle.x - other.params.Circle.x;
-        float dy = params.Circle.y - other.params.Circle.y;
-        float d = params.Circle.r + other.params.Circle.r;
+        // BB同士が当たっていない場合は当たっていない
+        return false;
+    }
+
+    if (type_ == Type::CIRCLE && other.type_ == Type::CIRCLE)
+    {
+        // 円と円
+        float dx = params_.Circle.x - other.params_.Circle.x;
+        float dy = params_.Circle.y - other.params_.Circle.y;
+        float d = params_.Circle.r + other.params_.Circle.r;
         return dx * dx + dy * dy <= d * d;
-    } else if (type == Type::CIRCLE && other.type == Type::RECT)
+    } else if (type_ == Type::CIRCLE && other.type_ == Type::RECT)
     {
-        float x1 = other.params.Rect.x1;
-        float y1 = other.params.Rect.y1;
-        float x2 = other.params.Rect.x2;
-        float y2 = other.params.Rect.y2;
-        float width = other.params.Rect.width;
-        float cx = params.Circle.x;
-        float cy = params.Circle.y;
-        float r = params.Circle.r;
-        return isIntersectedLineCircle(x1, y1, x2, y2, width, cx, cy, r);
-    } else if (type == Type::RECT && other.type == Type::CIRCLE)
+        // 円と矩形
+        float x1 = other.params_.Rect.x1;
+        float y1 = other.params_.Rect.y1;
+        float x2 = other.params_.Rect.x2;
+        float y2 = other.params_.Rect.y2;
+        float width = other.params_.Rect.width;
+        float cx = params_.Circle.x;
+        float cy = params_.Circle.y;
+        float r = params_.Circle.r;
+        return IsIntersectedLineCircle(x1, y1, x2, y2, width, cx, cy, r);
+    } else if (type_ == Type::RECT && other.type_ == Type::CIRCLE)
     {
-        float x1 = params.Rect.x1;
-        float y1 = params.Rect.y1;
-        float x2 = params.Rect.x2;
-        float y2 = params.Rect.y2;
-        float width = params.Rect.width;
-        float cx = other.params.Circle.x;
-        float cy = other.params.Circle.y;
-        float r = other.params.Circle.r;
-        return isIntersectedLineCircle(x1, y1, x2, y2, width, cx, cy, r);
-    } else if (type == Type::RECT && other.type == Type::RECT)
+        // 円と矩形
+        float x1 = params_.Rect.x1;
+        float y1 = params_.Rect.y1;
+        float x2 = params_.Rect.x2;
+        float y2 = params_.Rect.y2;
+        float width = params_.Rect.width;
+        float cx = other.params_.Circle.x;
+        float cy = other.params_.Circle.y;
+        float r = other.params_.Circle.r;
+        return IsIntersectedLineCircle(x1, y1, x2, y2, width, cx, cy, r);
+    } else if (type_ == Type::RECT && other.type_ == Type::RECT)
     {
-        const auto rect1 = lineToRect(params.Rect.x1, params.Rect.y1, params.Rect.x2, params.Rect.y2, params.Rect.width);
-        const auto rect2 = lineToRect(other.params.Rect.x1, other.params.Rect.y1, other.params.Rect.x2, other.params.Rect.y2, other.params.Rect.width);
+        // 矩形と矩形
+        const auto rect1 = LineToRect(params_.Rect.x1, params_.Rect.y1, params_.Rect.x2, params_.Rect.y2, params_.Rect.width);
+        const auto rect2 = LineToRect(other.params_.Rect.x1, other.params_.Rect.y1, other.params_.Rect.x2, other.params_.Rect.y2, other.params_.Rect.width);
         // 辺同士が交わってる場合
         for (int i = 0; i < 4; i++)
         {
             for (int j = 0; j < 4; j++)
             {
-                if (isIntersectedSegmentSegment(rect1[i], rect1[(i + 1) & 3], rect2[j], rect2[(j + 1) & 3])) return true;
+                if (IsIntersectedSegmentSegment(rect1[i], rect1[(i + 1) & 3], rect2[j], rect2[(j + 1) & 3])) return true;
             }
         }
         // 矩形が片方の矩形に完全に含まれる場合
-        return isPointInRect(rect1[0], rect2) || isPointInRect(rect2[0], rect1);
+        return IsPointInRect(rect1[0], rect2) || IsPointInRect(rect2[0], rect1);
     }
     return false;
 }
 
-const BoundingBox & Shape::getBoundingBox() const { return boundingBox; }
-
-void Shape::trans(float dx, float dy)
+const BoundingBox & Shape::GetBoundingBox() const
 {
-    if (type == Type::CIRCLE)
-    {
-        params.Circle.x += dx;
-        params.Circle.y += dy;
-    } else if (type == Type::RECT)
-    {
-        params.Rect.x1 += dx; params.Rect.x2 += dx;
-        params.Rect.y1 += dy; params.Rect.y2 += dy;
-    }
-    transBoundingBox(dx, dy);
+    return boundingBox_;
 }
 
-void Shape::setWidth(float width)
+void Shape::Trans(float dx, float dy)
+{
+    if (type_ == Type::CIRCLE)
+    {
+        params_.Circle.x += dx;
+        params_.Circle.y += dy;
+    } else if (type_ == Type::RECT)
+    {
+        params_.Rect.x1 += dx; params_.Rect.x2 += dx;
+        params_.Rect.y1 += dy; params_.Rect.y2 += dy;
+    }
+    TransBoundingBox(dx, dy);
+}
+
+void Shape::SetWidth(float width)
 {
     width = abs(width);
-    if (type == Type::CIRCLE)
+    if (type_ == Type::CIRCLE)
     {
-        params.Circle.r = width / 2;
-    } else if (type == Type::RECT)
+        params_.Circle.r = width / 2.0f;
+    } else if (type_ == Type::RECT)
     {
-        params.Rect.width = width;
+        params_.Rect.width = width;
     }
-    updateBoundingBox();
+    UpdateBoundingBox();
 }
 
-void Shape::render(const std::shared_ptr<Renderer>& renderer, bool permitCamera) const
+void Shape::Render(const std::shared_ptr<Renderer>& renderer, bool permitCamera) const
 {
     const D3DCOLOR color = D3DCOLOR_ARGB(128, 255, 0, 0);
-    if (type == Type::CIRCLE)
+    if (type_ == Type::CIRCLE)
     {
         static constexpr int vertexNum = 66;
         static constexpr int way = vertexNum - 2;
@@ -283,16 +301,16 @@ void Shape::render(const std::shared_ptr<Renderer>& renderer, bool permitCamera)
             }
             isInitialized = true;
         }
-        D3DXMATRIX world = scaleRotTrans(params.Circle.x, params.Circle.y, 0, 0, 0, 0, params.Circle.r, params.Circle.r, 1);
-        renderer->renderPrim2D(D3DPT_TRIANGLEFAN, vertices.size(), vertices.data(), NULL, BLEND_ALPHA, world, std::shared_ptr<Shader>(), permitCamera, false);
-    } else if (type == Type::RECT)
+        D3DXMATRIX world = scaleRotTrans(params_.Circle.x, params_.Circle.y, 0.0f, 0.0f, 0.0f, 0.0f, params_.Circle.r, params_.Circle.r, 1.0f);
+        renderer->renderPrim2D(D3DPT_TRIANGLEFAN, vertices.size(), vertices.data(), nullptr, BLEND_ALPHA, world, std::shared_ptr<Shader>(), permitCamera, false);
+    } else if (type_ == Type::RECT)
     {
         static std::array<Vertex, 4> vertices;
         for (auto& v : vertices)
         {
             v.color = color;
         }
-        const auto rect = lineToRect(params.Rect.x1, params.Rect.y1, params.Rect.x2, params.Rect.y2, params.Rect.width);
+        const auto rect = LineToRect(params_.Rect.x1, params_.Rect.y1, params_.Rect.x2, params_.Rect.y2, params_.Rect.width);
         vertices[0].x = rect[0].x;
         vertices[0].y = rect[0].y;
         vertices[1].x = rect[1].x;
@@ -303,42 +321,42 @@ void Shape::render(const std::shared_ptr<Renderer>& renderer, bool permitCamera)
         vertices[3].y = rect[2].y;
         D3DXMATRIX world;
         D3DXMatrixIdentity(&world);
-        renderer->renderPrim2D(D3DPT_TRIANGLESTRIP, vertices.size(), vertices.data(), NULL, BLEND_ALPHA, world, std::shared_ptr<Shader>(), permitCamera, false);
+        renderer->renderPrim2D(D3DPT_TRIANGLESTRIP, vertices.size(), vertices.data(), nullptr, BLEND_ALPHA, world, std::shared_ptr<Shader>(), permitCamera, false);
     }
 }
 
-Shape::Type Shape::getType() const
+Shape::Type Shape::GetType() const
 {
-    return type;
+    return type_;
 }
 
-void Shape::getCircle(float & x, float & y, float & r) const
+void Shape::GetCircle(float & x, float & y, float & r) const
 {
-    x = params.Circle.x;
-    y = params.Circle.y;
-    r = params.Circle.r;
+    x = params_.Circle.x;
+    y = params_.Circle.y;
+    r = params_.Circle.r;
 }
 
-void Shape::getRect(float & x1, float & y1, float & x2, float & y2, float & width) const
+void Shape::GetRect(float & x1, float & y1, float & x2, float & y2, float & width) const
 {
-    x1 = params.Rect.x1;
-    y1 = params.Rect.y1;
-    x2 = params.Rect.x2;
-    y2 = params.Rect.y2;
-    width = params.Rect.width;
+    x1 = params_.Rect.x1;
+    y1 = params_.Rect.y1;
+    x2 = params_.Rect.x2;
+    y2 = params_.Rect.y2;
+    width = params_.Rect.width;
 }
 
-void Shape::updateBoundingBox()
+void Shape::UpdateBoundingBox()
 {
-    if (type == Type::CIRCLE)
+    if (type_ == Type::CIRCLE)
     {
-        boundingBox.left = params.Circle.x - params.Circle.r;
-        boundingBox.top = params.Circle.y - params.Circle.r;
-        boundingBox.right = params.Circle.x + params.Circle.r;
-        boundingBox.bottom = params.Circle.y + params.Circle.r;
-    } else if (type == Type::RECT)
+        boundingBox_.left_ = params_.Circle.x - params_.Circle.r;
+        boundingBox_.top_ = params_.Circle.y - params_.Circle.r;
+        boundingBox_.right_ = params_.Circle.x + params_.Circle.r;
+        boundingBox_.bottom_ = params_.Circle.y + params_.Circle.r;
+    } else if (type_ == Type::RECT)
     {
-        const auto rect = lineToRect(params.Rect.x1, params.Rect.y1, params.Rect.x2, params.Rect.y2, params.Rect.width);
+        const auto rect = LineToRect(params_.Rect.x1, params_.Rect.y1, params_.Rect.x2, params_.Rect.y2, params_.Rect.width);
         float minX = rect[0].x;
         float maxX = minX;
         float minY = rect[0].y;
@@ -352,152 +370,194 @@ void Shape::updateBoundingBox()
             minY = std::min(minY, y);
             maxY = std::max(maxY, y);
         }
-        boundingBox.left = minX;
-        boundingBox.top = minY;
-        boundingBox.right = maxX;
-        boundingBox.bottom = maxY;
+        boundingBox_.left_ = minX;
+        boundingBox_.top_ = minY;
+        boundingBox_.right_ = maxX;
+        boundingBox_.bottom_ = maxY;
     }
 }
 
-void Shape::transBoundingBox(float dx, float dy)
+void Shape::TransBoundingBox(float dx, float dy)
 {
-    boundingBox.left += dx;
-    boundingBox.top += dy;
-    boundingBox.right += dx;
-    boundingBox.bottom += dy;
+    boundingBox_.left_ += dx;
+    boundingBox_.top_ += dy;
+    boundingBox_.right_ += dx;
+    boundingBox_.bottom_ += dy;
 }
 
-Intersection::Intersection(const Shape& shape) :
-    shape(shape),
-    treeIdx(-1)
+CollisionMatrix::CollisionMatrix(int dim, const CollisionFunction * mat) :
+    dimension_(dim)
 {
+    assert(dimension_ >= 0);
+
+    matrix_ = new CollisionFunction[dimension_ * dimension_];
+    for (int i = 0; i < dimension_ * dimension_; i++)
+    {
+        matrix_[i] = mat[i];
+    }
+}
+
+CollisionMatrix::~CollisionMatrix()
+{
+    safe_delete_array(matrix_);
+}
+
+void CollisionMatrix::Collide(const std::shared_ptr<Intersection>& isect1, const std::shared_ptr<Intersection>& isect2) const
+{
+    const auto group1 = isect1->GetCollisionGroup();
+    const auto group2 = isect2->GetCollisionGroup();
+
+    assert(group1 >= 0 && group1 < dimension_);
+    assert(group2 >= 0 && group2 < dimension_);
+
+    const auto func1 = matrix_[group1 * dimension_ + group2];
+    const auto func2 = matrix_[group2 * dimension_ + group1];
+
+    // どちらか片方だけ実行
+    if (func1)
+    {
+        func1(isect1, isect2);
+    } else if (func2)
+    {
+        func2(isect2, isect1);
+    }
+}
+
+bool CollisionMatrix::IsCollidable(CollisionGroup group1, CollisionGroup group2) const
+{
+    const auto func1 = matrix_[group1 * dimension_ + group2];
+    const auto func2 = matrix_[group2 * dimension_ + group1];
+    return func1 || func2;
+}
+
+
+Intersection::Intersection(const Shape& shape, CollisionGroup colGroup) :
+    shape_(shape),
+    colGroup_(colGroup),
+    treeIdx_(-1)
+{
+    assert(colGroup_ >= 0);
 }
 
 Intersection::~Intersection() {}
 
-bool Intersection::isIntersected(const std::shared_ptr<Intersection>& isect) const
+bool Intersection::IsIntersected(const std::shared_ptr<Intersection>& isect) const
 {
-    return shape.isIntersected(isect->shape);
+    return shape_.IsIntersected(isect->shape_);
 }
 
-void Intersection::render(const std::shared_ptr<Renderer>& renderer, bool permitCamera) const
+void Intersection::Render(const std::shared_ptr<Renderer>& renderer, bool permitCamera) const
 {
-    shape.render(renderer, permitCamera);
+    shape_.Render(renderer, permitCamera);
 }
 
-const Shape & Intersection::getShape() const
+const Shape & Intersection::GetShape() const
 {
-    return shape;
+    return shape_;
 }
 
-int Intersection::getTreeIndex() const
+int Intersection::GetTreeIndex() const
 {
-    return treeIdx;
+    return treeIdx_;
 }
 
-const std::vector<std::weak_ptr<Intersection>>& Intersection::getCollideIntersections() const
+const std::vector<std::weak_ptr<Intersection>>& Intersection::GetCollideIntersections() const
 {
-    return collideIsects;
+    return collideIsects_;
 }
 
-static inline int calcTreeIndex(int level, int morton)
+static inline int CalcTreeIndex(int level, int morton)
 {
     return ((1 << (level << 1)) - 1) / 3 + morton;
 }
 
-CollisionDetector::CollisionDetector(int width, int height, int maxlv, const CollisionMatrix mat, int dim) :
-    fieldWidth(width),
-    fieldHeight(height),
-    maxLevel(maxlv),
-    unitCellWidth(1.0f * width / (1 << maxlv)),
-    unitCellHeight(1.0f * height / (1 << maxlv)),
-    colMatrix(NULL),
-    matrixDim(dim)
+CollisionDetector::CollisionDetector(int fieldWidth, int fieldHeight, const std::shared_ptr<CollisionMatrix>& colMatrix) :
+    fieldWidth_((float)fieldWidth),
+    fieldHeight_((float)fieldHeight),
+    unitCellWidth_(1.0f * fieldWidth / (1 << MaxLevel)),
+    unitCellHeight_(1.0f * fieldHeight / (1 << MaxLevel)),
+    colMatrix_(colMatrix)
 {
-    colMatrix = new CollisionFunction[dim*dim];
-    memcpy(colMatrix, mat, sizeof(CollisionFunction) * dim * dim);
-    quadTree.resize(calcTreeIndex(maxLevel + 1, 0));
+    assert(fieldWidth_ >= 0.0f);
+    assert(fieldHeight_ >= 0.0f);
+    assert(MaxLevel >= 0);
 }
 
 CollisionDetector::~CollisionDetector()
 {
-    safe_delete_array(colMatrix);
 }
 
-void CollisionDetector::add(const std::shared_ptr<Intersection>& isect)
+void CollisionDetector::Add(const std::shared_ptr<Intersection>& isect)
 {
-    if (isect->treeIdx >= 0) return;
-    isect->treeIdx = calcTreeIndexFromBoundingBox(isect->shape.getBoundingBox());
-    auto& cell = quadTree[isect->treeIdx];
-    isect->posInCell = cell.insert(cell.end(), isect);
+    assert(isect->treeIdx_ < 0);
+    isect->treeIdx_ = CalcTreeIndexFromBoundingBox(isect->shape_.GetBoundingBox());
+    auto& cell = quadTree_[isect->treeIdx_];
+    isect->posInCell_ = cell.insert(cell.end(), isect);
 }
 
-void CollisionDetector::remove(const std::shared_ptr<Intersection>& isect)
+void CollisionDetector::Remove(const std::shared_ptr<Intersection>& isect)
 {
-    if (isect->treeIdx >= 0)
-    {
-        isect->posInCell->reset();
-        isect->treeIdx = -1;
-    }
+    assert(isect->treeIdx_ >= 0);
+    isect->posInCell_->reset();
+    isect->treeIdx_ = -1;
 }
 
-void CollisionDetector::update(const std::shared_ptr<Intersection>& isect)
+void CollisionDetector::Update(const std::shared_ptr<Intersection>& isect)
 {
-    remove(isect);
-    add(isect);
+    Remove(isect);
+    Add(isect);
 }
 
-void CollisionDetector::trans(const std::shared_ptr<Intersection>& isect, float dx, float dy)
+void CollisionDetector::Trans(const std::shared_ptr<Intersection>& isect, float dx, float dy)
 {
-    isect->shape.trans(dx, dy);
-    update(isect);
+    isect->shape_.Trans(dx, dy);
+    Update(isect);
 }
 
-void CollisionDetector::setWidth(const std::shared_ptr<Intersection>& isect, float width)
+void CollisionDetector::SetWidth(const std::shared_ptr<Intersection>& isect, float width)
 {
-    isect->shape.setWidth(width);
-    update(isect);
+    isect->shape_.SetWidth(width);
+    Update(isect);
 }
 
-void CollisionDetector::run()
+std::vector<std::shared_ptr<Intersection>> CollisionDetector::GetIntersectionsCollideWithIntersection(const std::shared_ptr<Intersection>& self, CollisionGroup targetGroup) const
 {
-    std::vector<std::vector<std::shared_ptr<Intersection>>> supers;
-    supers.resize(matrixDim);
-    run(0, supers);
-}
+    std::vector<std::shared_ptr<Intersection>> ret;
+    const CollisionGroup group1 = self->GetCollisionGroup();
 
-std::vector<std::weak_ptr<Intersection>> CollisionDetector::getIntersectionsCollideWithIntersection(const std::shared_ptr<Intersection>& isect1) const
-{
     // 幅優先探索
-    std::vector<std::weak_ptr<Intersection>> ret;
-    const int startTreeIndex = isect1->getTreeIndex();
+    const int startTreeIndex = self->GetTreeIndex();
     std::deque<int> treeIndices;
     treeIndices.push_back(startTreeIndex);
-    const CollisionGroup group1 = isect1->getCollisionGroup();
     while (!treeIndices.empty())
     {
         const int treeIdx = treeIndices.front();
         treeIndices.pop_front();
-        for (const auto& cell : quadTree.at(treeIdx))
+        for (const auto& cell : quadTree_.at(treeIdx))
         {
-            if (auto isect2 = cell.lock())
+            if (auto other = cell.lock())
             {
-                const CollisionGroup group2 = isect2->getCollisionGroup();
-                const CollisionFunction func1 = colMatrix[group1 * matrixDim + group2];
-                const CollisionFunction func2 = colMatrix[group2 * matrixDim + group1];
-                if (func1 == NULL && func2 == NULL) continue;
-                if (isect1->isIntersected(isect2)) ret.push_back(isect2);
+                const CollisionGroup group2 = other->GetCollisionGroup();
+                // ターゲットグループでないなら無視
+                if (targetGroup >= 0 && group2 != targetGroup) continue;
+                // 衝突しないグループ同士なら無視
+                if (!colMatrix_->IsCollidable(group1, group2)) continue;
+                if (self->IsIntersected(other))
+                {
+                    ret.push_back(other);
+                }
             }
         }
         // 下位レベル
         if (treeIdx >= startTreeIndex)
         {
-            if ((treeIdx << 2) + 1 < quadTree.size())
+            int lowLevelNode1 = (treeIdx << 2) + 1;
+            if (lowLevelNode1 < quadTree_.size())
             {
-                treeIndices.push_back((treeIdx << 2) + 1);
-                treeIndices.push_back((treeIdx << 2) + 2);
-                treeIndices.push_back((treeIdx << 2) + 3);
-                treeIndices.push_back((treeIdx << 2) + 4);
+                treeIndices.push_back(lowLevelNode1);
+                treeIndices.push_back(lowLevelNode1 + 1);
+                treeIndices.push_back(lowLevelNode1 + 2);
+                treeIndices.push_back(lowLevelNode1 + 3);
             }
         }
         // 上位レベル
@@ -512,33 +572,37 @@ std::vector<std::weak_ptr<Intersection>> CollisionDetector::getIntersectionsColl
     return ret;
 }
 
-std::vector<std::weak_ptr<Intersection>> CollisionDetector::getIntersectionsCollideWithShape(const Shape & shape1) const
+std::vector<std::shared_ptr<Intersection>> CollisionDetector::GetIntersectionsCollideWithShape(const Shape & self, CollisionGroup targetGroup) const
 {
+    std::vector<std::shared_ptr<Intersection>> ret;
+
     // 幅優先探索
-    std::vector<std::weak_ptr<Intersection>> ret;
-    const int startTreeIndex = calcTreeIndexFromBoundingBox(shape1.getBoundingBox());
+    const int startTreeIndex = CalcTreeIndexFromBoundingBox(self.GetBoundingBox());
     std::deque<int> treeIndices;
     treeIndices.push_back(startTreeIndex);
     while (!treeIndices.empty())
     {
         const int treeIdx = treeIndices.front();
         treeIndices.pop_front();
-        for (const auto& cell : quadTree.at(treeIdx))
+        for (const auto& cell : quadTree_.at(treeIdx))
         {
-            if (auto isect2 = cell.lock())
+            if (auto other = cell.lock())
             {
-                if (shape1.isIntersected(isect2->shape)) ret.push_back(isect2);
+                // ターゲットグループでないなら無視
+                if (targetGroup >= 0 && other->GetCollisionGroup() != targetGroup) continue;
+                if (self.IsIntersected(other->shape_)) ret.push_back(other);
             }
         }
         // 下位レベル
         if (treeIdx >= startTreeIndex)
         {
-            if ((treeIdx << 2) + 1 < quadTree.size())
+            int lowLevelNode1 = (treeIdx << 2) + 1;
+            if (lowLevelNode1 < quadTree_.size())
             {
-                treeIndices.push_back((treeIdx << 2) + 1);
-                treeIndices.push_back((treeIdx << 2) + 2);
-                treeIndices.push_back((treeIdx << 2) + 3);
-                treeIndices.push_back((treeIdx << 2) + 4);
+                treeIndices.push_back(lowLevelNode1);
+                treeIndices.push_back(lowLevelNode1 + 1);
+                treeIndices.push_back(lowLevelNode1 + 2);
+                treeIndices.push_back(lowLevelNode1 + 3);
             }
         }
         // 上位レベル
@@ -553,61 +617,80 @@ std::vector<std::weak_ptr<Intersection>> CollisionDetector::getIntersectionsColl
     return ret;
 }
 
-void CollisionDetector::run(int idx, std::vector<std::vector<std::shared_ptr<Intersection>>>& supers)
+void CollisionDetector::TestAllCollision()
 {
-    // 前のレベルの判定の数をグループごとに覚えておく
-    std::vector<int> prevSizes(matrixDim, 0);
-    for (int i = 0; i < matrixDim; i++)
+    std::unique_ptr<VisitedIsects[]> visitedIsects(new VisitedIsects[colMatrix_->GetDimension()], std::default_delete<VisitedIsects[]>());
+    TestNodeCollision(0, visitedIsects);
+}
+
+// 指定したノードの上位と下位にある全当たり判定のペアに対して衝突検査を行う
+// treeIdx: ノード番号
+// visitedIsects: 上位レベルのノードか、このノードで既に発見された当たり判定
+//                shared_ptrをそのまま格納するとコピーのコストが重いので、weak_ptrの場所を示す生ポインタを保持
+//                visitedに追加されたポインタの指す先がTestCollision時に削除されることはないので問題ない。
+
+// NOTE: CollisionFunction内でオブジェクトを移動させたりしてCollisionDetector内のIntersectionの位置が変わると、移動先でさらに判定が取られてしまう
+//       弾幕風の場合、衝突時に移動することはないのでこれを仕様とし特に対策は行わない
+void CollisionDetector::TestNodeCollision(int treeIdx, const std::unique_ptr<VisitedIsects[]>& visitedIsects)
+{
+    // 上位のレベルの判定の数をグループごとに覚えておく
+    std::unique_ptr<size_t[]> prevVisitedIsectCounts(new size_t[colMatrix_->GetDimension()], std::default_delete<size_t[]>());
+    for (int i = 0; i < colMatrix_->GetDimension(); ++i)
     {
-        prevSizes[i] = supers[i].size();
+        prevVisitedIsectCounts[i] = visitedIsects[i].size();
     }
+
     // 上位レベルに所属する全てのIntersectionと衝突判定を取る（グループごと)
-    auto& cell = quadTree[idx];
+    auto& cell = quadTree_[treeIdx];
     auto it = cell.begin();
     while (it != cell.end())
     {
-        if (auto isect = it->lock())
+        if (auto newVisit = it->lock())
         {
-            isect->collideIsects.clear();
-            CollisionGroup group1 = isect->getCollisionGroup();
-            for (int group2 = 0; group2 < matrixDim; group2++)
+            // 前フレームで衝突した当たり判定を空にする
+            newVisit->collideIsects_.clear();
+            const CollisionGroup group1 = newVisit->GetCollisionGroup();
+            for (int group2 = 0; group2 < colMatrix_->GetDimension(); ++group2)
             {
-                CollisionFunction func1 = colMatrix[group1 * matrixDim + group2];
-                CollisionFunction func2 = colMatrix[group2 * matrixDim + group1];
                 // 衝突しないグループは無視
-                if (func1 == NULL && func2 == NULL) continue;
-                for (auto& super : supers[group2])
+                if (!colMatrix_->IsCollidable(group1, group2)) continue;
+
+                for (auto& p : visitedIsects[group2])
                 {
-                    if (isect->isIntersected(super))
+                    if (auto visited = p->lock())
                     {
-                        isect->collideIsects.push_back(super);
-                        super->collideIsects.push_back(isect);
-                        // 衝突応答は自分->相手, 相手->自分の2方向分
-                        // 片方だけ定義してもよい
-                        if (func1) func1(isect, super);
-                        if (func2) func2(super, isect);
+                        if (newVisit->IsIntersected(visited))
+                        {
+                            // 衝突した相手を保存
+                            newVisit->collideIsects_.push_back(visited);
+                            visited->collideIsects_.push_back(newVisit);
+                            colMatrix_->Collide(newVisit, visited);
+                        }
                     }
                 }
             }
-            // 上位レベルに追加
-            supers[group1].push_back(isect);
+            // 発見済みに追加
+            visitedIsects[group1].push_back(&(*it));
             ++it;
         } else
         {
+            // 弱参照が切れてたらリストから削除
             it = cell.erase(it);
         }
     }
-    if ((idx << 2) + 1 < quadTree.size())
+    const int lowLevelNode1 = (treeIdx << 2) + 1;
+    if (lowLevelNode1 < quadTree_.size())
     {
-        run((idx << 2) + 1, supers);
-        run((idx << 2) + 2, supers);
-        run((idx << 2) + 3, supers);
-        run((idx << 2) + 4, supers);
+        TestNodeCollision(lowLevelNode1, visitedIsects);
+        TestNodeCollision(lowLevelNode1 + 1, visitedIsects);
+        TestNodeCollision(lowLevelNode1 + 2, visitedIsects);
+        TestNodeCollision(lowLevelNode1 + 3, visitedIsects);
     }
-    // このレベルで得たIntersectionを除外
-    for (int i = 0; i < matrixDim; i++)
+
+    // このノード以下で得た当たり判定を除外
+    for (int i = 0; i < colMatrix_->GetDimension(); ++i)
     {
-        supers[i].resize(prevSizes[i]);
+        visitedIsects[i].resize(prevVisitedIsectCounts[i]);
     }
 }
 
@@ -624,23 +707,284 @@ static inline DWORD pointToMorton(float x, float y, float unitWidth, float unitH
     return separateBit(x / unitWidth) | (separateBit(y / unitHeight) << 1);
 }
 
-int CollisionDetector::calcTreeIndexFromBoundingBox(const BoundingBox & boundingBox) const
+int CollisionDetector::CalcTreeIndexFromBoundingBox(const BoundingBox & boundingBox) const
 {
-    float left = constrain(boundingBox.left, 0.0f, fieldWidth - 1);
-    float right = constrain(boundingBox.right, 0.0f, fieldWidth - 1);
-    float top = constrain(boundingBox.top, 0.0f, fieldHeight - 1);
-    float bottom = constrain(boundingBox.bottom, 0.0f, fieldHeight - 1);
+    float left = constrain(boundingBox.left_, 0.0f, fieldWidth_ - 1);
+    float right = constrain(boundingBox.right_, 0.0f, fieldWidth_ - 1);
+    float top = constrain(boundingBox.top_, 0.0f, fieldHeight_ - 1);
+    float bottom = constrain(boundingBox.bottom_, 0.0f, fieldHeight_ - 1);
 
-    DWORD m1 = pointToMorton(left, top, unitCellWidth, unitCellHeight);
-    DWORD m2 = pointToMorton(right, bottom, unitCellWidth, unitCellHeight);
+    DWORD m1 = pointToMorton(left, top, unitCellWidth_, unitCellHeight_);
+    DWORD m2 = pointToMorton(right, bottom, unitCellWidth_, unitCellHeight_);
     DWORD m = m1 ^ m2;
     int k = 0;
-    for (int i = 0; i < maxLevel; m >>= 2, i++)
+    for (int i = 0; i < MaxLevel; m >>= 2, i++)
     {
         if ((m & 0x3) != 0) { k = i + 1; }
     }
-    int level = maxLevel - k;
+    int level = MaxLevel - k;
     DWORD morton = m2 >> (k << 1);
-    return calcTreeIndex(level, morton);
+    return CalcTreeIndex(level, morton);
 }
+
+ShotIntersection::ShotIntersection(float x, float y, float r, const std::shared_ptr<ObjShot>& shot, bool isTmpIntersection) :
+    Intersection(Shape(x, y, r),
+                 shot->isPlayerShot() ?
+                 (shot->isEraseShotEnabled() ? COL_GRP_PLAYER_ERASE_SHOT : COL_GRP_PLAYER_NON_ERASE_SHOT) :
+                 COL_GRP_ENEMY_SHOT),
+    shot_(shot),
+    isPlayerShot_(shot->isPlayerShot()),
+    isTmpIntersection_(isTmpIntersection)
+{
+}
+
+ShotIntersection::ShotIntersection(float x1, float y1, float x2, float y2, float width, const std::shared_ptr<ObjShot>& shot, bool isTmpIntersection) :
+    Intersection(Shape(x1, y1, x2, y2, width),
+                 shot->isPlayerShot() ?
+                 (shot->isEraseShotEnabled() ? COL_GRP_PLAYER_ERASE_SHOT : COL_GRP_PLAYER_NON_ERASE_SHOT) :
+                 COL_GRP_ENEMY_SHOT),
+    shot_(shot),
+    isPlayerShot_(shot->isPlayerShot()),
+    isTmpIntersection_(isTmpIntersection)
+{
+}
+
+void ShotIntersection::SetEraseShotEnable(bool enable)
+{
+    ChangeCollisionGroup(enable ? COL_GRP_PLAYER_ERASE_SHOT : COL_GRP_PLAYER_NON_ERASE_SHOT);
+}
+
+EnemyIntersectionToShot::EnemyIntersectionToShot(float x, float y, float r, const std::shared_ptr<ObjEnemy>& enemy) :
+    Intersection(Shape(x, y, r), COL_GRP_ENEMY_TO_SHOT),
+    enemy_(enemy),
+    x_(x),
+    y_(y)
+{
+}
+
+EnemyIntersectionToPlayer::EnemyIntersectionToPlayer(float x, float y, float r, const std::shared_ptr<ObjEnemy>& enemy) :
+    Intersection(Shape(x, y, r), COL_GRP_ENEMY_TO_PLAYER),
+    enemy_(enemy)
+{
+}
+
+PlayerIntersection::PlayerIntersection(float x, float y, float r, const std::shared_ptr<ObjPlayer>& player) :
+    Intersection(Shape(x, y, r), COL_GRP_PLAYER),
+    player_(player)
+{
+}
+
+PlayerGrazeIntersection::PlayerGrazeIntersection(float x, float y, float r, const std::shared_ptr<ObjPlayer>& player) :
+    Intersection(Shape(x, y, r), COL_GRP_PLAYER_GRAZE),
+    player_(player)
+{
+}
+
+SpellIntersection::SpellIntersection(float x, float y, float r, const std::shared_ptr<ObjSpell>& spell) :
+    Intersection(Shape(x, y, r), COL_GRP_SPELL),
+    spell_(spell)
+{
+}
+
+SpellIntersection::SpellIntersection(float x1, float y1, float x2, float y2, float width, const std::shared_ptr<ObjSpell>& spell) :
+    Intersection(Shape(x1, y1, x2, y2, width), COL_GRP_SPELL),
+    spell_(spell)
+{
+}
+
+PlayerIntersectionToItem::PlayerIntersectionToItem(float x, float y, const std::shared_ptr<ObjPlayer>& player) :
+    Intersection(Shape(x, y, 0), COL_GRP_PLAYER_TO_ITEM),
+    player_(player)
+{
+}
+
+ItemIntersection::ItemIntersection(float x, float y, float r, const std::shared_ptr<ObjItem>& item) :
+    Intersection(Shape(x, y, r), COL_GRP_ITEM),
+    item_(item)
+{
+}
+
+TempEnemyShotIntersection::TempEnemyShotIntersection(float x, float y, float r) :
+    Intersection(Shape(x, y, r), COL_GRP_TEMP_ENEMY_SHOT)
+{
+}
+
+TempEnemyShotIntersection::TempEnemyShotIntersection(float x1, float y1, float x2, float y2, float width) :
+    Intersection(Shape(x1, y1, x2, y2, width), COL_GRP_TEMP_ENEMY_SHOT)
+{
+}
+
+static inline bool isShotIntersectionEnabled(const std::shared_ptr<ShotIntersection>& isect)
+{
+    if (auto shot = isect->GetShot().lock())
+    {
+        // Regist前でShotDataで元から設定されている当たり判定の時は衝突無効
+        if (!shot->isRegistered() && !isect->IsTempIntersection()) return false;
+        // 判定が無効になっているとき、または遅延時は衝突無効
+        if (!shot->isIntersectionEnabled() || shot->isDelay()) return false;
+        return true;
+    }
+    return false;
+}
+
+static void collideEnemyShotWithPlayerEraseShot(const std::shared_ptr<Intersection>& isect1, const std::shared_ptr<Intersection>& isect2)
+{
+    auto playerShotIsect = std::dynamic_pointer_cast<ShotIntersection>(isect2);
+    if (auto playerShot = playerShotIsect->GetShot().lock())
+    {
+        if (playerShot->isEraseShotEnabled())
+        {
+            auto enemyShotIsect = std::dynamic_pointer_cast<ShotIntersection>(isect1);
+            if (auto enemyShot = enemyShotIsect->GetShot().lock())
+            {
+                if (isShotIntersectionEnabled(enemyShotIsect) && isShotIntersectionEnabled(playerShotIsect))
+                {
+                    if (playerShot->getType() == OBJ_SHOT)
+                    {
+                        playerShot->setPenetration(playerShot->getPenetration() - 1);
+                    }
+                    enemyShot->eraseWithSpell();
+                }
+            }
+        }
+    }
+}
+
+static void collideEnemyShotWithPlayer(const std::shared_ptr<Intersection>& isect1, const std::shared_ptr<Intersection>& isect2)
+{
+    auto enemyShotIsect = std::dynamic_pointer_cast<ShotIntersection>(isect1);
+    if (isShotIntersectionEnabled(enemyShotIsect))
+    {
+        if (auto enemyShot = enemyShotIsect->GetShot().lock())
+        {
+            if (auto player = std::dynamic_pointer_cast<PlayerIntersection>(isect2)->GetPlayer().lock())
+            {
+                player->hit(enemyShot->getID());
+            }
+        }
+    }
+}
+
+static void collideEnemyShotWithPlayerGraze(const std::shared_ptr<Intersection>& isect1, const std::shared_ptr<Intersection>& isect2)
+{
+    auto enemyShotIsect = std::dynamic_pointer_cast<ShotIntersection>(isect1);
+    if (isShotIntersectionEnabled(enemyShotIsect))
+    {
+        if (auto enemyShot = enemyShotIsect->GetShot().lock())
+        {
+            if (auto player = std::dynamic_pointer_cast<PlayerGrazeIntersection>(isect2)->GetPlayer().lock())
+            {
+                if (enemyShot->isGrazeEnabled() && player->isGrazeEnabled())
+                {
+                    player->addGraze(enemyShot->getID(), 1);
+                    enemyShot->graze();
+                }
+            }
+        }
+    }
+}
+
+static void collideEnemyShotWithSpell(const std::shared_ptr<Intersection>& isect1, const std::shared_ptr<Intersection>& isect2)
+{
+    auto enemyShotIsect = std::dynamic_pointer_cast<ShotIntersection>(isect1);
+    if (auto spell = std::dynamic_pointer_cast<SpellIntersection>(isect2)->GetSpell().lock())
+    {
+        if (spell->isEraseShotEnabled())
+        {
+            if (isShotIntersectionEnabled(enemyShotIsect))
+            {
+                if (auto enemyShot = enemyShotIsect->GetShot().lock())
+                {
+                    enemyShot->eraseWithSpell();
+                }
+            }
+        }
+    }
+}
+
+static void collidePlayerShotWithEnemyIntersectionToShot(const std::shared_ptr<Intersection>& isect1, const std::shared_ptr<Intersection>& isect2)
+{
+    auto playerShotIsect = std::dynamic_pointer_cast<ShotIntersection>(isect1);
+    auto enemyIsectToShot = std::dynamic_pointer_cast<EnemyIntersectionToShot>(isect2);
+    if (isShotIntersectionEnabled(playerShotIsect))
+    {
+        if (auto playerShot = playerShotIsect->GetShot().lock())
+        {
+            if (auto enemy = enemyIsectToShot->GetEnemy().lock())
+            {
+                if (playerShot->getType() == OBJ_SHOT)
+                {
+                    playerShot->setPenetration(playerShot->getPenetration() - 1);
+                }
+                if (playerShot->isSpellFactorEnabled())
+                {
+                    enemy->addSpellDamage(playerShot->getDamage());
+                } else
+                {
+                    enemy->addShotDamage(playerShot->getDamage());
+                }
+            }
+        }
+    }
+}
+
+static void collidePlayerWithEnemyIntersectionToPlayer(const std::shared_ptr<Intersection>& isect1, const std::shared_ptr<Intersection>& isect2)
+{
+    if (auto player = std::dynamic_pointer_cast<PlayerIntersection>(isect1)->GetPlayer().lock())
+    {
+        if (auto enemy = std::dynamic_pointer_cast<EnemyIntersectionToPlayer>(isect2)->GetEnemy().lock())
+        {
+            player->hit(enemy->getID());
+        }
+    }
+}
+
+static void collideEnemyIntersectionToShotWithSpell(const std::shared_ptr<Intersection>& isect1, const std::shared_ptr<Intersection>& isect2)
+{
+    if (auto enemy = std::dynamic_pointer_cast<EnemyIntersectionToShot>(isect1)->GetEnemy().lock())
+    {
+        if (auto spell = std::dynamic_pointer_cast<SpellIntersection>(isect2)->GetSpell().lock())
+        {
+            enemy->addSpellDamage(spell->getDamage());
+        }
+    }
+}
+
+static void collideWithPlayerToItemWithItem(const std::shared_ptr<Intersection>& isect1, const std::shared_ptr<Intersection>& isect2)
+{
+    if (auto player = std::dynamic_pointer_cast<PlayerIntersectionToItem>(isect1)->GetPlayer().lock())
+    {
+        if (auto item = std::dynamic_pointer_cast<ItemIntersection>(isect2)->GetItem().lock())
+        {
+            if (player->getState() == STATE_NORMAL)
+            {
+                player->getItem(item->getID());
+                item->obtained();
+            }
+        }
+    }
+}
+
+static void collidePlayerWithTempEnemyShot(const std::shared_ptr<Intersection>& isect1, const std::shared_ptr<Intersection>& isect2)
+{
+    if (auto player = std::dynamic_pointer_cast<PlayerIntersection>(isect1)->GetPlayer().lock())
+    {
+        player->hit(ID_INVALID);
+    }
+}
+
+// col matrix
+const CollisionFunction DEFAULT_COLLISION_MATRIX[DEFAULT_COLLISION_MATRIX_DIMENSION * DEFAULT_COLLISION_MATRIX_DIMENSION] = {
+    /* COL_GRP_ENEMY_SHOT           */  nullptr, collideEnemyShotWithPlayerEraseShot, nullptr, collideEnemyShotWithPlayer, collideEnemyShotWithPlayerGraze, nullptr, nullptr, collideEnemyShotWithSpell, nullptr, nullptr, nullptr,
+    /* COL_GRP_PLAYER_ERASE_SHOT    */  nullptr, nullptr, nullptr, nullptr, nullptr, collidePlayerShotWithEnemyIntersectionToShot, nullptr, nullptr, nullptr, nullptr, nullptr,
+    /* COL_GRP_PLAYER_NON_ERASESHOT */  nullptr, nullptr, nullptr, nullptr, nullptr, collidePlayerShotWithEnemyIntersectionToShot, nullptr, nullptr, nullptr, nullptr, nullptr,
+    /* COL_GRP_PLAYER               */  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, collidePlayerWithEnemyIntersectionToPlayer, nullptr, nullptr, nullptr, collidePlayerWithTempEnemyShot,
+    /* COL_GRP_PLAYER_GRAZE         */  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    /* COL_GRP_ENEMY_TO_SHOT        */  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, collideEnemyIntersectionToShotWithSpell, nullptr, nullptr, nullptr,
+    /* COL_GRP_ENEMY_TO_PLAYER      */  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    /* COL_GRP_SPELL                */  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    /* COL_GRP_PLAYER_TO_ITEM       */  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, collideWithPlayerToItemWithItem, nullptr,
+    /* COL_GRP_ITEM                 */  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    /* COL_GRP_TEMP_ENEMY_SHOT      */  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr
+};
 }

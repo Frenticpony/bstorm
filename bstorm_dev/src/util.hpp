@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <bstorm/type.hpp>
+#include <bstorm/intersection.hpp>
 
 #include <memory>
 #include <string>
@@ -10,7 +11,6 @@ namespace bstorm
 class Texture;
 class Intersection;
 class MoveMode;
-typedef int CollisionGroup;
 const char* getBlendTypeName(int blendType);
 const char* getObjTypeName(int objType);
 const char* getPrimitiveTypeName(int primType);

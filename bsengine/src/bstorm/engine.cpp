@@ -36,7 +36,6 @@
 #include <bstorm/obj_item.hpp>
 #include <bstorm/obj_player.hpp>
 #include <bstorm/intersection.hpp>
-#include <bstorm/collision_matrix.hpp>
 #include <bstorm/shot_data.hpp>
 #include <bstorm/item_data.hpp>
 #include <bstorm/auto_delete_clip.hpp>
@@ -131,7 +130,7 @@ void Engine::tickFrame()
 
         if (!isStagePaused())
         {
-            gameState->colDetector->run();
+            gameState->colDetector->TestAllCollision();
         }
 
         // SetShotIntersection{Circle, Line}で設定した判定削除
@@ -1326,6 +1325,7 @@ std::shared_ptr<ObjItem> Engine::createObjItem(int itemType)
 {
     auto obj = gameState->objTable->create<ObjItem>(itemType, gameState);
     gameState->objLayerList->setRenderPriority(obj, gameState->objLayerList->getItemRenderPriority());
+    obj->setIntersection();
     return obj;
 }
 
@@ -1692,27 +1692,25 @@ void Engine::deleteShotAll(int target, int behavior) const
 
 void Engine::deleteShotInCircle(int target, int behavior, float x, float y, float r) const
 {
-    auto isects = gameState->colDetector->getIntersectionsCollideWithShape(Shape(x, y, r));
-    for (auto& isectP : isects)
+    auto isects = gameState->colDetector->GetIntersectionsCollideWithShape(Shape(x, y, r), COL_GRP_ENEMY_SHOT);
+    for (auto& isect : isects)
     {
-        if (auto isect = isectP.lock())
+        if (auto shotIsect = std::dynamic_pointer_cast<ShotIntersection>(isect))
         {
-            if (auto shotIsect = std::dynamic_pointer_cast<ShotIntersection>(isect))
+            if (auto shot = shotIsect->GetShot().lock())
             {
-                if (!shotIsect->isPlayerShot)
+                // スペル耐性弾は無視
+                if (target == TYPE_SHOT && shot->isSpellResistEnabled()) continue;
+
+                if (behavior == TYPE_IMMEDIATE)
                 {
-                    // スペル耐性弾は無視
-                    if (target == TYPE_SHOT && shotIsect->shot->isSpellResistEnabled()) continue;
-                    if (behavior == TYPE_IMMEDIATE)
-                    {
-                        shotIsect->shot->deleteImmediate();
-                    } else if (behavior == TYPE_FADE)
-                    {
-                        shotIsect->shot->fadeDelete();
-                    } else if (behavior == TYPE_ITEM)
-                    {
-                        shotIsect->shot->toItem();
-                    }
+                    shot->deleteImmediate();
+                } else if (behavior == TYPE_FADE)
+                {
+                    shot->fadeDelete();
+                } else if (behavior == TYPE_ITEM)
+                {
+                    shot->toItem();
                 }
             }
         }
@@ -1721,23 +1719,26 @@ void Engine::deleteShotInCircle(int target, int behavior, float x, float y, floa
 
 std::vector<std::shared_ptr<ObjShot>> Engine::getShotInCircle(float x, float y, float r, int target) const
 {
-    auto isects = gameState->colDetector->getIntersectionsCollideWithShape(Shape(x, y, r));
+    // 同じショットに紐付いている判定が複数あるので、まずIDだけを集める
     std::unordered_set<int> shotIds;
-    for (auto& isectP : isects)
+
+    auto isects = gameState->colDetector->GetIntersectionsCollideWithShape(Shape(x, y, r), -1);
+    for (auto& isect : isects)
     {
-        if (auto isect = isectP.lock())
+        if (auto shotIsect = std::dynamic_pointer_cast<ShotIntersection>(isect))
         {
-            if (auto shotIsect = std::dynamic_pointer_cast<ShotIntersection>(isect))
+            if (target == TARGET_ENEMY && shotIsect->IsPlayerShot()) continue;
+            if (target == TARGET_PLAYER && !shotIsect->IsPlayerShot()) continue;
+            if (auto shot = shotIsect->GetShot().lock())
             {
-                if (target == TARGET_ENEMY && shotIsect->isPlayerShot) continue;
-                if (target == TARGET_PLAYER && !shotIsect->isPlayerShot) continue;
-                if (!shotIsect->shot->isDead())
+                if (!shot->isDead())
                 {
-                    shotIds.insert(shotIsect->shot->getID());
+                    shotIds.insert(shot->getID());
                 }
             }
         }
     }
+
     std::vector<std::shared_ptr<ObjShot>> shots;
     for (auto id : shotIds)
     {
@@ -1749,14 +1750,14 @@ std::vector<std::shared_ptr<ObjShot>> Engine::getShotInCircle(float x, float y, 
 void Engine::setShotIntersectoinCicle(float x, float y, float r)
 {
     auto isect = std::make_shared<TempEnemyShotIntersection>(x, y, r);
-    gameState->colDetector->add(isect);
+    gameState->colDetector->Add(isect);
     gameState->tempEnemyShotIsects.push_back(isect);
 }
 
 void Engine::setShotIntersectoinLine(float x1, float y1, float x2, float y2, float width)
 {
     auto isect = std::make_shared<TempEnemyShotIntersection>(x1, y1, x2, y2, width);
-    gameState->colDetector->add(isect);
+    gameState->colDetector->Add(isect);
     gameState->tempEnemyShotIsects.push_back(isect);
 }
 
@@ -2049,14 +2050,15 @@ void Engine::startStageScene(const std::shared_ptr<SourcePos>& srcPos)
     systemScript->start();
     systemScript->runInitialize();
 
-    // Player
+    // Create Player
+    auto player = gameState->objTable->create<ObjPlayer>(gameState, gameState->globalPlayerParams);
+    gameState->objLayerList->setRenderPriority(player, DEFAULT_PLAYER_RENDER_PRIORITY);
+    player->addIntersectionToItem();
+    gameState->playerObj = player;
     Logger::WriteLog(std::move(
         Log(Log::Level::LV_INFO)
         .setMessage("create player object.")
         .addSourcePos(srcPos)));
-    auto player = gameState->objTable->create<ObjPlayer>(gameState, gameState->globalPlayerParams);
-    gameState->objLayerList->setRenderPriority(player, DEFAULT_PLAYER_RENDER_PRIORITY);
-    gameState->playerObj = player;
 
     auto playerScript = gameState->scriptManager->compile(gameState->stagePlayerScriptInfo.path, SCRIPT_TYPE_PLAYER, gameState->stagePlayerScriptInfo.version, srcPos);
     gameState->stagePlayerScript = playerScript;

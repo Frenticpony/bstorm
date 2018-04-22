@@ -6,7 +6,7 @@
 namespace bstorm
 {
 class SpellIntersection;
-class ObjSpell : public ObjPrim2D, public ObjCol
+class ObjSpell : public ObjPrim2D, public ObjCol, public std::enable_shared_from_this<ObjSpell>
 {
 public:
     ObjSpell(const std::shared_ptr<GameState>& gameState);

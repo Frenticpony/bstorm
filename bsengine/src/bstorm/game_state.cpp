@@ -15,7 +15,6 @@
 #include <bstorm/obj_item.hpp>
 #include <bstorm/obj_player.hpp>
 #include <bstorm/intersection.hpp>
-#include <bstorm/collision_matrix.hpp>
 #include <bstorm/camera2D.hpp>
 #include <bstorm/camera3D.hpp>
 #include <bstorm/common_data_db.hpp>
@@ -37,7 +36,7 @@ GameState::GameState(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevi
     renderer(renderer),
     objTable(std::make_shared<ObjectTable>()),
     objLayerList(std::make_shared<ObjectLayerList>()),
-    colDetector(std::make_shared<CollisionDetector>(screenWidth, screenHeight, 6, (CollisionMatrix)defaultCollisionMatrix, DEFAULT_COLLISION_MATRIX_DIMENSION)),
+    colDetector(std::make_shared<CollisionDetector>(screenWidth, screenHeight, std::make_shared<CollisionMatrix>(DEFAULT_COLLISION_MATRIX_DIMENSION, DEFAULT_COLLISION_MATRIX))),
     textureCache(std::make_shared<TextureCache>(d3DDevice)),
     fontCache(std::make_shared<FontCache>(hWnd, d3DDevice)),
     meshCache(std::make_shared<MeshCache>()),

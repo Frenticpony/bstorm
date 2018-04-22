@@ -51,9 +51,6 @@
     <ClInclude Include="src\bstorm\code_generator.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\bstorm\collision_matrix.hpp">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="src\bstorm\common_data_db.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -279,9 +276,6 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\bstorm\code_generator.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="src\bstorm\collision_matrix.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\bstorm\common_data_db.cpp">

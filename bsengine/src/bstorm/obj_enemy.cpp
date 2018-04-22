@@ -4,7 +4,6 @@
 #include <bstorm/const.hpp>
 #include <bstorm/util.hpp>
 #include <bstorm/obj_enemy_boss_scene.hpp>
-#include <bstorm/collision_matrix.hpp>
 #include <bstorm/intersection.hpp>
 #include <bstorm/game_state.hpp>
 
@@ -92,19 +91,19 @@ void ObjEnemy::addTempIntersection(const std::shared_ptr<Intersection>& isect)
 {
     if (auto state = getGameState())
     {
-        state->colDetector->add(isect);
+        state->colDetector->Add(isect);
     }
     ObjCol::addTempIntersection(isect);
 }
 
 void ObjEnemy::addTempIntersectionCircleToShot(float x, float y, float r)
 {
-    addTempIntersection(std::make_shared<EnemyIntersectionToShot>(x, y, r, this));
+    addTempIntersection(std::make_shared<EnemyIntersectionToShot>(x, y, r, shared_from_this()));
 }
 
 void ObjEnemy::addTempIntersectionCircleToPlayer(float x, float y, float r)
 {
-    addTempIntersection(std::make_shared<EnemyIntersectionToPlayer>(x, y, r, this));
+    addTempIntersection(std::make_shared<EnemyIntersectionToPlayer>(x, y, r, shared_from_this()));
 }
 
 void ObjEnemy::addShotDamage(double damage)

@@ -21,7 +21,7 @@ public:
     int enemyShotCount;
 };
 
-class ObjShot : public ObjRender, public ObjMove, public ObjCol
+class ObjShot : public ObjRender, public ObjMove, public ObjCol, public std::enable_shared_from_this<ObjShot>
 {
 public:
     ObjShot(bool isPlayerShot, const std::shared_ptr<GameState>& gameState);
@@ -35,8 +35,9 @@ public:
     bool isPlayerShot() const;
 
     // intersection
-    void addIntersection(const std::shared_ptr<ShotIntersection>& isect);
-    void addTempIntersection(const std::shared_ptr<ShotIntersection>& isect);
+    void addIntersectionCircleA1(float r);
+    void addIntersectionCircleA2(float x, float y, float r);
+    void addIntersectionLine(float x1, float y1, float x2, float y2, float width);
     void addTempIntersectionCircleA1(float r);
     void addTempIntersectionCircleA2(float x, float y, float r);
     void addTempIntersectionLine(float x1, float y1, float x2, float y2, float width);
@@ -62,11 +63,11 @@ public:
     float getAngularVelocity() const;
     void setAngularVelocity(float angularVelocity);
     bool isSpellResistEnabled() const;
-    void setSpellResist(bool enable);
+    void setSpellResistEnable(bool enable);
     bool isSpellFactorEnabled() const;
     void setSpellFactor(bool enable);
     bool isEraseShotEnabled() const;
-    void setEraseShot(bool erase);
+    void setEraseShotEnable(bool enable);
     bool isItemChangeEnabled() const;
     void setItemChange(bool enable);
     bool isAutoDeleteEnabled() const;
@@ -123,6 +124,8 @@ protected:
     bool grazeInvalidFlag;
     bool useTempIntersectionFlag;
 private:
+    void addIntersection(const std::shared_ptr<ShotIntersection>& isect);
+    void addTempIntersection(const std::shared_ptr<ShotIntersection>& isect);
     const bool playerShotFlag;
     bool registerFlag;
     bool useDeleteFrameFlag;

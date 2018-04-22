@@ -1,7 +1,6 @@
 #include <bstorm/obj_col.hpp>
 
 #include <bstorm/intersection.hpp>
-#include <bstorm/collision_matrix.hpp>
 #include <bstorm/game_state.hpp>
 
 #include <iterator>
@@ -32,7 +31,7 @@ void ObjCol::transIntersection(float dx, float dy)
     {
         for (auto& isect : isects)
         {
-            state->colDetector->trans(isect, dx, dy);
+            state->colDetector->Trans(isect, dx, dy);
         }
     }
 }
@@ -43,7 +42,7 @@ void ObjCol::setWidthIntersection(float width)
     {
         for (auto& isect : isects)
         {
-            state->colDetector->setWidth(isect, width);
+            state->colDetector->SetWidth(isect, width);
         }
     }
 }
@@ -56,11 +55,11 @@ void ObjCol::renderIntersection(bool isPermitCamera) const
         {
             for (auto& isect : getIntersections())
             {
-                isect->render(state->renderer, isPermitCamera);
+                isect->Render(state->renderer, isPermitCamera);
             }
             for (auto& isect : getTempIntersections())
             {
-                isect->render(state->renderer, isPermitCamera);
+                isect->Render(state->renderer, isPermitCamera);
             }
         }
     }
@@ -83,24 +82,24 @@ bool ObjCol::isIntersected(const std::shared_ptr<ObjCol>& col) const
     {
         for (const auto& isect2 : col->getIntersections())
         {
-            if (isect1->isIntersected(isect2)) return true;
+            if (isect1->IsIntersected(isect2)) return true;
         }
 
         for (const auto& isect2 : col->getTempIntersections())
         {
-            if (isect1->isIntersected(isect2)) return true;
+            if (isect1->IsIntersected(isect2)) return true;
         }
     }
     for (const auto& isect1 : getTempIntersections())
     {
         for (const auto& isect2 : col->getIntersections())
         {
-            if (isect1->isIntersected(isect2)) return true;
+            if (isect1->IsIntersected(isect2)) return true;
         }
 
         for (const auto& isect2 : col->getTempIntersections())
         {
-            if (isect1->isIntersected(isect2)) return true;
+            if (isect1->IsIntersected(isect2)) return true;
         }
     }
     return false;
@@ -116,26 +115,27 @@ int ObjCol::getIntersectedCount() const
     int cnt = 0;
     for (const auto& isect : isects)
     {
-        cnt += isect->getCollideIntersections().size();
+        cnt += isect->GetCollideIntersections().size();
     }
     for (const auto& isect : oldTempIsects)
     {
-        cnt += isect->getCollideIntersections().size();
+        cnt += isect->GetCollideIntersections().size();
     }
     return cnt;
 }
 
 std::vector<std::weak_ptr<Intersection>> ObjCol::getCollideIntersections() const
 {
+    // TODO: コピーのコストが勿体無いのでTempは別の関数にする
     std::vector<std::weak_ptr<Intersection>> ret;
     for (const auto& isect : getIntersections())
     {
-        const auto& tmp = isect->getCollideIntersections();
+        const auto& tmp = isect->GetCollideIntersections();
         std::copy(tmp.begin(), tmp.end(), std::back_inserter(ret));
     }
     for (const auto& isect : getTempIntersections())
     {
-        const auto& tmp = isect->getCollideIntersections();
+        const auto& tmp = isect->GetCollideIntersections();
         std::copy(tmp.begin(), tmp.end(), std::back_inserter(ret));
     }
     return ret;

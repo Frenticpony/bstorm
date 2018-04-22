@@ -3,7 +3,6 @@
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/const.hpp>
 #include <bstorm/util.hpp>
-#include <bstorm/collision_matrix.hpp>
 #include <bstorm/intersection.hpp>
 #include <bstorm/item_data.hpp>
 #include <bstorm/texture.hpp>
@@ -31,8 +30,6 @@ ObjItem::ObjItem(int itemType, const std::shared_ptr<GameState>& gameState) :
     animationFrameCnt(0),
     animationIdx(0)
 {
-    pushIntersection(gameState->colDetector->create<ItemIntersection>(getX(), getY(), 23.99999f, this));
-
     setType(OBJ_ITEM);
     setBlendType(BLEND_NONE);
 
@@ -44,6 +41,18 @@ ObjItem::ObjItem(int itemType, const std::shared_ptr<GameState>& gameState) :
 
 ObjItem::~ObjItem()
 {
+}
+
+void ObjItem::setIntersection()
+{
+    if (auto gameState = getGameState())
+    {
+        if (getIntersections().size() == 0)
+        {
+            pushIntersection(gameState->colDetector->Create<ItemIntersection>(getX(), getY(), 23.99999f, shared_from_this()));
+        }
+    }
+
 }
 
 void ObjItem::update()
@@ -551,6 +560,7 @@ void DefaultBonusItemSpawner::spawn(float x, float y, const std::shared_ptr<Game
         gameState->objTable->add(bonusItem);
         gameState->objLayerList->setRenderPriority(bonusItem, gameState->objLayerList->getItemRenderPriority());
         bonusItem->setMovePosition(x, y);
+        bonusItem->setIntersection();
         bonusItem->setScore(300);
         bonusItem->setMoveMode(std::make_shared<MoveModeItemToPlayer>(8.0f, gameState->playerObj.lock()));
     }

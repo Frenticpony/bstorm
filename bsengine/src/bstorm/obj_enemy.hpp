@@ -8,7 +8,7 @@
 namespace bstorm
 {
 class Intersection;
-class ObjEnemy : public ObjSprite2D, public ObjMove, public ObjCol
+class ObjEnemy : public ObjSprite2D, public ObjMove, public ObjCol, public std::enable_shared_from_this<ObjEnemy>
 {
 public:
     ObjEnemy(bool isBoss, const std::shared_ptr<GameState>& gameState);

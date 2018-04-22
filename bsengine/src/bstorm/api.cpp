@@ -19,7 +19,6 @@
 #include <bstorm/obj_item.hpp>
 #include <bstorm/obj_spell.hpp>
 #include <bstorm/intersection.hpp>
-#include <bstorm/collision_matrix.hpp>
 #include <bstorm/shot_data.hpp>
 #include <bstorm/item_data.hpp>
 #include <bstorm/script_info.hpp>
@@ -2233,7 +2232,7 @@ static int IsIntersected_Line_Circle(lua_State* L)
     double cx = DnhValue::toNum(L, 6);
     double cy = DnhValue::toNum(L, 7);
     double r = DnhValue::toNum(L, 8);
-    lua_pushboolean(L, isIntersectedLineCircle(x1, y1, x2, y2, width, cx, cy, r));
+    lua_pushboolean(L, IsIntersectedLineCircle(x1, y1, x2, y2, width, cx, cy, r));
     return 1;
 }
 
@@ -4680,7 +4679,7 @@ static int ObjShot_SetSpellResist(lua_State* L)
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     bool spellResist = DnhValue::toBool(L, 2);
-    if (auto obj = engine->getObject<ObjShot>(objId)) { obj->setSpellResist(spellResist); }
+    if (auto obj = engine->getObject<ObjShot>(objId)) { obj->setSpellResistEnable(spellResist); }
     return 0;
 }
 
@@ -4725,7 +4724,7 @@ static int ObjShot_SetEraseShot(lua_State* L)
     Engine* engine = getEngine(L);
     int objId = DnhValue::toInt(L, 1);
     bool eraseShot = DnhValue::toBool(L, 2);
-    if (auto obj = engine->getObject<ObjShot>(objId)) { obj->setEraseShot(eraseShot); }
+    if (auto obj = engine->getObject<ObjShot>(objId)) { obj->setEraseShotEnable(eraseShot); }
     return 0;
 }
 
@@ -5124,16 +5123,22 @@ static int ObjCol_GetListOfIntersectedEnemyID(lua_State* L)
     DnhArray enemyIds;
     if (auto obj = engine->getObject<ObjCol>(objId))
     {
-        for (auto& isectP : obj->getCollideIntersections())
+        for (auto& wIsect : obj->getCollideIntersections())
         {
-            if (auto isect = isectP.lock())
+            if (auto isect = wIsect.lock())
             {
                 if (auto enemyIsectToShot = std::dynamic_pointer_cast<EnemyIntersectionToShot>(isect))
                 {
-                    enemyIds.pushBack(std::make_unique<DnhReal>(enemyIsectToShot->enemy->getID()));
+                    if (auto enemy = enemyIsectToShot->GetEnemy().lock())
+                    {
+                        enemyIds.pushBack(std::make_unique<DnhReal>(enemy->getID()));
+                    }
                 } else if (auto enemyIsectToPlayer = std::dynamic_pointer_cast<EnemyIntersectionToPlayer>(isect))
                 {
-                    enemyIds.pushBack(std::make_unique<DnhReal>(enemyIsectToPlayer->enemy->getID()));
+                    if (auto enemy = enemyIsectToPlayer->GetEnemy().lock())
+                    {
+                        enemyIds.pushBack(std::make_unique<DnhReal>(enemy->getID()));
+                    }
                 }
             }
         }
@@ -5693,7 +5698,11 @@ __declspec(noinline) static void addFunc(NameTable& table, const char* name, int
 
 #define constI(name) (addConstI(table, #name, name))
 #define unsafe(name, paramc) (addFunc(table, #name, (paramc), UnsafeFunction<name>))
+#ifdef _DEBUG
+#define safe(name, paramc) (unsafe(name, paramc))
+#else
 #define safe(name, paramc) (addFunc(table, #name, (paramc), name))
+#endif
 #define runtime(name, paramc) (addFunc(table, #name, (paramc), 0))
 #define TypeIs(typeSet) ((typeSet) & type)
 

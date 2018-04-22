@@ -15,11 +15,12 @@ namespace bstorm
 {
 class ItemData;
 class ItemIntersection;
-class ObjItem : public ObjRender, public ObjMove, public ObjCol
+class ObjItem : public ObjRender, public ObjMove, public ObjCol, public std::enable_shared_from_this<ObjItem>
 {
 public:
     ObjItem(int itemType, const std::shared_ptr<GameState>& gameState);
     ~ObjItem();
+    void setIntersection();
     void update() override;
     void render() override;
     int getItemType() const;

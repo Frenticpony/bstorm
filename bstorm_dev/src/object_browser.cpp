@@ -20,7 +20,6 @@
 #include <bstorm/obj_spell.hpp>
 #include <bstorm/obj_item.hpp>
 #include <bstorm/intersection.hpp>
-#include <bstorm/collision_matrix.hpp>
 #include <bstorm/dnh_value.hpp>
 #include <bstorm/shot_data.hpp>
 #include <bstorm/item_data.hpp>
@@ -625,7 +624,7 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                 {
                     bool spellResist = objShot->isSpellResistEnabled();
                     CheckboxRow("spell-resist", "##shotSpellResist", &spellResist);
-                    objShot->setSpellResist(spellResist);
+                    objShot->setSpellResistEnable(spellResist);
                 }
                 ImGui::Separator();
                 {
@@ -637,7 +636,7 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                 {
                     bool eraseShot = objShot->isEraseShotEnabled();
                     CheckboxRow("erase-shot", "##shotEraseShot", &eraseShot);
-                    objShot->setEraseShot(eraseShot);
+                    objShot->setEraseShotEnable(eraseShot);
                 }
                 ImGui::Separator();
                 {

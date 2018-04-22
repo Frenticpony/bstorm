@@ -2,7 +2,6 @@
 
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/intersection.hpp>
-#include <bstorm/collision_matrix.hpp>
 #include <bstorm/game_state.hpp>
 
 namespace bstorm
@@ -50,21 +49,21 @@ void ObjSpell::setEraseShotEnable(bool enable) { eraseShotEnable = enable; }
 
 void ObjSpell::addTempIntersection(const std::shared_ptr<SpellIntersection>& isect)
 {
-    if (auto state = getGameState())
+    if (auto gameState = getGameState())
     {
-        state->colDetector->add(isect);
+        gameState->colDetector->Add(isect);
+        ObjCol::addTempIntersection(isect);
     }
-    ObjCol::addTempIntersection(isect);
 }
 
 void ObjSpell::addTempIntersectionCircle(float x, float y, float r)
 {
-    addTempIntersection(std::make_shared<SpellIntersection>(x, y, r, this));
+    addTempIntersection(std::make_shared<SpellIntersection>(x, y, r, shared_from_this()));
 }
 
 void ObjSpell::addTempIntersectionLine(float x1, float y1, float x2, float y2, float width)
 {
-    addTempIntersection(std::make_shared<SpellIntersection>(x1, y1, x2, y2, width, this));
+    addTempIntersection(std::make_shared<SpellIntersection>(x1, y1, x2, y2, width, shared_from_this()));
 }
 ObjSpellManage::ObjSpellManage(const std::shared_ptr<GameState>& gameState) :
     Obj(gameState)

@@ -23,7 +23,7 @@ public:
     int64_t point;
 };
 
-class ObjPlayer : public ObjSprite2D, public ObjMove, public ObjCol
+class ObjPlayer : public ObjSprite2D, public ObjMove, public ObjCol, public std::enable_shared_from_this<ObjPlayer>
 {
 public:
     ObjPlayer(const std::shared_ptr<GameState>& gameState, const std::shared_ptr<GlobalPlayerParams>& globalParams);
@@ -32,6 +32,7 @@ public:
     void render() override;
     void addIntersectionCircleA1(float dx, float dy, float r, float dr);
     void addIntersectionCircleA2(float dx, float dy, float r);
+    void addIntersectionToItem();
     void setNormalSpeed(double speed);
     void setSlowSpeed(double speed);
     void setClip(float left, float top, float right, float bottom);
