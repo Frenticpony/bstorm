@@ -558,7 +558,7 @@ void ObjShot::checkAutoDelete(float x, float y)
 {
     if (auto state = getGameState())
     {
-        if (autoDeleteEnable && state->shotAutoDeleteClip->outOfClip(x, y))
+        if (autoDeleteEnable && state->shotAutoDeleteClip->IsOutOfClip(x, y))
         {
             die();
         }

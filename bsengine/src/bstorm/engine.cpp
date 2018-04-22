@@ -1626,7 +1626,7 @@ int Engine::getPlayerShotCount() const
 
 void Engine::setShotAutoDeleteClip(float left, float top, float right, float bottom)
 {
-    gameState->shotAutoDeleteClip->setClip(left, top, right, bottom);
+    gameState->shotAutoDeleteClip->SetClip(left, top, right, bottom);
 }
 
 void Engine::startShotScript(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
