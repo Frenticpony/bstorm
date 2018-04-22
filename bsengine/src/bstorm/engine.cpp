@@ -575,12 +575,12 @@ bool Engine::isPixelShaderSupported(int major, int minor)
 
 std::shared_ptr<Mesh> Engine::loadMesh(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
-    return gameState->meshCache->load(path, gameState->textureCache, srcPos);
+    return gameState->meshCache->Load(path, gameState->textureCache, srcPos);
 }
 
 void Engine::releaseUnusedMeshCache()
 {
-    gameState->meshCache->releaseUnusedMesh();
+    gameState->meshCache->ReleaseUnusedMesh();
 }
 
 std::shared_ptr<SoundBuffer> Engine::loadSound(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)

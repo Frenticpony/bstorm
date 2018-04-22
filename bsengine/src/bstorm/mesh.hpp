@@ -18,9 +18,8 @@ struct MeshVertex
 };
 
 class Texture;
-class MeshMaterial
+struct MeshMaterial
 {
-public:
     MeshMaterial(float r, float g, float b, float a, float dif, float amb, float emi, const std::shared_ptr<Texture>& texture) :
         col({ r, g, b, a }), dif(dif), amb(amb), emi(emi), texture(texture)
     {
@@ -45,15 +44,15 @@ public:
     Mesh(const std::wstring& path);
     ~Mesh();
     std::vector<MeshMaterial> materials;
-    const std::wstring& getPath() const;
+    const std::wstring& GetPath() const { return path_; }
 private:
-    std::wstring path;
+    std::wstring path_;
 };
 
 struct SourcePos;
 class TextureCache;
 struct Mqo;
-std::shared_ptr<Mesh> mqoToMesh(const Mqo& mqo, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos);
+std::shared_ptr<Mesh> MqoToMesh(const Mqo& mqo, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos);
 
 class FileLoader;
 class TextureCache;
@@ -61,14 +60,11 @@ class MeshCache
 {
 public:
     MeshCache();
-    void setLoader(const std::shared_ptr<FileLoader>& loader);
-    std::shared_ptr<Mesh> load(const std::wstring& path, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos);
-    void releaseUnusedMesh();
-    // backdoor
-    template <typename T>
-    void backDoor() const {}
+    void SetLoader(const std::shared_ptr<FileLoader>& loader);
+    std::shared_ptr<Mesh> Load(const std::wstring& path, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos);
+    void ReleaseUnusedMesh();
 private:
-    std::unordered_map<std::wstring, std::shared_ptr<Mesh>> meshMap;
-    std::shared_ptr<FileLoader> loader;
+    std::unordered_map<std::wstring, std::shared_ptr<Mesh>> meshMap_;
+    std::shared_ptr<FileLoader> loader_;
 };
 }

@@ -7,29 +7,29 @@
 #include <bstorm/file_loader.hpp>
 #include <bstorm/parser.hpp>
 
-#include <unordered_map>
-#include <unordered_set>
 #include <array>
-#include <d3dx9.h>
 
 namespace bstorm
 {
-static inline D3DXVECTOR3 toD3DXVECTOR3(const MqoVec3& vec)
+static inline D3DXVECTOR3 ToD3DXVECTOR3(const MqoVec3& vec)
 {
-    return D3DXVECTOR3(vec.x, vec.y, -vec.z); // âEéËånÇ©ÇÁç∂éËånÇ…ïœä∑Ç∑ÇÈÇÃÇ≈zç¿ïWÇ…-1
+    return D3DXVECTOR3(vec.x, vec.y, -vec.z); // âEéËånÇ©ÇÁç∂éËånÇ…ïœä∑Ç∑ÇÈÇÃÇ≈zç¿ïWÇîΩì]
 }
 
-static D3DXVECTOR3 calcFaceNormal(const D3DXVECTOR3& a, const D3DXVECTOR3& b, const D3DXVECTOR3& c)
+static D3DXVECTOR3 CalcFaceNormal(const D3DXVECTOR3& a, const D3DXVECTOR3& b, const D3DXVECTOR3& c)
 {
     D3DXVECTOR3 n;
     D3DXVECTOR3 ab = b - a;
     D3DXVECTOR3 ac = c - a;
     D3DXVec3Cross(&n, &ab, &ac);
-    D3DXVec3Normalize(&n, &n);
+    if (D3DXVec3Length(&n) != 0.0f)
+    {
+        D3DXVec3Normalize(&n, &n);
+    }
     return n;
 }
 
-std::shared_ptr<Mesh> mqoToMesh(const Mqo & mqo, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos)
+std::shared_ptr<Mesh> MqoToMesh(const Mqo & mqo, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos)
 {
     auto mesh = std::make_shared<Mesh>(mqo.path);
 
@@ -55,10 +55,10 @@ std::shared_ptr<Mesh> mqoToMesh(const Mqo & mqo, const std::shared_ptr<TextureCa
                 int vi2 = face.vertexIndices[0];
                 int vi1 = face.vertexIndices[i + 1];
                 int vi0 = face.vertexIndices[i + 2];
-                const D3DXVECTOR3 v0 = toD3DXVECTOR3(obj.vertices[vi0]);
-                const D3DXVECTOR3 v1 = toD3DXVECTOR3(obj.vertices[vi1]);
-                const D3DXVECTOR3 v2 = toD3DXVECTOR3(obj.vertices[vi2]);
-                const auto& faceNormal = calcFaceNormal(v0, v1, v2);
+                const D3DXVECTOR3 v0 = ToD3DXVECTOR3(obj.vertices[vi0]);
+                const D3DXVECTOR3 v1 = ToD3DXVECTOR3(obj.vertices[vi1]);
+                const D3DXVECTOR3 v2 = ToD3DXVECTOR3(obj.vertices[vi2]);
+                const auto& faceNormal = CalcFaceNormal(v0, v1, v2);
                 vertexNormals[vi0] += faceNormal;
                 vertexNormals[vi1] += faceNormal;
                 vertexNormals[vi2] += faceNormal;
@@ -70,7 +70,7 @@ std::shared_ptr<Mesh> mqoToMesh(const Mqo & mqo, const std::shared_ptr<TextureCa
         for (auto& normal : vertexNormals)
         {
             // ñ Ç…égÇÌÇÍÇƒÇ»Ç¢í∏ì_ÇÕñ≥éã
-            if (normal.x == 0 && normal.y == 0 && normal.z == 0) continue;
+            if (normal.x == 0.0f && normal.y == 0.0f && normal.z == 0.0f) continue;
             D3DXVec3Normalize(&normal, &normal);
         }
 
@@ -101,7 +101,7 @@ std::shared_ptr<Mesh> mqoToMesh(const Mqo & mqo, const std::shared_ptr<TextureCa
     return mesh;
 }
 
-Mesh::Mesh(const std::wstring & path) : path(path)
+Mesh::Mesh(const std::wstring & path) : path_(path)
 {
 }
 
@@ -110,25 +110,20 @@ Mesh::~Mesh()
     Logger::WriteLog(std::move(
         Log(Log::Level::LV_INFO)
         .setMessage("release mesh.")
-        .setParam(Log::Param(Log::Param::Tag::MESH, path))));
-}
-
-const std::wstring & Mesh::getPath() const
-{
-    return path;
+        .setParam(Log::Param(Log::Param::Tag::MESH, path_))));
 }
 
 MeshCache::MeshCache() :
-    loader(std::make_shared<FileLoaderFromTextFile>())
+    loader_(std::make_shared<FileLoaderFromTextFile>())
 {
 }
 
-void MeshCache::setLoader(const std::shared_ptr<FileLoader>& loader)
+void MeshCache::SetLoader(const std::shared_ptr<FileLoader>& loader)
 {
-    this->loader = loader;
+    this->loader_ = loader;
 }
 
-std::shared_ptr<Mesh> MeshCache::load(const std::wstring & path, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos)
+std::shared_ptr<Mesh> MeshCache::Load(const std::wstring & path, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos)
 {
     const auto ext = getLowerExt(path);
     if (ext != L".mqo")
@@ -140,20 +135,20 @@ std::shared_ptr<Mesh> MeshCache::load(const std::wstring & path, const std::shar
     }
 
     auto uniqPath = canonicalPath(path);
-    auto it = meshMap.find(uniqPath);
-    if (it != meshMap.end())
+    auto it = meshMap_.find(uniqPath);
+    if (it != meshMap_.end())
     {
         return it->second;
     } else
     {
-        if (auto mqo = parseMqo(uniqPath, loader))
+        if (auto mqo = parseMqo(uniqPath, loader_))
         {
-            auto mesh = mqoToMesh(*mqo, textureCache, srcPos);
+            auto mesh = MqoToMesh(*mqo, textureCache, srcPos);
             Logger::WriteLog(std::move(
                 Log(Log::Level::LV_INFO).setMessage("load mesh.")
                 .setParam(Log::Param(Log::Param::Tag::MESH, uniqPath))
                 .addSourcePos(srcPos)));
-            return meshMap[uniqPath] = std::move(mesh);
+            return meshMap_[uniqPath] = std::move(mesh);
         }
         throw Log(Log::Level::LV_ERROR)
             .setMessage("failed to load mesh.")
@@ -162,15 +157,15 @@ std::shared_ptr<Mesh> MeshCache::load(const std::wstring & path, const std::shar
     }
 }
 
-void MeshCache::releaseUnusedMesh()
+void MeshCache::ReleaseUnusedMesh()
 {
-    auto it = meshMap.begin();
-    while (it != meshMap.end())
+    auto it = meshMap_.begin();
+    while (it != meshMap_.end())
     {
         auto& mesh = it->second;
         if (mesh.use_count() <= 1)
         {
-            meshMap.erase(it++);
+            meshMap_.erase(it++);
         } else ++it;
     }
 }
