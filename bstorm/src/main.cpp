@@ -77,7 +77,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
 
         {
             // th_dnh.def読み込み
-            ThDnhDef def = loadThDnhDef(thDnhDefFilePath);
+            ThDnhDef def = LoadThDnhDef(thDnhDefFilePath);
             packageMainScriptPath = def.packageScriptMain;
             if (!def.windowTitle.empty()) windowTitle = def.windowTitle;
             screenWidth = def.screenWidth;
@@ -110,20 +110,20 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
         UpdateWindow(hWnd);
 
         auto engine = std::make_shared<Engine>(hWnd, screenWidth, screenHeight, std::make_shared<conf::KeyConfig>(config.keyConfig));
-        engine->setMousePostionProvider(std::make_shared<WinMousePositionProvider>(hWnd));
+        engine->SetMousePostionProvider(std::make_shared<WinMousePositionProvider>(hWnd));
 
         if (packageMainScriptPath.empty())
         {
-            throw Log(Log::Level::LV_ERROR).setMessage("package main script not specified.");
+            throw Log(Log::Level::LV_ERROR).SetMessage("package main script not specified.");
         }
 
-        engine->setPackageMainScript(packageMainScriptPath);
-        engine->startPackage();
+        engine->SetPackageMainScript(packageMainScriptPath);
+        engine->StartPackage();
 
         /* message loop */
         while (true)
         {
-            auto d3DDevice = engine->getGraphicDevice();
+            auto d3DDevice_ = engine->GetDirect3DDevice();
             if (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
             {
                 BOOL result = GetMessage(&msg, NULL, 0, 0);
@@ -140,30 +140,30 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
                 Sleep(1);
                 continue;
             }
-            if (SUCCEEDED(d3DDevice->BeginScene()))
+            if (SUCCEEDED(d3DDevice_->BeginScene()))
             {
-                engine->updateFpsCounter();
-                engine->setBackBufferRenderTarget();
-                d3DDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(114, 144, 154), 1.0f, 0);
-                if (engine->isPackageFinished()) break;
-                engine->tickFrame();
-                engine->render();
-                d3DDevice->EndScene();
-                switch (d3DDevice->Present(NULL, NULL, NULL, NULL))
+                engine->UpdateFpsCounter();
+                engine->SetBackBufferRenderTarget();
+                d3DDevice_->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(114, 144, 154), 1.0f, 0);
+                if (engine->IsPackageFinished()) break;
+                engine->TickFrame();
+                engine->Render();
+                d3DDevice_->EndScene();
+                switch (d3DDevice_->Present(NULL, NULL, NULL, NULL))
                 {
                     case D3DERR_DEVICELOST:
-                        if (d3DDevice->TestCooperativeLevel() == D3DERR_DEVICENOTRESET)
+                        if (d3DDevice_->TestCooperativeLevel() == D3DERR_DEVICENOTRESET)
                         {
-                            engine->releaseLostableGraphicResource();
-                            engine->resetGraphicDevice();
-                            engine->restoreLostableGraphicDevice();
+                            engine->ReleaseLostableGraphicResource();
+                            engine->ResetGraphicDevice();
+                            engine->RestoreLostableGraphicDevice();
                         } else
                         {
                             Sleep(1);
                         }
                         break;
                     case D3DERR_DRIVERINTERNALERROR:
-                        throw Log(Log::Level::LV_ERROR).setMessage("graphic device internal error occured.");
+                        throw Log(Log::Level::LV_ERROR).SetMessage("graphic device internal error occured.");
                         break;
                 }
             }
@@ -171,11 +171,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
     } catch (Log& log)
     {
         Logger::WriteLog(log);
-        MessageBoxW(hWnd, toUnicode(log.ToString()).c_str(), L"Engine Error", MB_OK);
+        MessageBoxW(hWnd, ToUnicode(log.ToString()).c_str(), L"Engine Error", MB_OK);
     } catch (const std::exception& e)
     {
         Logger::WriteLog(Log::Level::LV_ERROR, e.what());
-        MessageBoxW(hWnd, toUnicode(e.what()).c_str(), L"Unexpected Error", MB_OK);
+        MessageBoxW(hWnd, ToUnicode(e.what()).c_str(), L"Unexpected Error", MB_OK);
     }
     Logger::Shutdown();
     return (int)msg.wParam;

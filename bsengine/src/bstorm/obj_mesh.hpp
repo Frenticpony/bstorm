@@ -12,10 +12,10 @@ class ObjMesh : public ObjRender
 public:
     ObjMesh(const std::shared_ptr<GameState>& state);
     ~ObjMesh();
-    void update() override;
-    void render() override;
-    void setMesh(const std::shared_ptr<Mesh>& mesh);
+    void Update() override;
+    void Render() override;
+    void SetMesh(const std::shared_ptr<Mesh>& mesh);
 private:
-    std::shared_ptr<Mesh> mesh;
+    std::shared_ptr<Mesh> mesh_;
 };
 }

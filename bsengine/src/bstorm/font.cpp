@@ -33,22 +33,22 @@ FontParams::FontParams(const std::wstring& fontName, int size, int weight, const
     }
 }
 
-bool FontParams::operator==(const FontParams& params) const
+bool FontParams::operator==(const FontParams& params_) const
 {
-    return c == params.c &&
-        fontName == params.fontName &&
-        size == params.size &&
-        weight == params.weight &&
-        topColor == params.topColor &&
-        bottomColor == params.bottomColor &&
-        borderType == params.borderType &&
-        borderWidth == params.borderWidth &&
-        borderColor == params.borderColor;
+    return c == params_.c &&
+        fontName == params_.fontName &&
+        size == params_.size &&
+        weight == params_.weight &&
+        topColor == params_.topColor &&
+        bottomColor == params_.bottomColor &&
+        borderType == params_.borderType &&
+        borderWidth == params_.borderWidth &&
+        borderColor == params_.borderColor;
 }
 
-bool FontParams::operator!=(const FontParams& params) const
+bool FontParams::operator!=(const FontParams& params_) const
 {
-    return !(*this == params);
+    return !(*this == params_);
 }
 
 size_t FontParams::hashValue() const
@@ -57,37 +57,37 @@ size_t FontParams::hashValue() const
     hash_combine(h, fontName);
     hash_combine(h, size);
     hash_combine(h, weight);
-    hash_combine(h, bstorm::toD3DCOLOR(topColor, 0xff));
-    hash_combine(h, bstorm::toD3DCOLOR(bottomColor, 0xff));
+    hash_combine(h, bstorm::ToD3DCOLOR(topColor, 0xff));
+    hash_combine(h, bstorm::ToD3DCOLOR(bottomColor, 0xff));
     hash_combine(h, borderType);
     hash_combine(h, borderWidth);
-    hash_combine(h, bstorm::toD3DCOLOR(borderColor, 0xff));
+    hash_combine(h, bstorm::ToD3DCOLOR(borderColor, 0xff));
     hash_combine(h, c);
     return h;
 }
 
-static ColorRGB lerpColor(float y, float height, const ColorRGB& topColor, const ColorRGB& bottomColor)
+static ColorRGB LerpColor(float y, float height, const ColorRGB& topColor, const ColorRGB& bottomColor)
 {
     const float k = 1.0f - y / (height - 1.0f);
-    int fontR = (int)(topColor.getR() * k + bottomColor.getR() * (1 - k));
-    int fontG = (int)(topColor.getG() * k + bottomColor.getG() * (1 - k));
-    int fontB = (int)(topColor.getB() * k + bottomColor.getB() * (1 - k));
+    int fontR = (int)(topColor.GetR() * k + bottomColor.GetR() * (1 - k));
+    int fontG = (int)(topColor.GetG() * k + bottomColor.GetG() * (1 - k));
+    int fontB = (int)(topColor.GetB() * k + bottomColor.GetB() * (1 - k));
     return ColorRGB(fontR, fontG, fontB);
 }
 
 // FUTURE : error check
-Font::Font(const FontParams& params, HWND hWnd, IDirect3DDevice9* d3DDevice, int quality) :
-    texture(NULL),
-    params(params)
+Font::Font(const FontParams& params_, HWND hWnd, IDirect3DDevice9* d3DDevice_, int quality) :
+    texture_(NULL),
+    params_(params_)
 {
-    if (params.borderType == BORDER_NONE)
+    if (params_.borderType == BORDER_NONE)
     {
-        HFONT hFont = CreateFont(params.size, 0, 0, 0, params.weight, 0, 0, 0, DEFAULT_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY, DEFAULT_PITCH, params.fontName.c_str());
+        HFONT hFont = CreateFont(params_.size, 0, 0, 0, params_.weight, 0, 0, 0, DEFAULT_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY, DEFAULT_PITCH, params_.fontName.c_str());
         HDC hDC = GetDC(hWnd);
         HFONT hOldFont = (HFONT)SelectObject(hDC, hFont);
         TEXTMETRIC tm;
         GetTextMetrics(hDC, &tm);
-        UINT code = (UINT)params.c;
+        UINT code = (UINT)params_.c;
         MAT2 mat = { { 0, 1 }, { 0, 0 }, { 0, 0 }, { 0, 1 } }; // 回転行列
         GLYPHMETRICS gm;
         int bmpFormat = GGO_GRAY8_BITMAP; // 65階調
@@ -101,11 +101,11 @@ Font::Font(const FontParams& params, HWND hWnd, IDirect3DDevice9* d3DDevice, int
 
         const int fontWidth = gm.gmBlackBoxX;
         const int fontHeight = gm.gmBlackBoxY;
-        const int texWidth = nextPow2(fontWidth);
-        const int texHeight = nextPow2(fontHeight);
-        d3DDevice->CreateTexture(texWidth, texHeight, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture, NULL);
+        const int texWidth = NextPow2(fontWidth);
+        const int texHeight = NextPow2(fontHeight);
+        d3DDevice_->CreateTexture(texWidth, texHeight, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture_, NULL);
         D3DLOCKED_RECT texRect;
-        texture->LockRect(0, &texRect, NULL, D3DLOCK_DISCARD);
+        texture_->LockRect(0, &texRect, NULL, D3DLOCK_DISCARD);
         D3DCOLOR* texMem = (D3DCOLOR*)texRect.pBits;
 
         int bmpWidth = (fontWidth + 3) & ~3; // DWORD-align
@@ -118,7 +118,7 @@ Font::Font(const FontParams& params, HWND hWnd, IDirect3DDevice9* d3DDevice, int
                 BYTE alpha = (BYTE)(fontBmp[bmpPos] * 255.0 / (grad - 1));
                 if (alpha != 0)
                 {
-                    texMem[texPos] = toD3DCOLOR(lerpColor(y, fontHeight, params.topColor, params.bottomColor), alpha);
+                    texMem[texPos] = ToD3DCOLOR(LerpColor(y, fontHeight, params_.topColor, params_.bottomColor), alpha);
                 } else
                 {
                     // BLEND_ADD_RGB時に色が加算されないようにするため0
@@ -128,17 +128,17 @@ Font::Font(const FontParams& params, HWND hWnd, IDirect3DDevice9* d3DDevice, int
             }
         }
 
-        texture->UnlockRect(0);
+        texture_->UnlockRect(0);
         delete[] fontBmp;
 
-        this->width = fontWidth;
-        this->height = fontHeight;
-        this->printOffsetX = gm.gmptGlyphOrigin.x;
-        this->printOffsetY = tm.tmAscent - gm.gmptGlyphOrigin.y;
-        this->rightCharOffsetX = gm.gmCellIncX;
-        this->nextLineOffsetY = tm.tmHeight;
-        this->textureWidth = texWidth;
-        this->textureHeight = texHeight;
+        this->width_ = fontWidth;
+        this->height_ = fontHeight;
+        this->printOffsetX_ = gm.gmptGlyphOrigin.x;
+        this->printOffsetY_ = tm.tmAscent - gm.gmptGlyphOrigin.y;
+        this->rightCharOffsetX_ = gm.gmCellIncX;
+        this->nextLineOffsetY_ = tm.tmHeight;
+        this->textureWidth_ = texWidth;
+        this->textureHeight_ = texHeight;
     } else
     {
         // BORDER_SHADOWは廃止
@@ -149,7 +149,7 @@ Font::Font(const FontParams& params, HWND hWnd, IDirect3DDevice9* d3DDevice, int
 
         /* フォントの作成 */
         /** quality倍の大きさで取得 */
-        HFONT hFont = CreateFont(params.size * quality, 0, 0, 0, params.weight, 0, 0, 0, DEFAULT_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY, DEFAULT_PITCH, params.fontName.c_str());
+        HFONT hFont = CreateFont(params_.size * quality, 0, 0, 0, params_.weight, 0, 0, 0, DEFAULT_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY, DEFAULT_PITCH, params_.fontName.c_str());
         HFONT hOldFont = (HFONT)SelectObject(memDC, hFont);
 
         /* フォントのパラメータ取得 */
@@ -157,9 +157,9 @@ Font::Font(const FontParams& params, HWND hWnd, IDirect3DDevice9* d3DDevice, int
         GLYPHMETRICS gm;
         const MAT2 mat = { { 0, 1 }, { 0, 0 }, { 0, 0 }, { 0, 1 } };
         GetTextMetrics(memDC, &tm);
-        GetGlyphOutline(memDC, (UINT)params.c, GGO_METRICS, &gm, 0, NULL, &mat);
+        GetGlyphOutline(memDC, (UINT)params_.c, GGO_METRICS, &gm, 0, NULL, &mat);
 
-        const int penSize = 2 * params.borderWidth * quality;
+        const int penSize = 2 * params_.borderWidth * quality;
 
         /* フォント矩形 */
         /** 幅と高さがqualityの倍数になるように調整 */
@@ -199,13 +199,13 @@ Font::Font(const FontParams& params, HWND hWnd, IDirect3DDevice9* d3DDevice, int
 
         //縁取りを先に描く
         BeginPath(memDC);
-        TextOut(memDC, -drawOffsetX, -drawOffsetY, (std::wstring{ params.c }).c_str(), 1);
+        TextOut(memDC, -drawOffsetX, -drawOffsetY, (std::wstring{ params_.c }).c_str(), 1);
         EndPath(memDC);
         StrokePath(memDC);
 
         //文字を塗りつぶす
         BeginPath(memDC);
-        TextOut(memDC, -drawOffsetX, -drawOffsetY, (std::wstring{ params.c }).c_str(), 1);
+        TextOut(memDC, -drawOffsetX, -drawOffsetY, (std::wstring{ params_.c }).c_str(), 1);
         EndPath(memDC);
         FillPath(memDC);
 
@@ -218,12 +218,12 @@ Font::Font(const FontParams& params, HWND hWnd, IDirect3DDevice9* d3DDevice, int
         /* テクスチャ取得 */
         const int fontWidth = fontRect.right / quality;
         const int fontHeight = fontRect.bottom / quality;
-        const int texWidth = nextPow2(fontWidth);
-        const int texHeight = nextPow2(fontHeight);
+        const int texWidth = NextPow2(fontWidth);
+        const int texHeight = NextPow2(fontHeight);
 
-        d3DDevice->CreateTexture(texWidth, texHeight, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture, NULL);
+        d3DDevice_->CreateTexture(texWidth, texHeight, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture_, NULL);
         D3DLOCKED_RECT texRect;
-        texture->LockRect(0, &texRect, NULL, D3DLOCK_DISCARD);
+        texture_->LockRect(0, &texRect, NULL, D3DLOCK_DISCARD);
         D3DCOLOR* texMem = (D3DCOLOR*)texRect.pBits;
 
         /* フォントビットマップからテクスチャに書き込み */
@@ -260,84 +260,84 @@ Font::Font(const FontParams& params, HWND hWnd, IDirect3DDevice9* d3DDevice, int
                     texMem[texPos] = 0;
                 } else if (alpha < 0xff)
                 {
-                    texMem[texPos] = D3DCOLOR_ARGB(alpha, params.borderColor.getR(), params.borderColor.getG(), params.borderColor.getB());
+                    texMem[texPos] = D3DCOLOR_ARGB(alpha, params_.borderColor.GetR(), params_.borderColor.GetG(), params_.borderColor.GetB());
                 } else
                 {
                     /* フォントの色を線形補間で生成 */
-                    ColorRGB fontColor = lerpColor(y, fontHeight, params.topColor, params.bottomColor);
+                    ColorRGB fontColor = LerpColor(y, fontHeight, params_.topColor, params_.bottomColor);
                     /* 混ぜる */
-                    int r = ((fontColor.getR() * ch) >> 8) + ((params.borderColor.getR() * border) >> 8);
-                    int g = ((fontColor.getG() * ch) >> 8) + ((params.borderColor.getG() * border) >> 8);
-                    int b = ((fontColor.getB() * ch) >> 8) + ((params.borderColor.getB() * border) >> 8);
+                    int r = ((fontColor.GetR() * ch) >> 8) + ((params_.borderColor.GetR() * border) >> 8);
+                    int g = ((fontColor.GetG() * ch) >> 8) + ((params_.borderColor.GetG() * border) >> 8);
+                    int b = ((fontColor.GetB() * ch) >> 8) + ((params_.borderColor.GetB() * border) >> 8);
                     texMem[texPos] = D3DCOLOR_ARGB(alpha, (BYTE)r, (BYTE)g, (BYTE)b);
                 }
             }
         }
-        texture->UnlockRect(0);
+        texture_->UnlockRect(0);
         SelectObject(memDC, hOldBmp); DeleteObject(hBmp);
         DeleteDC(memDC);
 
         /* フィールド設定 */
-        hFont = CreateFont(params.size, 0, 0, 0, params.weight, 0, 0, 0, DEFAULT_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY, DEFAULT_PITCH, params.fontName.c_str());
+        hFont = CreateFont(params_.size, 0, 0, 0, params_.weight, 0, 0, 0, DEFAULT_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY, DEFAULT_PITCH, params_.fontName.c_str());
         hOldFont = (HFONT)SelectObject(hDC, hFont);
         GetTextMetrics(hDC, &tm);
-        GetGlyphOutline(hDC, (UINT)params.c, GGO_METRICS, &gm, 0, NULL, &mat);
+        GetGlyphOutline(hDC, (UINT)params_.c, GGO_METRICS, &gm, 0, NULL, &mat);
         SelectObject(hDC, hOldFont); DeleteObject(hFont);
         ReleaseDC(hWnd, hDC);
-        this->width = fontWidth;
-        this->height = fontHeight;
-        this->printOffsetX = gm.gmptGlyphOrigin.x;
-        this->printOffsetY = tm.tmAscent - gm.gmptGlyphOrigin.y;
-        this->rightCharOffsetX = gm.gmCellIncX + params.borderWidth;
-        this->nextLineOffsetY = tm.tmHeight;
-        this->textureWidth = texWidth;
-        this->textureHeight = texHeight;
+        this->width_ = fontWidth;
+        this->height_ = fontHeight;
+        this->printOffsetX_ = gm.gmptGlyphOrigin.x;
+        this->printOffsetY_ = tm.tmAscent - gm.gmptGlyphOrigin.y;
+        this->rightCharOffsetX_ = gm.gmCellIncX + params_.borderWidth;
+        this->nextLineOffsetY_ = tm.tmHeight;
+        this->textureWidth_ = texWidth;
+        this->textureHeight_ = texHeight;
     }
 }
 
 Font::~Font()
 {
-    safe_release(texture);
+    safe_release(texture_);
 }
 
-FontCache::FontCache(HWND hWnd, IDirect3DDevice9 * d3DDevice) :
-    hWnd(hWnd),
-    d3DDevice(d3DDevice),
-    borderedFontQuality(4)
+FontCache::FontCache(HWND hWnd, IDirect3DDevice9 * d3DDevice_) :
+    hWnd_(hWnd),
+    d3DDevice_(d3DDevice_),
+    borderedFontQuality_(4)
 {
 }
 
-std::shared_ptr<Font> FontCache::create(const FontParams& params)
+std::shared_ptr<Font> FontCache::Create(const FontParams& params_)
 {
-    auto it = fontMap.find(params);
-    if (it != fontMap.end())
+    auto it = fontMap_.find(params_);
+    if (it != fontMap_.end())
     {
         return it->second;
     } else
     {
-        return fontMap[params] = std::make_shared<Font>(params, hWnd, d3DDevice, borderedFontQuality);
+        return fontMap_[params_] = std::make_shared<Font>(params_, hWnd_, d3DDevice_, borderedFontQuality_);
     }
 }
 
-void FontCache::setBorderedFontQuality(int q)
+void FontCache::SetBorderedFontQuality(int q)
 {
-    borderedFontQuality = q;
+    borderedFontQuality_ = q;
 }
 
-void FontCache::releaseUnusedFont()
+void FontCache::ReleaseUnusedFont()
 {
-    auto it = fontMap.begin();
-    while (it != fontMap.end())
+    auto it = fontMap_.begin();
+    while (it != fontMap_.end())
     {
         auto& font = it->second;
         if (font.use_count() <= 1)
         {
-            fontMap.erase(it++);
+            fontMap_.erase(it++);
         } else ++it;
     }
 }
 
-bool installFont(const std::wstring& path)
+bool InstallFont(const std::wstring& path)
 {
     int result = AddFontResourceEx(path.c_str(), FR_PRIVATE, NULL);
     return result != 0;

@@ -29,7 +29,7 @@ ShotData::ShotData() :
 }
 
 ShotDataTable::ShotDataTable(Type type) :
-    type(type)
+    type_(type)
 {
 }
 
@@ -37,15 +37,15 @@ ShotDataTable::~ShotDataTable()
 {
 }
 
-void ShotDataTable::add(const std::shared_ptr<ShotData>& data)
+void ShotDataTable::Add(const std::shared_ptr<ShotData>& data)
 {
     if (data->texture)
     {
-        table[data->id] = data;
+        table_[data->id] = data;
     }
 }
 
-const char * ShotDataTable::getTypeName(Type type)
+const char * ShotDataTable::GetTypeName(Type type)
 {
     if (type == Type::PLAYER) return "player";
     if (type == Type::ENEMY) return "enemy";
@@ -59,26 +59,26 @@ static Log::Param::Tag getElemTag(ShotDataTable::Type type)
     return Log::Param::Tag::TEXT;
 }
 
-void ShotDataTable::load(const std::wstring & path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos)
+void ShotDataTable::Load(const std::wstring & path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos)
 {
-    if (isLoaded(path))
+    if (IsLoaded(path))
     {
         Logger::WriteLog(std::move(
             Log(Log::Level::LV_WARN)
-            .setMessage(std::string(getTypeName(type)) + " shot data already loaded.")
-            .setParam(Log::Param(getElemTag(type), path))
-            .addSourcePos(srcPos)));
+            .SetMessage(std::string(GetTypeName(type_)) + " shot data already loaded.")
+            .SetParam(Log::Param(getElemTag(type_), path))
+            .AddSourcePos(srcPos)));
     } else
     {
-        reload(path, loader, textureCache, srcPos);
+        Reload(path, loader, textureCache, srcPos);
     }
 }
 
-void ShotDataTable::reload(const std::wstring & path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos)
+void ShotDataTable::Reload(const std::wstring & path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos)
 {
-    std::wstring uniqPath = canonicalPath(path);
-    auto userShotData = parseUserShotData(uniqPath, loader);
-    auto texture = textureCache->load(userShotData->imagePath, false, srcPos);
+    std::wstring uniqPath = GetCanonicalPath(path);
+    auto userShotData = ParseUserShotData(uniqPath, loader);
+    auto texture = textureCache->Load(userShotData->imagePath, false, srcPos);
     for (auto& entry : userShotData->dataMap)
     {
         auto& data = entry.second;
@@ -99,25 +99,25 @@ void ShotDataTable::reload(const std::wstring & path, const std::shared_ptr<File
             data.collisions.push_back({ r, 0.0f, 0.0f });
         }
         data.texture = texture;
-        table[data.id] = std::make_shared<ShotData>(data);
+        table_[data.id] = std::make_shared<ShotData>(data);
     }
-    loadedPaths.insert(uniqPath);
+    loadedPaths_.insert(uniqPath);
     Logger::WriteLog(std::move(
         Log(Log::Level::LV_INFO)
-        .setMessage("load " + std::string(getTypeName(type)) + " shot data.")
-        .setParam(Log::Param(getElemTag(type), path))
-        .addSourcePos(srcPos)));
+        .SetMessage("load " + std::string(GetTypeName(type_)) + " shot data.")
+        .SetParam(Log::Param(getElemTag(type_), path))
+        .AddSourcePos(srcPos)));
 }
 
-bool ShotDataTable::isLoaded(const std::wstring & path) const
+bool ShotDataTable::IsLoaded(const std::wstring & path) const
 {
-    return loadedPaths.count(canonicalPath(path)) != 0;
+    return loadedPaths_.count(GetCanonicalPath(path)) != 0;
 }
 
 std::shared_ptr<ShotData> ShotDataTable::Get(int id) const
 {
-    auto it = table.find(id);
-    if (it != table.end())
+    auto it = table_.find(id);
+    if (it != table_.end())
     {
         return it->second;
     }
@@ -126,6 +126,6 @@ std::shared_ptr<ShotData> ShotDataTable::Get(int id) const
 
 ShotDataTable::Type ShotDataTable::GetType() const
 {
-    return type;
+    return type_;
 }
 }

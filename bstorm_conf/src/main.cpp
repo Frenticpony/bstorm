@@ -98,7 +98,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
 
     /* get direct3D device */
     IDirect3D9* d3D = Direct3DCreate9(D3D_SDK_VERSION);
-    IDirect3DDevice9* d3DDevice = NULL;
+    IDirect3DDevice9* d3DDevice_ = NULL;
     D3DPRESENT_PARAMETERS presentParams = {
         windowWidth,
         windowHeight,
@@ -116,11 +116,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
         D3DPRESENT_INTERVAL_ONE
     };
 
-    if (FAILED(d3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_FPU_PRESERVE, &presentParams, &d3DDevice)))
+    if (FAILED(d3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_FPU_PRESERVE, &presentParams, &d3DDevice_)))
     {
-        if (FAILED(d3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_FPU_PRESERVE, &presentParams, &d3DDevice)))
+        if (FAILED(d3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_FPU_PRESERVE, &presentParams, &d3DDevice_)))
         {
-            if (FAILED(d3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_REF, hWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_FPU_PRESERVE, &presentParams, &d3DDevice)))
+            if (FAILED(d3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_REF, hWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_FPU_PRESERVE, &presentParams, &d3DDevice_)))
             {
                 d3D->Release();
                 return 1;
@@ -136,7 +136,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
         {
             /* init imgui */
             ImGui::CreateContext();
-            ImGui_ImplDX9_Init(hWnd, d3DDevice);
+            ImGui_ImplDX9_Init(hWnd, d3DDevice_);
             ImGuiIO& io = ImGui::GetIO();
 
             // prevent imgui.ini generation
@@ -184,13 +184,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
                 continue;
             }
 
-            inputDevice.updateInputState();
+            inputDevice.UpdateInputState();
 
             // draw
-            if (SUCCEEDED(d3DDevice->BeginScene()))
+            if (SUCCEEDED(d3DDevice_->BeginScene()))
             {
                 ImGui_ImplDX9_NewFrame();
-                d3DDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(114, 144, 154), 1.0f, 0);
+                d3DDevice_->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(114, 144, 154), 1.0f, 0);
                 ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiSetCond_Once);
                 ImGui::SetNextWindowSize(ImVec2(configWindowWidth, configWindowHeight), ImGuiSetCond_Once);
                 ImGuiWindowFlags windowFlag = ImGuiWindowFlags_NoTitleBar |
@@ -265,7 +265,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
                         auto& keyMap = keyConfig.keyMaps[selectedKeyMapIdx];
                         for (int k = 0; k <= InputDevice::MaxKey; k++)
                         {
-                            if (inputDevice.getKeyState(k) == KEY_PUSH)
+                            if (inputDevice.GetKeyState(k) == KEY_PUSH)
                             {
                                 keyMap.key = k;
                                 selectedKeyMapIdx++;
@@ -276,7 +276,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
 
                         for (int k = 0; k <= InputDevice::MaxPadButton; k++)
                         {
-                            if (inputDevice.getPadButtonState(k) == KEY_PUSH)
+                            if (inputDevice.GetPadButtonState(k) == KEY_PUSH)
                             {
                                 keyMap.pad = k;
                                 selectedKeyMapIdx++;
@@ -301,14 +301,14 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
                 ImGui::EndFrame();
                 ImGui::Render();
                 ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
-                d3DDevice->EndScene();
-                switch (d3DDevice->Present(NULL, NULL, NULL, NULL))
+                d3DDevice_->EndScene();
+                switch (d3DDevice_->Present(NULL, NULL, NULL, NULL))
                 {
                     case D3DERR_DEVICELOST:
-                        if (d3DDevice->TestCooperativeLevel() == D3DERR_DEVICENOTRESET)
+                        if (d3DDevice_->TestCooperativeLevel() == D3DERR_DEVICENOTRESET)
                         {
                             ImGui_ImplDX9_InvalidateDeviceObjects();
-                            if (FAILED(d3DDevice->Reset(&presentParams)))
+                            if (FAILED(d3DDevice_->Reset(&presentParams)))
                             {
                                 PostQuitMessage(0);
                             }
@@ -325,16 +325,16 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
         SaveBstormConfig(configFilePath, useBinaryFormat, config);
     } catch (Log& log)
     {
-        MessageBoxW(hWnd, toUnicode(log.ToString()).c_str(), L"Error", MB_OK);
+        MessageBoxW(hWnd, ToUnicode(log.ToString()).c_str(), L"Error", MB_OK);
     } catch (const std::exception& e)
     {
-        MessageBoxW(hWnd, toUnicode(e.what()).c_str(), L"Unexpected Error", MB_OK);
+        MessageBoxW(hWnd, ToUnicode(e.what()).c_str(), L"Unexpected Error", MB_OK);
     }
 
     // clean
     ImGui_ImplDX9_Shutdown();
     ImGui::DestroyContext();
-    d3DDevice->Release();
+    d3DDevice_->Release();
     d3D->Release();
     UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
     return msg.wParam;

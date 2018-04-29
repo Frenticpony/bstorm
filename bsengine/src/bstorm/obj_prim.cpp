@@ -19,7 +19,7 @@ namespace bstorm
 {
 ObjPrim::ObjPrim(const std::shared_ptr<GameState>& state) :
     ObjRender(state),
-    primType(D3DPT_TRIANGLELIST)
+    primType_(D3DPT_TRIANGLELIST)
 {
 }
 
@@ -27,274 +27,274 @@ ObjPrim::~ObjPrim()
 {
 }
 
-void ObjPrim::update()
+void ObjPrim::Update()
 {
 }
 
-int ObjPrim::getPrimitiveType() const
+int ObjPrim::GetPrimitiveType() const
 {
-    return static_cast<int>(primType);
+    return static_cast<int>(primType_);
 }
 
-void ObjPrim::setPrimitiveType(int t)
+void ObjPrim::SetPrimitiveType(int t)
 {
-    primType = static_cast<_D3DPRIMITIVETYPE>(t);
+    primType_ = static_cast<_D3DPRIMITIVETYPE>(t);
 }
 
-void ObjPrim::setVertexCount(int cnt, bool doClear)
+void ObjPrim::SetVertexCount(int cnt, bool doClear)
 {
-    if (doClear) vertices.clear();
-    vertices.resize(cnt);
+    if (doClear) vertices_.clear();
+    vertices_.resize(cnt);
 }
 
-int ObjPrim::getVertexCount() const
+int ObjPrim::GetVertexCount() const
 {
-    return vertices.size();
+    return vertices_.size();
 }
 
-void ObjPrim::setTexture(const std::shared_ptr<Texture> &tex)
+void ObjPrim::SetTexture(const std::shared_ptr<Texture> &tex)
 {
-    renderTarget.reset();
-    texture = tex;
+    renderTarget_.reset();
+    texture_ = tex;
 }
 
-void ObjPrim::setRenderTarget(const std::shared_ptr<RenderTarget>& target)
+void ObjPrim::SetRenderTarget(const std::shared_ptr<RenderTarget>& target)
 {
-    texture.reset();
-    renderTarget = target;
+    texture_.reset();
+    renderTarget_ = target;
 }
 
-void ObjPrim::setVertexPosition(int vIdx, float x, float y, float z)
+void ObjPrim::SetVertexPosition(int vIdx, float x, float y, float z)
 {
-    if (isValidIndex(vIdx, vertices))
+    if (isValidIndex(vIdx, vertices_))
     {
-        vertices[vIdx].x = x;
-        vertices[vIdx].y = y;
-        vertices[vIdx].z = z;
+        vertices_[vIdx].x = x;
+        vertices_[vIdx].y = y;
+        vertices_[vIdx].z = z;
     }
 }
 
-float ObjPrim::getVertexPositionX(int vIdx) const
+float ObjPrim::GetVertexPositionX(int vIdx) const
 {
-    if (isValidIndex(vIdx, vertices))
+    if (isValidIndex(vIdx, vertices_))
     {
-        return vertices[vIdx].x;
-    }
-    return 0;
-}
-
-float ObjPrim::getVertexPositionY(int vIdx) const
-{
-    if (isValidIndex(vIdx, vertices))
-    {
-        return vertices[vIdx].y;
+        return vertices_[vIdx].x;
     }
     return 0;
 }
 
-float ObjPrim::getVertexPositionZ(int vIdx) const
+float ObjPrim::GetVertexPositionY(int vIdx) const
 {
-    if (isValidIndex(vIdx, vertices))
+    if (isValidIndex(vIdx, vertices_))
     {
-        return vertices[vIdx].z;
+        return vertices_[vIdx].y;
     }
     return 0;
 }
 
-void ObjPrim::setVertexUV(int vIdx, float u, float v)
+float ObjPrim::GetVertexPositionZ(int vIdx) const
 {
-    if (isValidIndex(vIdx, vertices))
+    if (isValidIndex(vIdx, vertices_))
     {
-        vertices[vIdx].u = u;
-        vertices[vIdx].v = v;
+        return vertices_[vIdx].z;
+    }
+    return 0;
+}
+
+void ObjPrim::SetVertexUV(int vIdx, float u, float v)
+{
+    if (isValidIndex(vIdx, vertices_))
+    {
+        vertices_[vIdx].u = u;
+        vertices_[vIdx].v = v;
     }
 }
 
-void ObjPrim::setVertexUVT(int vIdx, float u, float v)
+void ObjPrim::SetVertexUVT(int vIdx, float u, float v)
 {
-    auto d3DTex = getD3DTexture();
+    auto d3DTex = GetD3DTexture();
     if (d3DTex)
     {
-        setVertexUV(vIdx, u / getD3DTextureWidth(d3DTex), v / getD3DTextureHeight(d3DTex));
+        SetVertexUV(vIdx, u / GetD3DTextureWidth(d3DTex), v / GetD3DTextureHeight(d3DTex));
     }
 }
 
-void ObjPrim::setVertexColor(int vIdx, int r, int g, int b)
+void ObjPrim::SetVertexColor(int vIdx, int r, int g, int b)
 {
-    if (isValidIndex(vIdx, vertices))
+    if (isValidIndex(vIdx, vertices_))
     {
         ColorRGB rgb(r, g, b);
-        vertices[vIdx].color = toD3DCOLOR(rgb, (vertices[vIdx].color) >> 24);
+        vertices_[vIdx].color = ToD3DCOLOR(rgb, (vertices_[vIdx].color) >> 24);
     }
 }
 
-void ObjPrim::setVertexAlpha(int vIdx, int a)
+void ObjPrim::SetVertexAlpha(int vIdx, int a)
 {
-    if (isValidIndex(vIdx, vertices))
+    if (isValidIndex(vIdx, vertices_))
     {
         a = constrain(a, 0, 0xff);
-        vertices[vIdx].color &= D3DCOLOR_RGBA(0xff, 0xff, 0xff, 0);
-        vertices[vIdx].color |= D3DCOLOR_RGBA(0, 0, 0, a);
+        vertices_[vIdx].color &= D3DCOLOR_RGBA(0xff, 0xff, 0xff, 0);
+        vertices_[vIdx].color |= D3DCOLOR_RGBA(0, 0, 0, a);
     }
 }
 
-const std::shared_ptr<Texture>& ObjPrim::getTexture() const
+const std::shared_ptr<Texture>& ObjPrim::GetTexture() const
 {
-    return texture;
+    return texture_;
 }
 
-const std::shared_ptr<RenderTarget>& ObjPrim::getRenderTarget() const
+const std::shared_ptr<RenderTarget>& ObjPrim::GetRenderTarget() const
 {
-    return renderTarget;
+    return renderTarget_;
 }
 
-const std::vector<Vertex>& ObjPrim::getVertices() const
+const std::vector<Vertex>& ObjPrim::GetVertices() const
 {
-    return vertices;
+    return vertices_;
 }
 
-IDirect3DTexture9 * ObjPrim::getD3DTexture() const
+IDirect3DTexture9 * ObjPrim::GetD3DTexture() const
 {
-    if (texture)
+    if (texture_)
     {
-        return texture->getTexture();
-    } else if (renderTarget)
+        return texture_->GetTexture();
+    } else if (renderTarget_)
     {
-        return renderTarget->getTexture();
+        return renderTarget_->GetTexture();
     }
     return NULL;
 }
 
-_D3DPRIMITIVETYPE ObjPrim::getD3DPrimitiveType() const
+_D3DPRIMITIVETYPE ObjPrim::GetD3DPrimitiveType() const
 {
-    return primType;
+    return primType_;
 }
 
 ObjPrim2D::ObjPrim2D(const std::shared_ptr<GameState>& state) :
     ObjPrim(state)
 {
-    setType(OBJ_PRIMITIVE_2D);
+    SetType(OBJ_PRIMITIVE_2D);
 }
 
-void ObjPrim2D::render()
+void ObjPrim2D::Render()
 {
-    D3DXMATRIX world = scaleRotTrans(getX(), getY(), getZ(), getAngleX(), getAngleY(), getAngleZ(), getScaleX(), getScaleY(), getScaleZ());
-    if (auto state = getGameState())
+    D3DXMATRIX world = CreateScaleRotTransMatrix(GetX(), GetY(), GetZ(), GetAngleX(), GetAngleY(), GetAngleZ(), GetScaleX(), GetScaleY(), GetScaleZ());
+    if (auto state = GetGameState())
     {
-        state->renderer->renderPrim2D(getD3DPrimitiveType(), vertices.size(), vertices.data(), getD3DTexture(), getBlendType(), world, getAppliedShader(), isPermitCamera(), true);
+        state->renderer->RenderPrim2D(GetD3DPrimitiveType(), vertices_.size(), vertices_.data(), GetD3DTexture(), GetBlendType(), world, GetAppliedShader(), IsPermitCamera(), true);
     }
 }
 
 ObjSprite2D::ObjSprite2D(const std::shared_ptr<GameState>& state) :
     ObjPrim2D(state)
 {
-    setType(OBJ_SPRITE_2D);
-    setPrimitiveType(PRIMITIVE_TRIANGLESTRIP);
-    setVertexCount(4);
+    SetType(OBJ_SPRITE_2D);
+    SetPrimitiveType(PRIMITIVE_TRIANGLESTRIP);
+    SetVertexCount(4);
 }
 
-void ObjSprite2D::setSourceRect(float left, float top, float right, float bottom)
+void ObjSprite2D::SetSourceRect(float left, float top, float right, float bottom)
 {
-    setVertexUVT(0, left, top);
-    setVertexUVT(1, right, top);
-    setVertexUVT(2, left, bottom);
-    setVertexUVT(3, right, bottom);
+    SetVertexUVT(0, left, top);
+    SetVertexUVT(1, right, top);
+    SetVertexUVT(2, left, bottom);
+    SetVertexUVT(3, right, bottom);
 }
 
-void ObjSprite2D::setDestRect(float left, float top, float right, float bottom)
+void ObjSprite2D::SetDestRect(float left, float top, float right, float bottom)
 {
-    setVertexPosition(0, left, top, 0);
-    setVertexPosition(1, right, top, 0);
-    setVertexPosition(2, left, bottom, 0);
-    setVertexPosition(3, right, bottom, 0);
+    SetVertexPosition(0, left, top, 0);
+    SetVertexPosition(1, right, top, 0);
+    SetVertexPosition(2, left, bottom, 0);
+    SetVertexPosition(3, right, bottom, 0);
 }
 
-void ObjSprite2D::setDestCenter()
+void ObjSprite2D::SetDestCenter()
 {
-    if (getVertexCount() < 4) return;
-    auto texture = getD3DTexture();
+    if (GetVertexCount() < 4) return;
+    auto texture = GetD3DTexture();
     if (texture)
     {
-        float hw = getD3DTextureWidth(texture) / 2.0 * (vertices[3].u - vertices[0].u);
-        float hh = getD3DTextureHeight(texture) / 2.0 * (vertices[3].v - vertices[0].v);
-        setDestRect(-hw, -hh, hw, hh);
+        float hw = GetD3DTextureWidth(texture) / 2.0 * (vertices_[3].u - vertices_[0].u);
+        float hh = GetD3DTextureHeight(texture) / 2.0 * (vertices_[3].v - vertices_[0].v);
+        SetDestRect(-hw, -hh, hw, hh);
     }
 }
 
 ObjSpriteList2D::ObjSpriteList2D(const std::shared_ptr<GameState>& state) :
     ObjPrim2D(state),
-    isVertexClosed(false),
-    srcRectLeft(0),
-    srcRectTop(0),
-    srcRectRight(0),
-    srcRectBottom(0),
-    dstRectLeft(0),
-    dstRectTop(0),
-    dstRectRight(0),
-    dstRectBottom(0)
+    isVertexClosed_(false),
+    srcRectLeft_(0),
+    srcRectTop_(0),
+    srcRectRight_(0),
+    srcRectBottom_(0),
+    dstRectLeft_(0),
+    dstRectTop_(0),
+    dstRectRight_(0),
+    dstRectBottom_(0)
 {
-    setType(OBJ_SPRITE_LIST_2D);
-    setPrimitiveType(D3DPT_TRIANGLELIST);
+    SetType(OBJ_SPRITE_LIST_2D);
+    SetPrimitiveType(D3DPT_TRIANGLELIST);
 }
 
-void ObjSpriteList2D::render()
+void ObjSpriteList2D::Render()
 {
     // 検討： インデックスバッファを使う?
-    if (isVertexClosed)
+    if (isVertexClosed_)
     {
-        ObjPrim2D::render();
+        ObjPrim2D::Render();
     } else
     {
         // 保存
-        float prevX = getX();
-        float prevY = getY();
-        float prevZ = getZ();
-        float prevAngleX = getAngleX();
-        float prevAngleY = getAngleY();
-        float prevAngleZ = getAngleZ();
-        float prevScaleX = getScaleX();
-        float prevScaleY = getScaleY();
-        float prevScaleZ = getScaleZ();
+        float prevX = GetX();
+        float prevY = GetY();
+        float prevZ = GetZ();
+        float prevAngleX = GetAngleX();
+        float prevAngleY = GetAngleY();
+        float prevAngleZ = GetAngleZ();
+        float prevScaleX = GetScaleX();
+        float prevScaleY = GetScaleY();
+        float prevScaleZ = GetScaleZ();
         // パラメータをリセットして描画
-        setPosition(0, 0, 0);
-        setAngleXYZ(0, 0, 0);
-        setScaleXYZ(1, 1, 1);
-        ObjPrim2D::render();
+        SetPosition(0, 0, 0);
+        SetAngleXYZ(0, 0, 0);
+        SetScaleXYZ(1, 1, 1);
+        ObjPrim2D::Render();
         // 復元
-        setPosition(prevX, prevY, prevZ);
-        setAngleXYZ(prevAngleX, prevAngleY, prevAngleZ);
-        setScaleXYZ(prevScaleX, prevScaleY, prevScaleZ);
+        SetPosition(prevX, prevY, prevZ);
+        SetAngleXYZ(prevAngleX, prevAngleY, prevAngleZ);
+        SetScaleXYZ(prevScaleX, prevScaleY, prevScaleZ);
     }
 }
 
-void ObjSpriteList2D::setSourceRect(float left, float top, float right, float bottom)
+void ObjSpriteList2D::SetSourceRect(float left, float top, float right, float bottom)
 {
-    srcRectLeft = left;
-    srcRectTop = top;
-    srcRectRight = right;
-    srcRectBottom = bottom;
+    srcRectLeft_ = left;
+    srcRectTop_ = top;
+    srcRectRight_ = right;
+    srcRectBottom_ = bottom;
 }
 
-void ObjSpriteList2D::setDestRect(float left, float top, float right, float bottom)
+void ObjSpriteList2D::SetDestRect(float left, float top, float right, float bottom)
 {
-    dstRectLeft = left;
-    dstRectTop = top;
-    dstRectRight = right;
-    dstRectBottom = bottom;
+    dstRectLeft_ = left;
+    dstRectTop_ = top;
+    dstRectRight_ = right;
+    dstRectBottom_ = bottom;
 }
 
-void ObjSpriteList2D::setDestCenter()
+void ObjSpriteList2D::SetDestCenter()
 {
     /* テクスチャが存在しなくても実行できるが、弾幕風の実装に合わせる */
-    if (getD3DTexture())
+    if (GetD3DTexture())
     {
-        float hw = (srcRectRight - srcRectLeft) / 2.0;
-        float hh = (srcRectBottom - srcRectTop) / 2.0;
-        setDestRect(-hw, -hh, hw, hh);
+        float hw = (srcRectRight_ - srcRectLeft_) / 2.0;
+        float hh = (srcRectBottom_ - srcRectTop_) / 2.0;
+        SetDestRect(-hw, -hh, hw, hh);
     }
 }
 
-void ObjSpriteList2D::addVertex()
+void ObjSpriteList2D::AddVertex()
 {
     // 頂点を6つ生成する
     // 並びは
@@ -303,16 +303,16 @@ void ObjSpriteList2D::addVertex()
     // 1 4-5
 
     // 座標変換
-    D3DXMATRIX mat = scaleRotTrans(getX(), getY(), getZ(), getAngleX(), getAngleY(), getAngleZ(), getScaleX(), getScaleY(), getScaleZ());
+    D3DXMATRIX mat = CreateScaleRotTransMatrix(GetX(), GetY(), GetZ(), GetAngleX(), GetAngleY(), GetAngleZ(), GetScaleX(), GetScaleY(), GetScaleZ());
     D3DXMATRIX vecs;
     // 1行目:左上
     // 2行目:左下
     // 3行目:右上
     // 4行目:右下
-    vecs._11 = vecs._21 = dstRectLeft;
-    vecs._12 = vecs._32 = dstRectTop;
-    vecs._31 = vecs._41 = dstRectRight;
-    vecs._22 = vecs._42 = dstRectBottom;
+    vecs._11 = vecs._21 = dstRectLeft_;
+    vecs._12 = vecs._32 = dstRectTop_;
+    vecs._31 = vecs._41 = dstRectRight_;
+    vecs._22 = vecs._42 = dstRectBottom_;
     vecs._13 = vecs._23 = vecs._33 = vecs._43 = 0; // z = 0
     vecs._14 = vecs._24 = vecs._34 = vecs._44 = 1; // w = 1
     auto result = vecs * mat;
@@ -320,84 +320,84 @@ void ObjSpriteList2D::addVertex()
     float vt = 0;
     float ur = 0;
     float vb = 0;
-    auto texture = getD3DTexture();
+    auto texture = GetD3DTexture();
     if (texture)
     {
-        int texWidth = getD3DTextureWidth(texture);
-        int texHeight = getD3DTextureHeight(texture);
-        ul = srcRectLeft / texWidth;
-        vt = srcRectTop / texHeight;
-        ur = srcRectRight / texWidth;
-        vb = srcRectBottom / texHeight;
+        int texWidth = GetD3DTextureWidth(texture);
+        int texHeight = GetD3DTextureHeight(texture);
+        ul = srcRectLeft_ / texWidth;
+        vt = srcRectTop_ / texHeight;
+        ur = srcRectRight_ / texWidth;
+        vb = srcRectBottom_ / texHeight;
     }
-    D3DCOLOR color = getD3DCOLOR();
+    D3DCOLOR color = GetD3DCOLOR();
     Vertex v0(result._11, result._12, 0, color, ul, vt);
     Vertex v1(result._21, result._22, 0, color, ul, vb);
     Vertex v2(result._31, result._32, 0, color, ur, vt);
     Vertex& v3 = v2;
     Vertex& v4 = v1;
     Vertex v5(result._41, result._42, 0, color, ur, vb);
-    vertices.push_back(v0);
-    vertices.push_back(v1);
-    vertices.push_back(v2);
-    vertices.push_back(v3);
-    vertices.push_back(v4);
-    vertices.push_back(v5);
+    vertices_.push_back(v0);
+    vertices_.push_back(v1);
+    vertices_.push_back(v2);
+    vertices_.push_back(v3);
+    vertices_.push_back(v4);
+    vertices_.push_back(v5);
 }
 
-void ObjSpriteList2D::closeVertex()
+void ObjSpriteList2D::CloseVertex()
 {
-    setPosition(0, 0, 0);
-    setAngleXYZ(0, 0, 0);
-    setScaleXYZ(1, 1, 1);
-    isVertexClosed = true;
+    SetPosition(0, 0, 0);
+    SetAngleXYZ(0, 0, 0);
+    SetScaleXYZ(1, 1, 1);
+    isVertexClosed_ = true;
 }
 
-void ObjSpriteList2D::clearVerexCount()
+void ObjSpriteList2D::ClearVerexCount()
 {
-    setVertexCount(0);
-    isVertexClosed = false;
+    SetVertexCount(0);
+    isVertexClosed_ = false;
 }
 
 ObjPrim3D::ObjPrim3D(const std::shared_ptr<GameState>& state) :
     ObjPrim(state),
-    billboardEnable(false)
+    billboardEnable_(false)
 {
-    setType(OBJ_PRIMITIVE_3D);
+    SetType(OBJ_PRIMITIVE_3D);
 }
 
-void ObjPrim3D::render()
+void ObjPrim3D::Render()
 {
-    D3DXMATRIX world = scaleRotTrans(getX(), getY(), getZ(), getAngleX(), getAngleY(), getAngleZ(), getScaleX(), getScaleY(), getScaleZ());
-    if (auto state = getGameState())
+    D3DXMATRIX world = CreateScaleRotTransMatrix(GetX(), GetY(), GetZ(), GetAngleX(), GetAngleY(), GetAngleZ(), GetScaleX(), GetScaleY(), GetScaleZ());
+    if (auto state = GetGameState())
     {
-        state->renderer->renderPrim3D(getD3DPrimitiveType(), vertices.size(), vertices.data(), getD3DTexture(), getBlendType(), world, getAppliedShader(), isZWriteEnabled(), isZTestEnabled(), isFogEnabled(), isBillboardEnabled());
+        state->renderer->RenderPrim3D(GetD3DPrimitiveType(), vertices_.size(), vertices_.data(), GetD3DTexture(), GetBlendType(), world, GetAppliedShader(), IsZWriteEnabled(), IsZTestEnabled(), IsFogEnabled(), IsBillboardEnabled());
     }
 }
 
-bool ObjPrim3D::isBillboardEnabled() const
+bool ObjPrim3D::IsBillboardEnabled() const
 {
-    return billboardEnable;
+    return billboardEnable_;
 }
 
 ObjSprite3D::ObjSprite3D(const std::shared_ptr<GameState>& state) :
     ObjPrim3D(state)
 {
-    setType(OBJ_SPRITE_3D);
-    setPrimitiveType(PRIMITIVE_TRIANGLESTRIP);
-    setVertexCount(4);
+    SetType(OBJ_SPRITE_3D);
+    SetPrimitiveType(PRIMITIVE_TRIANGLESTRIP);
+    SetVertexCount(4);
 }
 
-void ObjSprite3D::setSourceRect(float left, float top, float right, float bottom)
+void ObjSprite3D::SetSourceRect(float left, float top, float right, float bottom)
 {
     // NOTE : Sprite2Dとは頂点の順番が違う
-    setVertexUVT(0, left, top);
-    setVertexUVT(1, left, bottom);
-    setVertexUVT(2, right, top);
-    setVertexUVT(3, right, bottom);
+    SetVertexUVT(0, left, top);
+    SetVertexUVT(1, left, bottom);
+    SetVertexUVT(2, right, top);
+    SetVertexUVT(3, right, bottom);
 }
 
-void ObjSprite3D::setDestRect(float left, float top, float right, float bottom)
+void ObjSprite3D::SetDestRect(float left, float top, float right, float bottom)
 {
     // 弾幕風の仕様で-0.5
     left -= 0.5f;
@@ -405,22 +405,22 @@ void ObjSprite3D::setDestRect(float left, float top, float right, float bottom)
     right -= 0.5f;
     bottom -= 0.5f;
     // NOTE : Sprite2Dとは頂点の順番が違う
-    setVertexPosition(0, left, top, 0);
-    setVertexPosition(1, left, bottom, 0);
-    setVertexPosition(2, right, top, 0);
-    setVertexPosition(3, right, bottom, 0);
+    SetVertexPosition(0, left, top, 0);
+    SetVertexPosition(1, left, bottom, 0);
+    SetVertexPosition(2, right, top, 0);
+    SetVertexPosition(3, right, bottom, 0);
 }
 
-void ObjSprite3D::setSourceDestRect(float left, float top, float right, float bottom)
+void ObjSprite3D::SetSourceDestRect(float left, float top, float right, float bottom)
 {
-    setSourceRect(left, top, right, bottom);
+    SetSourceRect(left, top, right, bottom);
     float hw = (right - left) / 2;
     float hh = (bottom - top) / 2;
-    setDestRect(-hw, -hh, hw, hh);
+    SetDestRect(-hw, -hh, hw, hh);
 }
 
-void ObjSprite3D::setBillboard(bool enable)
+void ObjSprite3D::SetBillboard(bool enable)
 {
-    billboardEnable = enable;
+    billboardEnable_ = enable;
 }
 }

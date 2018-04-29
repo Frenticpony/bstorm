@@ -12,7 +12,7 @@ std::unique_ptr<DnhValue> DnhValue::Get(lua_State* L, int idx)
             return std::make_unique<DnhReal>((double)lua_tonumber(L, idx));
         case LUA_TSTRING:
         {
-            std::wstring wstr = toUnicode(lua_tostring(L, idx));
+            std::wstring wstr = ToUnicode(lua_tostring(L, idx));
             return std::make_unique<DnhChar>(wstr.empty() ? L'\0' : wstr[0]);
         }
         case LUA_TBOOLEAN:
@@ -81,7 +81,7 @@ double DnhValue::ToNum(lua_State* L, int idx)
             return (double)lua_tonumber(L, idx);
         case LUA_TSTRING:
         {
-            std::wstring wstr = toUnicode(lua_tostring(L, idx));
+            std::wstring wstr = ToUnicode(lua_tostring(L, idx));
             return (double)(wstr.empty() ? 0 : wstr[0]);
         }
         case LUA_TBOOLEAN:
@@ -148,7 +148,7 @@ std::string DnhValue::ToStringU8(lua_State * L, int idx)
                 return ret;
             } else
             {
-                return toUTF8(ToString(L, idx));
+                return ToUTF8(ToString(L, idx));
             }
         }
         case LUA_TNIL:
@@ -197,7 +197,7 @@ bool DnhChar::ToBool() const { return value_ != L'\0'; }
 
 std::wstring DnhChar::ToString() const { return std::wstring{ value_ }; }
 
-void DnhChar::Push(lua_State * L) const { lua_pushstring(L, toUTF8(std::wstring{ value_ }).c_str()); }
+void DnhChar::Push(lua_State * L) const { lua_pushstring(L, ToUTF8(std::wstring{ value_ }).c_str()); }
 
 void DnhChar::Serialize(std::ostream & out) const
 {

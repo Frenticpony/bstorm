@@ -10,34 +10,34 @@ class ObjEnemyBossScene : public Obj
 {
 public:
     ObjEnemyBossScene(const std::shared_ptr<GameState>& gameState);
-    void update() override;
-    void regist(const std::shared_ptr<SourcePos>& srcPos);
-    void add(int step, const std::wstring& path);
-    void loadInThread(const std::shared_ptr<SourcePos>& srcPos);
-    int getTimer() const;
-    int getTimerF() const;
-    int getOrgTimerF() const;
-    int64_t getSpellScore() const;
-    bool isSpell() const;
-    bool isLastSpell() const;
-    bool isDurableSpell() const;
-    bool isLastStep() const;
-    int getRemainStepCount() const;
-    int getActiveStepLifeCount() const;
-    double getActiveStepTotalMaxLife() const;
-    double getActiveStepTotalLife() const;
-    int getPlayerShootDownCount() const;
-    int getPlayerSpellCount() const;
-    std::vector<double> getActiveStepLifeRateList() const;
-    double getCurrentLife() const;
-    double getCurrentLifeMax() const;
-    void setTimer(int sec);
-    void startSpell();
-    void addDamage(double life);
-    void addPlayerSpellCount(int c);
-    void addPlayerShootDownCount(int c);
-    std::shared_ptr<ObjEnemy> getEnemyBossObject() const;
-protected:
+    void Update() override;
+    void Regist(const std::shared_ptr<SourcePos>& srcPos);
+    void Add(int step, const std::wstring& path);
+    void LoadInThread(const std::shared_ptr<SourcePos>& srcPos);
+    int GetTimer() const;
+    int GetTimerF() const;
+    int GetOrgTimerF() const;
+    int64_t GetSpellScore() const;
+    bool IsSpell() const;
+    bool IsLastSpell() const;
+    bool IsDurableSpell() const;
+    bool IsLastStep() const;
+    int GetRemainStepCount() const;
+    int GetActiveStepLifeCount() const;
+    double GetActiveStepTotalMaxLife() const;
+    double GetActiveStepTotalLife() const;
+    int GetPlayerShootDownCount() const;
+    int GetPlayerSpellCount() const;
+    std::vector<double> GetActiveStepLifeRateList() const;
+    double GetCurrentLife() const;
+    double GetCurrentLifeMax() const;
+    void SetTimer(int sec);
+    void StartSpell();
+    void AddDamage(double life);
+    void AddPlayerSpellCount(int c);
+    void AddPlayerShootDownCount(int c);
+    std::shared_ptr<ObjEnemy> GetEnemyBossObject() const;
+private:
   // Phase: 独立したライフを持つ単位
     struct Phase
     {
@@ -53,20 +53,20 @@ protected:
         bool isLastSpell;
         bool isDurableSpell;
     };
-    bool loadNext();
-    const Phase& getCurrentPhase() const;
-    bool existPhase() const;
+    bool LoadNext();
+    const Phase& GetCurrentPhase() const;
+    bool ExistPhase() const;
     // ボスシーンは複数のステップから成り
     // ステップは複数のフェーズから成る
-    std::map<int, std::vector<Phase>> steps;
-    int maxStep;
-    int currentStep;
-    int currentPhase;
-    bool registerFlag;
-    int playerSpellCount;
-    int playerShootDownCount;
-    std::weak_ptr<ObjEnemy> enemyBossObj;
-    float lastEnemyBossX;
-    float lastEnemyBossY;
+    std::map<int, std::vector<Phase>> steps_;
+    int maxStep_;
+    int currentStep_;
+    int currentPhase_;
+    bool registerFlag_;
+    int playerSpellCount_;
+    int playerShootDownCount_;
+    std::weak_ptr<ObjEnemy> enemyBossObj_;
+    float lastEnemyBossX_;
+    float lastEnemyBossY_;
 };
 }

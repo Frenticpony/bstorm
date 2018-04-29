@@ -44,7 +44,7 @@ void drawShotDataInfo(const std::shared_ptr<ShotData>& shotData)
         ImGui::BulletText("delay-rect       : (%d %d %d %d) %s", shotData->delayRect.left, shotData->delayRect.top, shotData->delayRect.right, shotData->delayRect.bottom, shotData->useDelayRect ? "" : "[derived]");
         {
             // delay color
-            float delayColor[3] = { shotData->delayColor.getR() / 255.0f, shotData->delayColor.getG() / 255.0f, shotData->delayColor.getB() / 255.0f };
+            float delayColor[3] = { shotData->delayColor.GetR() / 255.0f, shotData->delayColor.GetG() / 255.0f, shotData->delayColor.GetB() / 255.0f };
             if (shotData->useDelayColor)
             {
                 ImGui::ColorEdit3("delay-color", delayColor, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_NoInputs);
@@ -240,13 +240,13 @@ void drawShotDataTab(const std::string& name, int& selectedId, const std::map<in
         float iconWidth = std::min(sideBarWidth * 0.3f, rectWidth);
         float iconHeight = std::max(iconWidth / rectWidth * rectHeight, ImGui::GetTextLineHeight());
 
-        float u1 = 1.0f * rect.left / data->texture->getWidth();
-        float v1 = 1.0f * rect.top / data->texture->getHeight();
-        float u2 = 1.0f * rect.right / data->texture->getWidth();
-        float v2 = 1.0f * rect.bottom / data->texture->getHeight();
+        float u1 = 1.0f * rect.left / data->texture->GetWidth();
+        float v1 = 1.0f * rect.top / data->texture->GetHeight();
+        float u2 = 1.0f * rect.right / data->texture->GetWidth();
+        float v2 = 1.0f * rect.bottom / data->texture->GetHeight();
 
         ImGui::PushID(id);
-        if (ImGui::ImageButton(data->texture->getTexture(), ImVec2(iconWidth, iconHeight), ImVec2(u1, v1), ImVec2(u2, v2), 0, ImVec4(0, 0, 0, 1)))
+        if (ImGui::ImageButton(data->texture->GetTexture(), ImVec2(iconWidth, iconHeight), ImVec2(u1, v1), ImVec2(u2, v2), 0, ImVec4(0, 0, 0, 1)))
         {
             selectedId = id;
         }
@@ -274,26 +274,26 @@ struct PlayerShotData;
 struct EnemyShotData;
 
 template<>
-void ShotDataTable::backDoor<PlayerShotData>() const
+void ShotDataTable::BackDoor<PlayerShotData>() const
 {
     static int selectedId = -1;
-    drawShotDataTab("Player", selectedId, table);
+    drawShotDataTab("Player", selectedId, table_);
 }
 
 template<>
-void ShotDataTable::backDoor<EnemyShotData>() const
+void ShotDataTable::BackDoor<EnemyShotData>() const
 {
     static int selectedId = -1;
-    drawShotDataTab("Enemy", selectedId, table);
+    drawShotDataTab("Enemy", selectedId, table_);
 }
 
 template <>
-void ItemDataTable::backDoor<UserDefDataBrowser>() const
+void ItemDataTable::BackDoor<UserDefDataBrowser>() const
 {
     static int selectedId = -1;
     float sideBarWidth = ImGui::GetContentRegionAvailWidth() * 0.2;
     ImGui::BeginChild("ItemDataTabSideBar", ImVec2(sideBarWidth, -1), true, ImGuiWindowFlags_HorizontalScrollbar);
-    for (const auto& entry : table)
+    for (const auto& entry : table_)
     {
         int id = entry.first;
         const auto& data = entry.second;
@@ -305,13 +305,13 @@ void ItemDataTable::backDoor<UserDefDataBrowser>() const
         float iconWidth = std::min(sideBarWidth * 0.3f, rectWidth);
         float iconHeight = std::max(iconWidth / rectWidth * rectHeight, ImGui::GetTextLineHeight());
 
-        float u1 = 1.0f * rect.left / texture->getWidth();
-        float v1 = 1.0f * rect.top / texture->getHeight();
-        float u2 = 1.0f * rect.right / texture->getWidth();
-        float v2 = 1.0f * rect.bottom / texture->getHeight();
+        float u1 = 1.0f * rect.left / texture->GetWidth();
+        float v1 = 1.0f * rect.top / texture->GetHeight();
+        float u2 = 1.0f * rect.right / texture->GetWidth();
+        float v2 = 1.0f * rect.bottom / texture->GetHeight();
 
         ImGui::PushID(id);
-        if (ImGui::ImageButton(texture->getTexture(), ImVec2(iconWidth, iconHeight), ImVec2(u1, v1), ImVec2(u2, v2), 0, ImVec4(0, 0, 0, 1)))
+        if (ImGui::ImageButton(texture->GetTexture(), ImVec2(iconWidth, iconHeight), ImVec2(u1, v1), ImVec2(u2, v2), 0, ImVec4(0, 0, 0, 1)))
         {
             selectedId = id;
         }
@@ -327,8 +327,8 @@ void ItemDataTable::backDoor<UserDefDataBrowser>() const
     ImGui::SameLine();
     ImGui::BeginChild("ItemDataTabInfoArea", ImVec2(ImGui::GetContentRegionAvailWidth(), -1), false, ImGuiWindowFlags_HorizontalScrollbar);
     ImGui::Text("Item Data Info");
-    auto it = table.find(selectedId);
-    if (it != table.end())
+    auto it = table_.find(selectedId);
+    if (it != table_.end())
     {
         drawItemDataInfo(it->second);
     }
@@ -366,13 +366,13 @@ void Engine::backDoor<UserDefDataBrowser>()
     ImGui::Separator();
     if (selectedTab == Tab::PLAYER_SHOT)
     {
-        gameState->playerShotDataTable->backDoor<PlayerShotData>();
+        gameState->playerShotDataTable->BackDoor<PlayerShotData>();
     } else if (selectedTab == Tab::ENEMY_SHOT)
     {
-        gameState->enemyShotDataTable->backDoor<EnemyShotData>();
+        gameState->enemyShotDataTable->BackDoor<EnemyShotData>();
     } else if (selectedTab == Tab::ITEM)
     {
-        gameState->itemDataTable->backDoor<UserDefDataBrowser>();
+        gameState->itemDataTable->BackDoor<UserDefDataBrowser>();
     }
 }
 

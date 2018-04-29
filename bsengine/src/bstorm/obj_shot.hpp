@@ -27,67 +27,67 @@ public:
     ObjShot(bool isPlayerShot, const std::shared_ptr<GameState>& gameState);
     ~ObjShot();
 
-    void update() override;
-    void render() override;
+    void Update() override;
+    void Render() override;
 
-    bool isRegistered() const;
-    void regist();
-    bool isPlayerShot() const;
+    bool IsRegistered() const;
+    void Regist();
+    bool IsPlayerShot() const;
 
     // intersection
-    void addIntersectionCircleA1(float r);
-    void addIntersectionCircleA2(float x, float y, float r);
-    void addIntersectionLine(float x1, float y1, float x2, float y2, float width);
-    void addTempIntersectionCircleA1(float r);
-    void addTempIntersectionCircleA2(float x, float y, float r);
-    void addTempIntersectionLine(float x1, float y1, float x2, float y2, float width);
-    bool isIntersectionEnabled() const;
-    void setIntersectionEnable(bool enable);
-    bool isTempIntersectionMode() const;
+    void AddIntersectionCircleA1(float r);
+    void AddIntersectionCircleA2(float x, float y, float r);
+    void AddIntersectionLine(float x1, float y1, float x2, float y2, float width);
+    void AddTempIntersectionCircleA1(float r);
+    void AddTempIntersectionCircleA2(float x, float y, float r);
+    void AddTempIntersectionLine(float x1, float y1, float x2, float y2, float width);
+    bool IsIntersectionEnabled() const;
+    void SetIntersectionEnable(bool enable);
+    bool IsTempIntersectionMode() const;
 
     // shot data
-    const std::shared_ptr<ShotData>& getShotData() const;
-    virtual void setShotData(const std::shared_ptr<ShotData>& shotData);
-    int getAnimationFrameCount() const;
-    int getAnimationIndex() const;
+    const std::shared_ptr<ShotData>& GetShotData() const;
+    virtual void SetShotData(const std::shared_ptr<ShotData>& shotData);
+    int GetAnimationFrameCount() const;
+    int GetAnimationIndex() const;
 
-    double getDamage() const;
-    void setDamage(double damage);
-    int getPenetration() const;
-    void setPenetration(int penetration);
-    int getDelay() const;
-    void setDelay(int delay);
-    bool isDelay() const;
-    int getSourceBlendType() const;
-    void setSourceBlendType(int blendType);
-    float getAngularVelocity() const;
-    void setAngularVelocity(float angularVelocity);
-    bool isSpellResistEnabled() const;
-    void setSpellResistEnable(bool enable);
-    bool isSpellFactorEnabled() const;
-    void setSpellFactor(bool enable);
-    bool isEraseShotEnabled() const;
-    void setEraseShotEnable(bool enable);
-    bool isItemChangeEnabled() const;
-    void setItemChange(bool enable);
-    bool isAutoDeleteEnabled() const;
-    void setAutoDeleteEnable(bool enable);
+    double GetDamage() const;
+    void SetDamage(double damage);
+    int GetPenetration() const;
+    void SetPenetration(int penetration);
+    int GetDelay() const;
+    void SetDelay(int delay);
+    bool IsDelay() const;
+    int GetSourceBlendType() const;
+    void SetSourceBlendType(int blendType);
+    float GetAngularVelocity() const;
+    void SetAngularVelocity(float angularVelocity);
+    bool IsSpellResistEnabled() const;
+    void SetSpellResistEnable(bool enable);
+    bool IsSpellFactorEnabled() const;
+    void SetSpellFactor(bool enable);
+    bool IsEraseShotEnabled() const;
+    void SetEraseShotEnable(bool enable);
+    bool IsItemChangeEnabled() const;
+    void SetItemChangeEnable(bool enable);
+    bool IsAutoDeleteEnabled() const;
+    void SetAutoDeleteEnable(bool enable);
 
     // delete
-    void toItem();
-    void eraseWithSpell();
-    void deleteImmediate();
-    void fadeDelete();
-    float getFadeScale() const;
-    bool isFadeDeleteStarted() const;
-    bool isFrameDeleteStarted() const;
-    int getDeleteFrameTimer() const;
-    int getFadeDeleteFrameTimer() const;
-    void setDeleteFrame(int frame);
+    void ToItem();
+    void EraseWithSpell();
+    void DeleteImmediate();
+    void FadeDelete();
+    float GetFadeScale() const;
+    bool IsFadeDeleteStarted() const;
+    bool IsFrameDeleteStarted() const;
+    int GetDeleteFrameTimer() const;
+    int GetFadeDeleteFrameTimer() const;
+    void SetDeleteFrame(int frame);
 
     // graze
-    virtual void graze();
-    virtual bool isGrazeEnabled() const;
+    virtual void Graze();
+    virtual bool IsGrazeEnabled() const;
 
     // spawn
     class AddedShot
@@ -106,147 +106,147 @@ public:
         const float dist;
         const float angle;
     };
-    void addShotA1(int shotObjId, int frame);
-    void addShotA2(int shotObjId, int frame, float dist, float angle);
-    int getFrameCountForAddShot() const;
-    const std::list<AddedShot>& getAddedShot() const;
-    virtual void generateDefaultBonusItem();
+    void AddShotA1(int shotObjId, int frame);
+    void AddShotA2(int shotObjId, int frame, float dist, float angle);
+    int GetFrameCountForAddShot() const;
+    const std::list<AddedShot>& GetAddedShot() const;
+    virtual void GenerateDefaultBonusItem();
 protected:
-    void transIntersection(float dx, float dy) override;
-    void renderIntersection();
-    void checkAutoDelete(float x, float y);
-    void updateAnimationPosition();
-    void tickDelayTimer();
-    void tickDeleteFrameTimer();
-    void tickAddedShotFrameCount();
-    void tickFadeDeleteTimer();
-    std::shared_ptr<ShotData> shotData;
-    bool grazeInvalidFlag;
-    bool useTempIntersectionFlag;
+    void TransIntersection(float dx, float dy) override;
+    void RenderIntersection();
+    void CheckAutoDelete(float x, float y);
+    void UpdateAnimationPosition();
+    void TickDelayTimer();
+    void TickDeleteFrameTimer();
+    void TickAddedShotFrameCount();
+    void TickFadeDeleteTimer();
+    std::shared_ptr<ShotData> shotData_;
+    bool isGrazeInvalid_;
+    bool isTempIntersectionMode_;
 private:
-    void addIntersection(const std::shared_ptr<ShotIntersection>& isect);
-    void addTempIntersection(const std::shared_ptr<ShotIntersection>& isect);
-    const bool playerShotFlag;
-    bool registerFlag;
-    bool useDeleteFrameFlag;
-    bool fadeDeleteFlag;
-    bool spellResistEnable;
-    bool eraseShotEnable;
-    bool spellFactorEnable;
-    bool itemChangeEnable;
-    bool intersectionEnable;
-    bool autoDeleteEnable;
-    float angularVelocity;
-    double damage;
-    int sourceBlendType;
-    int penetration;
-    int fadeDeleteTimer;
-    int delayTimer;
-    int deleteFrameTimer;
-    int fadeDeleteFrame;
-    int animationFrameCnt;
-    int animationIdx;
-    std::list<AddedShot> addedShots;
-    int addedShotFrameCnt;
+    void AddIntersection(const std::shared_ptr<ShotIntersection>& isect);
+    void AddTempIntersection(const std::shared_ptr<ShotIntersection>& isect);
+    const bool isPlayerShot_;
+    bool isRegistered_;
+    bool isFrameDeleteStarted_;
+    bool isFadeDeleteStarted_;
+    bool spellResistEnable_;
+    bool eraseShotEnable_;
+    bool spellFactorEnable_;
+    bool itemChangeEnable_;
+    bool intersectionEnable_;
+    bool autoDeleteEnable_;
+    float angularVelocity_;
+    double damage_;
+    int sourceBlendType_;
+    int penetration_;
+    int fadeDeleteTimer_;
+    int delayTimer_;
+    int deleteFrameTimer_;
+    int fadeDeleteFrame_;
+    int animationFrameCnt_;
+    int animationIdx_;
+    std::list<AddedShot> addedShots_;
+    int addedShotFrameCnt_;
 };
 
 class ObjLaser : public ObjShot
 {
 public:
     ObjLaser(bool isPlayerShot, const std::shared_ptr<GameState>& gameState);
-    void setShotData(const std::shared_ptr<ShotData>& shotData) override;
-    bool isGrazeEnabled() const override;
-    void graze() override;
-    float getLength() const;
-    void setLength(float limit);
-    float getRenderWidth() const;
-    virtual void setRenderWidth(float width);
-    float getIntersectionWidth() const;
-    void setIntersectionWidth(float width);
-    float getGrazeInvalidFrame() const;
-    void setGrazeInvalidFrame(int frame);
-    float getGrazeInvalidTimer() const;
-    float getItemDistance() const;
-    void setItemDistance(float distance);
+    void SetShotData(const std::shared_ptr<ShotData>& shotData) override;
+    void Graze() override;
+    bool IsGrazeEnabled() const override;
+    float GetLength() const;
+    void SetLength(float len); // 上限の長さを設定
+    float GetRenderWidth() const;
+    virtual void SetRenderWidth(float width);
+    float GetIntersectionWidth() const;
+    void SetIntersectionWidth(float width);
+    float GetGrazeInvalidFrame() const;
+    void SetGrazeInvalidFrame(int frame);
+    float GetGrazeInvalidTimer() const;
+    float GetItemDistance() const;
+    void SetItemDistance(float distance);
 protected:
-    void transIntersection(float dx, float dy) override {}
-    void tickGrazeInvalidTimer();
+    void TransIntersection(float dx, float dy) override {}
+    void TickGrazeInvalidTimer();
 private:
-    float length;
-    float renderWidth;
-    float intersectionWidth;
-    bool hasIntersectionWidth;
-    int grazeInvalidFrame;
-    int grazeInvalidTimer;
-    float itemDistance;
+    float length_;
+    float renderWidth_;
+    float intersectionWidth_;
+    bool hasIntersectionWidth_;
+    int grazeInvalidFrame_;
+    int grazeInvalidTimer_;
+    float itemDistance_;
 };
 
 class ObjLooseLaser : public ObjLaser
 {
 public:
     ObjLooseLaser(bool isPlayerShot, const std::shared_ptr<GameState>& gameState);
-    void update() override;
-    void render() override;
-    void generateDefaultBonusItem() override;
-    float getInvalidLengthHead() const;
-    float getInvalidLengthTail() const;
-    bool isDefaultInvalidLengthEnabled() const;
-    void setDefaultInvalidLengthEnable(bool enable);
-    void setInvalidLength(float head, float tail);
-    virtual Point2D getHead() const;
-    virtual Point2D getTail() const;
-    virtual float getRenderLength() const;
+    void Update() override;
+    void Render() override;
+    void GenerateDefaultBonusItem() override;
+    float GetInvalidLengthHead() const;
+    float GetInvalidLengthTail() const;
+    bool IsDefaultInvalidLengthEnabled() const;
+    void SetDefaultInvalidLengthEnable(bool enable);
+    void SetInvalidLength(float head, float tail);
+    virtual Point2D GetHead() const;
+    virtual Point2D GetTail() const;
+    virtual float GetRenderLength() const;
 protected:
-    void updateIntersection();
-    void renderLaser(float width, float length, float angle);
+    void UpdateIntersection();
+    void RenderLaser(float width, float length, float angle);
 private:
-    void extend();
-    bool defaultInvalidLengthEnable;
-    float invalidLengthHead;
-    float invalidLengthTail;
-    float renderLength; // レーザーの描画時の長さ, 不変条件 : 常に正
+    void Extend();
+    bool defaultInvalidLengthEnable_;
+    float invalidLengthHead_;
+    float invalidLengthTail_;
+    float renderLength_; // レーザーの描画時の長さ, 不変条件 : 常に正
 };
 
 class ObjStLaser : public ObjLooseLaser
 {
 public:
     ObjStLaser(bool isPlayerShot, const std::shared_ptr<GameState>& gameState);
-    void update() override;
-    void render() override;
-    Point2D getTail() const override;
-    float getLaserAngle() const;
-    void setLaserAngle(float angle);
-    bool hasSource() const;
-    void setSource(bool hasSource);
-    float getRenderLength() const override;
+    void Update() override;
+    void Render() override;
+    Point2D GetTail() const override;
+    float GetLaserAngle() const;
+    void SetLaserAngle(float angle);
+    bool HasSource() const;
+    void SetSource(bool hasSource);
+    float GetRenderLength() const override;
 private:
-    float laserAngle;
-    bool laserSourceEnable;
-    float laserWidthScale;
+    float laserAngle_;
+    bool laserSourceEnable_;
+    float laserWidthScale_;
 };
 
 class ObjCrLaser : public ObjLaser
 {
 public:
     ObjCrLaser(bool isPlayerShot, const std::shared_ptr<GameState>& gameState);
-    void update() override;
-    void render() override;
-    void generateDefaultBonusItem() override;
-    void setRenderWidth(float width) override;
-    float getTipDecrement() const;
-    void setTipDecrement(float dec);
-    int getLaserNodeCount() const;
+    void Update() override;
+    void Render() override;
+    void GenerateDefaultBonusItem() override;
+    void SetRenderWidth(float width) override;
+    float GetTipDecrement() const;
+    void SetTipDecrement(float dec);
+    int GetLaserNodeCount() const;
 protected:
-    void fixVertexDistance(float width);
-    void extend(float x, float y);
-    std::vector<Vertex> trail;
-    float totalLaserLength;
-    std::deque<float> laserNodeLengthList;
-    int tailPos;
-    bool hasHead;
-    const size_t shrinkThresholdOffset;
-    float headX;
-    float headY;
-    float tipDecrement;
+    void FixVertexDistance_(float width);
+    void Extend(float x, float y);
+    std::vector<Vertex> trail_;
+    float totalLaserLength_;
+    std::deque<float> laserNodeLengthList_;
+    int tailPos_;
+    bool hasHead_;
+    const size_t shrinkThresholdOffset_;
+    float headX_;
+    float headY_;
+    float tipDecrement_;
 };
 }

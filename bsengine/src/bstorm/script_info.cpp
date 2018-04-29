@@ -4,7 +4,7 @@
 
 namespace bstorm
 {
-int getScriptTypeConstFromName(const std::wstring& name)
+int GetScriptTypeConstFromName(const std::wstring& name)
 {
     if (name == SCRIPT_TYPE_PLAYER) return TYPE_SCRIPT_PLAYER;
     if (name == SCRIPT_TYPE_SINGLE) return TYPE_SCRIPT_SINGLE;
@@ -14,7 +14,7 @@ int getScriptTypeConstFromName(const std::wstring& name)
     return -1;
 }
 
-std::wstring getScriptTypeNameFromConst(int c)
+std::wstring GetScriptTypeNameFromConst(int c)
 {
     switch (c)
     {

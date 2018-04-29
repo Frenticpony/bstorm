@@ -85,7 +85,7 @@ static ImU32 getLogLevelColor(Log::Level level)
 static void showLevelMenu(Log::Level level, bool* selected)
 {
     std::string icon = getLogLevelIcon(level);
-    std::string name = Log::getLevelName(level);
+    std::string name = Log::GetLevelName(level);
     name[0] = toupper(name[0]);
     std::string text = icon + " " + name;
     ImGui::PushItemFlag(ImGuiItemFlags_SelectableDontClosePopup, true);
@@ -95,8 +95,8 @@ static void showLevelMenu(Log::Level level, bool* selected)
 
 static bool matchLog(const std::string& searchText, const Log& log)
 {
-    if (matchString(searchText, log.getMessage())) return true;
-    if (log.getParam() && matchString(searchText, log.getParam()->getText())) return true;
+    if (IsMatchString(searchText, log.GetMessage())) return true;
+    if (log.GetParam() && IsMatchString(searchText, log.GetParam()->GetText())) return true;
     return false;
 }
 
@@ -158,7 +158,7 @@ void LogWindow::draw()
                         continue;
                     }
                 }
-                switch (log.getLevel())
+                switch (log.GetLevel())
                 {
                     // level filter
                     case Log::Level::LV_INFO: if (!showInfoLevel) continue; break;
@@ -172,32 +172,32 @@ void LogWindow::draw()
                 ImGui::PushID(logIdx); // ここ以降にbreak, continueを書かない
                 ImGui::Columns(5, NULL, false);
                 const float iconColWidth = defaultIconColWidth;
-                const float srcPosColWidth = log.getSourcePosStack().empty() ? 0.0f : defaultSrcPosColWidth;
+                const float srcPosColWidth = log.GetSourcePosStack().empty() ? 0.0f : defaultSrcPosColWidth;
                 const float copyColWidth = defaultCopyColWidth;
-                const float msgColWidth = log.getParam() ?
+                const float msgColWidth = log.GetParam() ?
                     (availWidth - iconColWidth - defaultSrcPosColWidth - copyColWidth) * 0.3f :
                     (availWidth - iconColWidth - srcPosColWidth - copyColWidth);
-                const float paramColWidth = log.getParam() ? (availWidth - iconColWidth - msgColWidth - srcPosColWidth - copyColWidth) : 0.0f;
+                const float paramColWidth = log.GetParam() ? (availWidth - iconColWidth - msgColWidth - srcPosColWidth - copyColWidth) : 0.0f;
                 ImGui::SetColumnWidth(0, iconColWidth);
                 ImGui::SetColumnWidth(1, msgColWidth);
                 ImGui::SetColumnWidth(2, paramColWidth);
                 ImGui::SetColumnWidth(3, srcPosColWidth);
                 ImGui::SetColumnWidth(4, copyColWidth);
-                ImGui::PushStyleColor(ImGuiCol_Text, getLogLevelColor(log.getLevel()));
-                ImGui::Text(getLogLevelIcon(log.getLevel()));
+                ImGui::PushStyleColor(ImGuiCol_Text, getLogLevelColor(log.GetLevel()));
+                ImGui::Text(getLogLevelIcon(log.GetLevel()));
                 ImGui::NextColumn();
                 {
                     // msg
-                    ImGui::TextWrapped(log.getMessage().c_str());
+                    ImGui::TextWrapped(log.GetMessage().c_str());
                 }
                 ImGui::PopStyleColor();
                 ImGui::NextColumn();
                 {
                     // param
-                    if (log.getParam())
+                    if (log.GetParam())
                     {
                         ImU32 color;
-                        switch (log.getParam()->getTag())
+                        switch (log.GetParam()->GetTag())
                         {
                             case Log::Param::Tag::TEXTURE:
                             case Log::Param::Tag::PLAYER_SHOT_DATA:
@@ -215,18 +215,18 @@ void LogWindow::draw()
                                 break;
                         }
                         ImGui::PushStyleColor(ImGuiCol_Text, color);
-                        ImGui::TextWrapped(log.getParam()->getText().c_str());
+                        ImGui::TextWrapped(log.GetParam()->GetText().c_str());
                         ImGui::PopStyleColor();
                     }
                 }
                 ImGui::NextColumn();
                 {
                     // source pos
-                    const auto& srcPosStack = log.getSourcePosStack();
+                    const auto& srcPosStack = log.GetSourcePosStack();
                     if (!srcPosStack.empty())
                     {
                         ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0xfb, 0xed, 0xed, 0xff));
-                        auto omittedPos = toUTF8(getOmittedFileName(*srcPosStack[0].filename, 15)) + ":" + std::to_string(srcPosStack[0].line);
+                        auto omittedPos = ToUTF8(GetOmittedFileName(*srcPosStack[0].filename, 15)) + ":" + std::to_string(srcPosStack[0].line);
                         auto omittedPosWidth = ImGui::CalcTextSize(omittedPos.c_str()).x;
                         ImGui::Text("");
                         ImGui::SameLine(0.0f, srcPosColWidth - omittedPosWidth - 12.0f);

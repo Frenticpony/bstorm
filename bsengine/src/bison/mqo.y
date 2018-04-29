@@ -52,10 +52,10 @@ static int yylex(MqoParser::semantic_type *yylval, MqoParser::location_type* yyl
     switch(tk)
     {
         case MqoParser::token_type::TK_NUM:
-            yylval->num = lexer->getNumber();
+            yylval->num = lexer->GetNumber();
             break;
         case MqoParser::token_type::TK_STR:
-            ctx->tmpStr = lexer->getWString();
+            ctx->tmpStr = lexer->GetWString();
             break;
     }
     yylloc->begin.filename = lexer->getFilePath();
@@ -67,8 +67,8 @@ static int yylex(MqoParser::semantic_type *yylval, MqoParser::location_type* yyl
 void MqoParser::error(const MqoParser::location_type& yylloc, const std::string& msg)
 {
     throw Log(Log::Level::LV_ERROR)
-      .setMessage(msg)
-      .addSourcePos(std::make_shared<SourcePos>(yylloc.begin));
+      .SetMessage(msg)
+      .AddSourcePos(std::make_shared<SourcePos>(yylloc.begin));
 }
 
 static MqoColor4 toMqoColor4(uint32_t col)

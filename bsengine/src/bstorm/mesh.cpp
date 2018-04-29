@@ -36,7 +36,7 @@ std::shared_ptr<Mesh> MqoToMesh(const Mqo & mqo, const std::shared_ptr<TextureCa
     // ÞŽ¿î•ñ‚ðƒRƒs[
     for (const auto& mqoMat : mqo.materials)
     {
-        auto texture = textureCache->load(concatPath(parentPath(mqo.path), mqoMat.tex), false, srcPos);
+        auto texture = textureCache->Load(ConcatPath(GetParentPath(mqo.path), mqoMat.tex), false, srcPos);
         mesh->materials.emplace_back(mqoMat.col.r, mqoMat.col.g, mqoMat.col.b, mqoMat.col.a, mqoMat.dif, mqoMat.amb, mqoMat.emi, texture);
     }
 
@@ -109,8 +109,8 @@ Mesh::~Mesh()
 {
     Logger::WriteLog(std::move(
         Log(Log::Level::LV_INFO)
-        .setMessage("release mesh.")
-        .setParam(Log::Param(Log::Param::Tag::MESH, path_))));
+        .SetMessage("release mesh.")
+        .SetParam(Log::Param(Log::Param::Tag::MESH, path_))));
 }
 
 MeshCache::MeshCache() :
@@ -125,35 +125,35 @@ void MeshCache::SetLoader(const std::shared_ptr<FileLoader>& loader)
 
 std::shared_ptr<Mesh> MeshCache::Load(const std::wstring & path, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos)
 {
-    const auto ext = getLowerExt(path);
+    const auto ext = GetLowerExt(path);
     if (ext != L".mqo")
     {
         throw Log(Log::Level::LV_ERROR)
-            .setMessage("this file format is not supported.")
-            .setParam(Log::Param(Log::Param::Tag::TEXT, path))
-            .addSourcePos(srcPos);
+            .SetMessage("this file format is not supported.")
+            .SetParam(Log::Param(Log::Param::Tag::TEXT, path))
+            .AddSourcePos(srcPos);
     }
 
-    auto uniqPath = canonicalPath(path);
+    auto uniqPath = GetCanonicalPath(path);
     auto it = meshMap_.find(uniqPath);
     if (it != meshMap_.end())
     {
         return it->second;
     } else
     {
-        if (auto mqo = parseMqo(uniqPath, loader_))
+        if (auto mqo = ParseMqo(uniqPath, loader_))
         {
             auto mesh = MqoToMesh(*mqo, textureCache, srcPos);
             Logger::WriteLog(std::move(
-                Log(Log::Level::LV_INFO).setMessage("load mesh.")
-                .setParam(Log::Param(Log::Param::Tag::MESH, uniqPath))
-                .addSourcePos(srcPos)));
+                Log(Log::Level::LV_INFO).SetMessage("load mesh.")
+                .SetParam(Log::Param(Log::Param::Tag::MESH, uniqPath))
+                .AddSourcePos(srcPos)));
             return meshMap_[uniqPath] = std::move(mesh);
         }
         throw Log(Log::Level::LV_ERROR)
-            .setMessage("failed to load mesh.")
-            .setParam(Log::Param(Log::Param::Tag::TEXT, path))
-            .addSourcePos(srcPos);
+            .SetMessage("failed to load mesh.")
+            .SetParam(Log::Param(Log::Param::Tag::TEXT, path))
+            .AddSourcePos(srcPos);
     }
 }
 

@@ -17,36 +17,36 @@ public:
     // NOTE : initRenderState : 描画デバイスの初期化を行う
     // デバイスロストやライブラリによってデバイスの状態が書き換えられた場合も呼ぶ必要がある
     // 一連の描画の前に1回呼べばよい
-    void initRenderState();
-    void renderPrim2D(D3DPRIMITIVETYPE primType, int vertexCount, const Vertex* vertices, IDirect3DTexture9* texture, int blendType, const D3DXMATRIX& worldMatrix, const std::shared_ptr<Shader>& pixelShader, bool permitCamera, bool insertHalfPixelOffset);
-    void renderPrim3D(D3DPRIMITIVETYPE primType, int vertexCount, const Vertex* vertices, IDirect3DTexture9* texture, int blendType, const D3DXMATRIX& worldMatrix, const std::shared_ptr<Shader>& pixelShader, bool zWriteEnable, bool zTestEnable, bool useFog, bool billboardEnable);
-    void renderMesh(const std::shared_ptr<Mesh>& mesh, const D3DCOLORVALUE& col, int blendType, const D3DXMATRIX& worldMatrix, const std::shared_ptr<Shader>& pixelShader, bool zWriteEnable, bool zTestEnable, bool useFog);
-    void setViewProjMatrix2D(const D3DXMATRIX& view, const D3DXMATRIX& proj);
-    void setForbidCameraViewProjMatrix2D(int screenWidth, int screenHeight);
-    void setViewProjMatrix3D(const D3DXMATRIX& view, const D3DXMATRIX& proj);
-    void setViewProjMatrix3D(const D3DXMATRIX& view, const D3DXMATRIX& proj, const D3DXMATRIX& billboardMatrix);
-    void setBlendType(int type);
+    void InitRenderState();
+    void RenderPrim2D(D3DPRIMITIVETYPE primType, int vertexCount, const Vertex* vertices, IDirect3DTexture9* texture, int blendType, const D3DXMATRIX& worldMatrix, const std::shared_ptr<Shader>& pixelShader, bool permitCamera, bool insertHalfPixelOffset);
+    void RenderPrim3D(D3DPRIMITIVETYPE primType, int vertexCount, const Vertex* vertices, IDirect3DTexture9* texture, int blendType, const D3DXMATRIX& worldMatrix, const std::shared_ptr<Shader>& pixelShader, bool zWriteEnable, bool zTestEnable, bool useFog, bool billboardEnable_);
+    void RenderMesh(const std::shared_ptr<Mesh>& mesh, const D3DCOLORVALUE& col, int blendType, const D3DXMATRIX& worldMatrix, const std::shared_ptr<Shader>& pixelShader, bool zWriteEnable, bool zTestEnable, bool useFog);
+    void SetViewProjMatrix2D(const D3DXMATRIX& view, const D3DXMATRIX& proj);
+    void SetForbidCameraViewProjMatrix2D(int screenWidth, int screenHeight);
+    void SetViewProjMatrix3D(const D3DXMATRIX& view, const D3DXMATRIX& proj);
+    void SetViewProjMatrix3D(const D3DXMATRIX& view, const D3DXMATRIX& proj, const D3DXMATRIX& billboardMatrix);
+    void SetBlendType(int type);
     // NOTE : enable/disableScissorTest : デバイスロストすると設定値は消える
-    void enableScissorTest(const RECT& rect);
-    void disableScissorTest();
-    void setFogEnable(bool enable);
-    void setFogParam(float fogStart, float fogEnd, int r, int g, int b);
+    void EnableScissorTest(const RECT& rect);
+    void DisableScissorTest();
+    void SetFogEnable(bool enable);
+    void SetFogParam(float fogStart, float fogEnd, int r, int g, int b);
 private:
-    IDirect3DDevice9 * d3DDevice;
-    IDirect3DVertexShader9* prim2DVertexShader;
-    IDirect3DVertexShader9* prim3DVertexShader;
-    IDirect3DVertexShader9* meshVertexShader;
-    float screenWidth;
-    float screenHeight;
-    int currentBlendType;
-    D3DXMATRIX viewProjMatrix2D;
-    D3DXMATRIX viewProjMatrix3D;
-    D3DXMATRIX billboardViewProjMatrix3D;
-    D3DXMATRIX forbidCameraViewProjMatrix2D;
-    D3DXMATRIX halfPixelOffsetMatrix;
-    bool fogEnable;
-    float fogStart;
-    float fogEnd;
-    D3DCOLOR fogColor;
+    IDirect3DDevice9 * d3DDevice_;
+    IDirect3DVertexShader9* prim2DVertexShader_;
+    IDirect3DVertexShader9* prim3DVertexShader_;
+    IDirect3DVertexShader9* meshVertexShader_;
+    float screenWidth_;
+    float screenHeight_;
+    int currentBlendType_;
+    D3DXMATRIX viewProjMatrix2D_;
+    D3DXMATRIX viewProjMatrix3D_;
+    D3DXMATRIX billboardViewProjMatrix3D_;
+    D3DXMATRIX forbidCameraViewProjMatrix2D_;
+    D3DXMATRIX halfPixelOffsetMatrix_;
+    bool fogEnable_;
+    float fogStart_;
+    float fogEnd_;
+    D3DCOLOR fogColor_;
 };
 }

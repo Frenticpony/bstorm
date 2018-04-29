@@ -301,8 +301,8 @@ void Shape::Render(const std::shared_ptr<Renderer>& renderer, bool permitCamera)
             }
             isInitialized = true;
         }
-        D3DXMATRIX world = scaleRotTrans(params_.Circle.x, params_.Circle.y, 0.0f, 0.0f, 0.0f, 0.0f, params_.Circle.r, params_.Circle.r, 1.0f);
-        renderer->renderPrim2D(D3DPT_TRIANGLEFAN, vertices.size(), vertices.data(), nullptr, BLEND_ALPHA, world, std::shared_ptr<Shader>(), permitCamera, false);
+        D3DXMATRIX world = CreateScaleRotTransMatrix(params_.Circle.x, params_.Circle.y, 0.0f, 0.0f, 0.0f, 0.0f, params_.Circle.r, params_.Circle.r, 1.0f);
+        renderer->RenderPrim2D(D3DPT_TRIANGLEFAN, vertices.size(), vertices.data(), nullptr, BLEND_ALPHA, world, std::shared_ptr<Shader>(), permitCamera, false);
     } else if (type_ == Type::RECT)
     {
         static std::array<Vertex, 4> vertices;
@@ -321,7 +321,7 @@ void Shape::Render(const std::shared_ptr<Renderer>& renderer, bool permitCamera)
         vertices[3].y = rect[2].y;
         D3DXMATRIX world;
         D3DXMatrixIdentity(&world);
-        renderer->renderPrim2D(D3DPT_TRIANGLESTRIP, vertices.size(), vertices.data(), nullptr, BLEND_ALPHA, world, std::shared_ptr<Shader>(), permitCamera, false);
+        renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, vertices.size(), vertices.data(), nullptr, BLEND_ALPHA, world, std::shared_ptr<Shader>(), permitCamera, false);
     }
 }
 
@@ -729,22 +729,22 @@ int CollisionDetector::CalcTreeIndexFromBoundingBox(const BoundingBox & bounding
 
 ShotIntersection::ShotIntersection(float x, float y, float r, const std::shared_ptr<ObjShot>& shot, bool isTmpIntersection) :
     Intersection(Shape(x, y, r),
-                 shot->isPlayerShot() ?
-                 (shot->isEraseShotEnabled() ? COL_GRP_PLAYER_ERASE_SHOT : COL_GRP_PLAYER_NON_ERASE_SHOT) :
+                 shot->IsPlayerShot() ?
+                 (shot->IsEraseShotEnabled() ? COL_GRP_PLAYER_ERASE_SHOT : COL_GRP_PLAYER_NON_ERASE_SHOT) :
                  COL_GRP_ENEMY_SHOT),
     shot_(shot),
-    isPlayerShot_(shot->isPlayerShot()),
+    isPlayerShot_(shot->IsPlayerShot()),
     isTmpIntersection_(isTmpIntersection)
 {
 }
 
 ShotIntersection::ShotIntersection(float x1, float y1, float x2, float y2, float width, const std::shared_ptr<ObjShot>& shot, bool isTmpIntersection) :
     Intersection(Shape(x1, y1, x2, y2, width),
-                 shot->isPlayerShot() ?
-                 (shot->isEraseShotEnabled() ? COL_GRP_PLAYER_ERASE_SHOT : COL_GRP_PLAYER_NON_ERASE_SHOT) :
+                 shot->IsPlayerShot() ?
+                 (shot->IsEraseShotEnabled() ? COL_GRP_PLAYER_ERASE_SHOT : COL_GRP_PLAYER_NON_ERASE_SHOT) :
                  COL_GRP_ENEMY_SHOT),
     shot_(shot),
-    isPlayerShot_(shot->isPlayerShot()),
+    isPlayerShot_(shot->IsPlayerShot()),
     isTmpIntersection_(isTmpIntersection)
 {
 }
@@ -819,9 +819,9 @@ static inline bool isShotIntersectionEnabled(const std::shared_ptr<ShotIntersect
     if (auto shot = isect->GetShot().lock())
     {
         // Regist前でShotDataで元から設定されている当たり判定の時は衝突無効
-        if (!shot->isRegistered() && !isect->IsTempIntersection()) return false;
+        if (!shot->IsRegistered() && !isect->IsTempIntersection()) return false;
         // 判定が無効になっているとき、または遅延時は衝突無効
-        if (!shot->isIntersectionEnabled() || shot->isDelay()) return false;
+        if (!shot->IsIntersectionEnabled() || shot->IsDelay()) return false;
         return true;
     }
     return false;
@@ -832,7 +832,7 @@ static void collideEnemyShotWithPlayerEraseShot(const std::shared_ptr<Intersecti
     auto playerShotIsect = std::dynamic_pointer_cast<ShotIntersection>(isect2);
     if (auto playerShot = playerShotIsect->GetShot().lock())
     {
-        if (playerShot->isEraseShotEnabled())
+        if (playerShot->IsEraseShotEnabled())
         {
             auto enemyShotIsect = std::dynamic_pointer_cast<ShotIntersection>(isect1);
             if (auto enemyShot = enemyShotIsect->GetShot().lock())
@@ -841,9 +841,9 @@ static void collideEnemyShotWithPlayerEraseShot(const std::shared_ptr<Intersecti
                 {
                     if (playerShot->GetType() == OBJ_SHOT)
                     {
-                        playerShot->setPenetration(playerShot->getPenetration() - 1);
+                        playerShot->SetPenetration(playerShot->GetPenetration() - 1);
                     }
-                    enemyShot->eraseWithSpell();
+                    enemyShot->EraseWithSpell();
                 }
             }
         }
@@ -859,7 +859,7 @@ static void collideEnemyShotWithPlayer(const std::shared_ptr<Intersection>& isec
         {
             if (auto player = std::dynamic_pointer_cast<PlayerIntersection>(isect2)->GetPlayer().lock())
             {
-                player->hit(enemyShot->getID());
+                player->Hit(enemyShot->GetID());
             }
         }
     }
@@ -874,10 +874,10 @@ static void collideEnemyShotWithPlayerGraze(const std::shared_ptr<Intersection>&
         {
             if (auto player = std::dynamic_pointer_cast<PlayerGrazeIntersection>(isect2)->GetPlayer().lock())
             {
-                if (enemyShot->isGrazeEnabled() && player->isGrazeEnabled())
+                if (enemyShot->IsGrazeEnabled() && player->IsGrazeEnabled())
                 {
-                    player->addGraze(enemyShot->getID(), 1);
-                    enemyShot->graze();
+                    player->AddGraze(enemyShot->GetID(), 1);
+                    enemyShot->Graze();
                 }
             }
         }
@@ -889,13 +889,13 @@ static void collideEnemyShotWithSpell(const std::shared_ptr<Intersection>& isect
     auto enemyShotIsect = std::dynamic_pointer_cast<ShotIntersection>(isect1);
     if (auto spell = std::dynamic_pointer_cast<SpellIntersection>(isect2)->GetSpell().lock())
     {
-        if (spell->isEraseShotEnabled())
+        if (spell->IsEraseShotEnabled())
         {
             if (isShotIntersectionEnabled(enemyShotIsect))
             {
                 if (auto enemyShot = enemyShotIsect->GetShot().lock())
                 {
-                    enemyShot->eraseWithSpell();
+                    enemyShot->EraseWithSpell();
                 }
             }
         }
@@ -914,14 +914,14 @@ static void collidePlayerShotWithEnemyIntersectionToShot(const std::shared_ptr<I
             {
                 if (playerShot->GetType() == OBJ_SHOT)
                 {
-                    playerShot->setPenetration(playerShot->getPenetration() - 1);
+                    playerShot->SetPenetration(playerShot->GetPenetration() - 1);
                 }
-                if (playerShot->isSpellFactorEnabled())
+                if (playerShot->IsSpellFactorEnabled())
                 {
-                    enemy->addSpellDamage(playerShot->getDamage());
+                    enemy->AddSpellDamage(playerShot->GetDamage());
                 } else
                 {
-                    enemy->addShotDamage(playerShot->getDamage());
+                    enemy->AddShotDamage(playerShot->GetDamage());
                 }
             }
         }
@@ -934,7 +934,7 @@ static void collidePlayerWithEnemyIntersectionToPlayer(const std::shared_ptr<Int
     {
         if (auto enemy = std::dynamic_pointer_cast<EnemyIntersectionToPlayer>(isect2)->GetEnemy().lock())
         {
-            player->hit(enemy->getID());
+            player->Hit(enemy->GetID());
         }
     }
 }
@@ -945,7 +945,7 @@ static void collideEnemyIntersectionToShotWithSpell(const std::shared_ptr<Inters
     {
         if (auto spell = std::dynamic_pointer_cast<SpellIntersection>(isect2)->GetSpell().lock())
         {
-            enemy->addSpellDamage(spell->getDamage());
+            enemy->AddSpellDamage(spell->GetDamage());
         }
     }
 }
@@ -956,10 +956,10 @@ static void collideWithPlayerToItemWithItem(const std::shared_ptr<Intersection>&
     {
         if (auto item = std::dynamic_pointer_cast<ItemIntersection>(isect2)->GetItem().lock())
         {
-            if (player->getState() == STATE_NORMAL)
+            if (player->GetState() == STATE_NORMAL)
             {
-                player->getItem(item->getID());
-                item->obtained();
+                player->ObtainItem(item->GetID());
+                item->Obtained();
             }
         }
     }
@@ -969,7 +969,7 @@ static void collidePlayerWithTempEnemyShot(const std::shared_ptr<Intersection>& 
 {
     if (auto player = std::dynamic_pointer_cast<PlayerIntersection>(isect1)->GetPlayer().lock())
     {
-        player->hit(ID_INVALID);
+        player->Hit(ID_INVALID);
     }
 }
 

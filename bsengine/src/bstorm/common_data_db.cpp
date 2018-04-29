@@ -154,7 +154,7 @@ static void writeCommonDataHeader(const CommonDataDB::CommonDataArea& area, std:
 
 static void writeCommonDataDataSection(const CommonDataDB::DataKey& key, const std::unique_ptr<DnhValue>& value, std::ostream& out)
 {
-    std::string keySJIS = toMultiByte<932>(key);
+    std::string keySJIS = ToMultiByte<932>(key);
     uint32_t keySize = keySJIS.size();
     std::ostringstream elemStream;
     value->Serialize(elemStream);
@@ -198,7 +198,7 @@ bool CommonDataDB::SaveCommonDataArea(const DataAreaName& areaName, const std::w
     // 存在しないエリアなら何もしない
     if (areaTable_.count(areaName) == 0) return false;
     std::ofstream fstream;
-    mkdir_p(parentPath(path));
+    MakeDirectoryP(GetParentPath(path));
     fstream.open(path, std::ios::out | std::ios::binary);
     if (!fstream.good()) return false;
     return SaveCommonDataArea(areaName, fstream);
@@ -226,7 +226,7 @@ static void readCommonDataDataSection(CommonDataDB::CommonDataArea& area, std::i
         // skip element size
         in.ignore(sizeof(uint32_t));
         auto value = DnhValue::Deserialize(in);
-        area[fromMultiByte<932>(keyName)] = std::move(value);
+        area[FromMultiByte<932>(keyName)] = std::move(value);
     } else
     {
         // read element size

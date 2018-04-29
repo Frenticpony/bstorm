@@ -13,33 +13,33 @@ class ObjEnemy : public ObjSprite2D, public ObjMove, public ObjCol, public std::
 public:
     ObjEnemy(bool isBoss, const std::shared_ptr<GameState>& gameState);
     ~ObjEnemy();
-    void update() override;
-    void render() override;
-    bool isBoss() const;
-    bool isRegistered() const;
-    void regist();
-    double getLife() const { return life; }
-    double getDamageRateShot() const;
-    double getDamageRateSpell() const;
-    int getPrevFrameShotHitCount() const;
-    void setLife(double life);
-    void addLife(double life);
-    void setDamageRateShot(double rate);
-    void setDamageRateSpell(double rate);
-    const std::vector<Point2D>& getAllIntersectionToShotPosition() const;
-    void addTempIntersection(const std::shared_ptr<Intersection>& isect);
-    void addTempIntersectionCircleToShot(float x, float y, float r);
-    void addTempIntersectionCircleToPlayer(float x, float y, float r);
-    void addShotDamage(double damage);
-    void addSpellDamage(double damage);
-protected:
-    bool registerFlag;
-    const bool bossFlag;
-    double life;
-    double damageRateShot;
-    double damageRateSpell;
-    int shotHitCount;
-    int prevFrameShotHitCount;
-    std::vector<Point2D> prevTempIsectToShotPositions;
+    void Update() override;
+    void Render() override;
+    bool IsBoss() const;
+    bool IsRegistered() const;
+    void Regist();
+    double GetLife() const { return life_; }
+    double GetDamageRateShot() const;
+    double GetDamageRateSpell() const;
+    int GetPrevFrameShotHitCount() const;
+    void SetLife(double life);
+    void AddLife(double life);
+    void SetDamageRateShot(double rate);
+    void SetDamageRateSpell(double rate);
+    const std::vector<Point2D>& GetAllIntersectionToShotPosition() const;
+    void AddTempIntersection(const std::shared_ptr<Intersection>& isect);
+    void AddTempIntersectionCircleToShot(float x, float y, float r);
+    void AddTempIntersectionCircleToPlayer(float x, float y, float r);
+    void AddShotDamage(double damage);
+    void AddSpellDamage(double damage);
+private:
+    bool isRegistered_;
+    const bool isBoss_;
+    double life_;
+    double damageRateShot_;
+    double damageRateSpell_;
+    int shotHitCount_;
+    int prevFrameShotHitCount_;
+    std::vector<Point2D> prevTempIsectToShotPositions_;
 };
 }

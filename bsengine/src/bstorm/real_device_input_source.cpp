@@ -5,56 +5,56 @@
 
 namespace bstorm
 {
-void KeyAssign::addVirtualKey(VirtualKey vkey, Key key, PadButton padButton)
+void KeyAssign::AddVirtualKey(VirtualKey vkey, Key key, PadButton padButton)
 {
-    keyMap[vkey] = std::make_pair(key, padButton);
+    keyMap_[vkey] = std::make_pair(key, padButton);
 }
 
-Key KeyAssign::getAssignedKey(VirtualKey vkey) const
+Key KeyAssign::GetAssignedKey(VirtualKey vkey) const
 {
-    auto it = keyMap.find(vkey);
-    if (it != keyMap.end()) return it->second.first;
+    auto it = keyMap_.find(vkey);
+    if (it != keyMap_.end()) return it->second.first;
     return KEY_INVALID;
 }
 
-PadButton KeyAssign::getAssignedPadButton(VirtualKey vkey) const
+PadButton KeyAssign::GetAssignedPadButton(VirtualKey vkey) const
 {
-    auto it = keyMap.find(vkey);
-    if (it != keyMap.end()) return it->second.second;
+    auto it = keyMap_.find(vkey);
+    if (it != keyMap_.end()) return it->second.second;
     return KEY_INVALID;
 }
 
 RealDeviceInputSource::RealDeviceInputSource(const std::shared_ptr<InputDevice>& inputDevice, const std::shared_ptr<KeyAssign>& keyAssign) :
-    inputDevice(inputDevice),
-    keyAssign(keyAssign)
+    inputDevice_(inputDevice),
+    keyAssign_(keyAssign)
 {
 }
 
 RealDeviceInputSource::~RealDeviceInputSource() {}
 
-KeyState RealDeviceInputSource::getVirtualKeyState(VirtualKey vk)
+KeyState RealDeviceInputSource::GetVirtualKeyState(VirtualKey vk)
 {
     // 優先順
     // 1. SetVirtualKeyStateでセットされた状態
     // 2. 割り当てられたキーボードのキーの状態
     // 3. 割り当てられたパッドのボタンの状態
     {
-        auto it = directSettedVirtualKeyStates.find(vk);
-        if (it != directSettedVirtualKeyStates.end())
+        auto it = directSettedVirtualKeyStates_.find(vk);
+        if (it != directSettedVirtualKeyStates_.end())
         {
             return it->second;
         }
     }
-    auto keyState = inputDevice->getKeyState(keyAssign->getAssignedKey(vk));
+    auto keyState = inputDevice_->GetKeyState(keyAssign_->GetAssignedKey(vk));
     if (keyState != KEY_FREE)
     {
         return keyState;
     }
-    return inputDevice->getPadButtonState(keyAssign->getAssignedPadButton(vk));
+    return inputDevice_->GetPadButtonState(keyAssign_->GetAssignedPadButton(vk));
 }
 
-void RealDeviceInputSource::setVirtualKeyState(VirtualKey vkey, KeyState state)
+void RealDeviceInputSource::SetVirtualKeyState(VirtualKey vkey, KeyState state)
 {
-    directSettedVirtualKeyStates[vkey] = state;
+    directSettedVirtualKeyStates_[vkey] = state;
 }
 }

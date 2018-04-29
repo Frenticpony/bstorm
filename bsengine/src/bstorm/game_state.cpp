@@ -27,7 +27,7 @@
 
 namespace bstorm
 {
-GameState::GameState(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevice9* d3DDevice, const std::shared_ptr<Renderer>& renderer, const std::shared_ptr<conf::KeyConfig>& keyConfig, const std::shared_ptr<MousePositionProvider>& mousePosProvider, Engine* engine) :
+GameState::GameState(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevice9* d3DDevice_, const std::shared_ptr<Renderer>& renderer, const std::shared_ptr<conf::KeyConfig>& keyConfig, const std::shared_ptr<MousePositionProvider>& mousePosProvider, Engine* engine) :
     fpsCounter(std::make_shared<FpsCounter>()),
     inputDevice(std::make_shared<InputDevice>(hWnd, mousePosProvider)),
     keyAssign(std::make_shared<KeyAssign>()),
@@ -37,8 +37,8 @@ GameState::GameState(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevi
     objTable(std::make_shared<ObjectTable>()),
     objLayerList(std::make_shared<ObjectLayerList>()),
     colDetector(std::make_shared<CollisionDetector>(screenWidth, screenHeight, std::make_shared<CollisionMatrix>(DEFAULT_COLLISION_MATRIX_DIMENSION, DEFAULT_COLLISION_MATRIX))),
-    textureCache(std::make_shared<TextureCache>(d3DDevice)),
-    fontCache(std::make_shared<FontCache>(hWnd, d3DDevice)),
+    textureCache(std::make_shared<TextureCache>(d3DDevice_)),
+    fontCache(std::make_shared<FontCache>(hWnd, d3DDevice_)),
     meshCache(std::make_shared<MeshCache>()),
     camera2D(std::make_shared<Camera2D>()),
     camera3D(std::make_shared<Camera3D>()),
@@ -79,7 +79,7 @@ GameState::GameState(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevi
 {
     for (const auto& keyMap : keyConfig->keyMaps)
     {
-        keyAssign->addVirtualKey(keyMap.vkey, keyMap.key, keyMap.pad);
+        keyAssign->AddVirtualKey(keyMap.vkey, keyMap.key, keyMap.pad);
     }
 }
 }

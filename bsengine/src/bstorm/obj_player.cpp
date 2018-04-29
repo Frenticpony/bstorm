@@ -35,194 +35,194 @@ ObjPlayer::ObjPlayer(const std::shared_ptr<GameState>& gameState, const std::sha
     ObjSprite2D(gameState),
     ObjMove(this),
     ObjCol(gameState),
-    permitPlayerShot(true),
-    permitPlayerSpell(true),
-    state(STATE_NORMAL),
-    normalSpeed(4.0f),
-    slowSpeed(1.6f),
-    clipLeft(0),
-    clipTop(0),
-    clipRight(384),
-    clipBottom(448),
-    invincibilityFrame(0),
-    downStateFrame(120),
-    rebirthFrame(15),
-    rebirthLossFrame(3),
-    globalParams(globalParams),
-    autoItemCollectLineY(-1),
-    hitStateTimer(0),
-    downStateTimer(0),
-    currentFrameGrazeCnt(0)
+    permitPlayerShot_(true),
+    permitPlayerSpell_(true),
+    state_(STATE_NORMAL),
+    normalSpeed_(4.0f),
+    slowSpeed_(1.6f),
+    clipLeft_(0),
+    clipTop_(0),
+    clipRight_(384),
+    clipBottom_(448),
+    invincibilityFrame_(0),
+    downStateFrame_(120),
+    rebirthFrame_(15),
+    rebirthLossFrame_(3),
+    globalParams_(globalParams),
+    autoItemCollectLineY_(-1),
+    hitStateTimer_(0),
+    downStateTimer_(0),
+    currentFrameGrazeCnt_(0)
 {
-    setType(OBJ_PLAYER);
-    initPosition();
+    SetType(OBJ_PLAYER);
+    InitPosition();
 }
 
 ObjPlayer::~ObjPlayer() {}
 
-void ObjPlayer::update()
+void ObjPlayer::Update()
 {
-    if (auto gameState = getGameState())
+    if (auto gameState = GetGameState())
     {
-        if (state == STATE_NORMAL)
+        if (state_ == STATE_NORMAL)
         {
-            moveByKeyInput();
-            applyClip();
-            if (currentFrameGrazeCnt > 0)
+            MoveByKeyInput();
+            ApplyClip();
+            if (currentFrameGrazeCnt_ > 0)
             {
                 if (auto playerScript = gameState->stagePlayerScript.lock())
                 {
-                    // notify EV_GRAZE
+                    // Notify EV_GRAZE
                     auto grazeInfo = std::make_unique<DnhArray>();
-                    grazeInfo->PushBack(std::make_unique<DnhReal>((double)currentFrameGrazeCnt));
-                    grazeInfo->PushBack(std::make_unique<DnhArray>(currentFrameGrazeObjIds));
-                    grazeInfo->PushBack(std::make_unique<DnhArray>(currentFrameGrazeShotPoints));
-                    playerScript->notifyEvent(EV_GRAZE, grazeInfo);
+                    grazeInfo->PushBack(std::make_unique<DnhReal>((double)currentFrameGrazeCnt_));
+                    grazeInfo->PushBack(std::make_unique<DnhArray>(currentFrameGrazeObjIds_));
+                    grazeInfo->PushBack(std::make_unique<DnhArray>(currentFrameGrazeShotPoints_));
+                    playerScript->NotifyEvent(EV_GRAZE, grazeInfo);
                 }
             }
         }
-        if (state == STATE_HIT)
+        if (state_ == STATE_HIT)
         {
-            if (hitStateTimer <= 0)
+            if (hitStateTimer_ <= 0)
             {
-                shootDown();
+                ShootDown();
             } else
             {
-                hitStateTimer--;
+                hitStateTimer_--;
             }
         }
 
         // ボム入力処理
         // hitStateTimerのカウント処理の後に行う
-        if (state == STATE_NORMAL || state == STATE_HIT)
+        if (state_ == STATE_NORMAL || state_ == STATE_HIT)
         {
-            int spellKey = gameState->vKeyInputSource->getVirtualKeyState(VK_SPELL);
+            int spellKey = gameState->vKeyInputSource->GetVirtualKeyState(VK_SPELL);
             if (spellKey == KEY_PUSH)
             {
-                callSpell();
+                CallSpell();
             }
         }
 
-        if (state == STATE_DOWN)
+        if (state_ == STATE_DOWN)
         {
-            if (downStateTimer <= 0)
+            if (downStateTimer_ <= 0)
             {
-                rebirth();
+                Rebirth();
             } else
             {
-                downStateTimer--;
+                downStateTimer_--;
             }
         }
-        if (isInvincible())
+        if (IsInvincible())
         {
-            invincibilityFrame--;
+            invincibilityFrame_--;
         } else
         {
-            invincibilityFrame = 0;
+            invincibilityFrame_ = 0;
         }
-        currentFrameGrazeCnt = 0;
-        currentFrameGrazeObjIds.clear();
-        currentFrameGrazeShotPoints.clear();
+        currentFrameGrazeCnt_ = 0;
+        currentFrameGrazeObjIds_.clear();
+        currentFrameGrazeShotPoints_.clear();
     }
 }
 
-void ObjPlayer::render()
+void ObjPlayer::Render()
 {
-    ObjSprite2D::render();
-    ObjCol::renderIntersection(isPermitCamera());
+    ObjSprite2D::Render();
+    ObjCol::RenderIntersection(IsPermitCamera());
 }
 
-void ObjPlayer::addIntersectionCircleA1(float dx, float dy, float r, float dr)
+void ObjPlayer::AddIntersectionCircleA1(float dx, float dy, float r, float dr)
 {
-    if (auto gameState = getGameState())
+    if (auto gameState = GetGameState())
     {
-        ObjCol::pushIntersection(gameState->colDetector->Create<PlayerIntersection>(getX() + dx, getY() + dy, r, shared_from_this()));
-        ObjCol::pushIntersection(gameState->colDetector->Create<PlayerGrazeIntersection>(getX() + dx, getY() + dy, r + dr, shared_from_this()));
+        ObjCol::PushBackIntersection(gameState->colDetector->Create<PlayerIntersection>(GetX() + dx, GetY() + dy, r, shared_from_this()));
+        ObjCol::PushBackIntersection(gameState->colDetector->Create<PlayerGrazeIntersection>(GetX() + dx, GetY() + dy, r + dr, shared_from_this()));
     }
 }
 
-void ObjPlayer::addIntersectionCircleA2(float dx, float dy, float r)
+void ObjPlayer::AddIntersectionCircleA2(float dx, float dy, float r)
 {
-    if (auto gameState = getGameState())
+    if (auto gameState = GetGameState())
     {
-        ObjCol::pushIntersection(gameState->colDetector->Create<PlayerGrazeIntersection>(getX() + dx, getY() + dy, r, shared_from_this()));
+        ObjCol::PushBackIntersection(gameState->colDetector->Create<PlayerGrazeIntersection>(GetX() + dx, GetY() + dy, r, shared_from_this()));
     }
 }
 
-void ObjPlayer::addIntersectionToItem()
+void ObjPlayer::AddIntersectionToItem()
 {
-    if (auto gameState = getGameState())
+    if (auto gameState = GetGameState())
     {
-        isectToItem = gameState->colDetector->Create<PlayerIntersectionToItem>(getX(), getY(), shared_from_this());
+        isectToItem_ = gameState->colDetector->Create<PlayerIntersectionToItem>(GetX(), GetY(), shared_from_this());
     }
 }
 
-void ObjPlayer::setNormalSpeed(double speed)
+void ObjPlayer::SetNormalSpeed(double speed)
 {
-    normalSpeed = speed;
+    normalSpeed_ = speed;
 }
 
-void ObjPlayer::setSlowSpeed(double speed)
+void ObjPlayer::SetSlowSpeed(double speed)
 {
-    slowSpeed = speed;
+    slowSpeed_ = speed;
 }
 
-void ObjPlayer::setClip(float left, float top, float right, float bottom)
+void ObjPlayer::SetClip(float left, float top, float right, float bottom)
 {
-    clipLeft = left;
-    clipTop = top;
-    clipRight = right;
-    clipBottom = bottom;
+    clipLeft_ = left;
+    clipTop_ = top;
+    clipRight_ = right;
+    clipBottom_ = bottom;
 }
 
-void ObjPlayer::setLife(double life) { globalParams->life = life; }
+void ObjPlayer::SetLife(double life) { globalParams_->life = life; }
 
-void ObjPlayer::setSpell(double spell) { globalParams->spell = spell; }
+void ObjPlayer::SetSpell(double spell) { globalParams_->spell = spell; }
 
-void ObjPlayer::setPower(double power) { globalParams->power = power; }
+void ObjPlayer::SetPower(double power) { globalParams_->power = power; }
 
-void ObjPlayer::setDownStateFrame(int frame)
+void ObjPlayer::SetDownStateFrame(int frame)
 {
-    downStateFrame = frame;
+    downStateFrame_ = frame;
 }
 
-void ObjPlayer::setRebirthFrame(int frame)
+void ObjPlayer::SetRebirthFrame(int frame)
 {
-    rebirthFrame = frame;
+    rebirthFrame_ = frame;
 }
 
-void ObjPlayer::setRebirthLossFrame(int frame)
+void ObjPlayer::SetRebirthLossFrame(int frame)
 {
-    rebirthLossFrame = frame;
+    rebirthLossFrame_ = frame;
 }
 
-double ObjPlayer::getLife() const { return globalParams->life; }
+double ObjPlayer::GetLife() const { return globalParams_->life; }
 
-double ObjPlayer::getSpell() const { return globalParams->spell; }
+double ObjPlayer::GetSpell() const { return globalParams_->spell; }
 
-double ObjPlayer::getPower() const { return globalParams->power; }
+double ObjPlayer::GetPower() const { return globalParams_->power; }
 
-bool ObjPlayer::isPermitPlayerSpell() const
+bool ObjPlayer::IsPermitPlayerSpell() const
 {
-    if (auto gameState = getGameState())
+    if (auto gameState = GetGameState())
     {
         auto bossScene = gameState->enemyBossSceneObj.lock();
-        if (bossScene && bossScene->isLastSpell())
+        if (bossScene && bossScene->IsLastSpell())
         {
             return false;
         }
     }
-    return permitPlayerSpell;
+    return permitPlayerSpell_;
 }
 
-bool ObjPlayer::isLastSpellWait() const
+bool ObjPlayer::IsLastSpellWait() const
 {
-    return getState() == STATE_HIT;
+    return GetState() == STATE_HIT;
 }
 
-bool ObjPlayer::isSpellActive() const
+bool ObjPlayer::IsSpellActive() const
 {
-    if (auto gameState = getGameState())
+    if (auto gameState = GetGameState())
     {
         if (gameState->spellManageObj.lock())
         {
@@ -232,115 +232,115 @@ bool ObjPlayer::isSpellActive() const
     return false;
 }
 
-int64_t ObjPlayer::getScore() const { return globalParams->score; }
+int64_t ObjPlayer::GetScore() const { return globalParams_->score; }
 
-int64_t ObjPlayer::getGraze() const { return globalParams->graze; }
+int64_t ObjPlayer::GetGraze() const { return globalParams_->graze; }
 
-int64_t ObjPlayer::getPoint() const { return globalParams->point; }
+int64_t ObjPlayer::GetPoint() const { return globalParams_->point; }
 
-void ObjPlayer::addScore(int64_t score) { globalParams->score += score; }
+void ObjPlayer::AddScore(int64_t score) { globalParams_->score += score; }
 
-void ObjPlayer::addGraze(int64_t graze) { globalParams->graze += graze; }
+void ObjPlayer::AddGraze(int64_t graze) { globalParams_->graze += graze; }
 
-void ObjPlayer::addGraze(int shotObjId, int64_t graze)
+void ObjPlayer::AddGraze(int shotObjId, int64_t graze)
 {
-    if (auto gameState = getGameState())
+    if (auto gameState = GetGameState())
     {
         if (auto shot = gameState->objTable->Get<ObjShot>(shotObjId))
         {
-            globalParams->graze += graze;
-            currentFrameGrazeCnt += graze;
-            currentFrameGrazeObjIds.push_back((double)shot->getID());
-            currentFrameGrazeShotPoints.emplace_back(shot->getX(), shot->getY());
+            globalParams_->graze += graze;
+            currentFrameGrazeCnt_ += graze;
+            currentFrameGrazeObjIds_.push_back((double)shot->GetID());
+            currentFrameGrazeShotPoints_.emplace_back(shot->GetX(), shot->GetY());
         }
     }
 }
 
-void ObjPlayer::addPoint(int64_t point) { globalParams->point += point; }
+void ObjPlayer::AddPoint(int64_t point) { globalParams_->point += point; }
 
-void ObjPlayer::hit(int collisionObjId)
+void ObjPlayer::Hit(int collisionObjId)
 {
-    if (auto gameState = getGameState())
+    if (auto gameState = GetGameState())
     {
         if (gameState->forcePlayerInvincibleEnable) return;
-        if (state == STATE_NORMAL && !isInvincible())
+        if (state_ == STATE_NORMAL && !IsInvincible())
         {
-            state = STATE_HIT;
-            hitStateTimer = rebirthFrame;
+            state_ = STATE_HIT;
+            hitStateTimer_ = rebirthFrame_;
             // NOTE: 状態を変更してからイベントを送る
             if (auto playerScript = gameState->stagePlayerScript.lock())
             {
-                playerScript->notifyEvent(EV_HIT, std::make_unique<DnhArray>(std::vector<double>{ (double)collisionObjId }));
+                playerScript->NotifyEvent(EV_HIT, std::make_unique<DnhArray>(std::vector<double>{ (double)collisionObjId }));
             }
             // アイテム自動回収をキャンセル
-            gameState->autoItemCollectionManager->cancelCollectItems();
+            gameState->autoItemCollectionManager->CancelCollectItems();
         }
     }
 }
 
-void ObjPlayer::transIntersection(float dx, float dy)
+void ObjPlayer::TransIntersection(float dx, float dy)
 {
-    if (auto gameState = getGameState())
+    if (auto gameState = GetGameState())
     {
-        ObjCol::transIntersection(dx, dy);
-        if (isectToItem)
+        ObjCol::TransIntersection(dx, dy);
+        if (isectToItem_)
         {
-            gameState->colDetector->Trans(isectToItem, dx, dy);
+            gameState->colDetector->Trans(isectToItem_, dx, dy);
         }
     }
 }
 
-bool ObjPlayer::isInvincible() const
+bool ObjPlayer::IsInvincible() const
 {
-    return invincibilityFrame > 0;
+    return invincibilityFrame_ > 0;
 }
 
-void ObjPlayer::shootDown()
+void ObjPlayer::ShootDown()
 {
-    downStateTimer = downStateFrame;
-    globalParams->life--;
-    if (auto gameState = getGameState())
+    downStateTimer_ = downStateFrame_;
+    globalParams_->life--;
+    if (auto gameState = GetGameState())
     {
         if (auto bossScene = gameState->enemyBossSceneObj.lock())
         {
-            bossScene->addPlayerShootDownCount(1);
+            bossScene->AddPlayerShootDownCount(1);
         }
-        gameState->scriptManager->notifyEventAll(EV_PLAYER_SHOOTDOWN);
+        gameState->scriptManager->NotifyEventAll(EV_PLAYER_SHOOTDOWN);
     }
     // Eventを送ってから状態を変更する
-    if (globalParams->life >= 0)
+    if (globalParams_->life >= 0)
     {
-        state = STATE_DOWN;
+        state_ = STATE_DOWN;
     } else
     {
-        state = STATE_END;
+        state_ = STATE_END;
     }
-    setVisible(false);
+    SetVisible(false);
 }
 
-void ObjPlayer::rebirth()
+void ObjPlayer::Rebirth()
 {
-    state = STATE_NORMAL;
-    setVisible(true);
-    if (auto gameState = getGameState())
+    state_ = STATE_NORMAL;
+    SetVisible(true);
+    if (auto gameState = GetGameState())
     {
-        initPosition();
-        gameState->scriptManager->notifyEventAll(EV_PLAYER_REBIRTH);
+        InitPosition();
+        gameState->scriptManager->NotifyEventAll(EV_PLAYER_REBIRTH);
     }
 }
 
-void ObjPlayer::moveByKeyInput()
+void ObjPlayer::MoveByKeyInput()
 {
-    if (auto gameState = getGameState())
+    if (auto gameState = GetGameState())
     {
-        auto r = gameState->vKeyInputSource->getVirtualKeyState(VK_RIGHT);
-        auto l = gameState->vKeyInputSource->getVirtualKeyState(VK_LEFT);
-        auto u = gameState->vKeyInputSource->getVirtualKeyState(VK_UP);
-        auto d = gameState->vKeyInputSource->getVirtualKeyState(VK_DOWN);
+        auto r = gameState->vKeyInputSource->GetVirtualKeyState(VK_RIGHT);
+        auto l = gameState->vKeyInputSource->GetVirtualKeyState(VK_LEFT);
+        auto u = gameState->vKeyInputSource->GetVirtualKeyState(VK_UP);
+        auto d = gameState->vKeyInputSource->GetVirtualKeyState(VK_DOWN);
 
-        auto shift = gameState->vKeyInputSource->getVirtualKeyState(VK_SLOWMOVE);
+        auto shift = gameState->vKeyInputSource->GetVirtualKeyState(VK_SLOWMOVE);
         bool isSlowMode = shift == KEY_HOLD || shift == KEY_PUSH;
-        float speed = (isSlowMode ? slowSpeed : normalSpeed);
+        float speed = (isSlowMode ? slowSpeed_ : normalSpeed_);
 
         int dx = 0;
         int dy = 0;
@@ -350,90 +350,90 @@ void ObjPlayer::moveByKeyInput()
         if (u == KEY_HOLD || u == KEY_PUSH) { dy--; }
         if (d == KEY_HOLD || d == KEY_PUSH) { dy++; }
 
-        setMovePosition(getX() + speed * dx, getY() + speed * dy);
+        SetMovePosition(GetX() + speed * dx, GetY() + speed * dy);
     }
 }
 
-void ObjPlayer::applyClip()
+void ObjPlayer::ApplyClip()
 {
-    setMovePosition(std::min(std::max(getX(), clipLeft), clipRight), std::min(std::max(getY(), clipTop), clipBottom));
+    SetMovePosition(std::min(std::max(GetX(), clipLeft_), clipRight_), std::min(std::max(GetY(), clipTop_), clipBottom_));
 }
 
-void ObjPlayer::initPosition()
+void ObjPlayer::InitPosition()
 {
-    if (auto gameState = getGameState())
+    if (auto gameState = GetGameState())
     {
-        setMovePosition((gameState->stgFrame->right - gameState->stgFrame->left) / 2.0f, gameState->stgFrame->bottom - 48.0f);
+        SetMovePosition((gameState->stgFrame->right - gameState->stgFrame->left) / 2.0f, gameState->stgFrame->bottom - 48.0f);
     }
 }
 
-void ObjPlayer::callSpell()
+void ObjPlayer::CallSpell()
 {
-    auto gameState = getGameState();
+    auto gameState = GetGameState();
     if (!gameState) return;
     auto playerScript = gameState->stagePlayerScript.lock();
     auto spellManageObj = gameState->spellManageObj.lock();
-    if ((!spellManageObj || spellManageObj->isDead()) && isPermitPlayerSpell() && playerScript)
+    if ((!spellManageObj || spellManageObj->IsDead()) && IsPermitPlayerSpell() && playerScript)
     {
-        gameState->spellManageObj = gameState->objTable->create<ObjSpellManage>(gameState);
-        playerScript->notifyEvent(EV_REQUEST_SPELL);
-        if (playerScript->getScriptResult()->ToBool())
+        gameState->spellManageObj = gameState->objTable->Create<ObjSpellManage>(gameState);
+        playerScript->NotifyEvent(EV_REQUEST_SPELL);
+        if (playerScript->GetScriptResult()->ToBool())
         {
             // スペル発動
             if (auto bossScene = gameState->enemyBossSceneObj.lock())
             {
-                bossScene->addPlayerSpellCount(1);
+                bossScene->AddPlayerSpellCount(1);
             }
-            if (state == STATE_HIT)
+            if (state_ == STATE_HIT)
             {
                 // 喰らいボム
-                rebirthFrame = std::max(0, rebirthFrame - rebirthLossFrame);
-                state = STATE_NORMAL;
+                rebirthFrame_ = std::max(0, rebirthFrame_ - rebirthLossFrame_);
+                state_ = STATE_NORMAL;
             }
-            gameState->scriptManager->notifyEventAll(EV_PLAYER_SPELL);
+            gameState->scriptManager->NotifyEventAll(EV_PLAYER_SPELL);
         } else
         {
             // スペル不発
             if (gameState->spellManageObj.lock())
             {
-                gameState->objTable->del(gameState->spellManageObj.lock()->getID());
+                gameState->objTable->Delete(gameState->spellManageObj.lock()->GetID());
             }
         }
     }
 }
 
-void ObjPlayer::getItem(int itemObjId)
+void ObjPlayer::ObtainItem(int itemObjId)
 {
-    if (auto gameState = getGameState())
+    if (auto gameState = GetGameState())
     {
         if (auto item = gameState->objTable->Get<ObjItem>(itemObjId))
         {
-            if (item->isScoreItem())
+            if (item->IsScoreItem())
             {
-                addScore(item->getScore());
+                AddScore(item->GetScore());
             }
             // ボーナスアイテムの場合はイベントを送らない
-            if (item->getItemType() != ITEM_DEFAULT_BONUS)
+            if (item->GetItemType() != ITEM_DEFAULT_BONUS)
             {
                 int itemType = -1;
-                if (item->getItemType() == ITEM_USER)
+                if (item->GetItemType() == ITEM_USER)
                 {
-                    if (auto itemData = item->getItemData()) itemType = itemData->type;
+                    if (auto itemData = item->GetItemData()) itemType = itemData->type;
                 } else
                 {
-                    itemType = item->getItemType();
+                    itemType = item->GetItemType();
                 }
-                if (auto gameState = getGameState())
+                if (auto gameState = GetGameState())
                 {
                     // EV_GET_ITEM
-                    auto evArgs = std::make_unique<DnhArray>(std::vector<double>{ (double)itemType, (double)item->getID() });
+                    auto evArgs = std::make_unique<DnhArray>(std::vector<double>{ (double)itemType, (double)item->GetID() });
                     if (auto playerScript = gameState->stagePlayerScript.lock())
                     {
-                        playerScript->notifyEvent(EV_GET_ITEM, evArgs);
+                        playerScript->NotifyEvent(EV_GET_ITEM, evArgs);
                     }
                     if (auto itemScript = gameState->itemScript.lock())
                     {
-                        itemScript->notifyEvent(EV_GET_ITEM, evArgs);
+                        itemScript->NotifyEvent(EV_GET_ITEM, evArgs);
                     }
                 }
             }
@@ -441,8 +441,8 @@ void ObjPlayer::getItem(int itemObjId)
     }
 }
 
-bool ObjPlayer::isGrazeEnabled() const
+bool ObjPlayer::IsGrazeEnabled() const
 {
-    return state == STATE_NORMAL && !isInvincible();
+    return state_ == STATE_NORMAL && !IsInvincible();
 }
 }

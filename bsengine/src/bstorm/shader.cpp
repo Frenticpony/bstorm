@@ -7,48 +7,48 @@
 
 namespace bstorm
 {
-Shader::Shader(const std::wstring& path, bool precompiled, IDirect3DDevice9* d3DDevice) :
-    effect(NULL)
+Shader::Shader(const std::wstring& path, bool precompiled, IDirect3DDevice9* d3DDevice_) :
+    effect_(nullptr)
 {
-    ID3DXBuffer* buf = NULL;
-    if (FAILED(D3DXCreateEffectFromFile(d3DDevice, path.c_str(), NULL, NULL, precompiled ? D3DXSHADER_SKIPVALIDATION : 0, NULL, &(this->effect), &buf)))
+    ID3DXBuffer* buf = nullptr;
+    if (FAILED(D3DXCreateEffectFromFile(d3DDevice_, path.c_str(), nullptr, nullptr, precompiled ? D3DXSHADER_SKIPVALIDATION : 0, nullptr, &(this->effect_), &buf)))
     {
         buf->Release();
         throw Log(Log::Level::LV_ERROR)
-            .setMessage(((char*)(buf->GetBufferPointer())))
-            .setParam(Log::Param(Log::Param::Tag::SHADER, path));
+            .SetMessage(((char*)(buf->GetBufferPointer())))
+            .SetParam(Log::Param(Log::Param::Tag::SHADER, path));
     }
     safe_release(buf);
 }
 
 Shader::~Shader()
 {
-    effect->Release();
+    effect_->Release();
 }
 
-void Shader::onLostDevice()
+void Shader::OnLostDevice()
 {
-    if (FAILED(effect->OnLostDevice()))
+    if (FAILED(effect_->OnLostDevice()))
     {
-        throw Log(Log::Level::LV_ERROR).setMessage("failed to release shader.");
+        throw Log(Log::Level::LV_ERROR).SetMessage("failed to release shader.");
     }
 }
 
-void Shader::onResetDevice()
+void Shader::OnResetDevice()
 {
-    if (FAILED(effect->OnResetDevice()))
+    if (FAILED(effect_->OnResetDevice()))
     {
-        throw Log(Log::Level::LV_ERROR).setMessage("failed to reset shader.");
+        throw Log(Log::Level::LV_ERROR).SetMessage("failed to reset shader.");
     }
 }
 
-void Shader::setTexture(const std::string & name, IDirect3DTexture9* texture)
+void Shader::SetTexture(const std::string & name, IDirect3DTexture9* texture)
 {
-    effect->SetTexture(name.c_str(), texture);
+    effect_->SetTexture(name.c_str(), texture);
 }
 
 ID3DXEffect* Shader::getEffect() const
 {
-    return effect;
+    return effect_;
 }
 }

@@ -17,44 +17,44 @@
 
 %class{
 public :
-    double getNumber() const { return v_num; }
-    std::wstring getWString() const { return v_wstr; }
-    std::string getString() const { return v_str; }
-    void setLoader(const std::shared_ptr<FileLoader>& loader)
+    double GetNumber() const { return v_num_; }
+    std::wstring GetWString() const { return v_wstr_; }
+    std::string getString() const { return v_str_; }
+    void SetLoader(const std::shared_ptr<FileLoader>& loader)
     {
-        this->loader = loader;
+        this->loader_ = loader;
     }
-    void setInputSource(const std::wstring& path)
+    void SetInputSource(const std::wstring& path)
     {
-        filePath = std::make_shared<std::wstring>(canonicalPath(path));
-        fp = loader->openFile(*filePath);
-        if (fp == NULL)
+        filePath_ = std::make_shared<std::wstring>(GetCanonicalPath(path));
+        fp_ = loader_->OpenFile(*filePath_);
+        if (fp_ == nullptr)
         {
             throw Log(Log::Level::LV_ERROR)
-              .setMessage("can't open file")
-              .setParam(Log::Param(Log::Param::Tag::TEXT, path));
+              .SetMessage("can't open file")
+              .SetParam(Log::Param(Log::Param::Tag::TEXT, path));
         }
-        in(fp);
+        in(fp_);
     }
     std::shared_ptr<std::wstring> getFilePath() const
     {
-        if (filePath) return filePath;
+        if (filePath_) return filePath_;
         return std::make_shared<std::wstring>(L"");
     }
     ~MqoLexer()
     {
-        if (fp)
+        if (fp_)
         {
-            loader->closeFile(*getFilePath(), fp);
+            loader_->CloseFile(*getFilePath(), fp_);
         }
     }
-protected :
-    FILE* fp;
-    double v_num;
-    std::wstring v_wstr;
-    std::string v_str;
-    std::shared_ptr<FileLoader> loader;
-    std::shared_ptr<std::wstring> filePath;
+private :
+    FILE* fp_ = nullptr;
+    double v_num_;
+    std::wstring v_wstr_;
+    std::string v_str_;
+    std::shared_ptr<FileLoader> loader_;
+    std::shared_ptr<std::wstring> filePath_;
 %}
 
 %{
@@ -153,17 +153,17 @@ newline \r?\n
 "{" { return tk::TK_LBRACE; }
 "}" { return tk::TK_RBRACE; }
 
-{number} { v_num = std::atof(str().c_str()); return tk::TK_NUM; }
+{number} { v_num_ = std::atof(str().c_str()); return tk::TK_NUM; }
 
-\"  { v_wstr.clear(); start(STRING_LIT); }
+\"  { v_wstr_.clear(); start(STRING_LIT); }
 
 <STRING_LIT>{
 \" { start(INITIAL); return tk::TK_STR; }
-\\. { v_wstr += (wstr())[1]; }
-. { v_wstr += wstr(); }
+\\. { v_wstr_ += (wstr())[1]; }
+. { v_wstr_ += wstr(); }
 }
 
-{ident} { v_str = str(); return tk::TK_IDENT; }
+{ident} { v_str_ = str(); return tk::TK_IDENT; }
 
 . {}
 

@@ -70,7 +70,7 @@
     <ClInclude Include="src\bstorm\renderer.hpp" />
     <ClInclude Include="src\bstorm\render_target.hpp" />
     <ClInclude Include="src\bstorm\script.hpp" />
-    <ClInclude Include="src\bstorm\sem_checker.hpp" />
+    <ClInclude Include="src\bstorm\semantics_checker.hpp" />
     <ClInclude Include="src\bstorm\shot_data.hpp" />
     <ClInclude Include="src\bstorm\sound_device.hpp" />
     <ClInclude Include="src\bstorm\source_map.hpp" />
@@ -137,7 +137,7 @@
     <ClCompile Include="src\bstorm\renderer.cpp" />
     <ClCompile Include="src\bstorm\render_target.cpp" />
     <ClCompile Include="src\bstorm\script.cpp" />
-    <ClCompile Include="src\bstorm\sem_checker.cpp" />
+    <ClCompile Include="src\bstorm\semantics_checker.cpp" />
     <ClCompile Include="src\bstorm\shot_data.cpp" />
     <ClCompile Include="src\bstorm\sound_device.cpp" />
     <ClCompile Include="src\bstorm\source_map.cpp" />

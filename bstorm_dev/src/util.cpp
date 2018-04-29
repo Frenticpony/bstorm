@@ -134,13 +134,13 @@ const char * getMoveModeName(const std::shared_ptr<MoveMode>& mode)
 
 void drawCroppedImage(const Rect<int>& rect, const std::shared_ptr<Texture>& texture)
 {
-    float u1 = 1.0f * rect.left / texture->getWidth();
-    float v1 = 1.0f * rect.top / texture->getHeight();
-    float u2 = 1.0f * rect.right / texture->getWidth();
-    float v2 = 1.0f * rect.bottom / texture->getHeight();
+    float u1 = 1.0f * rect.left / texture->GetWidth();
+    float v1 = 1.0f * rect.top / texture->GetHeight();
+    float u2 = 1.0f * rect.right / texture->GetWidth();
+    float v2 = 1.0f * rect.bottom / texture->GetHeight();
     float rectWidth = std::abs(rect.right - rect.left);
     float rectHeight = std::abs(rect.bottom - rect.top);
-    ImGui::Image(texture->getTexture(), ImVec2(rectWidth, rectHeight), ImVec2(u1, v1), ImVec2(u2, v2));
+    ImGui::Image(texture->GetTexture(), ImVec2(rectWidth, rectHeight), ImVec2(u1, v1), ImVec2(u2, v2));
 }
 
 void drawIntersectionInfo(const std::shared_ptr<Intersection>& isect)

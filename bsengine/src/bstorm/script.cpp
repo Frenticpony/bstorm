@@ -8,7 +8,7 @@
 #include <bstorm/obj.hpp>
 #include <bstorm/dnh_value.hpp>
 #include <bstorm/engine.hpp>
-#include <bstorm/sem_checker.hpp>
+#include <bstorm/semantics_checker.hpp>
 #include <bstorm/code_generator.hpp>
 #include <bstorm/api.hpp>
 #include <bstorm/file_loader.hpp>
@@ -27,17 +27,17 @@ const std::unordered_set<std::wstring> ignoreScriptExts{ L".png", L".jpg", L".jp
 // NOTE: 必ずメンバ関数の冒頭でlockを行う。compile中に他の動作をすることはないのでロックして損はない。
 
 Script::Script(const std::wstring& p, const std::wstring& type, const std::wstring& version, int id, Engine* engine, const std::shared_ptr<SourcePos>& srcPos) :
-    L(NULL),
-    path(canonicalPath(p)),
-    type(type),
-    version(version),
-    id(id),
-    compileSrcPos(srcPos),
-    state(State::SCRIPT_NOT_COMPILED),
-    luaStateBusy(false),
-    stgSceneScript(type != SCRIPT_TYPE_PACKAGE),
-    autoDeleteObjectEnable(false),
-    engine(engine)
+    L_(NULL),
+    path_(GetCanonicalPath(p)),
+    type_(type),
+    version_(version),
+    id_(id),
+    compileSrcPos_(srcPos),
+    state_(State::SCRIPT_NOT_COMPILED),
+    luaStateBusy_(false),
+    isStgSceneScript_(type != SCRIPT_TYPE_PACKAGE),
+    autoDeleteObjectEnable_(false),
+    engine_(engine)
 {
 }
 
@@ -45,129 +45,129 @@ Script::~Script()
 {
     // NOTE: ここでロックを取ってはいけない。サブスレッドより先にロックを取るとデッドロックされる。
     // compileThreadはメインスレッドで代入されているので、アクセスにロックは必要ない
-    while (compileThread.joinable())
+    while (compileThread_.joinable())
     {
         Sleep(1);
     }
 
-    if (state != State::SCRIPT_NOT_COMPILED && state != State::SCRIPT_COMPILE_FAILED)
+    if (state_ != State::SCRIPT_NOT_COMPILED && state_ != State::SCRIPT_COMPILE_FAILED)
     {
-        runBuiltInSub("Finalize");
+        RunBuiltInSub("Finalize");
 
-        if (autoDeleteObjectEnable)
+        if (autoDeleteObjectEnable_)
         {
-            for (auto objId : autoDeleteTargetObjIds)
+            for (auto objId : autoDeleteTargetObjIds_)
             {
-                engine->deleteObject(objId);
+                engine_->DeleteObject(objId);
             }
         }
 
         Logger::WriteLog(std::move(
             Log(Log::Level::LV_INFO)
-            .setMessage("release script.")
-            .setParam(Log::Param(Log::Param(Log::Param::Tag::SCRIPT, path)))));
+            .SetMessage("release script.")
+            .SetParam(Log::Param(Log::Param(Log::Param::Tag::SCRIPT, path_)))));
     }
-    if (L) lua_close(L);
+    if (L_) lua_close(L_);
 }
 
-Script::State Script::getState() const { return state; }
+Script::State Script::GetState() const { return state_; }
 
-void Script::compile()
+void Script::Compile()
 {
-    std::lock_guard<std::recursive_mutex> lock(criticalSection);
-    if (state == State::SCRIPT_NOT_COMPILED)
+    std::lock_guard<std::recursive_mutex> lock(criticalSection_);
+    if (state_ == State::SCRIPT_NOT_COMPILED)
     {
         try
         {
-            execCompile();
-            state = State::SCRIPT_COMPILED;
+            ExecCompile();
+            state_ = State::SCRIPT_COMPILED;
         } catch (...)
         {
-            state = State::SCRIPT_COMPILE_FAILED;
+            state_ = State::SCRIPT_COMPILE_FAILED;
             throw;
         }
     }
 }
 
-void Script::compileInThread()
+void Script::CompileInThread()
 {
-    std::lock_guard<std::recursive_mutex> lock(criticalSection);
-    if (compileThread.joinable())
+    std::lock_guard<std::recursive_mutex> lock(criticalSection_);
+    if (compileThread_.joinable())
     {
         return;
     }
-    compileThread = std::thread([this]()
+    compileThread_ = std::thread([this]()
     {
-        std::lock_guard<std::recursive_mutex> lock(criticalSection);
+        std::lock_guard<std::recursive_mutex> lock(criticalSection_);
         // ロックが獲得される前にInThreadでないcompileが実行される可能性があるのでかならずロックしてからNOT_COMPILEDかどうか調べよ。
-        if (state == State::SCRIPT_NOT_COMPILED)
+        if (state_ == State::SCRIPT_NOT_COMPILED)
         {
             try
             {
-                execCompile();
-                state = State::SCRIPT_COMPILED;
+                ExecCompile();
+                state_ = State::SCRIPT_COMPILED;
             } catch (Log& log)
             {
                 // LoadScriptInThreadの場合はScript内でエラーをキャッチできないのでここでsrcPosをセット
-                log.addSourcePos(compileSrcPos);
-                saveError(std::current_exception());
-                state = State::SCRIPT_COMPILE_FAILED;
+                log.AddSourcePos(compileSrcPos_);
+                SaveError(std::current_exception());
+                state_ = State::SCRIPT_COMPILE_FAILED;
             } catch (...)
             {
-                state = State::SCRIPT_COMPILE_FAILED;
+                state_ = State::SCRIPT_COMPILE_FAILED;
             }
         }
-        compileThread.detach();
+        compileThread_.detach();
     });
 }
 
-int Script::getID() const
+int Script::GetID() const
 {
-    return id;
+    return id_;
 }
 
-const std::wstring & Script::getPath() const
+const std::wstring & Script::GetPath() const
 {
-    return path;
+    return path_;
 }
 
 const std::wstring& Script::GetType() const
 {
-    return type;
+    return type_;
 }
 
-const std::wstring & Script::getVersion() const
+const std::wstring & Script::GetVersion() const
 {
-    return version;
+    return version_;
 }
 
-void Script::close()
+void Script::Close()
 {
-    std::lock_guard<std::recursive_mutex> lock(criticalSection);
-    if (state != State::SCRIPT_COMPILE_FAILED)
+    std::lock_guard<std::recursive_mutex> lock(criticalSection_);
+    if (state_ != State::SCRIPT_COMPILE_FAILED)
     {
-        state = State::SCRIPT_CLOSED;
+        state_ = State::SCRIPT_CLOSED;
     }
 }
 
-bool Script::isClosed() const
+bool Script::IsClosed() const
 {
-    return state == State::SCRIPT_CLOSED;
+    return state_ == State::SCRIPT_CLOSED;
 }
 
-void Script::execCompile()
+void Script::ExecCompile()
 {
-    std::lock_guard<std::recursive_mutex> lock(criticalSection);
-    assert(state == State::SCRIPT_NOT_COMPILED);
+    std::lock_guard<std::recursive_mutex> lock(criticalSection_);
+    assert(state_ == State::SCRIPT_NOT_COMPILED);
     try
     {
-        L = lua_open();
+        L_ = lua_open();
         // Lua標準API登録
-        luaL_openlibs(L);
+        luaL_openlibs(L_);
 
         // 弾幕風標準API登録
         auto globalEnv = std::make_shared<Env>();
-        addStandardAPI(type, version, globalEnv->table);
+        addStandardAPI(type_, version_, globalEnv->table);
 
         for (const auto& entry : globalEnv->table)
         {
@@ -175,51 +175,51 @@ void Script::execCompile()
             {
                 if (builtInFunc->funcPointer)
                 {
-                    lua_register(L, (DNH_VAR_PREFIX + entry.first).c_str(), (lua_CFunction)builtInFunc->funcPointer);
+                    lua_register(L_, (DNH_VAR_PREFIX + entry.first).c_str(), (lua_CFunction)builtInFunc->funcPointer);
                 }
             }
         }
 
         // ランタイム用関数登録
-        lua_register(L, "c_chartonum", c_chartonum);
-        lua_register(L, "c_succchar", c_succchar);
-        lua_register(L, "c_predchar", c_predchar);
-        lua_register(L, "c_raiseerror", c_raiseerror);
+        lua_register(L_, "c_chartonum", c_chartonum);
+        lua_register(L_, "c_succchar", c_succchar);
+        lua_register(L_, "c_predchar", c_predchar);
+        lua_register(L_, "c_raiseerror", c_raiseerror);
 
         // ポインタ設定
-        setEngine(L, engine);
-        setScript(L, this);
+        setEngine(L_, engine_);
+        SetScript(L_, this);
 
         // パース
         std::shared_ptr<NodeBlock> program;
         {
             Logger::WriteLog(std::move(
                 Log(Log::Level::LV_DETAIL)
-                .setMessage("parse start...")
-                .setParam(Log::Param(Log::Param::Tag::SCRIPT, path))
-                .addSourcePos(compileSrcPos)));
+                .SetMessage("parse start...")
+                .SetParam(Log::Param(Log::Param::Tag::SCRIPT, path_))
+                .AddSourcePos(compileSrcPos_)));
             TimePoint tp;
-            program = parseDnhScript(path, globalEnv, true, std::make_shared<FileLoaderFromTextFile>());
+            program = ParseDnhScript(path_, globalEnv, true, std::make_shared<FileLoaderFromTextFile>());
             Logger::WriteLog(std::move(
                 Log(Log::Level::LV_DETAIL)
-                .setMessage("...parse complete " + std::to_string(tp.getElapsedMilliSec()) + " [ms].")
-                .setParam(Log::Param(Log::Param::Tag::SCRIPT, path))
-                .addSourcePos(compileSrcPos)));
+                .SetMessage("...parse complete " + std::to_string(tp.GetElapsedMilliSec()) + " [ms].")
+                .SetParam(Log::Param(Log::Param::Tag::SCRIPT, path_))
+                .AddSourcePos(compileSrcPos_)));
         }
 
         // 静的エラー検査
         {
-            SemChecker checker;
-            auto errors = checker.check(*program);
-            for (auto& err : errors)
+            SemanticsChecker checker;
+            auto errors_ = checker.Check(*program);
+            for (auto& err : errors_)
             {
                 Logger::WriteLog(err);
             }
-            if (!errors.empty())
+            if (!errors_.empty())
             {
                 throw Log(Log::Level::LV_ERROR)
-                    .setMessage("found " + std::to_string(errors.size()) + " script error" + (errors.size() > 1 ? "s." : "."))
-                    .setParam(Log::Param(Log::Param::Tag::SCRIPT, path));
+                    .SetMessage("found " + std::to_string(errors_.size()) + " script error" + (errors_.size() > 1 ? "s." : "."))
+                    .SetParam(Log::Param(Log::Param::Tag::SCRIPT, path_));
             }
         }
 
@@ -228,180 +228,180 @@ void Script::execCompile()
         {
             Logger::WriteLog(std::move(
                 Log(Log::Level::LV_DETAIL)
-                .setMessage("codegen start...")
-                .setParam(Log::Param(Log::Param::Tag::SCRIPT, path))
-                .addSourcePos(compileSrcPos)));
+                .SetMessage("codegen start...")
+                .SetParam(Log::Param(Log::Param::Tag::SCRIPT, path_))
+                .AddSourcePos(compileSrcPos_)));
             TimePoint tp;
-            codeGen.generate(*program);
+            codeGen.Generate(*program);
             Logger::WriteLog(std::move(
                 Log(Log::Level::LV_DETAIL)
-                .setMessage("...codegen complete " + std::to_string(tp.getElapsedMilliSec()) + " [ms].")
-                .setParam(Log::Param(Log::Param::Tag::SCRIPT, path))
-                .addSourcePos(compileSrcPos)));
-            srcMap = codeGen.getSourceMap();
+                .SetMessage("...codegen complete " + std::to_string(tp.GetElapsedMilliSec()) + " [ms].")
+                .SetParam(Log::Param(Log::Param::Tag::SCRIPT, path_))
+                .AddSourcePos(compileSrcPos_)));
+            srcMap_ = codeGen.GetSourceMap();
         }
 
         // ランタイム読み込み
-        luaL_loadbuffer(L, (const char *)luaJIT_BC_script_runtime, luaJIT_BC_script_runtime_SIZE, DNH_RUNTIME_NAME);
-        callLuaChunk();
+        luaL_loadbuffer(L_, (const char *)luaJIT_BC_script_runtime, luaJIT_BC_script_runtime_SIZE, DNH_RUNTIME_NAME);
+        CallLuaChunk();
 
         // コンパイル
         {
             Logger::WriteLog(std::move(
                 Log(Log::Level::LV_DETAIL)
-                .setMessage("compile start...")
-                .setParam(Log::Param(Log::Param::Tag::SCRIPT, path))
-                .addSourcePos(compileSrcPos)));
+                .SetMessage("compile start...")
+                .SetParam(Log::Param(Log::Param::Tag::SCRIPT, path_))
+                .AddSourcePos(compileSrcPos_)));
             TimePoint tp;
-            int hasCompileError = luaL_loadstring(L, codeGen.getCode());
+            int hasCompileError = luaL_loadstring(L_, codeGen.GetCode().c_str());
             if (hasCompileError)
             {
-                std::string msg = lua_tostring(L, -1); lua_pop(L, 1);
+                std::string msg = lua_tostring(L_, -1); lua_pop(L_, 1);
                 if (msg.find("has more than 200 local variables") != std::string::npos)
                 {
-                    auto ss = split(toUnicode(msg), L':');
+                    auto ss = Split(ToUnicode(msg), L':');
                     Log err = Log(Log::Level::LV_ERROR)
-                        .setMessage("too many variable used in one function.");
+                        .SetMessage("too many variable used in one function.");
                     if (ss.size() >= 2)
                     {
                         int line = _wtoi(ss[1].c_str());
-                        err.addSourcePos(srcMap.getSourcePos(line));
+                        err.AddSourcePos(srcMap_.GetSourcePos(line));
                     } else
                     {
-                        err.setParam(Log::Param(Log::Param::Tag::SCRIPT, path));
+                        err.SetParam(Log::Param(Log::Param::Tag::SCRIPT, path_));
                     }
                     throw err;
                 } else
                 {
                     throw Log(Log::Level::LV_ERROR)
-                        .setMessage("unexpected compile error occured, please send a bug report. (" + msg + ")")
-                        .setParam(Log::Param(Log::Param::Tag::SCRIPT, path));
+                        .SetMessage("unexpected compile error occured, please send a bug report. (" + msg + ")")
+                        .SetParam(Log::Param(Log::Param::Tag::SCRIPT, path_));
                 }
             }
             Logger::WriteLog(std::move(
                 Log(Log::Level::LV_DETAIL)
-                .setMessage("...compile complete " + std::to_string(tp.getElapsedMilliSec()) + " [ms].")
-                .setParam(Log::Param(Log::Param::Tag::SCRIPT, path))
-                .addSourcePos(compileSrcPos)));
+                .SetMessage("...compile complete " + std::to_string(tp.GetElapsedMilliSec()) + " [ms].")
+                .SetParam(Log::Param(Log::Param::Tag::SCRIPT, path_))
+                .AddSourcePos(compileSrcPos_)));
         }
     } catch (...)
     {
-        if (L)
+        if (L_)
         {
-            lua_close(L);
-            L = NULL;
+            lua_close(L_);
+            L_ = NULL;
         }
-        saveError(std::current_exception());
+        SaveError(std::current_exception());
         throw;
     }
 }
 
-void Script::runBuiltInSub(const std::string &name)
+void Script::RunBuiltInSub(const std::string &name)
 {
-    std::lock_guard<std::recursive_mutex> lock(criticalSection);
-    if (!err)
+    std::lock_guard<std::recursive_mutex> lock(criticalSection_);
+    if (!err_)
     {
-        if (luaStateBusy)
+        if (luaStateBusy_)
         {
-            lua_getglobal(L, (DNH_VAR_PREFIX + name).c_str());
+            lua_getglobal(L_, (DNH_VAR_PREFIX + name).c_str());
         } else
         {
-            lua_getglobal(L, (std::string(DNH_RUNTIME_PREFIX) + "run_" + name).c_str());
+            lua_getglobal(L_, (std::string(DNH_RUNTIME_PREFIX) + "run_" + name).c_str());
         }
-        callLuaChunk();
+        CallLuaChunk();
     }
 }
 
-void Script::callLuaChunk()
+void Script::CallLuaChunk()
 {
-    std::lock_guard<std::recursive_mutex> lock(criticalSection);
-    bool tmp = luaStateBusy;
-    luaStateBusy = true;
-    if (lua_pcall(L, 0, 0, 0) != 0)
+    std::lock_guard<std::recursive_mutex> lock(criticalSection_);
+    bool tmp = luaStateBusy_;
+    luaStateBusy_ = true;
+    if (lua_pcall(L_, 0, 0, 0) != 0)
     {
-        luaStateBusy = false;
-        std::string msg = lua_tostring(L, -1);
-        lua_pop(L, 1);
-        if (!err)
+        luaStateBusy_ = false;
+        std::string msg = lua_tostring(L_, -1);
+        lua_pop(L_, 1);
+        if (!err_)
         {
             try
             {
                 throw Log(Log::Level::LV_ERROR)
-                    .setMessage("unexpected script runtime error occured, please send a bug report.")
-                    .setParam(Log::Param(Log::Param::Tag::TEXT, msg));
+                    .SetMessage("unexpected script runtime error occured, please send a bug report.")
+                    .SetParam(Log::Param(Log::Param::Tag::TEXT, msg));
             } catch (...)
             {
-                saveError(std::current_exception());
+                SaveError(std::current_exception());
             }
         }
-        state = State::SCRIPT_CLOSED;
-        rethrowError();
+        state_ = State::SCRIPT_CLOSED;
+        RethrowError();
     }
-    luaStateBusy = tmp;
+    luaStateBusy_ = tmp;
 }
 
-void Script::load()
+void Script::Load()
 {
-    std::lock_guard<std::recursive_mutex> lock(criticalSection);
-    switch (state)
+    std::lock_guard<std::recursive_mutex> lock(criticalSection_);
+    switch (state_)
     {
         case State::SCRIPT_COMPILE_FAILED:
-            rethrowError();
+            RethrowError();
             break;
         case State::SCRIPT_NOT_COMPILED:
-            compile(); // breakしない
+            Compile(); // breakしない
         case State::SCRIPT_COMPILED:
-            callLuaChunk(); // Main Chunk
-            runBuiltInSub("Loading");
+            CallLuaChunk(); // Main Chunk
+            RunBuiltInSub("Loading");
             Logger::WriteLog(std::move(
                 Log(Log::Level::LV_INFO)
-                .setMessage("load script.")
-                .setParam(Log::Param(Log::Param(Log::Param::Tag::SCRIPT, canonicalPath(path))))
-                .addSourcePos(compileSrcPos)));
-            state = State::SCRIPT_LOADING_COMPLETED;
+                .SetMessage("load script.")
+                .SetParam(Log::Param(Log::Param(Log::Param::Tag::SCRIPT, GetCanonicalPath(path_))))
+                .AddSourcePos(compileSrcPos_)));
+            state_ = State::SCRIPT_LOADING_COMPLETED;
             break;
     }
 }
 
-void Script::start()
+void Script::Start()
 {
-    std::lock_guard<std::recursive_mutex> lock(criticalSection);
-    load();
-    if (state == State::SCRIPT_LOADING_COMPLETED)
+    std::lock_guard<std::recursive_mutex> lock(criticalSection_);
+    Load();
+    if (state_ == State::SCRIPT_LOADING_COMPLETED)
     {
-        state = State::SCRIPT_STARTED;
+        state_ = State::SCRIPT_STARTED;
     }
 }
 
-void Script::runInitialize()
+void Script::RunInitialize()
 {
-    std::lock_guard<std::recursive_mutex> lock(criticalSection);
-    if (state == State::SCRIPT_STARTED)
+    std::lock_guard<std::recursive_mutex> lock(criticalSection_);
+    if (state_ == State::SCRIPT_STARTED)
     {
-        runBuiltInSub("Initialize");
-        state = State::SCRIPT_INITIALIZED;
+        RunBuiltInSub("Initialize");
+        state_ = State::SCRIPT_INITIALIZED;
     }
 }
 
-void Script::runMainLoop()
+void Script::RunMainLoop()
 {
-    std::lock_guard<std::recursive_mutex> lock(criticalSection);
-    if (state == State::SCRIPT_INITIALIZED)
+    std::lock_guard<std::recursive_mutex> lock(criticalSection_);
+    if (state_ == State::SCRIPT_INITIALIZED)
     {
-        runBuiltInSub("MainLoop");
+        RunBuiltInSub("MainLoop");
     }
 }
 
-void Script::notifyEvent(int eventType)
+void Script::NotifyEvent(int eventType)
 {
-    std::lock_guard<std::recursive_mutex> lock(criticalSection);
-    notifyEvent(eventType, std::make_unique<DnhArray>(L""));
+    std::lock_guard<std::recursive_mutex> lock(criticalSection_);
+    NotifyEvent(eventType, std::make_unique<DnhArray>(L""));
 }
 
-void Script::notifyEvent(int eventType, const std::unique_ptr<DnhArray>& args)
+void Script::NotifyEvent(int eventType, const std::unique_ptr<DnhArray>& args)
 {
-    std::lock_guard<std::recursive_mutex> lock(criticalSection);
-    switch (state)
+    std::lock_guard<std::recursive_mutex> lock(criticalSection_);
+    switch (state_)
     {
         case State::SCRIPT_NOT_COMPILED:
         case State::SCRIPT_COMPILE_FAILED:
@@ -409,131 +409,131 @@ void Script::notifyEvent(int eventType, const std::unique_ptr<DnhArray>& args)
         case State::SCRIPT_LOADING_COMPLETED:
             break;
         default:
-            DnhReal((double)eventType).Push(L);
-            lua_setglobal(L, "script_event_type");
-            args->Push(L);
-            lua_setglobal(L, "script_event_args");
-            setScriptResult(std::make_unique<DnhNil>());
-            runBuiltInSub("Event");
+            DnhReal((double)eventType).Push(L_);
+            lua_setglobal(L_, "script_event_type");
+            args->Push(L_);
+            lua_setglobal(L_, "script_event_args");
+            SetScriptResult(std::make_unique<DnhNil>());
+            RunBuiltInSub("Event");
             break;
     }
 }
 
-bool Script::isStgSceneScript() const
+bool Script::IsStgSceneScript() const
 {
-    return stgSceneScript;
+    return isStgSceneScript_;
 }
 
-void Script::setAutoDeleteObjectEnable(bool enable)
+void Script::SetAutoDeleteObjectEnable(bool enable)
 {
-    std::lock_guard<std::recursive_mutex> lock(criticalSection);
-    autoDeleteObjectEnable = enable;
+    std::lock_guard<std::recursive_mutex> lock(criticalSection_);
+    autoDeleteObjectEnable_ = enable;
 }
 
-void Script::addAutoDeleteTargetObjectId(int id)
+void Script::AddAutoDeleteTargetObjectId(int id)
 {
-    std::lock_guard<std::recursive_mutex> lock(criticalSection);
+    std::lock_guard<std::recursive_mutex> lock(criticalSection_);
     if (id != ID_INVALID)
     {
-        autoDeleteTargetObjIds.push_back(id);
+        autoDeleteTargetObjIds_.push_back(id);
     }
 }
 
-std::unique_ptr<DnhValue> Script::getScriptResult() const
+std::unique_ptr<DnhValue> Script::GetScriptResult() const
 {
-    return engine->getScriptResult(getID());
+    return engine_->GetScriptResult(GetID());
 }
 
-void Script::setScriptResult(std::unique_ptr<DnhValue>&& value)
+void Script::SetScriptResult(std::unique_ptr<DnhValue>&& value)
 {
-    std::lock_guard<std::recursive_mutex> lock(criticalSection);
-    engine->setScriptResult(getID(), std::move(value));
+    std::lock_guard<std::recursive_mutex> lock(criticalSection_);
+    engine_->SetScriptResult(GetID(), std::move(value));
 }
 
-void Script::setScriptArgument(int idx, std::unique_ptr<DnhValue>&& value)
+void Script::SetScriptArgument(int idx, std::unique_ptr<DnhValue>&& value)
 {
-    std::lock_guard<std::recursive_mutex> lock(criticalSection);
-    scriptArgs[idx] = std::move(value);
+    std::lock_guard<std::recursive_mutex> lock(criticalSection_);
+    scriptArgs_[idx] = std::move(value);
 }
 
-int Script::getScriptArgumentount() const
+int Script::GetScriptArgumentCount() const
 {
-    return scriptArgs.size();
+    return scriptArgs_.size();
 }
 
-std::unique_ptr<DnhValue> Script::getScriptArgument(int idx)
+std::unique_ptr<DnhValue> Script::GetScriptArgument(int idx)
 {
-    std::lock_guard<std::recursive_mutex> lock(criticalSection);
-    if (scriptArgs.count(idx) == 0) return std::make_unique<DnhNil>();
-    return scriptArgs[idx]->Clone();
+    std::lock_guard<std::recursive_mutex> lock(criticalSection_);
+    if (scriptArgs_.count(idx) == 0) return std::make_unique<DnhNil>();
+    return scriptArgs_[idx]->Clone();
 }
 
-std::shared_ptr<SourcePos> Script::getSourcePos(int line)
+std::shared_ptr<SourcePos> Script::GetSourcePos(int line)
 {
-    std::lock_guard<std::recursive_mutex> lock(criticalSection);
-    return srcMap.getSourcePos(line);
+    std::lock_guard<std::recursive_mutex> lock(criticalSection_);
+    return srcMap_.GetSourcePos(line);
 }
 
-void Script::saveError(const std::exception_ptr& e)
+void Script::SaveError(const std::exception_ptr& e)
 {
-    std::lock_guard<std::recursive_mutex> lock(criticalSection);
-    err = e;
+    std::lock_guard<std::recursive_mutex> lock(criticalSection_);
+    err_ = e;
 }
 
-void Script::rethrowError() const
+void Script::RethrowError() const
 {
-    std::lock_guard<std::recursive_mutex> lock(criticalSection);
-    std::rethrow_exception(err);
+    std::lock_guard<std::recursive_mutex> lock(criticalSection_);
+    std::rethrow_exception(err_);
 }
 
 ScriptManager::ScriptManager(Engine * engine) :
-    idGen(0),
-    engine(engine)
+    idGen_(0),
+    engine_(engine)
 {
 }
 
 ScriptManager::~ScriptManager() {}
 
-std::shared_ptr<Script> ScriptManager::compile(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<SourcePos>& srcPos)
+std::shared_ptr<Script> ScriptManager::Compile(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<SourcePos>& srcPos)
 {
-    auto script = std::make_shared<Script>(path, type, version, idGen++, engine, srcPos);
-    script->compile();
-    scriptList.push_back(script);
-    scriptMap[script->getID()] = script;
+    auto script = std::make_shared<Script>(path, type, version, idGen_++, engine_, srcPos);
+    script->Compile();
+    scriptList_.push_back(script);
+    scriptMap_[script->GetID()] = script;
     return script;
 }
 
-std::shared_ptr<Script> ScriptManager::compileInThread(const std::wstring & path, const std::wstring & type, const std::wstring & version, const std::shared_ptr<SourcePos>& srcPos)
+std::shared_ptr<Script> ScriptManager::CompileInThread(const std::wstring & path, const std::wstring & type, const std::wstring & version, const std::shared_ptr<SourcePos>& srcPos)
 {
-    auto script = std::make_shared<Script>(path, type, version, idGen++, engine, srcPos);
-    script->compileInThread();
-    scriptList.push_back(script);
-    scriptMap[script->getID()] = script;
+    auto script = std::make_shared<Script>(path, type, version, idGen_++, engine_, srcPos);
+    script->CompileInThread();
+    scriptList_.push_back(script);
+    scriptMap_[script->GetID()] = script;
     return script;
 }
 
-void ScriptManager::runAll(bool ignoreStgSceneScript)
+void ScriptManager::RunAll(bool ignoreStgSceneScript)
 {
     // 未ロードのスクリプトがあれば1つだけロードする
     bool notLoaded = true;
-    for (auto& script : scriptList)
+    for (auto& script : scriptList_)
     {
-        switch (script->getState())
+        switch (script->GetState())
         {
             case Script::State::SCRIPT_COMPILED:
                 if (notLoaded)
                 {
-                    script->load();
+                    script->Load();
                     notLoaded = false;
                 }
                 break;
             case Script::State::SCRIPT_COMPILE_FAILED:
-                script->rethrowError();
+                script->RethrowError();
                 break;
             case Script::State::SCRIPT_INITIALIZED:
-                if (!(ignoreStgSceneScript && script->isStgSceneScript()))
+                if (!(ignoreStgSceneScript && script->IsStgSceneScript()))
                 {
-                    script->runMainLoop();
+                    script->RunMainLoop();
                 }
                 break;
         }
@@ -542,11 +542,11 @@ void ScriptManager::runAll(bool ignoreStgSceneScript)
 
 std::shared_ptr<Script> ScriptManager::Get(int id) const
 {
-    auto it = scriptMap.find(id);
-    if (it != scriptMap.end())
+    auto it = scriptMap_.find(id);
+    if (it != scriptMap_.end())
     {
         const auto& script = it->second;
-        if (!script->isClosed())
+        if (!script->IsClosed())
         {
             return it->second;
         }
@@ -554,72 +554,72 @@ std::shared_ptr<Script> ScriptManager::Get(int id) const
     return nullptr;
 }
 
-void ScriptManager::notifyEventAll(int eventType)
+void ScriptManager::NotifyEventAll(int eventType)
 {
-    for (auto& script : scriptList)
+    for (auto& script : scriptList_)
     {
         // NOTE: NotifyEventAllで送るとcloseされたスクリプトには届かない
-        if (!script->isClosed())
+        if (!script->IsClosed())
         {
-            script->notifyEvent(eventType);
+            script->NotifyEvent(eventType);
         }
     }
 }
 
-void ScriptManager::notifyEventAll(int eventType, const std::unique_ptr<DnhArray>& args)
+void ScriptManager::NotifyEventAll(int eventType, const std::unique_ptr<DnhArray>& args)
 {
-    for (auto& script : scriptList)
+    for (auto& script : scriptList_)
     {
         // NOTE: NotifyEventAllで送るとcloseされたスクリプトには届かない
-        if (!script->isClosed())
+        if (!script->IsClosed())
         {
-            script->notifyEvent(eventType, args);
+            script->NotifyEvent(eventType, args);
         }
     }
 }
 
-void ScriptManager::cleanClosedScript()
+void ScriptManager::CleanClosedScript()
 {
-    auto it = scriptList.begin();
-    while (it != scriptList.end())
+    auto it = scriptList_.begin();
+    while (it != scriptList_.end())
     {
         auto& script = *it;
-        if (script->isClosed())
+        if (script->IsClosed())
         {
-            scriptMap.erase(script->getID());
-            it = scriptList.erase(it);
+            scriptMap_.erase(script->GetID());
+            it = scriptList_.erase(it);
         } else ++it;
     }
 }
 
-void ScriptManager::closeStgSceneScript()
+void ScriptManager::CloseStgSceneScript()
 {
-    for (auto& script : scriptList)
+    for (auto& script : scriptList_)
     {
-        if (script->isStgSceneScript())
+        if (script->IsStgSceneScript())
         {
-            script->close();
+            script->Close();
         }
     }
 }
 
-std::unique_ptr<DnhValue> ScriptManager::getScriptResult(int scriptId) const
+std::unique_ptr<DnhValue> ScriptManager::GetScriptResult(int scriptId) const
 {
-    auto it = scriptResults.find(scriptId);
-    if (it != scriptResults.end())
+    auto it = scriptResults_.find(scriptId);
+    if (it != scriptResults_.end())
     {
         return it->second->Clone();
     }
     return std::make_unique<DnhNil>();
 }
 
-void ScriptManager::setScriptResult(int scriptId, std::unique_ptr<DnhValue>&& value)
+void ScriptManager::SetScriptResult(int scriptId, std::unique_ptr<DnhValue>&& value)
 {
-    scriptResults[scriptId] = std::move(value);
+    scriptResults_[scriptId] = std::move(value);
 }
 
-void ScriptManager::clearScriptResult()
+void ScriptManager::ClearScriptResult()
 {
-    scriptResults.clear();
+    scriptResults_.clear();
 }
 }

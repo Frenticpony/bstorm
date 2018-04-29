@@ -90,49 +90,49 @@ static const char meshVertexShaderSrc[] =
 namespace bstorm
 {
 Renderer::Renderer(IDirect3DDevice9* dev) :
-    d3DDevice(dev),
-    prim2DVertexShader(NULL),
-    prim3DVertexShader(NULL),
-    meshVertexShader(NULL),
-    currentBlendType(BLEND_NONE),
-    fogEnable(false),
-    fogStart(0),
-    fogEnd(0)
+    d3DDevice_(dev),
+    prim2DVertexShader_(nullptr),
+    prim3DVertexShader_(nullptr),
+    meshVertexShader_(nullptr),
+    currentBlendType_(BLEND_NONE),
+    fogEnable_(false),
+    fogStart_(0),
+    fogEnd_(0)
 {
-    ID3DXBuffer* code = NULL;
-    ID3DXBuffer* error = NULL;
+    ID3DXBuffer* code = nullptr;
+    ID3DXBuffer* error = nullptr;
     try
     {
         // create vertex shader 2D
-        if (FAILED(D3DXCompileShader(prim2DVertexShaderSrc, sizeof(prim2DVertexShaderSrc) - 1, NULL, NULL, "main", "vs_1_1", D3DXSHADER_PACKMATRIX_ROWMAJOR, &code, &error, NULL)))
+        if (FAILED(D3DXCompileShader(prim2DVertexShaderSrc, sizeof(prim2DVertexShaderSrc) - 1, nullptr, nullptr, "main", "vs_1_1", D3DXSHADER_PACKMATRIX_ROWMAJOR, &code, &error, nullptr)))
         {
             throw Log(Log::Level::LV_ERROR)
-                .setMessage("internal shader compile error.")
-                .setParam(Log::Param(Log::Param::Tag::TEXT, (const char*)error->GetBufferPointer()));
+                .SetMessage("internal shader compile error.")
+                .SetParam(Log::Param(Log::Param::Tag::TEXT, (const char*)error->GetBufferPointer()));
         }
-        d3DDevice->CreateVertexShader((const DWORD*)code->GetBufferPointer(), &prim2DVertexShader);
+        d3DDevice_->CreateVertexShader((const DWORD*)code->GetBufferPointer(), &prim2DVertexShader_);
         safe_release(code);
         safe_release(error);
 
         // create vertex shader 3D
-        if (FAILED(D3DXCompileShader(prim3DVertexShaderSrc, sizeof(prim3DVertexShaderSrc) - 1, NULL, NULL, "main", "vs_1_1", D3DXSHADER_PACKMATRIX_ROWMAJOR, &code, &error, NULL)))
+        if (FAILED(D3DXCompileShader(prim3DVertexShaderSrc, sizeof(prim3DVertexShaderSrc) - 1, nullptr, nullptr, "main", "vs_1_1", D3DXSHADER_PACKMATRIX_ROWMAJOR, &code, &error, nullptr)))
         {
             throw Log(Log::Level::LV_ERROR)
-                .setMessage("internal shader compile error.")
-                .setParam(Log::Param(Log::Param::Tag::TEXT, (const char*)error->GetBufferPointer()));
+                .SetMessage("internal shader compile error.")
+                .SetParam(Log::Param(Log::Param::Tag::TEXT, (const char*)error->GetBufferPointer()));
         }
-        d3DDevice->CreateVertexShader((const DWORD*)code->GetBufferPointer(), &prim3DVertexShader);
+        d3DDevice_->CreateVertexShader((const DWORD*)code->GetBufferPointer(), &prim3DVertexShader_);
         safe_release(code);
         safe_release(error);
 
         // create vertex shader mesh
-        if (FAILED(D3DXCompileShader(meshVertexShaderSrc, sizeof(meshVertexShaderSrc) - 1, NULL, NULL, "main", "vs_1_1", D3DXSHADER_PACKMATRIX_ROWMAJOR, &code, &error, NULL)))
+        if (FAILED(D3DXCompileShader(meshVertexShaderSrc, sizeof(meshVertexShaderSrc) - 1, nullptr, nullptr, "main", "vs_1_1", D3DXSHADER_PACKMATRIX_ROWMAJOR, &code, &error, nullptr)))
         {
             throw Log(Log::Level::LV_ERROR)
-                .setMessage("internal shader compile error.")
-                .setParam(Log::Param(Log::Param::Tag::TEXT, (const char*)error->GetBufferPointer()));
+                .SetMessage("internal shader compile error.")
+                .SetParam(Log::Param(Log::Param::Tag::TEXT, (const char*)error->GetBufferPointer()));
         }
-        d3DDevice->CreateVertexShader((const DWORD*)code->GetBufferPointer(), &meshVertexShader);
+        d3DDevice_->CreateVertexShader((const DWORD*)code->GetBufferPointer(), &meshVertexShader_);
         safe_release(code);
         safe_release(error);
     } catch (...)
@@ -142,42 +142,42 @@ Renderer::Renderer(IDirect3DDevice9* dev) :
         throw;
     }
 
-    D3DXMatrixTranslation(&halfPixelOffsetMatrix, -0.5f, -0.5f, 0.0f);
+    D3DXMatrixTranslation(&halfPixelOffsetMatrix_, -0.5f, -0.5f, 0.0f);
 }
 
 Renderer::~Renderer()
 {
-    prim2DVertexShader->Release();
-    prim3DVertexShader->Release();
-    meshVertexShader->Release();
+    prim2DVertexShader_->Release();
+    prim3DVertexShader_->Release();
+    meshVertexShader_->Release();
 }
 
-void Renderer::initRenderState()
+void Renderer::InitRenderState()
 {
     // カリング無効化
-    d3DDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+    d3DDevice_->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 
     // 固定機能パイプラインのピクセルシェーダ用
-    d3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-    d3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
-    d3DDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-    d3DDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
-    d3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-    d3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+    d3DDevice_->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+    d3DDevice_->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+    d3DDevice_->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+    d3DDevice_->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+    d3DDevice_->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+    d3DDevice_->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 
     // 透明度0を描画しないようにする
     // NOTE : ObjTextが乗算合成されたときに、背景部分が真っ黒にならないようにするため
-    d3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
-    d3DDevice->SetRenderState(D3DRS_ALPHAREF, 0);
-    d3DDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
+    d3DDevice_->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
+    d3DDevice_->SetRenderState(D3DRS_ALPHAREF, 0);
+    d3DDevice_->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
 
-    currentBlendType = BLEND_ALPHA;
-    d3DDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-    d3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-    d3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+    currentBlendType_ = BLEND_ALPHA;
+    d3DDevice_->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+    d3DDevice_->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+    d3DDevice_->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 
     // light off
-    d3DDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
+    d3DDevice_->SetRenderState(D3DRS_LIGHTING, FALSE);
 }
 
 static int calcPolygonNum(D3DPRIMITIVETYPE primType, int vertexCount)
@@ -191,23 +191,23 @@ static int calcPolygonNum(D3DPRIMITIVETYPE primType, int vertexCount)
     }
 }
 
-void Renderer::renderPrim2D(D3DPRIMITIVETYPE primType, int vertexCount, const Vertex* vertices, IDirect3DTexture9* texture, int blendType, const D3DXMATRIX & worldMatrix, const std::shared_ptr<Shader>& pixelShader, bool permitCamera, bool insertHalfPixelOffset)
+void Renderer::RenderPrim2D(D3DPRIMITIVETYPE primType, int vertexCount, const Vertex* vertices, IDirect3DTexture9* texture, int blendType, const D3DXMATRIX & worldMatrix, const std::shared_ptr<Shader>& pixelShader, bool permitCamera, bool insertHalfPixelOffset)
 {
     // disable z-buffer-write, z-test, fog
-    d3DDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
-    d3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
-    d3DDevice->SetRenderState(D3DRS_FOGENABLE, FALSE);
+    d3DDevice_->SetRenderState(D3DRS_ZENABLE, FALSE);
+    d3DDevice_->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+    d3DDevice_->SetRenderState(D3DRS_FOGENABLE, FALSE);
     // set blend type
-    setBlendType(blendType);
+    SetBlendType(blendType);
     // set vertex shader
-    d3DDevice->SetVertexShader(prim2DVertexShader);
+    d3DDevice_->SetVertexShader(prim2DVertexShader_);
     // set shader constant
-    d3DDevice->SetVertexShaderConstantF(0, (const float*)&(insertHalfPixelOffset ? (halfPixelOffsetMatrix * worldMatrix) : worldMatrix), 4);
-    d3DDevice->SetVertexShaderConstantF(4, (const float*)&(permitCamera ? viewProjMatrix2D : forbidCameraViewProjMatrix2D), 4);
+    d3DDevice_->SetVertexShaderConstantF(0, (const float*)&(insertHalfPixelOffset ? (halfPixelOffsetMatrix_ * worldMatrix) : worldMatrix), 4);
+    d3DDevice_->SetVertexShaderConstantF(4, (const float*)&(permitCamera ? viewProjMatrix2D_ : forbidCameraViewProjMatrix2D_), 4);
     // set vertex format
-    d3DDevice->SetFVF(Vertex::Format);
+    d3DDevice_->SetFVF(Vertex::Format);
     // set texture
-    d3DDevice->SetTexture(0, texture);
+    d3DDevice_->SetTexture(0, texture);
     // set pixel shader
     if (pixelShader)
     {
@@ -217,40 +217,40 @@ void Renderer::renderPrim2D(D3DPRIMITIVETYPE primType, int vertexCount, const Ve
         for (int i = 0; i < passCnt; i++)
         {
             effect->BeginPass(i);
-            d3DDevice->DrawPrimitiveUP(primType, calcPolygonNum(primType, vertexCount), vertices, sizeof(Vertex));
+            d3DDevice_->DrawPrimitiveUP(primType, calcPolygonNum(primType, vertexCount), vertices, sizeof(Vertex));
             effect->EndPass();
         }
         effect->End();
     } else
     {
-        d3DDevice->SetPixelShader(NULL);
-        d3DDevice->DrawPrimitiveUP(primType, calcPolygonNum(primType, vertexCount), vertices, sizeof(Vertex));
+        d3DDevice_->SetPixelShader(nullptr);
+        d3DDevice_->DrawPrimitiveUP(primType, calcPolygonNum(primType, vertexCount), vertices, sizeof(Vertex));
     }
-    d3DDevice->SetVertexShader(NULL);
-    d3DDevice->SetPixelShader(NULL);
+    d3DDevice_->SetVertexShader(nullptr);
+    d3DDevice_->SetPixelShader(nullptr);
 }
 
-void Renderer::renderPrim3D(D3DPRIMITIVETYPE primType, int vertexCount, const Vertex* vertices, IDirect3DTexture9* texture, int blendType, const D3DXMATRIX & worldMatrix, const std::shared_ptr<Shader>& pixelShader, bool zWriteEnable, bool zTestEnable, bool useFog, bool billboardEnable)
+void Renderer::RenderPrim3D(D3DPRIMITIVETYPE primType, int vertexCount, const Vertex* vertices, IDirect3DTexture9* texture, int blendType, const D3DXMATRIX & worldMatrix, const std::shared_ptr<Shader>& pixelShader, bool zWriteEnable, bool zTestEnable, bool useFog, bool billboardEnable_)
 {
     // set z-buffer-write, z-test, fog
-    d3DDevice->SetRenderState(D3DRS_ZENABLE, zTestEnable ? TRUE : FALSE);
-    d3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, zWriteEnable ? TRUE : FALSE);
-    d3DDevice->SetRenderState(D3DRS_FOGENABLE, useFog && fogEnable ? TRUE : FALSE);
-    d3DDevice->SetRenderState(D3DRS_FOGCOLOR, fogColor);
+    d3DDevice_->SetRenderState(D3DRS_ZENABLE, zTestEnable ? TRUE : FALSE);
+    d3DDevice_->SetRenderState(D3DRS_ZWRITEENABLE, zWriteEnable ? TRUE : FALSE);
+    d3DDevice_->SetRenderState(D3DRS_FOGENABLE, useFog && fogEnable_ ? TRUE : FALSE);
+    d3DDevice_->SetRenderState(D3DRS_FOGCOLOR, fogColor_);
     // set blend type
-    setBlendType(blendType);
+    SetBlendType(blendType);
     // set vertex shader
-    d3DDevice->SetVertexShader(prim3DVertexShader);
+    d3DDevice_->SetVertexShader(prim3DVertexShader_);
     // set shader constant
     // 3Dオブジェクトは頂点数が多いので、予め行列を全て掛けておく
-    const D3DXMATRIX worldViewProjMatrix = worldMatrix * (billboardEnable ? billboardViewProjMatrix3D : viewProjMatrix3D);
-    d3DDevice->SetVertexShaderConstantF(0, (const float*)&worldViewProjMatrix, 4);
-    d3DDevice->SetVertexShaderConstantF(12, &fogStart, 1);
-    d3DDevice->SetVertexShaderConstantF(13, &fogEnd, 1);
+    const D3DXMATRIX worldViewProjMatrix = worldMatrix * (billboardEnable_ ? billboardViewProjMatrix3D_ : viewProjMatrix3D_);
+    d3DDevice_->SetVertexShaderConstantF(0, (const float*)&worldViewProjMatrix, 4);
+    d3DDevice_->SetVertexShaderConstantF(12, &fogStart_, 1);
+    d3DDevice_->SetVertexShaderConstantF(13, &fogEnd_, 1);
     // set vertex format
-    d3DDevice->SetFVF(Vertex::Format);
+    d3DDevice_->SetFVF(Vertex::Format);
     // set texture
-    d3DDevice->SetTexture(0, texture);
+    d3DDevice_->SetTexture(0, texture);
     // set pixel shader
     if (pixelShader)
     {
@@ -260,39 +260,39 @@ void Renderer::renderPrim3D(D3DPRIMITIVETYPE primType, int vertexCount, const Ve
         for (int i = 0; i < passCnt; i++)
         {
             effect->BeginPass(i);
-            d3DDevice->DrawPrimitiveUP(primType, calcPolygonNum(primType, vertexCount), vertices, sizeof(Vertex));
+            d3DDevice_->DrawPrimitiveUP(primType, calcPolygonNum(primType, vertexCount), vertices, sizeof(Vertex));
             effect->EndPass();
         }
         effect->End();
     } else
     {
-        d3DDevice->SetPixelShader(NULL);
-        d3DDevice->DrawPrimitiveUP(primType, calcPolygonNum(primType, vertexCount), vertices, sizeof(Vertex));
+        d3DDevice_->SetPixelShader(nullptr);
+        d3DDevice_->DrawPrimitiveUP(primType, calcPolygonNum(primType, vertexCount), vertices, sizeof(Vertex));
     }
-    d3DDevice->SetVertexShader(NULL);
-    d3DDevice->SetPixelShader(NULL);
+    d3DDevice_->SetVertexShader(nullptr);
+    d3DDevice_->SetPixelShader(nullptr);
 }
 
-void Renderer::renderMesh(const std::shared_ptr<Mesh>& mesh, const D3DCOLORVALUE& col, int blendType, const D3DXMATRIX & worldMatrix, const std::shared_ptr<Shader>& pixelShader, bool zWriteEnable, bool zTestEnable, bool useFog)
+void Renderer::RenderMesh(const std::shared_ptr<Mesh>& mesh, const D3DCOLORVALUE& col, int blendType, const D3DXMATRIX & worldMatrix, const std::shared_ptr<Shader>& pixelShader, bool zWriteEnable, bool zTestEnable, bool useFog)
 {
     // set z-buffer-write, z-test, fog
-    d3DDevice->SetRenderState(D3DRS_ZENABLE, zTestEnable ? TRUE : FALSE);
-    d3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, zWriteEnable ? TRUE : FALSE);
-    d3DDevice->SetRenderState(D3DRS_FOGENABLE, useFog && fogEnable ? TRUE : FALSE);
-    d3DDevice->SetRenderState(D3DRS_FOGCOLOR, fogColor);
+    d3DDevice_->SetRenderState(D3DRS_ZENABLE, zTestEnable ? TRUE : FALSE);
+    d3DDevice_->SetRenderState(D3DRS_ZWRITEENABLE, zWriteEnable ? TRUE : FALSE);
+    d3DDevice_->SetRenderState(D3DRS_FOGENABLE, useFog && fogEnable_ ? TRUE : FALSE);
+    d3DDevice_->SetRenderState(D3DRS_FOGCOLOR, fogColor_);
     // set blend type
-    setBlendType(blendType);
+    SetBlendType(blendType);
     // set vertex shader
-    d3DDevice->SetVertexShader(meshVertexShader);
+    d3DDevice_->SetVertexShader(meshVertexShader_);
     // set shader constant
     {
-        const D3DXMATRIX worldViewProjMatrix = worldMatrix * viewProjMatrix3D;
-        d3DDevice->SetVertexShaderConstantF(0, (const float*)&worldViewProjMatrix, 4);
+        const D3DXMATRIX worldViewProjMatrix = worldMatrix * viewProjMatrix3D_;
+        d3DDevice_->SetVertexShaderConstantF(0, (const float*)&worldViewProjMatrix, 4);
     }
     {
         D3DXMATRIX normalMatrix = worldMatrix;
         normalMatrix._41 = normalMatrix._42 = normalMatrix._43 = 0.0f; // 平行移動成分を消去
-        if (D3DXMatrixInverse(&normalMatrix, NULL, &normalMatrix))
+        if (D3DXMatrixInverse(&normalMatrix, nullptr, &normalMatrix))
         {
             D3DXMatrixTranspose(&normalMatrix, &normalMatrix);
         } else
@@ -301,25 +301,25 @@ void Renderer::renderMesh(const std::shared_ptr<Mesh>& mesh, const D3DCOLORVALUE
             // とりあえず単位行列入れておく
             D3DXMatrixIdentity(&normalMatrix);
         }
-        d3DDevice->SetVertexShaderConstantF(4, (const float*)&normalMatrix, 4);
+        d3DDevice_->SetVertexShaderConstantF(4, (const float*)&normalMatrix, 4);
     }
-    d3DDevice->SetVertexShaderConstantF(12, &fogStart, 1);
-    d3DDevice->SetVertexShaderConstantF(13, &fogEnd, 1);
+    d3DDevice_->SetVertexShaderConstantF(12, &fogStart_, 1);
+    d3DDevice_->SetVertexShaderConstantF(13, &fogEnd_, 1);
     // set vertex format
-    d3DDevice->SetFVF(MeshVertex::Format);
+    d3DDevice_->SetFVF(MeshVertex::Format);
     for (const auto& mat : mesh->materials)
     {
         // set material
         D3DXVECTOR4 amb = D3DXVECTOR4{ col.r * (mat.amb + mat.emi), col.g * (mat.amb + mat.emi), col.b * (mat.amb + mat.emi), col.a };
         D3DXVECTOR4 dif = D3DXVECTOR4{ col.r * mat.dif, col.g * mat.dif, col.b * mat.dif, col.a };
-        d3DDevice->SetVertexShaderConstantF(8, (const float*)&amb, 1);
-        d3DDevice->SetVertexShaderConstantF(9, (const float*)&dif, 1);
+        d3DDevice_->SetVertexShaderConstantF(8, (const float*)&amb, 1);
+        d3DDevice_->SetVertexShaderConstantF(9, (const float*)&dif, 1);
         // set light dir
-        D3DXVECTOR4 lightDir = { 0, -1, -1, 0 };
+        D3DXVECTOR4 lightDir = { 0.0f, -1.0f, -1.0f, 0.0f };
         D3DXVec4Normalize(&lightDir, &lightDir);
-        d3DDevice->SetVertexShaderConstantF(10, (const float*)&lightDir, 1);
+        d3DDevice_->SetVertexShaderConstantF(10, (const float*)&lightDir, 1);
         // set texture
-        d3DDevice->SetTexture(0, mat.texture ? mat.texture->getTexture() : NULL);
+        d3DDevice_->SetTexture(0, mat.texture ? mat.texture->GetTexture() : nullptr);
         // set pixel shader
         if (pixelShader)
         {
@@ -329,26 +329,26 @@ void Renderer::renderMesh(const std::shared_ptr<Mesh>& mesh, const D3DCOLORVALUE
             for (int i = 0; i < passCnt; i++)
             {
                 effect->BeginPass(i);
-                d3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLELIST, mat.vertices.size() / 3, mat.vertices.data(), sizeof(MeshVertex));
+                d3DDevice_->DrawPrimitiveUP(D3DPT_TRIANGLELIST, mat.vertices.size() / 3, mat.vertices.data(), sizeof(MeshVertex));
                 effect->EndPass();
             }
             effect->End();
         } else
         {
-            d3DDevice->SetPixelShader(NULL);
-            d3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLELIST, mat.vertices.size() / 3, mat.vertices.data(), sizeof(MeshVertex));
+            d3DDevice_->SetPixelShader(nullptr);
+            d3DDevice_->DrawPrimitiveUP(D3DPT_TRIANGLELIST, mat.vertices.size() / 3, mat.vertices.data(), sizeof(MeshVertex));
         }
     }
-    d3DDevice->SetVertexShader(NULL);
-    d3DDevice->SetPixelShader(NULL);
+    d3DDevice_->SetVertexShader(nullptr);
+    d3DDevice_->SetPixelShader(nullptr);
 }
 
-void Renderer::setViewProjMatrix2D(const D3DXMATRIX& view, const D3DXMATRIX& proj)
+void Renderer::SetViewProjMatrix2D(const D3DXMATRIX& view, const D3DXMATRIX& proj)
 {
-    viewProjMatrix2D = view * proj;
+    viewProjMatrix2D_ = view * proj;
 }
 
-void Renderer::setForbidCameraViewProjMatrix2D(int screenWidth, int screenHeight)
+void Renderer::SetForbidCameraViewProjMatrix2D(int screenWidth, int screenHeight)
 {
     Camera2D camera2D;
     camera2D.Reset(0, 0);
@@ -356,82 +356,82 @@ void Renderer::setForbidCameraViewProjMatrix2D(int screenWidth, int screenHeight
     D3DXMATRIX forbidCameraProjMatrix2D;
     camera2D.GenerateViewMatrix(&forbidCameraViewMatrix2D);
     camera2D.GenerateProjMatrix(&forbidCameraProjMatrix2D, screenWidth, screenHeight, 0, 0);
-    forbidCameraViewProjMatrix2D = forbidCameraViewMatrix2D * forbidCameraProjMatrix2D;
+    forbidCameraViewProjMatrix2D_ = forbidCameraViewMatrix2D * forbidCameraProjMatrix2D;
 }
 
-void Renderer::setViewProjMatrix3D(const D3DXMATRIX & view, const D3DXMATRIX & proj)
+void Renderer::SetViewProjMatrix3D(const D3DXMATRIX & view, const D3DXMATRIX & proj)
 {
-    viewProjMatrix3D = view * proj;
+    viewProjMatrix3D_ = view * proj;
 }
 
-void Renderer::setViewProjMatrix3D(const D3DXMATRIX & view, const D3DXMATRIX & proj, const D3DXMATRIX & billboardMatrix)
+void Renderer::SetViewProjMatrix3D(const D3DXMATRIX & view, const D3DXMATRIX & proj, const D3DXMATRIX & billboardMatrix)
 {
-    viewProjMatrix3D = view * proj;
-    billboardViewProjMatrix3D = billboardMatrix * viewProjMatrix3D;
+    viewProjMatrix3D_ = view * proj;
+    billboardViewProjMatrix3D_ = billboardMatrix * viewProjMatrix3D_;
 }
 
-void Renderer::setBlendType(int type)
+void Renderer::SetBlendType(int type)
 {
-    if (type == currentBlendType) return;
+    if (type == currentBlendType_) return;
     switch (type)
     {
         case BLEND_ADD_RGB:
-            d3DDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-            d3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
-            d3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
+            d3DDevice_->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+            d3DDevice_->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+            d3DDevice_->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
             break;
         case BLEND_ADD_ARGB:
-            d3DDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-            d3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-            d3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
+            d3DDevice_->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+            d3DDevice_->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+            d3DDevice_->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
             break;
         case BLEND_MULTIPLY:
-            d3DDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-            d3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_DESTCOLOR);
-            d3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
+            d3DDevice_->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+            d3DDevice_->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_DESTCOLOR);
+            d3DDevice_->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
             break;
         case BLEND_SUBTRACT:
-            d3DDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_REVSUBTRACT);
-            d3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-            d3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
+            d3DDevice_->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_REVSUBTRACT);
+            d3DDevice_->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+            d3DDevice_->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
             break;
         case BLEND_INV_DESTRGB:
-            d3DDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-            d3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_INVDESTCOLOR);
-            d3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCCOLOR);
+            d3DDevice_->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+            d3DDevice_->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_INVDESTCOLOR);
+            d3DDevice_->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCCOLOR);
             break;
         case BLEND_ALPHA:
         default:
-            d3DDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-            d3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-            d3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+            d3DDevice_->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+            d3DDevice_->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+            d3DDevice_->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
             break;
     }
-    currentBlendType = type;
+    currentBlendType_ = type;
 }
 
-void Renderer::enableScissorTest(const RECT& rect)
+void Renderer::EnableScissorTest(const RECT& rect)
 {
-    d3DDevice->SetRenderState(D3DRS_SCISSORTESTENABLE, TRUE);
-    d3DDevice->SetScissorRect(&rect);
+    d3DDevice_->SetRenderState(D3DRS_SCISSORTESTENABLE, TRUE);
+    d3DDevice_->SetScissorRect(&rect);
 }
 
-void Renderer::disableScissorTest()
+void Renderer::DisableScissorTest()
 {
-    d3DDevice->SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
+    d3DDevice_->SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
 }
 
-void Renderer::setFogEnable(bool enable)
+void Renderer::SetFogEnable(bool enable)
 {
-    fogEnable = enable;
-    if (enable) { setFogParam(0, 0, 0, 0, 0); }
+    fogEnable_ = enable;
+    if (enable) { SetFogParam(0, 0, 0, 0, 0); }
 }
 
-void Renderer::setFogParam(float start, float end, int r, int g, int b)
+void Renderer::SetFogParam(float start, float end, int r, int g, int b)
 {
-    fogEnable = true;
-    fogStart = start;
-    fogEnd = end;
-    fogColor = toD3DCOLOR(ColorRGB(r, g, b), 0xff);
+    fogEnable_ = true;
+    fogStart_ = start;
+    fogEnd_ = end;
+    fogColor_ = ToD3DCOLOR(ColorRGB(r, g, b), 0xff);
 }
 }

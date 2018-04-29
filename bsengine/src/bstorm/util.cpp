@@ -5,18 +5,18 @@
 
 namespace bstorm
 {
-D3DCOLOR toD3DCOLOR(const ColorRGB& rgb, int alpha)
+D3DCOLOR ToD3DCOLOR(const ColorRGB& rgb, int alpha)
 {
     alpha = constrain(alpha, 0, 0xff);
-    return D3DCOLOR_ARGB(alpha, rgb.getR(), rgb.getG(), rgb.getB());
+    return D3DCOLOR_ARGB(alpha, rgb.GetR(), rgb.GetG(), rgb.GetB());
 }
 
-void mkdir_p(const std::wstring& dirName)
+void MakeDirectoryP(const std::wstring& dirName)
 {
     auto attr = GetFileAttributes(dirName.c_str());
     if (attr != -1 && (attr & FILE_ATTRIBUTE_DIRECTORY)) return;
     std::wstring dir = L"";
-    for (auto& name : split(canonicalPath(dirName), L'/'))
+    for (auto& name : Split(GetCanonicalPath(dirName), L'/'))
     {
         if (name.empty()) break;
         dir += name + L"/";
@@ -24,22 +24,22 @@ void mkdir_p(const std::wstring& dirName)
     }
 }
 
-std::wstring getExt(const std::wstring& path)
+std::wstring GetExt(const std::wstring& path)
 {
     auto found = path.find_last_of(L".");
     return (found != std::string::npos) ? path.substr(found) : L"";
 }
 
-std::wstring getLowerExt(const std::wstring& path)
+std::wstring GetLowerExt(const std::wstring& path)
 {
-    auto ext = getExt(path);
+    auto ext = GetExt(path);
     std::transform(ext.begin(), ext.end(), ext.begin(), tolower);
     return ext;
 }
 
-std::wstring getStem(const std::wstring & path)
+std::wstring GetStem(const std::wstring & path)
 {
-    std::wstring fileName = getFileName(path);
+    std::wstring fileName = GetFileName(path);
     auto found = fileName.find_last_of(L".");
     if (found != std::string::npos)
     {
@@ -50,7 +50,7 @@ std::wstring getStem(const std::wstring & path)
     }
 }
 
-std::wstring getFileName(const std::wstring & path)
+std::wstring GetFileName(const std::wstring & path)
 {
     auto found = path.find_last_of(L"/\\");
     if (found != std::string::npos)
@@ -62,10 +62,10 @@ std::wstring getFileName(const std::wstring & path)
     }
 }
 
-std::wstring getOmittedFileName(const std::wstring & path, int size)
+std::wstring GetOmittedFileName(const std::wstring & path, int size)
 {
-    auto stem = getStem(path);
-    auto ext = getExt(path);
+    auto stem = GetStem(path);
+    auto ext = GetExt(path);
     std::wstring ret;
     int omittedStemSize = std::max(0, size - (int)ext.size());
     ret += stem.substr(0, omittedStemSize);
@@ -77,12 +77,12 @@ std::wstring getOmittedFileName(const std::wstring & path, int size)
     return ret;
 }
 
-void getFilePathsRecursively(const std::wstring& dir, std::vector<std::wstring>& pathList, const std::unordered_set<std::wstring>& ignoreExts)
+void GetFilePathsRecursively(const std::wstring& dir, std::vector<std::wstring>& pathList, const std::unordered_set<std::wstring>& ignoreExts)
 {
-    getFilePaths(dir, pathList, ignoreExts, true);
+    GetFilePaths(dir, pathList, ignoreExts, true);
 }
 
-void getFilePaths(const std::wstring & dir, std::vector<std::wstring>& pathList, const std::unordered_set<std::wstring>& ignoreExts, bool doRecursive)
+void GetFilePaths(const std::wstring & dir, std::vector<std::wstring>& pathList, const std::unordered_set<std::wstring>& ignoreExts, bool doRecursive)
 {
     if (dir.empty()) return;
     WIN32_FIND_DATA data;
@@ -95,13 +95,13 @@ void getFilePaths(const std::wstring & dir, std::vector<std::wstring>& pathList,
         {
             continue;
         }
-        std::wstring path = concatPath(dir, fileName);
+        std::wstring path = ConcatPath(dir, fileName);
         if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
         {
-            if (doRecursive) getFilePathsRecursively(path, pathList, ignoreExts);
+            if (doRecursive) GetFilePathsRecursively(path, pathList, ignoreExts);
         } else
         {
-            const auto ext = getLowerExt(path);
+            const auto ext = GetLowerExt(path);
             if (ignoreExts.count(ext) == 0)
             {
                 pathList.push_back(path);
@@ -111,7 +111,7 @@ void getFilePaths(const std::wstring & dir, std::vector<std::wstring>& pathList,
     FindClose(fh);
 }
 
-void getDirs(const std::wstring & dir, std::vector<std::wstring>& dirList, bool doRecursive)
+void GetDirs(const std::wstring & dir, std::vector<std::wstring>& dirList, bool doRecursive)
 {
     if (dir.empty()) return;
     WIN32_FIND_DATA data;
@@ -124,22 +124,22 @@ void getDirs(const std::wstring & dir, std::vector<std::wstring>& dirList, bool 
         {
             continue;
         }
-        std::wstring path = concatPath(dir, fileName);
+        std::wstring path = ConcatPath(dir, fileName);
         if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
         {
             dirList.push_back(path);
-            if (doRecursive) getDirsRecursively(path, dirList);
+            if (doRecursive) GetDirsRecursively(path, dirList);
         }
     } while (FindNextFile(fh, &data));
     FindClose(fh);
 }
 
-void getDirsRecursively(const std::wstring & dir, std::vector<std::wstring>& dirList)
+void GetDirsRecursively(const std::wstring & dir, std::vector<std::wstring>& dirList)
 {
-    getDirs(dir, dirList, true);
+    GetDirs(dir, dirList, true);
 }
 
-std::vector<std::wstring> split(const std::wstring& s, wchar_t delimiter)
+std::vector<std::wstring> Split(const std::wstring& s, wchar_t delimiter)
 {
     std::vector<std::wstring> r;
     std::wistringstream ss(s);
@@ -151,7 +151,7 @@ std::vector<std::wstring> split(const std::wstring& s, wchar_t delimiter)
     return r;
 }
 
-std::vector<std::wstring> split(const std::wstring& s, const std::wstring& delimiter)
+std::vector<std::wstring> Split(const std::wstring& s, const std::wstring& delimiter)
 {
     std::vector<std::wstring> r;
     std::wstring::size_type pos = 0;
@@ -171,26 +171,26 @@ std::vector<std::wstring> split(const std::wstring& s, const std::wstring& delim
     return r;
 }
 
-bool matchString(const std::string& searchText, const std::string& searchTarget)
+bool IsMatchString(const std::string& searchText, const std::string& searchTarget)
 {
     return searchTarget.find(searchText) != std::string::npos;
 }
 
-bool isSpace(wchar_t c)
+bool IsSpace(wchar_t c)
 {
     return c == L' ' || c == L'\t' || c == L'\n' || c == L'\r' || c == L'\f' || c == L'\v' || c == L'\b';
 }
 
-void trimSpace(std::wstring & s)
+void TrimSpace(std::wstring * s)
 {
-    std::wstring::iterator it_left = std::find_if_not(s.begin(), s.end(), isSpace);
-    s.erase(s.begin(), it_left);
+    std::wstring::iterator it_left = std::find_if_not(s->begin(), s->end(), IsSpace);
+    s->erase(s->begin(), it_left);
 
-    std::wstring::iterator it_right = std::find_if_not(s.rbegin(), s.rend(), isSpace).base();
-    s.erase(it_right, s.end());
+    std::wstring::iterator it_right = std::find_if_not(s->rbegin(), s->rend(), IsSpace).base();
+    s->erase(it_right, s->end());
 }
 
-D3DXMATRIX scaleRotTrans(float x, float y, float z, float rx, float ry, float rz, float sx, float sy, float sz)
+D3DXMATRIX CreateScaleRotTransMatrix(float x, float y, float z, float rx, float ry, float rz, float sx, float sy, float sz)
 {
     D3DXMATRIX mat;
     //回転
@@ -216,7 +216,7 @@ D3DXMATRIX scaleRotTrans(float x, float y, float z, float rx, float ry, float rz
     return mat;
 }
 
-std::array<Vertex, 4> rectToVertices(D3DCOLOR color, int textureWidth, int textureHeight, const Rect<int>& rect)
+std::array<Vertex, 4> RectToVertices(D3DCOLOR color, int textureWidth, int textureHeight, const Rect<int>& rect)
 {
     std::array<Vertex, 4> vs;
     float ul = 1.0 * rect.left / textureWidth;
@@ -232,7 +232,7 @@ std::array<Vertex, 4> rectToVertices(D3DCOLOR color, int textureWidth, int textu
     return vs;
 }
 
-std::wstring canonicalPath(const std::wstring& path)
+std::wstring GetCanonicalPath(const std::wstring& path)
 {
     // unify path separator
     auto unified = std::regex_replace(path, std::wregex(L"((\\\\)|/)+"), L"/");
@@ -268,13 +268,13 @@ std::wstring canonicalPath(const std::wstring& path)
     return ret;
 }
 
-std::wstring concatPath(const std::wstring& a, const std::wstring& b)
+std::wstring ConcatPath(const std::wstring& a, const std::wstring& b)
 {
     if (!a.empty() && (a.back() == L'/' || a.back() == L'\\')) return a + b;
     return a + L"/" + b;
 }
 
-std::wstring parentPath(const std::wstring& path)
+std::wstring GetParentPath(const std::wstring& path)
 {
     auto found = path.find_last_of(L"/\\");
     auto ret = path.substr(0, found);
@@ -285,14 +285,14 @@ std::wstring parentPath(const std::wstring& path)
     return ret;
 }
 
-std::wstring expandIncludePath(const std::wstring & includerPath, const std::wstring & includeePath)
+std::wstring ExpandIncludePath(const std::wstring & includerPath, const std::wstring & includeePath)
 {
     if (includeePath.substr(0, 2) == L"./" ||
         includeePath.substr(0, 2) == L".\\" ||
         includeePath.substr(0, 3) == L"../" ||
         includeePath.substr(0, 3) == L"..\\")
     {
-        return canonicalPath(concatPath(parentPath(includerPath), includeePath));
+        return GetCanonicalPath(ConcatPath(GetParentPath(includerPath), includeePath));
     }
     return includeePath;
 }

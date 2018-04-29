@@ -1,22 +1,17 @@
 ﻿#pragma once
 
-#include <bstorm/env.hpp>
 #include <bstorm/node.hpp>
-#include <bstorm/source_map.hpp>
+#include <bstorm/logger.hpp>
 
-#include <string>
+#include <vector>
 #include <stack>
-#include <unordered_map>
 
 namespace bstorm
 {
-class CodeGenerator : public NodeTraverser
+class SemanticsChecker : public NodeTraverser
 {
 public:
-    CodeGenerator();
-    void Generate(Node& n);
-    SourceMap GetSourceMap() const { return srcMap_; }
-    const std::string& GetCode() const { return code_; }
+    std::vector<Log> Check(Node& n);
     void Traverse(NodeNum&);
     void Traverse(NodeChar&);
     void Traverse(NodeStr&);
@@ -84,27 +79,14 @@ public:
     void Traverse(NodeAlternative&);
     void Traverse(NodeHeader&);
 private:
-    void AddCode(const std::wstring& s);
-    void AddCode(const std::string& s);
-    void NewLine();
-    void NewLine(const std::shared_ptr<SourcePos>& srcPos);
-    void Indent();
-    void Unindent();
-    void genMonoOp(const std::string& fname, NodeMonoOp& exp);
-    void GenBinOp(const std::string& fname, NodeBinOp& exp);
-    void GenCmpBinOp(const std::string& op, NodeBinOp& exp);
-    void GenLogBinOp(const std::string& fname, NodeBinOp& exp);
-    void GenCheckNil(const std::string& name);
-    void GenProc(std::shared_ptr<NodeDef> def, const std::vector<std::string>& params_, NodeBlock& blk);
-    void GenOpAssign(const std::string& fname, const std::shared_ptr<NodeLeftVal>& left, std::shared_ptr<NodeExp> right);
-    void GenCopy(std::shared_ptr<NodeExp> exp);
-    bool IsCopyNeeded(const std::shared_ptr<NodeExp>& exp);
+    bool IsInFunc() const;
+    bool IsInLoop() const;
+    std::vector<Log> errors_;
+    std::stack<bool> funcCtxStack_;
+    std::stack<bool> loopCtxStack_;
     std::shared_ptr<Env> env_;
-    std::stack<std::shared_ptr<NodeDef>> procStack_;
-    std::string code_;
-    SourceMap srcMap_;
-    int indentLevel_;
-    int outputLine_;
-    bool isLineHead_;
+    void CheckMonoOp(NodeMonoOp& exp);
+    void CheckBinOp(NodeBinOp& exp);
+    void CheckAssign(NodeAssign& stmt);
 };
 }

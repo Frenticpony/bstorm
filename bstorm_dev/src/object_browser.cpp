@@ -36,7 +36,7 @@ static const char primitiveTypeList[] = "POINT_LIST\0LINELIST\0LINESTRIP\0TRIANG
 void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLayerList>& layerList)
 {
     constexpr ImGuiTreeNodeFlags headerFlags = ImGuiTreeNodeFlags_DefaultOpen;
-    ImGui::PushID(obj->getID());
+    ImGui::PushID(obj->GetID());
     {
         // Obj
         if (ImGui::CollapsingHeader("Obj", headerFlags))
@@ -45,22 +45,22 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
             ImGui::Text("Name"); ImGui::NextColumn(); ImGui::Text("Value"); ImGui::NextColumn();
             ImGui::Separator();
             ImGui::Separator();
-            ViewIntRow("id", obj->getID());
+            ViewIntRow("id", obj->GetID());
             ImGui::Separator();
             ViewTextRow("type", getObjTypeName(obj->GetType()));
             ImGui::Separator();
-            ViewBoolRow("dead", obj->isDead());
+            ViewBoolRow("dead", obj->IsDead());
             ImGui::Separator();
-            ViewTextRow("scene", obj->isStgSceneObject() ? "stg" : "package");
+            ViewTextRow("scene", obj->IsStgSceneObject() ? "stg" : "package");
             ImGui::Separator();
-            const auto& properties = obj->getProperties();
+            const auto& properties = obj->GetProperties();
             bool propertiesOpen = ImGui::TreeNode("properties##objProps"); ImGui::NextColumn(); ImGui::Text("(%d)", properties.size()); ImGui::NextColumn();
             if (propertiesOpen)
             {
                 for (const auto& entry : properties)
                 {
-                    auto name = toUTF8(entry.first);
-                    auto value = toUTF8(entry.second->ToString());
+                    auto name = ToUTF8(entry.first);
+                    auto value = ToUTF8(entry.second->ToString());
                     ImGui::Separator();
                     ImGui::Bullet(); ViewTextRow(name.c_str(), value.c_str());
                 }
@@ -81,9 +81,9 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                 ImGui::Separator();
                 ImGui::Separator();
                 {
-                    bool visible = objRender->isVisible();
+                    bool visible = objRender->IsVisible();
                     CheckboxRow("visible", "##visible", &visible);
-                    objRender->setVisible(visible);
+                    objRender->SetVisible(visible);
                 }
                 ImGui::Separator();
                 {
@@ -92,7 +92,7 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                     {
                         InputIntRow("priority", "##priority", &priority);
                         priority = constrain(priority, 0, MAX_RENDER_PRIORITY);
-                        layerList->setRenderPriority(objRender, priority);
+                        layerList->SetRenderPriority(objRender, priority);
                     } else
                     {
                         ViewIntRow("priority", priority);
@@ -100,77 +100,77 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                 }
                 ImGui::Separator();
                 {
-                    float x = objRender->getX();
-                    float y = objRender->getY();
-                    float z = objRender->getZ();
+                    float x = objRender->GetX();
+                    float y = objRender->GetY();
+                    float z = objRender->GetZ();
                     InputFloatRow("x", "##x", &x);
                     ImGui::Separator();
                     InputFloatRow("y", "##y", &y);
                     ImGui::Separator();
                     InputFloatRow("z", "##z", &z);
-                    objRender->setPosition(x, y, z);
+                    objRender->SetPosition(x, y, z);
                 }
                 ImGui::Separator();
                 {
-                    float angleX = objRender->getAngleX();
-                    float angleY = objRender->getAngleY();
-                    float angleZ = objRender->getAngleZ();
+                    float angleX = objRender->GetAngleX();
+                    float angleY = objRender->GetAngleY();
+                    float angleZ = objRender->GetAngleZ();
                     DragAngleRow("angle-x", "##angleX", &angleX);
                     ImGui::Separator();
                     DragAngleRow("angle-y", "##angleY", &angleY);
                     ImGui::Separator();
                     DragAngleRow("angle-z", "##angleZ", &angleZ);
-                    objRender->setAngleXYZ(angleX, angleY, angleZ);
+                    objRender->SetAngleXYZ(angleX, angleY, angleZ);
                 }
                 ImGui::Separator();
                 {
-                    float scaleX = objRender->getScaleX();
-                    float scaleY = objRender->getScaleY();
-                    float scaleZ = objRender->getScaleZ();
+                    float scaleX = objRender->GetScaleX();
+                    float scaleY = objRender->GetScaleY();
+                    float scaleZ = objRender->GetScaleZ();
                     InputFloatRow("scale-x", "##scaleX", &scaleX);
                     ImGui::Separator();
                     InputFloatRow("scale-y", "##scaleY", &scaleY);
                     ImGui::Separator();
                     InputFloatRow("scale-z", "##scaleZ", &scaleZ);
-                    objRender->setScaleXYZ(scaleX, scaleY, scaleZ);
+                    objRender->SetScaleXYZ(scaleX, scaleY, scaleZ);
                 }
                 ImGui::Separator();
                 {
-                    const auto& rgb = objRender->getColor();
-                    float color[4] = { rgb.getR() / 255.0f, rgb.getG() / 255.0f, rgb.getB() / 255.0f, objRender->getAlpha() / 255.0f };
+                    const auto& rgb = objRender->GetColor();
+                    float color[4] = { rgb.GetR() / 255.0f, rgb.GetG() / 255.0f, rgb.GetB() / 255.0f, objRender->GetAlpha() / 255.0f };
                     ColorEdit4Row("color", "##color", color);
-                    objRender->setColor(color[0] * 255, color[1] * 255, color[2] * 255);
-                    objRender->setAlpha(color[3] * 255);
+                    objRender->SetColor(color[0] * 255, color[1] * 255, color[2] * 255);
+                    objRender->SetAlpha(color[3] * 255);
                 }
                 ImGui::Separator();
                 {
-                    auto blendType = objRender->getBlendType();
+                    auto blendType = objRender->GetBlendType();
                     ComboRow("blend-type", "##blendType", &blendType, blendTypeList);
-                    objRender->setBlendType(blendType);
+                    objRender->SetBlendType(blendType);
                 }
                 ImGui::Separator();
                 {
-                    bool fog = objRender->isFogEnabled();
+                    bool fog = objRender->IsFogEnabled();
                     CheckboxRow("fog", "##fog", &fog);
-                    objRender->setFogEnable(fog);
+                    objRender->SetFogEnable(fog);
                 }
                 ImGui::Separator();
                 {
-                    bool zWrite = objRender->isZWriteEnabled();
+                    bool zWrite = objRender->IsZWriteEnabled();
                     CheckboxRow("z-write", "##zWrite", &zWrite);
-                    objRender->setZWrite(zWrite);
+                    objRender->SetZWrite(zWrite);
                 }
                 ImGui::Separator();
                 {
-                    bool zTest = objRender->isZTestEnabled();
+                    bool zTest = objRender->IsZTestEnabled();
                     CheckboxRow("z-test", "##zTest", &zTest);
-                    objRender->setZTest(zTest);
+                    objRender->SetZTest(zTest);
                 }
                 ImGui::Separator();
                 {
-                    bool permitCamera = objRender->isPermitCamera();
+                    bool permitCamera = objRender->IsPermitCamera();
                     CheckboxRow("permit-camera", "##permitCamera", &permitCamera);
-                    objRender->setPermitCamera(permitCamera);
+                    objRender->SetPermitCamera(permitCamera);
                 }
                 ImGui::Columns(1);
                 ImGui::Separator();
@@ -184,29 +184,29 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
         {
             if (ImGui::CollapsingHeader("ObjPrim", headerFlags))
             {
-                const auto& texture = objPrim->getTexture();
-                const auto& renderTarget = objPrim->getRenderTarget();
+                const auto& texture = objPrim->GetTexture();
+                const auto& renderTarget = objPrim->GetRenderTarget();
                 ImGui::Columns(2);
                 ImGui::Text("Name"); ImGui::NextColumn(); ImGui::Text("Value"); ImGui::NextColumn();
                 ImGui::Separator();
                 ImGui::Separator();
                 {
-                    int primType = objPrim->getPrimitiveType() - 1;
+                    int primType = objPrim->GetPrimitiveType() - 1;
                     ComboRow("primitive-type", "##primitiveType", &primType, primitiveTypeList);
-                    objPrim->setPrimitiveType(primType + 1);
+                    objPrim->SetPrimitiveType(primType + 1);
                 }
                 ImGui::Separator();
                 {
                     ImGui::AlignFirstTextHeightToWidgets();
                     bool verticesOpen = ImGui::TreeNode("vertices##primVertices"); ImGui::NextColumn();
                     {
-                        int vertexCount = objPrim->getVertexCount();
+                        int vertexCount = objPrim->GetVertexCount();
                         ImGui::InputInt("count##primVertexCount", &vertexCount, 1, 10);  ImGui::NextColumn();
-                        objPrim->setVertexCount(std::max(vertexCount, 0), false);
+                        objPrim->SetVertexCount(std::max(vertexCount, 0), false);
                     }
                     if (verticesOpen)
                     {
-                        const auto& vertices = objPrim->getVertices();
+                        const auto& vertices = objPrim->GetVertices();
                         for (int i = 0; i < vertices.size(); i++)
                         {
                             ImGui::PushID(i);
@@ -224,7 +224,7 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                                     InputFloatRow("y", "##primVertexY", &y);
                                     ImGui::Separator();
                                     InputFloatRow("z", "##primVertexZ", &z);
-                                    objPrim->setVertexPosition(i, x, y, z);
+                                    objPrim->SetVertexPosition(i, x, y, z);
                                 }
                                 ImGui::Separator();
                                 {
@@ -233,14 +233,14 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                                     SliderFloatRow("u", "##primVertexU", &u, 0.0f, 1.0f);
                                     ImGui::Separator();
                                     SliderFloatRow("v", "##primVertexV", &v, 0.0f, 1.0f);
-                                    objPrim->setVertexUV(i, u, v);
+                                    objPrim->SetVertexUV(i, u, v);
                                 }
                                 ImGui::Separator();
                                 {
                                     float color[4] = { ((vertex.color >> 16) & 0xff) / 255.0f, ((vertex.color >> 8) & 0xff) / 255.0f, (vertex.color & 0xff) / 255.0f, ((vertex.color >> 24) & 0xff) / 255.0f, };
                                     ColorEdit4Row("color", "##primVertexColor", color);
-                                    objPrim->setVertexColor(i, color[0] * 255, color[1] * 255, color[2] * 255);
-                                    objPrim->setVertexAlpha(i, color[3] * 255);
+                                    objPrim->SetVertexColor(i, color[0] * 255, color[1] * 255, color[2] * 255);
+                                    objPrim->SetVertexAlpha(i, color[3] * 255);
                                 }
                                 ImGui::Separator();
                                 ImGui::TreePop();
@@ -253,12 +253,12 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                         bool useObjRenderColor = ImGui::Button("apply##primVertexColorAll"); ImGui::NextColumn();
                         if (useObjRenderColor)
                         {
-                            const auto& rgb = objPrim->getColor();
-                            int alpha = objPrim->getAlpha();
+                            const auto& rgb = objPrim->GetColor();
+                            int alpha = objPrim->GetAlpha();
                             for (int i = 0; i < vertices.size(); i++)
                             {
-                                objPrim->setVertexColor(i, rgb.getR(), rgb.getG(), rgb.getB());
-                                objPrim->setVertexAlpha(i, alpha);
+                                objPrim->SetVertexColor(i, rgb.GetR(), rgb.GetG(), rgb.GetB());
+                                objPrim->SetVertexAlpha(i, alpha);
                             }
                         }
                         ImGui::Separator();
@@ -267,11 +267,11 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                 }
                 ImGui::Separator();
                 {
-                    ViewTextRow("texture", texture ? toUTF8(texture->getPath()).c_str() : "none");
+                    ViewTextRow("texture", texture ? ToUTF8(texture->GetPath()).c_str() : "none");
                 }
                 ImGui::Separator();
                 {
-                    ViewTextRow("render-target", renderTarget ? toUTF8(renderTarget->getName()).c_str() : "none");
+                    ViewTextRow("render-target", renderTarget ? ToUTF8(renderTarget->GetName()).c_str() : "none");
                 }
                 ImGui::Columns(1);
                 ImGui::Separator();
@@ -300,7 +300,7 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
         {
             if (ImGui::CollapsingHeader("ObjMove", headerFlags))
             {
-                const auto& mode = objMove->getMoveMode();
+                const auto& mode = objMove->GetMoveMode();
                 ImGui::Columns(2);
                 ImGui::Text("Name"); ImGui::NextColumn(); ImGui::Text("Value"); ImGui::NextColumn();
                 ImGui::Separator();
@@ -308,11 +308,11 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                 ViewTextRow("mode", getMoveModeName(mode));
                 ImGui::Separator();
                 {
-                    float speed = objMove->getSpeed();
+                    float speed = objMove->GetSpeed();
                     if (auto modeA = std::dynamic_pointer_cast<MoveModeA>(mode))
                     {
                         InputFloatRow("speed", "##moveSpeed", &speed);
-                        modeA->setSpeed(speed);
+                        modeA->SetSpeed(speed);
                     } else
                     {
                         ViewFloatRow("speed", speed);
@@ -320,11 +320,11 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                 }
                 ImGui::Separator();
                 {
-                    float angle = objMove->getAngle();
+                    float angle = objMove->GetAngle();
                     if (auto modeA = std::dynamic_pointer_cast<MoveModeA>(mode))
                     {
                         DragAngleRow("angle", "##moveAngle", &angle);
-                        modeA->setAngle(angle);
+                        modeA->SetAngle(angle);
                     } else
                     {
                         ViewFloatRow("angle", angle);
@@ -334,45 +334,45 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                 {
                     ImGui::Separator();
                     {
-                        float accel = modeA->getAcceleration();
+                        float accel = modeA->GetAcceleration();
                         InputFloatRow("acceleration", "##moveAcceleration", &accel);
-                        modeA->setAcceleration(accel);
+                        modeA->SetAcceleration(accel);
                     }
                     ImGui::Separator();
                     {
-                        float maxSpeed = modeA->getMaxSpeed();
+                        float maxSpeed = modeA->GetMaxSpeed();
                         InputFloatRow("max-speed", "##moveMaxSpeed", &maxSpeed);
-                        modeA->setMaxSpeed(maxSpeed);
+                        modeA->SetMaxSpeed(maxSpeed);
                     }
                     ImGui::Separator();
                     {
-                        float angularVelocity = modeA->getAngularVelocity();
+                        float angularVelocity = modeA->GetAngularVelocity();
                         InputFloatRow("angular-velocity", "##moveAngularVelocity", &angularVelocity);
-                        modeA->setAngularVelocity(angularVelocity);
+                        modeA->SetAngularVelocity(angularVelocity);
                     }
                 }
                 if (auto modeB = std::dynamic_pointer_cast<MoveModeB>(mode))
                 {
                     ImGui::Separator();
                     {
-                        float speed[2] = { modeB->getSpeedX(), modeB->getSpeedY() };
+                        float speed[2] = { modeB->GetSpeedX(), modeB->GetSpeedY() };
                         InputFloat2Row("speed-xy", "##moveBSpeedXY", speed);
-                        modeB->setSpeedX(speed[0]);
-                        modeB->setSpeedY(speed[1]);
+                        modeB->SetSpeedX(speed[0]);
+                        modeB->SetSpeedY(speed[1]);
                     }
                     ImGui::Separator();
                     {
-                        float acceleration[2] = { modeB->getAccelerationX(), modeB->getAccelerationY() };
+                        float acceleration[2] = { modeB->GetAccelerationX(), modeB->GetAccelerationY() };
                         InputFloat2Row("acceleration-xy", "##moveBAccelerationXY", acceleration);
-                        modeB->setAccelerationX(acceleration[0]);
-                        modeB->setAccelerationY(acceleration[1]);
+                        modeB->SetAccelerationX(acceleration[0]);
+                        modeB->SetAccelerationY(acceleration[1]);
                     }
                     ImGui::Separator();
                     {
-                        float maxSpeed[2] = { modeB->getMaxSpeedX(), modeB->getMaxSpeedY() };
+                        float maxSpeed[2] = { modeB->GetMaxSpeedX(), modeB->GetMaxSpeedY() };
                         InputFloat2Row("max-speed-xy", "##moveBMaxSpeedXY", maxSpeed);
-                        modeB->setMaxSpeedX(maxSpeed[0]);
-                        modeB->setMaxSpeedY(maxSpeed[1]);
+                        modeB->SetMaxSpeedX(maxSpeed[0]);
+                        modeB->SetMaxSpeedY(maxSpeed[1]);
                     }
                 }
                 ImGui::Columns(1);
@@ -391,70 +391,70 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                 ImGui::Separator();
                 ImGui::Separator();
                 {
-                    int linePitch = objText->getLinePitch();
+                    int linePitch = objText->GetLinePitch();
                     InputIntRow("line-pitch", "##textLinePitch", &linePitch);
-                    objText->setLinePitch(linePitch);
+                    objText->SetLinePitch(linePitch);
                 }
                 ImGui::Separator();
                 {
-                    int sidePitch = objText->getSidePitch();
+                    int sidePitch = objText->GetSidePitch();
                     InputIntRow("side-pitch", "##textSidePitch", &sidePitch);
-                    objText->setSidePitch(sidePitch);
+                    objText->SetSidePitch(sidePitch);
                 }
                 ImGui::Separator();
                 {
-                    int alignment = objText->getHorizontalAlignment();
+                    int alignment = objText->GetHorizontalAlignment();
                     if (alignment == ALIGNMENT_CENTER) alignment -= 2;
                     ComboRow("horizontal-alignment", "##textHorizontalAlignment", &alignment, "LEFT\0RIGHT\0CENTER\0");
                     if (alignment == 2) alignment = ALIGNMENT_CENTER;
-                    objText->setHorizontalAlignment(alignment);
+                    objText->SetHorizontalAlignment(alignment);
                 }
                 ImGui::Separator();
                 {
-                    bool syntacticAnalysis = objText->isSyntacticAnalysisEnabled();
+                    bool syntacticAnalysis = objText->IsSyntacticAnalysisEnabled();
                     CheckboxRow("syntactic-analysis", "##textSyntacticAnalysis", &syntacticAnalysis);
-                    objText->setSyntacticAnalysis(syntacticAnalysis);
+                    objText->SetSyntacticAnalysis(syntacticAnalysis);
                 }
                 ImGui::Separator();
                 {
-                    bool autoTransCenter = objText->isAutoTransCenterEnabled();
+                    bool autoTransCenter = objText->IsAutoTransCenterEnabled();
                     CheckboxRow("auto-trans-center", "##textAutoTransCenter", &autoTransCenter);
-                    objText->setAutoTransCenter(autoTransCenter);
+                    objText->SetAutoTransCenter(autoTransCenter);
                 }
                 ImGui::Separator();
                 {
-                    float transCenter[2] = { objText->getTransCenterX(), objText->getTransCenterY() };
+                    float transCenter[2] = { objText->GetTransCenterX(), objText->GetTransCenterY() };
                     InputFloat2Row("trans-center", "##textTransCeneter", transCenter);
-                    objText->setTransCenter(transCenter[0], transCenter[1]);
+                    objText->SetTransCenter(transCenter[0], transCenter[1]);
                 }
                 ImGui::Separator();
                 {
-                    int maxWidth = objText->getMaxWidth();
+                    int maxWidth = objText->GetMaxWidth();
                     InputIntRow("max-width", "##textMaxWidth", &maxWidth);
-                    objText->setMaxWidth(std::max(maxWidth, 0));
+                    objText->SetMaxWidth(std::max(maxWidth, 0));
                 }
                 ImGui::Separator();
                 {
-                    int maxHeight = objText->getMaxHeight();
+                    int maxHeight = objText->GetMaxHeight();
                     InputIntRow("max-height", "##textMaxHeight", &maxHeight);
-                    objText->setMaxHeight(std::max(maxHeight, 0));
+                    objText->SetMaxHeight(std::max(maxHeight, 0));
                 }
                 ImGui::Separator();
-                ViewIntRow("total-width", objText->getTotalWidth());
+                ViewIntRow("total-width", objText->GetTotalWidth());
                 ImGui::Separator();
-                ViewIntRow("total-height", objText->getTotalHeight());
+                ViewIntRow("total-height", objText->GetTotalHeight());
                 ImGui::Separator();
-                ViewIntRow("text-length", objText->getTextLength());
+                ViewIntRow("text-length", objText->GetTextLength());
                 ImGui::Separator();
-                ViewIntRow("text-length-cu", objText->getTextLengthCU());
+                ViewIntRow("text-length-cu", objText->GetTextLengthCU());
                 ImGui::Separator();
                 ImGui::AlignFirstTextHeightToWidgets();
                 bool openFontParams = ImGui::TreeNodeEx("font-params##textFontParams", ImGuiTreeNodeFlags_DefaultOpen); ImGui::NextColumn(); ImGui::PushItemWidth(-1);
-                if (objText->isFontParamModified())
+                if (objText->IsFontParamModified())
                 {
                     if (ImGui::Button(ICON_FA_REFRESH" update font##textUpdateFont"))
                     {
-                        objText->generateFonts();
+                        objText->GenerateFonts();
                     }
                 }
                 ImGui::PopItemWidth(); ImGui::NextColumn();
@@ -462,60 +462,60 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                 {
                     ImGui::Separator();
                     {
-                        std::string text = toUTF8(objText->getText());
+                        std::string text = ToUTF8(objText->GetText());
                         InputStringRow("text", "##textText", 1024, text);
-                        objText->setText(toUnicode(text));
+                        objText->SetText(ToUnicode(text));
                     }
                     ImGui::Separator();
                     {
-                        std::string fontName = toUTF8(objText->getFontName());
+                        std::string fontName = ToUTF8(objText->GetFontName());
                         InputStringRow("font-name", "##textFontName", 128, fontName);
-                        objText->setFontName(toUnicode(fontName));
+                        objText->SetFontName(ToUnicode(fontName));
                     }
                     ImGui::Separator();
                     {
-                        int fontSize = objText->getFontSize();
+                        int fontSize = objText->GetFontSize();
                         InputIntRow("size", "##textFontSize", &fontSize);
-                        objText->setFontSize(std::max(0, fontSize));
+                        objText->SetFontSize(std::max(0, fontSize));
                     }
                     ImGui::Separator();
                     {
-                        bool bold = objText->isFontBold();
+                        bool bold = objText->IsFontBold();
                         CheckboxRow("bold", "##textFontBold", &bold);
-                        objText->setFontBold(bold);
+                        objText->SetFontBold(bold);
                     }
                     ImGui::Separator();
                     {
-                        const auto& rgb = objText->getFontColorTop();
-                        float color[3] = { rgb.getR() / 255.0f, rgb.getG() / 255.0f, rgb.getB() / 255.0f };
+                        const auto& rgb = objText->GetFontColorTop();
+                        float color[3] = { rgb.GetR() / 255.0f, rgb.GetG() / 255.0f, rgb.GetB() / 255.0f };
                         ColorEdit3Row("top-color", "##textFontColorTop", color);
-                        objText->setFontColorTop(color[0] * 255, color[1] * 255, color[2] * 255);
+                        objText->SetFontColorTop(color[0] * 255, color[1] * 255, color[2] * 255);
                     }
                     ImGui::Separator();
                     {
-                        const auto& rgb = objText->getFontColorBottom();
-                        float color[3] = { rgb.getR() / 255.0f, rgb.getG() / 255.0f, rgb.getB() / 255.0f };
+                        const auto& rgb = objText->GetFontColorBottom();
+                        float color[3] = { rgb.GetR() / 255.0f, rgb.GetG() / 255.0f, rgb.GetB() / 255.0f };
                         ColorEdit3Row("bottom-color", "##textFontColorBottom", color);
-                        objText->setFontColorBottom(color[0] * 255, color[1] * 255, color[2] * 255);
+                        objText->SetFontColorBottom(color[0] * 255, color[1] * 255, color[2] * 255);
                     }
                     ImGui::Separator();
                     {
-                        int fontBorderType = objText->getFontBorderType();
+                        int fontBorderType = objText->GetFontBorderType();
                         ComboRow("border-type", "##textFontBorderType", &fontBorderType, "NONE\0FULL\0");
-                        objText->setFontBorderType(fontBorderType);
+                        objText->SetFontBorderType(fontBorderType);
                     }
                     ImGui::Separator();
                     {
-                        int fontBorderWidth = objText->getFontBorderWidth();
+                        int fontBorderWidth = objText->GetFontBorderWidth();
                         InputIntRow("border-width", "##textFontBorderWidth", &fontBorderWidth);
-                        objText->setFontBorderWidth(std::max(0, fontBorderWidth));
+                        objText->SetFontBorderWidth(std::max(0, fontBorderWidth));
                     }
                     ImGui::Separator();
                     {
-                        const auto& rgb = objText->getFontBorderColor();
-                        float color[3] = { rgb.getR() / 255.0f, rgb.getG() / 255.0f, rgb.getB() / 255.0f };
+                        const auto& rgb = objText->GetFontBorderColor();
+                        float color[3] = { rgb.GetR() / 255.0f, rgb.GetG() / 255.0f, rgb.GetB() / 255.0f };
                         ColorEdit3Row("border-color", "##textFontBorderColor", color);
-                        objText->setFontBorderColor(color[0] * 255, color[1] * 255, color[2] * 255);
+                        objText->SetFontBorderColor(color[0] * 255, color[1] * 255, color[2] * 255);
                     }
                     ImGui::TreePop();
                 }
@@ -527,16 +527,16 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                         int fontId = 0;
                         // 重複を弾く
                         std::unordered_set<IDirect3DTexture9*> displayed;
-                        const auto& bodyFonts = objText->getBodyFonts();
+                        const auto& bodyFonts = objText->GetBodyFonts();
                         for (const auto& font : bodyFonts)
                         {
                             if (font)
                             {
-                                auto fontTexture = font->getTexture();
+                                auto fontTexture = font->GetTexture();
                                 if (displayed.count(fontTexture) != 0) continue;
                                 displayed.insert(fontTexture);
                                 ImGui::PushID(fontId++);
-                                if (ImGui::TreeNode(toUTF8(std::wstring{ font->getParams().c }).c_str()))
+                                if (ImGui::TreeNode(ToUTF8(std::wstring{ font->GetParams().c }).c_str()))
                                 {
                                     drawFontInfo(font);
                                     ImGui::TreePop();
@@ -544,18 +544,18 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                                 ImGui::PopID();
                             }
                         }
-                        const auto& rubyFonts = objText->getRubyFonts();
+                        const auto& rubyFonts = objText->GetRubyFonts();
                         for (const auto& ruby : rubyFonts)
                         {
                             for (const auto& font : ruby.text)
                             {
                                 if (font)
                                 {
-                                    auto fontTexture = font->getTexture();
+                                    auto fontTexture = font->GetTexture();
                                     if (displayed.count(fontTexture) != 0) continue;
                                     displayed.insert(fontTexture);
                                     ImGui::PushID(fontId++);
-                                    if (ImGui::TreeNode(toUTF8(std::wstring{ font->getParams().c }).c_str()))
+                                    if (ImGui::TreeNode(ToUTF8(std::wstring{ font->GetParams().c }).c_str()))
                                     {
                                         drawFontInfo(font);
                                         ImGui::TreePop();
@@ -576,114 +576,114 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
         {
             if (ImGui::CollapsingHeader("ObjShot", headerFlags))
             {
-                const auto& shotData = objShot->getShotData();
+                const auto& shotData = objShot->GetShotData();
                 ImGui::Columns(2);
                 ImGui::Text("Name"); ImGui::NextColumn(); ImGui::Text("Value"); ImGui::NextColumn();
                 ImGui::Separator();
                 ImGui::Separator();
-                ViewTextRow("ownership", objShot->isPlayerShot() ? "player" : "enemy");
+                ViewTextRow("ownership", objShot->IsPlayerShot() ? "player" : "enemy");
                 ImGui::Separator();
-                ViewBoolRow("registered", objShot->isRegistered());
+                ViewBoolRow("registered", objShot->IsRegistered());
                 ImGui::Separator();
                 {
-                    double damage = objShot->getDamage();
+                    double damage = objShot->GetDamage();
                     InputDoubleRow("damage", "##shotDamage", &damage);
-                    objShot->setDamage(damage);
+                    objShot->SetDamage(damage);
                 }
                 ImGui::Separator();
                 {
-                    int penetration = objShot->getPenetration();
+                    int penetration = objShot->GetPenetration();
                     InputIntRow("penetration", "##shotPenetration", &penetration);
-                    objShot->setPenetration(penetration);
+                    objShot->SetPenetration(penetration);
                 }
                 ImGui::Separator();
                 {
-                    int delay = objShot->getDelay();
+                    int delay = objShot->GetDelay();
                     InputIntRow("delay", "##shotDelay", &delay);
-                    objShot->setDelay(delay);
+                    objShot->SetDelay(delay);
                 }
                 ImGui::Separator();
                 {
-                    int sourceBlendType = objShot->getSourceBlendType();
+                    int sourceBlendType = objShot->GetSourceBlendType();
                     ComboRow("source-blend-type", "##shotSourceBlendType", &sourceBlendType, blendTypeList);
-                    objShot->setSourceBlendType(sourceBlendType);
+                    objShot->SetSourceBlendType(sourceBlendType);
                 }
                 ImGui::Separator();
                 {
-                    float angularVelocity = objShot->getAngularVelocity();
+                    float angularVelocity = objShot->GetAngularVelocity();
                     InputFloatRow("angular-velocity", "##shotAngularVelocity", &angularVelocity);
-                    objShot->setAngularVelocity(angularVelocity);
+                    objShot->SetAngularVelocity(angularVelocity);
                 }
                 ImGui::Separator();
                 {
-                    bool intersectionEnable = objShot->isIntersectionEnabled();
+                    bool intersectionEnable = objShot->IsIntersectionEnabled();
                     CheckboxRow("intersection-enable", "##shotIntersectionEnable", &intersectionEnable);
-                    objShot->setIntersectionEnable(intersectionEnable);
+                    objShot->SetIntersectionEnable(intersectionEnable);
                 }
                 ImGui::Separator();
                 {
-                    bool spellResist = objShot->isSpellResistEnabled();
+                    bool spellResist = objShot->IsSpellResistEnabled();
                     CheckboxRow("spell-resist", "##shotSpellResist", &spellResist);
-                    objShot->setSpellResistEnable(spellResist);
+                    objShot->SetSpellResistEnable(spellResist);
                 }
                 ImGui::Separator();
                 {
-                    bool spellFactor = objShot->isSpellFactorEnabled();
+                    bool spellFactor = objShot->IsSpellFactorEnabled();
                     CheckboxRow("spell-factor", "##shotSpellFactor", &spellFactor);
-                    objShot->setSpellFactor(spellFactor);
+                    objShot->SetSpellFactor(spellFactor);
                 }
                 ImGui::Separator();
                 {
-                    bool eraseShot = objShot->isEraseShotEnabled();
+                    bool eraseShot = objShot->IsEraseShotEnabled();
                     CheckboxRow("erase-shot", "##shotEraseShot", &eraseShot);
-                    objShot->setEraseShotEnable(eraseShot);
+                    objShot->SetEraseShotEnable(eraseShot);
                 }
                 ImGui::Separator();
                 {
-                    bool itemChange = objShot->isItemChangeEnabled();
+                    bool itemChange = objShot->IsItemChangeEnabled();
                     CheckboxRow("item-change", "##shotItemChange", &itemChange);
-                    objShot->setItemChange(itemChange);
+                    objShot->SetItemChangeEnable(itemChange);
                 }
                 ImGui::Separator();
                 {
-                    bool autoDelete = objShot->isAutoDeleteEnabled();
+                    bool autoDelete = objShot->IsAutoDeleteEnabled();
                     CheckboxRow("auto-delete", "##shotAutoDelete", &autoDelete);
-                    objShot->setAutoDeleteEnable(autoDelete);
+                    objShot->SetAutoDeleteEnable(autoDelete);
                 }
                 ImGui::Separator();
-                ViewBoolRow("graze-enable", objShot->isGrazeEnabled());
+                ViewBoolRow("graze-enable", objShot->IsGrazeEnabled());
                 ImGui::Separator();
-                ViewBoolRow("use-temp-intersection", objShot->isTempIntersectionMode());
+                ViewBoolRow("use-temp-intersection", objShot->IsTempIntersectionMode());
                 ImGui::Separator();
                 {
-                    ViewBoolRow("frame-delete-started", objShot->isFrameDeleteStarted());
-                    if (objShot->isFrameDeleteStarted())
+                    ViewBoolRow("frame-delete-started", objShot->IsFrameDeleteStarted());
+                    if (objShot->IsFrameDeleteStarted())
                     {
                         ImGui::Separator();
-                        ViewFloatRow("frame-delete-timer", objShot->getDeleteFrameTimer());
+                        ViewFloatRow("frame-delete-timer", objShot->GetDeleteFrameTimer());
                     }
                 }
                 ImGui::Separator();
                 {
-                    ViewBoolRow("fade-delete-started", objShot->isFadeDeleteStarted());
-                    if (objShot->isFadeDeleteStarted())
+                    ViewBoolRow("fade-delete-started", objShot->IsFadeDeleteStarted());
+                    if (objShot->IsFadeDeleteStarted())
                     {
                         ImGui::Separator();
-                        ViewFloatRow("fade-delete-timer", objShot->getFadeDeleteFrameTimer());
+                        ViewFloatRow("fade-delete-timer", objShot->GetFadeDeleteFrameTimer());
                         ImGui::Separator();
-                        ViewFloatRow("fade-scale", objShot->getFadeScale());
+                        ViewFloatRow("fade-scale", objShot->GetFadeScale());
                     }
                 }
                 if (shotData && !shotData->animationData.empty())
                 {
                     ImGui::Separator();
-                    ViewIntRow("animation-frame-count", objShot->getAnimationFrameCount());
+                    ViewIntRow("animation-frame-count", objShot->GetAnimationFrameCount());
                     ImGui::Separator();
-                    ViewIntRow("animation-index", objShot->getAnimationIndex());
+                    ViewIntRow("animation-index", objShot->GetAnimationIndex());
                 }
                 ImGui::Separator();
                 {
-                    ViewIntRow("add-shot-frame-count", objShot->getFrameCountForAddShot());
+                    ViewIntRow("add-shot-frame-count", objShot->GetFrameCountForAddShot());
                 }
                 ImGui::Columns(1);
                 ImGui::Separator();
@@ -695,7 +695,7 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                         ImGui::TreePop();
                     }
                 }
-                const auto& isects = objShot->getIntersections();
+                const auto& isects = objShot->GetIntersections();
                 if (ImGui::TreeNode("intersections##shotIntersections"))
                 {
                     int isectId = 0;
@@ -711,7 +711,7 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                     }
                     ImGui::TreePop();
                 }
-                const auto& tempIsects = objShot->getTempIntersections();
+                const auto& tempIsects = objShot->GetTempIntersections();
                 if (ImGui::TreeNode("temporary intersections##shotTempIntersections"))
                 {
                     int isectId = 0;
@@ -727,7 +727,7 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                     }
                     ImGui::TreePop();
                 }
-                const auto& addedShots = objShot->getAddedShot();
+                const auto& addedShots = objShot->GetAddedShot();
                 if (ImGui::TreeNode("added shots##shotAddedShots"))
                 {
                     int addedShotId = 0;
@@ -764,35 +764,35 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                 ImGui::Separator();
                 ImGui::Separator();
                 {
-                    float length = objLaser->getLength();
+                    float length = objLaser->GetLength();
                     InputFloatRow("length", "##laserLength", &length);
-                    objLaser->setLength(length);
+                    objLaser->SetLength(length);
                 }
                 ImGui::Separator();
                 {
-                    float width = objLaser->getRenderWidth();
+                    float width = objLaser->GetRenderWidth();
                     InputFloatRow("render-width", "##laserRenderWidth", &width);
-                    objLaser->setRenderWidth(width);
+                    objLaser->SetRenderWidth(width);
                 }
                 ImGui::Separator();
                 {
-                    float width = objLaser->getIntersectionWidth();
+                    float width = objLaser->GetIntersectionWidth();
                     InputFloatRow("intersection-width", "##laserIntersectionWidth", &width);
-                    objLaser->setIntersectionWidth(std::max(width, 0.0f));
+                    objLaser->SetIntersectionWidth(std::max(width, 0.0f));
                 }
                 ImGui::Separator();
                 {
-                    float grazeInvalidFrame = objLaser->getGrazeInvalidFrame();
+                    float grazeInvalidFrame = objLaser->GetGrazeInvalidFrame();
                     InputFloatRow("graze-invalid-frame", "##laserGrazeInvalidFrame", &grazeInvalidFrame);
-                    objLaser->setGrazeInvalidFrame(std::max(grazeInvalidFrame, 0.0f));
+                    objLaser->SetGrazeInvalidFrame(std::max(grazeInvalidFrame, 0.0f));
                 }
                 ImGui::Separator();
-                ViewFloatRow("graze-invalid-timer", objLaser->getGrazeInvalidTimer());
+                ViewFloatRow("graze-invalid-timer", objLaser->GetGrazeInvalidTimer());
                 ImGui::Separator();
                 {
-                    float itemDistance = objLaser->getItemDistance();
+                    float itemDistance = objLaser->GetItemDistance();
                     InputFloatRow("item-distance", "##laserItemDistance", &itemDistance);
-                    objLaser->setItemDistance(std::max(itemDistance, 0.0f));
+                    objLaser->SetItemDistance(std::max(itemDistance, 0.0f));
                 }
                 ImGui::Columns(1);
                 ImGui::Separator();
@@ -809,14 +809,14 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                 ImGui::Text("Name"); ImGui::NextColumn(); ImGui::Text("Value"); ImGui::NextColumn();
                 ImGui::Separator();
                 ImGui::Separator();
-                ViewFloatRow("render-length", objLooseLaser->getRenderLength());
+                ViewFloatRow("render-length", objLooseLaser->GetRenderLength());
                 ImGui::Separator();
                 {
-                    float invalidLengthHead = objLooseLaser->getInvalidLengthHead();
-                    float invalidLengthTail = objLooseLaser->getInvalidLengthTail();
-                    bool defaultInvalidLengthEnable = objLooseLaser->isDefaultInvalidLengthEnabled();
+                    float invalidLengthHead = objLooseLaser->GetInvalidLengthHead();
+                    float invalidLengthTail = objLooseLaser->GetInvalidLengthTail();
+                    bool defaultInvalidLengthEnable = objLooseLaser->IsDefaultInvalidLengthEnabled();
                     CheckboxRow("default-invalid-length-enable", "##looseLaserDefaultInvalidLengthEnable", &defaultInvalidLengthEnable);
-                    objLooseLaser->setDefaultInvalidLengthEnable(defaultInvalidLengthEnable);
+                    objLooseLaser->SetDefaultInvalidLengthEnable(defaultInvalidLengthEnable);
                     if (defaultInvalidLengthEnable)
                     {
                         ImGui::Separator();
@@ -829,7 +829,7 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                         InputFloatRow("invalid-length-head", "##looseLaserInvalidLengthHead", &invalidLengthHead);
                         ImGui::Separator();
                         InputFloatRow("invalid-length-tail", "##looseLaserInvalidLengthTail", &invalidLengthTail);
-                        objLooseLaser->setInvalidLength(invalidLengthHead, invalidLengthTail);
+                        objLooseLaser->SetInvalidLength(invalidLengthHead, invalidLengthTail);
                     }
                 }
                 ImGui::Columns(1);
@@ -848,15 +848,15 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                 ImGui::Separator();
                 ImGui::Separator();
                 {
-                    float laserAngle = objStLaser->getLaserAngle();
+                    float laserAngle = objStLaser->GetLaserAngle();
                     DragAngleRow("laser-angle", "##stLaserLaserAngle", &laserAngle);
-                    objStLaser->setLaserAngle(laserAngle);
+                    objStLaser->SetLaserAngle(laserAngle);
                 }
                 ImGui::Separator();
                 {
-                    bool source = objStLaser->hasSource();
+                    bool source = objStLaser->HasSource();
                     CheckboxRow("laser-source", "##stLaserLaserSource", &source);
-                    objStLaser->setSource(source);
+                    objStLaser->SetSource(source);
                 }
                 ImGui::Columns(1);
                 ImGui::Separator();
@@ -874,12 +874,12 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                 ImGui::Separator();
                 ImGui::Separator();
                 {
-                    float tipDecrement = objCrLaser->getTipDecrement();
+                    float tipDecrement = objCrLaser->GetTipDecrement();
                     SliderFloatRow("tip-decrement", "##crLaserTipDecrement", &tipDecrement, 0.0f, 1.0f);
-                    objCrLaser->setTipDecrement(tipDecrement);
+                    objCrLaser->SetTipDecrement(tipDecrement);
                 }
                 ImGui::Separator();
-                ViewIntRow("laser-node-count", objCrLaser->getLaserNodeCount());
+                ViewIntRow("laser-node-count", objCrLaser->GetLaserNodeCount());
                 ImGui::Columns(1);
                 ImGui::Separator();
             }
@@ -895,32 +895,32 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                 ImGui::Text("Name"); ImGui::NextColumn(); ImGui::Text("Value"); ImGui::NextColumn();
                 ImGui::Separator();
                 ImGui::Separator();
-                ViewBoolRow("registered", objEnemy->isRegistered());
+                ViewBoolRow("registered", objEnemy->IsRegistered());
                 ImGui::Separator();
-                ViewBoolRow("is-boss", objEnemy->isBoss());
+                ViewBoolRow("is-boss", objEnemy->IsBoss());
                 ImGui::Separator();
                 {
-                    double life = objEnemy->getLife();
+                    double life = objEnemy->GetLife();
                     InputDoubleRow("life", "##enemyLife", &life);
-                    objEnemy->setLife(life);
+                    objEnemy->SetLife(life);
                 }
                 ImGui::Separator();
                 {
-                    float damageRateShot = (float)objEnemy->getDamageRateShot();
+                    float damageRateShot = (float)objEnemy->GetDamageRateShot();
                     SliderFloatRow("damage-rate-shot", "##enemyDamageRateShot", &damageRateShot, 0.0f, 100.0f);
-                    objEnemy->setDamageRateShot((double)damageRateShot);
+                    objEnemy->SetDamageRateShot((double)damageRateShot);
                 }
                 ImGui::Separator();
                 {
-                    float damageRateSpell = (float)objEnemy->getDamageRateSpell();
+                    float damageRateSpell = (float)objEnemy->GetDamageRateSpell();
                     SliderFloatRow("damage-rate-spell", "##enemyDamageRateSpell", &damageRateSpell, 0.0f, 100.0f);
-                    objEnemy->setDamageRateSpell((double)damageRateSpell);
+                    objEnemy->SetDamageRateSpell((double)damageRateSpell);
                 }
                 ImGui::Separator();
-                ViewIntRow("prev-frame-shot-hit-count", objEnemy->getPrevFrameShotHitCount());
+                ViewIntRow("prev-frame-shot-hit-count", objEnemy->GetPrevFrameShotHitCount());
                 ImGui::Columns(1);
                 ImGui::Separator();
-                const auto& tempIsects = objEnemy->getTempIntersections();
+                const auto& tempIsects = objEnemy->GetTempIntersections();
                 if (ImGui::TreeNode("temporary intersections##enemyTempIntersections"))
                 {
                     int isectId = 0;
@@ -949,22 +949,22 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                 ImGui::Text("Name"); ImGui::NextColumn(); ImGui::Text("Value"); ImGui::NextColumn();
                 ImGui::Separator();
                 ImGui::Separator();
-                ViewBoolRow("registered", objSpell->isRegistered());
+                ViewBoolRow("registered", objSpell->IsRegistered());
                 ImGui::Separator();
                 {
-                    double damage = objSpell->getDamage();
+                    double damage = objSpell->GetDamage();
                     InputDoubleRow("damage", "##spellDamage", &damage);
-                    objSpell->setDamage(damage);
+                    objSpell->SetDamage(damage);
                 }
                 ImGui::Separator();
                 {
-                    bool eraseShot = objSpell->isEraseShotEnabled();
+                    bool eraseShot = objSpell->IsEraseShotEnabled();
                     CheckboxRow("erase-shot", "##spellEraseShot", &eraseShot);
-                    objSpell->setEraseShotEnable(eraseShot);
+                    objSpell->SetEraseShotEnable(eraseShot);
                 }
                 ImGui::Columns(1);
                 ImGui::Separator();
-                const auto& tempIsects = objSpell->getTempIntersections();
+                const auto& tempIsects = objSpell->GetTempIntersections();
                 if (ImGui::TreeNode("temporary intersections##spellTempIntersections"))
                 {
                     int isectId = 0;
@@ -989,44 +989,44 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
         {
             if (ImGui::CollapsingHeader("ObjItem", headerFlags))
             {
-                const auto& itemData = objItem->getItemData();
+                const auto& itemData = objItem->GetItemData();
                 ImGui::Columns(2);
                 ImGui::Text("Name"); ImGui::NextColumn(); ImGui::Text("Value"); ImGui::NextColumn();
                 ImGui::Separator();
                 ImGui::Separator();
-                ViewTextRow("item-type", getItemTypeName(objItem->getItemType()));
+                ViewTextRow("item-type", getItemTypeName(objItem->GetItemType()));
                 ImGui::Separator();
                 {
-                    int64_t score = objItem->getScore();
+                    int64_t score = objItem->GetScore();
                     InputInt64Row("score", "##itemScore", &score);
-                    objItem->setScore(score);
+                    objItem->SetScore(score);
                 }
                 ImGui::Separator();
                 {
-                    bool renderScore = objItem->isRenderScoreEnabled();
+                    bool renderScore = objItem->IsRenderScoreEnabled();
                     CheckboxRow("render-score", "##itemRenderScore", &renderScore);
-                    objItem->setRenderScoreEnable(renderScore);
+                    objItem->SetRenderScoreEnable(renderScore);
                 }
                 ImGui::Separator();
                 {
-                    bool autoCollect = objItem->isAutoCollectEnabled();
+                    bool autoCollect = objItem->IsAutoCollectEnabled();
                     CheckboxRow("auto-collect-enable", "##itemAutoCollectEnable", &autoCollect);
-                    objItem->setAutoCollectEnable(autoCollect);
+                    objItem->SetAutoCollectEnable(autoCollect);
                 }
                 if (itemData && !itemData->animationData.empty())
                 {
                     ImGui::Separator();
-                    ViewIntRow("animation-frame-count", objItem->getAnimationFrameCount());
+                    ViewIntRow("animation-frame-count", objItem->GetAnimationFrameCount());
                     ImGui::Separator();
-                    ViewIntRow("animation-index", objItem->getAnimationIndex());
+                    ViewIntRow("animation-index", objItem->GetAnimationIndex());
                 }
                 ImGui::Separator();
                 {
-                    ViewBoolRow("auto-collected", objItem->isAutoCollected());
+                    ViewBoolRow("auto-collected", objItem->IsAutoCollected());
                 }
                 ImGui::Separator();
                 {
-                    ViewBoolRow("obtained", objItem->isObtained());
+                    ViewBoolRow("obtained", objItem->IsObtained());
                 }
                 ImGui::Columns(1);
                 ImGui::Separator();
@@ -1038,7 +1038,7 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                         ImGui::TreePop();
                     }
                 }
-                const auto& isects = objItem->getIntersections();
+                const auto& isects = objItem->GetIntersections();
                 if (ImGui::TreeNode("intersections##itemIntersections"))
                 {
                     int isectId = 0;
@@ -1063,7 +1063,7 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
 template <>
 void Engine::backDoor<ObjectBrowser>()
 {
-    const auto& table = gameState->objTable->getAll();
+    const auto& table = gameState->objTable->GetAll();
     static int selectedId = 0;
     float sideBarWidth = ImGui::GetContentRegionAvailWidth() * 0.2;
     ImGui::BeginChild("SideBar", ImVec2(sideBarWidth, -1), true, ImGuiWindowFlags_HorizontalScrollbar);
@@ -1073,11 +1073,11 @@ void Engine::backDoor<ObjectBrowser>()
         ImGui::PushID(id);
         const auto& obj = entry.second;
         auto type = obj->GetType();
-        auto nameProp = obj->getValue(L"name");
+        auto nameProp = obj->GetValue(L"name");
         std::string name;
         if (nameProp->GetType() != DnhValue::Type::NIL)
         {
-            name = toUTF8(nameProp->ToString());
+            name = ToUTF8(nameProp->ToString());
         } else
         {
             name = getObjTypeName(obj->GetType());

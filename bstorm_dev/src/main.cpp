@@ -88,14 +88,14 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
                 Logger::Init(std::make_shared<FileLogger>(logFilePath, logWindow));
             } catch (Log& log)
             {
-                log.setLevel(Log::Level::LV_WARN);
+                log.SetLevel(Log::Level::LV_WARN);
                 logWindow->log(log);
             }
         }
 
         {
             // th_dnh.def読み込み
-            ThDnhDef def = loadThDnhDef(thDnhDefFilePath);
+            ThDnhDef def = LoadThDnhDef(thDnhDefFilePath);
             packageMainScriptPath = def.packageScriptMain;
             if (!def.windowTitle.empty()) windowTitle = def.windowTitle;
             screenWidth = def.screenWidth;
@@ -138,13 +138,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
         auto playController = std::make_shared<PlayController>(engine);
         auto gameView = std::make_shared<GameView>(windowWidth / 2 - 320, 60, 640, 480, playController);
         auto gameViewMousePosProvider = std::make_shared<GameViewMousePositionProvider>(hWnd);
-        gameViewMousePosProvider->setScreenPos(gameView->getViewPosX(), gameView->getViewPosY());
-        gameViewMousePosProvider->setGameViewSize(gameView->getViewWidth(), gameView->getViewHeight());
-        engine->setMousePostionProvider(gameViewMousePosProvider);
+        gameViewMousePosProvider->SetScreenPos(gameView->getViewPosX(), gameView->getViewPosY());
+        gameViewMousePosProvider->SetGameViewSize(gameView->getViewWidth(), gameView->getViewHeight());
+        engine->SetMousePostionProvider(gameViewMousePosProvider);
 
 
         ImGui::CreateContext();
-        ImGui_ImplDX9_Init(hWnd, engine->getGraphicDevice());
+        ImGui_ImplDX9_Init(hWnd, engine->GetDirect3DDevice());
         {
             // フォント設定
             ImGuiIO& io = ImGui::GetIO();
@@ -167,7 +167,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
         /* message loop */
         while (true)
         {
-            auto d3DDevice = engine->getGraphicDevice();
+            auto d3DDevice_ = engine->GetDirect3DDevice();
             if (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
             {
                 BOOL result = GetMessage(&msg, NULL, 0, 0);
@@ -184,26 +184,26 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
                 Sleep(1);
                 continue;
             }
-            if (SUCCEEDED(d3DDevice->BeginScene()))
+            if (SUCCEEDED(d3DDevice_->BeginScene()))
             {
                 // NOTE : PlayController, 及びPlayControllerを使っているモジュールは他より先に描画(tickでテクスチャの解放が行われる可能性があるので)
-                engine->setBackBufferRenderTarget();
-                d3DDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(114, 144, 154), 1.0f, 0);
-                engine->updateFpsCounter();
+                engine->SetBackBufferRenderTarget();
+                d3DDevice_->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(114, 144, 154), 1.0f, 0);
+                engine->UpdateFpsCounter();
                 ImGui_ImplDX9_NewFrame();
                 playController->setScript(scriptExplorer->getSelectedMainScript(), scriptExplorer->getSelectedPlayerScript());
                 if (!playController->isPaused())
                 {
                     playController->tick();
                 }
-                auto gameViewRenderTarget = engine->getRenderTarget(GAME_VIEW_RENDER_TARGET);
+                auto gameViewRenderTarget = engine->GetRenderTarget(GAME_VIEW_RENDER_TARGET);
                 if (!gameViewRenderTarget)
                 {
                     Logger::SetEnable(false);
-                    gameViewRenderTarget = engine->createRenderTarget(GAME_VIEW_RENDER_TARGET, screenWidth, screenHeight, nullptr);
+                    gameViewRenderTarget = engine->CreateRenderTarget(GAME_VIEW_RENDER_TARGET, screenWidth, screenHeight, nullptr);
                     Logger::SetEnable(true);
                 }
-                engine->render(GAME_VIEW_RENDER_TARGET);
+                engine->Render(GAME_VIEW_RENDER_TARGET);
                 gameView->draw(gameViewRenderTarget);
                 {
                     // main menu bar
@@ -254,16 +254,16 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
                 ImGui::EndFrame();
                 ImGui::Render();
                 ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
-                d3DDevice->EndScene();
-                switch (d3DDevice->Present(NULL, NULL, NULL, NULL))
+                d3DDevice_->EndScene();
+                switch (d3DDevice_->Present(NULL, NULL, NULL, NULL))
                 {
                     case D3DERR_DEVICELOST:
-                        if (d3DDevice->TestCooperativeLevel() == D3DERR_DEVICENOTRESET)
+                        if (d3DDevice_->TestCooperativeLevel() == D3DERR_DEVICENOTRESET)
                         {
-                            engine->releaseLostableGraphicResource();
+                            engine->ReleaseLostableGraphicResource();
                             ImGui_ImplDX9_InvalidateDeviceObjects();
-                            engine->resetGraphicDevice();
-                            engine->restoreLostableGraphicDevice();
+                            engine->ResetGraphicDevice();
+                            engine->RestoreLostableGraphicDevice();
                             ImGui_ImplDX9_CreateDeviceObjects();
                         } else
                         {
@@ -279,11 +279,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
     } catch (Log& log)
     {
         Logger::WriteLog(log);
-        MessageBoxW(hWnd, toUnicode(log.ToString()).c_str(), L"Engine Error", MB_OK);
+        MessageBoxW(hWnd, ToUnicode(log.ToString()).c_str(), L"Engine Error", MB_OK);
     } catch (const std::exception& e)
     {
         Logger::WriteLog(Log::Level::LV_ERROR, e.what());
-        MessageBoxW(hWnd, toUnicode(e.what()).c_str(), L"Unexpected Error", MB_OK);
+        MessageBoxW(hWnd, ToUnicode(e.what()).c_str(), L"Unexpected Error", MB_OK);
     }
     Logger::Shutdown();
     ImGui_ImplDX9_Shutdown();

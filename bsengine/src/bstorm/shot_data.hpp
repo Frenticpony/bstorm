@@ -67,21 +67,21 @@ public:
         PLAYER,
         ENEMY
     };
-    static const char* getTypeName(Type type);
+    static const char* GetTypeName(Type type);
     ShotDataTable(Type type);
     ~ShotDataTable();
-    void add(const std::shared_ptr<ShotData>& data);
-    void load(const std::wstring& path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos);
-    void reload(const std::wstring& path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos);
-    bool isLoaded(const std::wstring& path) const;
+    void Add(const std::shared_ptr<ShotData>& data);
+    void Load(const std::wstring& path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos);
+    void Reload(const std::wstring& path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos);
+    bool IsLoaded(const std::wstring& path) const;
     std::shared_ptr<ShotData> Get(int id) const;
     Type GetType() const;
     /* backdoor */
     template <typename T>
-    void backDoor() const {}
+    void BackDoor() const {}
 private:
-    Type type;
-    std::unordered_set<std::wstring> loadedPaths;
-    std::map<int, std::shared_ptr<ShotData>> table;
+    Type type_;
+    std::unordered_set<std::wstring> loadedPaths_;
+    std::map<int, std::shared_ptr<ShotData>> table_;
 };
 }

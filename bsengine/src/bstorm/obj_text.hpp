@@ -13,51 +13,51 @@ class ObjText : public ObjRender
 public:
     ObjText(const std::shared_ptr<GameState>& state);
     ~ObjText();
-    void update() override;
-    void render() override;
-    const std::wstring& getText() const;
-    void setText(const std::wstring& t);
-    const std::wstring& getFontName() const;
-    void setFontName(const std::wstring& name);
-    int getFontSize() const;
-    void setFontSize(int s);
-    bool isFontBold() const;
-    void setFontBold(bool b);
-    const ColorRGB& getFontColorTop() const;
-    void setFontColorTop(int r, int g, int b);
-    const ColorRGB& getFontColorBottom() const;
-    void setFontColorBottom(int r, int g, int b);
-    int getFontBorderType() const;
-    void setFontBorderType(int t);
-    int getFontBorderWidth() const;
-    void setFontBorderWidth(int w);
-    const ColorRGB& getFontBorderColor() const;
-    void setFontBorderColor(int r, int g, int b);
-    int getLinePitch() const;
-    void setLinePitch(int pitch) { linePitch = pitch; }
-    int getSidePitch() const;
-    void setSidePitch(int pitch) { sidePitch = pitch; }
-    bool isAutoTransCenterEnabled() const;
-    void setAutoTransCenter(bool enable) { autoTransCenterEnable = enable; }
-    bool isSyntacticAnalysisEnabled() const;
-    void setSyntacticAnalysis(bool enable);
-    int getHorizontalAlignment() const;
-    void setHorizontalAlignment(int alignmentType);
-    float getTransCenterX() const;
-    float getTransCenterY() const;
-    void setTransCenter(float x, float y) { transCenterX = x; transCenterY = y; }
-    int getMaxWidth() const;
-    void setMaxWidth(int w) { maxWidth = w; }
-    int getMaxHeight() const;
-    void setMaxHeight(int h) { maxHeight = h; }
-    int getTotalWidth() const;
-    int getTotalHeight() const;
-    int getTextLength() const;
-    int getTextLengthCU() const;
-    std::vector<int> getTextLengthCUL() const;
-    bool isFontParamModified() const;
-    void generateFonts();
-    const std::vector<std::shared_ptr<Font>>& getBodyFonts() const;
+    void Update() override;
+    void Render() override;
+    const std::wstring& GetText() const;
+    void SetText(const std::wstring& t);
+    const std::wstring& GetFontName() const;
+    void SetFontName(const std::wstring& name);
+    int GetFontSize() const;
+    void SetFontSize(int s);
+    bool IsFontBold() const;
+    void SetFontBold(bool b);
+    const ColorRGB& GetFontColorTop() const;
+    void SetFontColorTop(int r, int g, int b);
+    const ColorRGB& GetFontColorBottom() const;
+    void SetFontColorBottom(int r, int g, int b);
+    int GetFontBorderType() const;
+    void SetFontBorderType(int t);
+    int GetFontBorderWidth() const;
+    void SetFontBorderWidth(int w);
+    const ColorRGB& GetFontBorderColor() const;
+    void SetFontBorderColor(int r, int g, int b);
+    int GetLinePitch() const;
+    void SetLinePitch(int pitch) { linePitch_ = pitch; }
+    int GetSidePitch() const;
+    void SetSidePitch(int pitch) { sidePitch_ = pitch; }
+    bool IsAutoTransCenterEnabled() const;
+    void SetAutoTransCenter(bool enable) { autoTransCenterEnable_ = enable; }
+    bool IsSyntacticAnalysisEnabled() const;
+    void SetSyntacticAnalysis(bool enable);
+    int GetHorizontalAlignment() const;
+    void SetHorizontalAlignment(int alignmentType);
+    float GetTransCenterX() const;
+    float GetTransCenterY() const;
+    void SetTransCenter(float x, float y) { transCenterX_ = x; transCenterY_ = y; }
+    int GetMaxWidth() const;
+    void SetMaxWidth(int w) { maxWidth_ = w; }
+    int GetMaxHeight() const;
+    void SetMaxHeight(int h) { maxHeight_ = h; }
+    int GetTotalWidth() const;
+    int GetTotalHeight() const;
+    int GetTextLength() const;
+    int GetTextLengthCU() const;
+    std::vector<int> GetTextLengthCUL() const;
+    bool IsFontParamModified() const;
+    void GenerateFonts();
+    const std::vector<std::shared_ptr<Font>>& GetBodyFonts() const;
     template <typename T>
     struct Ruby
     {
@@ -71,33 +71,33 @@ public:
         int end;
         T text;
     };
-    const std::vector<Ruby<std::vector<std::shared_ptr<Font>>>>& getRubyFonts() const;
-    static void parseRubiedString(const std::wstring& src, std::wstring& bodyText, std::vector<Ruby<std::wstring>>& rubies);
-protected:
-    int getNextLineOffsetY() const;
-    void renderFont(const std::shared_ptr<Font>& font, const D3DXMATRIX& worldMatrix);
-    std::wstring text;
-    std::wstring bodyText;
-    std::vector<Ruby<std::wstring>> rubies;
-    std::wstring fontName;
-    int size;
-    bool bold;
-    ColorRGB topColor;
-    ColorRGB bottomColor;
-    int borderType;
-    int borderWidth;
-    ColorRGB borderColor;
-    int linePitch;
-    int sidePitch;
-    float transCenterX;
-    float transCenterY;
-    bool autoTransCenterEnable;
-    int horizontalAlignment;
-    bool syntacticAnalysisEnable;
-    int maxWidth;
-    int maxHeight;
-    bool fontParamModified;
-    std::vector<std::shared_ptr<Font>> bodyFonts;
-    std::vector<Ruby<std::vector<std::shared_ptr<Font>>>> rubyFonts;
+    const std::vector<Ruby<std::vector<std::shared_ptr<Font>>>>& GetRubyFonts() const;
+    static void ParseRubiedString(const std::wstring& src, std::wstring& bodyText, std::vector<Ruby<std::wstring>>& rubies);
+private:
+    int GetNextLineOffsetY() const;
+    void RenderFont(const std::shared_ptr<Font>& font, const D3DXMATRIX& worldMatrix);
+    std::wstring text_;
+    std::wstring bodyText_;
+    std::vector<Ruby<std::wstring>> rubies_;
+    std::wstring fontName_;
+    int size_;
+    bool isBold_;
+    ColorRGB topColor_;
+    ColorRGB bottomColor_;
+    int borderType_;
+    int borderWidth_;
+    ColorRGB borderColor_;
+    int linePitch_;
+    int sidePitch_;
+    float transCenterX_;
+    float transCenterY_;
+    bool autoTransCenterEnable_;
+    int horizontalAlignment_;
+    bool syntacticAnalysisEnable_;
+    int maxWidth_;
+    int maxHeight_;
+    bool isFontParamModified_;
+    std::vector<std::shared_ptr<Font>> bodyFonts_;
+    std::vector<Ruby<std::vector<std::shared_ptr<Font>>>> rubyFonts_;
 };
 }

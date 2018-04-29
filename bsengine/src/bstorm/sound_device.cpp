@@ -9,22 +9,22 @@
 
 namespace bstorm
 {
-IDirectSoundBuffer8 * SoundDataLoaderFromSoundFile::loadSoundData(const std::wstring & path, IDirectSound8 * dSound)
+IDirectSoundBuffer8 * SoundDataLoaderFromSoundFile::LoadSoundData(const std::wstring & path, IDirectSound8 * dSound)
 {
-    IDirectSoundBuffer8* dSoundBuffer = NULL;
+    IDirectSoundBuffer8* dSoundBuffer = nullptr;
     // waveデータの書き込み
-    std::wstring ext(getLowerExt(path));
+    std::wstring ext(GetLowerExt(path));
     if (ext == L".wave" || ext == L".wav")
     {
-        dSoundBuffer = readWaveFile(path, dSound);
+        dSoundBuffer = ReadWaveFile(path, dSound);
     } else if (ext == L".ogg")
     {
-        dSoundBuffer = readOggVorbisFile(path, dSound);
+        dSoundBuffer = ReadOggVorbisFile(path, dSound);
     } else
     {
         throw Log(Log::Level::LV_ERROR)
-            .setMessage("unsupported sound file format.")
-            .setParam(Log::Param(Log::Param::Tag::TEXT, path));
+            .SetMessage("unsupported sound file format.")
+            .SetParam(Log::Param(Log::Param::Tag::TEXT, path));
     }
     return dSoundBuffer;
 }
@@ -34,16 +34,16 @@ static DWORD WINAPI SoundControlThread(LPVOID arg)
     SoundBuffer* soundBuffer = (SoundBuffer*)arg;
     while (true)
     {
-        HANDLE loopEndEvent = OpenEvent(EVENT_ALL_ACCESS, FALSE, soundBuffer->getLoopEndEventName().c_str());
+        HANDLE loopEndEvent = OpenEvent(EVENT_ALL_ACCESS, FALSE, soundBuffer->GetLoopEndEventName().c_str());
         auto ret = WaitForSingleObject(loopEndEvent, INFINITE);
         ResetEvent(loopEndEvent);
         CloseHandle(loopEndEvent);
         if (ret == WAIT_OBJECT_0)
         {
             OutputDebugStringW(L"catch sound control event.\n");
-            if (soundBuffer->isLoopEnabled())
+            if (soundBuffer->IsLoopEnabled())
             {
-                soundBuffer->seek(soundBuffer->getLoopStartSampleCount());
+                soundBuffer->Seek(soundBuffer->GetLoopStartSampleCount());
             }
         } else
         {
@@ -55,151 +55,151 @@ static DWORD WINAPI SoundControlThread(LPVOID arg)
 }
 
 SoundBuffer::SoundBuffer(const std::wstring& path, IDirectSoundBuffer8* buf) :
-    path(path),
-    dSoundBuffer(buf),
-    loopEnable(false),
-    loopStartSampleCnt(0),
-    loopEndSampleCnt(DSBPN_OFFSETSTOP),
-    controlThread(NULL),
-    loopEndEvent(NULL)
+    path_(path),
+    dSoundBuffer_(buf),
+    loopEnable_(false),
+    loopStartSampleCnt_(0),
+    loopEndSampleCnt_(DSBPN_OFFSETSTOP),
+    controlThread_(nullptr),
+    loopEndEvent_(nullptr)
 {
     try
     {
-        dSoundBuffer->SetVolume(DSBVOLUME_MAX);
-        dSoundBuffer->SetPan(DSBPAN_CENTER);
+        dSoundBuffer_->SetVolume(DSBVOLUME_MAX);
+        dSoundBuffer_->SetPan(DSBPAN_CENTER);
 
         WAVEFORMATEX waveFormat;
-        if (FAILED(dSoundBuffer->GetFormat(&waveFormat, sizeof(waveFormat), NULL)))
+        if (FAILED(dSoundBuffer_->GetFormat(&waveFormat, sizeof(waveFormat), nullptr)))
         {
             throw Log(Log::Level::LV_ERROR)
-                .setMessage("failed to get sound buffer format.")
-                .setParam(Log::Param(Log::Param::Tag::TEXT, path));
+                .SetMessage("failed to get sound buffer format.")
+                .SetParam(Log::Param(Log::Param::Tag::TEXT, path));
         }
-        samplePerSec = waveFormat.nSamplesPerSec;
-        bytesPerSample = waveFormat.wBitsPerSample / 8;
-        channelCnt = waveFormat.nChannels;
+        samplePerSec_ = waveFormat.nSamplesPerSec;
+        bytesPerSample_ = waveFormat.wBitsPerSample / 8;
+        channelCnt_ = waveFormat.nChannels;
 
-        loopEndEvent = CreateEvent(NULL, TRUE, FALSE, getLoopEndEventName().c_str());
-        if (loopEndEvent == NULL)
+        loopEndEvent_ = CreateEvent(nullptr, TRUE, FALSE, GetLoopEndEventName().c_str());
+        if (loopEndEvent_ == nullptr)
         {
             throw Log(Log::Level::LV_ERROR)
-                .setMessage("failed to create loop end event.")
-                .setParam(Log::Param(Log::Param::Tag::TEXT, path));
+                .SetMessage("failed to create loop end event.")
+                .SetParam(Log::Param(Log::Param::Tag::TEXT, path));
         }
 
-        controlThread = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)SoundControlThread, this, 0, NULL);
-        if (controlThread == NULL)
+        controlThread_ = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)SoundControlThread, this, 0, nullptr);
+        if (controlThread_ == nullptr)
         {
             throw Log(Log::Level::LV_ERROR)
-                .setMessage("failed to create sound control thread.")
-                .setParam(Log::Param(Log::Param::Tag::TEXT, path));
+                .SetMessage("failed to create sound control thread.")
+                .SetParam(Log::Param(Log::Param::Tag::TEXT, path));
         }
     } catch (...)
     {
-        if (loopEndEvent)
+        if (loopEndEvent_)
         {
-            CloseHandle(loopEndEvent);
+            CloseHandle(loopEndEvent_);
         }
-        if (controlThread)
+        if (controlThread_)
         {
-            TerminateThread(controlThread, 1);
-            CloseHandle(controlThread);
+            TerminateThread(controlThread_, 1);
+            CloseHandle(controlThread_);
         }
-        safe_release(dSoundBuffer);
+        safe_release(dSoundBuffer_);
         throw;
     }
 }
 
 SoundBuffer::SoundBuffer(const std::shared_ptr<SoundBuffer>& src, IDirectSound8* dSound) :
-    path(src->path),
-    dSoundBuffer(NULL),
-    loopEnable(false),
-    loopStartSampleCnt(0),
-    loopEndSampleCnt(DSBPN_OFFSETSTOP),
-    controlThread(NULL),
-    loopEndEvent(NULL)
+    path_(src->path_),
+    dSoundBuffer_(nullptr),
+    loopEnable_(false),
+    loopStartSampleCnt_(0),
+    loopEndSampleCnt_(DSBPN_OFFSETSTOP),
+    controlThread_(nullptr),
+    loopEndEvent_(nullptr)
 {
     try
     {
-        IDirectSoundBuffer* dSoundTempBuffer = NULL;
-        if (DS_OK != dSound->DuplicateSoundBuffer(src->dSoundBuffer, &dSoundTempBuffer))
+        IDirectSoundBuffer* dSoundTempBuffer = nullptr;
+        if (DS_OK != dSound->DuplicateSoundBuffer(src->dSoundBuffer_, &dSoundTempBuffer))
         {
             throw Log(Log::Level::LV_ERROR)
-                .setMessage("failed to duplicate sound buffer.")
-                .setParam(Log::Param(Log::Param::Tag::TEXT, path));
+                .SetMessage("failed to duplicate sound buffer.")
+                .SetParam(Log::Param(Log::Param::Tag::TEXT, path_));
         }
-        dSoundTempBuffer->QueryInterface(IID_IDirectSoundBuffer8, (void**)&(this->dSoundBuffer));
+        dSoundTempBuffer->QueryInterface(IID_IDirectSoundBuffer8, (void**)&dSoundBuffer_);
         // バグがあるので、バッファ複製直後に元の音量からちょっとずらす必要があるらしい
-        LONG origVolume = NULL; // 元の音量
-        src->dSoundBuffer->GetVolume(&origVolume);
-        dSoundBuffer->SetVolume(origVolume - 100);
+        LONG origVolume = 0; // 元の音量
+        src->dSoundBuffer_->GetVolume(&origVolume);
+        dSoundBuffer_->SetVolume(origVolume - 100);
         // 最大音量に設定する
-        dSoundBuffer->SetVolume(DSBVOLUME_MAX);
-        dSoundBuffer->SetPan(DSBPAN_CENTER);
+        dSoundBuffer_->SetVolume(DSBVOLUME_MAX);
+        dSoundBuffer_->SetPan(DSBPAN_CENTER);
         safe_release(dSoundTempBuffer);
 
         WAVEFORMATEX waveFormat;
-        if (FAILED(dSoundBuffer->GetFormat(&waveFormat, sizeof(waveFormat), NULL)))
+        if (FAILED(dSoundBuffer_->GetFormat(&waveFormat, sizeof(waveFormat), nullptr)))
         {
             throw Log(Log::Level::LV_ERROR)
-                .setMessage("failed to get sound buffer format.")
-                .setParam(Log::Param(Log::Param::Tag::TEXT, path));
+                .SetMessage("failed to get sound buffer format.")
+                .SetParam(Log::Param(Log::Param::Tag::TEXT, path_));
         }
-        samplePerSec = waveFormat.nSamplesPerSec;
-        bytesPerSample = waveFormat.wBitsPerSample / 8;
-        channelCnt = waveFormat.nChannels;
+        samplePerSec_ = waveFormat.nSamplesPerSec;
+        bytesPerSample_ = waveFormat.wBitsPerSample / 8;
+        channelCnt_ = waveFormat.nChannels;
 
-        loopEndEvent = CreateEvent(NULL, TRUE, FALSE, getLoopEndEventName().c_str());
-        if (loopEndEvent == NULL)
+        loopEndEvent_ = CreateEvent(nullptr, TRUE, FALSE, GetLoopEndEventName().c_str());
+        if (loopEndEvent_ == nullptr)
         {
             throw Log(Log::Level::LV_ERROR)
-                .setMessage("failed to create loop end event.")
-                .setParam(Log::Param(Log::Param::Tag::TEXT, path));
+                .SetMessage("failed to create loop end event.")
+                .SetParam(Log::Param(Log::Param::Tag::TEXT, path_));
         }
 
-        controlThread = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)SoundControlThread, this, 0, NULL);
-        if (controlThread == NULL)
+        controlThread_ = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)SoundControlThread, this, 0, nullptr);
+        if (controlThread_ == nullptr)
         {
             throw Log(Log::Level::LV_ERROR)
-                .setMessage("failed to create sound control thread.")
-                .setParam(Log::Param(Log::Param::Tag::TEXT, path));
+                .SetMessage("failed to create sound control thread.")
+                .SetParam(Log::Param(Log::Param::Tag::TEXT, path_));
         }
     } catch (...)
     {
-        if (loopEndEvent)
+        if (loopEndEvent_)
         {
-            CloseHandle(loopEndEvent);
+            CloseHandle(loopEndEvent_);
         }
-        if (controlThread)
+        if (controlThread_)
         {
-            TerminateThread(controlThread, 1);
-            CloseHandle(controlThread);
+            TerminateThread(controlThread_, 1);
+            CloseHandle(controlThread_);
         }
-        safe_release(dSoundBuffer);
+        safe_release(dSoundBuffer_);
         throw;
     }
 }
 
-void SoundBuffer::play()
+void SoundBuffer::Play()
 {
-    dSoundBuffer->Play(0, 0, loopEnable ? DSBPLAY_LOOPING : 0);
+    dSoundBuffer_->Play(0, 0, loopEnable_ ? DSBPLAY_LOOPING : 0);
 }
 
-void SoundBuffer::stop()
+void SoundBuffer::Stop()
 {
-    dSoundBuffer->Stop();
+    dSoundBuffer_->Stop();
 }
 
-void SoundBuffer::setVolume(float vol)
+void SoundBuffer::SetVolume(float vol)
 {
     vol = constrain(vol, 0.0f, 1.0f);
     // NOTE : 1000だと値に比べて大きく聞こえるので3000にした。音量1/2で-9dBぐらいになる調整
     vol = vol == 0.0f ? DSBVOLUME_MIN : (3000.0f * log10f(vol));
     vol = constrain(vol, 1.0f*DSBVOLUME_MIN, 1.0f*DSBVOLUME_MAX);
-    dSoundBuffer->SetVolume(vol);
+    dSoundBuffer_->SetVolume(vol);
 }
 
-void SoundBuffer::setPanRate(float pan)
+void SoundBuffer::SetPanRate(float pan)
 {
     pan = constrain(pan, -1.0f, 1.0f);
     const bool rightPan = pan > 0;
@@ -207,148 +207,148 @@ void SoundBuffer::setPanRate(float pan)
     pan = pan == 0 ? DSBPAN_LEFT : (1000.0f * log10f(pan));
     if (rightPan) pan *= -1;
     pan = constrain(pan, 1.0f*DSBPAN_LEFT, 1.0f*DSBPAN_RIGHT);
-    dSoundBuffer->SetPan(pan);
+    dSoundBuffer_->SetPan(pan);
 }
 
-void SoundBuffer::seek(int sample)
+void SoundBuffer::Seek(int sample)
 {
-    dSoundBuffer->SetCurrentPosition(sample * bytesPerSample * channelCnt);
+    dSoundBuffer_->SetCurrentPosition(sample * bytesPerSample_ * channelCnt_);
 }
 
-void SoundBuffer::setLoopEnable(bool enable)
+void SoundBuffer::SetLoopEnable(bool enable)
 {
-    loopEnable = enable;
+    loopEnable_ = enable;
 }
 
-void SoundBuffer::setLoopSampleCount(DWORD start, DWORD end)
+void SoundBuffer::SetLoopSampleCount(DWORD start, DWORD end)
 {
-    loopStartSampleCnt = start;
-    loopEndSampleCnt = end;
-    IDirectSoundNotify8* soundNotify = NULL;
-    dSoundBuffer->QueryInterface(IID_IDirectSoundNotify8, (void**)&soundNotify);
+    loopStartSampleCnt_ = start;
+    loopEndSampleCnt_ = end;
+    IDirectSoundNotify8* soundNotify = nullptr;
+    dSoundBuffer_->QueryInterface(IID_IDirectSoundNotify8, (void**)&soundNotify);
     DSBPOSITIONNOTIFY notifyPos;
-    notifyPos.dwOffset = loopEndSampleCnt * bytesPerSample * channelCnt;
-    notifyPos.hEventNotify = loopEndEvent;
+    notifyPos.dwOffset = loopEndSampleCnt_ * bytesPerSample_ * channelCnt_;
+    notifyPos.hEventNotify = loopEndEvent_;
     soundNotify->SetNotificationPositions(1, &notifyPos);
     safe_release(soundNotify);
 }
 
-void SoundBuffer::setLoopTime(double startSec, double endSec)
+void SoundBuffer::SetLoopTime(double startSec, double endSec)
 {
-    setLoopSampleCount((DWORD)(samplePerSec * startSec), (DWORD)(samplePerSec * endSec));
+    SetLoopSampleCount((DWORD)(samplePerSec_ * startSec), (DWORD)(samplePerSec_ * endSec));
 }
 
-bool SoundBuffer::isPlaying()
+bool SoundBuffer::IsPlaying()
 {
     DWORD status;
-    dSoundBuffer->GetStatus(&status);
+    dSoundBuffer_->GetStatus(&status);
     return (status & DSBSTATUS_PLAYING) != 0;
 }
 
-float SoundBuffer::getVolume()
+float SoundBuffer::GetVolume()
 {
     LONG vol;
-    dSoundBuffer->GetVolume(&vol);
+    dSoundBuffer_->GetVolume(&vol);
     return vol == DSBVOLUME_MIN ? 0.0f : powf(10.0f, vol / 3000.0f);
 }
 
-const std::wstring & SoundBuffer::getPath() const
+const std::wstring & SoundBuffer::GetPath() const
 {
-    return path;
+    return path_;
 }
 
-bool SoundBuffer::isLoopEnabled() const
+bool SoundBuffer::IsLoopEnabled() const
 {
-    return loopEnable;
+    return loopEnable_;
 }
 
-std::wstring SoundBuffer::getLoopEndEventName() const
+std::wstring SoundBuffer::GetLoopEndEventName() const
 {
     size_t id = (size_t)this;
     return L"LOOP_END_" + std::to_wstring(id);
 }
 
-DWORD SoundBuffer::getLoopStartSampleCount() const
+DWORD SoundBuffer::GetLoopStartSampleCount() const
 {
-    return loopStartSampleCnt;
+    return loopStartSampleCnt_;
 }
 
-DWORD SoundBuffer::getLoopEndSampleCount() const
+DWORD SoundBuffer::GetLoopEndSampleCount() const
 {
-    return loopEndSampleCnt;
+    return loopEndSampleCnt_;
 }
 
 SoundBuffer::~SoundBuffer()
 {
-    TerminateThread(controlThread, 0);
-    CloseHandle(controlThread);
-    CloseHandle(loopEndEvent);
-    safe_release(dSoundBuffer);
+    TerminateThread(controlThread_, 0);
+    CloseHandle(controlThread_);
+    CloseHandle(loopEndEvent_);
+    safe_release(dSoundBuffer_);
     Logger::WriteLog(std::move(
         Log(Log::Level::LV_INFO)
-        .setMessage("release sound.")
-        .setParam(Log::Param(Log::Param::Tag::SOUND, path))));
+        .SetMessage("release sound.")
+        .SetParam(Log::Param(Log::Param::Tag::SOUND, path_))));
 }
 
 SoundDevice::SoundDevice(HWND hWnd) :
-    hWnd(hWnd),
-    dSound(NULL),
-    loader(std::make_shared<SoundDataLoaderFromSoundFile>())
+    hWnd_(hWnd),
+    dSound_(nullptr),
+    loader_(std::make_shared<SoundDataLoaderFromSoundFile>())
 {
-    if (DS_OK != DirectSoundCreate8(NULL, &(this->dSound), NULL))
+    if (DS_OK != DirectSoundCreate8(nullptr, &dSound_, nullptr))
     {
         throw Log(Log::Level::LV_ERROR)
-            .setMessage("failed to init sound device.");
+            .SetMessage("failed to init sound device.");
     }
-    dSound->SetCooperativeLevel(hWnd, DSSCL_PRIORITY);
+    dSound_->SetCooperativeLevel(hWnd, DSSCL_PRIORITY);
 }
 
 SoundDevice::~SoundDevice()
 {
-    safe_release(dSound);
+    safe_release(dSound_);
 }
 
-std::shared_ptr<SoundBuffer> SoundDevice::loadSound(const std::wstring & path, bool doCache, const std::shared_ptr<SourcePos>& srcPos)
+std::shared_ptr<SoundBuffer> SoundDevice::LoadSound(const std::wstring & path, bool doCache, const std::shared_ptr<SourcePos>& srcPos)
 {
-    auto uniqPath = canonicalPath(path);
-    auto it = cache.find(uniqPath);
-    if (it != cache.end())
+    auto uniqPath = GetCanonicalPath(path);
+    auto it = cache_.find(uniqPath);
+    if (it != cache_.end())
     {
-        return std::make_shared<SoundBuffer>(it->second, dSound);
+        return std::make_shared<SoundBuffer>(it->second, dSound_);
     }
-    IDirectSoundBuffer8* buf = loader->loadSoundData(path, dSound);
-    if (buf == NULL)
+    IDirectSoundBuffer8* buf = loader_->LoadSoundData(path, dSound_);
+    if (buf == nullptr)
     {
         throw Log(Log::Level::LV_ERROR)
-            .setMessage("failed to load sound data.")
-            .setParam(Log::Param(Log::Param::Tag::TEXT, path));
+            .SetMessage("failed to load sound data.")
+            .SetParam(Log::Param(Log::Param::Tag::TEXT, path));
     }
     auto sound = std::make_shared<SoundBuffer>(uniqPath, buf);
     if (doCache)
     {
-        cache[uniqPath] = sound;
+        cache_[uniqPath] = sound;
     }
     Logger::WriteLog(std::move(
         Log(Log::Level::LV_INFO)
-        .setMessage("load sound.")
-        .setParam(Log::Param(Log::Param::Tag::SOUND, uniqPath)))
-        .addSourcePos(srcPos));
+        .SetMessage("load sound.")
+        .SetParam(Log::Param(Log::Param::Tag::SOUND, uniqPath)))
+        .AddSourcePos(srcPos));
     return sound;
 }
 
-void SoundDevice::setLoader(const std::shared_ptr<SoundDataLoader>& ld)
+void SoundDevice::SetLoader(const std::shared_ptr<SoundDataLoader>& ld)
 {
-    loader = ld;
+    loader_ = ld;
 }
 
-void SoundDevice::removeSoundCache(const std::wstring & path)
+void SoundDevice::RemoveSoundCache(const std::wstring & path)
 {
-    cache.erase(path);
+    cache_.erase(path);
 }
 
-void SoundDevice::clearSoundCache()
+void SoundDevice::ClearSoundCache()
 {
-    cache.clear();
+    cache_.clear();
 }
 
 static IDirectSoundBuffer8* createSoundBuffer(DWORD dataSize, WAVEFORMATEX* waveFormat, IDirectSound8* dSound)
@@ -369,10 +369,10 @@ static IDirectSoundBuffer8* createSoundBuffer(DWORD dataSize, WAVEFORMATEX* wave
     dSBufferDesc.lpwfxFormat = waveFormat;
     dSBufferDesc.guid3DAlgorithm = GUID_NULL;
 
-    IDirectSoundBuffer* dSoundTempBuffer = NULL;
-    if (DS_OK != dSound->CreateSoundBuffer(&dSBufferDesc, &dSoundTempBuffer, NULL))
+    IDirectSoundBuffer* dSoundTempBuffer = nullptr;
+    if (DS_OK != dSound->CreateSoundBuffer(&dSBufferDesc, &dSoundTempBuffer, nullptr))
     {
-        return NULL;
+        return nullptr;
     }
     IDirectSoundBuffer8* dSoundBuffer;
     dSoundTempBuffer->QueryInterface(IID_IDirectSoundBuffer8, (void**)&(dSoundBuffer));
@@ -380,10 +380,10 @@ static IDirectSoundBuffer8* createSoundBuffer(DWORD dataSize, WAVEFORMATEX* wave
     return dSoundBuffer;
 }
 
-IDirectSoundBuffer8* readWaveFile(const std::wstring & path, IDirectSound8* dSound)
+IDirectSoundBuffer8* ReadWaveFile(const std::wstring & path, IDirectSound8* dSound)
 {
-    IDirectSoundBuffer8* dSoundBuffer = NULL;
-    HMMIO hMmio = NULL;
+    IDirectSoundBuffer8* dSoundBuffer = nullptr;
+    HMMIO hMmio = nullptr;
 
     MMIOINFO mmioInfo;
     memset(&mmioInfo, 0, sizeof(MMIOINFO));
@@ -391,23 +391,23 @@ IDirectSoundBuffer8* readWaveFile(const std::wstring & path, IDirectSound8* dSou
     if (!hMmio)
     {
         throw Log(Log::Level::LV_ERROR)
-            .setMessage("can't open file")
-            .setParam(Log::Param(Log::Param::Tag::TEXT, path));
+            .SetMessage("can't open file")
+            .SetParam(Log::Param(Log::Param::Tag::TEXT, path));
     }
 
     auto illegal_wave_format = Log(Log::Level::LV_ERROR)
-        .setMessage("illegal wave format file.")
-        .setParam(Log::Param(Log::Param::Tag::TEXT, path));
+        .SetMessage("illegal wave format file.")
+        .SetParam(Log::Param(Log::Param::Tag::TEXT, path));
     auto failed_to_load_wave = Log(Log::Level::LV_ERROR)
-        .setMessage("failed to load wave file.")
-        .setParam(Log::Param(Log::Param::Tag::TEXT, path));
+        .SetMessage("failed to load wave file.")
+        .SetParam(Log::Param(Log::Param::Tag::TEXT, path));
 
     try
     {
         MMRESULT mmResult;
         MMCKINFO riffChunk;
         riffChunk.fccType = mmioFOURCC('W', 'A', 'V', 'E');
-        mmResult = mmioDescend(hMmio, &riffChunk, NULL, MMIO_FINDRIFF);
+        mmResult = mmioDescend(hMmio, &riffChunk, nullptr, MMIO_FINDRIFF);
         if (mmResult != MMSYSERR_NOERROR)
         {
             throw illegal_wave_format;
@@ -442,14 +442,14 @@ IDirectSoundBuffer8* readWaveFile(const std::wstring & path, IDirectSound8* dSou
         DWORD totalDataSize = dataChunk.cksize;
 
         dSoundBuffer = createSoundBuffer(totalDataSize, &waveFormat, dSound);
-        if (dSoundBuffer == NULL)
+        if (dSoundBuffer == nullptr)
         {
             throw failed_to_load_wave;
         }
 
-        char* writePoint = NULL;
+        char* writePoint = nullptr;
         DWORD writeLength = 0;
-        if (DS_OK != dSoundBuffer->Lock(0, 0, (LPVOID*)&writePoint, &writeLength, NULL, NULL, DSBLOCK_ENTIREBUFFER))
+        if (DS_OK != dSoundBuffer->Lock(0, 0, (LPVOID*)&writePoint, &writeLength, nullptr, nullptr, DSBLOCK_ENTIREBUFFER))
         {
             throw failed_to_load_wave;
         }
@@ -458,7 +458,7 @@ IDirectSoundBuffer8* readWaveFile(const std::wstring & path, IDirectSound8* dSou
         {
             throw failed_to_load_wave;
         }
-        dSoundBuffer->Unlock(writePoint, writeLength, NULL, 0);
+        dSoundBuffer->Unlock(writePoint, writeLength, nullptr, 0);
     } catch (...)
     {
         safe_release(dSoundBuffer);
@@ -469,37 +469,37 @@ IDirectSoundBuffer8* readWaveFile(const std::wstring & path, IDirectSound8* dSou
     return dSoundBuffer;
 }
 
-IDirectSoundBuffer8 * readOggVorbisFile(const std::wstring & path, IDirectSound8 * dSound)
+IDirectSoundBuffer8 * ReadOggVorbisFile(const std::wstring & path, IDirectSound8 * dSound)
 {
     auto cant_open_file = Log(Log::Level::LV_ERROR)
-        .setMessage("can't open ogg-vorbis file.")
-        .setParam(Log::Param(Log::Param::Tag::TEXT, path));
+        .SetMessage("can't open ogg-vorbis file.")
+        .SetParam(Log::Param(Log::Param::Tag::TEXT, path));
     auto illegal_vorbis_format = Log(Log::Level::LV_ERROR)
-        .setMessage("illegal ogg-vorbis format file.")
-        .setParam(Log::Param(Log::Param::Tag::TEXT, path));
+        .SetMessage("illegal ogg-vorbis format file.")
+        .SetParam(Log::Param(Log::Param::Tag::TEXT, path));
     auto failed_to_load_vorbis = Log(Log::Level::LV_ERROR)
-        .setMessage("failed to load ogg-vorbis file.")
-        .setParam(Log::Param(Log::Param::Tag::TEXT, path));
+        .SetMessage("failed to load ogg-vorbis file.")
+        .SetParam(Log::Param(Log::Param::Tag::TEXT, path));
 
 
     FILE* fp = _wfopen(path.c_str(), L"rb");
-    if (fp == NULL)
+    if (fp == nullptr)
     {
         throw cant_open_file;
     }
     OggVorbis_File vf;
-    if (ov_open(fp, &vf, NULL, 0) != 0)
+    if (ov_open(fp, &vf, nullptr, 0) != 0)
     {
         fclose(fp);
         throw cant_open_file;
     }
 
-    IDirectSoundBuffer8* dSoundBuffer = NULL;
+    IDirectSoundBuffer8* dSoundBuffer = nullptr;
 
     try
     {
         vorbis_info *vi = ov_info(&vf, -1);
-        if (vi == NULL)
+        if (vi == nullptr)
         {
             throw illegal_vorbis_format;
         }
@@ -516,14 +516,14 @@ IDirectSoundBuffer8 * readOggVorbisFile(const std::wstring & path, IDirectSound8
         waveFormat.wBitsPerSample = 16;
 
         dSoundBuffer = createSoundBuffer(totalDataSize, &waveFormat, dSound);
-        if (dSoundBuffer == NULL)
+        if (dSoundBuffer == nullptr)
         {
             throw failed_to_load_vorbis;
         }
 
-        char* writePoint = NULL;
+        char* writePoint = nullptr;
         DWORD writeLength = 0;
-        if (DS_OK != dSoundBuffer->Lock(0, 0, (LPVOID*)&writePoint, &writeLength, NULL, NULL, DSBLOCK_ENTIREBUFFER))
+        if (DS_OK != dSoundBuffer->Lock(0, 0, (LPVOID*)&writePoint, &writeLength, nullptr, nullptr, DSBLOCK_ENTIREBUFFER))
         {
             throw failed_to_load_vorbis;
         }
@@ -546,7 +546,7 @@ IDirectSoundBuffer8 * readOggVorbisFile(const std::wstring & path, IDirectSound8
             }
             writePoint += size;
         }
-        dSoundBuffer->Unlock(writePoint, writeLength, NULL, 0);
+        dSoundBuffer->Unlock(writePoint, writeLength, nullptr, 0);
     } catch (...)
     {
         ov_clear(&vf);

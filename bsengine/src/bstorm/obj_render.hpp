@@ -22,98 +22,98 @@ class ObjRender : public Obj
 public:
     ObjRender(const std::shared_ptr<GameState>& gameState);
     ~ObjRender();
-    virtual void render() = 0;
-    bool isVisible() const { return visibleFlag; }
-    void setVisible(bool visible) { visibleFlag = visible; }
-    int getRenderPriority() const { return priority; }
-    float getX() const { return x; }
-    float getY() const { return y; }
-    float getZ() const { return z; }
-    void setX(float x) { transIntersection(x - this->x, 0); this->x = x; }
-    void setY(float y) { transIntersection(0, y - this->y); this->y = y; }
-    void setZ(float z) { this->z = z; }
-    void setPosition(float x, float y, float z)
+    virtual void Render() = 0;
+    bool IsVisible() const { return visibleFlag_; }
+    void SetVisible(bool visible) { visibleFlag_ = visible; }
+    int getRenderPriority() const { return priority_; }
+    float GetX() const { return x_; }
+    float GetY() const { return y_; }
+    float GetZ() const { return z_; }
+    void SetX(float x) { TransIntersection(x - this->x_, 0); this->x_ = x; }
+    void SetY(float y) { TransIntersection(0, y - this->y_); this->y_ = y; }
+    void SetZ(float z) { this->z_ = z; }
+    void SetPosition(float x, float y, float z)
     {
-        transIntersection(x - this->x, y - this->y);
-        this->x = x;
-        this->y = y;
-        this->z = z;
+        TransIntersection(x - this->x_, y - this->y_);
+        this->x_ = x;
+        this->y_ = y;
+        this->z_ = z;
     }
-    float getAngleX() const { return angleX; }
-    float getAngleY() const { return angleY; }
-    float getAngleZ() const { return angleZ; }
-    void setAngleX(float angleX) { this->angleX = angleX; }
-    void setAngleY(float angleY) { this->angleY = angleY; }
-    void setAngleZ(float angleZ) { this->angleZ = angleZ; }
-    void setAngleXYZ(float angleX, float angleY, float angleZ)
+    float GetAngleX() const { return angleX_; }
+    float GetAngleY() const { return angleY_; }
+    float GetAngleZ() const { return angleZ_; }
+    void SetAngleX(float angleX) { this->angleX_ = angleX; }
+    void SetAngleY(float angleY) { this->angleY_ = angleY; }
+    void SetAngleZ(float angleZ) { this->angleZ_ = angleZ; }
+    void SetAngleXYZ(float angleX, float angleY, float angleZ)
     {
-        this->angleX = angleX;
-        this->angleY = angleY;
-        this->angleZ = angleZ;
+        this->angleX_ = angleX;
+        this->angleY_ = angleY;
+        this->angleZ_ = angleZ;
     }
-    float getScaleX() const { return scaleX; }
-    float getScaleY() const { return scaleY; }
-    float getScaleZ() const { return scaleZ; }
-    void setScaleX(float scaleX) { this->scaleX = scaleX; }
-    void setScaleY(float scaleY) { this->scaleY = scaleY; }
-    void setScaleZ(float scaleZ) { this->scaleZ = scaleZ; }
-    void setScaleXYZ(float scaleX, float scaleY, float scaleZ)
+    float GetScaleX() const { return scaleX_; }
+    float GetScaleY() const { return scaleY_; }
+    float GetScaleZ() const { return scaleZ_; }
+    void SetScaleX(float scaleX) { this->scaleX_ = scaleX; }
+    void SetScaleY(float scaleY) { this->scaleY_ = scaleY; }
+    void SetScaleZ(float scaleZ) { this->scaleZ_ = scaleZ; }
+    void SetScaleXYZ(float scaleX, float scaleY, float scaleZ)
     {
-        this->scaleX = scaleX;
-        this->scaleY = scaleY;
-        this->scaleZ = scaleZ;
+        this->scaleX_ = scaleX;
+        this->scaleY_ = scaleY;
+        this->scaleZ_ = scaleZ;
     }
-    const ColorRGB& getColor() const { return rgb; }
-    int getAlpha() const { return alpha; }
-    D3DCOLOR getD3DCOLOR() const;
-    void setColor(int r, int g, int b);
-    void setAlpha(int a);
-    void setColorHSV(int h, int s, int v);
-    int getBlendType() const { return blendType; }
-    void setBlendType(int t) { blendType = t; }
-    bool isFogEnabled() const { return fogEnable; }
-    void setFogEnable(bool enable) { fogEnable = enable; }
-    bool isZWriteEnabled() const { return zWriteEnable; }
-    void setZWrite(bool enable) { zWriteEnable = enable; }
-    bool isZTestEnabled() const { return zTestEnable; }
-    void setZTest(bool enable) { zTestEnable = enable; }
-    bool isPermitCamera() const { return permitCamera; }
-    void setPermitCamera(bool permit) { permitCamera = permit; }
-    void setShader(const std::shared_ptr<Shader>& shader);
-    void setShaderO(const std::shared_ptr<ObjRender>& obj);
-    const std::shared_ptr<Shader>& getShader() const { return shader; }
-    void resetShader();
-    void setShaderTechnique(const std::string& name);
-    void setShaderVector(const std::string& name, float x, float y, float z, float w);
-    void setShaderFloat(const std::string& name, float f);
-    void setShaderFloatArray(const std::string& name, const std::vector<float>& fs);
-    void setShaderTexture(const std::string& name, const std::shared_ptr<Texture>& texture);
-    void setShaderTexture(const std::string& name, const std::shared_ptr<RenderTarget>& renderTarget);
+    const ColorRGB& GetColor() const { return rgb_; }
+    int GetAlpha() const { return alpha_; }
+    D3DCOLOR GetD3DCOLOR() const;
+    void SetColor(int r, int g, int b);
+    void SetAlpha(int a);
+    void SetColorHSV(int h, int s, int v);
+    int GetBlendType() const { return blendType_; }
+    void SetBlendType(int t) { blendType_ = t; }
+    bool IsFogEnabled() const { return fogEnable_; }
+    void SetFogEnable(bool enable) { fogEnable_ = enable; }
+    bool IsZWriteEnabled() const { return zWriteEnable_; }
+    void SetZWrite(bool enable) { zWriteEnable_ = enable; }
+    bool IsZTestEnabled() const { return zTestEnable_; }
+    void SetZTest(bool enable) { zTestEnable_ = enable; }
+    bool IsPermitCamera() const { return permitCamera_; }
+    void SetPermitCamera(bool permit) { permitCamera_ = permit; }
+    void SetShader(const std::shared_ptr<Shader>& shader);
+    void SetShaderO(const std::shared_ptr<ObjRender>& obj);
+    const std::shared_ptr<Shader>& GetShader() const { return shader_; }
+    void ResetShader();
+    void SetShaderTechnique(const std::string& name);
+    void SetShaderVector(const std::string& name, float x, float y, float z, float w);
+    void SetShaderFloat(const std::string& name, float f);
+    void SetShaderFloatArray(const std::string& name, const std::vector<float>& fs);
+    void SetShaderTexture(const std::string& name, const std::shared_ptr<Texture>& texture);
+    void SetShaderTexture(const std::string& name, const std::shared_ptr<RenderTarget>& renderTarget);
 protected:
-    std::shared_ptr<Shader> getAppliedShader() const;
-    virtual void transIntersection(float dx, float dy) {}
+    std::shared_ptr<Shader> GetAppliedShader() const;
+    virtual void TransIntersection(float dx, float dy) {}
 private:
-    bool visibleFlag;
-    int priority;
-    float x;
-    float y;
-    float z;
-    float angleX;
-    float angleY;
-    float angleZ;
-    float scaleX;
-    float scaleY;
-    float scaleZ;
-    ColorRGB rgb;
-    int alpha;
-    int blendType;
-    bool fogEnable;
-    bool zWriteEnable;
-    bool zTestEnable;
-    bool permitCamera;
-    std::list<std::weak_ptr<ObjRender>>::iterator posInLayer;
-    std::shared_ptr<Shader> shader;
-    friend ObjectLayerList;
+    bool visibleFlag_;
+    int priority_;
+    float x_;
+    float y_;
+    float z_;
+    float angleX_;
+    float angleY_;
+    float angleZ_;
+    float scaleX_;
+    float scaleY_;
+    float scaleZ_;
+    ColorRGB rgb_;
+    int alpha_;
+    int blendType_;
+    bool fogEnable_;
+    bool zWriteEnable_;
+    bool zTestEnable_;
+    bool permitCamera_;
+    std::list<std::weak_ptr<ObjRender>>::iterator posInLayer_;
+    std::shared_ptr<Shader> shader_;
+    friend class ObjectLayerList;
 };
 
 class ObjShader : public ObjRender
@@ -121,8 +121,8 @@ class ObjShader : public ObjRender
 public:
     ObjShader(const std::shared_ptr<GameState>& gameState);
     ~ObjShader();
-    void update() override {}
-    void render() override {};
+    void Update() override {}
+    void Render() override {};
 };
 
 class ObjectLayerList
@@ -130,33 +130,33 @@ class ObjectLayerList
 public:
     ObjectLayerList();
     ~ObjectLayerList();
-    void setRenderPriority(const std::shared_ptr<ObjRender>& obj, int p);
-    void renderLayer(int priority, bool ignoreStgSceneObj, bool checkVisibleFlag);
-    void setLayerShader(int beginPriority, int endPriority, const std::shared_ptr<Shader>& shader);
-    void resetLayerShader(int beginPriority, int endPriority);
-    std::shared_ptr<Shader> getLayerShader(int p) const;
-    int getShotRenderPriority() const;
-    void setShotRenderPriority(int p);
-    int getItemRenderPriority() const;
-    void setItemRenderPriority(int p);
-    int getCameraFocusPermitRenderPriority() const;
-    int getStgFrameRenderPriorityMin() const;
-    void setStgFrameRenderPriorityMin(int p);
-    int getStgFrameRenderPriorityMax() const;
-    void setStgFrameRenderPriorityMax(int p);
-    bool isInvalidRenderPriority(int p) const;
-    void setInvalidRenderPriority(int min, int max);
-    void clearInvalidRenderPriority();
+    void SetRenderPriority(const std::shared_ptr<ObjRender>& obj, int p);
+    void RenderLayer(int priorit, bool ignoreStgSceneObj, bool checkVisibleFlag);
+    void SetLayerShader(int beginPriority, int endPriority, const std::shared_ptr<Shader>& shader);
+    void ResetLayerShader(int beginPriority, int endPriority);
+    std::shared_ptr<Shader> GetLayerShader(int p) const;
+    int GetShotRenderPriority() const;
+    void SetShotRenderPriority(int p);
+    int GetItemRenderPriority() const;
+    void SetItemRenderPriority(int p);
+    int GetCameraFocusPermitRenderPriority() const;
+    int GetStgFrameRenderPriorityMin() const;
+    void SetStgFrameRenderPriorityMin(int p);
+    int GetStgFrameRenderPriorityMax() const;
+    void SetStgFrameRenderPriorityMax(int p);
+    bool IsInvalidRenderPriority(int p) const;
+    void SetInvalidRenderPriority(int min, int max);
+    void ClearInvalidRenderPriority();
 private:
-    void remove(const std::shared_ptr<ObjRender>& obj);
-    std::array<std::list<std::weak_ptr<ObjRender>>, MAX_RENDER_PRIORITY + 1> layers;
-    std::array<std::shared_ptr<Shader>, MAX_RENDER_PRIORITY + 1> layerShaders;
-    int shotRenderPriority;
-    int itemRenderPriority;
-    int cameraFocusPermitRenderPriority;
-    int stgFrameRenderPriorityMin;
-    int stgFrameRenderPriorityMax;
-    int invalidRenderPriorityMin;
-    int invalidRenderPriorityMax;
+    void Remove(const std::shared_ptr<ObjRender>& obj);
+    std::array<std::list<std::weak_ptr<ObjRender>>, MAX_RENDER_PRIORITY + 1> layers_;
+    std::array<std::shared_ptr<Shader>, MAX_RENDER_PRIORITY + 1> layerShaders_;
+    int shotRenderPriority_;
+    int itemRenderPriority_;
+    int cameraFocusPermitRenderPriority_;
+    int stgFrameRenderPriorityMin_;
+    int stgFrameRenderPriorityMax_;
+    int invalidRenderPriorityMin_;
+    int invalidRenderPriorityMax_;
 };
 }

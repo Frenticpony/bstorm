@@ -13,210 +13,210 @@ namespace bstorm
 {
 ObjEnemyBossScene::ObjEnemyBossScene(const std::shared_ptr<GameState>& gameState) :
     Obj(gameState),
-    registerFlag(false),
-    currentStep(0),
-    currentPhase(-1),
-    playerSpellCount(0),
-    playerShootDownCount(0),
-    maxStep(0),
-    lastEnemyBossX(0),
-    lastEnemyBossY(0)
+    registerFlag_(false),
+    currentStep_(0),
+    currentPhase_(-1),
+    playerSpellCount_(0),
+    playerShootDownCount_(0),
+    maxStep_(0),
+    lastEnemyBossX_(0),
+    lastEnemyBossY_(0)
 {
-    setType(OBJ_ENEMY_BOSS_SCENE);
-    steps[0] = std::vector<Phase>();
+    SetType(OBJ_ENEMY_BOSS_SCENE);
+    steps_[0] = std::vector<Phase>();
 }
 
-void ObjEnemyBossScene::update()
+void ObjEnemyBossScene::Update()
 {
-    if (auto state = getGameState())
+    if (auto state = GetGameState())
     {
-        if (registerFlag)
+        if (registerFlag_)
         {
-            Phase& phase = const_cast<Phase&>(getCurrentPhase());
-            auto enemyBoss = enemyBossObj.lock();
+            Phase& phase = const_cast<Phase&>(GetCurrentPhase());
+            auto enemyBoss = enemyBossObj_.lock();
             if (phase.timerF > 0) phase.timerF--;
             if (phase.timerF == 0)
             {
                 phase.life = 0;
-                if (enemyBoss) enemyBoss->setLife(0);
-                state->scriptManager->notifyEventAll(EV_TIMEOUT);
+                if (enemyBoss) enemyBoss->SetLife(0);
+                state->scriptManager->NotifyEventAll(EV_TIMEOUT);
             }
             if (enemyBoss)
             {
-                lastEnemyBossX = enemyBoss->getX();
-                lastEnemyBossY = enemyBoss->getY();
+                lastEnemyBossX_ = enemyBoss->GetX();
+                lastEnemyBossY_ = enemyBoss->GetY();
             } else
             {
                 // スペルカードで
-                if (isSpell())
+                if (IsSpell())
                 {
                     // 時間制限内にクリアしたか、または耐久スペルで
-                    if (phase.timerF != 0 || isDurableSpell())
+                    if (phase.timerF != 0 || IsDurableSpell())
                     {
                         // ノーボムノーミスなら取得
-                        if (playerSpellCount == 0 && playerShootDownCount == 0)
+                        if (playerSpellCount_ == 0 && playerShootDownCount_ == 0)
                         {
-                            state->scriptManager->notifyEventAll(EV_GAIN_SPELL);
+                            state->scriptManager->NotifyEventAll(EV_GAIN_SPELL);
                         }
                     }
                 }
-                state->scriptManager->notifyEventAll(EV_END_BOSS_STEP);
-                if (!loadNext())
+                state->scriptManager->NotifyEventAll(EV_END_BOSS_STEP);
+                if (!LoadNext())
                 {
-                    die();
+                    Die();
                 }
             }
         }
     }
 }
 
-void ObjEnemyBossScene::regist(const std::shared_ptr<SourcePos>& srcPos)
+void ObjEnemyBossScene::Regist(const std::shared_ptr<SourcePos>& srcPos)
 {
-    if (registerFlag)
+    if (registerFlag_)
     {
         return;
     }
-    loadInThread(srcPos);
-    if (!loadNext())
+    LoadInThread(srcPos);
+    if (!LoadNext())
     {
-        die();
+        Die();
     }
-    registerFlag = true;
+    registerFlag_ = true;
 }
 
-void ObjEnemyBossScene::add(int step, const std::wstring& path)
+void ObjEnemyBossScene::Add(int step, const std::wstring& path)
 {
-    if (registerFlag) return;
-    maxStep = std::max(step, maxStep);
-    if (steps.count(step) == 0)
+    if (registerFlag_) return;
+    maxStep_ = std::max(step, maxStep_);
+    if (steps_.count(step) == 0)
     {
-        steps[step] = std::vector<Phase>();
+        steps_[step] = std::vector<Phase>();
     }
-    steps[step].emplace_back(path);
+    steps_[step].emplace_back(path);
 }
 
-void ObjEnemyBossScene::loadInThread(const std::shared_ptr<SourcePos>& srcPos)
+void ObjEnemyBossScene::LoadInThread(const std::shared_ptr<SourcePos>& srcPos)
 {
-    auto state = getGameState();
+    auto state = GetGameState();
     if (!state) return;
-    if (registerFlag) return;
-    for (auto& entry : steps)
+    if (registerFlag_) return;
+    for (auto& entry : steps_)
     {
         for (auto& phase : entry.second)
         {
             if (phase.scriptId < 0)
-                phase.scriptId = state->scriptManager->compileInThread(phase.path, SCRIPT_TYPE_SINGLE, state->stageMainScriptInfo.version, srcPos)->getID();
+                phase.scriptId = state->scriptManager->CompileInThread(phase.path, SCRIPT_TYPE_SINGLE, state->stageMainScriptInfo.version, srcPos)->GetID();
         }
     }
 }
 
-int ObjEnemyBossScene::getTimer() const
+int ObjEnemyBossScene::GetTimer() const
 {
-    if (getTimerF() < 0) return 99;
-    return (int)(getTimerF() / 60);
+    if (GetTimerF() < 0) return 99;
+    return (int)(GetTimerF() / 60);
 }
 
-int ObjEnemyBossScene::getTimerF() const
+int ObjEnemyBossScene::GetTimerF() const
 {
-    if (!existPhase()) return -1;
-    const Phase& phase = getCurrentPhase();
+    if (!ExistPhase()) return -1;
+    const Phase& phase = GetCurrentPhase();
     return phase.timerF;
 }
 
-int ObjEnemyBossScene::getOrgTimerF() const
+int ObjEnemyBossScene::GetOrgTimerF() const
 {
-    if (!existPhase()) return -1;
-    const Phase& phase = getCurrentPhase();
+    if (!ExistPhase()) return -1;
+    const Phase& phase = GetCurrentPhase();
     return phase.orgTimerF;
 }
 
-int64_t ObjEnemyBossScene::getSpellScore() const
+int64_t ObjEnemyBossScene::GetSpellScore() const
 {
-    if (!existPhase()) return 0;
-    const Phase& phase = getCurrentPhase();
+    if (!ExistPhase()) return 0;
+    const Phase& phase = GetCurrentPhase();
     if (phase.isDurableSpell || phase.orgTimerF == 0) return phase.spellScore;
     return phase.spellScore * phase.timerF / phase.orgTimerF;
 }
 
-bool ObjEnemyBossScene::isSpell() const
+bool ObjEnemyBossScene::IsSpell() const
 {
-    if (!existPhase()) return false;
-    const Phase& phase = getCurrentPhase();
+    if (!ExistPhase()) return false;
+    const Phase& phase = GetCurrentPhase();
     return phase.isSpell;
 }
 
-bool ObjEnemyBossScene::isLastSpell() const
+bool ObjEnemyBossScene::IsLastSpell() const
 {
-    if (!existPhase()) return false;
-    Phase& phase = const_cast<Phase&>(getCurrentPhase());
+    if (!ExistPhase()) return false;
+    Phase& phase = const_cast<Phase&>(GetCurrentPhase());
     return phase.isLastSpell;
 }
 
-bool ObjEnemyBossScene::isDurableSpell() const
+bool ObjEnemyBossScene::IsDurableSpell() const
 {
-    if (!existPhase()) return false;
-    Phase& phase = const_cast<Phase&>(getCurrentPhase());
+    if (!ExistPhase()) return false;
+    Phase& phase = const_cast<Phase&>(GetCurrentPhase());
     return phase.isDurableSpell;
 }
 
-bool ObjEnemyBossScene::isLastStep() const
+bool ObjEnemyBossScene::IsLastStep() const
 {
-    if (currentStep < 0) return false;
-    return maxStep == currentStep;
+    if (currentStep_ < 0) return false;
+    return maxStep_ == currentStep_;
 }
 
-int ObjEnemyBossScene::getRemainStepCount() const
+int ObjEnemyBossScene::GetRemainStepCount() const
 {
-    if (currentStep < 0) return 0;
-    return maxStep - currentStep;
+    if (currentStep_ < 0) return 0;
+    return maxStep_ - currentStep_;
 }
 
-int ObjEnemyBossScene::getActiveStepLifeCount() const
+int ObjEnemyBossScene::GetActiveStepLifeCount() const
 {
-    if (!existPhase()) return 0;
-    return steps.at(currentStep).size();
+    if (!ExistPhase()) return 0;
+    return steps_.at(currentStep_).size();
 }
 
-double ObjEnemyBossScene::getActiveStepTotalMaxLife() const
+double ObjEnemyBossScene::GetActiveStepTotalMaxLife() const
 {
-    if (!existPhase()) return 0;
+    if (!ExistPhase()) return 0;
     double total = 0;
-    for (const auto& phase : steps.at(currentStep))
+    for (const auto& phase : steps_.at(currentStep_))
     {
         total += phase.maxLife;
     }
     return total;
 }
 
-double ObjEnemyBossScene::getActiveStepTotalLife() const
+double ObjEnemyBossScene::GetActiveStepTotalLife() const
 {
-    if (!existPhase()) return 0;
-    const auto& phases = steps.at(currentStep);
+    if (!ExistPhase()) return 0;
+    const auto& phases = steps_.at(currentStep_);
     double total = 0;
-    for (int i = currentPhase; i < phases.size(); i++)
+    for (int i = currentPhase_; i < phases.size(); i++)
     {
         total += phases[i].life;
     }
     return total;
 }
 
-int ObjEnemyBossScene::getPlayerShootDownCount() const
+int ObjEnemyBossScene::GetPlayerShootDownCount() const
 {
-    return playerShootDownCount;
+    return playerShootDownCount_;
 }
 
-int ObjEnemyBossScene::getPlayerSpellCount() const
+int ObjEnemyBossScene::GetPlayerSpellCount() const
 {
-    return playerSpellCount;
+    return playerSpellCount_;
 }
 
-std::vector<double> ObjEnemyBossScene::getActiveStepLifeRateList() const
+std::vector<double> ObjEnemyBossScene::GetActiveStepLifeRateList() const
 {
-    if (!existPhase()) return std::vector<double>();
-    double total = getActiveStepTotalMaxLife();
+    if (!ExistPhase()) return std::vector<double>();
+    double total = GetActiveStepTotalMaxLife();
     double subTotal = 0;
     std::vector<double> list;
-    for (const auto& phase : steps.at(currentStep))
+    for (const auto& phase : steps_.at(currentStep_))
     {
         subTotal += phase.maxLife;
         list.push_back(subTotal / total);
@@ -224,60 +224,60 @@ std::vector<double> ObjEnemyBossScene::getActiveStepLifeRateList() const
     return list;
 }
 
-double ObjEnemyBossScene::getCurrentLife() const
+double ObjEnemyBossScene::GetCurrentLife() const
 {
-    if (!existPhase()) return 0;
-    const Phase& phase = getCurrentPhase();
+    if (!ExistPhase()) return 0;
+    const Phase& phase = GetCurrentPhase();
     return phase.life;
 }
 
-double ObjEnemyBossScene::getCurrentLifeMax() const
+double ObjEnemyBossScene::GetCurrentLifeMax() const
 {
-    if (!existPhase()) return 0;
-    const Phase& phase = getCurrentPhase();
+    if (!ExistPhase()) return 0;
+    const Phase& phase = GetCurrentPhase();
     return phase.maxLife;
 }
 
-void ObjEnemyBossScene::setTimer(int sec)
+void ObjEnemyBossScene::SetTimer(int sec)
 {
-    if (!existPhase()) return;
-    Phase& phase = const_cast<Phase&>(getCurrentPhase());
+    if (!ExistPhase()) return;
+    Phase& phase = const_cast<Phase&>(GetCurrentPhase());
     phase.timerF = sec * 60;
     phase.orgTimerF = phase.timerF;
 }
 
-void ObjEnemyBossScene::startSpell()
+void ObjEnemyBossScene::StartSpell()
 {
-    if (!existPhase()) return;
-    Phase& phase = const_cast<Phase&>(getCurrentPhase());
+    if (!ExistPhase()) return;
+    Phase& phase = const_cast<Phase&>(GetCurrentPhase());
     phase.isSpell = true;
-    if (auto state = getGameState())
+    if (auto state = GetGameState())
     {
-        state->scriptManager->notifyEventAll(EV_START_BOSS_SPELL);
+        state->scriptManager->NotifyEventAll(EV_START_BOSS_SPELL);
     }
 }
 
-void ObjEnemyBossScene::addDamage(double damage)
+void ObjEnemyBossScene::AddDamage(double damage)
 {
-    if (!existPhase()) return;
-    Phase& phase = const_cast<Phase&>(getCurrentPhase());
+    if (!ExistPhase()) return;
+    Phase& phase = const_cast<Phase&>(GetCurrentPhase());
     phase.life -= damage;
     phase.life = std::max(0.0, phase.life);
 }
 
-void ObjEnemyBossScene::addPlayerSpellCount(int c)
+void ObjEnemyBossScene::AddPlayerSpellCount(int c)
 {
-    playerSpellCount += c;
+    playerSpellCount_ += c;
 }
 
-void ObjEnemyBossScene::addPlayerShootDownCount(int c)
+void ObjEnemyBossScene::AddPlayerShootDownCount(int c)
 {
-    playerShootDownCount += c;
+    playerShootDownCount_ += c;
 }
 
-std::shared_ptr<ObjEnemy> ObjEnemyBossScene::getEnemyBossObject() const
+std::shared_ptr<ObjEnemy> ObjEnemyBossScene::GetEnemyBossObject() const
 {
-    return enemyBossObj.lock();
+    return enemyBossObj_.lock();
 }
 
 ObjEnemyBossScene::Phase::Phase(const std::wstring& path) :
@@ -293,97 +293,97 @@ ObjEnemyBossScene::Phase::Phase(const std::wstring& path) :
 {
 }
 
-bool ObjEnemyBossScene::existPhase() const
+bool ObjEnemyBossScene::ExistPhase() const
 {
-    if (steps.count(currentStep) == 0) return false;
-    if (currentPhase < 0 || currentPhase >= steps.at(currentStep).size()) return false;
+    if (steps_.count(currentStep_) == 0) return false;
+    if (currentPhase_ < 0 || currentPhase_ >= steps_.at(currentStep_).size()) return false;
     return true;
 }
 
-const ObjEnemyBossScene::Phase& ObjEnemyBossScene::getCurrentPhase() const
+const ObjEnemyBossScene::Phase& ObjEnemyBossScene::GetCurrentPhase() const
 {
-    if (!existPhase())
+    if (!ExistPhase())
     {
-        throw Log(Log::Level::LV_ERROR).setMessage("phase not exists, please send bug report.");
+        throw Log(Log::Level::LV_ERROR).SetMessage("phase not exists, please send bug report.");
     }
-    const auto& phases = steps.at(currentStep);
-    return phases.at(currentPhase);
+    const auto& phases = steps_.at(currentStep_);
+    return phases.at(currentPhase_);
 }
 
-bool ObjEnemyBossScene::loadNext()
+bool ObjEnemyBossScene::LoadNext()
 {
-    auto state = getGameState();
+    auto state = GetGameState();
     if (!state) return false;
 
-    currentPhase++;
-    if (currentPhase >= steps[currentStep].size())
+    currentPhase_++;
+    if (currentPhase_ >= steps_[currentStep_].size())
     {
-        currentStep++;
-        currentPhase = 0;
+        currentStep_++;
+        currentPhase_ = 0;
     }
 
-    if (!existPhase()) { return false; }
+    if (!ExistPhase()) { return false; }
 
-    if (currentPhase == 0)
+    if (currentPhase_ == 0)
     {
         // new step
-        for (auto& phase : steps[currentStep])
+        for (auto& phase : steps_[currentStep_])
         {
             // ステップ内の全てのフェーズのスクリプトを開始させる
             if (auto script = state->scriptManager->Get(phase.scriptId))
             {
                 // コンパイルと@Loadingが終了してなければブロックして完了させる
-                script->start();
+                script->Start();
 
-                script->notifyEvent(EV_REQUEST_LIFE);
-                if (script->getScriptResult()->GetType() == DnhValue::Type::NIL)
+                script->NotifyEvent(EV_REQUEST_LIFE);
+                if (script->GetScriptResult()->GetType() == DnhValue::Type::NIL)
                 {
                     Logger::WriteLog(Log::Level::LV_WARN, "enemy life hasn't been setted in @Event, set a default value 2000.");
                     phase.maxLife = phase.life = 2000.0f;
                 } else
                 {
-                    phase.maxLife = phase.life = std::max(0.0, script->getScriptResult()->ToNum());
+                    phase.maxLife = phase.life = std::max(0.0, script->GetScriptResult()->ToNum());
                 }
 
-                script->notifyEvent(EV_REQUEST_TIMER);
-                if (script->getScriptResult()->GetType() == DnhValue::Type::NIL)
+                script->NotifyEvent(EV_REQUEST_TIMER);
+                if (script->GetScriptResult()->GetType() == DnhValue::Type::NIL)
                 {
                     phase.timerF = -1; // 無制限
                 } else
                 {
                     // NOTE: double値を60倍してから切り捨てる
-                    phase.timerF = (int)(script->getScriptResult()->ToNum() * 60);
+                    phase.timerF = (int)(script->GetScriptResult()->ToNum() * 60);
                     phase.orgTimerF = phase.timerF;
                 }
 
-                script->notifyEvent(EV_REQUEST_IS_SPELL);
-                phase.isSpell = script->getScriptResult()->ToBool();
+                script->NotifyEvent(EV_REQUEST_IS_SPELL);
+                phase.isSpell = script->GetScriptResult()->ToBool();
 
-                script->notifyEvent(EV_REQUEST_SPELL_SCORE);
-                phase.spellScore = script->getScriptResult()->ToInt();
+                script->NotifyEvent(EV_REQUEST_SPELL_SCORE);
+                phase.spellScore = script->GetScriptResult()->ToInt();
 
-                script->notifyEvent(EV_REQUEST_IS_LAST_SPELL);
-                phase.isLastSpell = script->getScriptResult()->ToBool();
+                script->NotifyEvent(EV_REQUEST_IS_LAST_SPELL);
+                phase.isLastSpell = script->GetScriptResult()->ToBool();
 
-                script->notifyEvent(EV_REQUEST_IS_DURABLE_SPELL);
-                phase.isDurableSpell = script->getScriptResult()->ToBool();
+                script->NotifyEvent(EV_REQUEST_IS_DURABLE_SPELL);
+                phase.isDurableSpell = script->GetScriptResult()->ToBool();
             }
         }
     }
 
-    playerSpellCount = playerShootDownCount = 0;
-    const Phase& phase = getCurrentPhase();
+    playerSpellCount_ = playerShootDownCount_ = 0;
+    const Phase& phase = GetCurrentPhase();
 
     if (auto script = state->scriptManager->Get(phase.scriptId))
     {
-        auto boss = state->objTable->create<ObjEnemy>(true, state);
-        state->objLayerList->setRenderPriority(boss, DEFAULT_ENEMY_RENDER_PRIORITY);
-        boss->regist();
-        boss->setMovePosition(lastEnemyBossX, lastEnemyBossY);
-        boss->setLife(getCurrentLife());
-        enemyBossObj = boss;
-        script->runInitialize();
-        state->scriptManager->notifyEventAll(EV_START_BOSS_STEP);
+        auto boss = state->objTable->Create<ObjEnemy>(true, state);
+        state->objLayerList->SetRenderPriority(boss, DEFAULT_ENEMY_RENDER_PRIORITY);
+        boss->Regist();
+        boss->SetMovePosition(lastEnemyBossX_, lastEnemyBossY_);
+        boss->SetLife(GetCurrentLife());
+        enemyBossObj_ = boss;
+        script->RunInitialize();
+        state->scriptManager->NotifyEventAll(EV_START_BOSS_STEP);
     }
 
     return true;

@@ -20,85 +20,87 @@
 
 %class {
 public :
-    wchar_t getWChar() const { return v_wchar; }
-    std::wstring getWString() const { return v_wstr; }
-    std::string getString() const { return v_str; }
-    std::shared_ptr<std::wstring> getCurrentFilePath() const
+    wchar_t GetWChar() const { return v_wchar_; }
+    std::wstring GetWString() const { return v_wstr_; }
+    std::string GetString() const { return v_str_; }
+    std::shared_ptr<std::wstring> GetCurrentFilePath() const
     {
-        if (includeStack.empty()) return std::make_shared<std::wstring>(L"");
-        return includeStack.back();
+        if (includeStack_.empty()) return std::make_shared<std::wstring>(L"");
+        return includeStack_.back();
     }
-    SourcePos getSourcePos() const
+    SourcePos GetSourcePos() const
     {
-        return {(int)lineno(), (int)columno() + 1, getCurrentFilePath()};
+        return {(int)lineno(), (int)columno() + 1, GetCurrentFilePath()};
     }
-    void setLoader(const std::shared_ptr<FileLoader>& loader)
+    void SetLoader(const std::shared_ptr<FileLoader>& loader)
     {
-        this->loader = loader;
+        this->loader_ = loader;
     }
-    void pushInclude(const std::wstring& path)
+    void PushInclude(const std::wstring& path)
     {
         std::shared_ptr<std::wstring> includePath;
-        if (!includeStack.empty())
+        if (!includeStack_.empty())
         {
-            includePath = std::make_shared<std::wstring>(expandIncludePath(*getCurrentFilePath(), path));
+            includePath = std::make_shared<std::wstring>(ExpandIncludePath(*GetCurrentFilePath(), path));
         } else
         {
-            includePath = std::make_shared<std::wstring>(canonicalPath(path));
+            includePath = std::make_shared<std::wstring>(GetCanonicalPath(path));
         }
-        if (visitedFilePaths.count(*includePath) != 0)
+        if (visitedFilePaths_.count(*includePath) != 0)
         {
             return;
         }
-        std::FILE* fp = loader->openFile(*includePath);
-        if (fp == NULL)
+        std::FILE* fp = loader_->OpenFile(*includePath);
+        if (fp == nullptr)
         {
-            if (includeStack.empty())
+            if (includeStack_.empty())
             {
-                throw Log(Log::Level::LV_ERROR).setMessage("can't open file.")
-                  .setParam(Log::Param(Log::Param::Tag::TEXT, path));
+                throw Log(Log::Level::LV_ERROR)
+                  .SetMessage("can't open file.")
+                  .SetParam(Log::Param(Log::Param::Tag::TEXT, path));
             } else
             {
-                throw Log(Log::Level::LV_ERROR).setMessage("can't include file.")
-                  .setParam(Log::Param(Log::Param::Tag::TEXT, path))
-                  .addSourcePos(std::make_shared<SourcePos>(getSourcePos()));
+                throw Log(Log::Level::LV_ERROR)
+                  .SetMessage("can't include file.")
+                  .SetParam(Log::Param(Log::Param::Tag::TEXT, path))
+                  .AddSourcePos(std::make_shared<SourcePos>(GetSourcePos()));
             }
         }
-        visitedFilePaths.insert(*includePath);
-        if (includeStack.empty()) 
+        visitedFilePaths_.insert(*includePath);
+        if (includeStack_.empty()) 
         {
             in(fp);
         } else {
             push_matcher(new_matcher(fp));
         }
-        includeStack.push_back(includePath);
+        includeStack_.push_back(includePath);
     }
-    void popInclude()
+    void PopInclude()
     {
-        if (!includeStack.empty())
+        if (!includeStack_.empty())
         {
-            loader->closeFile(*getCurrentFilePath(), in());
-            if (includeStack.size() > 1)
+            loader_->CloseFile(*GetCurrentFilePath(), in());
+            if (includeStack_.size() > 1)
             {
                 pop_matcher();
             }
-            includeStack.pop_back();
+            includeStack_.pop_back();
         }
     }
     ~DnhLexer()
     {
-      while (!includeStack.empty())
+      while (!includeStack_.empty())
       {
-          popInclude();
+          PopInclude();
       }
     }
-protected :
-    wchar_t v_wchar;
-    std::wstring v_wstr;
-    std::string v_str;
-    std::vector<std::shared_ptr<std::wstring>> includeStack;
-    std::shared_ptr<FileLoader> loader;
-    std::set<std::wstring> visitedFilePaths;
+private :
+    wchar_t v_wchar_;
+    std::wstring v_wstr_;
+    std::string v_str_;
+    std::vector<std::shared_ptr<std::wstring>> includeStack_;
+    std::shared_ptr<FileLoader> loader_;
+    std::set<std::wstring> visitedFilePaths_;
 %}
 
 %{
@@ -122,11 +124,11 @@ newline \r?\n
 {newline} { start(INITIAL); }
 <<EOF>> {
     start(INITIAL);
-    if (includeStack.size() <= 1)
+    if (includeStack_.size() <= 1)
     {
         return tk::TK_EOF;
     }
-    popInclude();
+    PopInclude();
 }
 .
 }
@@ -197,38 +199,38 @@ newline \r?\n
 "{" { return(tk::TK_LBRACE); }
 "}" { return(tk::TK_RBRACE); }
 
-{number} { v_str = str(); return tk::TK_NUM; }
+{number} { v_str_ = str(); return tk::TK_NUM; }
 
-'\\.' { v_wchar = (wstr())[2]; return tk::TK_CHAR; }
-'.' { v_wchar = (wstr())[1]; return tk::TK_CHAR; }
+'\\.' { v_wchar_ = (wstr())[2]; return tk::TK_CHAR; }
+'.' { v_wchar_ = (wstr())[1]; return tk::TK_CHAR; }
 
-\"  { v_wstr.clear(); start(STRING_LIT); }
+\"  { v_wstr_.clear(); start(STRING_LIT); }
 
 <STRING_LIT>{
 \" { start(INITIAL); return tk::TK_STR; }
-[\\][\\] { v_wstr += wstr(); }
-\\\" { v_wstr += (wstr())[1]; }
-. { v_wstr += wstr(); }
+[\\][\\] { v_wstr_ += wstr(); }
+\\\" { v_wstr_ += (wstr())[1]; }
+. { v_wstr_ += wstr(); }
 }
 
-{ident} { v_str = str(); return tk::TK_IDENT; }
+{ident} { v_str_ = str(); return tk::TK_IDENT; }
 
 "#"{2,}"東方弾幕風" { return tk::TK_IGNORED_HEADER; }
 "#"{2,}{ident} { return tk::TK_IGNORED_HEADER; }
-"#東方弾幕風" { v_wstr = L"TouhouDanmakufu"; return tk::TK_HEADER; }
-"#"{ident} { v_wstr = wstr().substr(1); return tk::TK_HEADER; }
+"#東方弾幕風" { v_wstr_ = L"TouhouDanmakufu"; return tk::TK_HEADER; }
+"#"{ident} { v_wstr_ = wstr().substr(1); return tk::TK_HEADER; }
 
 .  {
-    throw Log(Log::Level::LV_ERROR).setMessage("found illegal token.")
-      .setParam(Log::Param(Log::Param::Tag::TEXT, str()))
-      .addSourcePos(std::make_shared<SourcePos>(getSourcePos()));
+    throw Log(Log::Level::LV_ERROR).SetMessage("found illegal token.")
+      .SetParam(Log::Param(Log::Param::Tag::TEXT, str()))
+      .AddSourcePos(std::make_shared<SourcePos>(GetSourcePos()));
 }
 
 <<EOF>> {
-  if (includeStack.size() <= 1)
+  if (includeStack_.size() <= 1)
   {
       return tk::TK_EOF;
   }
-  popInclude();
+  PopInclude();
 }
 %%

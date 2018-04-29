@@ -6,135 +6,135 @@
 namespace bstorm
 {
 Obj::Obj(const std::shared_ptr<GameState>& state) :
-    id(ID_INVALID),
-    type(-1),
-    deadFlag(false),
-    stgSceneObj(true),
-    gameState(state)
+    id_(ID_INVALID),
+    type_(-1),
+    isDead_(false),
+    isStgSceneObj_(true),
+    gameState_(state)
 {
 }
 
 Obj::~Obj() {}
 
-std::unique_ptr<DnhValue> Obj::getValue(const std::wstring& key) const
+std::unique_ptr<DnhValue> Obj::GetValue(const std::wstring& key) const
 {
-    return getValueD(key, std::make_unique<DnhNil>());
+    return GetValueD(key, std::make_unique<DnhNil>());
 }
 
-std::unique_ptr<DnhValue> Obj::getValueD(const std::wstring& key, std::unique_ptr<DnhValue>&& defaultValue) const
+std::unique_ptr<DnhValue> Obj::GetValueD(const std::wstring& key, std::unique_ptr<DnhValue>&& defaultValue) const
 {
-    auto it = properties.find(key);
-    if (it != properties.end())
+    auto it = properties_.find(key);
+    if (it != properties_.end())
     {
         return it->second->Clone();
     }
     return std::move(defaultValue);
 }
 
-void Obj::setValue(const std::wstring& key, std::unique_ptr<DnhValue>&& value)
+void Obj::SetValue(const std::wstring& key, std::unique_ptr<DnhValue>&& value)
 {
-    properties[key] = std::move(value);
+    properties_[key] = std::move(value);
 }
 
-void Obj::deleteValue(const std::wstring& key)
+void Obj::DeleteValue(const std::wstring& key)
 {
-    properties.erase(key);
+    properties_.erase(key);
 }
 
-bool Obj::isValueExists(const std::wstring& key) const
+bool Obj::IsValueExists(const std::wstring& key) const
 {
-    return properties.count(key) != 0;
+    return properties_.count(key) != 0;
 }
 
-const std::unordered_map<std::wstring, std::unique_ptr<DnhValue>>& Obj::getProperties() const
+const std::unordered_map<std::wstring, std::unique_ptr<DnhValue>>& Obj::GetProperties() const
 {
-    return properties;
+    return properties_;
 }
 
-std::shared_ptr<GameState> Obj::getGameState() const { return gameState.lock(); }
+std::shared_ptr<GameState> Obj::GetGameState() const { return gameState_.lock(); }
 
 ObjectTable::ObjectTable() :
-    idGen(0),
-    isUpdating(false)
+    idGen_(0),
+    isUpdating_(false)
 {
 }
 
 ObjectTable::~ObjectTable() {}
 
-void ObjectTable::add(const std::shared_ptr<Obj>& obj)
+void ObjectTable::Add(const std::shared_ptr<Obj>& obj)
 {
-    if (obj->id != ID_INVALID) return;
-    table[idGen] = obj;
-    obj->id = idGen;
-    idGen++;
+    if (obj->id_ != ID_INVALID) return;
+    table_[idGen_] = obj;
+    obj->id_ = idGen_;
+    idGen_++;
 }
 
-void ObjectTable::del(int id)
+void ObjectTable::Delete(int id)
 {
-    auto it = table.find(id);
-    if (it != table.end())
+    auto it = table_.find(id);
+    if (it != table_.end())
     {
-        it->second->die();
-        if (!isUpdating)
+        it->second->Die();
+        if (!isUpdating_)
         {
-            table.erase(it);
+            table_.erase(it);
         }
     }
 }
 
-bool ObjectTable::isDeleted(int id)
+bool ObjectTable::IsDeleted(int id)
 {
-    auto it = table.find(id);
-    if (it != table.end())
+    auto it = table_.find(id);
+    if (it != table_.end())
     {
-        return it->second->isDead();
+        return it->second->IsDead();
     } else
     {
         return true;
     }
 }
 
-void ObjectTable::updateAll(bool ignoreStgSceneObj)
+void ObjectTable::UpdateAll(bool ignoreStgSceneObj)
 {
-    isUpdating = true;
-    auto it = table.begin();
-    while (it != table.end())
+    isUpdating_ = true;
+    auto it = table_.begin();
+    while (it != table_.end())
     {
         auto& obj = it->second;
-        if (!obj->isDead())
+        if (!obj->IsDead())
         {
-            if (!ignoreStgSceneObj || !obj->isStgSceneObject())
+            if (!ignoreStgSceneObj || !obj->IsStgSceneObject())
             {
-                obj->update();
+                obj->Update();
             }
         }
-        if (obj->isDead())
+        if (obj->IsDead())
         {
-            table.erase(it++);
+            table_.erase(it++);
         } else
         {
             ++it;
         }
     }
-    isUpdating = false;
+    isUpdating_ = false;
 }
 
-void ObjectTable::deleteStgSceneObject()
+void ObjectTable::DeleteStgSceneObject()
 {
-    auto it = table.begin();
-    while (it != table.end())
+    auto it = table_.begin();
+    while (it != table_.end())
     {
-        if (it->second->isStgSceneObject())
+        if (it->second->IsStgSceneObject())
         {
-            table.erase(it++);
+            table_.erase(it++);
         } else
         {
             ++it;
         }
     }
 }
-const std::map<int, std::shared_ptr<Obj>>& ObjectTable::getAll()
+const std::map<int, std::shared_ptr<Obj>>& ObjectTable::GetAll()
 {
-    return table;
+    return table_;
 }
 }

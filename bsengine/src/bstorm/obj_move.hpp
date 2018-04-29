@@ -9,95 +9,95 @@ class MoveMode
 {
 public:
     virtual ~MoveMode();
-    virtual void move(float& x, float& y) = 0;
-    virtual float getSpeed() const = 0;
-    virtual float getAngle() const = 0;
+    virtual void Move(float& x, float& y) = 0;
+    virtual float GetSpeed() const = 0;
+    virtual float GetAngle() const = 0;
 };
 
 class MoveModeA : public MoveMode
 {
 public:
     MoveModeA();
-    void move(float& x, float& y) override;
-    float getSpeed() const override { return speed; }
-    float getAngle() const override { return angle; }
-    void setSpeed(float v) { speed = v; }
-    void setAngle(float v) { angle = v; }
-    float getAcceleration() const { return accel; }
-    void setAcceleration(float v) { accel = v; }
-    float getMaxSpeed() const { return maxSpeed; }
-    void setMaxSpeed(float v) { maxSpeed = v; }
-    float getAngularVelocity() const { return angularVelocity; }
-    void setAngularVelocity(float v) { angularVelocity = v; }
+    void Move(float& x, float& y) override;
+    float GetSpeed() const override { return speed_; }
+    float GetAngle() const override { return angle_; }
+    void SetSpeed(float v) { speed_ = v; }
+    void SetAngle(float v) { angle_ = v; }
+    float GetAcceleration() const { return accel_; }
+    void SetAcceleration(float v) { accel_ = v; }
+    float GetMaxSpeed() const { return maxSpeed_; }
+    void SetMaxSpeed(float v) { maxSpeed_ = v; }
+    float GetAngularVelocity() const { return angularVelocity_; }
+    void SetAngularVelocity(float v) { angularVelocity_ = v; }
 private:
-    float speed;
-    float angle;
-    float accel;
-    float maxSpeed;
-    float angularVelocity;
+    float speed_;
+    float angle_;
+    float accel_;
+    float maxSpeed_;
+    float angularVelocity_;
 };
 
 class MoveModeB : public MoveMode
 {
 public:
     MoveModeB(float speedX, float speedY, float accelX, float accelY, float maxSpeedX, float maxSpeedY);
-    void move(float& x, float& y) override;
-    float getAngle() const override;
-    float getSpeed() const override;
-    float getSpeedX() const { return speedX; }
-    void setSpeedX(float v) { speedX = v; }
-    float getSpeedY() const { return speedY; }
-    void setSpeedY(float v) { speedY = v; }
-    float getAccelerationX() const { return accelX; }
-    void setAccelerationX(float v) { accelX = v; }
-    float getAccelerationY() const { return accelY; }
-    void setAccelerationY(float v) { accelY = v; }
-    float getMaxSpeedX() const { return maxSpeedX; }
-    void setMaxSpeedX(float v) { maxSpeedX = v; }
-    float getMaxSpeedY() const { return maxSpeedY; }
-    void setMaxSpeedY(float v) { maxSpeedY = v; }
+    void Move(float& x, float& y) override;
+    float GetAngle() const override;
+    float GetSpeed() const override;
+    float GetSpeedX() const { return speedX_; }
+    void SetSpeedX(float v) { speedX_ = v; }
+    float GetSpeedY() const { return speedY_; }
+    void SetSpeedY(float v) { speedY_ = v; }
+    float GetAccelerationX() const { return accelX_; }
+    void SetAccelerationX(float v) { accelX_ = v; }
+    float GetAccelerationY() const { return accelY_; }
+    void SetAccelerationY(float v) { accelY_ = v; }
+    float GetMaxSpeedX() const { return maxSpeedX_; }
+    void SetMaxSpeedX(float v) { maxSpeedX_ = v; }
+    float GetMaxSpeedY() const { return maxSpeedY_; }
+    void SetMaxSpeedY(float v) { maxSpeedY_ = v; }
 private:
-    float speedX;
-    float speedY;
-    float accelX;
-    float accelY;
-    float maxSpeedX;
-    float maxSpeedY;
+    float speedX_;
+    float speedY_;
+    float accelX_;
+    float accelY_;
+    float maxSpeedX_;
+    float maxSpeedY_;
 };
 
 class MoveModeAtFrame : public MoveMode
 {
 public:
     MoveModeAtFrame(int frame, float speed, float angle);
-    void move(float& x, float& y) override;
-    float getAngle() const override { return angle; }
-    float getSpeed() const override { return speed; }
+    void Move(float& x, float& y) override;
+    float GetAngle() const override { return angle_; }
+    float GetSpeed() const override { return speed_; }
 private:
-    int frame;
-    float speed;
-    float angle;
-    bool isTimeUp;
-    float cosAngle;
-    float sinAngle;
+    int frame_;
+    float speed_;
+    const float angle_;
+    bool isTimeUp_;
+    const float cosAngle_;
+    const float sinAngle_;
 };
 
 class MoveModeAtWeight : public MoveMode
 {
 public:
     MoveModeAtWeight(float destX, float destY, float angle, float weight, float maxSpeed);
-    void move(float& x, float& y) override;
-    float getAngle() const override { return angle; }
-    float getSpeed() const override { return speed; }
+    void Move(float& x, float& y) override;
+    float GetAngle() const override { return angle_; }
+    float GetSpeed() const override { return speed_; }
 private:
-    float destX;
-    float destY;
-    float speed;
-    float angle;
-    float weight;
-    float maxSpeed;
-    bool isArrived;
-    float cosAngle;
-    float sinAngle;
+    const float destX_;
+    const float destY_;
+    float speed_;
+    const float angle_;
+    const float weight_;
+    const float maxSpeed_;
+    bool isArrived_;
+    const float cosAngle_;
+    const float sinAngle_;
 };
 
 class ObjRender;
@@ -107,11 +107,11 @@ class MovePattern
 public:
     MovePattern(int timer);
     virtual ~MovePattern();
-    virtual void apply(ObjMove* move, ObjRender* obj) = 0;
-    void tickTimerCount() { timer--; }
-    int getTiemrCount() const { return timer; }
-protected:
-    int timer;
+    virtual void Apply(ObjMove* move, ObjRender* obj) = 0;
+    void TickTimerCount() { timer_--; }
+    int GetTimerCount() const { return timer_; }
+private:
+    int timer_;
 };
 
 class ShotData;
@@ -119,60 +119,60 @@ class MovePatternA : public MovePattern
 {
 public:
     MovePatternA(int frame, float speed, float angle, float accel, float angularVelocity, float maxSpeed, const std::shared_ptr<ObjMove>& baseObj, const std::shared_ptr<ShotData>& shotData);
-    void apply(ObjMove* move, ObjRender* obj) override;
+    void Apply(ObjMove* move, ObjRender* obj) override;
 private:
-    float speed;
-    float angle;
-    float accel;
-    float angularVelocity;
-    float maxSpeed;
-    std::weak_ptr<ObjMove> baseObj;
-    std::weak_ptr<ShotData> shotData;
-    int shotDataId;
+    float speed_;
+    float angle_;
+    float accel_;
+    float angularVelocity_;
+    float maxSpeed_;
+    std::weak_ptr<ObjMove> baseObj_;
+    std::weak_ptr<ShotData> shotData_;
+    int shotDataId_;
 };
 
 class MovePatternB : public MovePattern
 {
 public:
     MovePatternB(int frame, float speedX, float speedY, float accelX, float accelY, float maxSpeedX, float maxSpeedY, const std::shared_ptr<ShotData>& shotData);
-    void apply(ObjMove* move, ObjRender* obj) override;
+    void Apply(ObjMove* move, ObjRender* obj) override;
 private:
-    float speedX;
-    float speedY;
-    float accelX;
-    float accelY;
-    float maxSpeedX;
-    float maxSpeedY;
-    std::weak_ptr<ShotData> shotData;
+    float speedX_;
+    float speedY_;
+    float accelX_;
+    float accelY_;
+    float maxSpeedX_;
+    float maxSpeedY_;
+    std::weak_ptr<ShotData> shotData_;
 };
 
 class ObjMove
 {
 public:
     ObjMove(ObjRender *obj);
-    float getMoveX() const;
-    void setMoveX(float x);
-    float getMoveY() const;
-    void setMoveY(float y);
-    void setMovePosition(float x, float y);
-    float getSpeed() const;
-    void setSpeed(float speed);
-    float getAngle() const;
-    void setAngle(float angle);
-    void setAcceleration(float accel);
-    void setMaxSpeed(float maxSpeed);
-    void setAngularVelocity(float angularVelocity);
-    void setDestAtSpeed(float x, float y, float speed);
-    void setDestAtFrame(float x, float y, int frame);
-    void setDestAtWeight(float x, float y, float w, float maxSpeed);
-    const std::shared_ptr<MoveMode>& getMoveMode() const;
-    void setMoveMode(const std::shared_ptr<MoveMode>& mode);
-    void addMovePattern(const std::shared_ptr<MovePattern>& pattern);
+    float GetMoveX() const;
+    void SetMoveX(float x);
+    float GetMoveY() const;
+    void SetMoveY(float y);
+    void SetMovePosition(float x, float y);
+    float GetSpeed() const;
+    void SetSpeed(float speed);
+    float GetAngle() const;
+    void SetAngle(float angle);
+    void SetAcceleration(float accel);
+    void SetMaxSpeed(float maxSpeed);
+    void SetAngularVelocity(float angularVelocity);
+    void SetDestAtSpeed(float x, float y, float speed);
+    void SetDestAtFrame(float x, float y, int frame);
+    void SetDestAtWeight(float x, float y, float w, float maxSpeed);
+    const std::shared_ptr<MoveMode>& GetMoveMode() const;
+    void SetMoveMode(const std::shared_ptr<MoveMode>& mode);
+    void AddMovePattern(const std::shared_ptr<MovePattern>& pattern);
 protected:
-    void move();
+    void Move();
 private:
     std::shared_ptr<MoveMode> mode;
-    std::list<std::shared_ptr<MovePattern>> patterns;
-    ObjRender *obj;
+    std::list<std::shared_ptr<MovePattern>> patterns_;
+    ObjRender *obj_;
 };
 };

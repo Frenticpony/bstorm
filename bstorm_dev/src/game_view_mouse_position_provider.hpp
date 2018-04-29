@@ -10,14 +10,14 @@ class GameViewMousePositionProvider : public MousePositionProvider
 {
 public:
     GameViewMousePositionProvider(HWND hWnd);
-    void getMousePos(int screenWidth, int screenHeight, int &x, int &y) override;
-    void setScreenPos(const std::shared_ptr<int>& screenPosX, const std::shared_ptr<int>& screenPosY);
-    void setGameViewSize(const std::shared_ptr<int>& gameViewWidth, const std::shared_ptr<int>& gameViewHeight);
+    void GetMousePos(int screenWidth, int screenHeight, int &x, int &y) override;
+    void SetScreenPos(const std::shared_ptr<int>& screenPosX, const std::shared_ptr<int>& screenPosY);
+    void SetGameViewSize(const std::shared_ptr<int>& gameViewWidth, const std::shared_ptr<int>& gameViewHeight);
 private:
-    HWND hWnd;
-    std::shared_ptr<int> screenPosX;
-    std::shared_ptr<int> screenPosY;
-    std::shared_ptr<int> gameViewWidth;
-    std::shared_ptr<int> gameViewHeight;
+    HWND hWnd_;
+    std::shared_ptr<int> screenPosX_;
+    std::shared_ptr<int> screenPosY_;
+    std::shared_ptr<int> gameViewWidth_;
+    std::shared_ptr<int> gameViewHeight_;
 };
 }

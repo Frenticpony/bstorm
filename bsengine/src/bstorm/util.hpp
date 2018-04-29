@@ -46,7 +46,7 @@ struct com_deleter
 };
 
 template <UINT cp>
-std::string toMultiByte(const std::wstring& ws)
+std::string ToMultiByte(const std::wstring& ws)
 {
     if (ws.empty()) return std::string();
     int neededSize = WideCharToMultiByte(cp, 0, &ws[0], (int)ws.size(), NULL, 0, NULL, NULL);
@@ -56,7 +56,7 @@ std::string toMultiByte(const std::wstring& ws)
 }
 
 template <UINT cp>
-std::wstring fromMultiByte(const std::string& s)
+std::wstring FromMultiByte(const std::string& s)
 {
     if (s.empty()) return std::wstring();
     int neededSize = MultiByteToWideChar(cp, 0, &s[0], (int)s.size(), NULL, 0);
@@ -65,24 +65,24 @@ std::wstring fromMultiByte(const std::string& s)
     return ws;
 }
 
-inline std::string toUTF8(const std::wstring& ws)
+inline std::string ToUTF8(const std::wstring& ws)
 {
-    return toMultiByte<CP_UTF8>(ws);
+    return ToMultiByte<CP_UTF8>(ws);
 }
 
-inline std::wstring toUnicode(const std::string& s)
+inline std::wstring ToUnicode(const std::string& s)
 {
-    return fromMultiByte<CP_UTF8>(s);
+    return FromMultiByte<CP_UTF8>(s);
 }
 
-std::vector<std::wstring> split(const std::wstring& s, wchar_t delimiter);
-std::vector<std::wstring> split(const std::wstring& s, const std::wstring& delimiter);
+std::vector<std::wstring> Split(const std::wstring& s, wchar_t delimiter);
+std::vector<std::wstring> Split(const std::wstring& s, const std::wstring& delimiter);
 
-bool matchString(const std::string& searchText, const std::string& searchTarget);
+bool IsMatchString(const std::string& searchText, const std::string& searchTarget);
 
-bool isSpace(wchar_t c);
+bool IsSpace(wchar_t c);
 
-void trimSpace(std::wstring& s);
+void TrimSpace(std::wstring* s);
 
 template <class T>
 void hash_combine(std::size_t& seed, const T& v)
@@ -97,29 +97,29 @@ T constrain(const T& v, const T& min, const T& max)
     return std::min(std::max<T>(v, min), max);
 }
 
-D3DCOLOR toD3DCOLOR(const ColorRGB& rgb, int alpha);
+D3DCOLOR ToD3DCOLOR(const ColorRGB& rgb, int alpha);
 
-void mkdir_p(const std::wstring& dirName);
+void MakeDirectoryP(const std::wstring& dirName);
 
-std::wstring getExt(const std::wstring& path);
-std::wstring getLowerExt(const std::wstring& path);
-std::wstring getStem(const std::wstring& path);
-std::wstring getFileName(const std::wstring& path);
-std::wstring getOmittedFileName(const std::wstring& path, int size);
+std::wstring GetExt(const std::wstring& path);
+std::wstring GetLowerExt(const std::wstring& path);
+std::wstring GetStem(const std::wstring& path);
+std::wstring GetFileName(const std::wstring& path);
+std::wstring GetOmittedFileName(const std::wstring& path, int size);
 
 // dir : 検索対象ディレクトリ、末尾の/はいらない、例：L"."
 // ignoreExts : 検索除外対象の拡張子の集合、小文字で記述、例：{L".png", L".jpg"}
-void getFilePaths(const std::wstring& dir, std::vector<std::wstring>& pathList, const std::unordered_set<std::wstring>& ignoreExts, bool doRecurive);
-void getFilePathsRecursively(const std::wstring& dir, std::vector<std::wstring>& pathList, const std::unordered_set<std::wstring>& ignoreExts);
+void GetFilePaths(const std::wstring& dir, std::vector<std::wstring>& pathList, const std::unordered_set<std::wstring>& ignoreExts, bool doRecurive);
+void GetFilePathsRecursively(const std::wstring& dir, std::vector<std::wstring>& pathList, const std::unordered_set<std::wstring>& ignoreExts);
 
-void getDirs(const std::wstring& dir, std::vector<std::wstring>& dirList, bool doRecursive);
-void getDirsRecursively(const std::wstring& dir, std::vector<std::wstring>& dirList);
+void GetDirs(const std::wstring& dir, std::vector<std::wstring>& dirList, bool doRecursive);
+void GetDirsRecursively(const std::wstring& dir, std::vector<std::wstring>& dirList);
 
 // 拡大、回転、移動の順番で掛けた行列を作る
-D3DXMATRIX scaleRotTrans(float x, float y, float z, float rx, float ry, float rz, float sx, float sy, float sz);
-std::array<Vertex, 4> rectToVertices(D3DCOLOR color, int textureWidth, int textureHeight, const Rect<int> &rect);
+D3DXMATRIX CreateScaleRotTransMatrix(float x, float y, float z, float rx, float ry, float rz, float sx, float sy, float sz);
+std::array<Vertex, 4> RectToVertices(D3DCOLOR color, int textureWidth, int textureHeight, const Rect<int> &rect);
 
-inline int nextPow2(int x)
+inline int NextPow2(int x)
 {
     if (x < 0) return 0;
     --x;
@@ -131,8 +131,8 @@ inline int nextPow2(int x)
     return x + 1;
 }
 
-std::wstring canonicalPath(const std::wstring& path);
-std::wstring concatPath(const std::wstring& a, const std::wstring& b);
-std::wstring parentPath(const std::wstring& path);
-std::wstring expandIncludePath(const std::wstring& includerPath, const std::wstring& includeePath);
+std::wstring GetCanonicalPath(const std::wstring& path);
+std::wstring ConcatPath(const std::wstring& a, const std::wstring& b);
+std::wstring GetParentPath(const std::wstring& path);
+std::wstring ExpandIncludePath(const std::wstring& includerPath, const std::wstring& includeePath);
 }

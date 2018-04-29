@@ -2,30 +2,30 @@
 
 namespace bstorm
 {
-GameViewMousePositionProvider::GameViewMousePositionProvider(HWND hWnd) : hWnd(hWnd)
+GameViewMousePositionProvider::GameViewMousePositionProvider(HWND hWnd) : hWnd_(hWnd)
 {
 }
 
-void GameViewMousePositionProvider::getMousePos(int screenWidth, int screenHeight, int & x, int & y)
+void GameViewMousePositionProvider::GetMousePos(int screenWidth, int screenHeight, int & x, int & y)
 {
     POINT point;
     x = 0; y = 0;
     if (GetCursorPos(&point))
     {
-        if (ScreenToClient(hWnd, &point))
+        if (ScreenToClient(hWnd_, &point))
         {
-            if (screenPosX) { point.x -= *screenPosX; }
-            if (screenPosY) { point.y -= *screenPosY; }
+            if (screenPosX_) { point.x -= *screenPosX_; }
+            if (screenPosY_) { point.y -= *screenPosY_; }
             int windowWidth = screenWidth;
             int windowHeight = screenHeight;
-            if (gameViewWidth && gameViewHeight)
+            if (gameViewWidth_ && gameViewHeight_)
             {
-                windowWidth = *gameViewWidth;
-                windowHeight = *gameViewHeight;
+                windowWidth = *gameViewWidth_;
+                windowHeight = *gameViewHeight_;
             } else
             {
                 RECT clientRect;
-                if (GetClientRect(hWnd, &clientRect))
+                if (GetClientRect(hWnd_, &clientRect))
                 {
                     windowWidth = clientRect.right;
                     windowHeight = clientRect.bottom;
@@ -38,15 +38,15 @@ void GameViewMousePositionProvider::getMousePos(int screenWidth, int screenHeigh
     }
 }
 
-void GameViewMousePositionProvider::setScreenPos(const std::shared_ptr<int>& screenPosX, const std::shared_ptr<int>& screenPosY)
+void GameViewMousePositionProvider::SetScreenPos(const std::shared_ptr<int>& screenPosX, const std::shared_ptr<int>& screenPosY)
 {
-    this->screenPosX = screenPosX;
-    this->screenPosY = screenPosY;
+    this->screenPosX_ = screenPosX;
+    this->screenPosY_ = screenPosY;
 }
 
-void GameViewMousePositionProvider::setGameViewSize(const std::shared_ptr<int>& gameViewWidth, const std::shared_ptr<int>& gameViewHeight)
+void GameViewMousePositionProvider::SetGameViewSize(const std::shared_ptr<int>& gameViewWidth, const std::shared_ptr<int>& gameViewHeight)
 {
-    this->gameViewWidth = gameViewWidth;
-    this->gameViewHeight = gameViewHeight;
+    this->gameViewWidth_ = gameViewWidth;
+    this->gameViewHeight_ = gameViewHeight;
 }
 }

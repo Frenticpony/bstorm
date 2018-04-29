@@ -20,41 +20,40 @@ class ObjItem : public ObjRender, public ObjMove, public ObjCol, public std::ena
 public:
     ObjItem(int itemType, const std::shared_ptr<GameState>& gameState);
     ~ObjItem();
-    void setIntersection();
-    void update() override;
-    void render() override;
-    int getItemType() const;
-    int64_t getScore() const;
-    void setScore(int64_t score);
-    bool isRenderScoreEnabled() const;
-    void setRenderScoreEnable(bool enable);
-    bool isAutoCollectEnabled() const;
-    void setAutoCollectEnable(bool enable);
-    bool isAutoCollected() const;
-    const std::shared_ptr<ItemData>& getItemData() const;
-    void setItemData(const std::shared_ptr<ItemData>& data);
-    int getAnimationFrameCount() const;
-    int getAnimationIndex() const;
-    bool isObtained() const;
-    void obtained();
-    bool isScoreItem() const;
-protected:
-    void transIntersection(float dx, float dy) override;
-    void updateAnimationPosition();
-    int itemType;
-    bool autoCollectEnable;
-    bool autoCollectFlag;
-    bool renderScoreEnable;
-    int autoDeleteClipLeft;
-    int autoDeleteClipRight;
-    int autoDeleteClipBottom;
-    float autoCollectSpeed;
-    int obtainedFlag;
+    void SetIntersection();
+    void Update() override;
+    void Render() override;
+    int GetItemType() const;
+    int64_t GetScore() const;
+    void SetScore(int64_t score);
+    bool IsRenderScoreEnabled() const;
+    void SetRenderScoreEnable(bool enable);
+    bool IsAutoCollectEnabled() const;
+    void SetAutoCollectEnable(bool enable);
+    bool IsAutoCollected() const;
+    const std::shared_ptr<ItemData>& GetItemData() const;
+    void SetItemData(const std::shared_ptr<ItemData>& data);
+    int GetAnimationFrameCount() const;
+    int GetAnimationIndex() const;
+    bool IsObtained() const;
+    void Obtained();
+    bool IsScoreItem() const;
 private:
-    int64_t score;
-    int animationFrameCnt;
-    int animationIdx;
-    std::shared_ptr<ItemData> itemData;
+    void TransIntersection(float dx, float dy) override;
+    void UpdateAnimationPosition();
+    int itemType_;
+    bool autoCollectEnable_;
+    bool isAutoCollected_;
+    bool renderScoreEnable_;
+    int autoDeleteClipLeft_;
+    int autoDeleteClipRight_;
+    int autoDeleteClipBottom_;
+    float autoCollectSpeed_;
+    int isObtained_;
+    int64_t score_;
+    int animationFrameCnt_;
+    int animationIdx_;
+    std::shared_ptr<ItemData> itemData_;
 };
 
 class ObjItemScoreText : public ObjSpriteList2D, public ObjMove
@@ -62,11 +61,11 @@ class ObjItemScoreText : public ObjSpriteList2D, public ObjMove
 public:
     ObjItemScoreText(int64_t score, const std::shared_ptr<Texture>& texture, const std::shared_ptr<GameState>& gameState);
     ~ObjItemScoreText();
-    void update() override;
-    void render() override;
+    void Update() override;
+    void Render() override;
 protected:
-    int scoreTextDeleteTimer;
-    int scoreTextAlpha;
+    int scoreTextDeleteTimer_;
+    int scoreTextAlpha_;
 };
 
 class ItemScoreTextSpawner
@@ -74,7 +73,7 @@ class ItemScoreTextSpawner
 public:
     ItemScoreTextSpawner();
     virtual ~ItemScoreTextSpawner();
-    virtual void spawn(float x, float y, int64_t score, const std::shared_ptr<GameState>& gameState);
+    virtual void Spawn(float x, float y, int64_t score, const std::shared_ptr<GameState>& gameState);
 };
 
 class DefaultBonusItemSpawner
@@ -82,7 +81,7 @@ class DefaultBonusItemSpawner
 public:
     DefaultBonusItemSpawner();
     virtual ~DefaultBonusItemSpawner();
-    virtual void spawn(float x, float y, const std::shared_ptr<GameState>& gameState);
+    virtual void Spawn(float x, float y, const std::shared_ptr<GameState>& gameState);
 };
 
 class ObjItem;
@@ -90,28 +89,28 @@ class AutoItemCollectionManager
 {
 public:
     AutoItemCollectionManager();
-    void collectAllItems();
-    void collectItemsByType(int itemType);
-    void collectItemsInCircle(float x, float y, float r);
-    void cancelCollectItems();
-    bool isAutoCollectTarget(int itemType, float itemX, float itemY) const;
-    bool isAutoCollectCanceled() const;
-    void reset();
+    void CollectAllItems();
+    void CollectItemsByType(int itemType);
+    void CollectItemsInCircle(float x, float y, float r);
+    void CancelCollectItems();
+    bool IsAutoCollectTarget(int itemType, float itemX, float itemY) const;
+    bool IsAutoCollectCanceled() const;
+    void Reset();
 private:
-    bool autoItemCollectCancelFlag;
-    std::unordered_set<int> autoItemCollectTargetTypes;
-    std::vector<std::tuple<float, float, float>> circles;
+    bool isAutoItemCollectCanceled_;
+    std::unordered_set<int> autoItemCollectTargetTypes_;
+    std::vector<std::tuple<float, float, float>> circles_;
 };
 
 class MoveModeItemDown : public MoveMode
 {
 public:
     MoveModeItemDown(float initSpeed);
-    void move(float& x, float& y) override;
-    float getAngle() const override { return 0; }
-    float getSpeed() const override { return 0; }
+    void Move(float& x, float& y) override;
+    float GetAngle() const override { return 0; }
+    float GetSpeed() const override { return 0; }
 private:
-    float speed;
+    float speed_;
 };
 
 class ObjMove;
@@ -119,19 +118,19 @@ class MoveModeItemDest : public MoveMode
 {
 public:
     MoveModeItemDest(float destX, float destY, ObjMove* obj);
-    void move(float& x, float& y) override;
-    float getAngle() const override { return 0; }
-    float getSpeed() const override { return 0; }
+    void Move(float& x, float& y) override;
+    float GetAngle() const override { return 0; }
+    float GetSpeed() const override { return 0; }
 private:
-    ObjMove * obj;
-    float speed;
-    float frame;
-    float lastX;
-    float lastY;
-    float destX;
-    float destY;
-    float cosAngle;
-    float sinAngle;
+    ObjMove * obj_;
+    float speed_;
+    float frame_;
+    float lastX_;
+    float lastY_;
+    float destX_;
+    float destY_;
+    float cosAngle_;
+    float sinAngle_;
 };
 
 class ObjPlayer;
@@ -139,22 +138,22 @@ class MoveModeItemToPlayer : public MoveMode
 {
 public:
     MoveModeItemToPlayer(float speed, const std::shared_ptr<ObjPlayer>& player);
-    void move(float& x, float& y) override;
-    float getAngle() const override { return 0; }
-    float getSpeed() const override { return 0; }
+    void Move(float& x, float& y) override;
+    float GetAngle() const override { return 0; }
+    float GetSpeed() const override { return 0; }
 private:
-    float speed;
-    std::weak_ptr<ObjPlayer> targetPlayer;
+    const float speed_;
+    std::weak_ptr<ObjPlayer> targetPlayer_;
 };
 
 class MoveModeHoverItemScoreText : public MoveMode
 {
 public:
     MoveModeHoverItemScoreText(float speed);
-    void move(float& x, float& y) override;
-    float getAngle() const override { return 0; }
-    float getSpeed() const override { return 0; }
+    void Move(float& x, float& y) override;
+    float GetAngle() const override { return 0; }
+    float GetSpeed() const override { return 0; }
 private:
-    float speed;
+    float speed_;
 };
 }

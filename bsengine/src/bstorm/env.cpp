@@ -4,7 +4,7 @@
 
 namespace bstorm
 {
-std::shared_ptr<NodeDef> Env::findDef(const std::string & name) const
+std::shared_ptr<NodeDef> Env::FindDef(const std::string & name) const
 {
     auto it = table.find(name);
     if (it != table.end())
@@ -14,7 +14,7 @@ std::shared_ptr<NodeDef> Env::findDef(const std::string & name) const
     {
         if (parent)
         {
-            return parent->findDef(name);
+            return parent->FindDef(name);
         } else
         {
             return nullptr;
@@ -22,7 +22,7 @@ std::shared_ptr<NodeDef> Env::findDef(const std::string & name) const
     }
 }
 
-bool Env::isRoot() const
+bool Env::IsRoot() const
 {
     if (parent) return false;
     return true;

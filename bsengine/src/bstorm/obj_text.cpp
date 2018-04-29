@@ -13,356 +13,356 @@ namespace bstorm
 {
 ObjText::ObjText(const std::shared_ptr<GameState>& state) :
     ObjRender(state),
-    fontName(L"ＭＳ ゴシック"),
-    size(20),
-    bold(false),
-    topColor({ 0xff, 0xff, 0xff }),
-    bottomColor({ 0xff, 0xff, 0xff }),
-    borderType(BORDER_NONE),
-    borderWidth(0),
-    borderColor({ 0xff, 0xff, 0xff }),
-    maxWidth(INT_MAX),
-    maxHeight(INT_MAX),
-    linePitch(4),
-    sidePitch(0),
-    transCenterX(0),
-    transCenterY(0),
-    autoTransCenterEnable(true),
-    horizontalAlignment(ALIGNMENT_LEFT),
-    syntacticAnalysisEnable(true),
-    fontParamModified(true)
+    fontName_(L"ＭＳ ゴシック"),
+    size_(20),
+    isBold_(false),
+    topColor_({ 0xff, 0xff, 0xff }),
+    bottomColor_({ 0xff, 0xff, 0xff }),
+    borderType_(BORDER_NONE),
+    borderWidth_(0),
+    borderColor_({ 0xff, 0xff, 0xff }),
+    maxWidth_(INT_MAX),
+    maxHeight_(INT_MAX),
+    linePitch_(4),
+    sidePitch_(0),
+    transCenterX_(0),
+    transCenterY_(0),
+    autoTransCenterEnable_(true),
+    horizontalAlignment_(ALIGNMENT_LEFT),
+    syntacticAnalysisEnable_(true),
+    isFontParamModified_(true)
 {
-    setType(OBJ_TEXT);
+    SetType(OBJ_TEXT);
 }
 
 ObjText::~ObjText()
 {
 }
 
-void ObjText::update() {}
+void ObjText::Update() {}
 
-void ObjText::generateFonts()
+void ObjText::GenerateFonts()
 {
-    if (fontParamModified)
+    if (isFontParamModified_)
     {
-        if (auto state = getGameState())
+        if (auto state = GetGameState())
         {
-            bodyFonts.clear();
-            rubyFonts.clear();
-            for (wchar_t c : bodyText)
+            bodyFonts_.clear();
+            rubyFonts_.clear();
+            for (wchar_t c : bodyText_)
             {
                 if (c == L'\n')
                 {
-                    bodyFonts.push_back(std::shared_ptr<Font>());
+                    bodyFonts_.push_back(std::shared_ptr<Font>());
                 } else
                 {
                     if (auto fc = state->fontCache)
                     {
-                        bodyFonts.push_back(fc->create(FontParams(fontName, size, bold ? FW_BOLD : FW_DONTCARE, topColor, bottomColor, borderType, borderWidth, borderColor, c)));
+                        bodyFonts_.push_back(fc->Create(FontParams(fontName_, size_, isBold_ ? FW_BOLD : FW_DONTCARE, topColor_, bottomColor_, borderType_, borderWidth_, borderColor_, c)));
                     }
                 }
             }
-            for (const Ruby<std::wstring>& ruby : rubies)
+            for (const Ruby<std::wstring>& ruby : rubies_)
             {
                 std::vector<std::shared_ptr<Font>> fonts;
                 for (wchar_t c : ruby.text)
                 {
                     if (auto fc = state->fontCache)
                     {
-                        fonts.push_back(fc->create(FontParams(fontName, size / 2, FW_BOLD, topColor, bottomColor, borderType, borderWidth / 2, borderColor, c)));
+                        fonts.push_back(fc->Create(FontParams(fontName_, size_ / 2, FW_BOLD, topColor_, bottomColor_, borderType_, borderWidth_ / 2, borderColor_, c)));
                     }
                 }
-                rubyFonts.emplace_back(ruby.begin, ruby.end, fonts);
+                rubyFonts_.emplace_back(ruby.begin, ruby.end, fonts);
             }
         }
-        fontParamModified = false;
+        isFontParamModified_ = false;
     }
 }
 
-const std::vector<std::shared_ptr<Font>>& ObjText::getBodyFonts() const
+const std::vector<std::shared_ptr<Font>>& ObjText::GetBodyFonts() const
 {
-    return bodyFonts;
+    return bodyFonts_;
 }
 
-int ObjText::getNextLineOffsetY() const
+int ObjText::GetNextLineOffsetY() const
 {
-    auto it = std::find_if(bodyFonts.begin(), bodyFonts.end(), [](const std::shared_ptr<Font>& font) { return font; });
-    if (it == bodyFonts.end()) return 0;
+    auto it = std::find_if(bodyFonts_.begin(), bodyFonts_.end(), [](const std::shared_ptr<Font>& font) { return font; });
+    if (it == bodyFonts_.end()) return 0;
     auto& font = *it;
-    return font->getNextLineOffsetY() + linePitch;
+    return font->GetNextLineOffsetY() + linePitch_;
 }
 
-void ObjText::renderFont(const std::shared_ptr<Font>& font, const D3DXMATRIX& world)
+void ObjText::RenderFont(const std::shared_ptr<Font>& font, const D3DXMATRIX& world)
 {
     std::array<Vertex, 4> vertices;
-    D3DCOLOR color = getD3DCOLOR();
+    D3DCOLOR color = GetD3DCOLOR();
     for (auto& vertex : vertices) { vertex.color = color; }
-    vertices[1].u = vertices[3].u = 1.0f * font->getWidth() / font->getTextureWidth();
-    vertices[2].v = vertices[3].v = 1.0f * font->getHeight() / font->getTextureHeight();
+    vertices[1].u = vertices[3].u = 1.0f * font->GetWidth() / font->GetTextureWidth();
+    vertices[2].v = vertices[3].v = 1.0f * font->GetHeight() / font->GetTextureHeight();
 
     vertices[0].x = vertices[2].x = 0;
     vertices[0].y = vertices[1].y = 0;
-    vertices[1].x = vertices[3].x = font->getWidth();
-    vertices[2].y = vertices[3].y = font->getHeight();
+    vertices[1].x = vertices[3].x = font->GetWidth();
+    vertices[2].y = vertices[3].y = font->GetHeight();
 
-    if (auto state = getGameState())
+    if (auto state = GetGameState())
     {
-        state->renderer->renderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), font->getTexture(), getBlendType(), world, getAppliedShader(), isPermitCamera(), true);
+        state->renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), font->GetTexture(), GetBlendType(), world, GetAppliedShader(), IsPermitCamera(), true);
     }
 }
 
-void ObjText::setText(const std::wstring& t)
+void ObjText::SetText(const std::wstring& t)
 {
-    if (text == t) return;
-    text = t;
-    if (syntacticAnalysisEnable)
+    if (text_ == t) return;
+    text_ = t;
+    if (syntacticAnalysisEnable_)
     {
-        parseRubiedString(t, bodyText, rubies);
+        ParseRubiedString(t, bodyText_, rubies_);
     } else
     {
-        bodyText = t;
-        rubies.clear();
+        bodyText_ = t;
+        rubies_.clear();
     }
-    fontParamModified = true;
+    isFontParamModified_ = true;
 }
 
-const std::wstring & ObjText::getFontName() const
+const std::wstring & ObjText::GetFontName() const
 {
-    return fontName;
+    return fontName_;
 }
 
-void ObjText::setFontName(const std::wstring& name)
+void ObjText::SetFontName(const std::wstring& name)
 {
-    if (fontName == name) return;
-    fontName = name;
-    fontParamModified = true;
+    if (fontName_ == name) return;
+    fontName_ = name;
+    isFontParamModified_ = true;
 }
 
-int ObjText::getFontSize() const
+int ObjText::GetFontSize() const
 {
-    return size;
+    return size_;
 }
 
-void ObjText::setFontSize(int s)
+void ObjText::SetFontSize(int s)
 {
-    if (size == s) return;
-    size = s;
-    fontParamModified = true;
+    if (size_ == s) return;
+    size_ = s;
+    isFontParamModified_ = true;
 }
 
-bool ObjText::isFontBold() const
+bool ObjText::IsFontBold() const
 {
-    return bold;
+    return isBold_;
 }
 
-void ObjText::setFontBold(bool b)
+void ObjText::SetFontBold(bool b)
 {
-    if (bold == b) return;
-    bold = b;
-    fontParamModified = true;
+    if (isBold_ == b) return;
+    isBold_ = b;
+    isFontParamModified_ = true;
 }
 
-const ColorRGB & ObjText::getFontColorTop() const
+const ColorRGB & ObjText::GetFontColorTop() const
 {
-    return topColor;
+    return topColor_;
 }
 
-void ObjText::setFontColorTop(int r, int g, int b)
-{
-    ColorRGB color(r, g, b);
-    if (topColor == color) return;
-    topColor = color;
-    fontParamModified = true;
-}
-
-const ColorRGB & ObjText::getFontColorBottom() const
-{
-    return bottomColor;
-}
-
-void ObjText::setFontColorBottom(int r, int g, int b)
+void ObjText::SetFontColorTop(int r, int g, int b)
 {
     ColorRGB color(r, g, b);
-    if (bottomColor == color) return;
-    bottomColor = color;
-    fontParamModified = true;
+    if (topColor_ == color) return;
+    topColor_ = color;
+    isFontParamModified_ = true;
 }
 
-int ObjText::getFontBorderType() const
+const ColorRGB & ObjText::GetFontColorBottom() const
 {
-    return borderType;
+    return bottomColor_;
 }
 
-void ObjText::setFontBorderType(int t)
-{
-    if (borderType == t) return;
-    borderType = t;
-    fontParamModified = true;
-}
-
-int ObjText::getFontBorderWidth() const
-{
-    return borderWidth;
-}
-
-void ObjText::setFontBorderWidth(int w)
-{
-    if (borderWidth == w) return;
-    borderWidth = w;
-    fontParamModified = true;
-}
-
-const ColorRGB & ObjText::getFontBorderColor() const
-{
-    return borderColor;
-}
-
-void ObjText::setFontBorderColor(int r, int g, int b)
+void ObjText::SetFontColorBottom(int r, int g, int b)
 {
     ColorRGB color(r, g, b);
-    if (borderColor == color) return;
-    borderColor = color;
-    fontParamModified = true;
+    if (bottomColor_ == color) return;
+    bottomColor_ = color;
+    isFontParamModified_ = true;
 }
 
-int ObjText::getLinePitch() const
+int ObjText::GetFontBorderType() const
 {
-    return linePitch;
+    return borderType_;
 }
 
-int ObjText::getSidePitch() const
+void ObjText::SetFontBorderType(int t)
 {
-    return sidePitch;
+    if (borderType_ == t) return;
+    borderType_ = t;
+    isFontParamModified_ = true;
 }
 
-bool ObjText::isAutoTransCenterEnabled() const
+int ObjText::GetFontBorderWidth() const
 {
-    return autoTransCenterEnable;
+    return borderWidth_;
 }
 
-bool ObjText::isSyntacticAnalysisEnabled() const
+void ObjText::SetFontBorderWidth(int w)
 {
-    return syntacticAnalysisEnable;
+    if (borderWidth_ == w) return;
+    borderWidth_ = w;
+    isFontParamModified_ = true;
 }
 
-void ObjText::setSyntacticAnalysis(bool enable)
+const ColorRGB & ObjText::GetFontBorderColor() const
 {
-    if (syntacticAnalysisEnable != enable)
+    return borderColor_;
+}
+
+void ObjText::SetFontBorderColor(int r, int g, int b)
+{
+    ColorRGB color(r, g, b);
+    if (borderColor_ == color) return;
+    borderColor_ = color;
+    isFontParamModified_ = true;
+}
+
+int ObjText::GetLinePitch() const
+{
+    return linePitch_;
+}
+
+int ObjText::GetSidePitch() const
+{
+    return sidePitch_;
+}
+
+bool ObjText::IsAutoTransCenterEnabled() const
+{
+    return autoTransCenterEnable_;
+}
+
+bool ObjText::IsSyntacticAnalysisEnabled() const
+{
+    return syntacticAnalysisEnable_;
+}
+
+void ObjText::SetSyntacticAnalysis(bool enable)
+{
+    if (syntacticAnalysisEnable_ != enable)
     {
-        syntacticAnalysisEnable = enable;
-        setText(text);
+        syntacticAnalysisEnable_ = enable;
+        SetText(text_);
     }
 }
 
-int ObjText::getHorizontalAlignment() const
+int ObjText::GetHorizontalAlignment() const
 {
-    return horizontalAlignment;
+    return horizontalAlignment_;
 }
 
-void ObjText::setHorizontalAlignment(int alignmentType)
+void ObjText::SetHorizontalAlignment(int alignmentType)
 {
-    horizontalAlignment = alignmentType;
+    horizontalAlignment_ = alignmentType;
 }
 
-float ObjText::getTransCenterX() const
+float ObjText::GetTransCenterX() const
 {
-    return transCenterX;
+    return transCenterX_;
 }
 
-float ObjText::getTransCenterY() const
+float ObjText::GetTransCenterY() const
 {
-    return transCenterY;
+    return transCenterY_;
 }
 
-int ObjText::getMaxWidth() const
+int ObjText::GetMaxWidth() const
 {
-    return maxWidth;
+    return maxWidth_;
 }
 
-int ObjText::getMaxHeight() const
+int ObjText::GetMaxHeight() const
 {
-    return maxHeight;
+    return maxHeight_;
 }
 
-void ObjText::render()
+void ObjText::Render()
 {
-    if (auto state = getGameState())
+    if (auto state = GetGameState())
     {
-        generateFonts();
+        GenerateFonts();
         int idx = 0;
-        float lineY = getY(); // 現在の行のy座標
-        const int centerX = getX() + (autoTransCenterEnable ? std::max(0, (getTotalWidth() - sidePitch) / 2) : transCenterX);
-        const int centerY = getY() + (autoTransCenterEnable ? getTotalHeight() / 2 + (borderType != BORDER_NONE ? borderWidth / 2 : 0) : transCenterY);
-        const int nextLineOffsetY = getNextLineOffsetY();
-        auto ruby = rubyFonts.begin();
-        for (auto cnt : getTextLengthCUL())
+        float lineY = GetY(); // 現在の行のy座標
+        const int centerX = GetX() + (autoTransCenterEnable_ ? std::max(0, (GetTotalWidth() - sidePitch_) / 2) : transCenterX_);
+        const int centerY = GetY() + (autoTransCenterEnable_ ? GetTotalHeight() / 2 + (borderType_ != BORDER_NONE ? borderWidth_ / 2 : 0) : transCenterY_);
+        const int nextLineOffsetY = GetNextLineOffsetY();
+        auto ruby = rubyFonts_.begin();
+        for (auto cnt : GetTextLengthCUL())
         { // 行ごとの文字数を取得
-            float colX = getX(); // 現在の列のx座標
+            float colX = GetX(); // 現在の列のx座標
             if (cnt != 0)
             {
-                if (!bodyFonts[idx]) idx++;
-                if (horizontalAlignment != ALIGNMENT_LEFT)
+                if (!bodyFonts_[idx]) idx++;
+                if (horizontalAlignment_ != ALIGNMENT_LEFT)
                 {
                     // alignment
                     int lineBodyWidth = 0;
                     for (int k = 0; k < cnt; k++)
                     {
-                        lineBodyWidth += bodyFonts[idx + k]->getRightCharOffsetX() + sidePitch;
+                        lineBodyWidth += bodyFonts_[idx + k]->GetRightCharOffsetX() + sidePitch_;
                     }
-                    if (borderType != BORDER_NONE)
+                    if (borderType_ != BORDER_NONE)
                     {
-                        lineBodyWidth += borderWidth;
+                        lineBodyWidth += borderWidth_;
                     }
-                    if (horizontalAlignment == ALIGNMENT_RIGHT)
+                    if (horizontalAlignment_ == ALIGNMENT_RIGHT)
                     {
-                        colX += maxWidth - lineBodyWidth;
-                    } else if (horizontalAlignment == ALIGNMENT_CENTER)
+                        colX += maxWidth_ - lineBodyWidth;
+                    } else if (horizontalAlignment_ == ALIGNMENT_CENTER)
                     {
-                        colX += (maxWidth - lineBodyWidth) / 2;
+                        colX += (maxWidth_ - lineBodyWidth) / 2;
                     }
                 }
                 for (int k = 0; k < cnt; k++)
                 {
-                    auto bodyFont = bodyFonts[idx];
+                    auto bodyFont = bodyFonts_[idx];
                     // 初めに中心座標を原点に持ってきてから拡大・回転したのち元の位置に戻す
-                    D3DXMATRIX trans = scaleRotTrans(colX + bodyFont->getPrintOffsetX() - centerX, lineY + bodyFont->getPrintOffsetY() - centerY, getZ(), 0, 0, 0, 1, 1, 1);
-                    D3DXMATRIX scaleRot = scaleRotTrans(centerX, centerY, 0, getAngleX(), getAngleY(), getAngleZ(), getScaleX(), getScaleY(), getScaleZ());
+                    D3DXMATRIX trans = CreateScaleRotTransMatrix(colX + bodyFont->GetPrintOffsetX() - centerX, lineY + bodyFont->GetPrintOffsetY() - centerY, GetZ(), 0, 0, 0, 1, 1, 1);
+                    D3DXMATRIX scaleRot = CreateScaleRotTransMatrix(centerX, centerY, 0, GetAngleX(), GetAngleY(), GetAngleZ(), GetScaleX(), GetScaleY(), GetScaleZ());
                     D3DXMATRIX world = trans * scaleRot;
-                    renderFont(bodyFont, world);
-                    if (ruby != rubyFonts.end())
+                    RenderFont(bodyFont, world);
+                    if (ruby != rubyFonts_.end())
                     {
                         if (ruby->begin == idx)
                         {
                             if (!ruby->text.empty())
                             {
                                 int bodyWidth = 0;
-                                for (int i = ruby->begin; i < ruby->end && i < bodyFonts.size(); i++)
+                                for (int i = ruby->begin; i < ruby->end && i < bodyFonts_.size(); i++)
                                 {
-                                    if (bodyFonts[i])
+                                    if (bodyFonts_[i])
                                     {
-                                        bodyWidth += bodyFonts[i]->getRightCharOffsetX() + sidePitch;
+                                        bodyWidth += bodyFonts_[i]->GetRightCharOffsetX() + sidePitch_;
                                     }
                                 }
                                 int rubyOffsetSum = 0;
                                 for (auto& font : ruby->text)
                                 {
-                                    rubyOffsetSum += font->getRightCharOffsetX();
+                                    rubyOffsetSum += font->GetRightCharOffsetX();
                                 }
                                 const int rubySidePitch = std::max(0, (bodyWidth - rubyOffsetSum)) / (ruby->text.size());
-                                const int rubyY = lineY - ruby->text[0]->getNextLineOffsetY();
+                                const int rubyY = lineY - ruby->text[0]->GetNextLineOffsetY();
                                 float rubyX = colX;
                                 for (auto rubyFont : ruby->text)
                                 {
-                                    D3DXMATRIX trans = scaleRotTrans(rubyX + rubyFont->getPrintOffsetX() - centerX, rubyY + rubyFont->getPrintOffsetY() - centerY, getZ(), 0, 0, 0, 1, 1, 1);
+                                    D3DXMATRIX trans = CreateScaleRotTransMatrix(rubyX + rubyFont->GetPrintOffsetX() - centerX, rubyY + rubyFont->GetPrintOffsetY() - centerY, GetZ(), 0, 0, 0, 1, 1, 1);
                                     D3DXMATRIX world = trans * scaleRot;
-                                    renderFont(rubyFont, world);
-                                    rubyX += rubyFont->getRightCharOffsetX() + rubySidePitch;
+                                    RenderFont(rubyFont, world);
+                                    rubyX += rubyFont->GetRightCharOffsetX() + rubySidePitch;
                                 }
                             }
                             ruby++;
                         }
                     }
-                    colX += bodyFont->getRightCharOffsetX() + sidePitch; // 文字の間隔空け
+                    colX += bodyFont->GetRightCharOffsetX() + sidePitch_; // 文字の間隔空け
                     idx++;
                 }
             } else idx++;
@@ -371,29 +371,29 @@ void ObjText::render()
     }
 }
 
-const std::wstring & ObjText::getText() const
+const std::wstring & ObjText::GetText() const
 {
-    return text;
+    return text_;
 }
 
-int ObjText::getTotalWidth() const
+int ObjText::GetTotalWidth() const
 {
     int idx = 0;
     int maxTotalWidth = 0;
-    for (auto cnt : getTextLengthCUL())
+    for (auto cnt : GetTextLengthCUL())
     {
         int totalWidth = 0;
         if (cnt != 0)
         {
-            if (!bodyFonts[idx]) idx++;
+            if (!bodyFonts_[idx]) idx++;
             for (int k = 0; k < cnt; k++)
             {
-                totalWidth += bodyFonts[idx]->getRightCharOffsetX() + sidePitch;
+                totalWidth += bodyFonts_[idx]->GetRightCharOffsetX() + sidePitch_;
                 idx++;
             }
-            if (borderType != BORDER_NONE)
+            if (borderType_ != BORDER_NONE)
             {
-                totalWidth += borderWidth;
+                totalWidth += borderWidth_;
             }
             maxTotalWidth = std::max(maxTotalWidth, totalWidth);
         } else idx++;
@@ -401,25 +401,25 @@ int ObjText::getTotalWidth() const
     return maxTotalWidth;
 }
 
-int ObjText::getTotalHeight() const
+int ObjText::GetTotalHeight() const
 {
-    if (bodyFonts.empty())
+    if (bodyFonts_.empty())
     {
         return 0;
     } else
     {
-        int lineCnt = getTextLengthCUL().size(); // 行数
+        int lineCnt = GetTextLengthCUL().size(); // 行数
         // NULLでないフォントを探す
-        int h = lineCnt * getNextLineOffsetY() - linePitch;
-        if (borderType != BORDER_NONE) h += borderWidth;
+        int h = lineCnt * GetNextLineOffsetY() - linePitch_;
+        if (borderType_ != BORDER_NONE) h += borderWidth_;
         return h;
     }
 }
 
-int ObjText::getTextLength() const
+int ObjText::GetTextLength() const
 {
     int cnt = 0;
-    for (wchar_t c : text)
+    for (wchar_t c : text_)
     {
         if ((int)c < 256)
         {
@@ -432,10 +432,10 @@ int ObjText::getTextLength() const
     return cnt;
 }
 
-int ObjText::getTextLengthCU() const
+int ObjText::GetTextLengthCU() const
 {
     int cnt = 0;
-    for (wchar_t c : bodyText)
+    for (wchar_t c : bodyText_)
     {
         if (c != L'\n')
         {
@@ -445,15 +445,15 @@ int ObjText::getTextLengthCU() const
     return cnt;
 }
 
-std::vector<int> ObjText::getTextLengthCUL() const
+std::vector<int> ObjText::GetTextLengthCUL() const
 {
     std::vector<int> cnts;
     int idx = 0;
     int cnt = 0;
     int sumWidth = 0;
-    while (idx < bodyFonts.size())
+    while (idx < bodyFonts_.size())
     {
-        if (!bodyFonts[idx])
+        if (!bodyFonts_[idx])
         {
             // 改行文字
             cnts.push_back(cnt);
@@ -461,9 +461,9 @@ std::vector<int> ObjText::getTextLengthCUL() const
             sumWidth = 0;
         } else
         {
-            int charWidth = bodyFonts[idx]->getRightCharOffsetX() + sidePitch;
+            int charWidth = bodyFonts_[idx]->GetRightCharOffsetX() + sidePitch_;
             sumWidth += charWidth;
-            if (maxWidth <= sumWidth)
+            if (maxWidth_ <= sumWidth)
             {
                 // 幅に収まらずに改行
                 cnts.push_back(cnt);
@@ -481,9 +481,9 @@ std::vector<int> ObjText::getTextLengthCUL() const
     return cnts;
 }
 
-bool ObjText::isFontParamModified() const
+bool ObjText::IsFontParamModified() const
 {
-    return fontParamModified;
+    return isFontParamModified_;
 }
 
 // FUTURE: パーサの引数に返り値を持たせないと使いにくいので直す(要求度：低)
@@ -515,7 +515,7 @@ static bool parseNewLine(const std::wstring& src, int& i)
 
 static void skipSpace(const std::wstring& src, int& i)
 {
-    while (i < src.size() && isSpace(src[i])) i++;
+    while (i < src.size() && IsSpace(src[i])) i++;
 }
 
 static bool parseRuby(const std::wstring& src, int& i, std::wstring& rb, std::wstring& rt)
@@ -571,12 +571,12 @@ parse_failed:
     return false;
 }
 
-const std::vector<ObjText::Ruby<std::vector<std::shared_ptr<Font>>>>& ObjText::getRubyFonts() const
+const std::vector<ObjText::Ruby<std::vector<std::shared_ptr<Font>>>>& ObjText::GetRubyFonts() const
 {
-    return rubyFonts;
+    return rubyFonts_;
 }
 
-void ObjText::parseRubiedString(const std::wstring& src, std::wstring& bodyText, std::vector<Ruby<std::wstring>>& rubies)
+void ObjText::ParseRubiedString(const std::wstring& src, std::wstring& bodyText, std::vector<Ruby<std::wstring>>& rubies)
 {
     bodyText.clear();
     rubies.clear();

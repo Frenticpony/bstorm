@@ -6,18 +6,18 @@
 namespace bstorm
 {
 GraphicDevice::GraphicDevice(HWND hWnd) :
-    d3D(NULL),
-    d3DDevice(NULL),
-    backBufferSurface(NULL),
-    backBufferDepthStencilSurface(NULL)
+    d3D_(nullptr),
+    d3DDevice_(nullptr),
+    backBufferSurface_(nullptr),
+    backBufferDepthStencilSurface_(nullptr)
 {
     RECT screen;
     GetClientRect(hWnd, &screen);
     BOOL isWindowMode = IsWindow(hWnd);
 
-    d3D = Direct3DCreate9(D3D_SDK_VERSION);
+    d3D_ = Direct3DCreate9(D3D_SDK_VERSION);
 
-    presentParams = {
+    presentParams_ = {
         (UINT)screen.right,
         (UINT)screen.bottom,
         isWindowMode ? D3DFMT_UNKNOWN : D3DFMT_X8R8G8B8,
@@ -34,63 +34,63 @@ GraphicDevice::GraphicDevice(HWND hWnd) :
         D3DPRESENT_INTERVAL_ONE
     };
 
-    if (FAILED(d3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_FPU_PRESERVE | D3DCREATE_MULTITHREADED, &presentParams, &d3DDevice)))
+    if (FAILED(d3D_->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_FPU_PRESERVE | D3DCREATE_MULTITHREADED, &presentParams_, &d3DDevice_)))
     {
-        if (FAILED(d3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_FPU_PRESERVE | D3DCREATE_MULTITHREADED, &presentParams, &d3DDevice)))
+        if (FAILED(d3D_->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_FPU_PRESERVE | D3DCREATE_MULTITHREADED, &presentParams_, &d3DDevice_)))
         {
-            if (FAILED(d3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_REF, hWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_FPU_PRESERVE | D3DCREATE_MULTITHREADED, &presentParams, &d3DDevice)))
+            if (FAILED(d3D_->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_REF, hWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_FPU_PRESERVE | D3DCREATE_MULTITHREADED, &presentParams_, &d3DDevice_)))
             {
-                d3D->Release();
+                d3D_->Release();
                 throw Log(Log::Level::LV_ERROR)
-                    .setMessage("failed to init graphic device.");
+                    .SetMessage("failed to init graphic device.");
             }
         }
     }
 
-    d3DDevice->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &backBufferSurface);
-    d3DDevice->GetDepthStencilSurface(&backBufferDepthStencilSurface);
+    d3DDevice_->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &backBufferSurface_);
+    d3DDevice_->GetDepthStencilSurface(&backBufferDepthStencilSurface_);
 }
 
 GraphicDevice::~GraphicDevice()
 {
-    safe_release(backBufferSurface);
-    safe_release(backBufferDepthStencilSurface);
-    d3DDevice->Release();
-    d3D->Release();
+    safe_release(backBufferSurface_);
+    safe_release(backBufferDepthStencilSurface_);
+    d3DDevice_->Release();
+    d3D_->Release();
 }
 
-void GraphicDevice::reset()
+void GraphicDevice::Reset()
 {
-    safe_release(backBufferSurface);
-    safe_release(backBufferDepthStencilSurface);
-    if (FAILED(d3DDevice->Reset(&presentParams)))
+    safe_release(backBufferSurface_);
+    safe_release(backBufferDepthStencilSurface_);
+    if (FAILED(d3DDevice_->Reset(&presentParams_)))
     {
-        throw Log(Log::Level::LV_ERROR).setMessage("failed to reset graphic device.");
+        throw Log(Log::Level::LV_ERROR).SetMessage("failed to reset graphic device.");
     }
-    d3DDevice->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &backBufferSurface);
-    d3DDevice->GetDepthStencilSurface(&backBufferDepthStencilSurface);
+    d3DDevice_->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &backBufferSurface_);
+    d3DDevice_->GetDepthStencilSurface(&backBufferDepthStencilSurface_);
 }
 
-IDirect3DDevice9 * GraphicDevice::getDevice() const
+IDirect3DDevice9 * GraphicDevice::GetDevice() const
 {
-    return d3DDevice;
+    return d3DDevice_;
 }
 
-void GraphicDevice::setBackbufferRenderTarget()
+void GraphicDevice::SetBackbufferRenderTarget()
 {
-    D3DVIEWPORT9 viewport = { 0, 0, presentParams.BackBufferWidth, presentParams.BackBufferHeight, 0.0f, 1.0f };
-    d3DDevice->SetViewport(&viewport);
-    d3DDevice->SetRenderTarget(0, backBufferSurface);
-    d3DDevice->SetDepthStencilSurface(backBufferDepthStencilSurface);
+    D3DVIEWPORT9 viewport = { 0, 0, presentParams_.BackBufferWidth, presentParams_.BackBufferHeight, 0.0f, 1.0f };
+    d3DDevice_->SetViewport(&viewport);
+    d3DDevice_->SetRenderTarget(0, backBufferSurface_);
+    d3DDevice_->SetDepthStencilSurface(backBufferDepthStencilSurface_);
 }
 
-DWORD GraphicDevice::getBackBufferWidth() const
+DWORD GraphicDevice::GetBackBufferWidth() const
 {
-    return presentParams.BackBufferWidth;
+    return presentParams_.BackBufferWidth;
 }
 
-DWORD GraphicDevice::getBackBufferHeight() const
+DWORD GraphicDevice::GetBackBufferHeight() const
 {
-    return presentParams.BackBufferHeight;
+    return presentParams_.BackBufferHeight;
 }
 }

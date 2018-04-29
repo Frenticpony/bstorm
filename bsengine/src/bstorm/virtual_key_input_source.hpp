@@ -8,7 +8,7 @@ class VirtualKeyInputSource
 {
 public:
     virtual ~VirtualKeyInputSource() {};
-    virtual KeyState getVirtualKeyState(VirtualKey vkey) = 0;
-    virtual void setVirtualKeyState(VirtualKey vkey, KeyState state) = 0;
+    virtual KeyState GetVirtualKeyState(VirtualKey vkey) = 0;
+    virtual void SetVirtualKeyState(VirtualKey vkey, KeyState state) = 0;
 };
 }

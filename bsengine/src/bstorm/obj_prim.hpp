@@ -17,90 +17,90 @@ class ObjPrim : public ObjRender
 public:
     ObjPrim(const std::shared_ptr<GameState>& state);
     ~ObjPrim();
-    void update() override;
-    int getPrimitiveType() const;
-    void setPrimitiveType(int t);
-    int getVertexCount() const;
-    void setVertexCount(int n, bool doClear = true);
-    const std::shared_ptr<Texture>& getTexture() const;
-    void setTexture(const std::shared_ptr<Texture>& texture);
-    const std::shared_ptr<RenderTarget>& getRenderTarget() const;
-    void setRenderTarget(const std::shared_ptr<RenderTarget>& target);
-    float getVertexPositionX(int vIdx) const;
-    float getVertexPositionY(int vIdx) const;
-    float getVertexPositionZ(int vIdx) const;
-    void setVertexPosition(int vIdx, float x, float y, float z);
-    void setVertexUV(int vIdx, float u, float v);
-    void setVertexUVT(int vIdx, float u, float v);
-    void setVertexColor(int vIdx, int r, int g, int b);
-    void setVertexAlpha(int vIdx, int a);
-    const std::vector<Vertex>& getVertices() const;
+    void Update() override;
+    int GetPrimitiveType() const;
+    void SetPrimitiveType(int t);
+    int GetVertexCount() const;
+    void SetVertexCount(int n, bool doClear = true);
+    const std::shared_ptr<Texture>& GetTexture() const;
+    void SetTexture(const std::shared_ptr<Texture>& texture);
+    const std::shared_ptr<RenderTarget>& GetRenderTarget() const;
+    void SetRenderTarget(const std::shared_ptr<RenderTarget>& target);
+    float GetVertexPositionX(int vIdx) const;
+    float GetVertexPositionY(int vIdx) const;
+    float GetVertexPositionZ(int vIdx) const;
+    void SetVertexPosition(int vIdx, float x, float y, float z);
+    void SetVertexUV(int vIdx, float u, float v);
+    void SetVertexUVT(int vIdx, float u, float v);
+    void SetVertexColor(int vIdx, int r, int g, int b);
+    void SetVertexAlpha(int vIdx, int a);
+    const std::vector<Vertex>& GetVertices() const;
 protected:
-    IDirect3DTexture9 * getD3DTexture() const;
-    _D3DPRIMITIVETYPE getD3DPrimitiveType() const;
-    std::vector<Vertex> vertices;
+    IDirect3DTexture9 * GetD3DTexture() const;
+    _D3DPRIMITIVETYPE GetD3DPrimitiveType() const;
+    std::vector<Vertex> vertices_;
 private:
-    _D3DPRIMITIVETYPE primType;
-    std::shared_ptr<Texture> texture;
-    std::shared_ptr<RenderTarget> renderTarget;
+    _D3DPRIMITIVETYPE primType_;
+    std::shared_ptr<Texture> texture_;
+    std::shared_ptr<RenderTarget> renderTarget_;
 };
 
 class ObjPrim2D : public ObjPrim
 {
 public:
     ObjPrim2D(const std::shared_ptr<GameState>& state);
-    void render() override;
+    void Render() override;
 };
 
 class ObjSprite2D : public ObjPrim2D
 {
 public:
     ObjSprite2D(const std::shared_ptr<GameState>& state);
-    void setSourceRect(float left, float top, float right, float bottom);
-    void setDestRect(float left, float top, float right, float bottom);
-    void setDestCenter();
+    void SetSourceRect(float left, float top, float right, float bottom);
+    void SetDestRect(float left, float top, float right, float bottom);
+    void SetDestCenter();
 };
 
 class ObjSpriteList2D : public ObjPrim2D
 {
 public:
     ObjSpriteList2D(const std::shared_ptr<GameState>& state);
-    void render() override;
-    void setSourceRect(float left, float top, float right, float bottom);
-    void setDestRect(float left, float top, float right, float bottom);
-    void setDestCenter();
-    void addVertex();
-    void closeVertex();
-    void clearVerexCount();
-protected:
-    bool isVertexClosed;
-    float srcRectLeft;
-    float srcRectTop;
-    float srcRectRight;
-    float srcRectBottom;
-    float dstRectLeft;
-    float dstRectTop;
-    float dstRectRight;
-    float dstRectBottom;
+    void Render() override;
+    void SetSourceRect(float left, float top, float right, float bottom);
+    void SetDestRect(float left, float top, float right, float bottom);
+    void SetDestCenter();
+    void AddVertex();
+    void CloseVertex();
+    void ClearVerexCount();
+private:
+    bool isVertexClosed_;
+    float srcRectLeft_;
+    float srcRectTop_;
+    float srcRectRight_;
+    float srcRectBottom_;
+    float dstRectLeft_;
+    float dstRectTop_;
+    float dstRectRight_;
+    float dstRectBottom_;
 };
 
 class ObjPrim3D : public ObjPrim
 {
 public:
     ObjPrim3D(const std::shared_ptr<GameState>& state);
-    void render() override;
-    bool isBillboardEnabled() const;
+    void Render() override;
+    bool IsBillboardEnabled() const;
 protected:
-    bool billboardEnable;
+    bool billboardEnable_;
 };
 
 class ObjSprite3D : public ObjPrim3D
 {
 public:
     ObjSprite3D(const std::shared_ptr<GameState>& state);
-    void setSourceRect(float left, float top, float right, float bottom);
-    void setDestRect(float left, float top, float right, float bottom);
-    void setSourceDestRect(float left, float top, float right, float bottom);
-    void setBillboard(bool enable);
+    void SetSourceRect(float left, float top, float right, float bottom);
+    void SetDestRect(float left, float top, float right, float bottom);
+    void SetSourceDestRect(float left, float top, float right, float bottom);
+    void SetBillboard(bool enable);
 };
 }

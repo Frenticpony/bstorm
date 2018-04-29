@@ -9,69 +9,69 @@ namespace bstorm
 ObjSpell::ObjSpell(const std::shared_ptr<GameState>& gameState) :
     ObjPrim2D(gameState),
     ObjCol(gameState),
-    damage(0),
-    registerFlag(false),
-    eraseShotEnable(true)
+    damage_(0),
+    isRegistered_(false),
+    eraseShotEnable_(true)
 {
-    setType(OBJ_SPELL);
+    SetType(OBJ_SPELL);
 }
 
 ObjSpell::~ObjSpell() {}
 
-void ObjSpell::update()
+void ObjSpell::Update()
 {
-    clearOldTempIntersection();
+    ClearOldTempIntersection();
 }
 
-void ObjSpell::render()
+void ObjSpell::Render()
 {
-    if (isRegistered())
+    if (IsRegistered())
     {
-        ObjPrim2D::render();
-        ObjCol::renderIntersection(isPermitCamera());
+        ObjPrim2D::Render();
+        ObjCol::RenderIntersection(IsPermitCamera());
     }
 }
 
-bool ObjSpell::isRegistered() const
+bool ObjSpell::IsRegistered() const
 {
-    return registerFlag;
+    return isRegistered_;
 }
 
-void ObjSpell::regist() { registerFlag = true; }
+void ObjSpell::Regist() { isRegistered_ = true; }
 
-double ObjSpell::getDamage() const { return damage; }
+double ObjSpell::GetDamage() const { return damage_; }
 
-void ObjSpell::setDamage(double damage) { this->damage = damage; }
+void ObjSpell::SetDamage(double damage) { this->damage_ = damage; }
 
-bool ObjSpell::isEraseShotEnabled() const { return eraseShotEnable; }
+bool ObjSpell::IsEraseShotEnabled() const { return eraseShotEnable_; }
 
-void ObjSpell::setEraseShotEnable(bool enable) { eraseShotEnable = enable; }
+void ObjSpell::SetEraseShotEnable(bool enable) { eraseShotEnable_ = enable; }
 
-void ObjSpell::addTempIntersection(const std::shared_ptr<SpellIntersection>& isect)
+void ObjSpell::AddTempIntersection(const std::shared_ptr<SpellIntersection>& isect)
 {
-    if (auto gameState = getGameState())
+    if (auto gameState = GetGameState())
     {
         gameState->colDetector->Add(isect);
-        ObjCol::addTempIntersection(isect);
+        ObjCol::AddTempIntersection(isect);
     }
 }
 
-void ObjSpell::addTempIntersectionCircle(float x, float y, float r)
+void ObjSpell::AddTempIntersectionCircle(float x, float y, float r)
 {
-    addTempIntersection(std::make_shared<SpellIntersection>(x, y, r, shared_from_this()));
+    AddTempIntersection(std::make_shared<SpellIntersection>(x, y, r, shared_from_this()));
 }
 
-void ObjSpell::addTempIntersectionLine(float x1, float y1, float x2, float y2, float width)
+void ObjSpell::AddTempIntersectionLine(float x1, float y1, float x2, float y2, float width)
 {
-    addTempIntersection(std::make_shared<SpellIntersection>(x1, y1, x2, y2, width, shared_from_this()));
+    AddTempIntersection(std::make_shared<SpellIntersection>(x1, y1, x2, y2, width, shared_from_this()));
 }
 ObjSpellManage::ObjSpellManage(const std::shared_ptr<GameState>& gameState) :
     Obj(gameState)
 {
-    setType(OBJ_SPELL_MANAGE);
+    SetType(OBJ_SPELL_MANAGE);
 }
 ObjSpellManage::~ObjSpellManage()
 {
 }
-void ObjSpellManage::update() {}
+void ObjSpellManage::Update() {}
 }

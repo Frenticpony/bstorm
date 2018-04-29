@@ -15,23 +15,23 @@ namespace bstorm
 {
 ObjRender::ObjRender(const std::shared_ptr<GameState>& gameState) :
     Obj(gameState),
-    visibleFlag(true),
-    priority(-1),
-    x(0),
-    y(0),
-    z(0),
-    angleX(0),
-    angleY(0),
-    angleZ(0),
-    scaleX(1),
-    scaleY(1),
-    scaleZ(1),
-    alpha(0xff),
-    blendType(BLEND_ALPHA),
-    fogEnable(true),
-    zWriteEnable(true),
-    zTestEnable(true),
-    permitCamera(true)
+    visibleFlag_(true),
+    priority_(-1),
+    x_(0),
+    y_(0),
+    z_(0),
+    angleX_(0),
+    angleY_(0),
+    angleZ_(0),
+    scaleX_(1),
+    scaleY_(1),
+    scaleZ_(1),
+    alpha_(0xff),
+    blendType_(BLEND_ALPHA),
+    fogEnable_(true),
+    zWriteEnable_(true),
+    zTestEnable_(true),
+    permitCamera_(true)
 {
 }
 
@@ -39,17 +39,17 @@ ObjRender::~ObjRender()
 {
 }
 
-void ObjRender::setColor(int r, int g, int b)
+void ObjRender::SetColor(int r, int g, int b)
 {
-    rgb = ColorRGB(r, g, b);
+    rgb_ = ColorRGB(r, g, b);
 }
 
-void ObjRender::setAlpha(int a)
+void ObjRender::SetAlpha(int a)
 {
-    alpha = constrain(a, 0, 0xff);
+    alpha_ = constrain(a, 0, 0xff);
 }
 
-void ObjRender::setColorHSV(int h, int s, int v)
+void ObjRender::SetColorHSV(int h, int s, int v)
 {
     h %= 360;
     if (h < 0) h += 360;
@@ -61,13 +61,14 @@ void ObjRender::setColorHSV(int h, int s, int v)
         r = g = b = v;
     } else
     {
-        int hi = floor(1.0 * h / 60);
-        float f = 1.0 * h / 60 - hi;
-        int m = 1.0 * v * (1.0 - 1.0 * s / 255);
-        int n = 1.0 * v * (1.0 - f * s / 255);
-        int k = 1.0 * v * (1.0 - (1.0 - f) * s / 255);
+        int hi = floor((float)h / 60.0f);
+        float f = (float)h / 60.0f - hi;
+        int m = (float)v * (1.0f - (float)s / 255.0f);
+        int n = (float)v * (1.0f - f * (float)s / 255.0f);
+        int k = (float)v * (1.0f - (1.0f - f) * (float)s / 255.0f);
         switch (hi)
         {
+            default:
             case 0:
                 r = v;
                 g = k;
@@ -94,133 +95,132 @@ void ObjRender::setColorHSV(int h, int s, int v)
                 b = v;
                 break;
             case 5:
-            default:
                 r = v;
                 g = m;
                 b = n;
                 break;
         }
     }
-    setColor(r, g, b);
+    SetColor(r, g, b);
 }
 
-D3DCOLOR ObjRender::getD3DCOLOR() const
+D3DCOLOR ObjRender::GetD3DCOLOR() const
 {
-    return toD3DCOLOR(rgb, alpha);
+    return ToD3DCOLOR(rgb_, alpha_);
 }
 
-void ObjRender::setShader(const std::shared_ptr<Shader>& s)
+void ObjRender::SetShader(const std::shared_ptr<Shader>& s)
 {
-    shader = s;
+    shader_ = s;
 }
 
-void ObjRender::setShaderO(const std::shared_ptr<ObjRender>& obj)
+void ObjRender::SetShaderO(const std::shared_ptr<ObjRender>& obj)
 {
-    shader = obj->shader;
+    shader_ = obj->shader_;
 }
 
-void ObjRender::resetShader()
+void ObjRender::ResetShader()
 {
-    shader.reset();
+    shader_.reset();
 }
 
-void ObjRender::setShaderTechnique(const std::string & name)
+void ObjRender::SetShaderTechnique(const std::string & name)
 {
-    if (shader)
+    if (shader_)
     {
-        shader->getEffect()->SetTechnique(name.c_str());
+        shader_->getEffect()->SetTechnique(name.c_str());
     }
 }
 
-void ObjRender::setShaderVector(const std::string & name, float x, float y, float z, float w)
+void ObjRender::SetShaderVector(const std::string & name, float x, float y, float z, float w)
 {
-    if (shader)
+    if (shader_)
     {
         D3DXVECTOR4 vec4(x, y, z, w);
-        shader->getEffect()->SetVector(name.c_str(), &vec4);
+        shader_->getEffect()->SetVector(name.c_str(), &vec4);
     }
 }
 
-void ObjRender::setShaderFloat(const std::string & name, float f)
+void ObjRender::SetShaderFloat(const std::string & name, float f)
 {
-    if (shader)
+    if (shader_)
     {
-        shader->getEffect()->SetFloat(name.c_str(), f);
+        shader_->getEffect()->SetFloat(name.c_str(), f);
     }
 }
 
-void ObjRender::setShaderFloatArray(const std::string & name, const std::vector<float>& fs)
+void ObjRender::SetShaderFloatArray(const std::string & name, const std::vector<float>& fs)
 {
-    if (shader)
+    if (shader_)
     {
-        shader->getEffect()->SetFloatArray(name.c_str(), &fs[0], fs.size());
+        shader_->getEffect()->SetFloatArray(name.c_str(), &fs[0], fs.size());
     }
 }
 
-void ObjRender::setShaderTexture(const std::string & name, const std::shared_ptr<Texture>& texture)
+void ObjRender::SetShaderTexture(const std::string & name, const std::shared_ptr<Texture>& texture)
 {
-    if (shader && texture)
+    if (shader_ && texture)
     {
-        shader->setTexture(name, texture->getTexture());
+        shader_->SetTexture(name, texture->GetTexture());
     }
 }
 
-void ObjRender::setShaderTexture(const std::string & name, const std::shared_ptr<RenderTarget>& renderTarget)
+void ObjRender::SetShaderTexture(const std::string & name, const std::shared_ptr<RenderTarget>& renderTarget)
 {
-    if (shader && renderTarget)
+    if (shader_ && renderTarget)
     {
-        shader->setTexture(name, renderTarget->getTexture());
+        shader_->SetTexture(name, renderTarget->GetTexture());
     }
 }
 
-std::shared_ptr<Shader> ObjRender::getAppliedShader() const
+std::shared_ptr<Shader> ObjRender::GetAppliedShader() const
 {
-    if (shader) return shader;
-    if (auto state = getGameState())
+    if (shader_) return shader_;
+    if (auto state = GetGameState())
     {
-        return state->objLayerList->getLayerShader(priority);
+        return state->objLayerList->GetLayerShader(priority_);
     }
     return nullptr;
 }
 
 ObjectLayerList::ObjectLayerList() :
-    shotRenderPriority(DEFAULT_SHOT_RENDER_PRIORITY),
-    itemRenderPriority(DEFAULT_ITEM_RENDER_PRIORITY),
-    cameraFocusPermitRenderPriority(DEFAULT_CAMERA_FOCUS_PERMIT_RENDER_PRIORITY),
-    stgFrameRenderPriorityMin(DEFAULT_STG_FRAME_RENDER_PRIORITY_MIN),
-    stgFrameRenderPriorityMax(DEFAULT_STG_FRAME_RENDER_PRIORITY_MAX),
-    invalidRenderPriorityMin(-1),
-    invalidRenderPriorityMax(-1)
+    shotRenderPriority_(DEFAULT_SHOT_RENDER_PRIORITY),
+    itemRenderPriority_(DEFAULT_ITEM_RENDER_PRIORITY),
+    cameraFocusPermitRenderPriority_(DEFAULT_CAMERA_FOCUS_PERMIT_RENDER_PRIORITY),
+    stgFrameRenderPriorityMin_(DEFAULT_STG_FRAME_RENDER_PRIORITY_MIN),
+    stgFrameRenderPriorityMax_(DEFAULT_STG_FRAME_RENDER_PRIORITY_MAX),
+    invalidRenderPriorityMin_(-1),
+    invalidRenderPriorityMax_(-1)
 {
 }
 
 ObjectLayerList::~ObjectLayerList() {}
 
-void ObjectLayerList::remove(const std::shared_ptr<ObjRender>& obj)
+void ObjectLayerList::Remove(const std::shared_ptr<ObjRender>& obj)
 {
-    if (obj->priority >= 0)
+    if (obj->priority_ >= 0)
     {
-        obj->posInLayer->reset();
-        obj->priority = -1;
+        obj->posInLayer_->reset();
+        obj->priority_ = -1;
     }
 }
 
-void ObjectLayerList::setRenderPriority(const std::shared_ptr<ObjRender>& obj, int p)
+void ObjectLayerList::SetRenderPriority(const std::shared_ptr<ObjRender>& obj, int p)
 {
     if (p < 0 || p > MAX_RENDER_PRIORITY) return;
     // 現在のレイヤーから削除
-    remove(obj);
+    Remove(obj);
     // 新しいレイヤーに追加
-    auto& layer = layers.at(p);
-    obj->posInLayer = layer.insert(layer.end(), obj);
-    obj->priority = p;
+    auto& layer = layers_.at(p);
+    obj->posInLayer_ = layer.insert(layer.end(), obj);
+    obj->priority_ = p;
 }
 
-void ObjectLayerList::renderLayer(int p, bool ignoreStgSceneObj, bool checkVisibleFlag)
+void ObjectLayerList::RenderLayer(int p, bool ignoreStgSceneObj, bool checkVisibleFlag)
 {
     if (p < 0 || p > MAX_RENDER_PRIORITY) return;
 
-    auto& layer = layers.at(p);
+    auto& layer = layers_.at(p);
 
     // バケツソートする
     std::vector<std::shared_ptr<ObjRender>> addShots;
@@ -243,10 +243,10 @@ void ObjectLayerList::renderLayer(int p, bool ignoreStgSceneObj, bool checkVisib
         ++it;
 
         // 終了状態 or 非表示状態
-        if (obj->isDead() || (checkVisibleFlag && !obj->isVisible())) { continue; }
+        if (obj->IsDead() || (checkVisibleFlag && !obj->IsVisible())) { continue; }
 
         // StgSceneのオブジェクトを描画するかどうか
-        if (ignoreStgSceneObj && obj->isStgSceneObject()) { continue; }
+        if (ignoreStgSceneObj && obj->IsStgSceneObject()) { continue; }
 
         auto shot = std::dynamic_pointer_cast<ObjShot>(obj);
 
@@ -257,19 +257,19 @@ void ObjectLayerList::renderLayer(int p, bool ignoreStgSceneObj, bool checkVisib
             continue;
         }
 
-        if (const auto& shotData = shot->getShotData())
+        if (const auto& shotData = shot->GetShotData())
         {
             int blendType;
-            if (!shot->isDelay())
+            if (!shot->IsDelay())
             {
-                blendType = shot->getBlendType();
+                blendType = shot->GetBlendType();
                 if (blendType == BLEND_NONE)
                 {
                     blendType = shotData->render;
                 }
             } else
             {
-                blendType = shot->getSourceBlendType();
+                blendType = shot->GetSourceBlendType();
                 if (blendType == BLEND_NONE)
                 {
                     blendType = shotData->delayRender;
@@ -296,107 +296,107 @@ void ObjectLayerList::renderLayer(int p, bool ignoreStgSceneObj, bool checkVisib
             }
         }
     }
-    for (auto shot : addShots) { shot->render(); }
-    for (auto shot : mulShots) { shot->render(); }
-    for (auto shot : subShots) { shot->render(); }
-    for (auto shot : invShots) { shot->render(); }
-    for (auto shot : alphaShots) { shot->render(); }
-    for (auto obj : others) { obj->render(); }
+    for (auto shot : addShots) { shot->Render(); }
+    for (auto shot : mulShots) { shot->Render(); }
+    for (auto shot : subShots) { shot->Render(); }
+    for (auto shot : invShots) { shot->Render(); }
+    for (auto shot : alphaShots) { shot->Render(); }
+    for (auto obj : others) { obj->Render(); }
 }
 
-void ObjectLayerList::setLayerShader(int beginPriority, int endPriority, const std::shared_ptr<Shader>& shader)
+void ObjectLayerList::SetLayerShader(int beginPriority, int endPriority, const std::shared_ptr<Shader>& shader)
 {
     beginPriority = std::max(0, beginPriority);
     endPriority = std::min(endPriority, MAX_RENDER_PRIORITY);
     for (int p = beginPriority; p <= endPriority; p++)
     {
-        layerShaders[p] = shader;
+        layerShaders_[p] = shader;
     }
 }
 
-void ObjectLayerList::resetLayerShader(int beginPriority, int endPriority)
+void ObjectLayerList::ResetLayerShader(int beginPriority, int endPriority)
 {
     beginPriority = std::max(0, beginPriority);
     endPriority = std::min(endPriority, MAX_RENDER_PRIORITY);
     for (int p = beginPriority; p <= endPriority; p++)
     {
-        layerShaders[p].reset();
+        layerShaders_[p].reset();
     }
 }
 
-std::shared_ptr<Shader> ObjectLayerList::getLayerShader(int p) const
+std::shared_ptr<Shader> ObjectLayerList::GetLayerShader(int p) const
 {
     if (p < 0 || p > MAX_RENDER_PRIORITY)
     {
         return nullptr;
     }
-    return layerShaders.at(p);
+    return layerShaders_.at(p);
 }
 
-int ObjectLayerList::getShotRenderPriority() const
+int ObjectLayerList::GetShotRenderPriority() const
 {
-    return shotRenderPriority;
+    return shotRenderPriority_;
 }
 
-void ObjectLayerList::setShotRenderPriority(int p)
+void ObjectLayerList::SetShotRenderPriority(int p)
 {
-    shotRenderPriority = p;
+    shotRenderPriority_ = p;
 }
 
-int ObjectLayerList::getItemRenderPriority() const
+int ObjectLayerList::GetItemRenderPriority() const
 {
-    return itemRenderPriority;
+    return itemRenderPriority_;
 }
 
-void ObjectLayerList::setItemRenderPriority(int p)
+void ObjectLayerList::SetItemRenderPriority(int p)
 {
-    itemRenderPriority = p;
+    itemRenderPriority_ = p;
 }
 
-int ObjectLayerList::getCameraFocusPermitRenderPriority() const
+int ObjectLayerList::GetCameraFocusPermitRenderPriority() const
 {
-    return cameraFocusPermitRenderPriority;
+    return cameraFocusPermitRenderPriority_;
 }
 
-int ObjectLayerList::getStgFrameRenderPriorityMin() const
+int ObjectLayerList::GetStgFrameRenderPriorityMin() const
 {
-    return stgFrameRenderPriorityMin;
+    return stgFrameRenderPriorityMin_;
 }
 
-void ObjectLayerList::setStgFrameRenderPriorityMin(int p)
+void ObjectLayerList::SetStgFrameRenderPriorityMin(int p)
 {
-    stgFrameRenderPriorityMin = p;
+    stgFrameRenderPriorityMin_ = p;
 }
 
-int ObjectLayerList::getStgFrameRenderPriorityMax() const
+int ObjectLayerList::GetStgFrameRenderPriorityMax() const
 {
-    return stgFrameRenderPriorityMax;
+    return stgFrameRenderPriorityMax_;
 }
 
-void ObjectLayerList::setStgFrameRenderPriorityMax(int p)
+void ObjectLayerList::SetStgFrameRenderPriorityMax(int p)
 {
-    stgFrameRenderPriorityMax = p;
+    stgFrameRenderPriorityMax_ = p;
 }
 
-bool ObjectLayerList::isInvalidRenderPriority(int p) const
+bool ObjectLayerList::IsInvalidRenderPriority(int p) const
 {
-    return p <= invalidRenderPriorityMax && invalidRenderPriorityMin <= p;
+    return p <= invalidRenderPriorityMax_ && invalidRenderPriorityMin_ <= p;
 }
 
-void ObjectLayerList::setInvalidRenderPriority(int min, int max)
+void ObjectLayerList::SetInvalidRenderPriority(int min, int max)
 {
-    invalidRenderPriorityMin = min;
-    invalidRenderPriorityMax = max;
+    invalidRenderPriorityMin_ = min;
+    invalidRenderPriorityMax_ = max;
 }
 
-void ObjectLayerList::clearInvalidRenderPriority()
+void ObjectLayerList::ClearInvalidRenderPriority()
 {
-    invalidRenderPriorityMin = invalidRenderPriorityMax = -1;
+    invalidRenderPriorityMin_ = invalidRenderPriorityMax_ = -1;
 }
 
 ObjShader::ObjShader(const std::shared_ptr<GameState>& gameState) : ObjRender(gameState)
 {
-    setType(OBJ_SHADER);
+    SetType(OBJ_SHADER);
 }
 ObjShader::~ObjShader() {}
 }

@@ -27,57 +27,57 @@ ItemDataTable::~ItemDataTable()
 {
 }
 
-void ItemDataTable::add(const std::shared_ptr<ItemData>& data)
+void ItemDataTable::Add(const std::shared_ptr<ItemData>& data)
 {
     if (data->texture)
     {
-        table[data->id] = data;
+        table_[data->id] = data;
     }
 }
 
-void ItemDataTable::load(const std::wstring & path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos)
+void ItemDataTable::Load(const std::wstring & path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos)
 {
-    if (isLoaded(path))
+    if (IsLoaded(path))
     {
         Logger::WriteLog(std::move(
             Log(Log::Level::LV_WARN)
-            .setMessage("item data already loaded.")
-            .setParam(Log::Param(Log::Param::Tag::ITEM_DATA, path))
-            .addSourcePos(srcPos)));
+            .SetMessage("item data already loaded.")
+            .SetParam(Log::Param(Log::Param::Tag::ITEM_DATA, path))
+            .AddSourcePos(srcPos)));
     } else
     {
-        reload(path, loader, textureCache, srcPos);
+        Reload(path, loader, textureCache, srcPos);
     }
 }
 
-void ItemDataTable::reload(const std::wstring & path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos)
+void ItemDataTable::Reload(const std::wstring & path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos)
 {
-    std::wstring uniqPath = canonicalPath(path);
-    auto userItemData = parseUserItemData(uniqPath, loader);
-    auto texture = textureCache->load(userItemData->imagePath, false, srcPos);
+    std::wstring uniqPath = GetCanonicalPath(path);
+    auto userItemData = ParseUserItemData(uniqPath, loader);
+    auto texture = textureCache->Load(userItemData->imagePath, false, srcPos);
     for (auto& entry : userItemData->dataMap)
     {
         auto& data = entry.second;
         data.texture = texture;
-        table[data.id] = std::make_shared<ItemData>(data);
+        table_[data.id] = std::make_shared<ItemData>(data);
     }
-    loadedPaths.insert(uniqPath);
+    loadedPaths_.insert(uniqPath);
     Logger::WriteLog(std::move(
         Log(Log::Level::LV_INFO)
-        .setMessage("load item data.")
-        .setParam(Log::Param(Log::Param::Tag::ITEM_DATA, path))
-        .addSourcePos(srcPos)));
+        .SetMessage("load item data.")
+        .SetParam(Log::Param(Log::Param::Tag::ITEM_DATA, path))
+        .AddSourcePos(srcPos)));
 }
 
-bool ItemDataTable::isLoaded(const std::wstring & path) const
+bool ItemDataTable::IsLoaded(const std::wstring & path) const
 {
-    return loadedPaths.count(canonicalPath(path)) != 0;
+    return loadedPaths_.count(GetCanonicalPath(path)) != 0;
 }
 
 std::shared_ptr<ItemData> ItemDataTable::Get(int id) const
 {
-    auto it = table.find(id);
-    if (it != table.end())
+    auto it = table_.find(id);
+    if (it != table_.end())
     {
         return it->second;
     }

@@ -7,114 +7,114 @@
 
 namespace bstorm
 {
-RenderTarget::RenderTarget(const std::wstring& name, int width, int height, IDirect3DDevice9* d3DDevice) :
+RenderTarget::RenderTarget(const std::wstring& name, int width, int height, IDirect3DDevice9* d3DDevice_) :
     LostableGraphicResource(),
-    name(name),
-    width(width),
-    height(height),
-    d3DDevice(d3DDevice),
-    texture(NULL),
-    textureSurface(NULL),
-    textureDepthStencilSurface(NULL),
-    viewport({ 0, 0, (DWORD)width, (DWORD)height, 0.0f, 1.0f })
+    name_(name),
+    width_(width),
+    height_(height),
+    d3DDevice_(d3DDevice_),
+    texture_(nullptr),
+    textureSurface_(nullptr),
+    textureDepthStencilSurface_(nullptr),
+    viewport_({ 0, 0, (DWORD)width, (DWORD)height, 0.0f, 1.0f })
 {
-    onResetDevice();
+    OnResetDevice();
 }
 
 RenderTarget::~RenderTarget()
 {
-    onLostDevice();
+    OnLostDevice();
 }
 
-void RenderTarget::setRenderTarget()
+void RenderTarget::SetRenderTarget()
 {
-    if (textureSurface != NULL && textureDepthStencilSurface != NULL)
+    if (textureSurface_ != nullptr && textureDepthStencilSurface_ != nullptr)
     {
-        d3DDevice->SetRenderTarget(0, textureSurface);
-        d3DDevice->SetDepthStencilSurface(textureDepthStencilSurface);
-        d3DDevice->SetViewport(&viewport);
+        d3DDevice_->SetRenderTarget(0, textureSurface_);
+        d3DDevice_->SetDepthStencilSurface(textureDepthStencilSurface_);
+        d3DDevice_->SetViewport(&viewport_);
     }
 }
 
-IDirect3DTexture9* RenderTarget::getTexture() const
+IDirect3DTexture9* RenderTarget::GetTexture() const
 {
-    return texture;
+    return texture_;
 }
 
-IDirect3DSurface9 * RenderTarget::getSurface() const
+IDirect3DSurface9 * RenderTarget::GetSurface() const
 {
-    return textureSurface;
+    return textureSurface_;
 }
 
-std::wstring RenderTarget::getName() const
+const std::wstring& RenderTarget::GetName() const
 {
-    return name;
+    return name_;
 }
 
-int RenderTarget::getWidth() const
+int RenderTarget::GetWidth() const
 {
-    return width;
+    return width_;
 }
 
-int RenderTarget::getHeight() const
+int RenderTarget::GetHeight() const
 {
-    return height;
+    return height_;
 }
 
-const D3DVIEWPORT9 & RenderTarget::getViewport() const
+const D3DVIEWPORT9 & RenderTarget::GetViewport() const
 {
-    return viewport;
+    return viewport_;
 }
 
-void RenderTarget::setViewport(int left, int top, int width, int height)
+void RenderTarget::SetViewport(int left, int top, int width, int height)
 {
-    viewport = { (DWORD)left, (DWORD)top, (DWORD)width, (DWORD)height, 0.0f, 1.0f };
+    viewport_ = { (DWORD)left, (DWORD)top, (DWORD)width, (DWORD)height, 0.0f, 1.0f };
 }
 
-void RenderTarget::onResetDevice()
+void RenderTarget::OnResetDevice()
 {
-    if (textureSurface != NULL || textureDepthStencilSurface != NULL) return;
+    if (textureSurface_ != nullptr || textureDepthStencilSurface_ != nullptr) return;
 
     Log err = Log(Log::Level::LV_ERROR)
-        .setMessage("failed to create render target.")
-        .setParam(Log::Param(Log::Param::Tag::RENDER_TARGET, name));
+        .SetMessage("failed to create render target.")
+        .SetParam(Log::Param(Log::Param::Tag::RENDER_TARGET, name_));
 
-    if (FAILED(d3DDevice->CreateTexture(
-        width,
-        height,
+    if (FAILED(d3DDevice_->CreateTexture(
+        width_,
+        height_,
         0,
         D3DUSAGE_RENDERTARGET,
         D3DFMT_A8R8G8B8,
         D3DPOOL_DEFAULT,
-        &(this->texture),
-        NULL)))
+        &texture_,
+        nullptr)))
     {
         throw err;
     }
 
-    if (FAILED(texture->GetSurfaceLevel(0, &(this->textureSurface))))
+    if (FAILED(texture_->GetSurfaceLevel(0, &textureSurface_)))
     {
         throw err;
     }
 
-    if (FAILED(d3DDevice->CreateDepthStencilSurface(
-        width,
-        height,
+    if (FAILED(d3DDevice_->CreateDepthStencilSurface(
+        width_,
+        height_,
         D3DFMT_D16,
         D3DMULTISAMPLE_NONE,
         0,
         TRUE,
-        &(this->textureDepthStencilSurface),
-        NULL)))
+        &textureDepthStencilSurface_,
+        nullptr)))
     {
         throw err;
     }
 }
 
-void RenderTarget::onLostDevice()
+void RenderTarget::OnLostDevice()
 {
-    safe_release(textureDepthStencilSurface);
-    safe_release(textureSurface);
-    safe_release(texture);
+    safe_release(textureDepthStencilSurface_);
+    safe_release(textureSurface_);
+    safe_release(texture_);
 }
 }

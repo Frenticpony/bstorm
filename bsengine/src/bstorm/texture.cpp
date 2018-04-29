@@ -8,67 +8,67 @@
 namespace bstorm
 {
 Texture::Texture(const std::wstring& path, IDirect3DTexture9* d3DTexture) :
-    d3DTexture(d3DTexture),
-    path(path),
-    reservedFlag(false)
+    d3DTexture_(d3DTexture),
+    path_(path),
+    reservedFlag_(false)
 {
-    getD3DTextureSize(d3DTexture, width, height);
+    GetD3DTextureSize(d3DTexture, &width_, &height_);
 }
 
 Texture::~Texture()
 {
-    safe_release(d3DTexture);
+    safe_release(d3DTexture_);
     Logger::WriteLog(std::move(
         Log(Log::Level::LV_INFO)
-        .setMessage("release texture.")
-        .setParam(Log::Param(Log::Param::Tag::TEXTURE, path))));
+        .SetMessage("release texture.")
+        .SetParam(Log::Param(Log::Param::Tag::TEXTURE, path_))));
 }
 
-const std::wstring& Texture::getPath() const
+const std::wstring& Texture::GetPath() const
 {
-    return path;
+    return path_;
 }
 
-int Texture::getWidth() const
+int Texture::GetWidth() const
 {
-    return width;
+    return width_;
 }
 
-int Texture::getHeight() const
+int Texture::GetHeight() const
 {
-    return height;
+    return height_;
 }
 
-void Texture::setReservedFlag(bool flag)
+void Texture::SetReservedFlag(bool flag)
 {
-    reservedFlag = flag;
+    reservedFlag_ = flag;
 }
 
-bool Texture::isReserved() const
+bool Texture::IsReserved() const
 {
-    return reservedFlag;
+    return reservedFlag_;
 }
 
-IDirect3DTexture9* Texture::getTexture() const
+IDirect3DTexture9* Texture::GetTexture() const
 {
-    return d3DTexture;
+    return d3DTexture_;
 }
 
-void Texture::reload(IDirect3DTexture9 * d3DTex)
+void Texture::Reload(IDirect3DTexture9 * d3DTex)
 {
     if (d3DTex)
     {
-        safe_release(d3DTexture);
-        d3DTexture = d3DTex;
-        getD3DTextureSize(d3DTexture, width, height);
+        safe_release(d3DTexture_);
+        d3DTexture_ = d3DTex;
+        GetD3DTextureSize(d3DTexture_, &width_, &height_);
     }
 }
 
-IDirect3DTexture9 * loadTextureFromFile(const std::wstring & path, IDirect3DDevice9* d3DDevice) noexcept(true)
+IDirect3DTexture9 * LoadTextureFromFile(const std::wstring & path, IDirect3DDevice9* d3DDevice_) noexcept(true)
 {
     IDirect3DTexture9* d3DTexture = NULL;
     if (FAILED(D3DXCreateTextureFromFileEx(
-        d3DDevice,
+        d3DDevice_,
         path.c_str(),
         D3DX_DEFAULT_NONPOW2, // 画像の横幅
         D3DX_DEFAULT_NONPOW2, // 画像の縦幅
@@ -88,144 +88,144 @@ IDirect3DTexture9 * loadTextureFromFile(const std::wstring & path, IDirect3DDevi
     return d3DTexture;
 }
 
-std::shared_ptr<Texture> TextureCache::load(const std::wstring& p, bool reserve, const std::shared_ptr<SourcePos>& srcPos)
+std::shared_ptr<Texture> TextureCache::Load(const std::wstring& p, bool reserve, const std::shared_ptr<SourcePos>& srcPos)
 {
-    auto uniqPath = canonicalPath(p);
-    if (auto texture = getTexture(uniqPath))
+    auto uniqPath = GetCanonicalPath(p);
+    if (auto texture = GetTexture(uniqPath))
     {
         // cache hit
-        if (reserve) texture->setReservedFlag(true);
+        if (reserve) texture->SetReservedFlag(true);
         return texture;
     }
-    return loadFirst(uniqPath, reserve, srcPos);
+    return LoadFirst(uniqPath, reserve, srcPos);
 }
 
-std::shared_ptr<Texture> TextureCache::loadFirst(const std::wstring & uniqPath, bool reserve, const std::shared_ptr<SourcePos>& srcPos)
+std::shared_ptr<Texture> TextureCache::LoadFirst(const std::wstring & uniqPath, bool reserve, const std::shared_ptr<SourcePos>& srcPos)
 {
     IDirect3DTexture9* d3DTexture = NULL;
     {
-        std::lock_guard<std::recursive_mutex> lock(textureLoadSection);
-        if (auto texture = getTexture(uniqPath))
+        std::lock_guard<std::recursive_mutex> lock(textureLoadSection_);
+        if (auto texture = GetTexture(uniqPath))
         {
-            if (reserve) texture->setReservedFlag(true);
+            if (reserve) texture->SetReservedFlag(true);
             return texture;
         }
         // load
-        d3DTexture = loadTextureFromFile(uniqPath, d3DDevice);
+        d3DTexture = LoadTextureFromFile(uniqPath, d3DDevice_);
     }
     if (d3DTexture)
     {
         auto texture = std::make_shared<Texture>(uniqPath, d3DTexture);
-        texture->setReservedFlag(reserve);
+        texture->SetReservedFlag(reserve);
         {
-            std::lock_guard<std::recursive_mutex> lock(memberAccessSection);
-            m_textureMap[uniqPath] = texture;
+            std::lock_guard<std::recursive_mutex> lock(memberAccessSection_);
+            textureMap_[uniqPath] = texture;
         }
         Logger::WriteLog(std::move(
-            Log(Log::Level::LV_INFO).setMessage(std::string("load texture") + (reserve ? " (reserved)." : "."))
-            .setParam(Log::Param(Log::Param::Tag::TEXTURE, uniqPath))
-            .addSourcePos(srcPos)));
+            Log(Log::Level::LV_INFO).SetMessage(std::string("load texture") + (reserve ? " (reserved)." : "."))
+            .SetParam(Log::Param(Log::Param::Tag::TEXTURE, uniqPath))
+            .AddSourcePos(srcPos)));
         return texture;
     }
     throw Log(Log::Level::LV_ERROR)
-        .setMessage("failed to load texture.")
-        .setParam(Log::Param(Log::Param::Tag::TEXTURE, uniqPath));
+        .SetMessage("failed to load texture.")
+        .SetParam(Log::Param(Log::Param::Tag::TEXTURE, uniqPath));
 }
 
-void TextureCache::loadInThread(const std::wstring & p, bool reserve, const std::shared_ptr<SourcePos>& srcPos)
+void TextureCache::LoadInThread(const std::wstring & p, bool reserve, const std::shared_ptr<SourcePos>& srcPos)
 {
-    const std::wstring& uniqPath = canonicalPath(p);
-    if (auto texture = getTexture(uniqPath))
+    const std::wstring& uniqPath = GetCanonicalPath(p);
+    if (auto texture = GetTexture(uniqPath))
     {
         // cache hit
-        if (reserve) texture->setReservedFlag(true);
+        if (reserve) texture->SetReservedFlag(true);
         return;
     }
     {
-        std::lock_guard<std::recursive_mutex> lock(memberAccessSection);
-        if (m_loadThreads.count(uniqPath) != 0) return; // ロード中
-        m_loadThreads[uniqPath] = std::thread([this, uniqPath, reserve, srcPos]()
+        std::lock_guard<std::recursive_mutex> lock(memberAccessSection_);
+        if (loadThreads_.count(uniqPath) != 0) return; // ロード中
+        loadThreads_[uniqPath] = std::thread([this, uniqPath, reserve, srcPos]()
         {
             try
             {
-                loadFirst(uniqPath, reserve, srcPos);
+                LoadFirst(uniqPath, reserve, srcPos);
             } catch (Log& log)
             {
-                log.setLevel(Log::Level::LV_WARN);
-                log.addSourcePos(srcPos);
+                log.SetLevel(Log::Level::LV_WARN);
+                log.AddSourcePos(srcPos);
                 Logger::WriteLog(log);
             }
             {
-                std::lock_guard<std::recursive_mutex> lock(memberAccessSection);
-                m_loadThreads[uniqPath].detach();
-                m_loadThreads.erase(uniqPath);
+                std::lock_guard<std::recursive_mutex> lock(memberAccessSection_);
+                loadThreads_[uniqPath].detach();
+                loadThreads_.erase(uniqPath);
             }
         });
     }
 }
 
-void TextureCache::reload(const std::wstring & p, bool reserve, const std::shared_ptr<SourcePos>& srcPos)
+void TextureCache::Reload(const std::wstring & p, bool reserve, const std::shared_ptr<SourcePos>& srcPos)
 {
-    const std::wstring& uniqPath = canonicalPath(p);
-    if (auto texture = getTexture(uniqPath))
+    const std::wstring& uniqPath = GetCanonicalPath(p);
+    if (auto texture = GetTexture(uniqPath))
     {
         // cache hit
-        if (reserve) texture->setReservedFlag(true);
+        if (reserve) texture->SetReservedFlag(true);
         IDirect3DTexture9* d3DTexture = NULL;
-        d3DTexture = loadTextureFromFile(uniqPath, d3DDevice);
+        d3DTexture = LoadTextureFromFile(uniqPath, d3DDevice_);
         if (d3DTexture)
         {
-            texture->reload(d3DTexture);
+            texture->Reload(d3DTexture);
             Logger::WriteLog(std::move(
-                Log(Log::Level::LV_INFO).setMessage(std::string("reload texture") + (reserve ? " (reserved)." : "."))
-                .setParam(Log::Param(Log::Param::Tag::TEXTURE, uniqPath))
-                .addSourcePos(srcPos)));
+                Log(Log::Level::LV_INFO).SetMessage(std::string("reload texture") + (reserve ? " (reserved)." : "."))
+                .SetParam(Log::Param(Log::Param::Tag::TEXTURE, uniqPath))
+                .AddSourcePos(srcPos)));
         } else
         {
             Logger::WriteLog(std::move(
-                Log(Log::Level::LV_WARN).setMessage(std::string("failed to reload texture."))
-                .setParam(Log::Param(Log::Param::Tag::TEXTURE, uniqPath))
-                .addSourcePos(srcPos)));
+                Log(Log::Level::LV_WARN).SetMessage(std::string("failed to reload texture."))
+                .SetParam(Log::Param(Log::Param::Tag::TEXTURE, uniqPath))
+                .AddSourcePos(srcPos)));
         }
     } else
     {
-        loadFirst(uniqPath, reserve, srcPos);
+        LoadFirst(uniqPath, reserve, srcPos);
     }
 }
 
-void TextureCache::removeReservedFlag(const std::wstring & p)
+void TextureCache::RemoveReservedFlag(const std::wstring & p)
 {
-    auto uniqPath = canonicalPath(p);
+    auto uniqPath = GetCanonicalPath(p);
     {
-        std::lock_guard<std::recursive_mutex> lock(memberAccessSection);
-        auto it = m_textureMap.find(uniqPath);
-        if (it != m_textureMap.end())
+        std::lock_guard<std::recursive_mutex> lock(memberAccessSection_);
+        auto it = textureMap_.find(uniqPath);
+        if (it != textureMap_.end())
         {
-            it->second->setReservedFlag(false);
+            it->second->SetReservedFlag(false);
         }
     }
 }
 
-void TextureCache::releaseUnusedTexture()
+void TextureCache::ReleaseUnusedTexture()
 {
-    std::lock_guard<std::recursive_mutex> lock(memberAccessSection);
-    auto it = m_textureMap.begin();
-    while (it != m_textureMap.end())
+    std::lock_guard<std::recursive_mutex> lock(memberAccessSection_);
+    auto it = textureMap_.begin();
+    while (it != textureMap_.end())
     {
         auto& texture = it->second;
-        if (!texture->isReserved() && texture.use_count() <= 1)
+        if (!texture->IsReserved() && texture.use_count() <= 1)
         {
-            m_textureMap.erase(it++);
+            textureMap_.erase(it++);
         } else ++it;
     }
 }
 
-std::shared_ptr<Texture> TextureCache::getTexture(const std::wstring& uniqPath) const
+std::shared_ptr<Texture> TextureCache::GetTexture(const std::wstring& uniqPath) const
 {
     {
-        std::lock_guard<std::recursive_mutex> lock(memberAccessSection);
-        auto it = m_textureMap.find(uniqPath);
-        if (it != m_textureMap.end())
+        std::lock_guard<std::recursive_mutex> lock(memberAccessSection_);
+        auto it = textureMap_.find(uniqPath);
+        if (it != textureMap_.end())
         {
             return it->second;
         }
@@ -233,8 +233,8 @@ std::shared_ptr<Texture> TextureCache::getTexture(const std::wstring& uniqPath) 
     return nullptr;
 }
 
-TextureCache::TextureCache(IDirect3DDevice9* d3DDevice) :
-    d3DDevice(d3DDevice)
+TextureCache::TextureCache(IDirect3DDevice9* d3DDevice_) :
+    d3DDevice_(d3DDevice_)
 {
 }
 
@@ -244,8 +244,8 @@ TextureCache::~TextureCache()
     {
         bool allThreadFinished = true;
         {
-            std::lock_guard<std::recursive_mutex> lock(memberAccessSection);
-            for (const auto& thread : m_loadThreads)
+            std::lock_guard<std::recursive_mutex> lock(memberAccessSection_);
+            for (const auto& thread : loadThreads_)
             {
                 allThreadFinished = allThreadFinished && !thread.second.joinable();
             }
@@ -255,30 +255,30 @@ TextureCache::~TextureCache()
     }
 }
 
-void getD3DTextureSize(IDirect3DTexture9 * texture, int & width, int & height)
+void GetD3DTextureSize(IDirect3DTexture9 * texture, int * width, int * height)
 {
     D3DSURFACE_DESC desc;
     if (FAILED(texture->GetLevelDesc(0, &desc)))
     {
-        width = height = 0;
+        *width = *height = 0;
     } else
     {
-        width = desc.Width;
-        height = desc.Height;
+        *width = desc.Width;
+        *height = desc.Height;
     }
 }
 
-int getD3DTextureWidth(IDirect3DTexture9 * texture)
+int GetD3DTextureWidth(IDirect3DTexture9 * texture)
 {
     int w, h;
-    getD3DTextureSize(texture, w, h);
+    GetD3DTextureSize(texture, &w, &h);
     return w;
 }
 
-int getD3DTextureHeight(IDirect3DTexture9 * texture)
+int GetD3DTextureHeight(IDirect3DTexture9 * texture)
 {
     int w, h;
-    getD3DTextureSize(texture, w, h);
+    GetD3DTextureSize(texture, &w, &h);
     return h;
 }
 }

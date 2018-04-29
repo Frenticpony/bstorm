@@ -9,267 +9,267 @@
 namespace bstorm
 {
 ObjMove::ObjMove(ObjRender *obj) :
-    obj(obj),
+    obj_(obj),
     mode(std::make_shared<MoveModeA>())
 {
 }
 
-float ObjMove::getMoveX() const { return obj->getX(); }
+float ObjMove::GetMoveX() const { return obj_->GetX(); }
 
-void ObjMove::setMoveX(float x) { obj->setX(x); }
+void ObjMove::SetMoveX(float x) { obj_->SetX(x); }
 
-float ObjMove::getMoveY() const { return obj->getY(); }
+float ObjMove::GetMoveY() const { return obj_->GetY(); }
 
-void ObjMove::setMoveY(float y) { obj->setY(y); }
+void ObjMove::SetMoveY(float y) { obj_->SetY(y); }
 
-void ObjMove::setMovePosition(float x, float y) { obj->setPosition(x, y, obj->getZ()); }
+void ObjMove::SetMovePosition(float x, float y) { obj_->SetPosition(x, y, obj_->GetZ()); }
 
-float ObjMove::getSpeed() const
+float ObjMove::GetSpeed() const
 {
-    return mode->getSpeed();
+    return mode->GetSpeed();
 }
 
-float ObjMove::getAngle() const
+float ObjMove::GetAngle() const
 {
-    return mode->getAngle();
+    return mode->GetAngle();
 }
 
-void ObjMove::setSpeed(float speed)
+void ObjMove::SetSpeed(float speed)
 {
     auto modeA = std::dynamic_pointer_cast<MoveModeA>(mode);
     if (!modeA)
     {
         modeA = std::make_shared<MoveModeA>();
-        setMoveMode(modeA);
+        SetMoveMode(modeA);
     }
-    modeA->setSpeed(speed);
+    modeA->SetSpeed(speed);
 }
 
-void ObjMove::setAngle(float angle)
+void ObjMove::SetAngle(float angle)
 {
     auto modeA = std::dynamic_pointer_cast<MoveModeA>(mode);
     if (!modeA)
     {
         modeA = std::make_shared<MoveModeA>();
-        setMoveMode(modeA);
+        SetMoveMode(modeA);
     }
-    modeA->setAngle(angle);
+    modeA->SetAngle(angle);
 }
 
-void ObjMove::setAcceleration(float accel)
+void ObjMove::SetAcceleration(float accel)
 {
     auto modeA = std::dynamic_pointer_cast<MoveModeA>(mode);
     if (!modeA)
     {
         modeA = std::make_shared<MoveModeA>();
-        setMoveMode(modeA);
+        SetMoveMode(modeA);
     }
-    modeA->setAcceleration(accel);
+    modeA->SetAcceleration(accel);
 }
 
-void ObjMove::setMaxSpeed(float maxSpeed)
+void ObjMove::SetMaxSpeed(float maxSpeed)
 {
     auto modeA = std::dynamic_pointer_cast<MoveModeA>(mode);
     if (!modeA)
     {
         modeA = std::make_shared<MoveModeA>();
-        setMoveMode(modeA);
+        SetMoveMode(modeA);
     }
-    modeA->setMaxSpeed(maxSpeed);
+    modeA->SetMaxSpeed(maxSpeed);
 }
 
-void ObjMove::setAngularVelocity(float angularVelocity)
+void ObjMove::SetAngularVelocity(float angularVelocity)
 {
     auto modeA = std::dynamic_pointer_cast<MoveModeA>(mode);
     if (!modeA)
     {
         modeA = std::make_shared<MoveModeA>();
-        setMoveMode(modeA);
+        SetMoveMode(modeA);
     }
-    modeA->setAngularVelocity(angularVelocity);
+    modeA->SetAngularVelocity(angularVelocity);
 }
 
-void ObjMove::setDestAtSpeed(float x, float y, float speed)
+void ObjMove::SetDestAtSpeed(float x, float y, float speed)
 {
-    float dx = x - getMoveX();
-    float dy = y - getMoveY();
+    float dx = x - GetMoveX();
+    float dy = y - GetMoveY();
     float dist = std::hypotf(dx, dy);
     int frame = (int)(ceil(dist / speed));
     float angle = D3DXToDegree(atan2(dy, dx));
-    setMoveMode(std::make_shared<MoveModeAtFrame>(frame, speed, angle));
+    SetMoveMode(std::make_shared<MoveModeAtFrame>(frame, speed, angle));
 }
 
-void ObjMove::setDestAtFrame(float x, float y, int frame)
+void ObjMove::SetDestAtFrame(float x, float y, int frame)
 {
-    float dx = x - getMoveX();
-    float dy = y - getMoveY();
+    float dx = x - GetMoveX();
+    float dy = y - GetMoveY();
     float dist = std::hypotf(dx, dy);
     float speed = dist / frame;
     float angle = D3DXToDegree(atan2(dy, dx));
-    setMoveMode(std::make_shared<MoveModeAtFrame>(frame, speed, angle));
+    SetMoveMode(std::make_shared<MoveModeAtFrame>(frame, speed, angle));
 }
 
-void ObjMove::setDestAtWeight(float x, float y, float weight, float maxSpeed)
+void ObjMove::SetDestAtWeight(float x, float y, float weight, float maxSpeed)
 {
-    float dx = x - getMoveX();
-    float dy = y - getMoveY();
-    setMoveMode(std::make_shared<MoveModeAtWeight>(x, y, D3DXToDegree(atan2(dy, dx)), weight, maxSpeed));
+    float dx = x - GetMoveX();
+    float dy = y - GetMoveY();
+    SetMoveMode(std::make_shared<MoveModeAtWeight>(x, y, D3DXToDegree(atan2(dy, dx)), weight, maxSpeed));
 }
 
-void ObjMove::setMoveMode(const std::shared_ptr<MoveMode>& mode)
+void ObjMove::SetMoveMode(const std::shared_ptr<MoveMode>& mode)
 {
     if (mode) this->mode = mode;
 }
 
-void ObjMove::addMovePattern(const std::shared_ptr<MovePattern>& pattern)
+void ObjMove::AddMovePattern(const std::shared_ptr<MovePattern>& pattern)
 {
     if (!pattern) return;
-    if (pattern->getTiemrCount() < 0)
+    if (pattern->GetTimerCount() < 0)
     {
         return;
-    } else if (pattern->getTiemrCount() == 0)
+    } else if (pattern->GetTimerCount() == 0)
     {
-        pattern->apply(this, this->obj);
+        pattern->Apply(this, this->obj_);
     } else
     {
-        patterns.push_back(pattern);
+        patterns_.push_back(pattern);
     }
 }
 
-void ObjMove::move()
+void ObjMove::Move()
 {
-    auto it = patterns.begin();
-    while (it != patterns.end())
+    auto it = patterns_.begin();
+    while (it != patterns_.end())
     {
         auto pat = *it;
-        pat->tickTimerCount();
-        if (pat->getTiemrCount() <= 0)
+        pat->TickTimerCount();
+        if (pat->GetTimerCount() <= 0)
         {
-            pat->apply(this, this->obj);
-            it = patterns.erase(it);
+            pat->Apply(this, this->obj_);
+            it = patterns_.erase(it);
         } else ++it;
     }
-    float x = getMoveX();
-    float y = getMoveY();
-    mode->move(x, y);
-    setMovePosition(x, y);
+    float x = GetMoveX();
+    float y = GetMoveY();
+    mode->Move(x, y);
+    SetMovePosition(x, y);
 }
 
-const std::shared_ptr<MoveMode>& ObjMove::getMoveMode() const
+const std::shared_ptr<MoveMode>& ObjMove::GetMoveMode() const
 {
     return mode;
 }
 
 MoveModeA::MoveModeA() :
-    speed(0),
-    angle(0),
-    accel(0),
-    maxSpeed(0),
-    angularVelocity(0)
+    speed_(0),
+    angle_(0),
+    accel_(0),
+    maxSpeed_(0),
+    angularVelocity_(0)
 {
 }
-void MoveModeA::move(float & x, float & y)
+void MoveModeA::Move(float & x, float & y)
 {
-    speed += accel;
-    if (accel > 0 && speed > maxSpeed || accel < 0 && speed < maxSpeed)
+    speed_ += accel_;
+    if (accel_ > 0 && speed_ > maxSpeed_ || accel_ < 0 && speed_ < maxSpeed_)
     {
-        speed = maxSpeed;
+        speed_ = maxSpeed_;
     }
-    angle += angularVelocity;
-    float rad = D3DXToRadian(angle);
-    float dx = speed * cos(rad);
-    float dy = speed * sin(rad);
+    angle_ += angularVelocity_;
+    float rad = D3DXToRadian(angle_);
+    float dx = speed_ * cos(rad);
+    float dy = speed_ * sin(rad);
     x += dx;
     y += dy;
 }
 
 MoveModeB::MoveModeB(float speedX, float speedY, float accelX, float accelY, float maxSpeedX, float maxSpeedY) :
-    speedX(speedX),
-    speedY(speedY),
-    accelX(accelX),
-    accelY(accelY),
-    maxSpeedX(maxSpeedX),
-    maxSpeedY(maxSpeedY)
+    speedX_(speedX),
+    speedY_(speedY),
+    accelX_(accelX),
+    accelY_(accelY),
+    maxSpeedX_(maxSpeedX),
+    maxSpeedY_(maxSpeedY)
 {
 }
 
-void MoveModeB::move(float & x, float & y)
+void MoveModeB::Move(float & x, float & y)
 {
-    speedX += accelX;
-    if (accelX > 0 && speedX > maxSpeedX || accelX < 0 && speedX < maxSpeedX)
+    speedX_ += accelX_;
+    if (accelX_ > 0 && speedX_ > maxSpeedX_ || accelX_ < 0 && speedX_ < maxSpeedX_)
     {
-        speedX = maxSpeedX;
+        speedX_ = maxSpeedX_;
     }
-    speedY += accelY;
-    if (accelY > 0 && speedY > maxSpeedY || accelY < 0 && speedY < maxSpeedY)
+    speedY_ += accelY_;
+    if (accelY_ > 0 && speedY_ > maxSpeedY_ || accelY_ < 0 && speedY_ < maxSpeedY_)
     {
-        speedY = maxSpeedY;
+        speedY_ = maxSpeedY_;
     }
-    x += speedX;
-    y += speedY;
+    x += speedX_;
+    y += speedY_;
 }
 
-float MoveModeB::getAngle() const
+float MoveModeB::GetAngle() const
 {
-    return D3DXToDegree(atan2(speedY, speedX));
+    return D3DXToDegree(atan2(speedY_, speedX_));
 }
 
-float MoveModeB::getSpeed() const
+float MoveModeB::GetSpeed() const
 {
-    return std::hypotf(speedX, speedY);
+    return std::hypotf(speedX_, speedY_);
 }
 
 MoveModeAtFrame::MoveModeAtFrame(int frame, float speed, float angle) :
-    frame(frame),
-    speed(speed),
-    angle(angle),
-    isTimeUp(false),
-    cosAngle(cos(D3DXToRadian(angle))),
-    sinAngle(sin(D3DXToRadian(angle)))
+    frame_(frame),
+    speed_(speed),
+    angle_(angle),
+    isTimeUp_(false),
+    cosAngle_(cos(D3DXToRadian(angle))),
+    sinAngle_(sin(D3DXToRadian(angle)))
 {
 }
 
-void MoveModeAtFrame::move(float & x, float & y)
+void MoveModeAtFrame::Move(float & x, float & y)
 {
-    if (isTimeUp) return;
-    float dx = speed * cosAngle;
-    float dy = speed * sinAngle;
+    if (isTimeUp_) return;
+    float dx = speed_ * cosAngle_;
+    float dy = speed_ * sinAngle_;
     x += dx;
     y += dy;
-    frame--;
-    if (frame <= 0)
+    frame_--;
+    if (frame_ <= 0)
     {
-        speed = 0;
-        isTimeUp = true;
+        speed_ = 0;
+        isTimeUp_ = true;
     }
 }
 
 MoveModeAtWeight::MoveModeAtWeight(float destX, float destY, float angle, float weight, float maxSpeed) :
-    destX(destX),
-    destY(destY),
-    speed(maxSpeed),
-    angle(angle),
-    weight(weight),
-    maxSpeed(maxSpeed),
-    isArrived(false),
-    cosAngle(cos(D3DXToRadian(angle))),
-    sinAngle(sin(D3DXToRadian(angle)))
+    destX_(destX),
+    destY_(destY),
+    speed_(maxSpeed),
+    angle_(angle),
+    weight_(weight),
+    maxSpeed_(maxSpeed),
+    isArrived_(false),
+    cosAngle_(cos(D3DXToRadian(angle))),
+    sinAngle_(sin(D3DXToRadian(angle)))
 {
 }
 
-void MoveModeAtWeight::move(float & x, float & y)
+void MoveModeAtWeight::Move(float & x, float & y)
 {
-    if (isArrived) return;
-    float distFromDest = std::hypotf(x - destX, y - destY);
+    if (isArrived_) return;
+    float distFromDest = std::hypotf(x - destX_, y - destY_);
     if (distFromDest <= 1)
     {
-        speed = 0;
-        isArrived = true;
+        speed_ = 0;
+        isArrived_ = true;
         return;
     }
-    speed = std::min(maxSpeed, distFromDest / weight);
-    float dx = speed * cosAngle;
-    float dy = speed * sinAngle;
+    speed_ = std::min(maxSpeed_, distFromDest / weight_);
+    float dx = speed_ * cosAngle_;
+    float dy = speed_ * sinAngle_;
     x += dx;
     y += dy;
 }
@@ -277,7 +277,7 @@ void MoveModeAtWeight::move(float & x, float & y)
 MoveMode::~MoveMode() {}
 
 MovePattern::MovePattern(int timer) :
-    timer(timer)
+    timer_(timer)
 {
 }
 
@@ -285,86 +285,86 @@ MovePattern::~MovePattern() {}
 
 MovePatternA::MovePatternA(int frame, float speed, float angle, float accel, float angularVelocity, float maxSpeed, const std::shared_ptr<ObjMove>& baseObj, const std::shared_ptr<ShotData>& shotData) :
     MovePattern(frame + 1),
-    speed(speed),
-    angle(angle),
-    accel(accel),
-    angularVelocity(angularVelocity),
-    maxSpeed(maxSpeed),
-    baseObj(baseObj),
-    shotData(shotData)
+    speed_(speed),
+    angle_(angle),
+    accel_(accel),
+    angularVelocity_(angularVelocity),
+    maxSpeed_(maxSpeed),
+    baseObj_(baseObj),
+    shotData_(shotData)
 {
 }
 
-void MovePatternA::apply(ObjMove* move, ObjRender* obj)
+void MovePatternA::Apply(ObjMove* move, ObjRender* obj)
 {
-    float prevSpeed = move->getSpeed();
-    float prevAngle = move->getAngle();
+    float prevSpeed = move->GetSpeed();
+    float prevAngle = move->GetAngle();
     auto modeA = std::make_shared<MoveModeA>();
-    // speed
-    modeA->setSpeed(speed == NO_CHANGE ? prevSpeed : speed);
-    // angle
-    modeA->setAngle(angle == NO_CHANGE ? prevAngle : angle);
+    // speed_
+    modeA->SetSpeed(speed_ == NO_CHANGE ? prevSpeed : speed_);
+    // angle_
+    modeA->SetAngle(angle_ == NO_CHANGE ? prevAngle : angle_);
     // acceleration
-    modeA->setAcceleration(accel);
+    modeA->SetAcceleration(accel_);
     // angularVelocity
-    modeA->setAngularVelocity(angularVelocity);
-    // maxSpeed
-    modeA->setMaxSpeed(maxSpeed);
+    modeA->SetAngularVelocity(angularVelocity_);
+    // maxSpeed_
+    modeA->SetMaxSpeed(maxSpeed_);
     // baseObject
-    if (auto base = baseObj.lock())
+    if (auto base = baseObj_.lock())
     {
-        float baseX = base->getMoveX();
-        float baseY = base->getMoveY();
-        modeA->setAngle(modeA->getAngle() + D3DXToDegree(atan2(baseY - move->getMoveY(), baseX - move->getMoveX())));
+        float baseX = base->GetMoveX();
+        float baseY = base->GetMoveY();
+        modeA->SetAngle(modeA->GetAngle() + D3DXToDegree(atan2(baseY - move->GetMoveY(), baseX - move->GetMoveX())));
     }
     // shotData
     if (auto shot = dynamic_cast<ObjShot*>(obj))
     {
-        if (auto data = shotData.lock())
+        if (auto data = shotData_.lock())
         {
-            shot->setShotData(data);
+            shot->SetShotData(data);
         }
     }
-    move->setMoveMode(modeA);
+    move->SetMoveMode(modeA);
 }
 
 MovePatternB::MovePatternB(int frame, float speedX, float speedY, float accelX, float accelY, float maxSpeedX, float maxSpeedY, const std::shared_ptr<ShotData>& shotData) :
     MovePattern(frame + 1),
-    speedX(speedX),
-    speedY(speedY),
-    accelX(accelX),
-    accelY(accelY),
-    maxSpeedX(maxSpeedX),
-    maxSpeedY(maxSpeedY),
-    shotData(shotData)
+    speedX_(speedX),
+    speedY_(speedY),
+    accelX_(accelX),
+    accelY_(accelY),
+    maxSpeedX_(maxSpeedX),
+    maxSpeedY_(maxSpeedY),
+    shotData_(shotData)
 {
 }
 
-void MovePatternB::apply(ObjMove * move, ObjRender * obj)
+void MovePatternB::Apply(ObjMove * move, ObjRender * obj)
 {
-    float prevSpeed = move->getSpeed();
-    float prevAngle = move->getAngle();
+    float prevSpeed = move->GetSpeed();
+    float prevAngle = move->GetAngle();
     auto modeB = std::make_shared<MoveModeB>(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
     // speedX
-    modeB->setSpeedX(speedX == NO_CHANGE ? (prevSpeed * cos(D3DXToRadian(prevAngle))) : speedX);
+    modeB->SetSpeedX(speedX_ == NO_CHANGE ? (prevSpeed * cos(D3DXToRadian(prevAngle))) : speedX_);
     // speedY
-    modeB->setSpeedY(speedY == NO_CHANGE ? (prevSpeed * sin(D3DXToRadian(prevAngle))) : speedY);
+    modeB->SetSpeedY(speedY_ == NO_CHANGE ? (prevSpeed * sin(D3DXToRadian(prevAngle))) : speedY_);
     // accelerationX
-    modeB->setAccelerationX(accelX);
+    modeB->SetAccelerationX(accelX_);
     // accelerationY
-    modeB->setAccelerationY(accelY);
+    modeB->SetAccelerationY(accelY_);
     // maxSpeedX
-    modeB->setMaxSpeedX(maxSpeedX);
+    modeB->SetMaxSpeedX(maxSpeedX_);
     // maxSpeedY
-    modeB->setMaxSpeedY(maxSpeedY);
+    modeB->SetMaxSpeedY(maxSpeedY_);
     // shotData
     if (auto shot = dynamic_cast<ObjShot*>(obj))
     {
-        if (auto data = shotData.lock())
+        if (auto data = shotData_.lock())
         {
-            shot->setShotData(data);
+            shot->SetShotData(data);
         }
     }
-    move->setMoveMode(modeB);
+    move->SetMoveMode(modeB);
 }
 }

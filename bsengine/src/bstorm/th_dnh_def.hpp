@@ -12,5 +12,5 @@ struct ThDnhDef
     int screenHeight = 480;
 };
 
-ThDnhDef loadThDnhDef(const std::string& path);
+ThDnhDef LoadThDnhDef(const std::string& path);
 }

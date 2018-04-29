@@ -79,72 +79,72 @@ class NodeTraverser
 {
 public:
     virtual ~NodeTraverser() {}
-    virtual void traverse(NodeNum&) {};
-    virtual void traverse(NodeChar&) {};
-    virtual void traverse(NodeStr&) {};
-    virtual void traverse(NodeArray&) {};
-    virtual void traverse(NodeNeg&) {};
-    virtual void traverse(NodeNot&) {};
-    virtual void traverse(NodeAbs&) {};
-    virtual void traverse(NodeAdd&) {};
-    virtual void traverse(NodeSub&) {};
-    virtual void traverse(NodeMul&) {};
-    virtual void traverse(NodeDiv&) {};
-    virtual void traverse(NodeRem&) {};
-    virtual void traverse(NodePow&) {};
-    virtual void traverse(NodeLt&) {};
-    virtual void traverse(NodeGt&) {};
-    virtual void traverse(NodeLe&) {};
-    virtual void traverse(NodeGe&) {};
-    virtual void traverse(NodeEq&) {};
-    virtual void traverse(NodeNe&) {};
-    virtual void traverse(NodeAnd&) {};
-    virtual void traverse(NodeOr&) {};
-    virtual void traverse(NodeCat&) {};
-    virtual void traverse(NodeNoParenCallExp&) {};
-    virtual void traverse(NodeCallExp&) {};
-    virtual void traverse(NodeArrayRef&) {};
-    virtual void traverse(NodeRange&) {};
-    virtual void traverse(NodeArraySlice&) {};
-    virtual void traverse(NodeNop&) {};
-    virtual void traverse(NodeLeftVal&) {};
-    virtual void traverse(NodeAssign&) {};
-    virtual void traverse(NodeAddAssign&) {};
-    virtual void traverse(NodeSubAssign&) {};
-    virtual void traverse(NodeMulAssign&) {};
-    virtual void traverse(NodeDivAssign&) {};
-    virtual void traverse(NodeRemAssign&) {};
-    virtual void traverse(NodePowAssign&) {};
-    virtual void traverse(NodeCatAssign&) {};
-    virtual void traverse(NodeCallStmt&) {};
-    virtual void traverse(NodeReturn&) {};
-    virtual void traverse(NodeReturnVoid&) {};
-    virtual void traverse(NodeYield&) {};
-    virtual void traverse(NodeBreak&) {};
-    virtual void traverse(NodeSucc&) {};
-    virtual void traverse(NodePred&) {};
-    virtual void traverse(NodeVarDecl&) {};
-    virtual void traverse(NodeVarInit&) {};
-    virtual void traverse(NodeProcParam&) {};
-    virtual void traverse(NodeLoopParam&) {};
-    virtual void traverse(NodeBlock&) {};
-    virtual void traverse(NodeSubDef&) {};
-    virtual void traverse(NodeBuiltInSubDef&) {};
-    virtual void traverse(NodeFuncDef&) {};
-    virtual void traverse(NodeTaskDef&) {};
-    virtual void traverse(NodeBuiltInFunc&) {};
-    virtual void traverse(NodeConst&) {};
-    virtual void traverse(NodeLocal&) {};
-    virtual void traverse(NodeLoop&) {};
-    virtual void traverse(NodeTimes&) {};
-    virtual void traverse(NodeWhile&) {};
-    virtual void traverse(NodeAscent&) {};
-    virtual void traverse(NodeDescent&) {};
-    virtual void traverse(NodeElseIf&) {};
-    virtual void traverse(NodeIf&) {};
-    virtual void traverse(NodeCase&) {};
-    virtual void traverse(NodeAlternative&) {};
-    virtual void traverse(NodeHeader&) {};
+    virtual void Traverse(NodeNum&) {};
+    virtual void Traverse(NodeChar&) {};
+    virtual void Traverse(NodeStr&) {};
+    virtual void Traverse(NodeArray&) {};
+    virtual void Traverse(NodeNeg&) {};
+    virtual void Traverse(NodeNot&) {};
+    virtual void Traverse(NodeAbs&) {};
+    virtual void Traverse(NodeAdd&) {};
+    virtual void Traverse(NodeSub&) {};
+    virtual void Traverse(NodeMul&) {};
+    virtual void Traverse(NodeDiv&) {};
+    virtual void Traverse(NodeRem&) {};
+    virtual void Traverse(NodePow&) {};
+    virtual void Traverse(NodeLt&) {};
+    virtual void Traverse(NodeGt&) {};
+    virtual void Traverse(NodeLe&) {};
+    virtual void Traverse(NodeGe&) {};
+    virtual void Traverse(NodeEq&) {};
+    virtual void Traverse(NodeNe&) {};
+    virtual void Traverse(NodeAnd&) {};
+    virtual void Traverse(NodeOr&) {};
+    virtual void Traverse(NodeCat&) {};
+    virtual void Traverse(NodeNoParenCallExp&) {};
+    virtual void Traverse(NodeCallExp&) {};
+    virtual void Traverse(NodeArrayRef&) {};
+    virtual void Traverse(NodeRange&) {};
+    virtual void Traverse(NodeArraySlice&) {};
+    virtual void Traverse(NodeNop&) {};
+    virtual void Traverse(NodeLeftVal&) {};
+    virtual void Traverse(NodeAssign&) {};
+    virtual void Traverse(NodeAddAssign&) {};
+    virtual void Traverse(NodeSubAssign&) {};
+    virtual void Traverse(NodeMulAssign&) {};
+    virtual void Traverse(NodeDivAssign&) {};
+    virtual void Traverse(NodeRemAssign&) {};
+    virtual void Traverse(NodePowAssign&) {};
+    virtual void Traverse(NodeCatAssign&) {};
+    virtual void Traverse(NodeCallStmt&) {};
+    virtual void Traverse(NodeReturn&) {};
+    virtual void Traverse(NodeReturnVoid&) {};
+    virtual void Traverse(NodeYield&) {};
+    virtual void Traverse(NodeBreak&) {};
+    virtual void Traverse(NodeSucc&) {};
+    virtual void Traverse(NodePred&) {};
+    virtual void Traverse(NodeVarDecl&) {};
+    virtual void Traverse(NodeVarInit&) {};
+    virtual void Traverse(NodeProcParam&) {};
+    virtual void Traverse(NodeLoopParam&) {};
+    virtual void Traverse(NodeBlock&) {};
+    virtual void Traverse(NodeSubDef&) {};
+    virtual void Traverse(NodeBuiltInSubDef&) {};
+    virtual void Traverse(NodeFuncDef&) {};
+    virtual void Traverse(NodeTaskDef&) {};
+    virtual void Traverse(NodeBuiltInFunc&) {};
+    virtual void Traverse(NodeConst&) {};
+    virtual void Traverse(NodeLocal&) {};
+    virtual void Traverse(NodeLoop&) {};
+    virtual void Traverse(NodeTimes&) {};
+    virtual void Traverse(NodeWhile&) {};
+    virtual void Traverse(NodeAscent&) {};
+    virtual void Traverse(NodeDescent&) {};
+    virtual void Traverse(NodeElseIf&) {};
+    virtual void Traverse(NodeIf&) {};
+    virtual void Traverse(NodeCase&) {};
+    virtual void Traverse(NodeAlternative&) {};
+    virtual void Traverse(NodeHeader&) {};
 };
 
 struct SourcePos;
@@ -152,7 +152,7 @@ struct Node
 {
     Node() {}
     virtual ~Node() {};
-    virtual void traverse(NodeTraverser& traverser) = 0;
+    virtual void Traverse(NodeTraverser& Traverser) = 0;
     std::shared_ptr<SourcePos> srcPos;
 };
 
@@ -168,28 +168,28 @@ struct NodeExp : public Node
 struct NodeNum : public NodeExp
 {
     NodeNum(const std::string& n) : NodeExp(), number(n) {};
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::string number;
 };
 
 struct NodeChar : public NodeExp
 {
     NodeChar(wchar_t c) : NodeExp(), c(c) {};
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     wchar_t c;
 };
 
 struct NodeStr : public NodeExp
 {
     NodeStr(const std::wstring& s) : NodeExp(), str(s) {};
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::wstring str;
 };
 
 struct NodeArray : public NodeExp
 {
     NodeArray(const std::vector<std::shared_ptr<NodeExp>>& es) : NodeExp(), elems(es) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::vector <std::shared_ptr<NodeExp>> elems;
 };
 
@@ -202,19 +202,19 @@ struct NodeMonoOp : public NodeExp
 struct NodeNeg : public NodeMonoOp
 {
     NodeNeg(const std::shared_ptr<NodeExp>& r) : NodeMonoOp(r) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 
 struct NodeNot : public NodeMonoOp
 {
     NodeNot(const std::shared_ptr<NodeExp>& r) : NodeMonoOp(r) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 
 struct NodeAbs : public NodeMonoOp
 {
     NodeAbs(const std::shared_ptr<NodeExp>& r) : NodeMonoOp(r) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 
 struct NodeBinOp : public NodeExp
@@ -227,93 +227,93 @@ struct NodeBinOp : public NodeExp
 struct NodeAdd : public NodeBinOp
 {
     NodeAdd(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 struct NodeSub : public NodeBinOp
 {
     NodeSub(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 struct NodeMul : public NodeBinOp
 {
     NodeMul(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 struct NodeDiv : public NodeBinOp
 {
     NodeDiv(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 struct NodeRem : public NodeBinOp
 {
     NodeRem(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 struct NodePow : public NodeBinOp
 {
     NodePow(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 
 struct NodeLt : public NodeBinOp
 {
     NodeLt(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 struct NodeGt : public NodeBinOp
 {
     NodeGt(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 struct NodeLe : public NodeBinOp
 {
     NodeLe(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 struct NodeGe : public NodeBinOp
 {
     NodeGe(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 struct NodeEq : public NodeBinOp
 {
     NodeEq(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 struct NodeNe : public NodeBinOp
 {
     NodeNe(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 
 struct NodeAnd : public NodeBinOp
 {
     NodeAnd(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 struct NodeOr : public NodeBinOp
 {
     NodeOr(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 
 struct NodeCat : public NodeBinOp
 {
     NodeCat(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 
 struct NodeNoParenCallExp : public NodeExp
 {
     NodeNoParenCallExp(const std::string& name) : NodeExp(), name(name) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::string name;
 };
 
 struct NodeCallExp : public NodeExp
 {
     NodeCallExp(const std::string& name, const std::vector<std::shared_ptr<NodeExp>>& as) :NodeExp(), name(name), args(as) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::string name;
     std::vector<std::shared_ptr<NodeExp>> args;
 };
@@ -321,7 +321,7 @@ struct NodeCallExp : public NodeExp
 struct NodeArrayRef : public NodeExp
 {
     NodeArrayRef(const std::shared_ptr<NodeExp>& a, const std::shared_ptr<NodeExp>& i) : NodeExp(), array(a), idx(i) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::shared_ptr<NodeExp> array;
     std::shared_ptr<NodeExp> idx;
 };
@@ -329,7 +329,7 @@ struct NodeArrayRef : public NodeExp
 struct NodeRange : public Node
 {
     NodeRange(const std::shared_ptr<NodeExp>& s, const std::shared_ptr<NodeExp>& e) : Node(), start(s), end(e) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::shared_ptr<NodeExp> start;
     std::shared_ptr<NodeExp> end;
 };
@@ -337,7 +337,7 @@ struct NodeRange : public Node
 struct NodeArraySlice : public NodeExp
 {
     NodeArraySlice(const std::shared_ptr<NodeExp>& a, const std::shared_ptr<NodeRange>& r) : NodeExp(), array(a), range(r) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::shared_ptr<NodeExp> array;
     std::shared_ptr<NodeRange> range;
 };
@@ -345,13 +345,13 @@ struct NodeArraySlice : public NodeExp
 struct NodeNop : public NodeStmt
 {
     NodeNop() : NodeStmt() {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 
 struct NodeLeftVal : public Node
 {
     NodeLeftVal(const std::string& name, const std::vector<std::shared_ptr<NodeExp>>& is) : Node(), name(name), indices(is) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::string name;
     std::vector<std::shared_ptr<NodeExp>> indices;
 };
@@ -359,7 +359,7 @@ struct NodeLeftVal : public Node
 struct NodeAssign : public NodeStmt
 {
     NodeAssign(const std::shared_ptr<NodeLeftVal>& l, const std::shared_ptr<NodeExp>& r) : NodeStmt(), lhs(l), rhs(r) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::shared_ptr<NodeLeftVal> lhs;
     std::shared_ptr<NodeExp> rhs;
 };
@@ -367,43 +367,43 @@ struct NodeAssign : public NodeStmt
 struct NodeAddAssign : public NodeAssign
 {
     NodeAddAssign(const std::shared_ptr<NodeLeftVal>& l, const std::shared_ptr<NodeExp>& r) : NodeAssign(l, r) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 struct NodeSubAssign : public NodeAssign
 {
     NodeSubAssign(const std::shared_ptr<NodeLeftVal>& l, const std::shared_ptr<NodeExp>& r) : NodeAssign(l, r) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 struct NodeMulAssign : public NodeAssign
 {
     NodeMulAssign(const std::shared_ptr<NodeLeftVal>& l, const std::shared_ptr<NodeExp>& r) : NodeAssign(l, r) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 struct NodeDivAssign : public NodeAssign
 {
     NodeDivAssign(const std::shared_ptr<NodeLeftVal>& l, const std::shared_ptr<NodeExp>& r) : NodeAssign(l, r) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 struct NodeRemAssign : public NodeAssign
 {
     NodeRemAssign(const std::shared_ptr<NodeLeftVal>& l, const std::shared_ptr<NodeExp>& r) : NodeAssign(l, r) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 struct NodePowAssign : public NodeAssign
 {
     NodePowAssign(const std::shared_ptr<NodeLeftVal>& l, const std::shared_ptr<NodeExp>& r) : NodeAssign(l, r) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 struct NodeCatAssign : public NodeAssign
 {
     NodeCatAssign(const std::shared_ptr<NodeLeftVal>& l, const std::shared_ptr<NodeExp>& r) : NodeAssign(l, r) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 
 struct NodeCallStmt : public NodeStmt
 {
     NodeCallStmt(const std::string& name, const std::vector<std::shared_ptr<NodeExp>>& as) : NodeStmt(), name(name), args(as) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::string name;
     std::vector<std::shared_ptr<NodeExp>> args;
 };
@@ -411,39 +411,39 @@ struct NodeCallStmt : public NodeStmt
 struct NodeReturn : public NodeStmt
 {
     NodeReturn(const std::shared_ptr<NodeExp>& e) : NodeStmt(), ret(e) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::shared_ptr<NodeExp> ret;
 };
 
 struct NodeReturnVoid : public NodeStmt
 {
     NodeReturnVoid() : NodeStmt() {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 
 struct NodeYield : public NodeStmt
 {
     NodeYield() : NodeStmt() {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 
 struct NodeBreak : public NodeStmt
 {
     NodeBreak() : NodeStmt() {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 
 struct NodeSucc : public NodeStmt
 {
     NodeSucc(const std::shared_ptr<NodeLeftVal>& l) : NodeStmt(), lhs(l) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::shared_ptr<NodeLeftVal> lhs;
 };
 
 struct NodePred : public NodeSucc
 {
     NodePred(const std::shared_ptr<NodeLeftVal>& l) : NodeSucc(l) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 
 struct NodeDef : public Node
@@ -455,13 +455,13 @@ struct NodeDef : public Node
 struct NodeVarDecl : public NodeDef
 {
     NodeVarDecl(const std::string& name) : NodeDef(name) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 
 struct NodeVarInit : public NodeStmt
 {
     NodeVarInit(const std::string& name, const std::shared_ptr<NodeExp>& r) : NodeStmt(), name(name), rhs(r) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::string name;
     std::shared_ptr<NodeExp> rhs;
 };
@@ -469,19 +469,19 @@ struct NodeVarInit : public NodeStmt
 struct NodeProcParam : public NodeDef
 {
     NodeProcParam(const std::string& name) : NodeDef(name) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 
 struct NodeLoopParam : public NodeDef
 {
     NodeLoopParam(const std::string& name) : NodeDef(name) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 
 struct NodeBlock : public Node
 {
     NodeBlock(const NameTable& t, const std::vector <std::shared_ptr<NodeStmt>>& ss) : Node(), table(t), stmts(ss) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     NameTable table;
     std::vector <std::shared_ptr<NodeStmt>> stmts;
 };
@@ -489,36 +489,36 @@ struct NodeBlock : public Node
 struct NodeSubDef : public NodeDef
 {
     NodeSubDef(const std::string& name, const std::shared_ptr<NodeBlock>& blk) : NodeDef(name), block(blk) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::shared_ptr<NodeBlock> block;
 };
 
 struct NodeBuiltInSubDef : public NodeSubDef
 {
     NodeBuiltInSubDef(const std::string& name, const std::shared_ptr<NodeBlock>& blk) : NodeSubDef(name, blk) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 
 struct NodeFuncDef : public NodeDef
 {
-    NodeFuncDef(const std::string& name, const std::vector<std::string>& ps, const std::shared_ptr<NodeBlock>& blk) : NodeDef(name), params(ps), block(blk) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
-    std::vector<std::string> params;
+    NodeFuncDef(const std::string& name, const std::vector<std::string>& ps, const std::shared_ptr<NodeBlock>& blk) : NodeDef(name), params_(ps), block(blk) {}
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
+    std::vector<std::string> params_;
     std::shared_ptr<NodeBlock> block;
 };
 
 struct NodeTaskDef : public NodeDef
 {
-    NodeTaskDef(const std::string& name, const std::vector<std::string>& ps, std::shared_ptr<NodeBlock>& blk) : NodeDef(name), params(ps), block(blk) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
-    std::vector<std::string> params;
+    NodeTaskDef(const std::string& name, const std::vector<std::string>& ps, std::shared_ptr<NodeBlock>& blk) : NodeDef(name), params_(ps), block(blk) {}
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
+    std::vector<std::string> params_;
     std::shared_ptr<NodeBlock> block;
 };
 
 struct NodeBuiltInFunc : public NodeDef
 {
     NodeBuiltInFunc(const std::string& name, int paramc, void* func) : NodeDef(name), paramCnt(paramc), funcPointer(func) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     int paramCnt;
     void* funcPointer;
 };
@@ -526,28 +526,28 @@ struct NodeBuiltInFunc : public NodeDef
 struct NodeConst : public NodeDef
 {
     NodeConst(const std::string& name, const std::wstring& c) : NodeDef(name), value(c) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::wstring value;
 };
 
 struct NodeLocal : public NodeStmt
 {
     NodeLocal(const std::shared_ptr<NodeBlock>& blk) : NodeStmt(), block(blk) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::shared_ptr<NodeBlock> block;
 };
 
 struct NodeLoop : public NodeStmt
 {
     NodeLoop(const std::shared_ptr<NodeBlock>& blk) : NodeStmt(), block(blk) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::shared_ptr<NodeBlock> block;
 };
 
 struct NodeTimes : public NodeStmt
 {
     NodeTimes(const std::shared_ptr<NodeExp>& c, const std::shared_ptr<NodeBlock>& blk) : NodeStmt(), cnt(c), block(blk) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::shared_ptr<NodeExp> cnt;
     std::shared_ptr<NodeBlock> block;
 };
@@ -555,7 +555,7 @@ struct NodeTimes : public NodeStmt
 struct NodeWhile : public NodeStmt
 {
     NodeWhile(const std::shared_ptr<NodeExp>& c, const std::shared_ptr<NodeBlock>& blk) : NodeStmt(), cond(c), block(blk) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::shared_ptr<NodeExp> cond;
     std::shared_ptr<NodeBlock> block;
 };
@@ -563,7 +563,7 @@ struct NodeWhile : public NodeStmt
 struct NodeAscent : public NodeStmt
 {
     NodeAscent(const std::string& p, const std::shared_ptr<NodeRange>& r, const std::shared_ptr<NodeBlock>& blk) : NodeStmt(), param(p), range(r), block(blk) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::string param;
     std::shared_ptr<NodeRange> range;
     std::shared_ptr<NodeBlock> block;
@@ -572,7 +572,7 @@ struct NodeAscent : public NodeStmt
 struct NodeDescent : public NodeStmt
 {
     NodeDescent(const std::string& p, const std::shared_ptr<NodeRange>& r, const std::shared_ptr<NodeBlock>& blk) : NodeStmt(), param(p), range(r), block(blk) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::string param;
     std::shared_ptr<NodeRange> range;
     std::shared_ptr<NodeBlock> block;
@@ -581,7 +581,7 @@ struct NodeDescent : public NodeStmt
 struct NodeElseIf : public NodeStmt
 {
     NodeElseIf(const std::shared_ptr<NodeExp>& c, const std::shared_ptr<NodeBlock>& blk) : NodeStmt(), cond(c), block(blk) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::shared_ptr<NodeExp> cond;
     std::shared_ptr<NodeBlock> block;
 };
@@ -590,7 +590,7 @@ struct NodeIf : public NodeStmt
 {
 public:
     NodeIf(const std::shared_ptr<NodeExp>& c, const std::shared_ptr<NodeBlock>& t, const std::vector<std::shared_ptr<NodeElseIf>>& elsifs, const std::shared_ptr<NodeBlock>& e) : NodeStmt(), cond(c), thenBlock(t), elsifs(elsifs), elseBlock(e) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::shared_ptr<NodeExp> cond;
     std::shared_ptr<NodeBlock> thenBlock;
     std::vector<std::shared_ptr<NodeElseIf>> elsifs;
@@ -600,7 +600,7 @@ public:
 struct NodeCase : public Node
 {
     NodeCase(const std::vector<std::shared_ptr<NodeExp>>& es, const std::shared_ptr<NodeBlock>& blk) : Node(), exps(es), block(blk) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::vector<std::shared_ptr<NodeExp>> exps;
     std::shared_ptr<NodeBlock> block;
 };
@@ -608,7 +608,7 @@ struct NodeCase : public Node
 struct NodeAlternative : public NodeStmt
 {
     NodeAlternative(const std::shared_ptr<NodeExp>& c, const std::vector<std::shared_ptr<NodeCase>>& cs, const std::shared_ptr<NodeBlock>& os) : NodeStmt(), cond(c), cases(cs), others(os) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::shared_ptr<NodeExp> cond;
     std::vector<std::shared_ptr<NodeCase>> cases;
     std::shared_ptr<NodeBlock> others; // Nullable
@@ -616,9 +616,9 @@ struct NodeAlternative : public NodeStmt
 
 struct NodeHeader : public NodeStmt
 {
-    NodeHeader(const std::wstring& name, const std::vector<std::wstring>& params) : NodeStmt(), name(name), params(params) {}
-    void traverse(NodeTraverser& traverser) { traverser.traverse(*this); }
+    NodeHeader(const std::wstring& name, const std::vector<std::wstring>& params_) : NodeStmt(), name(name), params_(params_) {}
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::wstring name;
-    std::vector<std::wstring> params;
+    std::vector<std::wstring> params_;
 };
 }

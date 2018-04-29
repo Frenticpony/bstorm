@@ -23,7 +23,7 @@ static void DrawCommonDataInfo(const std::map<CommonDataDB::DataAreaName, Common
         for (const auto& entry : areaTable)
         {
             const CommonDataDB::DataAreaName& areaName = entry.first;
-            std::string label = areaName.empty() ? "[default]" : toUTF8(areaName);
+            std::string label = areaName.empty() ? "[default]" : ToUTF8(areaName);
             if (ImGui::Selectable(label.c_str(), selectedArea == areaName))
             {
                 selectedArea = areaName;
@@ -49,7 +49,7 @@ static void DrawCommonDataInfo(const std::map<CommonDataDB::DataAreaName, Common
                 {
                     ImGui::Separator();
                 }
-                ImGui::Text(toUTF8(key).c_str()); ImGui::NextColumn(); ImGui::Text(toUTF8(value->ToString()).c_str()); ImGui::NextColumn();
+                ImGui::Text(ToUTF8(key).c_str()); ImGui::NextColumn(); ImGui::Text(ToUTF8(value->ToString()).c_str()); ImGui::NextColumn();
             }
             ImGui::Columns(1);
             ImGui::Separator();

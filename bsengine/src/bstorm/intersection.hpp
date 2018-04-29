@@ -200,8 +200,8 @@ class EnemyIntersectionToShot : public Intersection
 {
 public:
     EnemyIntersectionToShot(float x, float y, float r, const std::shared_ptr<ObjEnemy>& enemy);
-    float getX() { return x_; }
-    float getY() { return y_; }
+    float GetX() { return x_; }
+    float GetY() { return y_; }
     const std::weak_ptr<ObjEnemy>& GetEnemy() const { return enemy_; }
 private:
     std::weak_ptr<ObjEnemy> enemy_;
@@ -232,7 +232,7 @@ class PlayerGrazeIntersection : public Intersection
 {
 public:
     PlayerGrazeIntersection(float x, float y, float r, const std::shared_ptr<ObjPlayer>& player);
-    virtual void render(const std::shared_ptr<Renderer>& renderer, bool permitCamera) const {};
+    virtual void Render(const std::shared_ptr<Renderer>& renderer, bool permitCamera) const override {};
     const std::weak_ptr<ObjPlayer>& GetPlayer() const { return player_; }
 private:
     std::weak_ptr<ObjPlayer> player_;

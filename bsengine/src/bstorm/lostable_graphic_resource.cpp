@@ -2,41 +2,41 @@
 
 namespace bstorm
 {
-void LostableGraphicResourceManager::addResource(const std::shared_ptr<LostableGraphicResource>& resource)
+void LostableGraphicResourceManager::AddResource(const std::shared_ptr<LostableGraphicResource>& resource)
 {
-    resourceMap[resource.get()] = resource;
+    resourceMap_[resource.get()] = resource;
 }
 
-void LostableGraphicResourceManager::onLostDeviceAll()
+void LostableGraphicResourceManager::OnLostDeviceAll()
 {
-    for (auto& entry : resourceMap)
+    for (auto& entry : resourceMap_)
     {
         if (auto resource = entry.second.lock())
         {
-            resource->onLostDevice();
+            resource->OnLostDevice();
         }
     }
 }
 
-void LostableGraphicResourceManager::onResetDeviceAll()
+void LostableGraphicResourceManager::OnResetDeviceAll()
 {
-    for (auto& entry : resourceMap)
+    for (auto& entry : resourceMap_)
     {
         if (auto resource = entry.second.lock())
         {
-            resource->onResetDevice();
+            resource->OnResetDevice();
         }
     }
 }
 
-void LostableGraphicResourceManager::releaseUnusedResource()
+void LostableGraphicResourceManager::ReleaseUnusedResource()
 {
-    auto it = resourceMap.begin();
-    while (it != resourceMap.end())
+    auto it = resourceMap_.begin();
+    while (it != resourceMap_.end())
     {
         if (it->second.expired())
         {
-            resourceMap.erase(it++);
+            resourceMap_.erase(it++);
         } else ++it;
     }
 }

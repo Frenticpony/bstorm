@@ -25,7 +25,7 @@ void Logger::WriteLog(Log::Level level, const std::string & text)
 void Logger::WriteLog(Log::Level level, const std::wstring & text)
 {
     std::lock_guard<std::mutex> lock(mutex);
-    if (logEnabled) logger->log(level, toUTF8(text));
+    if (logEnabled) logger->log(level, ToUTF8(text));
 }
 
 void Logger::WriteLog(Log::Level level, std::string && text)
@@ -54,17 +54,17 @@ void Logger::SetEnable(bool enable)
 
 void Logger::log(Log::Level level, const std::string & text)
 {
-    log(std::move(Log(level).setMessage(text)));
+    log(std::move(Log(level).SetMessage(text)));
 }
 
 void Logger::log(Log::Level level, const std::wstring & text)
 {
-    log(level, toUTF8(text));
+    log(level, ToUTF8(text));
 }
 
 void Logger::log(Log::Level level, std::string && text)
 {
-    log(std::move(Log(level).setMessage(std::move(text))));
+    log(std::move(Log(level).SetMessage(std::move(text))));
 }
 
 std::shared_ptr<Logger> Logger::logger;
@@ -72,24 +72,24 @@ std::mutex Logger::mutex;
 bool Logger::logEnabled = true;
 
 Log::Param::Param(Tag tag, const std::string & text) :
-    tag(tag),
-    text(text)
+    tag_(tag),
+    text_(text)
 {
 }
 
 Log::Param::Param(Tag tag, const std::wstring & text) :
-    tag(tag),
-    text(toUTF8(text))
+    tag_(tag),
+    text_(ToUTF8(text))
 {
 }
 
 Log::Param::Param(Tag tag, std::string && text) :
-    tag(tag),
-    text(std::move(text))
+    tag_(tag),
+    text_(std::move(text))
 {
 }
 
-const char * Log::getLevelName(Level level)
+const char * Log::GetLevelName(Level level)
 {
     switch (level)
     {
@@ -105,90 +105,90 @@ const char * Log::getLevelName(Level level)
 }
 
 Log::Log() :
-    level(Level::LV_INFO)
+    level_(Level::LV_INFO)
 {
 }
 
-Log::Log(Level level) : level(level)
+Log::Log(Level level) : level_(level)
 {
 }
 
-Log & Log::setMessage(const std::string & text)
+Log & Log::SetMessage(const std::string & text)
 {
-    msg = text;
+    msg_ = text;
     return *this;
 }
 
-Log & Log::setMessage(const std::wstring & text)
+Log & Log::SetMessage(const std::wstring & text)
 {
-    return setMessage(toUTF8(text));
+    return SetMessage(ToUTF8(text));
 }
 
-Log & Log::setMessage(std::string && text)
+Log & Log::SetMessage(std::string && text)
 {
-    msg = std::move(text);
+    msg_ = std::move(text);
     return *this;
 }
 
-Log & Log::setParam(const Param & param)
+Log & Log::SetParam(const Param & param)
 {
-    this->param = std::make_shared<Param>(param);
+    this->param_ = std::make_shared<Param>(param);
     return *this;
 }
 
-Log & Log::setParam(Param && param)
+Log & Log::SetParam(Param && param)
 {
-    this->param = std::make_shared<Param>(std::move(param));
+    this->param_ = std::make_shared<Param>(std::move(param));
     return *this;
 }
 
-Log & Log::addSourcePos(const std::shared_ptr<SourcePos>& srcPos)
+Log & Log::AddSourcePos(const std::shared_ptr<SourcePos>& srcPos)
 {
-    if (srcPos) srcPosStack.push_back(*srcPos);
+    if (srcPos) srcPosStack_.push_back(*srcPos);
     return *this;
 }
 
-Log & Log::setLevel(Level level)
+Log & Log::SetLevel(Level level)
 {
-    this->level = level;
+    this->level_ = level;
     return *this;
 }
 
 std::string Log::ToString() const
 {
     std::string s;
-    s += msg;
-    if (param)
+    s += msg_;
+    if (param_)
     {
-        s += " [" + param->getText() + "]";
+        s += " [" + param_->GetText() + "]";
     }
-    if (!srcPosStack.empty())
+    if (!srcPosStack_.empty())
     {
-        s += " @ " + srcPosStack[0].ToString();
+        s += " @ " + srcPosStack_[0].ToString();
     }
     return s;
 }
 
 FileLogger::FileLogger(const std::wstring & filePath, const std::shared_ptr<Logger>& cc) :
-    cc(cc)
+    cc_(cc)
 {
-    file.open(filePath, std::ios::app);
-    if (!file.good())
+    file_.open(filePath, std::ios::app);
+    if (!file_.good())
     {
         throw Log(Log::Level::LV_ERROR)
-            .setMessage("can't open log file.")
-            .setParam(Log::Param(Log::Param::Tag::TEXT, filePath));
+            .SetMessage("can't open log file.")
+            .SetParam(Log::Param(Log::Param::Tag::TEXT, filePath));
     }
 }
 
 FileLogger::~FileLogger()
 {
-    file.close();
+    file_.close();
 }
 
 static void logToFile(const Log& lg, std::ofstream& file)
 {
-    if (lg.getLevel() == Log::Level::LV_USER) return;
+    if (lg.GetLevel() == Log::Level::LV_USER) return;
     {
         // date
         std::string date(23, '\0');
@@ -199,20 +199,20 @@ static void logToFile(const Log& lg, std::ofstream& file)
     }
     {
         // level tag
-        file << "[" << Log::getLevelName(lg.getLevel()) << "] ";
+        file << "[" << Log::GetLevelName(lg.GetLevel()) << "] ";
     }
     file << lg.ToString() << std::endl;
 }
 
 void FileLogger::log(Log& lg)
 {
-    logToFile(lg, file);
-    if (cc) cc->log(lg);
+    logToFile(lg, file_);
+    if (cc_) cc_->log(lg);
 }
 
 void FileLogger::log(Log&& lg)
 {
-    logToFile(lg, file);
-    if (cc) cc->log(std::move(lg));
+    logToFile(lg, file_);
+    if (cc_) cc_->log(std::move(lg));
 }
 }

@@ -31,11 +31,11 @@ static void drawFlatView(const std::map<std::wstring, ScriptInfo>& scripts, std:
     for (const auto& entry : scripts)
     {
         const ScriptInfo& script = entry.second;
-        const auto pathU8 = toUTF8(script.path);
-        const auto titleU8 = toUTF8(script.title);
+        const auto pathU8 = ToUTF8(script.path);
+        const auto titleU8 = ToUTF8(script.title);
         if (!searchText.empty())
         {
-            if (!(matchString(searchText, titleU8) || matchString(searchText, pathU8))) continue;
+            if (!(IsMatchString(searchText, titleU8) || IsMatchString(searchText, pathU8))) continue;
         }
         std::string icon;
         if (script.type == SCRIPT_TYPE_PLURAL)
@@ -72,9 +72,9 @@ static void drawTreeView(ScriptExplorer::TreeView& view, std::wstring& selectedP
         if (!searchText.empty())
         {
             // filter
-            if (!matchString(searchText, view.uniq)) return;
+            if (!IsMatchString(searchText, view.uniq)) return;
         }
-        std::wstring path = toUnicode(view.uniq);
+        std::wstring path = ToUnicode(view.uniq);
         bool isSelected = selectedPath == path;
         auto nodeFlag = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
         if (isSelected) nodeFlag |= ImGuiTreeNodeFlags_Selected;
@@ -103,19 +103,19 @@ static ScriptExplorer::TreeView createTreeView(const std::map<std::wstring, Scri
     for (const auto& entry : scripts)
     {
         const auto& script = entry.second;
-        std::vector<std::wstring> trail = split(script.path, L'/');
+        std::vector<std::wstring> trail = Split(script.path, L'/');
         ScriptExplorer::TreeView* current = &root;
         std::string uniq;
         for (int k = 0; k < trail.size(); k++)
         {
-            if (current->name.empty()) current->name = toUTF8(trail[k]);
+            if (current->name.empty()) current->name = ToUTF8(trail[k]);
             if (k == trail.size() - 1)
             {
-                current->uniq = toUTF8(script.path);
+                current->uniq = ToUTF8(script.path);
             } else
             {
                 uniq += current->name + "/";
-                std::string child = toUTF8(trail[k + 1]);
+                std::string child = ToUTF8(trail[k + 1]);
                 if (current->uniq.empty()) current->uniq = uniq;
                 if (current->children.count(child) == 0)
                 {
@@ -239,11 +239,11 @@ void ScriptExplorer::draw()
                     {
                         if (playerScripts.count(path) == 0) continue;
                         const ScriptInfo& playerScript = playerScripts.at(path);
-                        const auto pathU8 = toUTF8(playerScript.path);
-                        const auto titleU8 = toUTF8(playerScript.title);
+                        const auto pathU8 = ToUTF8(playerScript.path);
+                        const auto titleU8 = ToUTF8(playerScript.title);
                         if (!searchTextPlayer.empty())
                         {
-                            if (!(matchString(searchTextPlayer, titleU8) || matchString(searchTextPlayer, pathU8))) continue;
+                            if (!(IsMatchString(searchTextPlayer, titleU8) || IsMatchString(searchTextPlayer, pathU8))) continue;
                         }
                         ImGui::PushID(uiId++);
                         bool isSelected = selectedPlayerScriptPath == path;
@@ -264,17 +264,17 @@ void ScriptExplorer::draw()
             if (mainScripts.count(selectedMainScriptPath) != 0)
             {
                 const ScriptInfo& script = mainScripts.at(selectedMainScriptPath);
-                std::string type = toUTF8(script.type);
-                std::string title = toUTF8(script.title);
-                std::string location = toUTF8(script.path);
-                std::string version = toUTF8(script.version);
-                std::string id = toUTF8(script.id);
-                std::string text = toUTF8(script.text);
-                std::string image = toUTF8(script.imagePath);
-                std::string system = toUTF8(script.systemPath);
-                std::string background = toUTF8(script.backgroundPath);
-                std::string bgm = toUTF8(script.bgmPath);
-                std::string replayName = toUTF8(script.replayName);
+                std::string type = ToUTF8(script.type);
+                std::string title = ToUTF8(script.title);
+                std::string location = ToUTF8(script.path);
+                std::string version = ToUTF8(script.version);
+                std::string id = ToUTF8(script.id);
+                std::string text = ToUTF8(script.text);
+                std::string image = ToUTF8(script.imagePath);
+                std::string system = ToUTF8(script.systemPath);
+                std::string background = ToUTF8(script.backgroundPath);
+                std::string bgm = ToUTF8(script.bgmPath);
+                std::string replayName = ToUTF8(script.replayName);
                 std::vector<std::string> labels{ "Title", "Location", "Type", "Image", "System", "Background", "BGM", "ReplayName" };
                 std::vector<std::string> colons(labels.size(), ":");
                 std::vector<std::string> contents{ title, location, type + " (ver." + version + ")", image, system, background, bgm, replayName };
@@ -338,7 +338,7 @@ void ScriptExplorer::reload()
 
         // script/以下のスクリプトを再帰的に取得
         std::vector<std::wstring> scriptPaths;
-        getFilePathsRecursively(L"script", scriptPaths, ignoreScriptExts);
+        GetFilePathsRecursively(L"script", scriptPaths, ignoreScriptExts);
 
         auto loader = std::make_shared<FileLoaderFromTextFile>();
 
@@ -346,7 +346,7 @@ void ScriptExplorer::reload()
         {
             try
             {
-                ScriptInfo script = scanDnhScriptInfo(path, loader);
+                ScriptInfo script = ScanDnhScriptInfo(path, loader);
 
                 if (script.systemPath.empty() || script.systemPath == L"DEFAULT")
                 {

@@ -14,33 +14,33 @@ class GameState;
 class Obj : private NonCopyable
 {
 public:
-    typedef int Type;
+    using Type = int;
     Obj(const std::shared_ptr<GameState>& state);
     virtual ~Obj();
-    virtual void update() = 0;
-    std::unique_ptr<DnhValue> getValue(const std::wstring& key) const;
-    std::unique_ptr<DnhValue> getValueD(const std::wstring& key, std::unique_ptr<DnhValue>&& defaultValue) const;
-    void setValue(const std::wstring& key, std::unique_ptr<DnhValue>&& value);
-    void deleteValue(const std::wstring& key);
-    bool isValueExists(const std::wstring& key) const;
-    int getID() const { return id; }
-    Type GetType() const { return type; }
-    bool isDead() const { return deadFlag; }
-    bool isStgSceneObject() const { return stgSceneObj; }
-    void setStgSceneObject(bool b) { stgSceneObj = b; }
-    const std::unordered_map<std::wstring, std::unique_ptr<DnhValue>>& getProperties() const;
+    virtual void Update() = 0;
+    std::unique_ptr<DnhValue> GetValue(const std::wstring& key) const;
+    std::unique_ptr<DnhValue> GetValueD(const std::wstring& key, std::unique_ptr<DnhValue>&& defaultValue) const;
+    void SetValue(const std::wstring& key, std::unique_ptr<DnhValue>&& value);
+    void DeleteValue(const std::wstring& key);
+    bool IsValueExists(const std::wstring& key) const;
+    int GetID() const { return id_; }
+    Type GetType() const { return type_; }
+    bool IsDead() const { return isDead_; }
+    bool IsStgSceneObject() const { return isStgSceneObj_; }
+    void SetStgSceneObject(bool b) { isStgSceneObj_ = b; }
+    const std::unordered_map<std::wstring, std::unique_ptr<DnhValue>>& GetProperties() const;
 protected:
-    void setType(Type t) { type = t; }
-    void die() { deadFlag = true; };
-    std::shared_ptr<GameState> getGameState() const;
+    void SetType(Type t) { type_ = t; }
+    void Die() { isDead_ = true; };
+    std::shared_ptr<GameState> GetGameState() const;
 private:
-    int id;
-    Type type;
-    bool deadFlag;
-    std::unordered_map<std::wstring, std::unique_ptr<DnhValue>> properties;
-    std::weak_ptr<GameState> gameState;
-    bool stgSceneObj;
-    friend ObjectTable;
+    int id_;
+    Type type_;
+    bool isDead_;
+    std::unordered_map<std::wstring, std::unique_ptr<DnhValue>> properties_;
+    std::weak_ptr<GameState> gameState_;
+    bool isStgSceneObj_;
+    friend class ObjectTable;
 };
 
 class ObjectTable
@@ -51,29 +51,29 @@ public:
     template <class T>
     std::shared_ptr<T> Get(int id)
     {
-        auto it = table.find(id);
-        if (it != table.end() && !it->second->isDead())
+        auto it = table_.find(id);
+        if (it != table_.end() && !it->second->IsDead())
         {
             return std::dynamic_pointer_cast<T>(it->second);
         }
         return nullptr;
     }
-    void add(const std::shared_ptr<Obj>& obj);
+    void Add(const std::shared_ptr<Obj>& obj);
     template <class T, class... Args>
-    std::shared_ptr<T> create(Args... args)
+    std::shared_ptr<T> Create(Args... args)
     {
         std::shared_ptr<T> obj = std::make_shared<T>(args...);
-        add(obj);
+        Add(obj);
         return obj;
     }
-    void del(int id);
-    bool isDeleted(int id);
-    void updateAll(bool ignoreStgSceneObj);
-    void deleteStgSceneObject();
-    const std::map<int, std::shared_ptr<Obj>>& getAll();
+    void Delete(int id);
+    bool IsDeleted(int id);
+    void UpdateAll(bool ignoreStgSceneObj);
+    void DeleteStgSceneObject();
+    const std::map<int, std::shared_ptr<Obj>>& GetAll();
 private:
-    int idGen;
-    std::map<int, std::shared_ptr<Obj>> table;
-    bool isUpdating;
+    int idGen_;
+    std::map<int, std::shared_ptr<Obj>> table_;
+    bool isUpdating_;
 };
 }

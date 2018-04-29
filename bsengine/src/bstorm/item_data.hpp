@@ -40,16 +40,16 @@ class ItemDataTable
 public:
     ItemDataTable();
     ~ItemDataTable();
-    void add(const std::shared_ptr<ItemData>& data);
-    void load(const std::wstring& path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos);
-    void reload(const std::wstring& path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos);
-    bool isLoaded(const std::wstring& path) const;
+    void Add(const std::shared_ptr<ItemData>& data);
+    void Load(const std::wstring& path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos);
+    void Reload(const std::wstring& path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos);
+    bool IsLoaded(const std::wstring& path) const;
     std::shared_ptr<ItemData> Get(int id) const;
     /* backdoor */
     template <typename T>
-    void backDoor() const {}
+    void BackDoor() const {}
 private:
-    std::unordered_set<std::wstring> loadedPaths;
-    std::map<int, std::shared_ptr<ItemData>> table;
+    std::unordered_set<std::wstring> loadedPaths_;
+    std::map<int, std::shared_ptr<ItemData>> table_;
 };
 }

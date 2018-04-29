@@ -2,7 +2,7 @@
 
 #include <windows.h>
 
-static DWORD getTimeMilliSec()
+static DWORD GetTimeMilliSec()
 {
     timeBeginPeriod(1);
     DWORD r = timeGetTime();
@@ -13,59 +13,59 @@ static DWORD getTimeMilliSec()
 namespace bstorm
 {
 TimePoint::TimePoint() :
-    isHighAccuracyMode(QueryPerformanceCounter((LARGE_INTEGER*)&time))
+    isHighAccuracyMode_(QueryPerformanceCounter((LARGE_INTEGER*)&time_))
 {
-    if (isHighAccuracyMode)
+    if (isHighAccuracyMode_)
     {
-        QueryPerformanceFrequency((LARGE_INTEGER*)&freq);
+        QueryPerformanceFrequency((LARGE_INTEGER*)&freq_);
     }
-    timeMilli = getTimeMilliSec();
+    timeMilli_ = GetTimeMilliSec();
 }
 
 TimePoint::~TimePoint() {}
 
-float TimePoint::getElapsedMilliSec(const TimePoint& tp) const
+float TimePoint::GetElapsedMilliSec(const TimePoint& tp) const
 {
-    if (isHighAccuracyMode && tp.isHighAccuracyMode)
+    if (isHighAccuracyMode_ && tp.isHighAccuracyMode_)
     {
-        return 1000.0f * (tp.time - time) / freq;
+        return 1000.0f * (tp.time_ - time_) / freq_;
     }
-    return (float)(tp.timeMilli - timeMilli);
+    return (float)(tp.timeMilli_ - timeMilli_);
 }
 
 FpsCounter::FpsCounter() :
-    prevFrameTime(),
-    milliSecPerFrameAccum(0.0f),
-    milliSecPerFrameIdx(0),
-    stableFps(60.0f)
+    prevFrameTime_(),
+    milliSecPerFrameAccum_(0.0f),
+    milliSecPerFrameIdx_(0),
+    stableFps_(60.0f)
 {
-    milliSecPerFrameList.fill(0.0f);
+    milliSecPerFrameList_.fill(0.0f);
 }
 
 FpsCounter::~FpsCounter()
 {
 }
 
-void FpsCounter::update()
+void FpsCounter::Update()
 {
     TimePoint now;
-    float deltaTime = prevFrameTime.getElapsedMilliSec(now);
-    float removedTime = milliSecPerFrameList[milliSecPerFrameIdx];
-    milliSecPerFrameAccum += deltaTime - removedTime;
-    milliSecPerFrameList[milliSecPerFrameIdx] = deltaTime;
-    milliSecPerFrameIdx = (milliSecPerFrameIdx + 1) & (SampleCnt - 1);
-    prevFrameTime = now;
-    fps = 1000.0f / (milliSecPerFrameAccum / SampleCnt);
-    if (milliSecPerFrameIdx == 0) { stableFps = fps; }
+    float deltaTime = prevFrameTime_.GetElapsedMilliSec(now);
+    float removedTime = milliSecPerFrameList_[milliSecPerFrameIdx_];
+    milliSecPerFrameAccum_ += deltaTime - removedTime;
+    milliSecPerFrameList_[milliSecPerFrameIdx_] = deltaTime;
+    milliSecPerFrameIdx_ = (milliSecPerFrameIdx_ + 1) & (SampleCnt - 1);
+    prevFrameTime_ = now;
+    fps_ = 1000.0f / (milliSecPerFrameAccum_ / SampleCnt);
+    if (milliSecPerFrameIdx_ == 0) { stableFps_ = fps_; }
 }
 
 float FpsCounter::Get() const
 {
-    return fps;
+    return fps_;
 }
 
-float FpsCounter::getStable() const
+float FpsCounter::GetStable() const
 {
-    return stableFps;
+    return stableFps_;
 }
 }

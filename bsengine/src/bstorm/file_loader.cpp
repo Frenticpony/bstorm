@@ -4,7 +4,7 @@
 
 namespace bstorm
 {
-FILE* FileLoaderFromTextFile::openFile(const std::wstring& path)
+FILE* FileLoaderFromTextFile::OpenFile(const std::wstring& path)
 {
     OutputDebugStringW(L"OpenFile: ");
     OutputDebugStringW(path.c_str());
@@ -12,7 +12,7 @@ FILE* FileLoaderFromTextFile::openFile(const std::wstring& path)
     return _wfopen(path.c_str(), L"rb");
 }
 
-void FileLoaderFromTextFile::closeFile(const std::wstring& path, FILE* fp)
+void FileLoaderFromTextFile::CloseFile(const std::wstring& path, FILE* fp)
 {
     OutputDebugStringW(L"CloseFile: ");
     OutputDebugStringW(path.c_str());

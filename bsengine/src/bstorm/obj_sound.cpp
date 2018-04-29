@@ -8,123 +8,123 @@ namespace bstorm
 {
 ObjSound::ObjSound(const std::shared_ptr<GameState>& gameState) :
     Obj(gameState),
-    soundBuffer(NULL),
-    restartEnable(false),
-    division(SoundDivision::BGM),
-    fadeRatePerSec(0)
+    soundBuffer_(NULL),
+    restartEnable_(false),
+    division_(SoundDivision::BGM),
+    fadeRatePerSec_(0)
 {
-    setType(OBJ_SOUND);
+    SetType(OBJ_SOUND);
 }
 
 ObjSound::~ObjSound()
 {
 }
 
-void ObjSound::update()
+void ObjSound::Update()
 {
-    if (fadeRatePerSec != 0)
+    if (fadeRatePerSec_ != 0)
     {
-        if (isPlaying())
+        if (IsPlaying())
         {
-            setVolumeRate(getVolumeRate() + fadeRatePerSec / 60.0f);
+            SetVolumeRate(GetVolumeRate() + fadeRatePerSec_ / 60.0f);
         }
     }
 }
 
-void ObjSound::setSound(const std::shared_ptr<SoundBuffer>& buf)
+void ObjSound::SetSound(const std::shared_ptr<SoundBuffer>& buf)
 {
-    restartEnable = false;
-    soundBuffer = buf;
+    restartEnable_ = false;
+    soundBuffer_ = buf;
 }
 
-void ObjSound::play()
+void ObjSound::Play()
 {
-    if (soundBuffer)
+    if (soundBuffer_)
     {
-        if (isPlaying() || !restartEnable)
+        if (IsPlaying() || !restartEnable_)
         {
-            soundBuffer->seek(0);
+            soundBuffer_->Seek(0);
         }
-        soundBuffer->play();
+        soundBuffer_->Play();
     }
 }
 
-void ObjSound::stop()
+void ObjSound::Stop()
 {
-    if (soundBuffer)
+    if (soundBuffer_)
     {
-        soundBuffer->stop();
+        soundBuffer_->Stop();
     }
 }
 
-void ObjSound::setVolumeRate(float vol)
+void ObjSound::SetVolumeRate(float vol)
 {
-    if (soundBuffer)
+    if (soundBuffer_)
     {
-        soundBuffer->setVolume(vol / 100.0f);
+        soundBuffer_->SetVolume(vol / 100.0f);
     }
 }
 
-void ObjSound::setPanRate(float pan)
+void ObjSound::SetPanRate(float pan)
 {
-    if (soundBuffer)
+    if (soundBuffer_)
     {
-        soundBuffer->setPanRate(pan / 100.0f);
+        soundBuffer_->SetPanRate(pan / 100.0f);
     }
 }
 
-void ObjSound::setFade(float fadeRatePerSec)
+void ObjSound::SetFade(float fadeRatePerSec)
 {
-    this->fadeRatePerSec = fadeRatePerSec;
+    this->fadeRatePerSec_ = fadeRatePerSec;
 }
 
-void ObjSound::setLoopEnable(bool enable)
+void ObjSound::SetLoopEnable(bool enable)
 {
-    if (soundBuffer)
+    if (soundBuffer_)
     {
-        soundBuffer->setLoopEnable(enable);
+        soundBuffer_->SetLoopEnable(enable);
     }
 }
 
-void ObjSound::setLoopTime(double startSec, double endSec)
+void ObjSound::SetLoopTime(double startSec, double endSec)
 {
-    if (soundBuffer)
+    if (soundBuffer_)
     {
-        soundBuffer->setLoopTime(startSec, endSec);
+        soundBuffer_->SetLoopTime(startSec, endSec);
     }
 }
 
-void ObjSound::setLoopSampleCount(DWORD startCount, DWORD endCount)
+void ObjSound::SetLoopSampleCount(DWORD startCount, DWORD endCount)
 {
-    if (soundBuffer)
+    if (soundBuffer_)
     {
-        soundBuffer->setLoopSampleCount(startCount, endCount);
+        soundBuffer_->SetLoopSampleCount(startCount, endCount);
     }
 }
 
-void ObjSound::setRestartEnable(bool enable)
+void ObjSound::SetRestartEnable(bool enable)
 {
-    if (soundBuffer)
+    if (soundBuffer_)
     {
-        restartEnable = enable;
+        restartEnable_ = enable;
     }
 }
 
-void ObjSound::setSoundDivision(SoundDivision div)
+void ObjSound::SetSoundDivision(SoundDivision div)
 {
-    division = div;
+    division_ = div;
 }
 
-bool ObjSound::isPlaying() const
+bool ObjSound::IsPlaying() const
 {
-    return soundBuffer && soundBuffer->isPlaying();
+    return soundBuffer_ && soundBuffer_->IsPlaying();
 }
 
-float ObjSound::getVolumeRate() const
+float ObjSound::GetVolumeRate() const
 {
-    if (soundBuffer)
+    if (soundBuffer_)
     {
-        return 100.0f * soundBuffer->getVolume();
+        return 100.0f * soundBuffer_->GetVolume();
     } else
     {
         return 0.0f;

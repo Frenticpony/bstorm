@@ -54,7 +54,7 @@ namespace conf { struct KeyConfig; }
 class GameState
 {
 public:
-    GameState(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevice9* d3DDevice, const std::shared_ptr<Renderer>& renderer, const std::shared_ptr<conf::KeyConfig>& keyConfig, const std::shared_ptr<MousePositionProvider>& mousePosProvider, Engine* engine);
+    GameState(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevice9* d3DDevice_, const std::shared_ptr<Renderer>& renderer, const std::shared_ptr<conf::KeyConfig>& keyConfig, const std::shared_ptr<MousePositionProvider>& mousePosProvider, Engine* engine);
     std::shared_ptr<FpsCounter> fpsCounter;
     std::shared_ptr<InputDevice> inputDevice;
     std::shared_ptr<KeyAssign> keyAssign;

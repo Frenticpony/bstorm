@@ -15,51 +15,52 @@
 %}
 
 %init {
- fp = NULL;
+ fp_ = NULL;
 %}
 
 %class{
 public :
-    void setLoader(const std::shared_ptr<FileLoader>& loader)
+    void SetLoader(const std::shared_ptr<FileLoader>& loader)
     {
-        this->loader = loader;
+        this->loader_ = loader;
     }
-    void setInputSource(const std::wstring& path)
+    void SetInputSource(const std::wstring& path)
     {
-        filePath = std::make_shared<std::wstring>(canonicalPath(path));
-        fp = loader->openFile(*filePath);
-        if (fp == NULL)
+        filePath_ = std::make_shared<std::wstring>(GetCanonicalPath(path));
+        fp_ = loader_->OpenFile(*filePath_);
+        if (fp_ == NULL)
         {
-            throw Log(Log::Level::LV_ERROR).setMessage("can't open file.")
-              .setParam(Log::Param(Log::Param::Tag::TEXT, path));
+            throw Log(Log::Level::LV_ERROR)
+              .SetMessage("can't open file.")
+              .SetParam(Log::Param(Log::Param::Tag::TEXT, path));
         }
-        in(fp);
+        in(fp_);
     }
     std::shared_ptr<std::wstring> getFilePath() const
     {
-        if (filePath) return filePath;
+        if (filePath_) return filePath_;
         return std::make_shared<std::wstring>(L"");
     }
-    SourcePos getSourcePos() const
+    SourcePos GetSourcePos() const
     {
         return {(int)lineno(), (int)columno() + 1, getFilePath()};
     }
-    std::wstring getWString() const
+    std::wstring GetWString() const
     {
-      return v_wstr;
+      return v_wstr_;
     }
     ~UserDefDataLexer()
     {
-        if (fp)
+        if (fp_)
         {
-            loader->closeFile(*getFilePath(), fp);
+            loader_->CloseFile(*getFilePath(), fp_);
         }
     }
-protected :
-    std::wstring v_wstr;
-    std::shared_ptr<std::wstring> filePath;
-    FILE* fp;
-    std::shared_ptr<FileLoader> loader;
+private :
+    std::wstring v_wstr_;
+    std::shared_ptr<std::wstring> filePath_;
+    FILE* fp_;
+    std::shared_ptr<FileLoader> loader_;
 %}
 
 %{
@@ -129,20 +130,21 @@ newline \r?\n
 
 "true"             { return tk::TK_TRUE; }
 "false"            { return tk::TK_FALSE; }
-{number}           { v_wstr = wstr(); return tk::TK_NUM; }
-\"                 { v_wstr.clear(); start(STRING_LIT); }
+{number}           { v_wstr_ = wstr(); return tk::TK_NUM; }
+\"                 { v_wstr_.clear(); start(STRING_LIT); }
 
 <STRING_LIT>{
 \" { start(INITIAL); return tk::TK_STR; }
-[\\][\\] { v_wstr += wstr(); }
-\\\" { v_wstr += (wstr())[1]; }
-. { v_wstr += wstr(); }
+[\\][\\] { v_wstr_ += wstr(); }
+\\\" { v_wstr_ += (wstr())[1]; }
+. { v_wstr_ += wstr(); }
 }
 
 . {
-    throw Log(Log::Level::LV_ERROR).setMessage("found illegal token.")
-      .setParam(Log::Param(Log::Param::Tag::TEXT, str()))
-      .addSourcePos(std::make_shared<SourcePos>(getSourcePos()));
+    throw Log(Log::Level::LV_ERROR)
+      .SetMessage("found illegal token.")
+      .SetParam(Log::Param(Log::Param::Tag::TEXT, str()))
+      .AddSourcePos(std::make_shared<SourcePos>(GetSourcePos()));
 }
 
 <<EOF>> { return tk::TK_EOF; }

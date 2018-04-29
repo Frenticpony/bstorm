@@ -9,7 +9,7 @@
 
 namespace bstorm
 {
-ThDnhDef loadThDnhDef(const std::string & path)
+ThDnhDef LoadThDnhDef(const std::string & path)
 {
     ThDnhDef def;
     std::ifstream thDnhDefFile;
@@ -36,10 +36,10 @@ ThDnhDef loadThDnhDef(const std::string & path)
                 def.screenHeight = std::atoi(match[1].str().c_str());
             } else if (regex_match(line, match, std::regex(R"(window.title\s*=\s*(.*))")))
             {
-                def.windowTitle = fromMultiByte<932>(match[1].str());
+                def.windowTitle = FromMultiByte<932>(match[1].str());
             } else if (regex_match(line, match, std::regex(R"(package.script.main\s*=\s*(.*))")))
             {
-                def.packageScriptMain = fromMultiByte<932>(match[1].str());
+                def.packageScriptMain = FromMultiByte<932>(match[1].str());
             }
         }
     }

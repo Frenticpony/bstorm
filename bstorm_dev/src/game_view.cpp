@@ -111,7 +111,7 @@ void GameView::draw(const std::shared_ptr<RenderTarget>& renderTarget)
 
                 {
                     const ScriptInfo& mainScriptInfo = playController->getMainScriptInfo();
-                    auto scriptName = mainScriptInfo.title.empty() ? toUTF8(mainScriptInfo.path) : toUTF8(mainScriptInfo.title);
+                    auto scriptName = mainScriptInfo.title.empty() ? ToUTF8(mainScriptInfo.path) : ToUTF8(mainScriptInfo.title);
                     if (playController->isPackageFinished())
                     {
                         if (scriptName.empty())
@@ -212,7 +212,7 @@ void GameView::draw(const std::shared_ptr<RenderTarget>& renderTarget)
         auto sideMargin = ImGui::GetWindowWidth() - ImGui::GetContentRegionAvailWidth();
         auto topMargin = ImGui::GetWindowSize().y - ImGui::GetContentRegionAvail().y;
         ImGui::SetWindowSize(ImVec2(*viewWidth + sideMargin, *viewHeight + topMargin), ImGuiCond_Always);
-        ImGui::Image(renderTarget->getTexture(), ImVec2(*viewWidth, *viewHeight));
+        ImGui::Image(renderTarget->GetTexture(), ImVec2(*viewWidth, *viewHeight));
         {
             // set view pos to pointer
             auto windowPos = ImGui::GetWindowPos();

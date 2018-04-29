@@ -28,81 +28,82 @@ class ObjPlayer : public ObjSprite2D, public ObjMove, public ObjCol, public std:
 public:
     ObjPlayer(const std::shared_ptr<GameState>& gameState, const std::shared_ptr<GlobalPlayerParams>& globalParams);
     ~ObjPlayer();
-    void update() override;
-    void render() override;
-    void addIntersectionCircleA1(float dx, float dy, float r, float dr);
-    void addIntersectionCircleA2(float dx, float dy, float r);
-    void addIntersectionToItem();
-    void setNormalSpeed(double speed);
-    void setSlowSpeed(double speed);
-    void setClip(float left, float top, float right, float bottom);
-    void setLife(double life);
-    void setSpell(double spell);
-    void setPower(double power);
-    void setInvincibilityFrame(int frame) { invincibilityFrame = frame; }
-    void setDownStateFrame(int frame);
-    void setRebirthFrame(int frame);
-    void setRebirthLossFrame(int frame);
-    void setForbidPlayerShot(bool forbid) { permitPlayerShot = !forbid; }
-    void setForbidPlayerSpell(bool forbid) { permitPlayerSpell = !forbid; }
-    int getState() const { return state; }
-    float getNormalSpeed() const { return normalSpeed; }
-    float getSlowSpeed() const { return slowSpeed; }
-    float getClipLeft() const { return clipLeft; }
-    float getClipTop() const { return clipTop; }
-    float getClipRight() const { return clipRight; }
-    float getClipBottom() const { return clipBottom; }
-    double getLife() const;
-    double getSpell() const;
-    double getPower() const;
-    int getInvincibilityFrame() const { return invincibilityFrame; }
-    int getDownStateFrame() const { return downStateFrame; }
-    int getRebirthFrame() const { return rebirthFrame; }
-    bool isPermitPlayerShot() const { return permitPlayerShot; }
-    bool isPermitPlayerSpell() const;
-    bool isLastSpellWait() const;
-    bool isSpellActive() const;
-    int64_t getScore() const;
-    int64_t getGraze() const;
-    int64_t getPoint() const;
-    void addScore(int64_t score);
-    void addGraze(int64_t graze);
-    void addGraze(int shotObjId, int64_t graze);
-    void addPoint(int64_t point);
-    float getAutoItemCollectLineY() const { return autoItemCollectLineY; }
-    void setAutoItemCollectLineY(float y) { autoItemCollectLineY = y; }
-    void hit(int collisionObjId);
-    void callSpell();
-    void getItem(int itemObjId);
-    bool isGrazeEnabled() const;
+    void Update() override;
+    void Render() override;
+    void AddIntersectionCircleA1(float dx, float dy, float r, float dr);
+    void AddIntersectionCircleA2(float dx, float dy, float r);
+    void AddIntersectionToItem();
+    void SetNormalSpeed(double speed);
+    void SetSlowSpeed(double speed);
+    void SetClip(float left, float top, float right, float bottom);
+    void SetLife(double life);
+    void SetSpell(double spell);
+    void SetPower(double power);
+    void SetInvincibilityFrame(int frame) { invincibilityFrame_ = frame; }
+    void SetDownStateFrame(int frame);
+    void SetRebirthFrame(int frame);
+    void SetRebirthLossFrame(int frame);
+    void SetForbidPlayerShot(bool forbid) { permitPlayerShot_ = !forbid; }
+    void SetForbidPlayerSpell(bool forbid) { permitPlayerSpell_ = !forbid; }
+    int GetState() const { return state_; }
+    float GetNormalSpeed() const { return normalSpeed_; }
+    float GetSlowSpeed() const { return slowSpeed_; }
+    float GetClipLeft() const { return clipLeft_; }
+    float GetClipTop() const { return clipTop_; }
+    float GetClipRight() const { return clipRight_; }
+    float GetClipBottom() const { return clipBottom_; }
+    double GetLife() const;
+    double GetSpell() const;
+    double GetPower() const;
+    int GetInvincibilityFrame() const { return invincibilityFrame_; }
+    int GetDownStateFrame() const { return downStateFrame_; }
+    int GetRebirthFrame() const { return rebirthFrame_; }
+    bool IsPermitPlayerShot() const { return permitPlayerShot_; }
+    bool IsPermitPlayerSpell() const;
+    bool IsLastSpellWait() const;
+    bool IsSpellActive() const;
+    int64_t GetScore() const;
+    int64_t GetGraze() const;
+    int64_t GetPoint() const;
+    void AddScore(int64_t score);
+    void AddGraze(int64_t graze);
+    void AddGraze(int shotObjId, int64_t graze);
+    void AddPoint(int64_t point);
+    float GetAutoItemCollectLineY() const { return autoItemCollectLineY_; }
+    void SetAutoItemCollectLineY(float y) { autoItemCollectLineY_ = y; }
+    void Hit(int collisionObjId);
+    void CallSpell();
+    void ObtainItem(int itemObjId);
+    bool IsGrazeEnabled() const;
 protected:
-    void transIntersection(float dx, float dy);
-    bool isInvincible() const;
-    void shootDown();
-    void rebirth();
-    void moveByKeyInput();
-    void applyClip();
-    void initPosition();
-    int invincibilityFrame;
-    int downStateFrame;
-    int rebirthFrame;
-    int rebirthLossFrame;
-    bool permitPlayerShot;
-    bool permitPlayerSpell;
-    int state;
-    float normalSpeed;
-    float slowSpeed;
-    float clipLeft;
-    float clipTop;
-    float clipRight;
-    float clipBottom;
-    std::shared_ptr<GlobalPlayerParams> globalParams;
-    float autoItemCollectLineY;
-    int hitStateTimer;
-    int downStateTimer;
-    int64_t currentFrameGrazeCnt;
-    std::vector<double> currentFrameGrazeObjIds;
-    std::vector<Point2D> currentFrameGrazeShotPoints;
-    std::shared_ptr<PlayerIntersectionToItem> isectToItem;
+    void TransIntersection(float dx, float dy);
+private:
+    bool IsInvincible() const;
+    void ShootDown();
+    void Rebirth();
+    void MoveByKeyInput();
+    void ApplyClip();
+    void InitPosition();
+    int invincibilityFrame_;
+    int downStateFrame_;
+    int rebirthFrame_;
+    int rebirthLossFrame_;
+    bool permitPlayerShot_;
+    bool permitPlayerSpell_;
+    int state_;
+    float normalSpeed_;
+    float slowSpeed_;
+    float clipLeft_;
+    float clipTop_;
+    float clipRight_;
+    float clipBottom_;
+    std::shared_ptr<GlobalPlayerParams> globalParams_;
+    float autoItemCollectLineY_;
+    int hitStateTimer_;
+    int downStateTimer_;
+    int64_t currentFrameGrazeCnt_;
+    std::vector<double> currentFrameGrazeObjIds_;
+    std::vector<Point2D> currentFrameGrazeShotPoints_;
+    std::shared_ptr<PlayerIntersectionToItem> isectToItem_;
 };
 }

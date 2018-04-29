@@ -32,6 +32,6 @@ public:
     std::wstring replayName;
 };
 
-int getScriptTypeConstFromName(const std::wstring& name);
-std::wstring getScriptTypeNameFromConst(int c);
+int GetScriptTypeConstFromName(const std::wstring& name);
+std::wstring GetScriptTypeNameFromConst(int c);
 }

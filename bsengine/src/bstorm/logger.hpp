@@ -24,7 +24,7 @@ public:
         LV_DEBUG,
         LV_USER
     };
-    static const char* getLevelName(Level level);
+    static const char* GetLevelName(Level level);
     class Param
     {
     public:
@@ -44,31 +44,31 @@ public:
         Param(Tag tag, const std::string& text);
         Param(Tag tag, const std::wstring& text);
         Param(Tag tag, std::string&& text);
-        Tag getTag() const { return tag; }
-        const std::string& getText() const { return text; }
+        Tag GetTag() const { return tag_; }
+        const std::string& GetText() const { return text_; }
     private:
-        Tag tag;
-        std::string text; // utf8
+        Tag tag_;
+        std::string text_; // utf8
     };
     Log();
     Log(Level level);
-    Log& setMessage(const std::string& text);
-    Log& setMessage(const std::wstring& text);
-    Log& setMessage(std::string&& text);
-    Log& setParam(const Param& param);
-    Log& setParam(Param&& param);
-    Log& addSourcePos(const std::shared_ptr<SourcePos>& srcPos);
-    Log& setLevel(Level level);
+    Log& SetMessage(const std::string& text);
+    Log& SetMessage(const std::wstring& text);
+    Log& SetMessage(std::string&& text);
+    Log& SetParam(const Param& param);
+    Log& SetParam(Param&& param);
+    Log& AddSourcePos(const std::shared_ptr<SourcePos>& srcPos);
+    Log& SetLevel(Level level);
     std::string ToString() const;
-    Level getLevel() const { return level; }
-    const std::string& getMessage() const { return msg; }
-    const std::shared_ptr<Param>& getParam() const { return param; }
-    const std::vector<SourcePos>& getSourcePosStack() const { return srcPosStack; }
+    Level GetLevel() const { return level_; }
+    const std::string& GetMessage() const { return msg_; }
+    const std::shared_ptr<Param>& GetParam() const { return param_; }
+    const std::vector<SourcePos>& GetSourcePosStack() const { return srcPosStack_; }
 private:
-    Level level;
-    std::string msg; // utf8
-    std::shared_ptr<Param> param; // Nullable
-    std::vector<SourcePos> srcPosStack; // add = push_back
+    Level level_;
+    std::string msg_; // utf8
+    std::shared_ptr<Param> param_; // Nullable
+    std::vector<SourcePos> srcPosStack_; // add = push_back
 };
 
 
@@ -119,7 +119,7 @@ public:
     void log(Log& lg) override;
     void log(Log&& lg) override;
 private:
-    std::ofstream file;
-    std::shared_ptr<Logger> cc;
+    std::ofstream file_;
+    std::shared_ptr<Logger> cc_;
 };
 }

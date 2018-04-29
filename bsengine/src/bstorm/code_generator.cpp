@@ -26,298 +26,308 @@ static bool isDeclarationNeeded(const std::shared_ptr<NodeDef>& def)
 }
 
 CodeGenerator::CodeGenerator() :
-    indentLevel(0),
-    outputLine(1),
-    isLineHead(true)
+    indentLevel_(0),
+    outputLine_(1),
+    isLineHead_(true)
 {
 }
-void CodeGenerator::traverse(NodeNum& exp)
+
+void CodeGenerator::Generate(Node & n)
 {
-    addCode(exp.number);
+    code_.clear();
+    code_.reserve(4096);
+    n.Traverse(*this);
 }
-void CodeGenerator::traverse(NodeChar& exp)
+
+void CodeGenerator::Traverse(NodeNum& exp)
 {
-    addCode("[=[" + toUTF8(std::wstring{ exp.c }) + "]=]");
-    if (exp.c == L'\r' || exp.c == L'\n') outputLine++;
+    AddCode(exp.number);
 }
-void CodeGenerator::traverse(NodeStr& exp)
+
+void CodeGenerator::Traverse(NodeChar& exp)
 {
-    addCode("{");
+    AddCode("[=[" + ToUTF8(std::wstring{ exp.c }) + "]=]");
+    if (exp.c == L'\r' || exp.c == L'\n') outputLine_++;
+}
+
+void CodeGenerator::Traverse(NodeStr& exp)
+{
+    AddCode("{");
     for (int i = 0; i < exp.str.size(); i++)
     {
-        if (i != 0) addCode(",");
-        NodeChar(exp.str[i]).traverse(*this);
+        if (i != 0) AddCode(",");
+        NodeChar(exp.str[i]).Traverse(*this);
     }
-    addCode("}");
+    AddCode("}");
 }
-void CodeGenerator::traverse(NodeArray& exp)
+void CodeGenerator::Traverse(NodeArray& exp)
 {
-    addCode("{");
+    AddCode("{");
     for (int i = 0; i < exp.elems.size(); i++)
     {
-        if (i != 0) addCode(",");
-        exp.elems[i]->traverse(*this);
+        if (i != 0) AddCode(",");
+        exp.elems[i]->Traverse(*this);
     }
-    addCode("}");
+    AddCode("}");
 }
-void CodeGenerator::traverse(NodeNeg& exp) { genMonoOp("negative", exp); }
-void CodeGenerator::traverse(NodeNot& exp) { genMonoOp("not", exp); }
-void CodeGenerator::traverse(NodeAbs& exp) { genMonoOp("absolute", exp); }
+void CodeGenerator::Traverse(NodeNeg& exp) { genMonoOp("negative", exp); }
+void CodeGenerator::Traverse(NodeNot& exp) { genMonoOp("not", exp); }
+void CodeGenerator::Traverse(NodeAbs& exp) { genMonoOp("absolute", exp); }
 
-void CodeGenerator::traverse(NodeAdd& exp) { genBinOp("add", exp); }
-void CodeGenerator::traverse(NodeSub& exp) { genBinOp("subtract", exp); }
-void CodeGenerator::traverse(NodeMul& exp) { genBinOp("multiply", exp); }
-void CodeGenerator::traverse(NodeDiv& exp) { genBinOp("divide", exp); }
-void CodeGenerator::traverse(NodeRem& exp) { genBinOp("remainder", exp); }
-void CodeGenerator::traverse(NodePow& exp) { genBinOp("power", exp); }
+void CodeGenerator::Traverse(NodeAdd& exp) { GenBinOp("add", exp); }
+void CodeGenerator::Traverse(NodeSub& exp) { GenBinOp("subtract", exp); }
+void CodeGenerator::Traverse(NodeMul& exp) { GenBinOp("multiply", exp); }
+void CodeGenerator::Traverse(NodeDiv& exp) { GenBinOp("divide", exp); }
+void CodeGenerator::Traverse(NodeRem& exp) { GenBinOp("remainder", exp); }
+void CodeGenerator::Traverse(NodePow& exp) { GenBinOp("power", exp); }
 
-void CodeGenerator::traverse(NodeLt& exp) { genCmpBinOp("<", exp); }
-void CodeGenerator::traverse(NodeGt& exp) { genCmpBinOp(">", exp); }
-void CodeGenerator::traverse(NodeLe& exp) { genCmpBinOp("<=", exp); }
-void CodeGenerator::traverse(NodeGe& exp) { genCmpBinOp(">=", exp); }
-void CodeGenerator::traverse(NodeEq& exp) { genCmpBinOp("==", exp); }
-void CodeGenerator::traverse(NodeNe& exp) { genCmpBinOp("~=", exp); }
+void CodeGenerator::Traverse(NodeLt& exp) { GenCmpBinOp("<", exp); }
+void CodeGenerator::Traverse(NodeGt& exp) { GenCmpBinOp(">", exp); }
+void CodeGenerator::Traverse(NodeLe& exp) { GenCmpBinOp("<=", exp); }
+void CodeGenerator::Traverse(NodeGe& exp) { GenCmpBinOp(">=", exp); }
+void CodeGenerator::Traverse(NodeEq& exp) { GenCmpBinOp("==", exp); }
+void CodeGenerator::Traverse(NodeNe& exp) { GenCmpBinOp("~=", exp); }
 
-void CodeGenerator::traverse(NodeAnd& exp) { genLogBinOp("and", exp); }
-void CodeGenerator::traverse(NodeOr& exp) { genLogBinOp("or", exp); }
-void CodeGenerator::traverse(NodeCat& exp)
+void CodeGenerator::Traverse(NodeAnd& exp) { GenLogBinOp("and", exp); }
+void CodeGenerator::Traverse(NodeOr& exp) { GenLogBinOp("or", exp); }
+void CodeGenerator::Traverse(NodeCat& exp)
 {
-    if (isCopyNeeded(exp.lhs))
+    if (IsCopyNeeded(exp.lhs))
     {
-        genBinOp("concatenate", exp);
+        GenBinOp("concatenate", exp);
     } else
     {
-        genBinOp("mconcatenate", exp);
+        GenBinOp("mconcatenate", exp);
     }
 }
-void CodeGenerator::traverse(NodeNoParenCallExp& call)
+void CodeGenerator::Traverse(NodeNoParenCallExp& call)
 {
-    auto def = env->findDef(call.name);
+    auto def = env_->FindDef(call.name);
     if (std::dynamic_pointer_cast<NodeVarDecl>(def) ||
         std::dynamic_pointer_cast<NodeProcParam>(def) ||
         std::dynamic_pointer_cast<NodeLoopParam>(def))
     {
-        genCheckNil(call.name);
+        GenCheckNil(call.name);
     } else if (call.name == "GetCurrentScriptDirectory" && std::dynamic_pointer_cast<NodeBuiltInFunc>(def))
     {
-        NodeStr(parentPath(*call.srcPos->filename) + L"/").traverse(*this);
+        NodeStr(GetParentPath(*call.srcPos->filename) + L"/").Traverse(*this);
     } else if (auto c = std::dynamic_pointer_cast<NodeConst>(def))
     {
-        addCode(toUTF8(c->value) + " --[[ " + call.name + " ]]");
+        AddCode(ToUTF8(c->value) + " --[[ " + call.name + " ]]");
     } else
     {
-        addCode(varname(call.name) + "()");
+        AddCode(varname(call.name) + "()");
     }
 }
 
-void CodeGenerator::traverse(NodeCallExp& call)
+void CodeGenerator::Traverse(NodeCallExp& call)
 {
-    auto def = env->findDef(call.name);
+    auto def = env_->FindDef(call.name);
     if (call.name == "GetCurrentScriptDirectory" && std::dynamic_pointer_cast<NodeBuiltInFunc>(def))
     {
-        NodeStr(parentPath(*call.srcPos->filename) + L"/").traverse(*this);
+        NodeStr(GetParentPath(*call.srcPos->filename) + L"/").Traverse(*this);
     } else if (auto c = std::dynamic_pointer_cast<NodeConst>(def))
     {
-        addCode(toUTF8(c->value) + " --[[ " + call.name + " ]]");
+        AddCode(ToUTF8(c->value) + " --[[ " + call.name + " ]]");
     } else
     {
-        addCode(varname(call.name) + "(");
+        AddCode(varname(call.name) + "(");
         bool isUserFunc = !std::dynamic_pointer_cast<NodeBuiltInFunc>(def);
         for (int i = 0; i < call.args.size(); i++)
         {
-            if (i != 0) addCode(",");
+            if (i != 0) AddCode(",");
             if (isUserFunc)
             {
-                genCopy(call.args[i]);
+                GenCopy(call.args[i]);
             } else
             {
-                call.args[i]->traverse(*this);
+                call.args[i]->Traverse(*this);
             }
         }
-        addCode(")");
+        AddCode(")");
     }
 }
 
-void CodeGenerator::traverse(NodeHeader &) {}
+void CodeGenerator::Traverse(NodeHeader &) {}
 
-void CodeGenerator::addCode(const std::wstring & s)
+void CodeGenerator::AddCode(const std::wstring & s)
 {
-    addCode(toUTF8(s));
+    AddCode(ToUTF8(s));
 }
-void CodeGenerator::addCode(const std::string& s)
+void CodeGenerator::AddCode(const std::string& s)
 {
 #ifdef _DEBUG
     constexpr char* tab = "  ";
-    if (isLineHead && !s.empty())
+    if (isLineHead_ && !s.empty())
     {
-        for (int i = 0; i < indentLevel; i++) { code += tab; }
-        isLineHead = false;
+        for (int i = 0; i < indentLevel_; i++) { code_ += tab; }
+        isLineHead_ = false;
     }
 #endif
-    code += s;
+    code_ += s;
 }
-void CodeGenerator::newLine()
+void CodeGenerator::NewLine()
 {
-    outputLine++;
-    addCode("\n");
-    isLineHead = true;
+    outputLine_++;
+    AddCode("\n");
+    isLineHead_ = true;
 }
-void CodeGenerator::newLine(const std::shared_ptr<SourcePos>& srcPos)
+void CodeGenerator::NewLine(const std::shared_ptr<SourcePos>& srcPos)
 {
-    srcMap.logSourcePos(outputLine, srcPos->filename, srcPos->line);
-    newLine();
+    srcMap_.LogSourcePos(outputLine_, srcPos->filename, srcPos->line);
+    NewLine();
 }
-void CodeGenerator::indent()
+void CodeGenerator::Indent()
 {
-    indentLevel++;
+    indentLevel_++;
 }
-void CodeGenerator::unindent()
+void CodeGenerator::Unindent()
 {
-    indentLevel--;
+    indentLevel_--;
 }
 void CodeGenerator::genMonoOp(const std::string& fname, NodeMonoOp& exp)
 {
-    addCode(runtime(fname) + "(");
-    exp.rhs->traverse(*this);
-    addCode(")");
+    AddCode(runtime(fname) + "(");
+    exp.rhs->Traverse(*this);
+    AddCode(")");
 }
-void CodeGenerator::genBinOp(const std::string& fname, NodeBinOp& exp)
+void CodeGenerator::GenBinOp(const std::string& fname, NodeBinOp& exp)
 {
-    addCode(runtime(fname) + "(");
-    exp.lhs->traverse(*this);
-    addCode(",");
-    exp.rhs->traverse(*this);
-    addCode(")");
+    AddCode(runtime(fname) + "(");
+    exp.lhs->Traverse(*this);
+    AddCode(",");
+    exp.rhs->Traverse(*this);
+    AddCode(")");
 }
-void CodeGenerator::genCmpBinOp(const std::string & op, NodeBinOp & exp)
+void CodeGenerator::GenCmpBinOp(const std::string & op, NodeBinOp & exp)
 {
-    addCode("(" + runtime("compare") + "(");
-    exp.lhs->traverse(*this);
-    addCode(",");
-    exp.rhs->traverse(*this);
-    addCode(") ");
-    addCode(op);
-    addCode(" 0)");
+    AddCode("(" + runtime("compare") + "(");
+    exp.lhs->Traverse(*this);
+    AddCode(",");
+    exp.rhs->Traverse(*this);
+    AddCode(") ");
+    AddCode(op);
+    AddCode(" 0)");
 }
-void CodeGenerator::genLogBinOp(const std::string & fname, NodeBinOp & exp)
+void CodeGenerator::GenLogBinOp(const std::string & fname, NodeBinOp & exp)
 {
-    addCode(runtime(fname) + "(");
-    exp.lhs->traverse(*this);
-    addCode(", function() return ");
-    exp.rhs->traverse(*this);
-    addCode(" end");
-    addCode(")");
+    AddCode(runtime(fname) + "(");
+    exp.lhs->Traverse(*this);
+    AddCode(", function() return ");
+    exp.rhs->Traverse(*this);
+    AddCode(" end");
+    AddCode(")");
 }
-void CodeGenerator::genCheckNil(const std::string & name)
+void CodeGenerator::GenCheckNil(const std::string & name)
 {
-    addCode("r_checknil(" + varname(name) + ", \"" + name + "\")");
+    AddCode("r_checknil(" + varname(name) + ", \"" + name + "\")");
 }
-void CodeGenerator::genProc(std::shared_ptr<NodeDef> def, const std::vector<std::string>& params, NodeBlock & blk)
+void CodeGenerator::GenProc(std::shared_ptr<NodeDef> def, const std::vector<std::string>& params_, NodeBlock & blk)
 {
-    addCode(varname(def->name) + " = function(");
-    for (int i = 0; i < params.size(); i++)
+    AddCode(varname(def->name) + " = function(");
+    for (int i = 0; i < params_.size(); i++)
     {
-        if (i != 0) addCode(",");
-        addCode(varname(params[i]));
+        if (i != 0) AddCode(",");
+        AddCode(varname(params_[i]));
     }
-    addCode(")"); newLine();
-    blk.traverse(*this);
+    AddCode(")"); NewLine();
+    blk.Traverse(*this);
     if (std::dynamic_pointer_cast<NodeFuncDef>(def))
     {
         auto result = blk.table.at("result");
         if (!std::dynamic_pointer_cast<NodeProcParam>(result))
         {
-            indent();
-            addCode("do return " + varname("result") + " end");
-            newLine(result->srcPos);
-            unindent();
+            Indent();
+            AddCode("do return " + varname("result") + " end");
+            NewLine(result->srcPos);
+            Unindent();
         }
     }
-    addCode("end"); newLine();
+    AddCode("end"); NewLine();
 }
-void CodeGenerator::genOpAssign(const std::string & fname, const std::shared_ptr<NodeLeftVal>& left, std::shared_ptr<NodeExp> right)
+void CodeGenerator::GenOpAssign(const std::string & fname, const std::shared_ptr<NodeLeftVal>& left, std::shared_ptr<NodeExp> right)
 {
     switch (left->indices.size())
     {
         case 0:
             // a += e;
             // out : a = add(r_checknil(a), e);
-            addCode(varname(left->name) + " = ");
-            addCode(runtime(fname) + "(");
-            genCheckNil(left->name);
+            AddCode(varname(left->name) + " = ");
+            AddCode(runtime(fname) + "(");
+            GenCheckNil(left->name);
             if (right)
             {
-                addCode(",");
-                right->traverse(*this);
+                AddCode(",");
+                right->Traverse(*this);
             }
-            addCode(");"); newLine(left->srcPos);
+            AddCode(");"); NewLine(left->srcPos);
             break;
         case 1:
             // a[_i] += e;
             // out :  r_checknil(a);
             //        local i = _i;
             //        r_write1(a, i, r_add(r_read(a, i), e));
-            addCode("do"); newLine();
-            genCheckNil(left->name); newLine(left->srcPos);
-            addCode("local i = "); left->indices[0]->traverse(*this); addCode(";"); newLine(left->srcPos);
-            addCode("r_write1(" + varname(left->name) + ", i, ");
-            addCode(runtime(fname) + "(");
-            addCode(runtime("read") + "(" + varname(left->name) + ", i)");
+            AddCode("do"); NewLine();
+            GenCheckNil(left->name); NewLine(left->srcPos);
+            AddCode("local i = "); left->indices[0]->Traverse(*this); AddCode(";"); NewLine(left->srcPos);
+            AddCode("r_write1(" + varname(left->name) + ", i, ");
+            AddCode(runtime(fname) + "(");
+            AddCode(runtime("read") + "(" + varname(left->name) + ", i)");
             if (right)
             {
-                addCode(",");
-                right->traverse(*this);
+                AddCode(",");
+                right->Traverse(*this);
             }
-            addCode("));"); newLine(left->srcPos);
-            addCode("end"); newLine();
+            AddCode("));"); NewLine(left->srcPos);
+            AddCode("end"); NewLine();
             break;
         default:
             // a[i][j]..[z] += e;
             // out : check_nil(a);
             //       local is = {i, j, .. , z};
             //       r_write(check_nil(a), is, r_add(r_read(..r_read(a, is[1]), is[2]), .. is[n]), e);
-            addCode("do"); newLine();
-            genCheckNil(left->name); newLine(left->srcPos);
-            addCode("local is = {");
+            AddCode("do"); NewLine();
+            GenCheckNil(left->name); NewLine(left->srcPos);
+            AddCode("local is = {");
             for (int i = 0; i < left->indices.size(); i++)
             {
-                if (i != 0) addCode(",");
-                left->indices[i]->traverse(*this);
+                if (i != 0) AddCode(",");
+                left->indices[i]->Traverse(*this);
             }
-            addCode("};"); newLine(left->srcPos);
-            addCode("r_write(" + varname(left->name) + ", is");
-            addCode("," + runtime(fname) + "(");
+            AddCode("};"); NewLine(left->srcPos);
+            AddCode("r_write(" + varname(left->name) + ", is");
+            AddCode("," + runtime(fname) + "(");
             for (int i = 0; i < left->indices.size(); i++)
             {
-                addCode(runtime("read") + "(");
+                AddCode(runtime("read") + "(");
             }
-            addCode(varname(left->name) + ",");
+            AddCode(varname(left->name) + ",");
             for (int i = 0; i < left->indices.size(); i++)
             {
-                if (i != 0) addCode(",");
-                addCode("is[" + std::to_string(i + 1) + "])");
+                if (i != 0) AddCode(",");
+                AddCode("is[" + std::to_string(i + 1) + "])");
             }
             if (right)
             {
-                addCode(",");
-                right->traverse(*this);
+                AddCode(",");
+                right->Traverse(*this);
             }
-            addCode("));"); newLine(left->srcPos);
-            addCode("end"); newLine();
+            AddCode("));"); NewLine(left->srcPos);
+            AddCode("end"); NewLine();
             break;
     }
 }
-void CodeGenerator::genCopy(std::shared_ptr<NodeExp> exp)
+void CodeGenerator::GenCopy(std::shared_ptr<NodeExp> exp)
 {
-    if (isCopyNeeded(exp))
+    if (IsCopyNeeded(exp))
     {
-        addCode("r_cp("); exp->traverse(*this); addCode(")");
+        AddCode("r_cp("); exp->Traverse(*this); AddCode(")");
     } else
     {
-        exp->traverse(*this);
+        exp->Traverse(*this);
     }
 }
-bool CodeGenerator::isCopyNeeded(const std::shared_ptr<NodeExp>& exp)
+bool CodeGenerator::IsCopyNeeded(const std::shared_ptr<NodeExp>& exp)
 {
     if (std::dynamic_pointer_cast<NodeNum>(exp) ||
         std::dynamic_pointer_cast<NodeChar>(exp) ||
@@ -331,21 +341,21 @@ bool CodeGenerator::isCopyNeeded(const std::shared_ptr<NodeExp>& exp)
     {
         for (auto& elem : arr->elems)
         {
-            if (isCopyNeeded(elem)) return true;
+            if (IsCopyNeeded(elem)) return true;
         }
         return false;
     } else if (auto op = std::dynamic_pointer_cast<NodeAnd>(exp))
     {
-        return isCopyNeeded(op->lhs) || isCopyNeeded(op->rhs);
+        return IsCopyNeeded(op->lhs) || IsCopyNeeded(op->rhs);
     } else if (auto op = std::dynamic_pointer_cast<NodeOr>(exp))
     {
-        return isCopyNeeded(op->lhs) || isCopyNeeded(op->rhs);
+        return IsCopyNeeded(op->lhs) || IsCopyNeeded(op->rhs);
     } else if (std::dynamic_pointer_cast<NodeBinOp>(exp))
     {
         return false;
     } else if (auto call = std::dynamic_pointer_cast<NodeNoParenCallExp>(exp))
     {
-        auto def = env->findDef(call->name);
+        auto def = env_->FindDef(call->name);
         if (std::dynamic_pointer_cast<NodeBuiltInFunc>(def) ||
             std::dynamic_pointer_cast<NodeConst>(def))
         {
@@ -354,7 +364,7 @@ bool CodeGenerator::isCopyNeeded(const std::shared_ptr<NodeExp>& exp)
         return true;
     } else if (auto call = std::dynamic_pointer_cast<NodeCallExp>(exp))
     {
-        auto def = env->findDef(call->name);
+        auto def = env_->FindDef(call->name);
         if (std::dynamic_pointer_cast<NodeBuiltInFunc>(def) ||
             std::dynamic_pointer_cast<NodeConst>(def))
         {
@@ -364,353 +374,353 @@ bool CodeGenerator::isCopyNeeded(const std::shared_ptr<NodeExp>& exp)
     }
     return true;
 }
-void CodeGenerator::traverse(NodeArrayRef& exp)
+void CodeGenerator::Traverse(NodeArrayRef& exp)
 {
-    addCode(runtime("read") + "(");
-    exp.array->traverse(*this);
-    addCode(",");
-    exp.idx->traverse(*this);
-    addCode(")");
+    AddCode(runtime("read") + "(");
+    exp.array->Traverse(*this);
+    AddCode(",");
+    exp.idx->Traverse(*this);
+    AddCode(")");
 }
-void CodeGenerator::traverse(NodeRange &) {}
-void CodeGenerator::traverse(NodeArraySlice& exp)
+void CodeGenerator::Traverse(NodeRange &) {}
+void CodeGenerator::Traverse(NodeArraySlice& exp)
 {
-    addCode(runtime("slice") + "(");
-    exp.array->traverse(*this);
-    addCode(",");
-    exp.range->start->traverse(*this);
-    addCode(",");
-    exp.range->end->traverse(*this);
-    addCode(")");
+    AddCode(runtime("slice") + "(");
+    exp.array->Traverse(*this);
+    AddCode(",");
+    exp.range->start->Traverse(*this);
+    AddCode(",");
+    exp.range->end->Traverse(*this);
+    AddCode(")");
 }
-void CodeGenerator::traverse(NodeNop &) {}
-void CodeGenerator::traverse(NodeLeftVal &) {}
-void CodeGenerator::traverse(NodeAssign& stmt)
+void CodeGenerator::Traverse(NodeNop &) {}
+void CodeGenerator::Traverse(NodeLeftVal &) {}
+void CodeGenerator::Traverse(NodeAssign& stmt)
 {
-    auto def = env->findDef(stmt.lhs->name);
+    auto def = env_->FindDef(stmt.lhs->name);
     switch (stmt.lhs->indices.size())
     {
         case 0:
             // a = e;
             // out : a = r_cp(e);
-            addCode(varname(def->name) + " = "); genCopy(stmt.rhs); addCode(";");
+            AddCode(varname(def->name) + " = "); GenCopy(stmt.rhs); AddCode(";");
             break;
         case 1:
             // a[i] = e;
             // out : r_write1(r_checknil(a), i, e);
-            addCode("r_write1(");
-            genCheckNil(def->name);
-            addCode(",");
-            stmt.lhs->indices[0]->traverse(*this);
-            addCode(",");
-            stmt.rhs->traverse(*this);
-            addCode(");");
+            AddCode("r_write1(");
+            GenCheckNil(def->name);
+            AddCode(",");
+            stmt.lhs->indices[0]->Traverse(*this);
+            AddCode(",");
+            stmt.rhs->Traverse(*this);
+            AddCode(");");
             break;
         default:
             // a[i1][i2] .. [in] = e;
             // out : r_write(r_checknil(a), {i1, i2, .. in}, e);
-            addCode("r_write(");
-            genCheckNil(def->name);
-            addCode(", {");
+            AddCode("r_write(");
+            GenCheckNil(def->name);
+            AddCode(", {");
             for (int i = 0; i < stmt.lhs->indices.size(); i++)
             {
-                if (i != 0) addCode(",");
-                stmt.lhs->indices[i]->traverse(*this);
+                if (i != 0) AddCode(",");
+                stmt.lhs->indices[i]->Traverse(*this);
             }
-            addCode("}, ");
-            stmt.rhs->traverse(*this);
-            addCode(");");
+            AddCode("}, ");
+            stmt.rhs->Traverse(*this);
+            AddCode(");");
             break;
     }
-    newLine(stmt.srcPos);
+    NewLine(stmt.srcPos);
 }
-void CodeGenerator::traverse(NodeAddAssign& stmt) { genOpAssign("add", stmt.lhs, stmt.rhs); }
-void CodeGenerator::traverse(NodeSubAssign& stmt) { genOpAssign("subtract", stmt.lhs, stmt.rhs); }
-void CodeGenerator::traverse(NodeMulAssign& stmt) { genOpAssign("multiply", stmt.lhs, stmt.rhs); }
-void CodeGenerator::traverse(NodeDivAssign& stmt) { genOpAssign("divide", stmt.lhs, stmt.rhs); }
-void CodeGenerator::traverse(NodeRemAssign& stmt) { genOpAssign("remainder", stmt.lhs, stmt.rhs); }
-void CodeGenerator::traverse(NodePowAssign& stmt) { genOpAssign("power", stmt.lhs, stmt.rhs); }
-void CodeGenerator::traverse(NodeCatAssign& stmt) { genOpAssign("mconcatenate", stmt.lhs, stmt.rhs); }
+void CodeGenerator::Traverse(NodeAddAssign& stmt) { GenOpAssign("add", stmt.lhs, stmt.rhs); }
+void CodeGenerator::Traverse(NodeSubAssign& stmt) { GenOpAssign("subtract", stmt.lhs, stmt.rhs); }
+void CodeGenerator::Traverse(NodeMulAssign& stmt) { GenOpAssign("multiply", stmt.lhs, stmt.rhs); }
+void CodeGenerator::Traverse(NodeDivAssign& stmt) { GenOpAssign("divide", stmt.lhs, stmt.rhs); }
+void CodeGenerator::Traverse(NodeRemAssign& stmt) { GenOpAssign("remainder", stmt.lhs, stmt.rhs); }
+void CodeGenerator::Traverse(NodePowAssign& stmt) { GenOpAssign("power", stmt.lhs, stmt.rhs); }
+void CodeGenerator::Traverse(NodeCatAssign& stmt) { GenOpAssign("mconcatenate", stmt.lhs, stmt.rhs); }
 
-void CodeGenerator::traverse(NodeCallStmt& call)
+void CodeGenerator::Traverse(NodeCallStmt& call)
 {
-    auto def = env->findDef(call.name);
+    auto def = env_->FindDef(call.name);
 
     if (std::dynamic_pointer_cast<NodeConst>(def)) return;
 
     bool isTask = (bool)std::dynamic_pointer_cast<NodeTaskDef>(def);
     if (isTask)
     {
-        addCode("r_fork(" + varname(call.name));
+        AddCode("r_fork(" + varname(call.name));
         if (call.args.size() != 0)
         {
-            addCode(", {");
+            AddCode(", {");
         }
     } else
     {
-        addCode(varname(call.name) + "(");
+        AddCode(varname(call.name) + "(");
     }
     bool isUserFunc = !std::dynamic_pointer_cast<NodeBuiltInFunc>(def);
     for (int i = 0; i < call.args.size(); i++)
     {
-        if (i != 0) addCode(",");
+        if (i != 0) AddCode(",");
         if (isUserFunc)
         {
-            genCopy(call.args[i]);
+            GenCopy(call.args[i]);
         } else
         {
-            call.args[i]->traverse(*this);
+            call.args[i]->Traverse(*this);
         }
     }
     if (isTask && call.args.size() != 0)
     {
-        addCode("}");
+        AddCode("}");
     }
-    addCode(");"); newLine(call.srcPos);
+    AddCode(");"); NewLine(call.srcPos);
 }
-void CodeGenerator::traverse(NodeReturn& stmt)
+void CodeGenerator::Traverse(NodeReturn& stmt)
 {
-    addCode("do return "); stmt.ret->traverse(*this); addCode(" end");
-    newLine(stmt.srcPos);
+    AddCode("do return "); stmt.ret->Traverse(*this); AddCode(" end");
+    NewLine(stmt.srcPos);
 }
-void CodeGenerator::traverse(NodeReturnVoid& stmt)
+void CodeGenerator::Traverse(NodeReturnVoid& stmt)
 {
-    if (procStack.empty())
+    if (procStack_.empty())
     {
         // top level return
-        addCode("do return end");
+        AddCode("do return end");
     } else
     {
-        if (auto func = std::dynamic_pointer_cast<NodeFuncDef>(procStack.top()))
+        if (auto func = std::dynamic_pointer_cast<NodeFuncDef>(procStack_.top()))
         {
             auto result = func->block->table.at("result");
             if (auto funcParam = std::dynamic_pointer_cast<NodeProcParam>(result))
             {
                 // function has "result" param
-                addCode("do return end");
+                AddCode("do return end");
             } else
             {
                 // return implicit result
-                addCode("do return " + varname("result") + " end");
+                AddCode("do return " + varname("result") + " end");
             }
         } else
         {
             // return from sub or task
-            addCode("do return end");
+            AddCode("do return end");
         }
     }
-    newLine(stmt.srcPos);
+    NewLine(stmt.srcPos);
 }
-void CodeGenerator::traverse(NodeYield& stmt)
+void CodeGenerator::Traverse(NodeYield& stmt)
 {
-    if (!procStack.empty())
+    if (!procStack_.empty())
     {
-        addCode("coroutine.yield();");
-        newLine(stmt.srcPos);
+        AddCode("coroutine.yield();");
+        NewLine(stmt.srcPos);
     }
 }
-void CodeGenerator::traverse(NodeBreak& stmt)
+void CodeGenerator::Traverse(NodeBreak& stmt)
 {
-    if (procStack.empty())
+    if (procStack_.empty())
     {
-        addCode("do return end");
+        AddCode("do return end");
     } else
     {
-        addCode("do break end");
+        AddCode("do break end");
     }
-    newLine(stmt.srcPos);
+    NewLine(stmt.srcPos);
 }
 
-void CodeGenerator::traverse(NodeSucc& stmt) { genOpAssign("successor", stmt.lhs, std::shared_ptr<NodeExp>()); }
-void CodeGenerator::traverse(NodePred& stmt) { genOpAssign("predecessor", stmt.lhs, std::shared_ptr<NodeExp>()); }
+void CodeGenerator::Traverse(NodeSucc& stmt) { GenOpAssign("successor", stmt.lhs, std::shared_ptr<NodeExp>()); }
+void CodeGenerator::Traverse(NodePred& stmt) { GenOpAssign("predecessor", stmt.lhs, std::shared_ptr<NodeExp>()); }
 
-void CodeGenerator::traverse(NodeVarDecl &) {}
-void CodeGenerator::traverse(NodeVarInit& stmt)
+void CodeGenerator::Traverse(NodeVarDecl &) {}
+void CodeGenerator::Traverse(NodeVarInit& stmt)
 {
-    addCode(varname(stmt.name) + " = "); genCopy(stmt.rhs); addCode(";");
-    newLine(stmt.rhs->srcPos);
+    AddCode(varname(stmt.name) + " = "); GenCopy(stmt.rhs); AddCode(";");
+    NewLine(stmt.rhs->srcPos);
 }
-void CodeGenerator::traverse(NodeProcParam &) {}
-void CodeGenerator::traverse(NodeLoopParam& param)
+void CodeGenerator::Traverse(NodeProcParam &) {}
+void CodeGenerator::Traverse(NodeLoopParam& param)
 {
-    addCode("local " + varname(param.name) + " = r_cp(i);");
-    newLine(param.srcPos);
+    AddCode("local " + varname(param.name) + " = r_cp(i);");
+    NewLine(param.srcPos);
 }
-void CodeGenerator::traverse(NodeBuiltInFunc &) {}
-void CodeGenerator::traverse(NodeConst &) {}
-void CodeGenerator::traverse(NodeLocal& stmt)
+void CodeGenerator::Traverse(NodeBuiltInFunc &) {}
+void CodeGenerator::Traverse(NodeConst &) {}
+void CodeGenerator::Traverse(NodeLocal& stmt)
 {
-    addCode("do"); newLine();
-    stmt.block->traverse(*this);
-    addCode("end"); newLine();
+    AddCode("do"); NewLine();
+    stmt.block->Traverse(*this);
+    AddCode("end"); NewLine();
 }
-void CodeGenerator::traverse(NodeLoop& stmt)
+void CodeGenerator::Traverse(NodeLoop& stmt)
 {
-    addCode("while 1 do"); newLine();
-    stmt.block->traverse(*this);
-    addCode("end"); newLine();
+    AddCode("while 1 do"); NewLine();
+    stmt.block->Traverse(*this);
+    AddCode("end"); NewLine();
 }
-void CodeGenerator::traverse(NodeTimes& stmt)
+void CodeGenerator::Traverse(NodeTimes& stmt)
 {
-    addCode("do"); newLine();
-    addCode("local i = 0;"); newLine(stmt.srcPos);
-    addCode("local e = math.ceil(r_tonum(");  stmt.cnt->traverse(*this); addCode("));");
-    newLine(stmt.cnt->srcPos);
-    addCode("while i < e do"); newLine();
-    stmt.block->traverse(*this);
-    indent();
-    addCode("i = i + 1;"); newLine();
-    unindent();
-    addCode("end"); newLine();
-    addCode("end"); newLine();
+    AddCode("do"); NewLine();
+    AddCode("local i = 0;"); NewLine(stmt.srcPos);
+    AddCode("local e = math.ceil(r_tonum(");  stmt.cnt->Traverse(*this); AddCode("));");
+    NewLine(stmt.cnt->srcPos);
+    AddCode("while i < e do"); NewLine();
+    stmt.block->Traverse(*this);
+    Indent();
+    AddCode("i = i + 1;"); NewLine();
+    Unindent();
+    AddCode("end"); NewLine();
+    AddCode("end"); NewLine();
 }
-void CodeGenerator::traverse(NodeWhile& stmt)
+void CodeGenerator::Traverse(NodeWhile& stmt)
 {
-    addCode("while r_tobool("); stmt.cond->traverse(*this); addCode(") do"); newLine(stmt.cond->srcPos);
-    stmt.block->traverse(*this);
-    addCode("end"); newLine();
+    AddCode("while r_tobool("); stmt.cond->Traverse(*this); AddCode(") do"); NewLine(stmt.cond->srcPos);
+    stmt.block->Traverse(*this);
+    AddCode("end"); NewLine();
 }
-void CodeGenerator::traverse(NodeAscent& stmt)
+void CodeGenerator::Traverse(NodeAscent& stmt)
 {
-    addCode("do"); newLine();
-    addCode("local i = ");  stmt.range->start->traverse(*this); addCode(";"); newLine(stmt.range->start->srcPos);
-    addCode("local e = ");  stmt.range->end->traverse(*this); addCode(";"); newLine(stmt.range->end->srcPos);
-    addCode("while " + runtime("compare") + "(e, i) > 0 do"); newLine(stmt.srcPos);
-    stmt.block->traverse(*this);
-    indent(); addCode("i = " + runtime("successor") + "(i);"); newLine(stmt.srcPos); unindent();
-    addCode("end"); newLine();
-    addCode("end"); newLine();
+    AddCode("do"); NewLine();
+    AddCode("local i = ");  stmt.range->start->Traverse(*this); AddCode(";"); NewLine(stmt.range->start->srcPos);
+    AddCode("local e = ");  stmt.range->end->Traverse(*this); AddCode(";"); NewLine(stmt.range->end->srcPos);
+    AddCode("while " + runtime("compare") + "(e, i) > 0 do"); NewLine(stmt.srcPos);
+    stmt.block->Traverse(*this);
+    Indent(); AddCode("i = " + runtime("successor") + "(i);"); NewLine(stmt.srcPos); Unindent();
+    AddCode("end"); NewLine();
+    AddCode("end"); NewLine();
 }
-void CodeGenerator::traverse(NodeDescent& stmt)
+void CodeGenerator::Traverse(NodeDescent& stmt)
 {
-    addCode("do"); newLine();
-    addCode("local s = ");  stmt.range->start->traverse(*this); addCode(";"); newLine(stmt.range->start->srcPos);
-    addCode("local i = ");  stmt.range->end->traverse(*this); addCode(";"); newLine(stmt.range->end->srcPos);
-    addCode("while " + runtime("compare") + "(s, i) < 0 do"); newLine(stmt.srcPos);
-    indent(); addCode("i = " + runtime("predecessor") + "(i);"); newLine(stmt.srcPos); unindent();
-    stmt.block->traverse(*this);
-    addCode("end"); newLine();
-    addCode("end"); newLine();
+    AddCode("do"); NewLine();
+    AddCode("local s = ");  stmt.range->start->Traverse(*this); AddCode(";"); NewLine(stmt.range->start->srcPos);
+    AddCode("local i = ");  stmt.range->end->Traverse(*this); AddCode(";"); NewLine(stmt.range->end->srcPos);
+    AddCode("while " + runtime("compare") + "(s, i) < 0 do"); NewLine(stmt.srcPos);
+    Indent(); AddCode("i = " + runtime("predecessor") + "(i);"); NewLine(stmt.srcPos); Unindent();
+    stmt.block->Traverse(*this);
+    AddCode("end"); NewLine();
+    AddCode("end"); NewLine();
 }
-void CodeGenerator::traverse(NodeElseIf& elsif)
+void CodeGenerator::Traverse(NodeElseIf& elsif)
 {
-    addCode("elseif r_tobool("); elsif.cond->traverse(*this); addCode(") then"); newLine(elsif.cond->srcPos);
-    elsif.block->traverse(*this);
+    AddCode("elseif r_tobool("); elsif.cond->Traverse(*this); AddCode(") then"); NewLine(elsif.cond->srcPos);
+    elsif.block->Traverse(*this);
 }
-void CodeGenerator::traverse(NodeIf& stmt)
+void CodeGenerator::Traverse(NodeIf& stmt)
 {
-    addCode("if r_tobool("); stmt.cond->traverse(*this); addCode(") then"); newLine(stmt.cond->srcPos);
-    stmt.thenBlock->traverse(*this);
-    for (auto elsif : stmt.elsifs) { elsif->traverse(*this); }
+    AddCode("if r_tobool("); stmt.cond->Traverse(*this); AddCode(") then"); NewLine(stmt.cond->srcPos);
+    stmt.thenBlock->Traverse(*this);
+    for (auto elsif : stmt.elsifs) { elsif->Traverse(*this); }
     if (stmt.elseBlock)
     {
-        addCode("else"); newLine();
-        stmt.elseBlock->traverse(*this);
+        AddCode("else"); NewLine();
+        stmt.elseBlock->Traverse(*this);
     }
-    addCode("end"); newLine();
+    AddCode("end"); NewLine();
 }
-void CodeGenerator::traverse(NodeCase &) {}
-void CodeGenerator::traverse(NodeAlternative& stmt)
+void CodeGenerator::Traverse(NodeCase &) {}
+void CodeGenerator::Traverse(NodeAlternative& stmt)
 {
-    addCode("do"); newLine();
-    addCode("local c = "); genCopy(stmt.cond); addCode(";"); newLine(stmt.cond->srcPos);
+    AddCode("do"); NewLine();
+    AddCode("local c = "); GenCopy(stmt.cond); AddCode(";"); NewLine(stmt.cond->srcPos);
     /* gen if-seq */
     for (int i = 0; i < stmt.cases.size(); i++)
     {
         // case
-        if (i != 0) addCode("else"); // 1つ目以降のcaseはelse if
-        addCode("if false");
+        if (i != 0) AddCode("else"); // 1つ目以降のcaseはelse if
+        AddCode("if false");
         // orの右結合計算列を作る(右結合の方が早く短絡するので)
         for (auto& exp : stmt.cases[i]->exps)
         {
-            addCode(" or (");
-            addCode("(" + runtime("compare") + "(c,"); exp->traverse(*this); addCode(") == 0)");
+            AddCode(" or (");
+            AddCode("(" + runtime("compare") + "(c,"); exp->Traverse(*this); AddCode(") == 0)");
         }
         for (auto& exp : stmt.cases[i]->exps)
         {
-            addCode(")");
+            AddCode(")");
         }
-        addCode(" then"); newLine(stmt.cases[i]->srcPos);
-        stmt.cases[i]->block->traverse(*this);
+        AddCode(" then"); NewLine(stmt.cases[i]->srcPos);
+        stmt.cases[i]->block->Traverse(*this);
     }
     /* gen else*/
     if (stmt.others)
     {
-        addCode(stmt.cases.empty() ? "do" : "else"); newLine();
-        stmt.others->traverse(*this);
-        addCode("end"); newLine();
+        AddCode(stmt.cases.empty() ? "do" : "else"); NewLine();
+        stmt.others->Traverse(*this);
+        AddCode("end"); NewLine();
     } else
     {
         if (!stmt.cases.empty())
         {
-            addCode("end"); newLine();
+            AddCode("end"); NewLine();
         }
     }
-    addCode("end"); newLine();
+    AddCode("end"); NewLine();
 }
-void CodeGenerator::traverse(NodeBlock& blk)
+void CodeGenerator::Traverse(NodeBlock& blk)
 {
     auto newEnv = std::make_shared<Env>();
-    newEnv->parent = env;
+    newEnv->parent = env_;
     newEnv->table = blk.table;
-    env = newEnv;
+    env_ = newEnv;
 
-    if (!env->isRoot())
+    if (!env_->IsRoot())
     {
-        indent();
+        Indent();
         // local declare
         for (const auto& bind : blk.table)
         {
             auto def = bind.second;
             if (isDeclarationNeeded(def))
             {
-                addCode("local "); addCode(varname(def->name)); addCode(";"); newLine(def->srcPos);
+                AddCode("local "); AddCode(varname(def->name)); AddCode(";"); NewLine(def->srcPos);
             }
         }
     }
 
     for (const auto& bind : blk.table)
     {
-        bind.second->traverse(*this);
+        bind.second->Traverse(*this);
     }
 
     for (auto& stmt : blk.stmts)
     {
-        stmt->traverse(*this);
+        stmt->Traverse(*this);
     }
 
-    if (!env->isRoot())
+    if (!env_->IsRoot())
     {
-        unindent();
+        Unindent();
     }
-    env = env->parent;
+    env_ = env_->parent;
 }
-void CodeGenerator::traverse(NodeSubDef& sub)
+void CodeGenerator::Traverse(NodeSubDef& sub)
 {
     std::shared_ptr<NodeSubDef> def = std::make_shared<NodeSubDef>(sub);
-    procStack.push(def);
-    genProc(def, {}, *sub.block);
-    procStack.pop();
+    procStack_.push(def);
+    GenProc(def, {}, *sub.block);
+    procStack_.pop();
 }
-void CodeGenerator::traverse(NodeBuiltInSubDef& sub)
+void CodeGenerator::Traverse(NodeBuiltInSubDef& sub)
 {
     std::shared_ptr<NodeBuiltInSubDef> def = std::make_shared<NodeBuiltInSubDef>(sub);
-    procStack.push(def);
-    genProc(def, {}, *sub.block);
-    procStack.pop();
+    procStack_.push(def);
+    GenProc(def, {}, *sub.block);
+    procStack_.pop();
 }
-void CodeGenerator::traverse(NodeFuncDef& func)
+void CodeGenerator::Traverse(NodeFuncDef& func)
 {
     std::shared_ptr<NodeFuncDef> def = std::make_shared<NodeFuncDef>(func);
-    procStack.push(def);
-    genProc(def, func.params, *func.block);
-    procStack.pop();
+    procStack_.push(def);
+    GenProc(def, func.params_, *func.block);
+    procStack_.pop();
 }
-void CodeGenerator::traverse(NodeTaskDef& task)
+void CodeGenerator::Traverse(NodeTaskDef& task)
 {
     std::shared_ptr<NodeTaskDef> def = std::make_shared<NodeTaskDef>(task);
-    procStack.push(def);
-    genProc(def, task.params, *task.block);
-    procStack.pop();
+    procStack_.push(def);
+    GenProc(def, task.params_, *task.block);
+    procStack_.pop();
 }
 }

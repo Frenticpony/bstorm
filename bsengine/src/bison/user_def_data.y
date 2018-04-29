@@ -77,20 +77,20 @@ static int yylex(UserDefDataParser::semantic_type* yylval,  UserDefDataParser::l
             yylval->boolean = false;
             break;
         case UserDefDataParser::token_type::TK_NUM:
-            yylval->num = std::stof(lexer->getWString());
+            yylval->num = std::stof(lexer->GetWString());
             break;
         case UserDefDataParser::token_type::TK_STR:
-            ctx->tmpStr = lexer->getWString();
+            ctx->tmpStr = lexer->GetWString();
             break;
     }
-    yylloc->begin = lexer->getSourcePos();
+    yylloc->begin = lexer->GetSourcePos();
     return tk;
 }
 
 void UserDefDataParser::error(const UserDefDataParser::location_type& yylloc, const std::string &msg) {
     throw Log(Log::Level::LV_ERROR)
-      .setMessage(msg)
-      .addSourcePos(std::make_shared<SourcePos>(yylloc.begin));
+      .SetMessage(msg)
+      .AddSourcePos(std::make_shared<SourcePos>(yylloc.begin));
 }
 }
 

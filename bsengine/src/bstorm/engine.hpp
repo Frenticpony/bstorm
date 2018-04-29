@@ -60,199 +60,199 @@ class Engine
 public:
     Engine(HWND hWnd, int screenWidth, int screenHeight, const std::shared_ptr<conf::KeyConfig>& defaultKeyConfig);
     virtual ~Engine();
-    void addLostableGraphicResource(const std::shared_ptr<LostableGraphicResource>& resource);
+    void AddLostableGraphicResource(const std::shared_ptr<LostableGraphicResource>& resource);
     template <class T, class... Args>
-    std::shared_ptr<LostableGraphicResource> createLostableGraphicResource(Args... args)
+    std::shared_ptr<LostableGraphicResource> CreateLostableGraphicResource(Args... args)
     {
         auto resource = std::make_shared<T>(args...);
-        addLostableGraphicResource(resource);
+        AddLostableGraphicResource(resource);
         return resource;
     }
-    HWND getWindowHandle() const;
+    HWND GetWindowHandle() const;
     /* engine control */
-    void tickFrame();
-    void render(); // render to backbuffer
-    void render(const std::wstring& renderTargetName);
-    void renderToTextureA1(const std::wstring& renderTargetName, int begin, int end, bool doClear);
-    void renderToTextureB1(const std::wstring& renderTargetName, int objId, bool doClear);
+    void TickFrame();
+    void Render(); // render to backbuffer
+    void Render(const std::wstring& renderTargetName);
+    void RenderToTextureA1(const std::wstring& renderTargetName, int begin, int end, bool doClear);
+    void RenderToTextureB1(const std::wstring& renderTargetName, int objId, bool doClear);
     // NOTE : resetに失敗したらEngineを終了すべき
-    void reset(int screenWidth, int screenHeight);
-    int getScreenWidth() const;
-    int getScreenHeight() const;
-    bool isRenderIntersectionEnabled() const;
-    void setRenderIntersectionEnable(bool enable);
-    bool isForcePlayerInvincibleEnabled() const;
-    void setForcePlayerInvincibleEnable(bool enable);
+    void Reset(int screenWidth, int screenHeight);
+    int GetScreenWidth() const;
+    int GetScreenHeight() const;
+    bool IsRenderIntersectionEnabled() const;
+    void SetRenderIntersectionEnable(bool enable);
+    bool IsForcePlayerInvincibleEnabled() const;
+    void SetForcePlayerInvincibleEnable(bool enable);
     /* graphic device control */
-    IDirect3DDevice9* getGraphicDevice() const;
+    IDirect3DDevice9* GetDirect3DDevice() const;
     // should call only to reset device
-    void resetGraphicDevice();
-    void releaseLostableGraphicResource();
-    void restoreLostableGraphicDevice();
+    void ResetGraphicDevice();
+    void ReleaseLostableGraphicResource();
+    void RestoreLostableGraphicDevice();
     // set backbuffer to render-target
-    void setBackBufferRenderTarget();
-    void releaseUnusedLostableGraphicResource();
+    void SetBackBufferRenderTarget();
+    void ReleaseUnusedLostableGraphicResource();
     /* input */
-    KeyState getKeyState(Key k);
-    KeyState getVirtualKeyState(VirtualKey vk);
-    void setVirtualKeyState(VirtualKey vk, KeyState state);
-    void addVirtualKey(VirtualKey vk, Key k, PadButton btn);
-    KeyState getMouseState(MouseButton btn);
-    int getMouseX();
-    int getMouseY();
-    int getMouseMoveZ();
-    void setMousePostionProvider(const std::shared_ptr<MousePositionProvider>& provider);
-    void setInputEnable(bool enable);
+    KeyState GetKeyState(Key k);
+    KeyState GetVirtualKeyState(VirtualKey vk);
+    void SetVirtualKeyState(VirtualKey vk, KeyState state);
+    void AddVirtualKey(VirtualKey vk, Key k, PadButton btn);
+    KeyState GetMouseState(MouseButton btn);
+    int GetMouseX();
+    int GetMouseY();
+    int GetMouseMoveZ();
+    void SetMousePostionProvider(const std::shared_ptr<MousePositionProvider>& provider);
+    void SetInputEnable(bool enable);
     /* logging function */
-    void writeLog(const std::string&& msg, const std::shared_ptr<SourcePos>& srcPos);
+    void WriteLog(const std::string&& msg, const std::shared_ptr<SourcePos>& srcPos);
     /* time */
-    std::wstring getCurrentDateTimeS();
-    float getCurrentFps() const;
-    float getStageTime() const;
-    float getPackageTime() const;
-    void updateFpsCounter();
-    void resetFpsCounter();
-    void startSlow(int pseudoFps, bool byPlayer);
-    void stopSlow(bool byPlayer);
-    int64_t getElapsedFrame() const;
+    std::wstring GetCurrentDateTimeS();
+    float GetCurrentFps() const;
+    float GetStageTime() const;
+    float GetPackageTime() const;
+    void UpdateFpsCounter();
+    void ResetFpsCounter();
+    void StartSlow(int pseudoFps, bool byPlayer);
+    void StopSlow(bool byPlayer);
+    int64_t GetElapsedFrame() const;
     /* path */
-    std::wstring getMainStgScriptPath() const;
-    std::wstring Engine::getMainStgScriptDirectory() const;
-    std::wstring getMainPackageScriptPath() const;
+    std::wstring GetMainStgScriptPath() const;
+    std::wstring Engine::GetMainStgScriptDirectory() const;
+    std::wstring GetMainPackageScriptPath() const;
     /* texture */
-    std::shared_ptr<Texture> loadTexture(const std::wstring& path, bool reserve, const std::shared_ptr<SourcePos>& srcPos);
-    void loadTextureInThread(const std::wstring& path, bool reserve, const std::shared_ptr<SourcePos>& srcPos) noexcept(true);
-    void removeTextureReservedFlag(const std::wstring& path);
-    void releaseUnusedTextureCache();
+    std::shared_ptr<Texture> LoadTexture(const std::wstring& path, bool reserve, const std::shared_ptr<SourcePos>& srcPos);
+    void LoadTextureInThread(const std::wstring& path, bool reserve, const std::shared_ptr<SourcePos>& srcPos) noexcept(true);
+    void RemoveTextureReservedFlag(const std::wstring& path);
+    void ReleaseUnusedTextureCache();
     /* font */
-    void releaseUnusedFontCache();
-    bool installFont(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    void ReleaseUnusedFontCache();
+    bool InstallFont(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
     /* render target */
-    std::shared_ptr<RenderTarget> createRenderTarget(const std::wstring& name, int width, int height, const std::shared_ptr<SourcePos>& srcPos);
-    void removeRenderTarget(const std::wstring& name, const std::shared_ptr<SourcePos>& srcPos);
-    std::shared_ptr<RenderTarget> getRenderTarget(const std::wstring& name) const;
-    std::wstring getReservedRenderTargetName(int idx) const;
-    std::wstring getTransitionRenderTargetName() const;
-    void saveRenderedTextureA1(const std::wstring& name, const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
-    void saveRenderedTextureA2(const std::wstring& name, const std::wstring& path, int left, int top, int right, int bottom, const std::shared_ptr<SourcePos>& srcPos);
-    void saveSnapShotA1(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
-    void saveSnapShotA2(const std::wstring& path, int left, int top, int right, int bottom, const std::shared_ptr<SourcePos>& srcPos);
+    std::shared_ptr<RenderTarget> CreateRenderTarget(const std::wstring& name, int width, int height, const std::shared_ptr<SourcePos>& srcPos);
+    void RemoveRenderTarget(const std::wstring& name, const std::shared_ptr<SourcePos>& srcPos);
+    std::shared_ptr<RenderTarget> GetRenderTarget(const std::wstring& name) const;
+    std::wstring GetReservedRenderTargetName(int idx) const;
+    std::wstring GetTransitionRenderTargetName() const;
+    void SaveRenderedTextureA1(const std::wstring& name, const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    void SaveRenderedTextureA2(const std::wstring& name, const std::wstring& path, int left, int top, int right, int bottom, const std::shared_ptr<SourcePos>& srcPos);
+    void SaveSnapShotA1(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    void SaveSnapShotA2(const std::wstring& path, int left, int top, int right, int bottom, const std::shared_ptr<SourcePos>& srcPos);
     /* shader */
-    std::shared_ptr<Shader> createShader(const std::wstring& path, bool precompiled);
-    bool isPixelShaderSupported(int major, int minor);
+    std::shared_ptr<Shader> CreateShader(const std::wstring& path, bool precompiled);
+    bool IsPixelShaderSupported(int major, int minor);
     /* mesh */
-    std::shared_ptr<Mesh> loadMesh(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
-    void releaseUnusedMeshCache();
+    std::shared_ptr<Mesh> LoadMesh(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    void ReleaseUnusedMeshCache();
     /* sound */
-    std::shared_ptr<SoundBuffer> loadSound(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
-    void loadOrphanSound(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
-    void removeOrphanSound(const std::wstring& path);
-    void playBGM(const std::wstring& path, double loopStartSec, double loopEndSec);
-    void playSE(const std::wstring& path);
-    void stopOrphanSound(const std::wstring& path);
-    void cacheSound(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
-    void removeSoundCache(const std::wstring& path);
-    void clearSoundCache();
+    std::shared_ptr<SoundBuffer> LoadSound(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    void LoadOrphanSound(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    void RemoveOrphanSound(const std::wstring& path);
+    void PlayBGM(const std::wstring& path, double loopStartSec, double loopEndSec);
+    void PlaySE(const std::wstring& path);
+    void StopOrphanSound(const std::wstring& path);
+    void CacheSound(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    void RemoveSoundCache(const std::wstring& path);
+    void ClearSoundCache();
     /* layer */
-    void setObjectRenderPriority(const std::shared_ptr<ObjRender>& obj, int priority);
-    void setShader(int beginPriority, int endPriority, const std::shared_ptr<Shader>& shader);
-    void resetShader(int beginPriority, int endPriority);
-    int getStgFrameRenderPriorityMin() const;
-    void setStgFrameRenderPriorityMin(int p);
-    int getStgFrameRenderPriorityMax() const;
-    void setStgFrameRenderPriorityMax(int p);
-    int getShotRenderPriority() const;
-    void setShotRenderPriority(int p);
-    int getItemRenderPriority() const;
-    void setItemRenderPriority(int p);
-    int getPlayerRenderPriority() const;
-    int getCameraFocusPermitRenderPriority() const;
-    void setInvalidRenderPriority(int min, int max);
-    void clearInvalidRenderPriority();
-    std::shared_ptr<Shader> getShader(int p) const;
+    void SetObjectRenderPriority(const std::shared_ptr<ObjRender>& obj, int priority);
+    void SetShader(int beginPriority, int endPriority, const std::shared_ptr<Shader>& shader);
+    void ResetShader(int beginPriority, int endPriority);
+    int GetStgFrameRenderPriorityMin() const;
+    void SetStgFrameRenderPriorityMin(int p);
+    int GetStgFrameRenderPriorityMax() const;
+    void SetStgFrameRenderPriorityMax(int p);
+    int GetShotRenderPriority() const;
+    void SetShotRenderPriority(int p);
+    int GetItemRenderPriority() const;
+    void SetItemRenderPriority(int p);
+    int GetPlayerRenderPriority() const;
+    int GetCameraFocusPermitRenderPriority() const;
+    void SetInvalidRenderPriority(int min, int max);
+    void ClearInvalidRenderPriority();
+    std::shared_ptr<Shader> GetShader(int p) const;
     /* renderer */
-    void setFogEnable(bool enable);
-    void setFogParam(float fogStart, float fogEnd, int r, int g, int b);
+    void SetFogEnable(bool enable);
+    void SetFogParam(float fogStart, float fogEnd, int r, int g, int b);
     /* 3D camera */
-    void setCameraFocusX(float x);
-    void setCameraFocusY(float y);
-    void setCameraFocusZ(float z);
-    void setCameraFocusXYZ(float x, float y, float z);
-    void setCameraRadius(float r);
-    void setCameraAzimuthAngle(float angle);
-    void setCameraElevationAngle(float angle);
-    void setCameraYaw(float yaw);
-    void setCameraPitch(float pitch);
-    void setCameraRoll(float roll);
-    void resetCamera();
-    float getCameraX() const;
-    float getCameraY() const;
-    float getCameraZ() const;
-    float getCameraFocusX() const;
-    float getCameraFocusY() const;
-    float getCameraFocusZ() const;
-    float getCameraRadius() const;
-    float getCameraAzimuthAngle() const;
-    float getCameraElevationAngle() const;
-    float getCameraYaw() const;
-    float getCameraPitch() const;
-    float getCameraRoll() const;
-    void setCameraPerspectiveClip(float nearClip, float farClip);
+    void SetCameraFocusX(float x);
+    void SetCameraFocusY(float y);
+    void SetCameraFocusZ(float z);
+    void SetCameraFocusXYZ(float x, float y, float z);
+    void SetCameraRadius(float r);
+    void SetCameraAzimuthAngle(float angle);
+    void SetCameraElevationAngle(float angle);
+    void SetCameraYaw(float yaw);
+    void SetCameraPitch(float pitch);
+    void SetCameraRoll(float roll);
+    void ResetCamera();
+    float GetCameraX() const;
+    float GetCameraY() const;
+    float GetCameraZ() const;
+    float GetCameraFocusX() const;
+    float GetCameraFocusY() const;
+    float GetCameraFocusZ() const;
+    float GetCameraRadius() const;
+    float GetCameraAzimuthAngle() const;
+    float GetCameraElevationAngle() const;
+    float GetCameraYaw() const;
+    float GetCameraPitch() const;
+    float GetCameraRoll() const;
+    void SetCameraPerspectiveClip(float nearClip, float farClip);
     /* 2D camera */
-    void set2DCameraFocusX(float x);
-    void set2DCameraFocusY(float y);
-    void set2DCameraAngleZ(float z);
-    void set2DCameraRatio(float r);
-    void set2DCameraRatioX(float x);
-    void set2DCameraRatioY(float x);
-    void reset2DCamera();
-    float get2DCameraX() const;
-    float get2DCameraY() const;
-    float get2DCameraAngleZ() const;
-    float get2DCameraRatio() const;
-    float get2DCameraRatioX() const;
-    float get2DCameraRatioY() const;
+    void Set2DCameraFocusX(float x);
+    void Set2DCameraFocusY(float y);
+    void Set2DCameraAngleZ(float z);
+    void Set2DCameraRatio(float r);
+    void Set2DCameraRatioX(float x);
+    void Set2DCameraRatioY(float x);
+    void Reset2DCamera();
+    float Get2DCameraX() const;
+    float Get2DCameraY() const;
+    float Get2DCameraAngleZ() const;
+    float Get2DCameraRatio() const;
+    float Get2DCameraRatioX() const;
+    float Get2DCameraRatioY() const;
     /* common data */
-    void setCommonData(const std::wstring& key, std::unique_ptr<DnhValue>&& value);
-    std::unique_ptr<DnhValue> getCommonData(const std::wstring& key, std::unique_ptr<DnhValue>&& defaultValue) const;
-    void clearCommonData();
-    void deleteCommonData(const std::wstring& key);
-    void setAreaCommonData(const std::wstring& areaName, const std::wstring& key, std::unique_ptr<DnhValue>&& value);
-    std::unique_ptr<DnhValue> getAreaCommonData(const std::wstring& areaName, const std::wstring& key, std::unique_ptr<DnhValue>&& value) const;
-    void clearAreaCommonData(const std::wstring& areaName);
-    void deleteAreaCommonData(const std::wstring& areaName, const std::wstring& key);
-    void createCommonDataArea(const std::wstring& areaName);
-    bool isCommonDataAreaExists(const std::wstring& areaName) const;
-    void copyCommonDataArea(const std::wstring& dest, const std::wstring& src);
-    std::vector<std::wstring> getCommonDataAreaKeyList() const;
-    std::vector<std::wstring> getCommonDataValueKeyList(const std::wstring& areaName) const;
-    bool saveCommonDataAreaA1(const std::wstring& areaName) const;
-    bool loadCommonDataAreaA1(const std::wstring& areaName);
-    bool saveCommonDataAreaA2(const std::wstring& areaName, const std::wstring& path) const;
-    bool loadCommonDataAreaA2(const std::wstring& areaName, const std::wstring& path);
-    std::wstring Engine::getDefaultCommonDataSavePath(const std::wstring& areaName) const;
+    void SetCommonData(const std::wstring& key, std::unique_ptr<DnhValue>&& value);
+    std::unique_ptr<DnhValue> GetCommonData(const std::wstring& key, std::unique_ptr<DnhValue>&& defaultValue) const;
+    void ClearCommonData();
+    void DeleteCommonData(const std::wstring& key);
+    void SetAreaCommonData(const std::wstring& areaName, const std::wstring& key, std::unique_ptr<DnhValue>&& value);
+    std::unique_ptr<DnhValue> GetAreaCommonData(const std::wstring& areaName, const std::wstring& key, std::unique_ptr<DnhValue>&& value) const;
+    void ClearAreaCommonData(const std::wstring& areaName);
+    void DeleteAreaCommonData(const std::wstring& areaName, const std::wstring& key);
+    void CreateCommonDataArea(const std::wstring& areaName);
+    bool IsCommonDataAreaExists(const std::wstring& areaName) const;
+    void CopyCommonDataArea(const std::wstring& dest, const std::wstring& src);
+    std::vector<std::wstring> GetCommonDataAreaKeyList() const;
+    std::vector<std::wstring> GetCommonDataValueKeyList(const std::wstring& areaName) const;
+    bool SaveCommonDataAreaA1(const std::wstring& areaName) const;
+    bool LoadCommonDataAreaA1(const std::wstring& areaName);
+    bool SaveCommonDataAreaA2(const std::wstring& areaName, const std::wstring& path) const;
+    bool LoadCommonDataAreaA2(const std::wstring& areaName, const std::wstring& path);
+    std::wstring Engine::GetDefaultCommonDataSavePath(const std::wstring& areaName) const;
     /* user def data */
-    void loadPlayerShotData(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
-    void reloadPlayerShotData(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
-    void loadEnemyShotData(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
-    void reloadEnemyShotData(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
-    void loadItemData(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
-    void reloadItemData(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
-    std::shared_ptr<ShotData> getPlayerShotData(int id) const;
-    std::shared_ptr<ShotData> getEnemyShotData(int id) const;
-    std::shared_ptr<ItemData> getItemData(int id) const;
+    void LoadPlayerShotData(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    void ReloadPlayerShotData(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    void LoadEnemyShotData(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    void ReloadEnemyShotData(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    void LoadItemData(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    void ReloadItemData(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    std::shared_ptr<ShotData> GetPlayerShotData(int id) const;
+    std::shared_ptr<ShotData> GetEnemyShotData(int id) const;
+    std::shared_ptr<ItemData> GetItemData(int id) const;
     /* object */
     template <class T>
-    std::shared_ptr<T> getObject(int id) const
+    std::shared_ptr<T> GetObject(int id) const
     {
-        return std::dynamic_pointer_cast<T>(getObj(id));
+        return std::dynamic_pointer_cast<T>(GetObj(id));
     };
 
     template <class T>
-    std::vector <std::shared_ptr<T>> getObjectAll() const
+    std::vector <std::shared_ptr<T>> GetObjectAll() const
     {
         std::vector <std::shared_ptr<T>> objs;
-        for (const auto& entry : getObjAll())
+        for (const auto& entry : GetObjAll())
         {
             if (auto obj = std::dynamic_pointer_cast<T>(entry.second))
             {
@@ -261,133 +261,133 @@ public:
         }
         return objs;
     }
-    std::shared_ptr<ObjPlayer> getPlayerObject() const;
-    std::shared_ptr<ObjEnemy> getEnemyBossObject() const;
-    std::shared_ptr<ObjEnemyBossScene> getEnemyBossSceneObject() const;
-    std::shared_ptr<ObjSpellManage> getSpellManageObject() const;
-    void deleteObject(int id);
-    bool isObjectDeleted(int id) const;
-    std::shared_ptr<ObjPrim2D> createObjPrim2D();
-    std::shared_ptr<ObjSprite2D> createObjSprite2D();
-    std::shared_ptr<ObjSpriteList2D> createObjSpriteList2D();
-    std::shared_ptr<ObjPrim3D> createObjPrim3D();
-    std::shared_ptr<ObjSprite3D> createObjSprite3D();
-    std::shared_ptr<ObjMesh> createObjMesh();
-    std::shared_ptr<ObjText> createObjText();
-    std::shared_ptr<ObjSound> createObjSound();
-    std::shared_ptr<ObjFileT> createObjFileT();
-    std::shared_ptr<ObjFileB> createObjFileB();
-    std::shared_ptr<ObjShader> createObjShader();
-    std::shared_ptr<ObjShot> createObjShot(bool isPlayerShot);
-    std::shared_ptr<ObjShot> createShotA1(float x, float y, float speed, float angle, int shotDataId, int delay, bool isPlayerShot);
-    std::shared_ptr<ObjShot> createShotA2(float x, float y, float speed, float angle, float accel, float maxSpeed, int shotDataId, int delay, bool isPlayerShot);
-    std::shared_ptr<ObjShot> createShotOA1(int objId, float speed, float angle, int shotDataId, int delay, bool isPlayerShot);
-    std::shared_ptr<ObjShot> createShotB1(float x, float y, float speedX, float speedY, int shotDataId, int delay, bool isPlayerShot);
-    std::shared_ptr<ObjShot> createShotB2(float x, float y, float speedX, float speedY, float accelX, float accelY, float maxSpeedX, float maxSpeedY, int shotDataId, int delay, bool isPlayerShot);
-    std::shared_ptr<ObjShot> createShotOB1(int objId, float speedX, float speedY, int shotDataId, int delay, bool isPlayerShot);
-    std::shared_ptr<ObjShot> createPlayerShotA1(float x, float y, float speed, float angle, double damage, int penetration, int shotDataId);
-    std::shared_ptr<ObjLooseLaser> createObjLooseLaser(bool isPlayerShot);
-    std::shared_ptr<ObjLooseLaser> createLooseLaserA1(float x, float y, float speed, float angle, float length, float width, int shotDataId, int delay, bool isPlayerShot);
-    std::shared_ptr<ObjStLaser> createObjStLaser(bool isPlayerShot);
-    std::shared_ptr<ObjStLaser> createStraightLaserA1(float x, float y, float angle, float length, float width, int deleteFrame, int shotDataId, int delay, bool isPlayerShot);
-    std::shared_ptr<ObjCrLaser> createObjCrLaser(bool isPlayerShot);
-    std::shared_ptr<ObjCrLaser> createCurveLaserA1(float x, float y, float speed, float angle, float length, float width, int shotDataId, int delay, bool isPlayerShot);
-    std::shared_ptr<ObjItem> createItemA1(int itemType, float x, float y, int64_t score);
-    std::shared_ptr<ObjItem> createItemA2(int itemType, float x, float y, float destX, float destY, int64_t score);
-    std::shared_ptr<ObjItem> createItemU1(int itemDataId, float x, float y, int64_t score);
-    std::shared_ptr<ObjItem> createItemU2(int itemDataId, float x, float y, float destX, float destY, int64_t score);
-    std::shared_ptr<ObjEnemy> createObjEnemy();
-    std::shared_ptr<ObjEnemyBossScene> createObjEnemyBossScene(const std::shared_ptr<SourcePos>& srcPos);
-    std::shared_ptr<ObjSpell> createObjSpell();
-    std::shared_ptr<ObjItem> createObjItem(int itemType);
+    std::shared_ptr<ObjPlayer> GetPlayerObject() const;
+    std::shared_ptr<ObjEnemy> GetEnemyBossObject() const;
+    std::shared_ptr<ObjEnemyBossScene> GetEnemyBossSceneObject() const;
+    std::shared_ptr<ObjSpellManage> GetSpellManageObject() const;
+    void DeleteObject(int id);
+    bool IsObjectDeleted(int id) const;
+    std::shared_ptr<ObjPrim2D> CreateObjPrim2D();
+    std::shared_ptr<ObjSprite2D> CreateObjSprite2D();
+    std::shared_ptr<ObjSpriteList2D> CreateObjSpriteList2D();
+    std::shared_ptr<ObjPrim3D> CreateObjPrim3D();
+    std::shared_ptr<ObjSprite3D> CreateObjSprite3D();
+    std::shared_ptr<ObjMesh> CreateObjMesh();
+    std::shared_ptr<ObjText> CreateObjText();
+    std::shared_ptr<ObjSound> CreateObjSound();
+    std::shared_ptr<ObjFileT> CreateObjFileT();
+    std::shared_ptr<ObjFileB> CreateObjFileB();
+    std::shared_ptr<ObjShader> CreateObjShader();
+    std::shared_ptr<ObjShot> CreateObjShot(bool isPlayerShot);
+    std::shared_ptr<ObjShot> CreateShotA1(float x, float y, float speed, float angle, int shotDataId, int delay, bool isPlayerShot);
+    std::shared_ptr<ObjShot> CreateShotA2(float x, float y, float speed, float angle, float accel, float maxSpeed, int shotDataId, int delay, bool isPlayerShot);
+    std::shared_ptr<ObjShot> CreateShotOA1(int objId, float speed, float angle, int shotDataId, int delay, bool isPlayerShot);
+    std::shared_ptr<ObjShot> CreateShotB1(float x, float y, float speedX, float speedY, int shotDataId, int delay, bool isPlayerShot);
+    std::shared_ptr<ObjShot> CreateShotB2(float x, float y, float speedX, float speedY, float accelX, float accelY, float maxSpeedX, float maxSpeedY, int shotDataId, int delay, bool isPlayerShot);
+    std::shared_ptr<ObjShot> CreateShotOB1(int objId, float speedX, float speedY, int shotDataId, int delay, bool isPlayerShot);
+    std::shared_ptr<ObjShot> CreatePlayerShotA1(float x, float y, float speed, float angle, double damage, int penetration, int shotDataId);
+    std::shared_ptr<ObjLooseLaser> CreateObjLooseLaser(bool isPlayerShot);
+    std::shared_ptr<ObjLooseLaser> CreateLooseLaserA1(float x, float y, float speed, float angle, float length, float width, int shotDataId, int delay, bool isPlayerShot);
+    std::shared_ptr<ObjStLaser> CreateObjStLaser(bool isPlayerShot);
+    std::shared_ptr<ObjStLaser> CreateStraightLaserA1(float x, float y, float angle, float length, float width, int deleteFrame, int shotDataId, int delay, bool isPlayerShot);
+    std::shared_ptr<ObjCrLaser> CreateObjCrLaser(bool isPlayerShot);
+    std::shared_ptr<ObjCrLaser> CreateCurveLaserA1(float x, float y, float speed, float angle, float length, float width, int shotDataId, int delay, bool isPlayerShot);
+    std::shared_ptr<ObjItem> CreateItemA1(int itemType, float x, float y, int64_t score);
+    std::shared_ptr<ObjItem> CreateItemA2(int itemType, float x, float y, float destX, float destY, int64_t score);
+    std::shared_ptr<ObjItem> CreateItemU1(int itemDataId, float x, float y, int64_t score);
+    std::shared_ptr<ObjItem> CreateItemU2(int itemDataId, float x, float y, float destX, float destY, int64_t score);
+    std::shared_ptr<ObjEnemy> CreateObjEnemy();
+    std::shared_ptr<ObjEnemyBossScene> CreateObjEnemyBossScene(const std::shared_ptr<SourcePos>& srcPos);
+    std::shared_ptr<ObjSpell> CreateObjSpell();
+    std::shared_ptr<ObjItem> CreateObjItem(int itemType);
     /* script */
-    std::shared_ptr<Script> getScript(int scriptId) const;
-    std::shared_ptr<Script> loadScript(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<SourcePos>& srcPos);
-    std::shared_ptr<Script> loadScriptInThread(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<SourcePos>& srcPos);
-    void closeStgScene();
-    void notifyEventAll(int eventType);
-    void notifyEventAll(int eventType, const std::unique_ptr<DnhArray>& args);
-    std::wstring getPlayerID() const;
-    std::wstring getPlayerReplayName() const;
-    std::shared_ptr<Script> getPlayerScript() const;
-    std::unique_ptr<DnhValue> getScriptResult(int scriptId) const;
-    void setScriptResult(int scriptId, std::unique_ptr<DnhValue>&& value);
-    std::vector<ScriptInfo> getScriptList(const std::wstring& dirPath, int scriptType, bool doRecursive);
-    void getLoadFreePlayerScriptList();
-    int getFreePlayerScriptCount() const;
-    ScriptInfo getFreePlayerScriptInfo(int idx) const;
-    ScriptInfo getScriptInfo(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    std::shared_ptr<Script> GetScript(int scriptId) const;
+    std::shared_ptr<Script> LoadScript(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<SourcePos>& srcPos);
+    std::shared_ptr<Script> LoadScriptInThread(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<SourcePos>& srcPos);
+    void CloseStgScene();
+    void NotifyEventAll(int eventType);
+    void NotifyEventAll(int eventType, const std::unique_ptr<DnhArray>& args);
+    std::wstring GetPlayerID() const;
+    std::wstring GetPlayerReplayName() const;
+    std::shared_ptr<Script> GetPlayerScript() const;
+    std::unique_ptr<DnhValue> GetScriptResult(int scriptId) const;
+    void SetScriptResult(int scriptId, std::unique_ptr<DnhValue>&& value);
+    std::vector<ScriptInfo> GetScriptList(const std::wstring& dirPath, int scriptType, bool doRecursive);
+    void GetLoadFreePlayerScriptList();
+    int GetFreePlayerScriptCount() const;
+    ScriptInfo GetFreePlayerScriptInfo(int idx) const;
+    ScriptInfo GetScriptInfo(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
     /* point */
-    int64_t getScore() const;
-    void addScore(int64_t score);
-    int64_t getGraze() const;
-    void addGraze(int64_t graze);
-    int64_t getPoint() const;
-    void addPoint(int64_t point);
+    int64_t GetScore() const;
+    void AddScore(int64_t score);
+    int64_t GetGraze() const;
+    void AddGraze(int64_t graze);
+    int64_t GetPoint() const;
+    void AddPoint(int64_t point);
     /* stg frame */
-    void setStgFrame(float left, float top, float right, float bottom);
-    float getStgFrameLeft() const;
-    float getStgFrameTop() const;
-    float getStgFrameWidth() const;
-    float getStgFrameHeight() const;
-    float getStgFrameCenterWorldX() const;
-    float getStgFrameCenterWorldY() const;
-    float getStgFrameCenterScreenX() const;
-    float getStgFrameCenterScreenY() const;
+    void SetStgFrame(float left, float top, float right, float bottom);
+    float GetStgFrameLeft() const;
+    float GetStgFrameTop() const;
+    float GetStgFrameWidth() const;
+    float GetStgFrameHeight() const;
+    float GetStgFrameCenterWorldX() const;
+    float GetStgFrameCenterWorldY() const;
+    float GetStgFrameCenterScreenX() const;
+    float GetStgFrameCenterScreenY() const;
     /* shot */
-    int getAllShotCount() const;
-    int getEnemyShotCount() const;
-    int getPlayerShotCount() const;
-    void setShotAutoDeleteClip(float left, float top, float right, float bottom);
-    void startShotScript(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
-    void setDeleteShotImmediateEventOnShotScriptEnable(bool enable);
-    void setDeleteShotFadeEventOnShotScriptEnable(bool enable);
-    void setDeleteShotToItemEventOnShotScriptEnable(bool enable);
-    void deleteShotAll(int target, int behavior) const;
-    void deleteShotInCircle(int target, int behavior, float x, float y, float r) const;
-    std::vector<std::shared_ptr<ObjShot>> getShotInCircle(float x, float y, float r, int target) const;
-    void setShotIntersectoinCicle(float x, float y, float r);
-    void setShotIntersectoinLine(float x1, float y1, float x2, float y2, float width);
+    int GetAllShotCount() const;
+    int GetEnemyShotCount() const;
+    int GetPlayerShotCount() const;
+    void SetShotAutoDeleteClip(float left, float top, float right, float bottom);
+    void StartShotScript(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    void SetDeleteShotImmediateEventOnShotScriptEnable(bool enable);
+    void SetDeleteShotFadeEventOnShotScriptEnable(bool enable);
+    void SetDeleteShotToItemEventOnShotScriptEnable(bool enable);
+    void DeleteShotAll(int tarGet, int behavior) const;
+    void DeleteShotInCircle(int tarGet, int behavior, float x, float y, float r) const;
+    std::vector<std::shared_ptr<ObjShot>> GetShotInCircle(float x, float y, float r, int tarGet) const;
+    void SetShotIntersectoinCicle(float x, float y, float r);
+    void SetShotIntersectoinLine(float x1, float y1, float x2, float y2, float width);
     /* item */
-    void collectAllItems();
-    void collectItemsByType(int itemType);
-    void collectItemsInCircle(float x, float y, float r);
-    void cancelCollectItems();
-    void setDefaultBonusItemEnable(bool enable);
-    void startItemScript(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    void CollectAllItems();
+    void CollectItemsByType(int itemType);
+    void CollectItemsInCircle(float x, float y, float r);
+    void CancelCollectItems();
+    void SetDefaultBonusItemEnable(bool enable);
+    void StartItemScript(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
     /* package */
-    bool isPackageFinished() const;
-    void closePackage();
-    void initializeStageScene();
-    void finalizeStageScene();
-    void startStageScene(const std::shared_ptr<SourcePos>& srcPos);
-    void setStageIndex(uint16_t idx);
-    void setStageMainScript(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
-    void setStageMainScript(const ScriptInfo& script);
-    void setStagePlayerScript(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
-    void setStagePlayerScript(const ScriptInfo& script);
-    void setStageReplayFile(const std::wstring& path);
-    bool isStageFinished() const;
-    int getStageSceneResult() const;
-    bool isStagePaused() const;
-    void pauseStageScene(bool doPause);
-    void terminateStageScene();
-    void setPackageMainScript(const std::wstring& path);
-    void setPackageMainScript(const ScriptInfo& script);
-    void startPackage();
+    bool IsPackageFinished() const;
+    void ClosePackage();
+    void InitializeStageScene();
+    void FinalizeStageScene();
+    void StartStageScene(const std::shared_ptr<SourcePos>& srcPos);
+    void SetStageIndex(uint16_t idx);
+    void SetStageMainScript(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    void SetStageMainScript(const ScriptInfo& script);
+    void SetStagePlayerScript(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    void SetStagePlayerScript(const ScriptInfo& script);
+    void SetStageReplayFile(const std::wstring& path);
+    bool IsStageFinished() const;
+    int GetStageSceneResult() const;
+    bool IsStagePaused() const;
+    void PauseStageScene(bool doPause);
+    void TerminateStageScene();
+    void SetPackageMainScript(const std::wstring& path);
+    void SetPackageMainScript(const ScriptInfo& script);
+    void StartPackage();
     /* for default package */
-    void setPauseScriptPath(const std::wstring& path);
-    void setEndSceneScriptPath(const std::wstring& path);
-    void setReplaySaveSceneScriptPath(const std::wstring& path);
+    void SetPauseScriptPath(const std::wstring& path);
+    void SetEndSceneScriptPath(const std::wstring& path);
+    void SetReplaySaveSceneScriptPath(const std::wstring& path);
     /* etc */
-    Point2D get2DPosition(float x, float y, float z, bool isStgScene);
+    Point2D Get2DPosition(float x, float y, float z, bool isStgScene);
     /* backdoor */
     template <typename T>
     void backDoor() {}
 protected:
     void renderToTexture(const std::wstring& renderTargetName, int begin, int end, int objId, bool doClear, bool renderToBackBuffer, bool checkInvalidRenderPriority, bool checkVisibleFlag);
-    std::shared_ptr<Obj> getObj(int id) const;
-    const std::map<int, std::shared_ptr<Obj>>& getObjAll() const;
+    std::shared_ptr<Obj> GetObj(int id) const;
+    const std::map<int, std::shared_ptr<Obj>>& GetObjAll() const;
     HWND hWnd;
     std::unique_ptr<GraphicDevice> graphicDevice;
     std::unique_ptr<LostableGraphicResourceManager> lostableGraphicResourceManager;

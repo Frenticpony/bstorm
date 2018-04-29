@@ -13,127 +13,127 @@ ObjEnemy::ObjEnemy(bool isBoss, const std::shared_ptr<GameState>& gameState) :
     ObjSprite2D(gameState),
     ObjMove(this),
     ObjCol(gameState),
-    registerFlag(false),
-    life(0),
-    damageRateShot(1.0),
-    damageRateSpell(1.0),
-    shotHitCount(0),
-    prevFrameShotHitCount(0),
-    bossFlag(isBoss)
+    isRegistered_(false),
+    life_(0),
+    damageRateShot_(1.0),
+    damageRateSpell_(1.0),
+    shotHitCount_(0),
+    prevFrameShotHitCount_(0),
+    isBoss_(isBoss)
 {
-    setType(isBoss ? OBJ_ENEMY_BOSS : OBJ_ENEMY);
+    SetType(isBoss ? OBJ_ENEMY_BOSS : OBJ_ENEMY);
 }
 
 ObjEnemy::~ObjEnemy() {}
 
-void ObjEnemy::update()
+void ObjEnemy::Update()
 {
-    if (isRegistered())
+    if (IsRegistered())
     {
-        move();
+        Move();
     }
-    prevFrameShotHitCount = 0;
-    std::swap(shotHitCount, prevFrameShotHitCount);
-    clearOldTempIntersection();
-    for (const auto& isect : getTempIntersections())
+    prevFrameShotHitCount_ = 0;
+    std::swap(shotHitCount_, prevFrameShotHitCount_);
+    ClearOldTempIntersection();
+    for (const auto& isect : GetTempIntersections())
     {
         if (auto toShot = std::dynamic_pointer_cast<EnemyIntersectionToShot>(isect))
         {
-            prevTempIsectToShotPositions.emplace_back(toShot->getX(), toShot->getY());
+            prevTempIsectToShotPositions_.emplace_back(toShot->GetX(), toShot->GetY());
         }
     }
 }
 
-void ObjEnemy::render()
+void ObjEnemy::Render()
 {
-    if (isRegistered())
+    if (IsRegistered())
     {
-        ObjSprite2D::render();
-        ObjCol::renderIntersection(isPermitCamera());
+        ObjSprite2D::Render();
+        ObjCol::RenderIntersection(IsPermitCamera());
     }
 }
 
-bool ObjEnemy::isBoss() const { return bossFlag; }
+bool ObjEnemy::IsBoss() const { return isBoss_; }
 
-bool ObjEnemy::isRegistered() const
+bool ObjEnemy::IsRegistered() const
 {
-    return registerFlag;
+    return isRegistered_;
 }
 
-void ObjEnemy::regist() { registerFlag = true; }
+void ObjEnemy::Regist() { isRegistered_ = true; }
 
-double ObjEnemy::getDamageRateShot() const { return damageRateShot * 100.0; }
+double ObjEnemy::GetDamageRateShot() const { return damageRateShot_ * 100.0; }
 
-double ObjEnemy::getDamageRateSpell() const { return damageRateSpell * 100.0; }
+double ObjEnemy::GetDamageRateSpell() const { return damageRateSpell_ * 100.0; }
 
-int ObjEnemy::getPrevFrameShotHitCount() const { return prevFrameShotHitCount; }
+int ObjEnemy::GetPrevFrameShotHitCount() const { return prevFrameShotHitCount_; }
 
-void ObjEnemy::setLife(double life)
+void ObjEnemy::SetLife(double life)
 {
-    this->life = life;
+    this->life_ = life;
 }
 
-void ObjEnemy::addLife(double life)
+void ObjEnemy::AddLife(double life)
 {
-    this->life += life;
+    this->life_ += life;
 }
 
-void ObjEnemy::setDamageRateShot(double rate) { damageRateShot = rate / 100.0; }
+void ObjEnemy::SetDamageRateShot(double rate) { damageRateShot_ = rate / 100.0; }
 
-void ObjEnemy::setDamageRateSpell(double rate) { damageRateSpell = rate / 100.0; }
+void ObjEnemy::SetDamageRateSpell(double rate) { damageRateSpell_ = rate / 100.0; }
 
-const std::vector<Point2D>& ObjEnemy::getAllIntersectionToShotPosition() const
+const std::vector<Point2D>& ObjEnemy::GetAllIntersectionToShotPosition() const
 {
-    return prevTempIsectToShotPositions;
+    return prevTempIsectToShotPositions_;
 }
 
-void ObjEnemy::addTempIntersection(const std::shared_ptr<Intersection>& isect)
+void ObjEnemy::AddTempIntersection(const std::shared_ptr<Intersection>& isect)
 {
-    if (auto state = getGameState())
+    if (auto state = GetGameState())
     {
         state->colDetector->Add(isect);
     }
-    ObjCol::addTempIntersection(isect);
+    ObjCol::AddTempIntersection(isect);
 }
 
-void ObjEnemy::addTempIntersectionCircleToShot(float x, float y, float r)
+void ObjEnemy::AddTempIntersectionCircleToShot(float x, float y, float r)
 {
-    addTempIntersection(std::make_shared<EnemyIntersectionToShot>(x, y, r, shared_from_this()));
+    AddTempIntersection(std::make_shared<EnemyIntersectionToShot>(x, y, r, shared_from_this()));
 }
 
-void ObjEnemy::addTempIntersectionCircleToPlayer(float x, float y, float r)
+void ObjEnemy::AddTempIntersectionCircleToPlayer(float x, float y, float r)
 {
-    addTempIntersection(std::make_shared<EnemyIntersectionToPlayer>(x, y, r, shared_from_this()));
+    AddTempIntersection(std::make_shared<EnemyIntersectionToPlayer>(x, y, r, shared_from_this()));
 }
 
-void ObjEnemy::addShotDamage(double damage)
+void ObjEnemy::AddShotDamage(double damage)
 {
-    damage *= damageRateShot;
-    life -= damage;
-    shotHitCount++;
-    if (isBoss())
+    damage *= damageRateShot_;
+    life_ -= damage;
+    shotHitCount_++;
+    if (IsBoss())
     {
-        if (auto state = getGameState())
+        if (auto state = GetGameState())
         {
             if (auto bossScene = state->enemyBossSceneObj.lock())
             {
-                bossScene->addDamage(damage);
+                bossScene->AddDamage(damage);
             }
         }
     }
 }
 
-void ObjEnemy::addSpellDamage(double damage)
+void ObjEnemy::AddSpellDamage(double damage)
 {
-    damage *= damageRateSpell;
-    life -= damage;
-    if (isBoss())
+    damage *= damageRateSpell_;
+    life_ -= damage;
+    if (IsBoss())
     {
-        if (auto state = getGameState())
+        if (auto state = GetGameState())
         {
             if (auto bossScene = state->enemyBossSceneObj.lock())
             {
-                bossScene->addDamage(damage);
+                bossScene->AddDamage(damage);
             }
         }
     }

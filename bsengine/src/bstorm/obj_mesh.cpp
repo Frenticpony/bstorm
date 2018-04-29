@@ -11,31 +11,31 @@ namespace bstorm
 ObjMesh::ObjMesh(const std::shared_ptr<GameState>& gameState) :
     ObjRender(gameState)
 {
-    setType(OBJ_MESH);
+    SetType(OBJ_MESH);
 }
 
 ObjMesh::~ObjMesh()
 {
 }
 
-void ObjMesh::update() {}
+void ObjMesh::Update() {}
 
-void ObjMesh::render()
+void ObjMesh::Render()
 {
-    if (mesh)
+    if (mesh_)
     {
-        if (auto gameState = getGameState())
+        if (auto gameState = GetGameState())
         {
-            D3DXMATRIX world = scaleRotTrans(getX(), getY(), getZ(), getAngleX(), getAngleY(), getAngleZ(), getScaleX(), getScaleY(), getScaleZ());
-            const auto& rgb = getColor();
-            D3DCOLORVALUE col = D3DCOLORVALUE{ rgb.getR() / 255.0f, rgb.getG() / 255.0f, rgb.getB() / 255.0f, getAlpha() / 255.0f };
-            gameState->renderer->renderMesh(mesh, col, getBlendType(), world, getAppliedShader(), isZWriteEnabled(), isZTestEnabled(), isFogEnabled());
+            D3DXMATRIX world = CreateScaleRotTransMatrix(GetX(), GetY(), GetZ(), GetAngleX(), GetAngleY(), GetAngleZ(), GetScaleX(), GetScaleY(), GetScaleZ());
+            const auto& rgb = GetColor();
+            D3DCOLORVALUE col = D3DCOLORVALUE{ rgb.GetR() / 255.0f, rgb.GetG() / 255.0f, rgb.GetB() / 255.0f, GetAlpha() / 255.0f };
+            gameState->renderer->RenderMesh(mesh_, col, GetBlendType(), world, GetAppliedShader(), IsZWriteEnabled(), IsZTestEnabled(), IsFogEnabled());
         }
     }
 }
 
-void ObjMesh::setMesh(const std::shared_ptr<Mesh>& mesh)
+void ObjMesh::SetMesh(const std::shared_ptr<Mesh>& mesh)
 {
-    this->mesh = mesh;
+    this->mesh_ = mesh;
 }
 }

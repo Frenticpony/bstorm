@@ -10,8 +10,8 @@ PlayController::PlayController(const std::shared_ptr<Engine>& engine) :
     engine(engine),
     playSpeed(1),
     paused(true),
-    screenWidth(engine->getScreenWidth()),
-    screenHeight(engine->getScreenHeight()),
+    screenWidth(engine->GetScreenWidth()),
+    screenHeight(engine->GetScreenHeight()),
     renderIntersectionEnable(false),
     playerInvincibleEnable(false),
     inputEnable(false)
@@ -24,22 +24,22 @@ void PlayController::tick()
     {
         for (int i = 0; i < playSpeed; i++)
         {
-            if (engine->isPackageFinished()) break;
-            engine->tickFrame();
+            if (engine->IsPackageFinished()) break;
+            engine->TickFrame();
         }
     } catch (Log& log)
     {
         Logger::WriteLog(log);
-        engine->reset(screenWidth, screenHeight);
+        engine->Reset(screenWidth, screenHeight);
     }
 }
 
 void PlayController::pause(bool doPause)
 {
-    if (paused == true && doPause == false && engine->isPackageFinished())
+    if (paused == true && doPause == false && engine->IsPackageFinished())
     {
         reload();
-        if (!engine->isPackageFinished())
+        if (!engine->IsPackageFinished())
         {
             paused = false;
         }
@@ -51,7 +51,7 @@ void PlayController::pause(bool doPause)
 
 void PlayController::close()
 {
-    engine->reset(screenWidth, screenHeight);
+    engine->Reset(screenWidth, screenHeight);
     pause(true);
 }
 
@@ -61,9 +61,9 @@ void PlayController::reload()
     {
         if (mainScript.type == SCRIPT_TYPE_PACKAGE)
         {
-            engine->reset(screenWidth, screenHeight);
-            engine->setPackageMainScript(mainScript);
-            engine->startPackage();
+            engine->Reset(screenWidth, screenHeight);
+            engine->SetPackageMainScript(mainScript);
+            engine->StartPackage();
         } else
         {
             if (mainScript.path.empty())
@@ -80,25 +80,25 @@ void PlayController::reload()
                 {
                     mainScript.type = SCRIPT_TYPE_SINGLE;
                 }
-                engine->reset(screenWidth, screenHeight);
-                engine->setStageMainScript(mainScript);
-                engine->setStagePlayerScript(playerScript);
+                engine->Reset(screenWidth, screenHeight);
+                engine->SetStageMainScript(mainScript);
+                engine->SetStagePlayerScript(playerScript);
                 ScriptInfo defaultPackageMainScript;
                 defaultPackageMainScript.path = DEFAULT_PACKAGE_PATH;
                 defaultPackageMainScript.type = SCRIPT_TYPE_PACKAGE;
                 defaultPackageMainScript.version = SCRIPT_VERSION_PH3;
-                engine->setPackageMainScript(defaultPackageMainScript);
-                engine->startPackage();
+                engine->SetPackageMainScript(defaultPackageMainScript);
+                engine->StartPackage();
             }
         }
     } catch (Log& log)
     {
         Logger::WriteLog(log);
-        engine->reset(screenWidth, screenHeight);
+        engine->Reset(screenWidth, screenHeight);
     }
-    engine->setRenderIntersectionEnable(renderIntersectionEnable);
-    engine->setForcePlayerInvincibleEnable(playerInvincibleEnable);
-    engine->setInputEnable(inputEnable);
+    engine->SetRenderIntersectionEnable(renderIntersectionEnable);
+    engine->SetForcePlayerInvincibleEnable(playerInvincibleEnable);
+    engine->SetInputEnable(inputEnable);
 }
 
 bool PlayController::isPaused() const
@@ -124,7 +124,7 @@ void PlayController::setScript(const ScriptInfo & mainScript, const ScriptInfo &
 
 int64_t PlayController::getElapsedFrame() const
 {
-    return engine->getElapsedFrame();
+    return engine->GetElapsedFrame();
 }
 
 void PlayController::setScreenSize(int width, int height)
@@ -135,7 +135,7 @@ void PlayController::setScreenSize(int width, int height)
 
 bool PlayController::isPackageFinished() const
 {
-    return engine->isPackageFinished();
+    return engine->IsPackageFinished();
 }
 
 bool PlayController::isRenderIntersectionEnabled() const
@@ -146,7 +146,7 @@ bool PlayController::isRenderIntersectionEnabled() const
 void PlayController::setRenderIntersectionEnable(bool enable)
 {
     renderIntersectionEnable = enable;
-    engine->setRenderIntersectionEnable(enable);
+    engine->SetRenderIntersectionEnable(enable);
 }
 
 bool PlayController::isPlayerInvincibleEnabled() const
@@ -157,13 +157,13 @@ bool PlayController::isPlayerInvincibleEnabled() const
 void PlayController::setPlayerInvincibleEnable(bool enable)
 {
     playerInvincibleEnable = enable;
-    engine->setForcePlayerInvincibleEnable(enable);
+    engine->SetForcePlayerInvincibleEnable(enable);
 }
 
 void PlayController::setInputEnable(bool enable)
 {
     inputEnable = enable;
-    engine->setInputEnable(enable);
+    engine->SetInputEnable(enable);
 }
 
 const ScriptInfo& PlayController::getMainScriptInfo() const

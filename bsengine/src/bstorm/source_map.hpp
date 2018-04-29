@@ -23,9 +23,9 @@ struct SourceLoc
 class SourceMap
 {
 public:
-    void logSourcePos(int outputLine, const std::shared_ptr<std::wstring>& path, int srcLine);
-    std::shared_ptr<SourcePos> getSourcePos(int outputLine) const;
+    void LogSourcePos(int outputLine, const std::shared_ptr<std::wstring>& path, int srcLine);
+    std::shared_ptr<SourcePos> GetSourcePos(int outputLine) const;
 private:
-    std::map<int, SourcePos> srcMap;
+    std::map<int, SourcePos> srcMap_;
 };
 }

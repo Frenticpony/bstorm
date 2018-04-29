@@ -29,32 +29,32 @@ ObjShot::ObjShot(bool isPlayerShot, const std::shared_ptr<GameState>& gameState)
     ObjRender(gameState),
     ObjMove(this),
     ObjCol(gameState),
-    playerShotFlag(isPlayerShot),
-    registerFlag(false),
-    intersectionEnable(true),
-    autoDeleteEnable(true),
-    spellResistEnable(false),
-    spellFactorEnable(false),
-    itemChangeEnable(true),
-    angularVelocity(0),
-    damage(1),
-    penetration(5),
-    eraseShotEnable(false),
-    delayTimer(0),
-    deleteFrameTimer(0),
-    useDeleteFrameFlag(false),
-    sourceBlendType(BLEND_NONE),
-    grazeInvalidFlag(false),
-    useTempIntersectionFlag(false),
-    addedShotFrameCnt(0),
-    fadeDeleteFlag(false),
-    fadeDeleteFrame(30),
-    animationFrameCnt(0),
-    animationIdx(0)
+    isPlayerShot_(isPlayerShot),
+    isRegistered_(false),
+    intersectionEnable_(true),
+    autoDeleteEnable_(true),
+    spellResistEnable_(false),
+    spellFactorEnable_(false),
+    itemChangeEnable_(true),
+    angularVelocity_(0),
+    damage_(1),
+    penetration_(5),
+    eraseShotEnable_(false),
+    delayTimer_(0),
+    deleteFrameTimer_(0),
+    isFrameDeleteStarted_(false),
+    sourceBlendType_(BLEND_NONE),
+    isGrazeInvalid_(false),
+    isTempIntersectionMode_(false),
+    addedShotFrameCnt_(0),
+    isFadeDeleteStarted_(false),
+    fadeDeleteFrame_(30),
+    animationFrameCnt_(0),
+    animationIdx_(0)
 {
-    setType(OBJ_SHOT);
-    setBlendType(BLEND_NONE);
-    if (playerShotFlag)
+    SetType(OBJ_SHOT);
+    SetBlendType(BLEND_NONE);
+    if (isPlayerShot_)
     {
         gameState->shotCounter->playerShotCount++;
     } else
@@ -65,17 +65,17 @@ ObjShot::ObjShot(bool isPlayerShot, const std::shared_ptr<GameState>& gameState)
 
 ObjShot::~ObjShot()
 {
-    if (auto state = getGameState())
+    if (auto state = GetGameState())
     {
-        for (auto& addedShot : addedShots)
+        for (auto& addedShot : addedShots_)
         {
-            state->objTable->del(addedShot.objId);
+            state->objTable->Delete(addedShot.objId);
         }
     }
     // FUTURE :デストラクタではなくdead時にカウントする
-    if (auto gameState = getGameState())
+    if (auto gameState = GetGameState())
     {
-        if (isPlayerShot())
+        if (IsPlayerShot())
         {
             gameState->shotCounter->playerShotCount--;
         } else
@@ -85,36 +85,36 @@ ObjShot::~ObjShot()
     }
 }
 
-void ObjShot::update()
+void ObjShot::Update()
 {
-    if (isRegistered())
+    if (IsRegistered())
     {
-        if (getPenetration() <= 0) { die(); return; }
-        if (!isDelay())
+        if (GetPenetration() <= 0) { Die(); return; }
+        if (!IsDelay())
         {
-            move();
-            checkAutoDelete(getX(), getY());
-            if (shotData)
+            Move();
+            CheckAutoDelete(GetX(), GetY());
+            if (shotData_)
             {
-                setAngleZ(getAngleZ() + getAngularVelocity());
-                updateAnimationPosition();
+                SetAngleZ(GetAngleZ() + GetAngularVelocity());
+                UpdateAnimationPosition();
             }
         }
-        tickAddedShotFrameCount();
-        tickDelayTimer();
-        tickDeleteFrameTimer();
-        tickFadeDeleteTimer();
+        TickAddedShotFrameCount();
+        TickDelayTimer();
+        TickDeleteFrameTimer();
+        TickFadeDeleteTimer();
     }
-    clearOldTempIntersection();
+    ClearOldTempIntersection();
 }
 
-void ObjShot::render()
+void ObjShot::Render()
 {
-    if (isRegistered())
+    if (IsRegistered())
     {
-        if (shotData)
+        if (shotData_)
         {
-            float delayScale = 2.0f - (23.0f - std::min(23, getDelay())) / 16.0f; // delay=23から32Fで0になるように設定
+            float delayScale = 2.0f - (23.0f - std::min(23, GetDelay())) / 16.0f; // delay=23から32Fで0になるように設定
 
             // カーブレーザーのときは遅延光がちょっと大きい
             if (GetType() == OBJ_CURVE_LASER)
@@ -124,127 +124,127 @@ void ObjShot::render()
 
             /* 配置 */
             // NOTE : fixedAngleじゃないなら移動方向に向ける
-            D3DXMATRIX world = scaleRotTrans(getX(), getY(), 0.0f,
-                                             getAngleX(), getAngleY(), getAngleZ() + (shotData->fixedAngle ? 0.0f : getAngle() + 90.0f),
-                                             isDelay() ? delayScale : getScaleX(), isDelay() ? delayScale : getScaleY(), 1.0f);
+            D3DXMATRIX world = CreateScaleRotTransMatrix(GetX(), GetY(), 0.0f,
+                                             GetAngleX(), GetAngleY(), GetAngleZ() + (shotData_->fixedAngle ? 0.0f : GetAngle() + 90.0f),
+                                             IsDelay() ? delayScale : GetScaleX(), IsDelay() ? delayScale : GetScaleY(), 1.0f);
 
             /* ブレンド方法の選択 */
             int shotBlend = BLEND_NONE;
-            if (!isDelay())
+            if (!IsDelay())
             {
-                if (getBlendType() == BLEND_NONE)
+                if (GetBlendType() == BLEND_NONE)
                 {
-                    shotBlend = shotData->render;
+                    shotBlend = shotData_->render;
                 } else
                 {
                     /* ObjRenderで指定されたintがある場合はそちらを使う */
-                    shotBlend = getBlendType();
+                    shotBlend = GetBlendType();
                 }
             } else
             {
                 /* 遅延時間時 */
-                if (getSourceBlendType() == BLEND_NONE)
+                if (GetSourceBlendType() == BLEND_NONE)
                 {
-                    shotBlend = shotData->delayRender;
+                    shotBlend = shotData_->delayRender;
                 } else
                 {
-                    shotBlend = getSourceBlendType();
+                    shotBlend = GetSourceBlendType();
                 }
             }
 
             // NOTE : ADD_RGBはADD_ARGBとして解釈
-            if (getBlendType() == BLEND_NONE && shotBlend == BLEND_ADD_RGB)
+            if (GetBlendType() == BLEND_NONE && shotBlend == BLEND_ADD_RGB)
             {
                 shotBlend = BLEND_ADD_ARGB;
             }
 
             // 色と透明度
             D3DCOLOR color;
-            if (!isDelay())
+            if (!IsDelay())
             {
-                color = toD3DCOLOR(getColor(), (int)(getFadeScale() * std::min(shotData->alpha, getAlpha())));
+                color = ToD3DCOLOR(GetColor(), (int)(GetFadeScale() * std::min(shotData_->alpha, GetAlpha())));
             } else
             {
                 // NOTE: 遅延光は透明度反映無し
-                color = toD3DCOLOR(shotData->delayColor, 0xff);
+                color = ToD3DCOLOR(shotData_->delayColor, 0xff);
             }
 
-            auto vertices = rectToVertices(color, shotData->texture->getWidth(), shotData->texture->getHeight(), isDelay() ? shotData->delayRect :
-                (animationIdx >= 0 && animationIdx < shotData->animationData.size()) ? shotData->animationData[animationIdx].rect :
-                                           shotData->rect);
+            auto vertices = RectToVertices(color, shotData_->texture->GetWidth(), shotData_->texture->GetHeight(), IsDelay() ? shotData_->delayRect :
+                (animationIdx_ >= 0 && animationIdx_ < shotData_->animationData.size()) ? shotData_->animationData[animationIdx_].rect :
+                                           shotData_->rect);
 
-            if (auto state = getGameState())
+            if (auto state = GetGameState())
             {
-                state->renderer->renderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData->texture->getTexture(), shotBlend, world, getAppliedShader(), isPermitCamera(), true);
+                state->renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData_->texture->GetTexture(), shotBlend, world, GetAppliedShader(), IsPermitCamera(), true);
             }
         }
-        renderIntersection();
+        RenderIntersection();
     }
 }
 
-double ObjShot::getDamage() const
+double ObjShot::GetDamage() const
 {
-    return damage;
+    return damage_;
 }
 
-void ObjShot::setDamage(double damage) { this->damage = damage; }
+void ObjShot::SetDamage(double damage) { this->damage_ = damage; }
 
-int ObjShot::getPenetration() const
+int ObjShot::GetPenetration() const
 {
-    return penetration;
+    return penetration_;
 }
 
-void ObjShot::setPenetration(int penetration) { this->penetration = penetration; }
+void ObjShot::SetPenetration(int penetration) { this->penetration_ = penetration; }
 
-int ObjShot::getDelay() const
+int ObjShot::GetDelay() const
 {
-    return delayTimer;
+    return delayTimer_;
 }
 
-void ObjShot::setDelay(int delay) { delayTimer = std::max(delay, 0); }
+void ObjShot::SetDelay(int delay) { delayTimer_ = std::max(delay, 0); }
 
-bool ObjShot::isDelay() const
+bool ObjShot::IsDelay() const
 {
-    return delayTimer > 0;
+    return delayTimer_ > 0;
 }
 
-int ObjShot::getSourceBlendType() const
+int ObjShot::GetSourceBlendType() const
 {
-    return sourceBlendType;
+    return sourceBlendType_;
 }
 
-void ObjShot::setSourceBlendType(int blendType)
+void ObjShot::SetSourceBlendType(int blendType)
 {
-    sourceBlendType = blendType;
+    sourceBlendType_ = blendType;
 }
 
-float ObjShot::getAngularVelocity() const
+float ObjShot::GetAngularVelocity() const
 {
-    return angularVelocity;
+    return angularVelocity_;
 }
 
-void ObjShot::setAngularVelocity(float angularVelocity)
+void ObjShot::SetAngularVelocity(float angularVelocity)
 {
-    this->angularVelocity = angularVelocity;
+    this->angularVelocity_ = angularVelocity;
 }
 
-bool ObjShot::isSpellResistEnabled() const { return spellResistEnable; }
+bool ObjShot::IsSpellResistEnabled() const { return spellResistEnable_; }
 
-void ObjShot::setSpellResistEnable(bool enable) { spellResistEnable = enable; }
+void ObjShot::SetSpellResistEnable(bool enable) { spellResistEnable_ = enable; }
 
-bool ObjShot::isSpellFactorEnabled() const { return spellFactorEnable; }
+bool ObjShot::IsSpellFactorEnabled() const { return spellFactorEnable_; }
 
-void ObjShot::setSpellFactor(bool enable) { spellFactorEnable = enable; }
+void ObjShot::SetSpellFactor(bool enable) { spellFactorEnable_ = enable; }
 
-bool ObjShot::isEraseShotEnabled() const { return eraseShotEnable; }
+bool ObjShot::IsEraseShotEnabled() const { return eraseShotEnable_; }
 
-void ObjShot::setEraseShotEnable(bool enable)
+void ObjShot::SetEraseShotEnable(bool enable)
 {
-    eraseShotEnable = enable;
-    if (isPlayerShot())
+    eraseShotEnable_ = enable;
+    if (IsPlayerShot())
     {
         // 既に作られている判定に弾消し属性を付与
-        for (auto& isect : ObjCol::getIntersections())
+        for (auto& isect : ObjCol::GetIntersections())
         {
             if (auto shotIsect = std::dynamic_pointer_cast<ShotIntersection>(isect))
             {
@@ -252,7 +252,7 @@ void ObjShot::setEraseShotEnable(bool enable)
             }
         }
 
-        for (auto& isect : ObjCol::getTempIntersections())
+        for (auto& isect : ObjCol::GetTempIntersections())
         {
             if (auto shotIsect = std::dynamic_pointer_cast<ShotIntersection>(isect))
             {
@@ -262,229 +262,229 @@ void ObjShot::setEraseShotEnable(bool enable)
     }
 }
 
-bool ObjShot::isItemChangeEnabled() const
+bool ObjShot::IsItemChangeEnabled() const
 {
-    return itemChangeEnable;
+    return itemChangeEnable_;
 }
 
-void ObjShot::setItemChange(bool enable) { itemChangeEnable = enable; }
+void ObjShot::SetItemChangeEnable(bool enable) { itemChangeEnable_ = enable; }
 
-bool ObjShot::isAutoDeleteEnabled() const
+bool ObjShot::IsAutoDeleteEnabled() const
 {
-    return autoDeleteEnable;
+    return autoDeleteEnable_;
 }
 
-void ObjShot::setAutoDeleteEnable(bool enable)
+void ObjShot::SetAutoDeleteEnable(bool enable)
 {
-    autoDeleteEnable = enable;
+    autoDeleteEnable_ = enable;
 }
 
-void ObjShot::addIntersection(const std::shared_ptr<ShotIntersection>& isect)
+void ObjShot::AddIntersection(const std::shared_ptr<ShotIntersection>& isect)
 {
-    if (!useTempIntersectionFlag)
+    if (!isTempIntersectionMode_)
     {
-        if (auto state = getGameState())
+        if (auto state = GetGameState())
         {
             state->colDetector->Add(isect);
         }
-        ObjCol::pushIntersection(isect);
+        ObjCol::PushBackIntersection(isect);
     }
 }
 
-void ObjShot::addTempIntersection(const std::shared_ptr<ShotIntersection>& isect)
+void ObjShot::AddTempIntersection(const std::shared_ptr<ShotIntersection>& isect)
 {
-    if (!useTempIntersectionFlag)
+    if (!isTempIntersectionMode_)
     {
-        useTempIntersectionFlag = true;
-        clearIntersection();
+        isTempIntersectionMode_ = true;
+        ClearIntersection();
     }
-    if (auto state = getGameState())
+    if (auto state = GetGameState())
     {
         state->colDetector->Add(isect);
     }
-    ObjCol::addTempIntersection(isect);
+    ObjCol::AddTempIntersection(isect);
 }
 
-void ObjShot::addIntersectionCircleA1(float r)
+void ObjShot::AddIntersectionCircleA1(float r)
 {
-    addIntersectionCircleA2(getX(), getY(), r);
+    AddIntersectionCircleA2(GetX(), GetY(), r);
 }
 
-void ObjShot::addIntersectionCircleA2(float x, float y, float r)
+void ObjShot::AddIntersectionCircleA2(float x, float y, float r)
 {
-    addIntersection(std::make_shared<ShotIntersection>(x, y, r, shared_from_this(), false));
+    AddIntersection(std::make_shared<ShotIntersection>(x, y, r, shared_from_this(), false));
 }
 
-void ObjShot::addIntersectionLine(float x1, float y1, float x2, float y2, float width)
+void ObjShot::AddIntersectionLine(float x1, float y1, float x2, float y2, float width)
 {
-    addIntersection(std::make_shared<ShotIntersection>(x1, y1, x2, y2, width, shared_from_this(), false));
+    AddIntersection(std::make_shared<ShotIntersection>(x1, y1, x2, y2, width, shared_from_this(), false));
 }
 
-void ObjShot::addTempIntersectionCircleA1(float r)
+void ObjShot::AddTempIntersectionCircleA1(float r)
 {
-    addTempIntersectionCircleA2(getX(), getY(), r);
+    AddTempIntersectionCircleA2(GetX(), GetY(), r);
 }
 
-void ObjShot::addTempIntersectionCircleA2(float x, float y, float r)
+void ObjShot::AddTempIntersectionCircleA2(float x, float y, float r)
 {
-    addTempIntersection(std::make_shared<ShotIntersection>(x, y, r, shared_from_this(), true));
+    AddTempIntersection(std::make_shared<ShotIntersection>(x, y, r, shared_from_this(), true));
 }
 
-void ObjShot::addTempIntersectionLine(float x1, float y1, float x2, float y2, float width)
+void ObjShot::AddTempIntersectionLine(float x1, float y1, float x2, float y2, float width)
 {
-    addTempIntersection(std::make_shared<ShotIntersection>(x1, y1, x2, y2, width, shared_from_this(), true));
+    AddTempIntersection(std::make_shared<ShotIntersection>(x1, y1, x2, y2, width, shared_from_this(), true));
 }
 
-bool ObjShot::isIntersectionEnabled() const
+bool ObjShot::IsIntersectionEnabled() const
 {
-    return intersectionEnable;
+    return intersectionEnable_;
 }
 
-void ObjShot::setIntersectionEnable(bool enable) { intersectionEnable = enable; }
+void ObjShot::SetIntersectionEnable(bool enable) { intersectionEnable_ = enable; }
 
-bool ObjShot::isTempIntersectionMode() const
+bool ObjShot::IsTempIntersectionMode() const
 {
-    return useDeleteFrameFlag;
+    return isFrameDeleteStarted_;
 }
 
-bool ObjShot::isRegistered() const { return registerFlag; }
+bool ObjShot::IsRegistered() const { return isRegistered_; }
 
-void ObjShot::regist()
+void ObjShot::Regist()
 {
-    registerFlag = true;
+    isRegistered_ = true;
 }
 
-bool ObjShot::isPlayerShot() const { return playerShotFlag; }
+bool ObjShot::IsPlayerShot() const { return isPlayerShot_; }
 
-const std::shared_ptr<ShotData>& ObjShot::getShotData() const
+const std::shared_ptr<ShotData>& ObjShot::GetShotData() const
 {
-    return shotData;
+    return shotData_;
 }
 
-void ObjShot::setShotData(const std::shared_ptr<ShotData>& data)
+void ObjShot::SetShotData(const std::shared_ptr<ShotData>& data)
 {
     if (data->texture)
     {
-        shotData = data;
-        clearIntersection();
-        if (shotData)
+        shotData_ = data;
+        ClearIntersection();
+        if (shotData_)
         {
-            angularVelocity = shotData->angularVelocity;
-            if (auto state = getGameState())
+            angularVelocity_ = shotData_->angularVelocity;
+            if (auto state = GetGameState())
             {
-                if (!useTempIntersectionFlag)
+                if (!isTempIntersectionMode_)
                 {
-                    for (const auto& col : shotData->collisions)
+                    for (const auto& col : shotData_->collisions)
                     {
-                        addIntersectionCircleA2(getX() + col.x, getY() + col.y, col.r);
+                        AddIntersectionCircleA2(GetX() + col.x, GetY() + col.y, col.r);
                     }
                 }
-                if (shotData->useAngularVelocityRand)
+                if (shotData_->useAngularVelocityRand)
                 {
-                    angularVelocity = state->randGenerator->randDouble(shotData->angularVelocityRandMin, shotData->angularVelocityRandMax);
+                    angularVelocity_ = state->randGenerator->RandDouble(shotData_->angularVelocityRandMin, shotData_->angularVelocityRandMax);
                 }
             }
         }
     }
 }
 
-int ObjShot::getAnimationFrameCount() const
+int ObjShot::GetAnimationFrameCount() const
 {
-    return animationFrameCnt;
+    return animationFrameCnt_;
 }
 
-int ObjShot::getAnimationIndex() const
+int ObjShot::GetAnimationIndex() const
 {
-    return animationIdx;
+    return animationIdx_;
 }
 
-void ObjShot::addShotA1(int shotObjId, int frame)
+void ObjShot::AddShotA1(int shotObjId, int frame)
 {
-    if (isDead()) return;
-    if (auto state = getGameState())
+    if (IsDead()) return;
+    if (auto state = GetGameState())
     {
         if (auto shot = state->objTable->Get<ObjShot>(shotObjId))
         {
-            shot->registerFlag = false;
-            addedShots.emplace_back(shotObjId, frame);
+            shot->isRegistered_ = false;
+            addedShots_.emplace_back(shotObjId, frame);
         }
     }
 }
 
-void ObjShot::addShotA2(int shotObjId, int frame, float dist, float angle)
+void ObjShot::AddShotA2(int shotObjId, int frame, float dist, float angle)
 {
-    if (isDead()) return;
-    if (auto state = getGameState())
+    if (IsDead()) return;
+    if (auto state = GetGameState())
     {
         if (auto shot = state->objTable->Get<ObjShot>(shotObjId))
         {
-            shot->registerFlag = false;
-            addedShots.emplace_back(shotObjId, frame, dist, angle);
+            shot->isRegistered_ = false;
+            addedShots_.emplace_back(shotObjId, frame, dist, angle);
         }
     }
 }
 
-int ObjShot::getFrameCountForAddShot() const
+int ObjShot::GetFrameCountForAddShot() const
 {
-    return addedShotFrameCnt;
+    return addedShotFrameCnt_;
 }
 
-const std::list<ObjShot::AddedShot>& ObjShot::getAddedShot() const
+const std::list<ObjShot::AddedShot>& ObjShot::GetAddedShot() const
 {
-    return addedShots;
+    return addedShots_;
 }
 
-void ObjShot::generateDefaultBonusItem()
+void ObjShot::GenerateDefaultBonusItem()
 {
-    if (auto state = getGameState())
+    if (auto state = GetGameState())
     {
-        state->defaultBonusItemSpawner->spawn(getX(), getY(), state);
+        state->defaultBonusItemSpawner->Spawn(GetX(), GetY(), state);
     }
 }
 
-void ObjShot::toItem()
+void ObjShot::ToItem()
 {
-    if (isDead()) return;
-    if (isItemChangeEnabled())
+    if (IsDead()) return;
+    if (IsItemChangeEnabled())
     {
-        if (auto gameState = getGameState())
+        if (auto gameState = GetGameState())
         {
             // EV_DELETE_SHOT_TO_ITEM 
             auto evArgs = std::make_unique<DnhArray>();
-            evArgs->PushBack(std::make_unique<DnhReal>(getID()));
-            evArgs->PushBack(std::make_unique<DnhArray>(Point2D(getX(), getY())));
+            evArgs->PushBack(std::make_unique<DnhReal>(GetID()));
+            evArgs->PushBack(std::make_unique<DnhArray>(Point2D(GetX(), GetY())));
             if (auto itemScript = gameState->itemScript.lock())
             {
-                itemScript->notifyEvent(EV_DELETE_SHOT_TO_ITEM, evArgs);
+                itemScript->NotifyEvent(EV_DELETE_SHOT_TO_ITEM, evArgs);
             }
             if (gameState->deleteShotToItemEventOnShotScriptEnable)
             {
                 if (auto shotScript = gameState->shotScript.lock())
                 {
-                    shotScript->notifyEvent(EV_DELETE_SHOT_TO_ITEM, evArgs);
+                    shotScript->NotifyEvent(EV_DELETE_SHOT_TO_ITEM, evArgs);
                 }
             }
             if (gameState->defaultBonusItemEnable)
             {
-                generateDefaultBonusItem();
+                GenerateDefaultBonusItem();
             }
         }
     }
-    die();
+    Die();
 }
 
-void ObjShot::eraseWithSpell()
+void ObjShot::EraseWithSpell()
 {
-    if (!isSpellResistEnabled())
+    if (!IsSpellResistEnabled())
     {
-        toItem();
+        ToItem();
     }
 }
 
-void ObjShot::deleteImmediate()
+void ObjShot::DeleteImmediate()
 {
-    if (isDead()) return;
-    if (auto gameState = getGameState())
+    if (IsDead()) return;
+    if (auto gameState = GetGameState())
     {
         // EV_DELETE_SHOT_IMMEDIATE
         if (gameState->deleteShotImmediateEventOnShotScriptEnable)
@@ -492,127 +492,127 @@ void ObjShot::deleteImmediate()
             if (auto shotScript = gameState->shotScript.lock())
             {
                 auto evArgs = std::make_unique<DnhArray>();
-                evArgs->PushBack(std::make_unique<DnhReal>(getID()));
-                evArgs->PushBack(std::make_unique<DnhArray>(Point2D(getX(), getY())));
-                shotScript->notifyEvent(EV_DELETE_SHOT_IMMEDIATE, evArgs);
+                evArgs->PushBack(std::make_unique<DnhReal>(GetID()));
+                evArgs->PushBack(std::make_unique<DnhArray>(Point2D(GetX(), GetY())));
+                shotScript->NotifyEvent(EV_DELETE_SHOT_IMMEDIATE, evArgs);
             }
         }
     }
-    die();
+    Die();
 }
 
-void ObjShot::fadeDelete()
+void ObjShot::FadeDelete()
 {
-    if (!isRegistered()) return;
-    if (fadeDeleteFlag) return;
-    fadeDeleteFlag = true;
-    fadeDeleteTimer = fadeDeleteFrame;
+    if (!IsRegistered()) return;
+    if (isFadeDeleteStarted_) return;
+    isFadeDeleteStarted_ = true;
+    fadeDeleteTimer_ = fadeDeleteFrame_;
 }
 
-float ObjShot::getFadeScale() const
+float ObjShot::GetFadeScale() const
 {
-    if (isFadeDeleteStarted())
+    if (IsFadeDeleteStarted())
     {
-        return 1.0f * fadeDeleteTimer / fadeDeleteFrame;
+        return 1.0f * fadeDeleteTimer_ / fadeDeleteFrame_;
     }
     return 1.0f;
 }
 
-bool ObjShot::isFadeDeleteStarted() const
+bool ObjShot::IsFadeDeleteStarted() const
 {
-    return fadeDeleteFlag;
+    return isFadeDeleteStarted_;
 }
 
-bool ObjShot::isFrameDeleteStarted() const
+bool ObjShot::IsFrameDeleteStarted() const
 {
-    return useDeleteFrameFlag;
+    return isFrameDeleteStarted_;
 }
 
-int ObjShot::getDeleteFrameTimer() const
+int ObjShot::GetDeleteFrameTimer() const
 {
-    return deleteFrameTimer;
+    return deleteFrameTimer_;
 }
 
-int ObjShot::getFadeDeleteFrameTimer() const
+int ObjShot::GetFadeDeleteFrameTimer() const
 {
-    return fadeDeleteTimer;
+    return fadeDeleteTimer_;
 }
 
-void ObjShot::setDeleteFrame(int frame)
+void ObjShot::SetDeleteFrame(int frame)
 {
-    useDeleteFrameFlag = true;
-    deleteFrameTimer = frame;
+    isFrameDeleteStarted_ = true;
+    deleteFrameTimer_ = frame;
 }
 
-void ObjShot::transIntersection(float dx, float dy)
+void ObjShot::TransIntersection(float dx, float dy)
 {
-    ObjCol::transIntersection(dx, dy);
+    ObjCol::TransIntersection(dx, dy);
 }
 
-void ObjShot::renderIntersection()
+void ObjShot::RenderIntersection()
 {
-    ObjCol::renderIntersection(isPermitCamera());
+    ObjCol::RenderIntersection(IsPermitCamera());
 }
 
-void ObjShot::checkAutoDelete(float x, float y)
+void ObjShot::CheckAutoDelete(float x, float y)
 {
-    if (auto state = getGameState())
+    if (auto state = GetGameState())
     {
-        if (autoDeleteEnable && state->shotAutoDeleteClip->IsOutOfClip(x, y))
+        if (autoDeleteEnable_ && state->shotAutoDeleteClip->IsOutOfClip(x, y))
         {
-            die();
+            Die();
         }
     }
 }
 
-void ObjShot::updateAnimationPosition()
+void ObjShot::UpdateAnimationPosition()
 {
-    if (shotData)
+    if (shotData_)
     {
-        if (animationIdx < 0 || animationIdx >= shotData->animationData.size())
+        if (animationIdx_ < 0 || animationIdx_ >= shotData_->animationData.size())
         {
-            animationFrameCnt = animationIdx = 0;
+            animationFrameCnt_ = animationIdx_ = 0;
             return;
         }
-        animationFrameCnt++;
-        if (shotData->animationData[animationIdx].frame <= animationFrameCnt)
+        animationFrameCnt_++;
+        if (shotData_->animationData[animationIdx_].frame <= animationFrameCnt_)
         {
-            animationFrameCnt = 0;
-            animationIdx++;
-            if (animationIdx >= shotData->animationData.size()) animationIdx = 0;
+            animationFrameCnt_ = 0;
+            animationIdx_++;
+            if (animationIdx_ >= shotData_->animationData.size()) animationIdx_ = 0;
         }
     }
 }
 
-void ObjShot::tickDelayTimer()
+void ObjShot::TickDelayTimer()
 {
-    delayTimer = std::max(0, delayTimer - 1);
+    delayTimer_ = std::max(0, delayTimer_ - 1);
 }
 
-void ObjShot::tickDeleteFrameTimer()
+void ObjShot::TickDeleteFrameTimer()
 {
-    if (useDeleteFrameFlag)
+    if (isFrameDeleteStarted_)
     {
-        if (!isDelay())
+        if (!IsDelay())
         {
-            if (deleteFrameTimer <= 0)
+            if (deleteFrameTimer_ <= 0)
             {
-                deleteImmediate();
+                DeleteImmediate();
             }
-            deleteFrameTimer--;
+            deleteFrameTimer_--;
         }
     }
 }
 
-void ObjShot::tickAddedShotFrameCount()
+void ObjShot::TickAddedShotFrameCount()
 {
-    if (isDelay() || isDead()) return;
-    auto it = addedShots.begin();
-    while (it != addedShots.end())
+    if (IsDelay() || IsDead()) return;
+    auto it = addedShots_.begin();
+    while (it != addedShots_.end())
     {
-        if (it->frame == addedShotFrameCnt)
+        if (it->frame == addedShotFrameCnt_)
         {
-            if (auto state = getGameState())
+            if (auto state = GetGameState())
             {
                 if (auto shot = state->objTable->Get<ObjShot>(it->objId))
                 {
@@ -620,44 +620,44 @@ void ObjShot::tickAddedShotFrameCount()
                     float dy = 0;
                     if (it->type == AddedShot::Type::A1)
                     {
-                        dx = shot->getX();
-                        dy = shot->getX();
+                        dx = shot->GetX();
+                        dy = shot->GetX();
                     } else if (it->type == AddedShot::Type::A2)
                     {
                         float baseAngle = 0;
                         auto stLaser = dynamic_cast<ObjStLaser*>(this);
                         if (stLaser != NULL)
                         {
-                            baseAngle = stLaser->getLaserAngle();
-                            shot->setAngle(baseAngle + it->angle);
+                            baseAngle = stLaser->GetLaserAngle();
+                            shot->SetAngle(baseAngle + it->angle);
                         } else
                         {
-                            baseAngle = getAngle();
+                            baseAngle = GetAngle();
                         }
                         float dir = D3DXToRadian(baseAngle + it->angle);
                         dx = it->dist * cos(dir);
                         dy = it->dist * sin(dir);
                     }
-                    shot->setMovePosition(getX() + dx, getY() + dy);
-                    shot->regist();
+                    shot->SetMovePosition(GetX() + dx, GetY() + dy);
+                    shot->Regist();
                 }
             }
-            it = addedShots.erase(it);
+            it = addedShots_.erase(it);
         } else
         {
             it++;
         }
     }
-    addedShotFrameCnt++;
+    addedShotFrameCnt_++;
 }
 
-void ObjShot::tickFadeDeleteTimer()
+void ObjShot::TickFadeDeleteTimer()
 {
-    if (!isFadeDeleteStarted() || isDead()) return;
-    fadeDeleteTimer--;
-    if (fadeDeleteTimer <= 0)
+    if (!IsFadeDeleteStarted() || IsDead()) return;
+    fadeDeleteTimer_--;
+    if (fadeDeleteTimer_ <= 0)
     {
-        if (auto gameState = getGameState())
+        if (auto gameState = GetGameState())
         {
             //EV_DELETE_SHOT_FADE
             if (gameState->deleteShotFadeEventOnShotScriptEnable)
@@ -665,24 +665,24 @@ void ObjShot::tickFadeDeleteTimer()
                 if (auto shotScript = gameState->shotScript.lock())
                 {
                     auto evArgs = std::make_unique<DnhArray>();
-                    evArgs->PushBack(std::make_unique<DnhReal>(getID()));
-                    evArgs->PushBack(std::make_unique<DnhArray>(Point2D{ getX(), getY() }));
-                    shotScript->notifyEvent(EV_DELETE_SHOT_FADE, evArgs);
+                    evArgs->PushBack(std::make_unique<DnhReal>(GetID()));
+                    evArgs->PushBack(std::make_unique<DnhArray>(Point2D{ GetX(), GetY() }));
+                    shotScript->NotifyEvent(EV_DELETE_SHOT_FADE, evArgs);
                 }
             }
         }
-        die();
+        Die();
     }
 }
 
-void ObjShot::graze()
+void ObjShot::Graze()
 {
-    grazeInvalidFlag = true;
+    isGrazeInvalid_ = true;
 }
 
-bool ObjShot::isGrazeEnabled() const
+bool ObjShot::IsGrazeEnabled() const
 {
-    return !grazeInvalidFlag;
+    return !isGrazeInvalid_;
 }
 
 ObjShot::AddedShot::AddedShot(int objId, int frame) :
@@ -705,480 +705,481 @@ ObjShot::AddedShot::AddedShot(int objId, int frame, float dist, float angle) :
 
 ObjLaser::ObjLaser(bool isPlayerShot, const std::shared_ptr<GameState>& gameState) :
     ObjShot(isPlayerShot, gameState),
-    length(0),
-    renderWidth(0),
-    intersectionWidth(0),
-    hasIntersectionWidth(false),
-    grazeInvalidFrame(20),
-    grazeInvalidTimer(0),
-    itemDistance(25)
+    length_(0),
+    renderWidth_(0),
+    intersectionWidth_(0),
+    hasIntersectionWidth_(false),
+    grazeInvalidFrame_(20),
+    grazeInvalidTimer_(0),
+    itemDistance_(25)
 {
-    setSpellResistEnable(true);
-    setPenetration(1 << 24);
+    SetSpellResistEnable(true);
+    SetPenetration(1 << 24);
 }
 
-void ObjLaser::setShotData(const std::shared_ptr<ShotData>& shotData)
+void ObjLaser::SetShotData(const std::shared_ptr<ShotData>& shotData)
 {
-    this->shotData = shotData;
+    this->shotData_ = shotData;
 }
 
-bool ObjLaser::isGrazeEnabled() const
+bool ObjLaser::IsGrazeEnabled() const
 {
-    return !grazeInvalidFlag && grazeInvalidFrame > 0;
+    return !isGrazeInvalid_ && grazeInvalidFrame_ > 0;
 }
 
-void ObjLaser::graze()
+void ObjLaser::Graze()
 {
-    grazeInvalidFlag = true;
-    grazeInvalidTimer = grazeInvalidFrame;
+    isGrazeInvalid_ = true;
+    grazeInvalidTimer_ = grazeInvalidFrame_;
 }
 
-void ObjLaser::setLength(float limit)
+void ObjLaser::SetLength(float len)
 {
-    length = limit;
+    length_ = len;
 }
 
-float ObjLaser::getRenderWidth() const { return renderWidth; }
+float ObjLaser::GetRenderWidth() const { return renderWidth_; }
 
-float ObjLaser::getLength() const
+float ObjLaser::GetLength() const
 {
-    return length;
+    return length_;
 }
 
-void ObjLaser::setRenderWidth(float width)
+void ObjLaser::SetRenderWidth(float width)
 {
-    renderWidth = width;
-    if (!hasIntersectionWidth)
+    renderWidth_ = width;
+    if (!hasIntersectionWidth_)
     {
-        setIntersectionWidth(width / 2);
+        SetIntersectionWidth(width / 2);
     }
 }
 
-float ObjLaser::getIntersectionWidth() const
+float ObjLaser::GetIntersectionWidth() const
 {
-    return intersectionWidth;
+    return intersectionWidth_;
 }
 
-void ObjLaser::setIntersectionWidth(float width)
+void ObjLaser::SetIntersectionWidth(float width)
 {
     width = abs(width);
-    if (intersectionWidth != width)
+    if (intersectionWidth_ != width)
     {
-        ObjCol::setWidthIntersection(width);
-        intersectionWidth = width;
+        ObjCol::SetWidthIntersection(width);
+        intersectionWidth_ = width;
     }
-    hasIntersectionWidth = true;
+    hasIntersectionWidth_ = true;
 }
 
-float ObjLaser::getGrazeInvalidFrame() const
+float ObjLaser::GetGrazeInvalidFrame() const
 {
-    return grazeInvalidFrame;
+    return grazeInvalidFrame_;
 }
 
-void ObjLaser::setGrazeInvalidFrame(int frame)
+void ObjLaser::SetGrazeInvalidFrame(int frame)
 {
-    grazeInvalidFrame = frame;
+    grazeInvalidFrame_ = frame;
 }
 
-float ObjLaser::getGrazeInvalidTimer() const
+float ObjLaser::GetGrazeInvalidTimer() const
 {
-    return grazeInvalidTimer;
+    return grazeInvalidTimer_;
 }
 
-float ObjLaser::getItemDistance() const
+float ObjLaser::GetItemDistance() const
 {
-    return itemDistance;
+    return itemDistance_;
 }
 
-void ObjLaser::setItemDistance(float distance)
+void ObjLaser::SetItemDistance(float distance)
 {
-    itemDistance = abs(distance);
+    itemDistance_ = abs(distance);
 }
 
-void ObjLaser::tickGrazeInvalidTimer()
+void ObjLaser::TickGrazeInvalidTimer()
 {
-    if (grazeInvalidFlag)
+    if (isGrazeInvalid_)
     {
-        grazeInvalidTimer--;
+        grazeInvalidTimer_--;
     }
-    if (grazeInvalidTimer == 0)
+    if (grazeInvalidTimer_ == 0)
     {
-        grazeInvalidFlag = false;
+        isGrazeInvalid_ = false;
     }
 }
 
 ObjLooseLaser::ObjLooseLaser(bool isPlayerShot, const std::shared_ptr<GameState>& gameState) :
     ObjLaser(isPlayerShot, gameState),
-    renderLength(0),
-    invalidLengthHead(0),
-    invalidLengthTail(0),
-    defaultInvalidLengthEnable(true)
+    renderLength_(0),
+    invalidLengthHead_(0),
+    invalidLengthTail_(0),
+    defaultInvalidLengthEnable_(true)
 {
-    setType(OBJ_LOOSE_LASER);
+    SetType(OBJ_LOOSE_LASER);
 }
 
-void ObjLooseLaser::update()
+void ObjLooseLaser::Update()
 {
-    if (isRegistered())
+    if (IsRegistered())
     {
-        if (getPenetration() <= 0) { die(); return; }
-        if (!isDelay())
+        if (GetPenetration() <= 0) { Die(); return; }
+        if (!IsDelay())
         {
-            move();
-            extend();
-            Point2D tail = getTail();
-            checkAutoDelete(tail.x, tail.y);
-            updateAnimationPosition();
+            Move();
+            Extend();
+            Point2D tail = GetTail();
+            CheckAutoDelete(tail.x, tail.y);
+            UpdateAnimationPosition();
         }
-        tickAddedShotFrameCount();
-        tickDelayTimer();
-        tickDeleteFrameTimer();
-        tickFadeDeleteTimer();
-        tickGrazeInvalidTimer();
+        TickAddedShotFrameCount();
+        TickDelayTimer();
+        TickDeleteFrameTimer();
+        TickFadeDeleteTimer();
+        TickGrazeInvalidTimer();
     }
-    clearOldTempIntersection();
+    ClearOldTempIntersection();
 }
 
-void ObjLooseLaser::render()
+void ObjLooseLaser::Render()
 {
-    if (isRegistered())
+    if (IsRegistered())
     {
-        if (const auto& shotData = getShotData())
+        if (const auto& shotData = GetShotData())
         {
-            if (isDelay())
+            if (IsDelay())
             {
-                ObjShot::render();
+                ObjShot::Render();
             } else
             {
-                renderLaser(getRenderWidth(), renderLength, getAngle());
+                RenderLaser(GetRenderWidth(), renderLength_, GetAngle());
             }
         }
     }
 }
 
-void ObjLooseLaser::generateDefaultBonusItem()
+void ObjLooseLaser::GenerateDefaultBonusItem()
 {
-    if (auto state = getGameState())
+    if (auto state = GetGameState())
     {
-        const Point2D head = getHead();
-        const Point2D tail = getTail();
-        const float dist = getItemDistance();
-        const float dx = dist * (tail.x - head.x) / getRenderLength();
-        const float dy = dist * (tail.y - head.y) / getRenderLength();
+        const Point2D head = GetHead();
+        const Point2D tail = GetTail();
+        const float dist = GetItemDistance();
+        const float dx = dist * (tail.x - head.x) / GetRenderLength();
+        const float dy = dist * (tail.y - head.y) / GetRenderLength();
         float distSum = 0;
         float x = head.x;
         float y = head.y;
         if (dist <= 0) return; // 無限ループ防止
         while (true)
         {
-            state->defaultBonusItemSpawner->spawn(x, y, state);
+            state->defaultBonusItemSpawner->Spawn(x, y, state);
             x += dx;
             y += dy;
             distSum += dist;
-            if (distSum > getRenderLength()) break;
+            if (distSum > GetRenderLength()) break;
         }
     }
 }
 
-float ObjLooseLaser::getInvalidLengthHead() const
+float ObjLooseLaser::GetInvalidLengthHead() const
 {
-    if (defaultInvalidLengthEnable)
+    if (defaultInvalidLengthEnable_)
     {
-        return getRenderLength() * 0.1;
+        return GetRenderLength() * 0.1;
     }
-    return invalidLengthHead;
+    return invalidLengthHead_;
 }
 
-float ObjLooseLaser::getInvalidLengthTail() const
+float ObjLooseLaser::GetInvalidLengthTail() const
 {
-    if (defaultInvalidLengthEnable)
+    if (defaultInvalidLengthEnable_)
     {
-        return getRenderLength() * 0.1;
+        return GetRenderLength() * 0.1;
     }
-    return invalidLengthTail;
+    return invalidLengthTail_;
 }
 
-bool ObjLooseLaser::isDefaultInvalidLengthEnabled() const
+bool ObjLooseLaser::IsDefaultInvalidLengthEnabled() const
 {
-    return defaultInvalidLengthEnable;
+    return defaultInvalidLengthEnable_;
 }
 
-void ObjLooseLaser::setDefaultInvalidLengthEnable(bool enable)
+void ObjLooseLaser::SetDefaultInvalidLengthEnable(bool enable)
 {
-    defaultInvalidLengthEnable = enable;
+    defaultInvalidLengthEnable_ = enable;
 }
 
-void ObjLooseLaser::setInvalidLength(float head, float tail)
+void ObjLooseLaser::SetInvalidLength(float head, float tail)
 {
-    setDefaultInvalidLengthEnable(false);
-    invalidLengthHead = std::max(0.0f, head);
-    invalidLengthTail = std::max(0.0f, tail);
+    SetDefaultInvalidLengthEnable(false);
+    invalidLengthHead_ = std::max(0.0f, head);
+    invalidLengthTail_ = std::max(0.0f, tail);
 }
 
-Point2D ObjLooseLaser::getHead() const
+Point2D ObjLooseLaser::GetHead() const
 {
-    return Point2D(getX(), getY());
+    return Point2D(GetX(), GetY());
 }
 
-Point2D ObjLooseLaser::getTail() const
+Point2D ObjLooseLaser::GetTail() const
 {
-    float rdir = D3DXToRadian(getAngle() + 180.0f); // reverse dir
-    if (getSpeed() < 0) rdir += D3DX_PI;
-    float dx = getRenderLength() * cos(rdir);
-    float dy = getRenderLength() * sin(rdir);
-    return Point2D(getX() + dx, getY() + dy);
+    float rdir = D3DXToRadian(GetAngle() + 180.0f); // reverse dir
+    if (GetSpeed() < 0) rdir += D3DX_PI;
+    float dx = GetRenderLength() * cos(rdir);
+    float dy = GetRenderLength() * sin(rdir);
+    return Point2D(GetX() + dx, GetY() + dy);
 }
 
-float ObjLooseLaser::getRenderLength() const
+float ObjLooseLaser::GetRenderLength() const
 {
-    return renderLength;
+    return renderLength_;
 }
 
-void ObjLooseLaser::updateIntersection()
+void ObjLooseLaser::UpdateIntersection()
 {
-    if (!useTempIntersectionFlag)
+    if (!isTempIntersectionMode_)
     {
-        clearIntersection();
-        if (getInvalidLengthHead() + getInvalidLengthTail() <= getRenderLength())
+        ClearIntersection();
+        if (GetInvalidLengthHead() + GetInvalidLengthTail() <= GetRenderLength())
         {
-            Point2D head = getHead();
-            Point2D tail = getTail();
+            Point2D head = GetHead();
+            Point2D tail = GetTail();
             // 新しい判定を追加
             // dir : head - tail
-            float cosDir = (head.x - tail.x) / getRenderLength();
-            float sinDir = (head.y - tail.y) / getRenderLength();
-            float isectTailX = cosDir * getInvalidLengthTail() + tail.x;
-            float isectTailY = sinDir * getInvalidLengthTail() + tail.y;
-            float isectHeadX = -cosDir * getInvalidLengthHead() + head.x;
-            float isectHeadY = -sinDir * getInvalidLengthHead() + head.y;
-            addIntersectionLine(isectTailX, isectTailY, isectHeadX, isectHeadY, getIntersectionWidth());
+            float cosDir = (head.x - tail.x) / GetRenderLength();
+            float sinDir = (head.y - tail.y) / GetRenderLength();
+            float isectTailX = cosDir * GetInvalidLengthTail() + tail.x;
+            float isectTailY = sinDir * GetInvalidLengthTail() + tail.y;
+            float isectHeadX = -cosDir * GetInvalidLengthHead() + head.x;
+            float isectHeadY = -sinDir * GetInvalidLengthHead() + head.y;
+            AddIntersectionLine(isectTailX, isectTailY, isectHeadX, isectHeadY, GetIntersectionWidth());
         }
     }
 }
 
-void ObjLooseLaser::renderLaser(float width, float length, float angle)
+void ObjLooseLaser::RenderLaser(float width, float length, float angle)
 {
-    if (const auto& shotData = getShotData())
+    if (const auto& shotData = GetShotData())
     {
-        const auto head = getHead();
-        const auto tail = getTail();
+        const auto head = GetHead();
+        const auto tail = GetTail();
         float centerX = (head.x + tail.x) / 2;
         float centerY = (head.y + tail.y) / 2;
 
         /* ブレンド方法の選択 */
         // NOTE : shotDataのrenderは使わない
-        int laserBlend = getBlendType() == BLEND_NONE ? BLEND_ADD_ARGB : getBlendType();
+        int laserBlend = GetBlendType() == BLEND_NONE ? BLEND_ADD_ARGB : GetBlendType();
 
         // 色と透明度を設定
-        D3DCOLOR color = toD3DCOLOR(getColor(), ((int)(getFadeScale() * std::min(shotData->alpha, getAlpha()))));
-        auto vertices = rectToVertices(color, shotData->texture->getWidth(), shotData->texture->getHeight(), (getAnimationIndex() >= 0 && getAnimationIndex() < shotData->animationData.size()) ? shotData->animationData[getAnimationIndex()].rect : shotData->rect);
+        D3DCOLOR color = ToD3DCOLOR(GetColor(), ((int)(GetFadeScale() * std::min(shotData->alpha, GetAlpha()))));
+        auto vertices = RectToVertices(color, shotData->texture->GetWidth(), shotData->texture->GetHeight(), (GetAnimationIndex() >= 0 && GetAnimationIndex() < shotData->animationData.size()) ? shotData->animationData[GetAnimationIndex()].rect : shotData->rect);
 
         /* 配置 */
         float rectWidth = abs(vertices[0].x - vertices[1].x);
         float rectHeight = abs(vertices[0].y - vertices[2].y);
-        D3DXMATRIX world = scaleRotTrans(centerX, centerY, 0.0f, 0.0f, 0.0f, angle + 90.0f, width / rectWidth, length / rectHeight, 1.0f);
+        D3DXMATRIX world = CreateScaleRotTransMatrix(centerX, centerY, 0.0f, 0.0f, 0.0f, angle + 90.0f, width / rectWidth, length / rectHeight, 1.0f);
 
-        if (auto state = getGameState())
+        if (auto state = GetGameState())
         {
-            state->renderer->renderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData->texture->getTexture(), laserBlend, world, getAppliedShader(), isPermitCamera(), false);
+            state->renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData->texture->GetTexture(), laserBlend, world, GetAppliedShader(), IsPermitCamera(), false);
         }
     }
 }
 
-void ObjLooseLaser::extend()
+void ObjLooseLaser::Extend()
 {
-    float dl = abs(getSpeed());
-    if (renderLength + dl <= getLength())
+    float dl = abs(GetSpeed());
+    if (renderLength_ + dl <= GetLength())
     {
-        renderLength += dl;
-        updateIntersection();
+        renderLength_ += dl;
+        UpdateIntersection();
     }
 }
 
 ObjStLaser::ObjStLaser(bool isPlayerShot, const std::shared_ptr<GameState>& gameState) :
     ObjLooseLaser(isPlayerShot, gameState),
-    laserAngle(270),
-    laserSourceEnable(true),
-    laserWidthScale(0)
+    laserAngle_(270),
+    laserSourceEnable_(true),
+    laserWidthScale_(0)
 {
-    setType(OBJ_STRAIGHT_LASER);
+    SetType(OBJ_STRAIGHT_LASER);
 }
 
-void ObjStLaser::update()
+void ObjStLaser::Update()
 {
-    if (isRegistered())
+    if (IsRegistered())
     {
-        if (getPenetration() <= 0) die();
-        if (!isDelay())
+        if (GetPenetration() <= 0) Die();
+        if (!IsDelay())
         {
-            move();
-            checkAutoDelete(getX(), getY());
-            updateIntersection();
-            updateAnimationPosition();
+            Move();
+            CheckAutoDelete(GetX(), GetY());
+            UpdateIntersection();
+            UpdateAnimationPosition();
         }
-        tickAddedShotFrameCount();
-        tickDelayTimer();
-        tickDeleteFrameTimer();
-        tickFadeDeleteTimer();
-        tickGrazeInvalidTimer();
+        TickAddedShotFrameCount();
+        TickDelayTimer();
+        TickDeleteFrameTimer();
+        TickFadeDeleteTimer();
+        TickGrazeInvalidTimer();
         // 10フレームで1倍になるようにする
-        laserWidthScale = isDelay() ? 0.0f : std::min(1.0f, laserWidthScale + 0.1f);
+        laserWidthScale_ = IsDelay() ? 0.0f : std::min(1.0f, laserWidthScale_ + 0.1f);
     }
-    clearOldTempIntersection();
+    ClearOldTempIntersection();
 }
 
-void ObjStLaser::render()
+void ObjStLaser::Render()
 {
-    if (isRegistered())
+    if (IsRegistered())
     {
-        if (const auto& shotData = getShotData())
+        if (const auto& shotData = GetShotData())
         {
-            if (laserSourceEnable && !isFadeDeleteStarted())
+            if (laserSourceEnable_ && !IsFadeDeleteStarted())
             {
                 // レーザー源の描画
-                auto vertices = rectToVertices(toD3DCOLOR(shotData->delayColor, 0xff), shotData->texture->getWidth(), shotData->texture->getHeight(), shotData->delayRect);
+                auto vertices = RectToVertices(ToD3DCOLOR(shotData->delayColor, 0xff), shotData->texture->GetWidth(), shotData->texture->GetHeight(), shotData->delayRect);
 
                 /* 配置 */
-                const Point2D head = getHead();
+                const Point2D head = GetHead();
                 float rectWidth = abs(vertices[0].x - vertices[1].x);
                 float rectHeight = abs(vertices[0].y - vertices[2].y);
-                float renderWidth = getRenderWidth() * 1.3125f; // レーザーの幅よりちょっと大きい
-                auto world = scaleRotTrans(head.x, head.y, 0.0f,
-                                           0.0f, 0.0f, getLaserAngle() - 90.0f,
+                float renderWidth = GetRenderWidth() * 1.3125f; // レーザーの幅よりちょっと大きい
+                auto world = CreateScaleRotTransMatrix(head.x, head.y, 0.0f,
+                                           0.0f, 0.0f, GetLaserAngle() - 90.0f,
                                            renderWidth / rectWidth, renderWidth / rectHeight, 1.0f);
 
                 /* ブレンド方法の選択 */
                 // NOTE :  delay_renderは使用しない
-                int laserBlend = getSourceBlendType() == BLEND_NONE ? BLEND_ADD_ARGB : getSourceBlendType();
-                if (auto state = getGameState())
+                int laserBlend = GetSourceBlendType() == BLEND_NONE ? BLEND_ADD_ARGB : GetSourceBlendType();
+                if (auto state = GetGameState())
                 {
-                    state->renderer->renderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData->texture->getTexture(), laserBlend, world, getAppliedShader(), isPermitCamera(), false);
+                    state->renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData->texture->GetTexture(), laserBlend, world, GetAppliedShader(), IsPermitCamera(), false);
                 }
             }
             // 遅延時間時は予告線
-            float renderWidth = isDelay() ? getRenderWidth() / 20.0f : getRenderWidth() * laserWidthScale;
+            float renderWidth = IsDelay() ? GetRenderWidth() / 20.0f : GetRenderWidth() * laserWidthScale_;
             renderWidth *= -1; // 左右反転してる
-            renderLaser(renderWidth, getLength(), laserAngle);
+            RenderLaser(renderWidth, GetLength(), laserAngle_);
         }
     }
-    renderIntersection();
+    RenderIntersection();
 }
 
-Point2D ObjStLaser::getTail() const
+Point2D ObjStLaser::GetTail() const
 {
-    float dir = D3DXToRadian(laserAngle);
-    float tailX = getX() + getLength() * cos(dir);
-    float tailY = getY() + getLength() * sin(dir);
+    float dir = D3DXToRadian(laserAngle_);
+    float tailX = GetX() + GetLength() * cos(dir);
+    float tailY = GetY() + GetLength() * sin(dir);
     return Point2D(tailX, tailY);
 }
 
-float ObjStLaser::getLaserAngle() const
+float ObjStLaser::GetLaserAngle() const
 {
-    return laserAngle;
+    return laserAngle_;
 }
 
-void ObjStLaser::setLaserAngle(float angle)
+void ObjStLaser::SetLaserAngle(float angle)
 {
-    laserAngle = angle;
+    laserAngle_ = angle;
 }
 
-bool ObjStLaser::hasSource() const
+bool ObjStLaser::HasSource() const
 {
-    return laserSourceEnable;
+    return laserSourceEnable_;
 }
 
-void ObjStLaser::setSource(bool source)
+void ObjStLaser::SetSource(bool source)
 {
-    laserSourceEnable = source;
+    laserSourceEnable_ = source;
 }
 
-float ObjStLaser::getRenderLength() const
+float ObjStLaser::GetRenderLength() const
 {
-    return getLength();
+    return GetLength();
 }
 
 ObjCrLaser::ObjCrLaser(bool isPlayerShot, const std::shared_ptr<GameState>& gameState) :
     ObjLaser(isPlayerShot, gameState),
-    totalLaserLength(0),
-    tailPos(0),
-    hasHead(false),
-    shrinkThresholdOffset((size_t)(this) & 0xff),
-    tipDecrement(1)
+    totalLaserLength_(0),
+    tailPos_(0),
+    hasHead_(false),
+    shrinkThresholdOffset_((size_t)(this) & 0xff),
+    tipDecrement_(1)
 {
-    setType(OBJ_CURVE_LASER);
+    SetType(OBJ_CURVE_LASER);
 }
 
-void ObjCrLaser::update()
+void ObjCrLaser::Update()
 {
-    if (isRegistered())
+    if (IsRegistered())
     {
-        if (getPenetration() <= 0) { die(); return; }
+        if (GetPenetration() <= 0) { Die(); return; }
         // 遅延時も動く
-        move();
-        if (tailPos != trail.size())
+        Move();
+        if (tailPos_ != trail_.size())
         {
-            float tailX = (trail[tailPos].x + trail[tailPos + 1].x) / 2;
-            float tailY = (trail[tailPos].y + trail[tailPos + 1].y) / 2;
-            checkAutoDelete(tailX, tailY);
+            float tailX = (trail_[tailPos_].x + trail_[tailPos_ + 1].x) / 2;
+            float tailY = (trail_[tailPos_].y + trail_[tailPos_ + 1].y) / 2;
+            CheckAutoDelete(tailX, tailY);
         }
-        extend(getX(), getY());
+        Extend(GetX(), GetY());
         // NOTE : 描画にPrimitiveUpを使うので、trailはvectorである必要がある(メモリの連続性が必要)
         // 節の長さが上限を超えた時は末尾の節から削除していく必要があるが、毎フレームeraseを呼ぶのは遅いので
         // 末尾の位置(tailPos)を進めて、後でtailPosより前の部分をまとめてeraseする。
         // eraseするフレームが他のレーザーと被らないようにOffsetで閾値をずらしている
-        if (tailPos >= (int)getLength() + shrinkThresholdOffset)
+        // リプレイには影響ないはず
+        if (tailPos_ >= (int)GetLength() + shrinkThresholdOffset_)
         {
-            trail.erase(trail.begin(), trail.begin() + tailPos);
-            tailPos = 0;
+            trail_.erase(trail_.begin(), trail_.begin() + tailPos_);
+            tailPos_ = 0;
         }
-        updateAnimationPosition();
+        UpdateAnimationPosition();
 
-        tickAddedShotFrameCount();
-        tickDelayTimer();
-        tickDeleteFrameTimer();
-        tickFadeDeleteTimer();
-        tickGrazeInvalidTimer();
+        TickAddedShotFrameCount();
+        TickDelayTimer();
+        TickDeleteFrameTimer();
+        TickFadeDeleteTimer();
+        TickGrazeInvalidTimer();
     }
-    clearOldTempIntersection();
+    ClearOldTempIntersection();
 }
 
-void ObjCrLaser::render()
+void ObjCrLaser::Render()
 {
-    if (isRegistered())
+    if (IsRegistered())
     {
-        if (getLaserNodeCount() <= 0) return;
-        if (const auto& shotData = getShotData())
+        if (GetLaserNodeCount() <= 0) return;
+        if (const auto& shotData = GetShotData())
         {
-            if (isDelay())
+            if (IsDelay())
             {
-                ObjShot::render();
+                ObjShot::Render();
             } else
             {
                 // uv算出用
-                auto laserRect = rectToVertices(0, shotData->texture->getWidth(), shotData->texture->getHeight(), (getAnimationIndex() >= 0 && getAnimationIndex() < shotData->animationData.size()) ? shotData->animationData[getAnimationIndex()].rect : shotData->rect);
+                auto laserRect = RectToVertices(0, shotData->texture->GetWidth(), shotData->texture->GetHeight(), (GetAnimationIndex() >= 0 && GetAnimationIndex() < shotData->animationData.size()) ? shotData->animationData[GetAnimationIndex()].rect : shotData->rect);
 
                 // trailに色、UV値をセットする
                 // レーザー中心の透明度
-                const int baseAlpha = (int)(getFadeScale() * std::min(getAlpha(), shotData->alpha));
+                const int baseAlpha = (int)(GetFadeScale() * std::min(GetAlpha(), shotData->alpha));
                 // 先端~中心の減少の変化率, tipDecrementから0に変化するので負
-                const float ddecr = -tipDecrement / (getLaserNodeCount() >> 1);
+                const float ddecr = -tipDecrement_ / (GetLaserNodeCount() >> 1);
                 float lengthSum = 0;
-                float decr = tipDecrement;
-                for (int i = tailPos, lengthCnt = 0; i < trail.size(); i += 2, lengthCnt++)
+                float decr = tipDecrement_;
+                for (int i = tailPos_, lengthCnt = 0; i < trail_.size(); i += 2, lengthCnt++)
                 {
-                    Vertex& v1 = trail[i];
-                    Vertex& v2 = trail[i + 1];
+                    Vertex& v1 = trail_[i];
+                    Vertex& v2 = trail_[i + 1];
                     v1.u = laserRect[0].u;
                     v2.u = laserRect[1].u;
-                    v1.v = v2.v = laserRect[2].v - lengthSum / totalLaserLength * (laserRect[2].v - laserRect[1].v);
+                    v1.v = v2.v = laserRect[2].v - lengthSum / totalLaserLength_ * (laserRect[2].v - laserRect[1].v);
 
                     int alpha = (int)(baseAlpha * (1 - abs(decr)));
                     decr += ddecr;
 
-                    v1.color = v2.color = toD3DCOLOR(getColor(), alpha);
-                    if (lengthCnt < laserNodeLengthList.size())
+                    v1.color = v2.color = ToD3DCOLOR(GetColor(), alpha);
+                    if (lengthCnt < laserNodeLengthList_.size())
                     {
-                        lengthSum += laserNodeLengthList[lengthCnt];
+                        lengthSum += laserNodeLengthList_[lengthCnt];
                     }
                 }
 
@@ -1186,71 +1187,71 @@ void ObjCrLaser::render()
                 D3DXMATRIX world;
                 D3DXMatrixIdentity(&world);
                 // ShotDataのrenderは使わない
-                if (auto state = getGameState())
+                if (auto state = GetGameState())
                 {
-                    int laserBlend = getBlendType() == BLEND_NONE ? BLEND_ADD_ARGB : getBlendType();
-                    state->renderer->renderPrim2D(D3DPT_TRIANGLESTRIP, trail.size() - tailPos, &trail[tailPos], shotData->texture->getTexture(), laserBlend, world, getAppliedShader(), isPermitCamera(), false);
+                    int laserBlend = GetBlendType() == BLEND_NONE ? BLEND_ADD_ARGB : GetBlendType();
+                    state->renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, trail_.size() - tailPos_, &trail_[tailPos_], shotData->texture->GetTexture(), laserBlend, world, GetAppliedShader(), IsPermitCamera(), false);
                 }
             }
         }
     }
-    renderIntersection();
+    RenderIntersection();
 }
 
-void ObjCrLaser::generateDefaultBonusItem()
+void ObjCrLaser::GenerateDefaultBonusItem()
 {
-    if (auto state = getGameState())
+    if (auto state = GetGameState())
     {
-        if (getLaserNodeCount() > 0)
+        if (GetLaserNodeCount() > 0)
         {
-            for (int i = tailPos; i < trail.size(); i += 2)
+            for (int i = tailPos_; i < trail_.size(); i += 2)
             {
-                float x = (trail[i].x + trail[i + 1].x) / 2;
-                float y = (trail[i].y + trail[i + 1].y) / 2;
-                state->defaultBonusItemSpawner->spawn(x, y, state);
+                float x = (trail_[i].x + trail_[i + 1].x) / 2;
+                float y = (trail_[i].y + trail_[i + 1].y) / 2;
+                state->defaultBonusItemSpawner->Spawn(x, y, state);
             }
         }
     }
 }
 
-void ObjCrLaser::setRenderWidth(float width)
+void ObjCrLaser::SetRenderWidth(float width)
 {
-    if (getRenderWidth() != width)
+    if (GetRenderWidth() != width)
     {
-        fixVertexDistance(width);
+        FixVertexDistance_(width);
     }
-    ObjLaser::setRenderWidth(width);
+    ObjLaser::SetRenderWidth(width);
 }
 
-float ObjCrLaser::getTipDecrement() const
+float ObjCrLaser::GetTipDecrement() const
 {
-    return tipDecrement;
+    return tipDecrement_;
 }
 
-void ObjCrLaser::fixVertexDistance(float width)
+void ObjCrLaser::FixVertexDistance_(float width)
 {
     // 頂点の間隔を再設定
-    float dw = width - getRenderWidth();
+    float dw = width - GetRenderWidth();
     float prevX = 0;
     float prevY = 0;
-    for (int i = tailPos; i < trail.size(); i += 2)
+    for (int i = tailPos_; i < trail_.size(); i += 2)
     {
-        Vertex& v1 = trail[i];
-        Vertex& v2 = trail[i + 1];
+        Vertex& v1 = trail_[i];
+        Vertex& v2 = trail_[i + 1];
 
         float centerX = (v1.x + v2.x) / 2;
         float centerY = (v1.y + v2.y) / 2;
 
-        if (i > tailPos)
+        if (i > tailPos_)
         {
             float rot = atan2(centerY - prevY, centerX - prevX) + D3DX_PI / 2;
             float dx = cos(rot) * dw / 2;
             float dy = sin(rot) * dw / 2;
 
-            if (i == tailPos + 1)
+            if (i == tailPos_ + 1)
             {
-                trail[i - 2].x += dx; trail[i - 2].y += dy;
-                trail[i - 1].x -= dx; trail[i - 1].y -= dy;
+                trail_[i - 2].x += dx; trail_[i - 2].y += dy;
+                trail_[i - 1].x -= dx; trail_[i - 1].y -= dy;
             }
 
             v1.x += dx; v1.y += dy;
@@ -1262,58 +1263,58 @@ void ObjCrLaser::fixVertexDistance(float width)
     }
 }
 
-void ObjCrLaser::setTipDecrement(float dec)
+void ObjCrLaser::SetTipDecrement(float dec)
 {
-    tipDecrement = constrain(dec, 0.0f, 1.0f);
+    tipDecrement_ = constrain(dec, 0.0f, 1.0f);
 }
 
-void ObjCrLaser::extend(float x, float y)
+void ObjCrLaser::Extend(float x, float y)
 {
-    if (hasHead)
+    if (hasHead_)
     {
         // 進行方向+90度
-        const float normalDir = atan2(y - headY, x - headX) + D3DX_PI / 2.0f;
-        const float halfWidth = getRenderWidth() / 2.0f;
+        const float normalDir = atan2(y - headY_, x - headX_) + D3DX_PI / 2.0f;
+        const float halfWidth = GetRenderWidth() / 2.0f;
         const float dx = halfWidth * cos(normalDir);
         const float dy = halfWidth * sin(normalDir);
 
-        if (tailPos == trail.size())
+        if (tailPos_ == trail_.size())
         {
-            trail.emplace_back(headX + dx, headY + dy, 0.0f, 0, 0.0f, 0.0f);
-            trail.emplace_back(headX - dx, headY - dy, 0.0f, 0, 0.0f, 0.0f);
+            trail_.emplace_back(headX_ + dx, headY_ + dy, 0.0f, 0, 0.0f, 0.0f);
+            trail_.emplace_back(headX_ - dx, headY_ - dy, 0.0f, 0, 0.0f, 0.0f);
         }
 
-        trail.emplace_back(x + dx, y + dy, 0.0f, 0, 0.0f, 0.0f);
-        trail.emplace_back(x - dx, y - dy, 0.0f, 0, 0.0f, 0.0f);
+        trail_.emplace_back(x + dx, y + dy, 0.0f, 0, 0.0f, 0.0f);
+        trail_.emplace_back(x - dx, y - dy, 0.0f, 0, 0.0f, 0.0f);
 
-        float laserNodeLength = std::hypotf(x - headX, y - headY);
-        totalLaserLength += laserNodeLength;
-        laserNodeLengthList.push_back(laserNodeLength);
+        float laserNodeLength = std::hypotf(x - headX_, y - headY_);
+        totalLaserLength_ += laserNodeLength;
+        laserNodeLengthList_.push_back(laserNodeLength);
 
-        addIntersectionLine(headX, headY, x, y, getIntersectionWidth());
+        AddIntersectionLine(headX_, headY_, x, y, GetIntersectionWidth());
 
         // カーブレーザーの場合
         // length : レーザーを構成する頂点の組の数
-        if (getLaserNodeCount() + 1 > (int)getLength())
+        if (GetLaserNodeCount() + 1 > (int)GetLength())
         {
-            tailPos += 2;
-            totalLaserLength -= laserNodeLengthList[0];
-            laserNodeLengthList.pop_front();
-            if (getIntersections().size() > 0)
+            tailPos_ += 2;
+            totalLaserLength_ -= laserNodeLengthList_[0];
+            laserNodeLengthList_.pop_front();
+            if (GetIntersections().size() > 0)
             {
-                ObjCol::shiftIntersection();
+                ObjCol::PopFrontIntersection();
             }
         }
     } else
     {
-        hasHead = true;
+        hasHead_ = true;
     }
-    headX = x;
-    headY = y;
+    headX_ = x;
+    headY_ = y;
 }
 
-int ObjCrLaser::getLaserNodeCount() const
+int ObjCrLaser::GetLaserNodeCount() const
 {
-    return laserNodeLengthList.size();
+    return laserNodeLengthList_.size();
 }
 }

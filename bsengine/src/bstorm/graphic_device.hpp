@@ -12,16 +12,16 @@ class GraphicDevice : private NonCopyable
 public:
     GraphicDevice(HWND hWnd);
     ~GraphicDevice();
-    void reset();
-    IDirect3DDevice9* getDevice() const;
-    void setBackbufferRenderTarget();
-    DWORD getBackBufferWidth() const;
-    DWORD getBackBufferHeight() const;
+    void Reset();
+    IDirect3DDevice9* GetDevice() const;
+    void SetBackbufferRenderTarget();
+    DWORD GetBackBufferWidth() const;
+    DWORD GetBackBufferHeight() const;
 private:
-    IDirect3D9 * d3D;
-    IDirect3DDevice9* d3DDevice;
-    IDirect3DSurface9* backBufferSurface;
-    IDirect3DSurface9* backBufferDepthStencilSurface;
-    D3DPRESENT_PARAMETERS presentParams;
+    IDirect3D9 * d3D_;
+    IDirect3DDevice9* d3DDevice_;
+    IDirect3DSurface9* backBufferSurface_;
+    IDirect3DSurface9* backBufferDepthStencilSurface_;
+    D3DPRESENT_PARAMETERS presentParams_;
 };
 }

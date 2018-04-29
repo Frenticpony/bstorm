@@ -6,18 +6,18 @@ namespace bstorm
 {
 std::string SourcePos::ToString() const
 {
-    return toUTF8(*filename) + ":" + std::to_string(line) + ((column >= 0) ? (":" + std::to_string(column)) : "");
+    return ToUTF8(*filename) + ":" + std::to_string(line) + ((column >= 0) ? (":" + std::to_string(column)) : "");
 }
 
-void SourceMap::logSourcePos(int outputLine, const std::shared_ptr<std::wstring>& path, int srcLine)
+void SourceMap::LogSourcePos(int outputLine, const std::shared_ptr<std::wstring>& path, int srcLine)
 {
-    srcMap[outputLine] = { srcLine, -1, path };
+    srcMap_[outputLine] = { srcLine, -1, path };
 }
 
-std::shared_ptr<SourcePos> SourceMap::getSourcePos(int outputLine) const
+std::shared_ptr<SourcePos> SourceMap::GetSourcePos(int outputLine) const
 {
-    auto it = srcMap.find(outputLine);
-    if (it != srcMap.end())
+    auto it = srcMap_.find(outputLine);
+    if (it != srcMap_.end())
     {
         return std::make_shared<SourcePos>(it->second);
     }

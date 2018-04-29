@@ -17,28 +17,28 @@ struct Rect
 class ColorRGB
 {
 public:
-    ColorRGB() : r(0xff), g(0xff), b(0xff) {}
+    ColorRGB() : r_(0xff), g_(0xff), b_(0xff) {}
     ColorRGB(int r, int g, int b) :
-        r(std::min(::std::max(r, 0), 0xff)),
-        g(std::min(::std::max(g, 0), 0xff)),
-        b(std::min(::std::max(b, 0), 0xff))
+        r_(std::min(::std::max(r, 0), 0xff)),
+        g_(std::min(::std::max(g, 0), 0xff)),
+        b_(std::min(::std::max(b, 0), 0xff))
     {
     }
     bool operator==(const ColorRGB& other) const
     {
-        return r == other.r && g == other.g && b == other.b;
+        return r_ == other.r_ && g_ == other.g_ && b_ == other.b_;
     }
     bool operator!=(const ColorRGB& other) const
     {
         return !(*this == other);
     }
-    int getR() const { return r; }
-    int getG() const { return g; }
-    int getB() const { return b; }
+    int GetR() const { return r_; }
+    int GetG() const { return g_; }
+    int GetB() const { return b_; }
 private:
-    int r;
-    int g;
-    int b;
+    int r_;
+    int g_;
+    int b_;
 };
 
 struct AnimationClip
@@ -47,11 +47,11 @@ struct AnimationClip
     int frame;
     Rect<int> rect;
 };
-typedef std::vector<AnimationClip> AnimationData;
+using AnimationData = std::vector<AnimationClip>;
 
 struct Vertex
 {
-    Vertex() : x(0), y(0), z(0), color(D3DCOLOR_ARGB(0xff, 0xff, 0xff, 0xff)), u(0), v(0) {}
+    Vertex() : x(0.0f), y(0.0f), z(0.0f), color(D3DCOLOR_ARGB(0xff, 0xff, 0xff, 0xff)), u(0.0f), v(0.0f) {}
     Vertex(float x, float y, float z, D3DCOLOR color, float u, float v) : x(x), y(y), z(z), color(color), u(u), v(v) {}
     float x, y, z;
     D3DCOLOR color;
@@ -67,9 +67,9 @@ struct Point2D
     float y;
 };
 
-typedef int KeyState;
-typedef int VirtualKey;
-typedef int Key;
-typedef int PadButton;
-typedef int MouseButton;
+using  KeyState = int;
+using  VirtualKey = int;
+using  Key = int;
+using  PadButton = int;
+using  MouseButton = int;
 }
