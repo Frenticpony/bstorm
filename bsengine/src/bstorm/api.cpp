@@ -70,8 +70,9 @@ static int GetScriptPathList(lua_State* L)
     Engine* engine = getEngine(L);
     auto dirPath = DnhValue::ToString(L, 1);
     int scriptType = DnhValue::ToInt(L, 2);
-    DnhArray pathList;
-    for (const auto& info : engine->GetScriptList(dirPath, scriptType, false))
+    auto scriptList = engine->GetScriptList(dirPath, scriptType, false);
+    DnhArray pathList(scriptList.size());
+    for (const auto& info : scriptList)
     {
         pathList.PushBack(std::make_unique<DnhArray>(info.path));
     }
@@ -174,7 +175,7 @@ static int GetCommonData(lua_State* L)
     Engine* engine = getEngine(L);
     std::wstring key = DnhValue::ToString(L, 1);
     auto defaultValue = DnhValue::Get(L, 2);
-    engine->GetCommonData(key, std::move(defaultValue))->Push(L);
+    engine->GetCommonData(key, defaultValue)->Push(L);
     return 1;
 }
 
@@ -209,7 +210,7 @@ static int GetAreaCommonData(lua_State* L)
     std::wstring area = DnhValue::ToString(L, 1);
     std::wstring key = DnhValue::ToString(L, 2);
     auto defaultValue = DnhValue::Get(L, 3);
-    engine->GetAreaCommonData(area, key, std::move(defaultValue))->Push(L);
+    engine->GetAreaCommonData(area, key, defaultValue)->Push(L);
     return 1;
 }
 
@@ -258,8 +259,9 @@ static int CopyCommonDataArea(lua_State* L)
 static int GetCommonDataAreaKeyList(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    DnhArray ret;
-    for (const auto& key : engine->GetCommonDataAreaKeyList())
+    auto keyList = engine->GetCommonDataAreaKeyList();
+    DnhArray ret(keyList.size());
+    for (const auto& key : keyList)
     {
         ret.PushBack(std::make_unique<DnhArray>(key));
     }
@@ -912,7 +914,7 @@ static int GetScore(lua_State* L)
 static int AddScore(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    int64_t score = DnhValue::ToNum(L, 1);
+    GameScore score = DnhValue::ToNum(L, 1);
     engine->AddScore(score);
     return 0;
 }
@@ -2068,7 +2070,7 @@ static int CreateItemA1(lua_State* L)
     int type = DnhValue::ToInt(L, 1);
     double x = DnhValue::ToNum(L, 2);
     double y = DnhValue::ToNum(L, 3);
-    int64_t score = DnhValue::ToNum(L, 4);
+    GameScore score = DnhValue::ToNum(L, 4);
     if (auto item = engine->CreateItemA1(type, x, y, score))
     {
         script->AddAutoDeleteTargetObjectId(item->GetID());
@@ -2089,7 +2091,7 @@ static int CreateItemA2(lua_State* L)
     double y = DnhValue::ToNum(L, 3);
     double destX = DnhValue::ToNum(L, 4);
     double destY = DnhValue::ToNum(L, 5);
-    int64_t score = DnhValue::ToNum(L, 6);
+    GameScore score = DnhValue::ToNum(L, 6);
     if (auto item = engine->CreateItemA2(type, x, y, destX, destY, score))
     {
         script->AddAutoDeleteTargetObjectId(item->GetID());
@@ -2108,7 +2110,7 @@ static int CreateItemU1(lua_State* L)
     int itemDataId = DnhValue::ToInt(L, 1);
     double x = DnhValue::ToNum(L, 2);
     double y = DnhValue::ToNum(L, 3);
-    int64_t score = DnhValue::ToNum(L, 4);
+    GameScore score = DnhValue::ToNum(L, 4);
     if (auto item = engine->CreateItemU1(itemDataId, x, y, score))
     {
         script->AddAutoDeleteTargetObjectId(item->GetID());
@@ -2129,7 +2131,7 @@ static int CreateItemU2(lua_State* L)
     double y = DnhValue::ToNum(L, 3);
     double destX = DnhValue::ToNum(L, 4);
     double destY = DnhValue::ToNum(L, 5);
-    int64_t score = DnhValue::ToNum(L, 6);
+    GameScore score = DnhValue::ToNum(L, 6);
     if (auto item = engine->CreateItemU2(itemDataId, x, y, destX, destY, score))
     {
         script->AddAutoDeleteTargetObjectId(item->GetID());
@@ -2485,7 +2487,7 @@ static int Obj_GetValueD(lua_State* L)
     auto defaultValue = DnhValue::Get(L, 3);
     if (auto obj = engine->GetObject<Obj>(objId))
     {
-        obj->GetValueD(key, std::move(defaultValue))->Push(L);
+        obj->GetValueD(key, defaultValue)->Push(L);
     } else
     {
         defaultValue->Push(L);

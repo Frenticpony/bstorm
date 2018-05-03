@@ -3,6 +3,7 @@
 #include <bstorm/obj_prim.hpp>
 #include <bstorm/obj_move.hpp>
 #include <bstorm/obj_col.hpp>
+#include <bstorm/type.hpp>
 
 namespace bstorm
 {
@@ -18,7 +19,7 @@ public:
     double life;
     double spell;
     double power;
-    int64_t score;
+    GameScore score;
     int64_t graze;
     int64_t point;
 };
@@ -62,10 +63,10 @@ public:
     bool IsPermitPlayerSpell() const;
     bool IsLastSpellWait() const;
     bool IsSpellActive() const;
-    int64_t GetScore() const;
+    GameScore GetScore() const;
     int64_t GetGraze() const;
     int64_t GetPoint() const;
-    void AddScore(int64_t score);
+    void AddScore(GameScore score);
     void AddGraze(int64_t graze);
     void AddGraze(int shotObjId, int64_t graze);
     void AddPoint(int64_t point);

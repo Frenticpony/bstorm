@@ -233,9 +233,9 @@ void ObjItem::Render()
 
 int ObjItem::GetItemType() const { return itemType_; }
 
-int64_t ObjItem::GetScore() const { return score_; }
+GameScore ObjItem::GetScore() const { return score_; }
 
-void ObjItem::SetScore(int64_t score) { this->score_ = score; }
+void ObjItem::SetScore(GameScore score) { this->score_ = score; }
 
 bool ObjItem::IsRenderScoreEnabled() const
 {
@@ -330,7 +330,7 @@ void ObjItem::UpdateAnimationPosition()
     }
 }
 
-ObjItemScoreText::ObjItemScoreText(int64_t score, const std::shared_ptr<Texture>& texture, const std::shared_ptr<GameState>& gameState) :
+ObjItemScoreText::ObjItemScoreText(GameScore score, const std::shared_ptr<Texture>& texture, const std::shared_ptr<GameState>& gameState) :
     ObjSpriteList2D(gameState),
     ObjMove(this),
     scoreTextDeleteTimer_(32),
@@ -538,7 +538,7 @@ void MoveModeHoverItemScoreText::Move(float & x, float & y)
 ItemScoreTextSpawner::ItemScoreTextSpawner() {}
 ItemScoreTextSpawner::~ItemScoreTextSpawner() {}
 
-void ItemScoreTextSpawner::Spawn(float x, float y, int64_t score, const std::shared_ptr<GameState>& gameState)
+void ItemScoreTextSpawner::Spawn(float x, float y, GameScore score, const std::shared_ptr<GameState>& gameState)
 {
     if (gameState)
     {

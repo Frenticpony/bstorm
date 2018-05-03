@@ -130,7 +130,7 @@ int ObjEnemyBossScene::GetOrgTimerF() const
     return phase.orgTimerF;
 }
 
-int64_t ObjEnemyBossScene::GetSpellScore() const
+GameScore ObjEnemyBossScene::GetSpellScore() const
 {
     if (!ExistPhase()) return 0;
     const Phase& phase = GetCurrentPhase();

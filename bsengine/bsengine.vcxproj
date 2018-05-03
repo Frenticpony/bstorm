@@ -29,6 +29,7 @@
     <ClInclude Include="src\bstorm\dnh_const.hpp" />
     <ClInclude Include="src\bstorm\dnh_value.hpp" />
     <ClInclude Include="src\bstorm\env.hpp" />
+    <ClInclude Include="src\bstorm\log_error.hpp" />
     <ClInclude Include="src\bstorm\fps_counter.hpp" />
     <ClInclude Include="src\bstorm\input_device.hpp" />
     <ClInclude Include="src\bstorm\key_name_map.hpp" />
@@ -40,6 +41,7 @@
     <ClInclude Include="src\bstorm\obj_sound.hpp" />
     <ClInclude Include="src\bstorm\parser.hpp" />
     <ClInclude Include="src\bstorm\real_device_input_source.hpp" />
+    <ClInclude Include="src\bstorm\replay_data.hpp" />
     <ClInclude Include="src\bstorm\script_info.hpp" />
     <ClInclude Include="src\bstorm\script_runtime.h" />
     <ClInclude Include="src\bstorm\shader.hpp" />
@@ -93,6 +95,7 @@
     <ClCompile Include="src\bison\dnh.tab.cpp" />
     <ClCompile Include="src\bison\mqo.tab.cpp" />
     <ClCompile Include="src\bison\user_def_data.tab.cpp" />
+    <ClCompile Include="src\bstorm\log_error.cpp" />
     <ClCompile Include="src\bstorm\camera2D.cpp" />
     <ClCompile Include="src\bstorm\camera3D.cpp" />
     <ClCompile Include="src\bstorm\code_generator.cpp" />
@@ -111,6 +114,7 @@
     <ClCompile Include="src\bstorm\obj_sound.cpp" />
     <ClCompile Include="src\bstorm\parser.cpp" />
     <ClCompile Include="src\bstorm\real_device_input_source.cpp" />
+    <ClCompile Include="src\bstorm\replay_data.cpp" />
     <ClCompile Include="src\reflex\dnh_lexer.cpp" />
     <ClCompile Include="src\reflex\mqo_lexer.cpp" />
     <ClCompile Include="src\reflex\user_def_data_lexer.cpp" />

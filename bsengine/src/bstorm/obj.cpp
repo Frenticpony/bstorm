@@ -16,19 +16,19 @@ Obj::Obj(const std::shared_ptr<GameState>& state) :
 
 Obj::~Obj() {}
 
-std::unique_ptr<DnhValue> Obj::GetValue(const std::wstring& key) const
+const std::unique_ptr<DnhValue>& Obj::GetValue(const std::wstring& key) const
 {
-    return GetValueD(key, std::make_unique<DnhNil>());
+    return GetValueD(key, DnhValue::Nil());
 }
 
-std::unique_ptr<DnhValue> Obj::GetValueD(const std::wstring& key, std::unique_ptr<DnhValue>&& defaultValue) const
+const std::unique_ptr<DnhValue>& Obj::GetValueD(const std::wstring& key, const std::unique_ptr<DnhValue>& defaultValue) const
 {
     auto it = properties_.find(key);
     if (it != properties_.end())
     {
-        return it->second->Clone();
+        return it->second;
     }
-    return std::move(defaultValue);
+    return defaultValue;
 }
 
 void Obj::SetValue(const std::wstring& key, std::unique_ptr<DnhValue>&& value)

@@ -88,7 +88,7 @@ public:
     std::shared_ptr<ItemScoreTextSpawner> itemScoreTextSpawner;
     std::shared_ptr<DefaultBonusItemSpawner> defaultBonusItemSpawner;
     std::shared_ptr<AutoItemCollectionManager> autoItemCollectionManager;
-    int64_t elapsedFrame;
+    FrameCount elapsedFrame;
     std::shared_ptr<TimePoint> packageStartTime;
     std::shared_ptr<TimePoint> stageStartTime;
     std::vector<ScriptInfo> freePlayerScriptInfoList;
@@ -103,7 +103,7 @@ public:
     std::weak_ptr<Script> shotScript;
     std::weak_ptr<Script> itemScript;
     std::wstring stageReplayFilePath;
-    uint32_t stageIdx;
+    StageIndex stageIdx;
     int stageSceneResult;
     bool stagePaused;
     bool stageForceTerminated;

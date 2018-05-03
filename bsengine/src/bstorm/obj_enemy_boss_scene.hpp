@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <bstorm/obj.hpp>
+#include <bstorm/type.hpp>
 
 namespace bstorm
 {
@@ -17,7 +18,7 @@ public:
     int GetTimer() const;
     int GetTimerF() const;
     int GetOrgTimerF() const;
-    int64_t GetSpellScore() const;
+    GameScore GetSpellScore() const;
     bool IsSpell() const;
     bool IsLastSpell() const;
     bool IsDurableSpell() const;
@@ -48,7 +49,7 @@ private:
         double maxLife;
         int timerF;
         int orgTimerF;
-        int64_t spellScore;
+        GameScore spellScore;
         bool isSpell;
         bool isLastSpell;
         bool isDurableSpell;

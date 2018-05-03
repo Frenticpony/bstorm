@@ -13,7 +13,7 @@ static DWORD GetTimeMilliSec()
 namespace bstorm
 {
 TimePoint::TimePoint() :
-    isHighAccuracyMode_(QueryPerformanceCounter((LARGE_INTEGER*)&time_))
+    isHighAccuracyMode_(QueryPerformanceCounter((LARGE_INTEGER*)&timeMicro_))
 {
     if (isHighAccuracyMode_)
     {
@@ -28,9 +28,14 @@ float TimePoint::GetElapsedMilliSec(const TimePoint& tp) const
 {
     if (isHighAccuracyMode_ && tp.isHighAccuracyMode_)
     {
-        return 1000.0f * (tp.time_ - time_) / freq_;
+        return 1000.0f * (tp.timeMicro_ - timeMicro_) / freq_;
     }
     return (float)(tp.timeMilli_ - timeMilli_);
+}
+
+float TimePoint::GetTimeMilliSec() const
+{
+    return isHighAccuracyMode_ ? (timeMicro_ * 1000.0f) : timeMilli_;
 }
 
 FpsCounter::FpsCounter() :

@@ -11,11 +11,12 @@ public:
     TimePoint();
     ~TimePoint();
     float GetElapsedMilliSec(const TimePoint& tp = TimePoint()) const;
+    float GetTimeMilliSec() const;
 private:
     bool isHighAccuracyMode_;
-    INT64 time_; // 記録時点
+    INT64 timeMicro_; // 記録時点
     INT64 freq_;
-    // 高精度モードが使えない時用
+    // 高精度モードが使えない時用の記録時点
     DWORD timeMilli_;
 };
 

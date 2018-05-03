@@ -20,7 +20,7 @@ std::unique_ptr<DnhValue> DnhValue::Get(lua_State* L, int idx)
         case LUA_TTABLE:
         {
             size_t size = lua_objlen(L, idx);
-            std::unique_ptr<DnhArray> arr = std::make_unique<DnhArray>();
+            std::unique_ptr<DnhArray> arr = std::make_unique<DnhArray>(size);
             for (int i = 1; i <= size; i++)
             {
                 lua_rawgeti(L, idx, i);
@@ -60,9 +60,9 @@ std::unique_ptr<DnhValue> DnhValue::Deserialize(std::istream& in)
         }
         case Type::ARRAY:
         {
-            auto arr = std::make_unique<DnhArray>();
             uint32_t length;
             in.read((char*)&length, sizeof(length));
+            auto arr = std::make_unique<DnhArray>((size_t)(length));
             for (int i = 0; i < length; i++)
             {
                 arr->PushBack(DnhValue::Deserialize(in));
@@ -158,6 +158,12 @@ std::string DnhValue::ToStringU8(lua_State * L, int idx)
     }
 }
 
+const std::unique_ptr<DnhValue>& DnhValue::Nil()
+{
+    static std::unique_ptr<DnhValue> nil = std::make_unique<DnhNil>();
+    return nil;
+}
+
 DnhReal::DnhReal(double num) :
     DnhValue(Type::REAL),
     value_(num)
@@ -242,6 +248,12 @@ DnhArray::DnhArray() :
 {
 }
 
+DnhArray::DnhArray(size_t reserveSize) :
+    DnhValue(Type::ARRAY)
+{
+    Reserve(reserveSize);
+}
+
 DnhArray::DnhArray(std::vector<std::unique_ptr<DnhValue>>&& a) :
     DnhValue(Type::ARRAY),
     values_(std::move(a))
@@ -251,15 +263,17 @@ DnhArray::DnhArray(std::vector<std::unique_ptr<DnhValue>>&& a) :
 DnhArray::DnhArray(const std::wstring & s) :
     DnhValue(Type::ARRAY)
 {
+    Reserve(s.size());
     for (wchar_t c : s)
     {
-        values_.push_back(std::make_unique<DnhChar>(c));
+        PushBack(std::make_unique<DnhChar>(c));
     }
 }
 
 DnhArray::DnhArray(const std::vector<double>& ns) :
     DnhValue(Type::ARRAY)
 {
+    Reserve(ns.size());
     for (double n : ns)
     {
         PushBack(std::make_unique<DnhReal>(n));
@@ -312,13 +326,13 @@ std::wstring DnhArray::ToString() const
     return result;
 }
 
-std::unique_ptr<DnhValue> DnhArray::Index(int idx) const
+const std::unique_ptr<DnhValue>& DnhArray::Index(int idx) const
 {
     if (idx < 0 || idx >= GetSize())
     {
-        return std::unique_ptr<DnhValue>();
+        return DnhValue::Nil();
     }
-    return values_[idx]->Clone();
+    return values_[idx];
 }
 
 void DnhArray::Push(lua_State * L) const
@@ -346,9 +360,17 @@ void DnhArray::Serialize(std::ostream & out) const
 
 std::unique_ptr<DnhValue> DnhArray::Clone() const
 {
-    std::unique_ptr<DnhArray> a = std::make_unique<DnhArray>();
-    for (const auto& v : values_) a->PushBack(v->Clone());
-    return std::move(a);
+    std::unique_ptr<DnhArray> arr = std::make_unique<DnhArray>(GetSize());
+    for (const auto& v : values_)
+    {
+        arr->PushBack(v->Clone());
+    }
+    return std::move(arr);
+}
+
+void DnhArray::Reserve(size_t size)
+{
+    values_.reserve(size);
 }
 
 DnhNil::DnhNil() :

@@ -10,6 +10,8 @@
 
 namespace bstorm
 {
+
+
 class DnhValue
 {
 public:
@@ -38,6 +40,7 @@ public:
     static bool ToBool(lua_State* L, int idx);
     static std::wstring ToString(lua_State* L, int idx);
     static std::string ToStringU8(lua_State* L, int idx);
+    static const std::unique_ptr<DnhValue>& Nil();
 private:
     const Type type_;
 };
@@ -88,6 +91,7 @@ class DnhArray : public DnhValue
 {
 public:
     DnhArray();
+    DnhArray(size_t reserveSize);
     DnhArray(std::vector<std::unique_ptr<DnhValue>>&& a);
     DnhArray(const std::wstring& s);
     DnhArray(const std::vector<double>& ns);
@@ -98,10 +102,11 @@ public:
     double ToNum() const override;
     bool ToBool() const override;
     std::wstring ToString() const override;
-    std::unique_ptr<DnhValue> Index(int idx) const;
+    const std::unique_ptr<DnhValue>& Index(int idx) const;
     void Push(lua_State* L) const override;
     void Serialize(std::ostream& out) const override;
     std::unique_ptr<DnhValue> Clone() const override;
+    void Reserve(size_t size);
 private:
     std::vector<std::unique_ptr<DnhValue>> values_;
 };

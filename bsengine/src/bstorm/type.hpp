@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <stdint.h>
 #include <d3d9.h>
 
 namespace bstorm
@@ -72,4 +73,9 @@ using  VirtualKey = int;
 using  Key = int;
 using  PadButton = int;
 using  MouseButton = int;
+
+using GameScore = int64_t;
+using StageIndex = int;
+using RandValue = uint32_t;
+using FrameCount = int64_t;
 }

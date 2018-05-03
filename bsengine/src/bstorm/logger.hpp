@@ -71,7 +71,6 @@ private:
     std::vector<SourcePos> srcPosStack_; // add = push_back
 };
 
-
 class Logger
 {
 public:

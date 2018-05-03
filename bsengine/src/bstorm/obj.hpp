@@ -18,8 +18,8 @@ public:
     Obj(const std::shared_ptr<GameState>& state);
     virtual ~Obj();
     virtual void Update() = 0;
-    std::unique_ptr<DnhValue> GetValue(const std::wstring& key) const;
-    std::unique_ptr<DnhValue> GetValueD(const std::wstring& key, std::unique_ptr<DnhValue>&& defaultValue) const;
+    const std::unique_ptr<DnhValue>& GetValue(const std::wstring& key) const;
+    const std::unique_ptr<DnhValue>& GetValueD(const std::wstring& key, const std::unique_ptr<DnhValue>& defaultValue) const;
     void SetValue(const std::wstring& key, std::unique_ptr<DnhValue>&& value);
     void DeleteValue(const std::wstring& key);
     bool IsValueExists(const std::wstring& key) const;

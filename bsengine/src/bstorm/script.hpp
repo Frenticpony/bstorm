@@ -58,11 +58,11 @@ public:
     bool IsStgSceneScript() const;
     void SetAutoDeleteObjectEnable(bool enable);
     void AddAutoDeleteTargetObjectId(int id);
-    std::unique_ptr<DnhValue> GetScriptResult() const;
+    const std::unique_ptr<DnhValue>& GetScriptResult() const;
     void SetScriptResult(std::unique_ptr<DnhValue>&& value);
     void SetScriptArgument(int idx, std::unique_ptr<DnhValue>&& value);
     int GetScriptArgumentCount() const;
-    std::unique_ptr<DnhValue> GetScriptArgument(int idx);
+    const std::unique_ptr<DnhValue>& GetScriptArgument(int idx);
 private:
     void ExecCompile();
     void RunBuiltInSub(const std::string &name);
@@ -99,7 +99,7 @@ public:
     void NotifyEventAll(int eventType, const std::unique_ptr<DnhArray>& args);
     void CleanClosedScript();
     void CloseStgSceneScript();
-    std::unique_ptr<DnhValue> GetScriptResult(int scriptId) const;
+    const std::unique_ptr<DnhValue>& GetScriptResult(int scriptId) const;
     void SetScriptResult(int scriptId, std::unique_ptr<DnhValue>&& value);
     void ClearScriptResult();
 private:

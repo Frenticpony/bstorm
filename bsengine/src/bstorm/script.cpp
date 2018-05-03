@@ -439,7 +439,7 @@ void Script::AddAutoDeleteTargetObjectId(int id)
     }
 }
 
-std::unique_ptr<DnhValue> Script::GetScriptResult() const
+const std::unique_ptr<DnhValue>& Script::GetScriptResult() const
 {
     return engine_->GetScriptResult(GetID());
 }
@@ -461,11 +461,14 @@ int Script::GetScriptArgumentCount() const
     return scriptArgs_.size();
 }
 
-std::unique_ptr<DnhValue> Script::GetScriptArgument(int idx)
+const std::unique_ptr<DnhValue>& Script::GetScriptArgument(int idx)
 {
     std::lock_guard<std::recursive_mutex> lock(criticalSection_);
-    if (scriptArgs_.count(idx) == 0) return std::make_unique<DnhNil>();
-    return scriptArgs_[idx]->Clone();
+    if (scriptArgs_.count(idx) == 0)
+    {
+        return DnhValue::Nil();
+    }
+    return scriptArgs_[idx];
 }
 
 std::shared_ptr<SourcePos> Script::GetSourcePos(int line)
@@ -603,14 +606,14 @@ void ScriptManager::CloseStgSceneScript()
     }
 }
 
-std::unique_ptr<DnhValue> ScriptManager::GetScriptResult(int scriptId) const
+const std::unique_ptr<DnhValue>& ScriptManager::GetScriptResult(int scriptId) const
 {
     auto it = scriptResults_.find(scriptId);
     if (it != scriptResults_.end())
     {
-        return it->second->Clone();
+        return it->second;
     }
-    return std::make_unique<DnhNil>();
+    return DnhValue::Nil();
 }
 
 void ScriptManager::SetScriptResult(int scriptId, std::unique_ptr<DnhValue>&& value)

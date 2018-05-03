@@ -232,13 +232,13 @@ bool ObjPlayer::IsSpellActive() const
     return false;
 }
 
-int64_t ObjPlayer::GetScore() const { return globalParams_->score; }
+GameScore ObjPlayer::GetScore() const { return globalParams_->score; }
 
 int64_t ObjPlayer::GetGraze() const { return globalParams_->graze; }
 
 int64_t ObjPlayer::GetPoint() const { return globalParams_->point; }
 
-void ObjPlayer::AddScore(int64_t score) { globalParams_->score += score; }
+void ObjPlayer::AddScore(GameScore score) { globalParams_->score += score; }
 
 void ObjPlayer::AddGraze(int64_t graze) { globalParams_->graze += graze; }
 

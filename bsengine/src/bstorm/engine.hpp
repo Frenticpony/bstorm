@@ -214,11 +214,11 @@ public:
     float Get2DCameraRatioY() const;
     /* common data */
     void SetCommonData(const std::wstring& key, std::unique_ptr<DnhValue>&& value);
-    std::unique_ptr<DnhValue> GetCommonData(const std::wstring& key, std::unique_ptr<DnhValue>&& defaultValue) const;
+    const std::unique_ptr<DnhValue>& GetCommonData(const std::wstring& key, const std::unique_ptr<DnhValue>& defaultValue) const;
     void ClearCommonData();
     void DeleteCommonData(const std::wstring& key);
     void SetAreaCommonData(const std::wstring& areaName, const std::wstring& key, std::unique_ptr<DnhValue>&& value);
-    std::unique_ptr<DnhValue> GetAreaCommonData(const std::wstring& areaName, const std::wstring& key, std::unique_ptr<DnhValue>&& value) const;
+    const std::unique_ptr<DnhValue>& GetAreaCommonData(const std::wstring& areaName, const std::wstring& key, const std::unique_ptr<DnhValue>& defaultValue) const;
     void ClearAreaCommonData(const std::wstring& areaName);
     void DeleteAreaCommonData(const std::wstring& areaName, const std::wstring& key);
     void CreateCommonDataArea(const std::wstring& areaName);
@@ -292,10 +292,10 @@ public:
     std::shared_ptr<ObjStLaser> CreateStraightLaserA1(float x, float y, float angle, float length, float width, int deleteFrame, int shotDataId, int delay, bool isPlayerShot);
     std::shared_ptr<ObjCrLaser> CreateObjCrLaser(bool isPlayerShot);
     std::shared_ptr<ObjCrLaser> CreateCurveLaserA1(float x, float y, float speed, float angle, float length, float width, int shotDataId, int delay, bool isPlayerShot);
-    std::shared_ptr<ObjItem> CreateItemA1(int itemType, float x, float y, int64_t score);
-    std::shared_ptr<ObjItem> CreateItemA2(int itemType, float x, float y, float destX, float destY, int64_t score);
-    std::shared_ptr<ObjItem> CreateItemU1(int itemDataId, float x, float y, int64_t score);
-    std::shared_ptr<ObjItem> CreateItemU2(int itemDataId, float x, float y, float destX, float destY, int64_t score);
+    std::shared_ptr<ObjItem> CreateItemA1(int itemType, float x, float y, GameScore score);
+    std::shared_ptr<ObjItem> CreateItemA2(int itemType, float x, float y, float destX, float destY, GameScore score);
+    std::shared_ptr<ObjItem> CreateItemU1(int itemDataId, float x, float y, GameScore score);
+    std::shared_ptr<ObjItem> CreateItemU2(int itemDataId, float x, float y, float destX, float destY, GameScore score);
     std::shared_ptr<ObjEnemy> CreateObjEnemy();
     std::shared_ptr<ObjEnemyBossScene> CreateObjEnemyBossScene(const std::shared_ptr<SourcePos>& srcPos);
     std::shared_ptr<ObjSpell> CreateObjSpell();
@@ -310,7 +310,7 @@ public:
     std::wstring GetPlayerID() const;
     std::wstring GetPlayerReplayName() const;
     std::shared_ptr<Script> GetPlayerScript() const;
-    std::unique_ptr<DnhValue> GetScriptResult(int scriptId) const;
+    const std::unique_ptr<DnhValue>& GetScriptResult(int scriptId) const;
     void SetScriptResult(int scriptId, std::unique_ptr<DnhValue>&& value);
     std::vector<ScriptInfo> GetScriptList(const std::wstring& dirPath, int scriptType, bool doRecursive);
     void GetLoadFreePlayerScriptList();
@@ -318,8 +318,8 @@ public:
     ScriptInfo GetFreePlayerScriptInfo(int idx) const;
     ScriptInfo GetScriptInfo(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
     /* point */
-    int64_t GetScore() const;
-    void AddScore(int64_t score);
+    GameScore GetScore() const;
+    void AddScore(GameScore score);
     int64_t GetGraze() const;
     void AddGraze(int64_t graze);
     int64_t GetPoint() const;

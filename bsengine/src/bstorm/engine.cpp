@@ -937,9 +937,9 @@ void Engine::SetCommonData(const std::wstring & key, std::unique_ptr<DnhValue>&&
     gameState->commonDataDB->SetCommonData(key, std::move(value));
 }
 
-std::unique_ptr<DnhValue> Engine::GetCommonData(const std::wstring & key, std::unique_ptr<DnhValue>&& defaultValue) const
+const std::unique_ptr<DnhValue>& Engine::GetCommonData(const std::wstring & key, const std::unique_ptr<DnhValue>& defaultValue) const
 {
-    return gameState->commonDataDB->GetCommonData(key, std::move(defaultValue));
+    return gameState->commonDataDB->GetCommonData(key, defaultValue);
 }
 
 void Engine::ClearCommonData()
@@ -957,9 +957,9 @@ void Engine::SetAreaCommonData(const std::wstring & areaName, const std::wstring
     gameState->commonDataDB->SetAreaCommonData(areaName, key, std::move(value));
 }
 
-std::unique_ptr<DnhValue> Engine::GetAreaCommonData(const std::wstring & areaName, const std::wstring & key, std::unique_ptr<DnhValue>&& value) const
+const std::unique_ptr<DnhValue>& Engine::GetAreaCommonData(const std::wstring & areaName, const std::wstring & key, const std::unique_ptr<DnhValue>& defaultValue) const
 {
-    return gameState->commonDataDB->GetAreaCommonData(areaName, key, std::move(value));
+    return gameState->commonDataDB->GetAreaCommonData(areaName, key, defaultValue);
 }
 
 void Engine::ClearAreaCommonData(const std::wstring & areaName)
@@ -999,22 +999,54 @@ std::vector<std::wstring> Engine::GetCommonDataValueKeyList(const std::wstring &
 
 bool Engine::SaveCommonDataAreaA1(const std::wstring & areaName) const
 {
-    return gameState->commonDataDB->SaveCommonDataArea(areaName, GetDefaultCommonDataSavePath(areaName));
+    try
+    {
+        gameState->commonDataDB->SaveCommonDataArea(areaName, GetDefaultCommonDataSavePath(areaName));
+    } catch (Log& log)
+    {
+        Logger::WriteLog(std::move(log.SetLevel(Log::Level::LV_WARN)));
+        return false;
+    }
+    return true;
 }
 
 bool Engine::LoadCommonDataAreaA1(const std::wstring & areaName)
 {
-    return gameState->commonDataDB->LoadCommonDataArea(areaName, GetDefaultCommonDataSavePath(areaName));
+    try
+    {
+        gameState->commonDataDB->LoadCommonDataArea(areaName, GetDefaultCommonDataSavePath(areaName));
+    } catch (Log& log)
+    {
+        Logger::WriteLog(std::move(log.SetLevel(Log::Level::LV_WARN)));
+        return false;
+    }
+    return true;
 }
 
 bool Engine::SaveCommonDataAreaA2(const std::wstring & areaName, const std::wstring & path) const
 {
-    return gameState->commonDataDB->SaveCommonDataArea(areaName, path);
+    try
+    {
+        gameState->commonDataDB->SaveCommonDataArea(areaName, path);
+    } catch (Log& log)
+    {
+        Logger::WriteLog(std::move(log.SetLevel(Log::Level::LV_WARN)));
+        return false;
+    }
+    return true;
 }
 
 bool Engine::LoadCommonDataAreaA2(const std::wstring & areaName, const std::wstring & path)
 {
-    return gameState->commonDataDB->LoadCommonDataArea(areaName, path);
+    try
+    {
+        gameState->commonDataDB->LoadCommonDataArea(areaName, path);
+    } catch (Log& log)
+    {
+        Logger::WriteLog(std::move(log.SetLevel(Log::Level::LV_WARN)));
+        return false;
+    }
+    return true;
 }
 
 std::wstring Engine::GetDefaultCommonDataSavePath(const std::wstring & areaName) const
@@ -1251,7 +1283,7 @@ std::shared_ptr<ObjCrLaser> Engine::CreateCurveLaserA1(float x, float y, float s
     return laser;
 }
 
-std::shared_ptr<ObjItem> Engine::CreateItemA1(int itemType, float x, float y, int64_t score)
+std::shared_ptr<ObjItem> Engine::CreateItemA1(int itemType, float x, float y, GameScore score)
 {
     auto item = CreateObjItem(itemType);
     item->SetMovePosition(x, y);
@@ -1260,7 +1292,7 @@ std::shared_ptr<ObjItem> Engine::CreateItemA1(int itemType, float x, float y, in
     return item;
 }
 
-std::shared_ptr<ObjItem> Engine::CreateItemA2(int itemType, float x, float y, float destX, float destY, int64_t score)
+std::shared_ptr<ObjItem> Engine::CreateItemA2(int itemType, float x, float y, float destX, float destY, GameScore score)
 {
     auto item = CreateObjItem(itemType);
     item->SetMovePosition(x, y);
@@ -1269,7 +1301,7 @@ std::shared_ptr<ObjItem> Engine::CreateItemA2(int itemType, float x, float y, fl
     return item;
 }
 
-std::shared_ptr<ObjItem> Engine::CreateItemU1(int itemDataId, float x, float y, int64_t score)
+std::shared_ptr<ObjItem> Engine::CreateItemU1(int itemDataId, float x, float y, GameScore score)
 {
     auto item = CreateObjItem(ITEM_USER);
     item->SetMovePosition(x, y);
@@ -1279,7 +1311,7 @@ std::shared_ptr<ObjItem> Engine::CreateItemU1(int itemDataId, float x, float y, 
     return item;
 }
 
-std::shared_ptr<ObjItem> Engine::CreateItemU2(int itemDataId, float x, float y, float destX, float destY, int64_t score)
+std::shared_ptr<ObjItem> Engine::CreateItemU2(int itemDataId, float x, float y, float destX, float destY, GameScore score)
 {
     auto item = CreateObjItem(ITEM_USER);
     item->SetMovePosition(x, y);
@@ -1465,7 +1497,7 @@ std::shared_ptr<Script> Engine::GetPlayerScript() const
     return gameState->stagePlayerScript.lock();
 }
 
-std::unique_ptr<DnhValue> Engine::GetScriptResult(int scriptId) const
+const std::unique_ptr<DnhValue>& Engine::GetScriptResult(int scriptId) const
 {
     return gameState->scriptManager->GetScriptResult(scriptId);
 }
@@ -1531,12 +1563,12 @@ ScriptInfo Engine::GetScriptInfo(const std::wstring & path, const std::shared_pt
     }
 }
 
-int64_t Engine::GetScore() const
+GameScore Engine::GetScore() const
 {
     return gameState->globalPlayerParams->score;
 }
 
-void Engine::AddScore(int64_t score)
+void Engine::AddScore(GameScore score)
 {
     gameState->globalPlayerParams->score += score;
 }

@@ -1073,7 +1073,7 @@ void Engine::backDoor<ObjectBrowser>()
         ImGui::PushID(id);
         const auto& obj = entry.second;
         auto type = obj->GetType();
-        auto nameProp = obj->GetValue(L"name");
+        const auto& nameProp = obj->GetValue(L"name");
         std::string name;
         if (nameProp->GetType() != DnhValue::Type::NIL)
         {
