@@ -1772,6 +1772,7 @@ std::vector<std::shared_ptr<ObjShot>> Engine::GetShotInCircle(float x, float y, 
     }
 
     std::vector<std::shared_ptr<ObjShot>> shots;
+    shots.reserve(shotIds.size());
     for (auto id : shotIds)
     {
         shots.push_back(GetObject<ObjShot>(id));
