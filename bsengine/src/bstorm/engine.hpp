@@ -14,7 +14,6 @@ namespace bstorm
 class GraphicDevice;
 class LostableGraphicResource;
 class LostableGraphicResourceManager;
-class KeyAssign;
 class MousePositionProvider;
 class Renderer;
 class RenderTarget;
@@ -61,13 +60,6 @@ public:
     Engine(HWND hWnd, int screenWidth, int screenHeight, const std::shared_ptr<conf::KeyConfig>& defaultKeyConfig);
     virtual ~Engine();
     void AddLostableGraphicResource(const std::shared_ptr<LostableGraphicResource>& resource);
-    template <class T, class... Args>
-    std::shared_ptr<LostableGraphicResource> CreateLostableGraphicResource(Args... args)
-    {
-        auto resource = std::make_shared<T>(args...);
-        AddLostableGraphicResource(resource);
-        return resource;
-    }
     HWND GetWindowHandle() const;
     /* engine control */
     void TickFrame();
