@@ -16,6 +16,11 @@ public:
     using DataAreaName = std::wstring;
     using CommonDataArea = std::map<DataKey, std::unique_ptr<DnhValue>>;
     CommonDataDB();
+    ~CommonDataDB();
+    CommonDataDB(const CommonDataDB&) = default;
+    CommonDataDB(CommonDataDB&&) = default;
+    CommonDataDB& operator=(const CommonDataDB& other) = default;
+    CommonDataDB& operator=(CommonDataDB&& other) = default;
     void SetCommonData(const DataKey& key, std::unique_ptr<DnhValue>&& value);
     const std::unique_ptr<DnhValue>& GetCommonData(const DataKey& key, const std::unique_ptr<DnhValue>& defaultValue) const;
     void ClearCommonData();

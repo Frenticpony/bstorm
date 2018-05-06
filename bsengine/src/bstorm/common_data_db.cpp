@@ -19,6 +19,8 @@ CommonDataDB::CommonDataDB()
     CreateCommonDataArea(DefaultDataAreaName);
 }
 
+CommonDataDB::~CommonDataDB() {}
+
 void CommonDataDB::SetCommonData(const DataKey& key, std::unique_ptr<DnhValue>&& value)
 {
     SetAreaCommonData(DefaultDataAreaName, key, std::move(value));
