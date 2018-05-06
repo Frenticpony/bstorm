@@ -13,6 +13,7 @@
 
 namespace bstorm
 {
+class Renderer;
 class Shader;
 class Texture;
 class RenderTarget;
@@ -22,7 +23,7 @@ class ObjRender : public Obj
 public:
     ObjRender(const std::shared_ptr<GameState>& gameState);
     ~ObjRender();
-    virtual void Render() = 0;
+    virtual void Render(const std::unique_ptr<Renderer>& renderer) = 0;
     bool IsVisible() const { return visibleFlag_; }
     void SetVisible(bool visible) { visibleFlag_ = visible; }
     int getRenderPriority() const { return priority_; }
@@ -122,7 +123,7 @@ public:
     ObjShader(const std::shared_ptr<GameState>& gameState);
     ~ObjShader();
     void Update() override {}
-    void Render() override {};
+    void Render(const std::unique_ptr<Renderer>& renderer) override {};
 };
 
 class ObjectLayerList
@@ -131,7 +132,7 @@ public:
     ObjectLayerList();
     ~ObjectLayerList();
     void SetRenderPriority(const std::shared_ptr<ObjRender>& obj, int p);
-    void RenderLayer(int priorit, bool ignoreStgSceneObj, bool checkVisibleFlag);
+    void RenderLayer(int priority, bool ignoreStgSceneObj, bool checkVisibleFlag, const std::unique_ptr<Renderer>& renderer);
     void SetLayerShader(int beginPriority, int endPriority, const std::shared_ptr<Shader>& shader);
     void ResetLayerShader(int beginPriority, int endPriority);
     std::shared_ptr<Shader> GetLayerShader(int p) const;

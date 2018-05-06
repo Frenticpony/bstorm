@@ -62,8 +62,7 @@ Engine::Engine(HWND hWnd, int screenWidth, int screenHeight, const std::shared_p
     hWnd(hWnd),
     graphicDevice(std::make_unique<GraphicDevice>(hWnd)),
     lostableGraphicResourceManager(std::make_unique<LostableGraphicResourceManager>()),
-    defaultKeyConfig(defaultKeyConfig),
-    renderer(std::make_shared<Renderer>(graphicDevice->GetDevice()))
+    defaultKeyConfig(defaultKeyConfig)
 {
     Logger::WriteLog(Log::Level::LV_INFO, "boot engine.");
     Reset(screenWidth, screenHeight);
@@ -186,7 +185,7 @@ void Engine::RenderToTextureB1(const std::wstring& name, int objId, bool doClear
 void Engine::Reset(int screenWidth, int screenHeight)
 {
     Logger::SetEnable(false);
-    gameState = std::make_shared<GameState>(screenWidth, screenHeight, GetWindowHandle(), GetDirect3DDevice(), renderer, defaultKeyConfig, mousePosProvider, this);
+    gameState = std::make_shared<GameState>(screenWidth, screenHeight, GetWindowHandle(), GetDirect3DDevice(), defaultKeyConfig, mousePosProvider, this);
     Reset2DCamera();
     ResetCamera();
 
@@ -195,8 +194,8 @@ void Engine::Reset(int screenWidth, int screenHeight)
     CreateRenderTarget(GetReservedRenderTargetName(0), 1024, 512, nullptr);
     CreateRenderTarget(GetReservedRenderTargetName(1), 1024, 512, nullptr);
     CreateRenderTarget(GetReservedRenderTargetName(2), 1024, 512, nullptr);
-    renderer->SetForbidCameraViewProjMatrix2D(GetScreenWidth(), GetScreenHeight());
-    renderer->SetFogEnable(false);
+    gameState->renderer->SetForbidCameraViewProjMatrix2D(GetScreenWidth(), GetScreenHeight());
+    gameState->renderer->SetFogEnable(false);
     Logger::SetEnable(true);
 }
 
@@ -732,12 +731,12 @@ std::shared_ptr<Shader> Engine::GetShader(int p) const
 
 void Engine::SetFogEnable(bool enable)
 {
-    renderer->SetFogEnable(enable);
+    gameState->renderer->SetFogEnable(enable);
 }
 
 void Engine::SetFogParam(float fogStart, float fogEnd, int r, int g, int b)
 {
-    renderer->SetFogParam(fogStart, fogEnd, r, g, b);
+    gameState->renderer->SetFogParam(fogStart, fogEnd, r, g, b);
 }
 
 void Engine::SetCameraFocusX(float x)
@@ -2070,7 +2069,7 @@ void Engine::StartStageScene(const std::shared_ptr<SourcePos>& srcPos)
     SetDeleteShotFadeEventOnShotScriptEnable(false);
     SetDeleteShotToItemEventOnShotScriptEnable(false);
     gameState->stagePaused = false;
-    renderer->SetFogEnable(false);
+    gameState->renderer->SetFogEnable(false);
     gameState->pseudoPlayerFps = gameState->pseudoEnemyFps = 60;
 
     if (gameState->stageMainScriptInfo.systemPath.empty() || gameState->stageMainScriptInfo.systemPath == L"DEFAULT")
@@ -2155,7 +2154,7 @@ void Engine::renderToTexture(const std::wstring& name, int begin, int end, int o
 
     D3DXMATRIX viewMatrix2D, projMatrix2D, viewMatrix3D, projMatrix3D, billboardMatrix;
     Camera2D outsideStgFrameCamera2D; outsideStgFrameCamera2D.Reset(0, 0);
-    renderer->InitRenderState();
+    gameState->renderer->InitRenderState();
 
     if (doClear)
     {
@@ -2172,27 +2171,27 @@ void Engine::renderToTexture(const std::wstring& name, int begin, int end, int o
 
     // [0, stgFrameMin]
     {
-        renderer->DisableScissorTest();
+        gameState->renderer->DisableScissorTest();
 
         // set 2D matrix
         outsideStgFrameCamera2D.GenerateViewMatrix(&viewMatrix2D);
         outsideStgFrameCamera2D.GenerateProjMatrix(&projMatrix2D, GetScreenWidth(), GetScreenHeight(), 0, 0);
-        renderer->SetViewProjMatrix2D(viewMatrix2D, projMatrix2D);
+        gameState->renderer->SetViewProjMatrix2D(viewMatrix2D, projMatrix2D);
 
         // set 3D matrix
         gameState->camera3D->GenerateProjMatrix(&projMatrix3D, GetScreenWidth(), GetScreenHeight(), GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f);
-        renderer->SetViewProjMatrix3D(viewMatrix3D, projMatrix3D, billboardMatrix);
+        gameState->renderer->SetViewProjMatrix3D(viewMatrix3D, projMatrix3D, billboardMatrix);
         for (int p = 0; p < GetStgFrameRenderPriorityMin(); p++)
         {
             if (obj && obj->getRenderPriority() == p)
             {
-                obj->Render();
+                obj->Render(gameState->renderer);
             }
             if (objId == ID_INVALID && p >= begin && p <= end)
             {
                 if (!(checkInvalidRenderPriority && gameState->objLayerList->IsInvalidRenderPriority(p)))
                 {
-                    gameState->objLayerList->RenderLayer(p, IsStagePaused(), checkVisibleFlag);
+                    gameState->objLayerList->RenderLayer(p, IsStagePaused(), checkVisibleFlag, gameState->renderer);
                 }
             }
         }
@@ -2209,7 +2208,7 @@ void Engine::renderToTexture(const std::wstring& name, int begin, int end, int o
                 scissorRect.right = gameState->stgFrame->right * graphicDevice->GetBackBufferWidth() / gameState->screenWidth;
                 scissorRect.bottom = gameState->stgFrame->bottom * graphicDevice->GetBackBufferHeight() / gameState->screenHeight;
             }
-            renderer->EnableScissorTest(scissorRect);
+            gameState->renderer->EnableScissorTest(scissorRect);
         }
 
         // set 2D matrix
@@ -2217,24 +2216,24 @@ void Engine::renderToTexture(const std::wstring& name, int begin, int end, int o
         {
             gameState->camera2D->GenerateViewMatrix(&viewMatrix2D);
             gameState->camera2D->GenerateProjMatrix(&projMatrix2D, GetScreenWidth(), GetScreenHeight(), GetStgFrameCenterScreenX(), GetStgFrameCenterScreenY());
-            renderer->SetViewProjMatrix2D(viewMatrix2D, projMatrix2D);
+            gameState->renderer->SetViewProjMatrix2D(viewMatrix2D, projMatrix2D);
         }
 
         // set 3D matrix
         gameState->camera3D->GenerateProjMatrix(&projMatrix3D, GetScreenWidth(), GetScreenHeight(), GetStgFrameCenterScreenX(), GetStgFrameCenterScreenY());
-        renderer->SetViewProjMatrix3D(viewMatrix3D, projMatrix3D, billboardMatrix);
+        gameState->renderer->SetViewProjMatrix3D(viewMatrix3D, projMatrix3D, billboardMatrix);
 
         for (int p = GetStgFrameRenderPriorityMin(); p <= GetStgFrameRenderPriorityMax(); p++)
         {
             if (obj && obj->getRenderPriority() == p)
             {
-                obj->Render();
+                obj->Render(gameState->renderer);
             }
             if (objId == ID_INVALID && p >= begin && p <= end)
             {
                 if (!(checkInvalidRenderPriority && gameState->objLayerList->IsInvalidRenderPriority(p)))
                 {
-                    gameState->objLayerList->RenderLayer(p, IsStagePaused(), checkVisibleFlag);
+                    gameState->objLayerList->RenderLayer(p, IsStagePaused(), checkVisibleFlag, gameState->renderer);
                 }
             }
             if (p == gameState->objLayerList->GetCameraFocusPermitRenderPriority())
@@ -2245,34 +2244,34 @@ void Engine::renderToTexture(const std::wstring& name, int begin, int end, int o
                     Camera2D focusForbidCamera;
                     focusForbidCamera.Reset(GetStgFrameCenterWorldX(), GetStgFrameCenterWorldY());
                     focusForbidCamera.GenerateViewMatrix(&viewMatrix2D);
-                    renderer->SetViewProjMatrix2D(viewMatrix2D, projMatrix2D);
+                    gameState->renderer->SetViewProjMatrix2D(viewMatrix2D, projMatrix2D);
                 }
             }
         }
     }
     {
         // (stgFrameMax, MAX_RENDER_PRIORITY]
-        renderer->DisableScissorTest();
+        gameState->renderer->DisableScissorTest();
 
         // set 2D matrix
         outsideStgFrameCamera2D.GenerateViewMatrix(&viewMatrix2D);
         outsideStgFrameCamera2D.GenerateProjMatrix(&projMatrix2D, GetScreenWidth(), GetScreenHeight(), 0, 0);
-        renderer->SetViewProjMatrix2D(viewMatrix2D, projMatrix2D);
+        gameState->renderer->SetViewProjMatrix2D(viewMatrix2D, projMatrix2D);
 
         // set 3D matrix
         gameState->camera3D->GenerateProjMatrix(&projMatrix3D, GetScreenWidth(), GetScreenHeight(), GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f);
-        renderer->SetViewProjMatrix3D(viewMatrix3D, projMatrix3D, billboardMatrix);
+        gameState->renderer->SetViewProjMatrix3D(viewMatrix3D, projMatrix3D, billboardMatrix);
         for (int p = GetStgFrameRenderPriorityMax() + 1; p <= MAX_RENDER_PRIORITY; p++)
         {
             if (obj && obj->getRenderPriority() == p)
             {
-                obj->Render();
+                obj->Render(gameState->renderer);
             }
             if (objId == ID_INVALID && p >= begin && p <= end)
             {
                 if (!(checkInvalidRenderPriority && gameState->objLayerList->IsInvalidRenderPriority(p)))
                 {
-                    gameState->objLayerList->RenderLayer(p, IsStagePaused(), checkVisibleFlag);
+                    gameState->objLayerList->RenderLayer(p, IsStagePaused(), checkVisibleFlag, gameState->renderer);
                 }
             }
         }

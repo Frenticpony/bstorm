@@ -44,12 +44,12 @@ void ObjEnemy::Update()
     }
 }
 
-void ObjEnemy::Render()
+void ObjEnemy::Render(const std::unique_ptr<Renderer>& renderer)
 {
     if (IsRegistered())
     {
-        ObjSprite2D::Render();
-        ObjCol::RenderIntersection(IsPermitCamera());
+        ObjSprite2D::Render(renderer);
+        ObjCol::RenderIntersection(renderer, IsPermitCamera());
     }
 }
 

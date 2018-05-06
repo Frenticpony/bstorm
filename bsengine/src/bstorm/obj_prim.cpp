@@ -176,7 +176,7 @@ ObjPrim2D::ObjPrim2D(const std::shared_ptr<GameState>& state) :
     SetType(OBJ_PRIMITIVE_2D);
 }
 
-void ObjPrim2D::Render()
+void ObjPrim2D::Render(const std::unique_ptr<Renderer>& renderer)
 {
     D3DXMATRIX world = CreateScaleRotTransMatrix(GetX(), GetY(), GetZ(), GetAngleX(), GetAngleY(), GetAngleZ(), GetScaleX(), GetScaleY(), GetScaleZ());
     if (auto state = GetGameState())
@@ -237,12 +237,11 @@ ObjSpriteList2D::ObjSpriteList2D(const std::shared_ptr<GameState>& state) :
     SetPrimitiveType(D3DPT_TRIANGLELIST);
 }
 
-void ObjSpriteList2D::Render()
+void ObjSpriteList2D::Render(const std::unique_ptr<Renderer>& renderer)
 {
-    // 検討： インデックスバッファを使う?
     if (isVertexClosed_)
     {
-        ObjPrim2D::Render();
+        ObjPrim2D::Render(renderer);
     } else
     {
         // 保存
@@ -259,7 +258,7 @@ void ObjSpriteList2D::Render()
         SetPosition(0, 0, 0);
         SetAngleXYZ(0, 0, 0);
         SetScaleXYZ(1, 1, 1);
-        ObjPrim2D::Render();
+        ObjPrim2D::Render(renderer);
         // 復元
         SetPosition(prevX, prevY, prevZ);
         SetAngleXYZ(prevAngleX, prevAngleY, prevAngleZ);
@@ -366,13 +365,10 @@ ObjPrim3D::ObjPrim3D(const std::shared_ptr<GameState>& state) :
     SetType(OBJ_PRIMITIVE_3D);
 }
 
-void ObjPrim3D::Render()
+void ObjPrim3D::Render(const std::unique_ptr<Renderer>& renderer)
 {
     D3DXMATRIX world = CreateScaleRotTransMatrix(GetX(), GetY(), GetZ(), GetAngleX(), GetAngleY(), GetAngleZ(), GetScaleX(), GetScaleY(), GetScaleZ());
-    if (auto state = GetGameState())
-    {
-        state->renderer->RenderPrim3D(GetD3DPrimitiveType(), vertices_.size(), vertices_.data(), GetD3DTexture(), GetBlendType(), world, GetAppliedShader(), IsZWriteEnabled(), IsZTestEnabled(), IsFogEnabled(), IsBillboardEnabled());
-    }
+    renderer->RenderPrim3D(GetD3DPrimitiveType(), vertices_.size(), vertices_.data(), GetD3DTexture(), GetBlendType(), world, GetAppliedShader(), IsZWriteEnabled(), IsZTestEnabled(), IsFogEnabled(), IsBillboardEnabled());
 }
 
 bool ObjPrim3D::IsBillboardEnabled() const

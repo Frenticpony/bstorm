@@ -47,7 +47,7 @@ void ObjCol::SetWidthIntersection(float width)
     }
 }
 
-void ObjCol::RenderIntersection(bool isPermitCamera) const
+void ObjCol::RenderIntersection(const std::unique_ptr<Renderer>& renderer, bool isPermitCamera) const
 {
     if (auto state = gameState_.lock())
     {
@@ -55,11 +55,11 @@ void ObjCol::RenderIntersection(bool isPermitCamera) const
         {
             for (auto& isect : GetIntersections())
             {
-                isect->Render(state->renderer, isPermitCamera);
+                isect->Render(renderer, isPermitCamera);
             }
             for (auto& isect : GetTempIntersections())
             {
-                isect->Render(state->renderer, isPermitCamera);
+                isect->Render(renderer, isPermitCamera);
             }
         }
     }

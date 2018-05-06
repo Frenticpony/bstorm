@@ -108,7 +108,7 @@ void ObjShot::Update()
     ClearOldTempIntersection();
 }
 
-void ObjShot::Render()
+void ObjShot::Render(const std::unique_ptr<Renderer>& renderer)
 {
     if (IsRegistered())
     {
@@ -125,8 +125,8 @@ void ObjShot::Render()
             /* 配置 */
             // NOTE : fixedAngleじゃないなら移動方向に向ける
             D3DXMATRIX world = CreateScaleRotTransMatrix(GetX(), GetY(), 0.0f,
-                                             GetAngleX(), GetAngleY(), GetAngleZ() + (shotData_->fixedAngle ? 0.0f : GetAngle() + 90.0f),
-                                             IsDelay() ? delayScale : GetScaleX(), IsDelay() ? delayScale : GetScaleY(), 1.0f);
+                                                         GetAngleX(), GetAngleY(), GetAngleZ() + (shotData_->fixedAngle ? 0.0f : GetAngle() + 90.0f),
+                                                         IsDelay() ? delayScale : GetScaleX(), IsDelay() ? delayScale : GetScaleY(), 1.0f);
 
             /* ブレンド方法の選択 */
             int shotBlend = BLEND_NONE;
@@ -175,10 +175,10 @@ void ObjShot::Render()
 
             if (auto state = GetGameState())
             {
-                state->renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData_->texture->GetTexture(), shotBlend, world, GetAppliedShader(), IsPermitCamera(), true);
+                renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData_->texture->GetTexture(), shotBlend, world, GetAppliedShader(), IsPermitCamera(), true);
             }
         }
-        RenderIntersection();
+        RenderIntersection(renderer);
     }
 }
 
@@ -549,9 +549,9 @@ void ObjShot::TransIntersection(float dx, float dy)
     ObjCol::TransIntersection(dx, dy);
 }
 
-void ObjShot::RenderIntersection()
+void ObjShot::RenderIntersection(const std::unique_ptr<Renderer>& renderer)
 {
-    ObjCol::RenderIntersection(IsPermitCamera());
+    ObjCol::RenderIntersection(renderer, IsPermitCamera());
 }
 
 void ObjShot::CheckAutoDelete(float x, float y)
@@ -839,7 +839,7 @@ void ObjLooseLaser::Update()
     ClearOldTempIntersection();
 }
 
-void ObjLooseLaser::Render()
+void ObjLooseLaser::Render(const std::unique_ptr<Renderer>& renderer)
 {
     if (IsRegistered())
     {
@@ -847,10 +847,10 @@ void ObjLooseLaser::Render()
         {
             if (IsDelay())
             {
-                ObjShot::Render();
+                ObjShot::Render(renderer);
             } else
             {
-                RenderLaser(GetRenderWidth(), renderLength_, GetAngle());
+                RenderLaser(GetRenderWidth(), renderLength_, GetAngle(), renderer);
             }
         }
     }
@@ -956,7 +956,7 @@ void ObjLooseLaser::UpdateIntersection()
     }
 }
 
-void ObjLooseLaser::RenderLaser(float width, float length, float angle)
+void ObjLooseLaser::RenderLaser(float width, float length, float angle, const std::unique_ptr<Renderer>& renderer)
 {
     if (const auto& shotData = GetShotData())
     {
@@ -980,7 +980,7 @@ void ObjLooseLaser::RenderLaser(float width, float length, float angle)
 
         if (auto state = GetGameState())
         {
-            state->renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData->texture->GetTexture(), laserBlend, world, GetAppliedShader(), IsPermitCamera(), false);
+            renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData->texture->GetTexture(), laserBlend, world, GetAppliedShader(), IsPermitCamera(), false);
         }
     }
 }
@@ -1027,7 +1027,7 @@ void ObjStLaser::Update()
     ClearOldTempIntersection();
 }
 
-void ObjStLaser::Render()
+void ObjStLaser::Render(const std::unique_ptr<Renderer>& renderer)
 {
     if (IsRegistered())
     {
@@ -1044,24 +1044,21 @@ void ObjStLaser::Render()
                 float rectHeight = abs(vertices[0].y - vertices[2].y);
                 float renderWidth = GetRenderWidth() * 1.3125f; // レーザーの幅よりちょっと大きい
                 auto world = CreateScaleRotTransMatrix(head.x, head.y, 0.0f,
-                                           0.0f, 0.0f, GetLaserAngle() - 90.0f,
-                                           renderWidth / rectWidth, renderWidth / rectHeight, 1.0f);
+                                                       0.0f, 0.0f, GetLaserAngle() - 90.0f,
+                                                       renderWidth / rectWidth, renderWidth / rectHeight, 1.0f);
 
                 /* ブレンド方法の選択 */
                 // NOTE :  delay_renderは使用しない
                 int laserBlend = GetSourceBlendType() == BLEND_NONE ? BLEND_ADD_ARGB : GetSourceBlendType();
-                if (auto state = GetGameState())
-                {
-                    state->renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData->texture->GetTexture(), laserBlend, world, GetAppliedShader(), IsPermitCamera(), false);
-                }
+                renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData->texture->GetTexture(), laserBlend, world, GetAppliedShader(), IsPermitCamera(), false);
             }
             // 遅延時間時は予告線
             float renderWidth = IsDelay() ? GetRenderWidth() / 20.0f : GetRenderWidth() * laserWidthScale_;
             renderWidth *= -1; // 左右反転してる
-            RenderLaser(renderWidth, GetLength(), laserAngle_);
+            RenderLaser(renderWidth, GetLength(), laserAngle_, renderer);
         }
     }
-    RenderIntersection();
+    RenderIntersection(renderer);
 }
 
 Point2D ObjStLaser::GetTail() const
@@ -1143,7 +1140,7 @@ void ObjCrLaser::Update()
     ClearOldTempIntersection();
 }
 
-void ObjCrLaser::Render()
+void ObjCrLaser::Render(const std::unique_ptr<Renderer>& renderer)
 {
     if (IsRegistered())
     {
@@ -1152,7 +1149,7 @@ void ObjCrLaser::Render()
         {
             if (IsDelay())
             {
-                ObjShot::Render();
+                ObjShot::Render(renderer);
             } else
             {
                 // uv算出用
@@ -1186,16 +1183,13 @@ void ObjCrLaser::Render()
                 // 描画
                 D3DXMATRIX world;
                 D3DXMatrixIdentity(&world);
-                // ShotDataのrenderは使わない
-                if (auto state = GetGameState())
-                {
-                    int laserBlend = GetBlendType() == BLEND_NONE ? BLEND_ADD_ARGB : GetBlendType();
-                    state->renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, trail_.size() - tailPos_, &trail_[tailPos_], shotData->texture->GetTexture(), laserBlend, world, GetAppliedShader(), IsPermitCamera(), false);
-                }
+                // ShotDataのrender値は使わない
+                int laserBlend = GetBlendType() == BLEND_NONE ? BLEND_ADD_ARGB : GetBlendType();
+                renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, trail_.size() - tailPos_, &trail_[tailPos_], shotData->texture->GetTexture(), laserBlend, world, GetAppliedShader(), IsPermitCamera(), false);
             }
         }
     }
-    RenderIntersection();
+    RenderIntersection(renderer);
 }
 
 void ObjCrLaser::GenerateDefaultBonusItem()

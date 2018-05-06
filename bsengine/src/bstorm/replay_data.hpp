@@ -40,7 +40,7 @@ public:
               GameScore totalScore,
               const std::wstring& playerName) noexcept(false);
     // ステージ情報記録開始
-    void StartRecordingStageInfo(StageIndex stageIdx, GameScore stageStartScore, RandValue randSeed, const std::shared_ptr<TimePoint>& startTime);
+    void StartRecordingStageInfo(StageIndex stageIdx, GameScore stageStartScore, RandSeed randSeed, const std::shared_ptr<TimePoint>& startTime);
     // ステージ情報記録終了
     void EndRecordingStageInfo(StageIndex stageIdx, GameScore stageLastScore, const std::shared_ptr<TimePoint>& endTime) noexcept(true);
     // フレーム毎のステージ情報を記録

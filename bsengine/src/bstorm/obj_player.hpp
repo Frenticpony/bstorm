@@ -30,7 +30,7 @@ public:
     ObjPlayer(const std::shared_ptr<GameState>& gameState, const std::shared_ptr<GlobalPlayerParams>& globalParams);
     ~ObjPlayer();
     void Update() override;
-    void Render() override;
+    void Render(const std::unique_ptr<Renderer>& renderer) override;
     void AddIntersectionCircleA1(float dx, float dy, float r, float dr);
     void AddIntersectionCircleA2(float dx, float dy, float r);
     void AddIntersectionToItem();

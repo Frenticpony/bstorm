@@ -216,11 +216,11 @@ void ObjectLayerList::SetRenderPriority(const std::shared_ptr<ObjRender>& obj, i
     obj->priority_ = p;
 }
 
-void ObjectLayerList::RenderLayer(int p, bool ignoreStgSceneObj, bool checkVisibleFlag)
+void ObjectLayerList::RenderLayer(int priority, bool ignoreStgSceneObj, bool checkVisibleFlag, const std::unique_ptr<Renderer>& renderer)
 {
-    if (p < 0 || p > MAX_RENDER_PRIORITY) return;
+    if (priority < 0 || priority > MAX_RENDER_PRIORITY) return;
 
-    auto& layer = layers_.at(p);
+    auto& layer = layers_.at(priority);
 
     // バケツソートする
     std::vector<std::shared_ptr<ObjRender>> addShots;
@@ -296,12 +296,12 @@ void ObjectLayerList::RenderLayer(int p, bool ignoreStgSceneObj, bool checkVisib
             }
         }
     }
-    for (auto shot : addShots) { shot->Render(); }
-    for (auto shot : mulShots) { shot->Render(); }
-    for (auto shot : subShots) { shot->Render(); }
-    for (auto shot : invShots) { shot->Render(); }
-    for (auto shot : alphaShots) { shot->Render(); }
-    for (auto obj : others) { obj->Render(); }
+    for (auto shot : addShots) { shot->Render(renderer); }
+    for (auto shot : mulShots) { shot->Render(renderer); }
+    for (auto shot : subShots) { shot->Render(renderer); }
+    for (auto shot : invShots) { shot->Render(renderer); }
+    for (auto shot : alphaShots) { shot->Render(renderer); }
+    for (auto obj : others) { obj->Render(renderer); }
 }
 
 void ObjectLayerList::SetLayerShader(int beginPriority, int endPriority, const std::shared_ptr<Shader>& shader)

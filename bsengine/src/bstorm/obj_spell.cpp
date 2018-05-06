@@ -23,12 +23,12 @@ void ObjSpell::Update()
     ClearOldTempIntersection();
 }
 
-void ObjSpell::Render()
+void ObjSpell::Render(const std::unique_ptr<Renderer>& renderer)
 {
     if (IsRegistered())
     {
-        ObjPrim2D::Render();
-        ObjCol::RenderIntersection(IsPermitCamera());
+        ObjPrim2D::Render(renderer);
+        ObjCol::RenderIntersection(renderer, IsPermitCamera());
     }
 }
 

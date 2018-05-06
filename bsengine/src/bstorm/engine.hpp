@@ -385,7 +385,6 @@ protected:
     std::unique_ptr<LostableGraphicResourceManager> lostableGraphicResourceManager;
     std::shared_ptr<conf::KeyConfig> defaultKeyConfig;
     std::shared_ptr<MousePositionProvider> mousePosProvider;
-    std::shared_ptr<Renderer> renderer;
     std::unordered_map<std::wstring, std::shared_ptr<RenderTarget>> renderTargets;
     std::shared_ptr<GameState> gameState;
 };

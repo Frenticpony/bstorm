@@ -14,7 +14,7 @@ public:
     ObjText(const std::shared_ptr<GameState>& state);
     ~ObjText();
     void Update() override;
-    void Render() override;
+    void Render(const std::unique_ptr<Renderer>& renderer) override;
     const std::wstring& GetText() const;
     void SetText(const std::wstring& t);
     const std::wstring& GetFontName() const;
@@ -75,7 +75,7 @@ public:
     static void ParseRubiedString(const std::wstring& src, std::wstring& bodyText, std::vector<Ruby<std::wstring>>& rubies);
 private:
     int GetNextLineOffsetY() const;
-    void RenderFont(const std::shared_ptr<Font>& font, const D3DXMATRIX& worldMatrix);
+    void RenderFont(const std::shared_ptr<Font>& font, const D3DXMATRIX& worldMatrix, const std::unique_ptr<Renderer>& renderer);
     std::wstring text_;
     std::wstring bodyText_;
     std::vector<Ruby<std::wstring>> rubies_;

@@ -126,10 +126,10 @@ void ObjPlayer::Update()
     }
 }
 
-void ObjPlayer::Render()
+void ObjPlayer::Render(const std::unique_ptr<Renderer>& renderer)
 {
-    ObjSprite2D::Render();
-    ObjCol::RenderIntersection(IsPermitCamera());
+    ObjSprite2D::Render(renderer);
+    ObjCol::RenderIntersection(renderer, IsPermitCamera());
 }
 
 void ObjPlayer::AddIntersectionCircleA1(float dx, float dy, float r, float dr)

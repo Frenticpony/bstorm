@@ -213,7 +213,7 @@ void ReplayData::Save(const std::wstring & filePath, const std::wstring & userNa
     }
 }
 
-void ReplayData::StartRecordingStageInfo(StageIndex stageIdx, GameScore stageStartScore, RandValue randSeed, const std::shared_ptr<TimePoint>& startTime)
+void ReplayData::StartRecordingStageInfo(StageIndex stageIdx, GameScore stageStartScore, RandSeed randSeed, const std::shared_ptr<TimePoint>& startTime)
 {
     const auto stageInfoAreaName = StageInfoAreaName(stageIdx);
 

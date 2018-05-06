@@ -23,7 +23,7 @@ public:
     ~ObjItem();
     void SetIntersection();
     void Update() override;
-    void Render() override;
+    void Render(const std::unique_ptr<Renderer>& renderer) override;
     int GetItemType() const;
     GameScore GetScore() const;
     void SetScore(GameScore score);
@@ -63,7 +63,7 @@ public:
     ObjItemScoreText(GameScore score, const std::shared_ptr<Texture>& texture, const std::shared_ptr<GameState>& gameState);
     ~ObjItemScoreText();
     void Update() override;
-    void Render() override;
+    void Render(const std::unique_ptr<Renderer>& renderer) override;
 protected:
     int scoreTextDeleteTimer_;
     int scoreTextAlpha_;

@@ -1,5 +1,6 @@
 ﻿#include <bstorm/game_state.hpp>
 
+#include <bstorm/renderer.hpp>
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/fps_counter.hpp>
 #include <bstorm/input_device.hpp>
@@ -23,22 +24,23 @@
 #include <bstorm/item_data.hpp>
 #include <bstorm/auto_delete_clip.hpp>
 #include <bstorm/rand_generator.hpp>
+#include <bstorm/dnh_value.hpp>
 #include <bstorm/config.hpp>
 
 namespace bstorm
 {
-GameState::GameState(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevice9* d3DDevice_, const std::shared_ptr<Renderer>& renderer, const std::shared_ptr<conf::KeyConfig>& keyConfig, const std::shared_ptr<MousePositionProvider>& mousePosProvider, Engine* engine) :
+GameState::GameState(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevice9* d3DDevice, const std::shared_ptr<conf::KeyConfig>& keyConfig, const std::shared_ptr<MousePositionProvider>& mousePosProvider, Engine* engine) :
     fpsCounter(std::make_shared<FpsCounter>()),
     inputDevice(std::make_shared<InputDevice>(hWnd, mousePosProvider)),
     keyAssign(std::make_shared<KeyAssign>()),
     vKeyInputSource(std::make_shared<RealDeviceInputSource>(inputDevice, keyAssign)),
     soundDevice(std::make_shared<SoundDevice>(hWnd)),
-    renderer(renderer),
+    renderer(std::make_unique<Renderer>(d3DDevice)),
     objTable(std::make_shared<ObjectTable>()),
     objLayerList(std::make_shared<ObjectLayerList>()),
     colDetector(std::make_shared<CollisionDetector>(screenWidth, screenHeight, std::make_shared<CollisionMatrix>(DEFAULT_COLLISION_MATRIX_DIMENSION, DEFAULT_COLLISION_MATRIX))),
-    textureCache(std::make_shared<TextureCache>(d3DDevice_)),
-    fontCache(std::make_shared<FontCache>(hWnd, d3DDevice_)),
+    textureCache(std::make_shared<TextureCache>(d3DDevice)),
+    fontCache(std::make_shared<FontCache>(hWnd, d3DDevice)),
     meshCache(std::make_shared<MeshCache>()),
     camera2D(std::make_shared<Camera2D>()),
     camera3D(std::make_shared<Camera3D>()),

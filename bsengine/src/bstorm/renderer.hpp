@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <bstorm/non_copyable.hpp>
+
 #include <d3dx9.h>
 #include <array>
 #include <memory>
@@ -9,7 +11,7 @@ namespace bstorm
 struct Vertex;
 class Shader;
 class Mesh;
-class Renderer
+class Renderer : private NonCopyable
 {
 public:
     Renderer(IDirect3DDevice9*);

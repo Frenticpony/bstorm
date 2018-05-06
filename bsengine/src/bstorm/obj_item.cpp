@@ -152,7 +152,7 @@ void ObjItem::Update()
     }
 }
 
-void ObjItem::Render()
+void ObjItem::Render(const std::unique_ptr<Renderer>& renderer)
 {
     if (itemData_)
     {
@@ -223,12 +223,9 @@ void ObjItem::Render()
         }
 
         auto vertices = RectToVertices(renderColor, itemData_->texture->GetWidth(), itemData_->texture->GetHeight(), rect);
-        if (auto state = GetGameState())
-        {
-            state->renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), itemData_->texture->GetTexture(), itemBlend, world, GetAppliedShader(), IsPermitCamera(), true);
-        }
+        renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), itemData_->texture->GetTexture(), itemBlend, world, GetAppliedShader(), IsPermitCamera(), true);
     }
-    ObjCol::RenderIntersection(IsPermitCamera());
+    ObjCol::RenderIntersection(renderer, IsPermitCamera());
 }
 
 int ObjItem::GetItemType() const { return itemType_; }
@@ -374,9 +371,9 @@ void ObjItemScoreText::Update()
     }
 }
 
-void ObjItemScoreText::Render()
+void ObjItemScoreText::Render(const std::unique_ptr<Renderer>& renderer)
 {
-    ObjSpriteList2D::Render();
+    ObjSpriteList2D::Render(renderer);
 }
 
 AutoItemCollectionManager::AutoItemCollectionManager() :

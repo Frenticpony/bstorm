@@ -56,10 +56,7 @@ void ObjText::GenerateFonts()
                     bodyFonts_.push_back(std::shared_ptr<Font>());
                 } else
                 {
-                    if (auto fc = state->fontCache)
-                    {
-                        bodyFonts_.push_back(fc->Create(FontParams(fontName_, size_, isBold_ ? FW_BOLD : FW_DONTCARE, topColor_, bottomColor_, borderType_, borderWidth_, borderColor_, c)));
-                    }
+                    bodyFonts_.push_back(state->fontCache->Create(FontParams(fontName_, size_, isBold_ ? FW_BOLD : FW_DONTCARE, topColor_, bottomColor_, borderType_, borderWidth_, borderColor_, c)));
                 }
             }
             for (const Ruby<std::wstring>& ruby : rubies_)
@@ -67,10 +64,7 @@ void ObjText::GenerateFonts()
                 std::vector<std::shared_ptr<Font>> fonts;
                 for (wchar_t c : ruby.text)
                 {
-                    if (auto fc = state->fontCache)
-                    {
-                        fonts.push_back(fc->Create(FontParams(fontName_, size_ / 2, FW_BOLD, topColor_, bottomColor_, borderType_, borderWidth_ / 2, borderColor_, c)));
-                    }
+                    fonts.push_back(state->fontCache->Create(FontParams(fontName_, size_ / 2, FW_BOLD, topColor_, bottomColor_, borderType_, borderWidth_ / 2, borderColor_, c)));
                 }
                 rubyFonts_.emplace_back(ruby.begin, ruby.end, fonts);
             }
@@ -92,7 +86,7 @@ int ObjText::GetNextLineOffsetY() const
     return font->GetNextLineOffsetY() + linePitch_;
 }
 
-void ObjText::RenderFont(const std::shared_ptr<Font>& font, const D3DXMATRIX& world)
+void ObjText::RenderFont(const std::shared_ptr<Font>& font, const D3DXMATRIX& world, const std::unique_ptr<Renderer>& renderer)
 {
     std::array<Vertex, 4> vertices;
     D3DCOLOR color = GetD3DCOLOR();
@@ -107,7 +101,7 @@ void ObjText::RenderFont(const std::shared_ptr<Font>& font, const D3DXMATRIX& wo
 
     if (auto state = GetGameState())
     {
-        state->renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), font->GetTexture(), GetBlendType(), world, GetAppliedShader(), IsPermitCamera(), true);
+        renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), font->GetTexture(), GetBlendType(), world, GetAppliedShader(), IsPermitCamera(), true);
     }
 }
 
@@ -284,7 +278,7 @@ int ObjText::GetMaxHeight() const
     return maxHeight_;
 }
 
-void ObjText::Render()
+void ObjText::Render(const std::unique_ptr<Renderer>& renderer)
 {
     if (auto state = GetGameState())
     {
@@ -328,7 +322,7 @@ void ObjText::Render()
                     D3DXMATRIX trans = CreateScaleRotTransMatrix(colX + bodyFont->GetPrintOffsetX() - centerX, lineY + bodyFont->GetPrintOffsetY() - centerY, GetZ(), 0, 0, 0, 1, 1, 1);
                     D3DXMATRIX scaleRot = CreateScaleRotTransMatrix(centerX, centerY, 0, GetAngleX(), GetAngleY(), GetAngleZ(), GetScaleX(), GetScaleY(), GetScaleZ());
                     D3DXMATRIX world = trans * scaleRot;
-                    RenderFont(bodyFont, world);
+                    RenderFont(bodyFont, world, renderer);
                     if (ruby != rubyFonts_.end())
                     {
                         if (ruby->begin == idx)
@@ -355,7 +349,7 @@ void ObjText::Render()
                                 {
                                     D3DXMATRIX trans = CreateScaleRotTransMatrix(rubyX + rubyFont->GetPrintOffsetX() - centerX, rubyY + rubyFont->GetPrintOffsetY() - centerY, GetZ(), 0, 0, 0, 1, 1, 1);
                                     D3DXMATRIX world = trans * scaleRot;
-                                    RenderFont(rubyFont, world);
+                                    RenderFont(rubyFont, world, renderer);
                                     rubyX += rubyFont->GetRightCharOffsetX() + rubySidePitch;
                                 }
                             }

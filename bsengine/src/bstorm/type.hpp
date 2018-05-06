@@ -76,6 +76,6 @@ using  MouseButton = int;
 
 using GameScore = int64_t;
 using StageIndex = int;
-using RandValue = uint32_t;
+using RandSeed = uint32_t;
 using FrameCount = int64_t;
 }

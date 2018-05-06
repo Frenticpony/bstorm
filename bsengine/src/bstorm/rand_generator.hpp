@@ -9,11 +9,11 @@ namespace bstorm
 class RandGenerator
 {
 public:
-    static constexpr RandValue min() { return 0u; }
-    static constexpr RandValue max() { return 0xffffffffu; }
-    RandGenerator(RandValue seed) : s(seed) {}
-    RandValue operator()() { return RandUInt(); }
-    RandValue RandUInt()
+    static constexpr RandSeed min() { return 0u; }
+    static constexpr RandSeed max() { return 0xffffffffu; }
+    RandGenerator(RandSeed seed) : s(seed) {}
+    RandSeed operator()() { return RandUInt(); }
+    RandSeed RandUInt()
     {
         s = s ^ (s << 13); s = s ^ (s >> 17);
         return s = s ^ (s << 5);
@@ -23,9 +23,9 @@ public:
         std::uniform_real_distribution<double> dist(min, max);
         return dist(*this);
     }
-    RandValue GetSeed() const { return s; }
-    void SetSeed(RandValue seed) { s = seed; }
+    RandSeed GetSeed() const { return s; }
+    void SetSeed(RandSeed seed) { s = seed; }
 private:
-    RandValue s;
+    RandSeed s;
 };
 }

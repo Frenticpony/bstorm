@@ -12,7 +12,7 @@ public:
     ObjSpell(const std::shared_ptr<GameState>& gameState);
     ~ObjSpell();
     void Update() override;
-    void Render() override;
+    void Render(const std::unique_ptr<Renderer>& renderer) override;
     bool IsRegistered() const;
     void Regist();
     double GetDamage() const;
