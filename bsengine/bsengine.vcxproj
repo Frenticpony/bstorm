@@ -83,10 +83,10 @@
     <ClInclude Include="src\bstorm\shot_data.hpp" />
     <ClInclude Include="src\bstorm\sound_device.hpp" />
     <ClInclude Include="src\bstorm\source_map.hpp" />
+    <ClInclude Include="src\bstorm\stage_types.hpp" />
     <ClInclude Include="src\bstorm\texture.hpp" />
     <ClInclude Include="src\bstorm\th_dnh_def.hpp" />
     <ClInclude Include="src\bstorm\time_point.hpp" />
-    <ClInclude Include="src\bstorm\type.hpp" />
     <ClInclude Include="src\bstorm\util.hpp" />
     <ClInclude Include="src\bstorm\version.hpp" />
     <ClInclude Include="src\bstorm\vertex.hpp" />

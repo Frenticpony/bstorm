@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include <bstorm/type.hpp>
 #include <bstorm/nullable_shared_ptr.hpp>
 #include <bstorm/point2D.hpp>
 #include <bstorm/stage_common_player_params.hpp>

@@ -1,11 +1,11 @@
 ﻿#pragma once
 
-#include <bstorm/type.hpp>
-
 #include <random>
 
 namespace bstorm
 {
+using RandSeed = uint32_t;
+
 class RandGenerator
 {
 public:

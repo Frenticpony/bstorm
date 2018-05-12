@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include <bstorm/type.hpp>
 #include <bstorm/color_rgb.hpp>
 #include <bstorm/const.hpp>
 #include <bstorm/obj.hpp>

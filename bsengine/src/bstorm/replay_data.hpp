@@ -1,6 +1,7 @@
 #pragma once
 
-#include <bstorm/type.hpp>
+#include <bstorm/rand_generator.hpp>
+#include <bstorm/stage_types.hpp>
 #include <bstorm/key_types.hpp>
 #include <bstorm/stage_common_player_params.hpp>
 #include <bstorm/common_data_db.hpp>

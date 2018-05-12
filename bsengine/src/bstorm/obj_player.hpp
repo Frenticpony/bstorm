@@ -3,7 +3,6 @@
 #include <bstorm/obj_prim.hpp>
 #include <bstorm/obj_move.hpp>
 #include <bstorm/obj_col.hpp>
-#include <bstorm/type.hpp>
 #include <bstorm/point2D.hpp>
 #include <bstorm/stage_common_player_params.hpp>
 

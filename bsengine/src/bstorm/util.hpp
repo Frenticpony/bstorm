@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-#include <bstorm/type.hpp>
-
 #include <string>
 #include <array>
 #include <vector>

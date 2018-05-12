@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include <bstorm/type.hpp>
+#include <bstorm/stage_types.hpp>
 #include <bstorm/font.hpp>
 #include <bstorm/animation.hpp>
 #include <bstorm/stage_common_player_params.hpp>

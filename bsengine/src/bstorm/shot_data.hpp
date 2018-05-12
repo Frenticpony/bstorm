@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include <bstorm/type.hpp>
 #include <bstorm/rect.hpp>
 #include <bstorm/animation.hpp>
 #include <bstorm/color_rgb.hpp>

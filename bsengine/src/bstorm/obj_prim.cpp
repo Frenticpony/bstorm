@@ -1,6 +1,5 @@
 ﻿#include <bstorm/obj_prim.hpp>
 
-#include <bstorm/type.hpp>
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/util.hpp>
 #include <bstorm/texture.hpp>

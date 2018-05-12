@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include <bstorm/type.hpp>
+#include <bstorm/rect.hpp>
 
 namespace bstorm
 {

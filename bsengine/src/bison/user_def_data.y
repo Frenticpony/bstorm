@@ -14,7 +14,6 @@
 {
 #include <bstorm/shot_data.hpp>
 #include <bstorm/item_data.hpp>
-#include <bstorm/type.hpp>
 #include <bstorm/source_map.hpp>
 
 #include <string>

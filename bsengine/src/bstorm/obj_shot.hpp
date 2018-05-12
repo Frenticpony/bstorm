@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include <bstorm/type.hpp>
 #include <bstorm/point2D.hpp>
 #include <bstorm/vertex.hpp>
 #include <bstorm/obj_render.hpp>

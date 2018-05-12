@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include <bstorm/obj.hpp>
-#include <bstorm/type.hpp>
 #include <bstorm/stage_common_player_params.hpp>
 
 namespace bstorm

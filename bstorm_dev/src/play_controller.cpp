@@ -4,6 +4,8 @@
 #include <bstorm/logger.hpp>
 #include <bstorm/engine.hpp>
 
+#include <algorithm>
+
 namespace bstorm
 {
 PlayController::PlayController(const std::shared_ptr<Engine>& engine) :

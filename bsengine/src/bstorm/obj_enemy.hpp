@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include <bstorm/type.hpp>
 #include <bstorm/point2D.hpp>
 #include <bstorm/obj_prim.hpp>
 #include <bstorm/obj_move.hpp>
