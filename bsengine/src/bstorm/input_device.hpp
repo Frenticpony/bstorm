@@ -2,6 +2,7 @@
 
 #include <bstorm/non_copyable.hpp>
 #include <bstorm/type.hpp>
+#include <bstorm/key_types.hpp>
 
 #include <windows.h>
 #include <unordered_map>

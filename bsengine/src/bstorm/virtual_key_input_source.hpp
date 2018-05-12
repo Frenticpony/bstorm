@@ -1,6 +1,6 @@
 #pragma once
 
-#include <bstorm/type.hpp>
+#include <bstorm/key_types.hpp>
 
 namespace bstorm
 {

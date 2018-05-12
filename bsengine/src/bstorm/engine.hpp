@@ -3,6 +3,7 @@
 #include <bstorm/type.hpp>
 #include <bstorm/nullable_shared_ptr.hpp>
 #include <bstorm/stage_common_player_params.hpp>
+#include <bstorm/key_types.hpp>
 
 #include <memory>
 #include <string>

@@ -68,12 +68,6 @@ struct Point2D
     float y;
 };
 
-using  KeyState = int;
-using  VirtualKey = int;
-using  Key = int;
-using  PadButton = int;
-using  MouseButton = int;
-
 using StageIndex = int;
 using RandSeed = uint32_t;
 using FrameCount = int64_t;

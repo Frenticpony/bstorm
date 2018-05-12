@@ -234,6 +234,9 @@
     <ClInclude Include="src\bstorm\nullable_shared_ptr.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="src\bstorm\key_types.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\bison\dnh.tab.cpp">
