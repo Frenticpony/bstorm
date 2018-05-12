@@ -98,7 +98,7 @@ private:
     int maxWidth_;
     int maxHeight_;
     bool isFontParamModified_;
-    std::vector<std::shared_ptr<Font>> bodyFonts_;
+    std::vector<NullableSharedPtr<Font>> bodyFonts_;
     std::vector<Ruby<std::vector<std::shared_ptr<Font>>>> rubyFonts_;
 };
 }

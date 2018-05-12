@@ -12,10 +12,14 @@
 
 namespace bstorm
 {
-struct FontParams
+class FontParams
 {
+public:
     FontParams();
     FontParams(const std::wstring& fontName, int size, int weight, const ColorRGB& topColor, const ColorRGB& bottomColor, int borderType, int borderWidth, const ColorRGB& borderColor, wchar_t c);
+    bool operator==(const FontParams& params) const;
+    bool operator!=(const FontParams& params) const;
+    size_t hashValue() const;
     std::wstring fontName;
     int size;
     int weight;
@@ -25,9 +29,6 @@ struct FontParams
     int borderWidth;
     ColorRGB borderColor;
     wchar_t c;
-    bool operator==(const FontParams& params_) const;
-    bool operator!=(const FontParams& params_) const;
-    size_t hashValue() const;
 };
 }
 
@@ -36,9 +37,9 @@ namespace std
 template<>
 struct hash<bstorm::FontParams>
 {
-    size_t operator()(const bstorm::FontParams& params_) const
+    size_t operator()(const bstorm::FontParams& params) const
     {
-        return params_.hashValue();
+        return params.hashValue();
     }
 };
 }
@@ -48,7 +49,7 @@ namespace bstorm
 class Font : private NonCopyable
 {
 public:
-    Font(const FontParams& params_, HWND hWnd, IDirect3DDevice9* d3DDevice_, int borderedFontQuality);
+    Font(const FontParams& params, HWND hWnd, IDirect3DDevice9* d3DDevice_, int borderedFontQuality);
     ~Font();
     int GetWidth() const { return width_; }
     int GetHeight() const { return height_; }
@@ -78,12 +79,10 @@ class FontCache
 {
 public:
     FontCache(HWND hWnd, IDirect3DDevice9* d3DDevice_);
-    std::shared_ptr<Font> Create(const FontParams& params_);
+    std::shared_ptr<Font> Create(const FontParams& params);
     void SetBorderedFontQuality(int q); // 1 ~ 4
     void ReleaseUnusedFont();
-    // backdoor
-    template <typename T>
-    void BackDoor() const {}
+    const std::unordered_map<FontParams, std::shared_ptr<Font>>& GetFontMap() const { return fontMap_; }
 private:
     HWND hWnd_;
     IDirect3DDevice9* d3DDevice_;

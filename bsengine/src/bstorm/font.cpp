@@ -33,22 +33,22 @@ FontParams::FontParams(const std::wstring& fontName, int size, int weight, const
     }
 }
 
-bool FontParams::operator==(const FontParams& params_) const
+bool FontParams::operator==(const FontParams& params) const
 {
-    return c == params_.c &&
-        fontName == params_.fontName &&
-        size == params_.size &&
-        weight == params_.weight &&
-        topColor == params_.topColor &&
-        bottomColor == params_.bottomColor &&
-        borderType == params_.borderType &&
-        borderWidth == params_.borderWidth &&
-        borderColor == params_.borderColor;
+    return c == params.c &&
+        fontName == params.fontName &&
+        size == params.size &&
+        weight == params.weight &&
+        topColor == params.topColor &&
+        bottomColor == params.bottomColor &&
+        borderType == params.borderType &&
+        borderWidth == params.borderWidth &&
+        borderColor == params.borderColor;
 }
 
-bool FontParams::operator!=(const FontParams& params_) const
+bool FontParams::operator!=(const FontParams& params) const
 {
-    return !(*this == params_);
+    return !(*this == params);
 }
 
 size_t FontParams::hashValue() const
@@ -76,9 +76,9 @@ static ColorRGB LerpColor(float y, float height, const ColorRGB& topColor, const
 }
 
 // FUTURE : error check
-Font::Font(const FontParams& params_, HWND hWnd, IDirect3DDevice9* d3DDevice_, int quality) :
+Font::Font(const FontParams& params, HWND hWnd, IDirect3DDevice9* d3DDevice_, int quality) :
     texture_(NULL),
-    params_(params_)
+    params_(params)
 {
     if (params_.borderType == BORDER_NONE)
     {
@@ -307,15 +307,15 @@ FontCache::FontCache(HWND hWnd, IDirect3DDevice9 * d3DDevice_) :
 {
 }
 
-std::shared_ptr<Font> FontCache::Create(const FontParams& params_)
+std::shared_ptr<Font> FontCache::Create(const FontParams& params)
 {
-    auto it = fontMap_.find(params_);
+    auto it = fontMap_.find(params);
     if (it != fontMap_.end())
     {
         return it->second;
     } else
     {
-        return fontMap_[params_] = std::make_shared<Font>(params_, hWnd_, d3DDevice_, borderedFontQuality_);
+        return fontMap_[params] = std::make_shared<Font>(params, hWnd_, d3DDevice_, borderedFontQuality_);
     }
 }
 

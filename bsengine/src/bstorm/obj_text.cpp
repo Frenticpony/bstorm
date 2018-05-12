@@ -54,10 +54,10 @@ void ObjText::GenerateFonts()
             {
                 if (c == L'\n')
                 {
-                    bodyFonts_.push_back(std::shared_ptr<Font>());
+                    bodyFonts_.push_back(nullptr);
                 } else
                 {
-                    bodyFonts_.push_back(package->fontCache->Create(FontParams(fontName_, size_, isBold_ ? FW_BOLD : FW_DONTCARE, topColor_, bottomColor_, borderType_, borderWidth_, borderColor_, c)));
+                    bodyFonts_.push_back(package->CreateFont(&FontParams(fontName_, size_, isBold_ ? FW_BOLD : FW_DONTCARE, topColor_, bottomColor_, borderType_, borderWidth_, borderColor_, c)));
                 }
             }
             for (const Ruby<std::wstring>& ruby : rubies_)
@@ -65,7 +65,7 @@ void ObjText::GenerateFonts()
                 std::vector<std::shared_ptr<Font>> fonts;
                 for (wchar_t c : ruby.text)
                 {
-                    fonts.push_back(package->fontCache->Create(FontParams(fontName_, size_ / 2, FW_BOLD, topColor_, bottomColor_, borderType_, borderWidth_ / 2, borderColor_, c)));
+                    fonts.push_back(package->CreateFont(&FontParams(fontName_, size_ / 2, FW_BOLD, topColor_, bottomColor_, borderType_, borderWidth_ / 2, borderColor_, c)));
                 }
                 rubyFonts_.emplace_back(ruby.begin, ruby.end, fonts);
             }

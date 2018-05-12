@@ -4,6 +4,7 @@
 #include <bstorm/nullable_shared_ptr.hpp>
 #include <bstorm/stage_common_player_params.hpp>
 #include <bstorm/key_types.hpp>
+#include <bstorm/font.hpp>
 
 #include <memory>
 #include <string>
@@ -121,6 +122,7 @@ public:
     void ReleaseUnusedTextureCache();
     /* font */
     void ReleaseUnusedFontCache();
+    const std::unordered_map<FontParams, std::shared_ptr<Font>>& GetFontMap() const;
     bool InstallFont(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
     /* render target */
     std::shared_ptr<RenderTarget> CreateRenderTarget(const std::wstring& name, int width, int height, const std::shared_ptr<SourcePos>& srcPos);

@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <bstorm/type.hpp>
+#include <bstorm/font.hpp>
 #include <bstorm/stage_common_player_params.hpp>
 #include <bstorm/script_info.hpp>
 
@@ -11,10 +12,10 @@
 #include <windows.h>
 #include <d3d9.h>
 
+#undef CreateFont
+
 namespace bstorm
 {
-constexpr uint8_t COLLISION_DETECTOR_MAX_LEVEL = 5;
-
 class FpsCounter;
 class TimePoint;
 class MousePositionProvider;
@@ -31,6 +32,8 @@ class Intersection;
 class FileLoader;
 class TextureCache;
 class FontCache;
+class Font;
+class FontParams;
 class MeshCache;
 class Camera2D;
 class Camera3D;
@@ -68,7 +71,6 @@ public:
     std::shared_ptr<CollisionDetector> colDetector;
     std::vector<std::shared_ptr<Intersection>> tempEnemyShotIsects;
     std::shared_ptr<TextureCache> textureCache;
-    std::shared_ptr<FontCache> fontCache;
     std::shared_ptr<MeshCache> meshCache;
     std::shared_ptr<Camera2D> camera2D;
     std::shared_ptr<Camera3D> camera3D;
@@ -115,6 +117,11 @@ public:
     bool forcePlayerInvincibleEnable;
     bool defaultBonusItemEnable;
 
+    /* font */
+    std::shared_ptr<Font> CreateFont(const FontParams* param);
+    void ReleaseUnusedFont();
+    const std::unordered_map<FontParams, std::shared_ptr<Font>>& GetFontMap() const;
+
     /* common player params */
     PlayerLife GetPlayerLife() const;
     PlayerSpell GetPlayerSpell() const;
@@ -129,6 +136,7 @@ public:
     void SetPlayerGraze(PlayerGraze graze);
     void SetPlayerPoint(PlayerPoint point);
 private:
+    const std::shared_ptr<FontCache> fontCache_;
     StageCommonPlayerParams stageCommonPlayerParams_;
 };
 }

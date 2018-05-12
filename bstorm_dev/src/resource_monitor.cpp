@@ -167,15 +167,14 @@ void TextureCache::BackDoor<ResourceMonitor>()
     ImGui::EndChild();
 }
 
-template<>
-void FontCache::BackDoor<ResourceMonitor>() const
+void DrawFontInfoTab(const std::unordered_map<FontParams, std::shared_ptr<Font>>& fontMap)
 {
     static FontParams selectedFontParams;
     float sideBarWidth = ImGui::GetContentRegionAvailWidth() * 0.2;
     ImGui::BeginChild("ResourceFontTabSideBar", ImVec2(sideBarWidth, -1), true, ImGuiWindowFlags_HorizontalScrollbar);
     {
         int fontId = 0;
-        for (const auto& entry : fontMap_)
+        for (const auto& entry : fontMap)
         {
             ImGui::PushID(fontId++);
             const auto& params_ = entry.first;
@@ -199,9 +198,9 @@ void FontCache::BackDoor<ResourceMonitor>() const
     ImGui::EndChild();
     ImGui::SameLine();
     ImGui::BeginChild("ResourceFontTabInfoArea", ImVec2(-1, -1), false, ImGuiWindowFlags_HorizontalScrollbar);
-    auto it = fontMap_.find(selectedFontParams);
+    auto it = fontMap.find(selectedFontParams);
     ImGui::Text("Font Info");
-    if (it != fontMap_.end())
+    if (it != fontMap.end())
     {
         drawFontInfo(it->second);
     }
@@ -269,7 +268,7 @@ void Engine::backDoor<ResourceMonitor>()
         package->textureCache->BackDoor<ResourceMonitor>();
     } else if (selectedTab == Tab::FONT)
     {
-        package->fontCache->BackDoor<ResourceMonitor>();
+        DrawFontInfoTab(GetFontMap());
     } else if (selectedTab == Tab::RENDER_TARGET)
     {
         backDoor<RenderTargetMonitor>();

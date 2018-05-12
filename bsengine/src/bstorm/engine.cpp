@@ -431,7 +431,12 @@ void Engine::ReleaseUnusedTextureCache()
 
 void Engine::ReleaseUnusedFontCache()
 {
-    package->fontCache->ReleaseUnusedFont();
+    package->ReleaseUnusedFont();
+}
+
+const std::unordered_map<FontParams, std::shared_ptr<Font>>& Engine::GetFontMap() const
+{
+    return package->GetFontMap();
 }
 
 bool Engine::InstallFont(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)

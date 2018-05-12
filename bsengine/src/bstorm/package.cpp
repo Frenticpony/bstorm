@@ -28,6 +28,8 @@
 #include <bstorm/dnh_value.hpp>
 #include <bstorm/config.hpp>
 
+#undef CreateFont
+
 namespace bstorm
 {
 Package::Package(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevice9* d3DDevice, const std::shared_ptr<conf::KeyConfig>& keyConfig, const std::shared_ptr<MousePositionProvider>& mousePosProvider, Engine* engine) :
@@ -42,7 +44,6 @@ Package::Package(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevice9*
     objLayerList(std::make_shared<ObjectLayerList>()),
     colDetector(std::make_shared<CollisionDetector>(screenWidth, screenHeight, std::make_shared<CollisionMatrix>(DEFAULT_COLLISION_MATRIX_DIMENSION, DEFAULT_COLLISION_MATRIX))),
     textureCache(std::make_shared<TextureCache>(d3DDevice)),
-    fontCache(std::make_shared<FontCache>(hWnd, d3DDevice)),
     meshCache(std::make_shared<MeshCache>(textureCache, fileLoader)),
     camera2D(std::make_shared<Camera2D>()),
     camera3D(std::make_shared<Camera3D>()),
@@ -77,13 +78,30 @@ Package::Package(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevice9*
     screenHeight(screenHeight),
     renderIntersectionEnable(false),
     forcePlayerInvincibleEnable(false),
-    defaultBonusItemEnable(true)
+    defaultBonusItemEnable(true),
+    fontCache_(std::make_shared<FontCache>(hWnd, d3DDevice))
 {
     for (const auto& keyMap : keyConfig->keyMaps)
     {
         keyAssign->AddVirtualKey(keyMap.vkey, keyMap.key, keyMap.pad);
     }
 }
+
+std::shared_ptr<Font> Package::CreateFont(const FontParams * param)
+{
+    return fontCache_->Create(*param);
+}
+
+void Package::ReleaseUnusedFont()
+{
+    fontCache_->ReleaseUnusedFont();
+}
+
+const std::unordered_map<FontParams, std::shared_ptr<Font>>& Package::GetFontMap() const
+{
+    return fontCache_->GetFontMap();
+}
+
 PlayerLife Package::GetPlayerLife() const
 {
     return stageCommonPlayerParams_.life;
