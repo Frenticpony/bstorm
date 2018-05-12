@@ -27,9 +27,9 @@ public:
     // 全ステージの情報をステージのインデックスリスト順に取得する
     std::unique_ptr<DnhValue> GetStageInfoList(const CommonDataDB::DataKey& infoKey) const;
     // プレイ時のFPSを取得
-    float GetFps(StageIndex stageIdx, FrameCount stageElapsedFrame) const;
+    float GetFps(StageIndex stageIdx, int stageElapsedFrame) const;
     // プレイ時のキー入力を取得
-    std::unordered_map<VirtualKey, KeyState> GetVirtualKeyStates(StageIndex stageIdx, FrameCount stageElapsedFrame) const;
+    std::unordered_map<VirtualKey, KeyState> GetVirtualKeyStates(StageIndex stageIdx, int stageElapsedFrame) const;
     // ステージから共通データエリアを読み出す
     bool LoadCommonDataArea(StageIndex stageIdx, const CommonDataDB::DataAreaName& areaName, CommonDataDB& dst) const;
 

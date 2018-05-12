@@ -11,5 +11,4 @@ namespace bstorm
 
 using StageIndex = int;
 using RandSeed = uint32_t;
-using FrameCount = int64_t;
 }

@@ -17,8 +17,8 @@ public:
     void Add(int step, const std::wstring& path);
     void LoadInThread(const std::shared_ptr<SourcePos>& srcPos);
     int GetTimer() const;
-    FrameCount GetTimerF() const;
-    FrameCount GetOrgTimerF() const;
+    int GetTimerF() const;
+    int GetOrgTimerF() const;
     PlayerScore GetSpellScore() const;
     bool IsSpell() const;
     bool IsLastSpell() const;
@@ -48,8 +48,8 @@ private:
         int scriptId;
         double life;
         double maxLife;
-        FrameCount timerF;
-        FrameCount orgTimerF;
+        int timerF;
+        int orgTimerF;
         PlayerScore spellScore;
         bool isSpell;
         bool isLastSpell;

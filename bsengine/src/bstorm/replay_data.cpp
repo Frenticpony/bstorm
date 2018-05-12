@@ -95,7 +95,7 @@ std::unique_ptr<DnhValue> ReplayData::GetStageInfoList(const CommonDataDB::DataK
     return std::move(stageInfoList);
 }
 
-float ReplayData::GetFps(StageIndex stageIdx, FrameCount stageElapsedFrame) const
+float ReplayData::GetFps(StageIndex stageIdx, int stageElapsedFrame) const
 {
     const auto stageInfoAreaName = StageInfoAreaName(stageIdx);
     const auto& fpsList = data_.GetAreaCommonData(stageInfoAreaName, StageFpsListInfoKey, DnhValue::Nil());
@@ -106,7 +106,7 @@ float ReplayData::GetFps(StageIndex stageIdx, FrameCount stageElapsedFrame) cons
     return 0.0f;
 }
 
-std::unordered_map<VirtualKey, KeyState> ReplayData::GetVirtualKeyStates(StageIndex stageIdx, FrameCount stageElapsedFrame) const
+std::unordered_map<VirtualKey, KeyState> ReplayData::GetVirtualKeyStates(StageIndex stageIdx, int stageElapsedFrame) const
 {
     std::unordered_map<VirtualKey, KeyState> ret;
     const auto stageInfoAreaName = StageInfoAreaName(stageIdx);

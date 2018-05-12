@@ -90,12 +90,12 @@ public:
     std::shared_ptr<ItemScoreTextSpawner> itemScoreTextSpawner;
     std::shared_ptr<DefaultBonusItemSpawner> defaultBonusItemSpawner;
     std::shared_ptr<AutoItemCollectionManager> autoItemCollectionManager;
-    FrameCount elapsedFrame;
+    int elapsedFrame;
     std::shared_ptr<TimePoint> packageStartTime;
     std::shared_ptr<TimePoint> stageStartTime;
     std::vector<ScriptInfo> freePlayerScriptInfoList;
-    FrameCount pseudoPlayerFps;
-    FrameCount pseudoEnemyFps;
+    int pseudoPlayerFps;
+    int pseudoEnemyFps;
     ScriptInfo packageMainScriptInfo;
     ScriptInfo stageMainScriptInfo;
     ScriptInfo stagePlayerScriptInfo;

@@ -91,8 +91,8 @@ private:
     float clipRight_;
     float clipBottom_;
     float autoItemCollectLineY_;
-    FrameCount hitStateTimer_;
-    FrameCount downStateTimer_;
+    int hitStateTimer_;
+    int downStateTimer_;
     PlayerGraze currentFrameGrazeCnt_;
     std::vector<double> currentFrameGrazeObjIds_;
     std::vector<Point2D> currentFrameGrazeShotPoints_;

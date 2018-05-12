@@ -116,14 +116,14 @@ int ObjEnemyBossScene::GetTimer() const
     return (int)(GetTimerF() / 60);
 }
 
-FrameCount ObjEnemyBossScene::GetTimerF() const
+int ObjEnemyBossScene::GetTimerF() const
 {
     if (!ExistPhase()) return -1;
     const Phase& phase = GetCurrentPhase();
     return phase.timerF;
 }
 
-FrameCount ObjEnemyBossScene::GetOrgTimerF() const
+int ObjEnemyBossScene::GetOrgTimerF() const
 {
     if (!ExistPhase()) return -1;
     const Phase& phase = GetCurrentPhase();
