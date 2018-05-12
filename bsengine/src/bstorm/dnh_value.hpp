@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <bstorm/type.hpp>
+#include <bstorm/point2D.hpp>
 
 #include <string>
 #include <vector>

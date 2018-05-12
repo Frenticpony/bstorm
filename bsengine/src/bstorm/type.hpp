@@ -23,14 +23,6 @@ struct AnimationClip
 };
 using AnimationData = std::vector<AnimationClip>;
 
-struct Point2D
-{
-    Point2D() : x(0.0f), y(0.0f) {}
-    Point2D(float x, float y) : x(x), y(y) {}
-    float x;
-    float y;
-};
-
 using StageIndex = int;
 using RandSeed = uint32_t;
 using FrameCount = int64_t;
