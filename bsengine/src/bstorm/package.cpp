@@ -2,6 +2,7 @@
 
 #include <bstorm/renderer.hpp>
 #include <bstorm/dnh_const.hpp>
+#include <bstorm/time_point.hpp>
 #include <bstorm/fps_counter.hpp>
 #include <bstorm/input_device.hpp>
 #include <bstorm/real_device_input_source.hpp>

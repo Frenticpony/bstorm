@@ -6,6 +6,7 @@
 #include <bstorm/parser.hpp>
 #include <bstorm/graphic_device.hpp>
 #include <bstorm/logger.hpp>
+#include <bstorm/time_point.hpp>
 #include <bstorm/fps_counter.hpp>
 #include <bstorm/input_device.hpp>
 #include <bstorm/virtual_key_input_source.hpp>

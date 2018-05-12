@@ -79,6 +79,7 @@
     <ClInclude Include="src\bstorm\source_map.hpp" />
     <ClInclude Include="src\bstorm\texture.hpp" />
     <ClInclude Include="src\bstorm\th_dnh_def.hpp" />
+    <ClInclude Include="src\bstorm\time_point.hpp" />
     <ClInclude Include="src\bstorm\type.hpp" />
     <ClInclude Include="src\bstorm\util.hpp" />
     <ClInclude Include="src\bstorm\version.hpp" />
@@ -116,6 +117,7 @@
     <ClCompile Include="src\bstorm\parser.cpp" />
     <ClCompile Include="src\bstorm\real_device_input_source.cpp" />
     <ClCompile Include="src\bstorm\replay_data.cpp" />
+    <ClCompile Include="src\bstorm\time_point.cpp" />
     <ClCompile Include="src\reflex\dnh_lexer.cpp" />
     <ClCompile Include="src\reflex\mqo_lexer.cpp" />
     <ClCompile Include="src\reflex\user_def_data_lexer.cpp" />

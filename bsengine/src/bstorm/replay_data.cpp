@@ -1,7 +1,7 @@
 #include <bstorm/replay_data.hpp>
 
 #include <bstorm/dnh_value.hpp>
-#include <bstorm/fps_counter.hpp>
+#include <bstorm/time_point.hpp>
 #include <bstorm/util.hpp>
 #include <bstorm/logger.hpp>
 #include <bstorm/log_error.hpp>

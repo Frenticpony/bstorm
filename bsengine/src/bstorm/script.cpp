@@ -14,7 +14,7 @@
 #include <bstorm/file_loader.hpp>
 #include <bstorm/logger.hpp>
 #include <bstorm/engine.hpp>
-#include <bstorm/fps_counter.hpp>
+#include <bstorm/time_point.hpp>
 #include <bstorm/script_runtime.h>
 
 #include <exception>
