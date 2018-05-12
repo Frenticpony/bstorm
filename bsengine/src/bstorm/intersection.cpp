@@ -533,9 +533,9 @@ std::vector<std::shared_ptr<Intersection>> CollisionDetector::GetIntersectionsCo
     {
         const int treeIdx = treeIndices.front();
         treeIndices.pop_front();
-        for (const auto& cell : quadTree_.at(treeIdx))
+        for (const auto& p : quadTree_.at(treeIdx))
         {
-            if (auto other = cell.lock())
+            if (auto other = p.lock())
             {
                 const CollisionGroup group2 = other->GetCollisionGroup();
                 // ターゲットグループでないなら無視
@@ -584,9 +584,9 @@ std::vector<std::shared_ptr<Intersection>> CollisionDetector::GetIntersectionsCo
     {
         const int treeIdx = treeIndices.front();
         treeIndices.pop_front();
-        for (const auto& cell : quadTree_.at(treeIdx))
+        for (const auto& p : quadTree_.at(treeIdx))
         {
-            if (auto other = cell.lock())
+            if (auto other = p.lock())
             {
                 // ターゲットグループでないなら無視
                 if (targetGroup >= 0 && other->GetCollisionGroup() != targetGroup) continue;
