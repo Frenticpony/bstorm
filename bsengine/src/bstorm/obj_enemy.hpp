@@ -11,7 +11,7 @@ class Intersection;
 class ObjEnemy : public ObjSprite2D, public ObjMove, public ObjCol, public std::enable_shared_from_this<ObjEnemy>
 {
 public:
-    ObjEnemy(bool isBoss, const std::shared_ptr<GameState>& gameState);
+    ObjEnemy(bool isBoss, const std::shared_ptr<Package>& package);
     ~ObjEnemy();
     void Update() override;
     void Render(const std::unique_ptr<Renderer>& renderer) override;

@@ -7,7 +7,7 @@
 #include <bstorm/util.hpp>
 #include <bstorm/shot_data.hpp>
 #include <bstorm/item_data.hpp>
-#include <bstorm/game_state.hpp>
+#include <bstorm/package.hpp>
 #include <bstorm/engine.hpp>
 
 #include <algorithm>
@@ -366,13 +366,13 @@ void Engine::backDoor<UserDefDataBrowser>()
     ImGui::Separator();
     if (selectedTab == Tab::PLAYER_SHOT)
     {
-        gameState->playerShotDataTable->BackDoor<PlayerShotData>();
+        package->playerShotDataTable->BackDoor<PlayerShotData>();
     } else if (selectedTab == Tab::ENEMY_SHOT)
     {
-        gameState->enemyShotDataTable->BackDoor<EnemyShotData>();
+        package->enemyShotDataTable->BackDoor<EnemyShotData>();
     } else if (selectedTab == Tab::ITEM)
     {
-        gameState->itemDataTable->BackDoor<UserDefDataBrowser>();
+        package->itemDataTable->BackDoor<UserDefDataBrowser>();
     }
 }
 

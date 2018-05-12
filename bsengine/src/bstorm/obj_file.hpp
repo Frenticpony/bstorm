@@ -12,7 +12,7 @@ namespace bstorm
 class ObjFile : public Obj
 {
 public:
-    ObjFile(const std::shared_ptr<GameState>& state);
+    ObjFile(const std::shared_ptr<Package>& state);
     ~ObjFile();
     virtual bool Open(const std::wstring& path) = 0;
     virtual bool OpenNW(const std::wstring& path) = 0;
@@ -25,7 +25,7 @@ protected:
 class ObjFileT : public ObjFile
 {
 public:
-    ObjFileT(const std::shared_ptr<GameState>& state);
+    ObjFileT(const std::shared_ptr<Package>& state);
     void Update() override;
     bool Open(const std::wstring& path);
     bool OpenNW(const std::wstring& path);
@@ -49,7 +49,7 @@ public:
         UTF16LE,
         UTF16BE
     };
-    ObjFileB(const std::shared_ptr<GameState>& state);
+    ObjFileB(const std::shared_ptr<Package>& state);
     void Update() override;
     bool Open(const std::wstring& path);
     bool OpenNW(const std::wstring& path) { return false; }

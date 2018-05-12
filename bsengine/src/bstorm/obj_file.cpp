@@ -5,7 +5,7 @@
 
 namespace bstorm
 {
-ObjFile::ObjFile(const std::shared_ptr<GameState>& state) : Obj(state)
+ObjFile::ObjFile(const std::shared_ptr<Package>& state) : Obj(state)
 {
 }
 
@@ -25,7 +25,7 @@ int ObjFile::getSize()
 }
 
 
-ObjFileT::ObjFileT(const std::shared_ptr<GameState>& state) : ObjFile(state)
+ObjFileT::ObjFileT(const std::shared_ptr<Package>& state) : ObjFile(state)
 {
     SetType(OBJ_FILE_TEXT);
 }
@@ -124,7 +124,7 @@ std::vector<std::wstring> ObjFileT::SplitLineText(int lineNum, const std::wstrin
     return Split(lines_[lineNum - 1], delimiter);
 }
 
-ObjFileB::ObjFileB(const std::shared_ptr<GameState>& state) :
+ObjFileB::ObjFileB(const std::shared_ptr<Package>& state) :
     ObjFile(state),
     code_(Encoding::ACP),
     useBE_(false)

@@ -5,14 +5,14 @@
 #include <bstorm/util.hpp>
 #include <bstorm/obj_enemy_boss_scene.hpp>
 #include <bstorm/intersection.hpp>
-#include <bstorm/game_state.hpp>
+#include <bstorm/package.hpp>
 
 namespace bstorm
 {
-ObjEnemy::ObjEnemy(bool isBoss, const std::shared_ptr<GameState>& gameState) :
-    ObjSprite2D(gameState),
+ObjEnemy::ObjEnemy(bool isBoss, const std::shared_ptr<Package>& package) :
+    ObjSprite2D(package),
     ObjMove(this),
-    ObjCol(gameState),
+    ObjCol(package),
     isRegistered_(false),
     life_(0),
     damageRateShot_(1.0),
@@ -89,9 +89,9 @@ const std::vector<Point2D>& ObjEnemy::GetAllIntersectionToShotPosition() const
 
 void ObjEnemy::AddTempIntersection(const std::shared_ptr<Intersection>& isect)
 {
-    if (auto state = GetGameState())
+    if (auto package = GetPackage().lock())
     {
-        state->colDetector->Add(isect);
+        package->colDetector->Add(isect);
     }
     ObjCol::AddTempIntersection(isect);
 }
@@ -113,9 +113,9 @@ void ObjEnemy::AddShotDamage(double damage)
     shotHitCount_++;
     if (IsBoss())
     {
-        if (auto state = GetGameState())
+        if (auto package = GetPackage().lock())
         {
-            if (auto bossScene = state->enemyBossSceneObj.lock())
+            if (auto bossScene = package->enemyBossSceneObj.lock())
             {
                 bossScene->AddDamage(damage);
             }
@@ -129,9 +129,9 @@ void ObjEnemy::AddSpellDamage(double damage)
     life_ -= damage;
     if (IsBoss())
     {
-        if (auto state = GetGameState())
+        if (auto package = GetPackage().lock())
         {
-            if (auto bossScene = state->enemyBossSceneObj.lock())
+            if (auto bossScene = package->enemyBossSceneObj.lock())
             {
                 bossScene->AddDamage(damage);
             }

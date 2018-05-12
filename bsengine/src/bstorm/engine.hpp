@@ -51,7 +51,7 @@ class ItemData;
 class ScriptInfo;
 class Script;
 class SoundBuffer;
-class GameState;
+class Package;
 struct SourcePos;
 namespace conf { struct KeyConfig; }
 class Engine
@@ -386,6 +386,6 @@ protected:
     std::shared_ptr<conf::KeyConfig> defaultKeyConfig;
     std::shared_ptr<MousePositionProvider> mousePosProvider;
     std::unordered_map<std::wstring, std::shared_ptr<RenderTarget>> renderTargets;
-    std::shared_ptr<GameState> gameState;
+    std::shared_ptr<Package> package;
 };
 }

@@ -44,7 +44,7 @@
 #include <bstorm/script_info.hpp>
 #include <bstorm/script.hpp>
 #include <bstorm/config.hpp>
-#include <bstorm/game_state.hpp>
+#include <bstorm/package.hpp>
 
 #include <exception>
 #include <ctime>
@@ -86,62 +86,62 @@ void Engine::TickFrame()
         return;
     }
 
-    if (auto packageMain = gameState->packageMainScript.lock())
+    if (auto packageMain = package->packageMainScript.lock())
     {
         if (packageMain->IsClosed())
         {
             Logger::WriteLog(Log::Level::LV_INFO, "finish package.");
-            gameState->packageMainScript.reset();
+            package->packageMainScript.reset();
             Reset(GetScreenWidth(), GetScreenHeight());
             return;
         }
     }
 
-    if (GetElapsedFrame() % (60 / std::min(gameState->pseudoEnemyFps, gameState->pseudoPlayerFps)) == 0)
+    if (GetElapsedFrame() % (60 / std::min(package->pseudoEnemyFps, package->pseudoPlayerFps)) == 0)
     {
-        if (auto stageMain = gameState->stageMainScript.lock())
+        if (auto stageMain = package->stageMainScript.lock())
         {
             if (stageMain->IsClosed())
             {
-                if (gameState->stageForceTerminated)
+                if (package->stageForceTerminated)
                 {
-                    gameState->stageSceneResult = STAGE_RESULT_BREAK_OFF;
-                    gameState->globalPlayerParams = std::make_shared<GlobalPlayerParams>();
-                    gameState->globalPlayerParams->life = 0.0;
+                    package->stageSceneResult = STAGE_RESULT_BREAK_OFF;
+                    package->globalPlayerParams = std::make_shared<GlobalPlayerParams>();
+                    package->globalPlayerParams->life = 0.0;
                 } else if (auto player = GetPlayerObject())
                 {
-                    gameState->stageSceneResult = player->GetState() != STATE_END ? STAGE_RESULT_CLEARED : STAGE_RESULT_PLAYER_DOWN;
+                    package->stageSceneResult = player->GetState() != STATE_END ? STAGE_RESULT_CLEARED : STAGE_RESULT_PLAYER_DOWN;
                 } else
                 {
-                    gameState->stageSceneResult = STAGE_RESULT_PLAYER_DOWN;
+                    package->stageSceneResult = STAGE_RESULT_PLAYER_DOWN;
                 }
                 RenderToTextureA1(GetTransitionRenderTargetName(), 0, MAX_RENDER_PRIORITY, true);
-                gameState->objTable->DeleteStgSceneObject();
-                gameState->scriptManager->CloseStgSceneScript();
-                gameState->stageMainScript.reset();
-                gameState->stagePlayerScript.reset();
-                gameState->stageForceTerminated = false;
-                gameState->stagePaused = true;
-                gameState->pseudoPlayerFps = gameState->pseudoEnemyFps = 60;
+                package->objTable->DeleteStgSceneObject();
+                package->scriptManager->CloseStgSceneScript();
+                package->stageMainScript.reset();
+                package->stagePlayerScript.reset();
+                package->stageForceTerminated = false;
+                package->stagePaused = true;
+                package->pseudoPlayerFps = package->pseudoEnemyFps = 60;
             }
         }
-        gameState->scriptManager->CleanClosedScript();
+        package->scriptManager->CleanClosedScript();
 
         if (!IsStagePaused())
         {
-            gameState->colDetector->TestAllCollision();
+            package->colDetector->TestAllCollision();
         }
 
         // SetShotIntersection{Circle, Line}で設定した判定削除
-        gameState->tempEnemyShotIsects.clear();
+        package->tempEnemyShotIsects.clear();
 
-        gameState->inputDevice->UpdateInputState();
+        package->inputDevice->UpdateInputState();
 
-        gameState->scriptManager->RunAll(IsStagePaused());
+        package->scriptManager->RunAll(IsStagePaused());
 
-        gameState->objTable->UpdateAll(IsStagePaused());
+        package->objTable->UpdateAll(IsStagePaused());
 
-        gameState->autoItemCollectionManager->Reset();
+        package->autoItemCollectionManager->Reset();
     }
     // 使われなくなったリソース開放
     switch (GetElapsedFrame() % 1920)
@@ -159,7 +159,7 @@ void Engine::TickFrame()
             ReleaseUnusedMeshCache();
             break;
     }
-    gameState->elapsedFrame += 1;
+    package->elapsedFrame += 1;
 }
 
 void Engine::Render()
@@ -185,7 +185,7 @@ void Engine::RenderToTextureB1(const std::wstring& name, int objId, bool doClear
 void Engine::Reset(int screenWidth, int screenHeight)
 {
     Logger::SetEnable(false);
-    gameState = std::make_shared<GameState>(screenWidth, screenHeight, GetWindowHandle(), GetDirect3DDevice(), defaultKeyConfig, mousePosProvider, this);
+    package = std::make_shared<Package>(screenWidth, screenHeight, GetWindowHandle(), GetDirect3DDevice(), defaultKeyConfig, mousePosProvider, this);
     Reset2DCamera();
     ResetCamera();
 
@@ -194,39 +194,39 @@ void Engine::Reset(int screenWidth, int screenHeight)
     CreateRenderTarget(GetReservedRenderTargetName(0), 1024, 512, nullptr);
     CreateRenderTarget(GetReservedRenderTargetName(1), 1024, 512, nullptr);
     CreateRenderTarget(GetReservedRenderTargetName(2), 1024, 512, nullptr);
-    gameState->renderer->SetForbidCameraViewProjMatrix2D(GetScreenWidth(), GetScreenHeight());
-    gameState->renderer->SetFogEnable(false);
+    package->renderer->SetForbidCameraViewProjMatrix2D(GetScreenWidth(), GetScreenHeight());
+    package->renderer->SetFogEnable(false);
     Logger::SetEnable(true);
 }
 
 int Engine::GetScreenWidth() const
 {
-    return gameState->screenWidth;
+    return package->screenWidth;
 }
 
 int Engine::GetScreenHeight() const
 {
-    return gameState->screenHeight;
+    return package->screenHeight;
 }
 
 bool Engine::IsRenderIntersectionEnabled() const
 {
-    return gameState->renderIntersectionEnable;
+    return package->renderIntersectionEnable;
 }
 
 void Engine::SetRenderIntersectionEnable(bool enable)
 {
-    gameState->renderIntersectionEnable = enable;
+    package->renderIntersectionEnable = enable;
 }
 
 bool Engine::IsForcePlayerInvincibleEnabled() const
 {
-    return gameState->forcePlayerInvincibleEnable;
+    return package->forcePlayerInvincibleEnable;
 }
 
 void Engine::SetForcePlayerInvincibleEnable(bool enable)
 {
-    gameState->forcePlayerInvincibleEnable = enable;
+    package->forcePlayerInvincibleEnable = enable;
 }
 
 IDirect3DDevice9* Engine::GetDirect3DDevice() const
@@ -266,53 +266,53 @@ void Engine::ReleaseUnusedLostableGraphicResource()
 
 KeyState Engine::GetKeyState(Key k)
 {
-    return gameState->inputDevice->GetKeyState(k);
+    return package->inputDevice->GetKeyState(k);
 }
 
 KeyState Engine::GetVirtualKeyState(VirtualKey vk)
 {
-    return gameState->vKeyInputSource->GetVirtualKeyState(vk);
+    return package->vKeyInputSource->GetVirtualKeyState(vk);
 }
 
 void Engine::SetVirtualKeyState(VirtualKey vk, KeyState state)
 {
-    gameState->vKeyInputSource->SetVirtualKeyState(vk, state);
+    package->vKeyInputSource->SetVirtualKeyState(vk, state);
 }
 
 void Engine::AddVirtualKey(VirtualKey vk, Key k, PadButton btn)
 {
-    gameState->keyAssign->AddVirtualKey(vk, k, btn);
+    package->keyAssign->AddVirtualKey(vk, k, btn);
 }
 
 KeyState Engine::GetMouseState(MouseButton btn)
 {
-    return gameState->inputDevice->GetMouseState(btn);
+    return package->inputDevice->GetMouseState(btn);
 }
 
 int Engine::GetMouseX()
 {
-    return gameState->inputDevice->GetMouseX(GetScreenWidth(), GetScreenHeight());
+    return package->inputDevice->GetMouseX(GetScreenWidth(), GetScreenHeight());
 }
 
 int Engine::GetMouseY()
 {
-    return gameState->inputDevice->GetMouseY(GetScreenWidth(), GetScreenHeight());
+    return package->inputDevice->GetMouseY(GetScreenWidth(), GetScreenHeight());
 }
 
 int Engine::GetMouseMoveZ()
 {
-    return gameState->inputDevice->GetMouseMoveZ();
+    return package->inputDevice->GetMouseMoveZ();
 }
 
 void Engine::SetMousePostionProvider(const std::shared_ptr<MousePositionProvider>& provider)
 {
     mousePosProvider = provider;
-    gameState->inputDevice->SetMousePositionProvider(mousePosProvider);
+    package->inputDevice->SetMousePositionProvider(mousePosProvider);
 }
 
 void Engine::SetInputEnable(bool enable)
 {
-    gameState->inputDevice->SetInputEnable(enable);
+    package->inputDevice->SetInputEnable(enable);
 }
 
 void Engine::WriteLog(const std::string && msg, const std::shared_ptr<SourcePos>& srcPos)
@@ -334,7 +334,7 @@ std::wstring Engine::GetCurrentDateTimeS()
 
 float Engine::GetCurrentFps() const
 {
-    return gameState->fpsCounter->GetStable();
+    return package->fpsCounter->GetStable();
 }
 
 float Engine::GetStageTime() const
@@ -343,22 +343,22 @@ float Engine::GetStageTime() const
     {
         return 0.0;
     }
-    return gameState->stageStartTime->GetElapsedMilliSec();
+    return package->stageStartTime->GetElapsedMilliSec();
 }
 
 float Engine::GetPackageTime() const
 {
-    return gameState->packageStartTime->GetElapsedMilliSec();
+    return package->packageStartTime->GetElapsedMilliSec();
 }
 
 void Engine::UpdateFpsCounter()
 {
-    gameState->fpsCounter->Update();
+    package->fpsCounter->Update();
 }
 
 void Engine::ResetFpsCounter()
 {
-    gameState->fpsCounter = std::make_shared<FpsCounter>();
+    package->fpsCounter = std::make_shared<FpsCounter>();
 }
 
 void Engine::StartSlow(int pseudoFps, bool byPlayer)
@@ -366,10 +366,10 @@ void Engine::StartSlow(int pseudoFps, bool byPlayer)
     pseudoFps = constrain(pseudoFps, 1, 60);
     if (byPlayer)
     {
-        gameState->pseudoPlayerFps = pseudoFps;
+        package->pseudoPlayerFps = pseudoFps;
     } else
     {
-        gameState->pseudoEnemyFps = pseudoFps;
+        package->pseudoEnemyFps = pseudoFps;
     }
 }
 
@@ -377,56 +377,56 @@ void Engine::StopSlow(bool byPlayer)
 {
     if (byPlayer)
     {
-        gameState->pseudoPlayerFps = 60;
+        package->pseudoPlayerFps = 60;
     } else
     {
-        gameState->pseudoEnemyFps = 60;
+        package->pseudoEnemyFps = 60;
     }
 }
 
 int64_t Engine::GetElapsedFrame() const
 {
-    return gameState->elapsedFrame;
+    return package->elapsedFrame;
 }
 
 std::wstring Engine::GetMainStgScriptPath() const
 {
-    return gameState->stageMainScriptInfo.path;
+    return package->stageMainScriptInfo.path;
 }
 
 std::wstring Engine::GetMainStgScriptDirectory() const
 {
-    return GetParentPath(gameState->stageMainScriptInfo.path) + L"/";
+    return GetParentPath(package->stageMainScriptInfo.path) + L"/";
 }
 
 std::wstring Engine::GetMainPackageScriptPath() const
 {
-    return gameState->packageMainScriptInfo.path;
+    return package->packageMainScriptInfo.path;
 }
 
 std::shared_ptr<Texture> Engine::LoadTexture(const std::wstring & path, bool reserve, const std::shared_ptr<SourcePos>& srcPos)
 {
-    return gameState->textureCache->Load(path, reserve, srcPos);
+    return package->textureCache->Load(path, reserve, srcPos);
 }
 
 void Engine::LoadTextureInThread(const std::wstring & path, bool reserve, const std::shared_ptr<SourcePos>& srcPos) noexcept(true)
 {
-    gameState->textureCache->LoadInThread(path, reserve, srcPos);
+    package->textureCache->LoadInThread(path, reserve, srcPos);
 }
 
 void Engine::RemoveTextureReservedFlag(const std::wstring & path)
 {
-    gameState->textureCache->RemoveReservedFlag(path);
+    package->textureCache->RemoveReservedFlag(path);
 }
 
 void Engine::ReleaseUnusedTextureCache()
 {
-    gameState->textureCache->ReleaseUnusedTexture();
+    package->textureCache->ReleaseUnusedTexture();
 }
 
 void Engine::ReleaseUnusedFontCache()
 {
-    gameState->fontCache->ReleaseUnusedFont();
+    package->fontCache->ReleaseUnusedFont();
 }
 
 bool Engine::InstallFont(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
@@ -574,33 +574,33 @@ bool Engine::IsPixelShaderSupported(int major, int minor)
 
 std::shared_ptr<Mesh> Engine::LoadMesh(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
-    return gameState->meshCache->Load(path, gameState->textureCache, srcPos);
+    return package->meshCache->Load(path, package->textureCache, srcPos);
 }
 
 void Engine::ReleaseUnusedMeshCache()
 {
-    gameState->meshCache->ReleaseUnusedMesh();
+    package->meshCache->ReleaseUnusedMesh();
 }
 
 std::shared_ptr<SoundBuffer> Engine::LoadSound(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
-    return gameState->soundDevice->LoadSound(path, false, srcPos);
+    return package->soundDevice->LoadSound(path, false, srcPos);
 }
 
 void Engine::LoadOrphanSound(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
-    gameState->orphanSounds[GetCanonicalPath(path)] = LoadSound(path, srcPos);
+    package->orphanSounds[GetCanonicalPath(path)] = LoadSound(path, srcPos);
 }
 
 void Engine::RemoveOrphanSound(const std::wstring & path)
 {
-    gameState->orphanSounds.erase(GetCanonicalPath(path));
+    package->orphanSounds.erase(GetCanonicalPath(path));
 }
 
 void Engine::PlayBGM(const std::wstring & path, double loopStartSec, double loopEndSec)
 {
-    auto it = gameState->orphanSounds.find(GetCanonicalPath(path));
-    if (it != gameState->orphanSounds.end())
+    auto it = package->orphanSounds.find(GetCanonicalPath(path));
+    if (it != package->orphanSounds.end())
     {
         auto& sound = it->second;
         if (sound->IsPlaying()) sound->Seek(0);
@@ -612,8 +612,8 @@ void Engine::PlayBGM(const std::wstring & path, double loopStartSec, double loop
 
 void Engine::PlaySE(const std::wstring & path)
 {
-    auto it = gameState->orphanSounds.find(GetCanonicalPath(path));
-    if (it != gameState->orphanSounds.end())
+    auto it = package->orphanSounds.find(GetCanonicalPath(path));
+    if (it != package->orphanSounds.end())
     {
         auto& sound = it->second;
         if (sound->IsPlaying()) sound->Seek(0);
@@ -623,8 +623,8 @@ void Engine::PlaySE(const std::wstring & path)
 
 void Engine::StopOrphanSound(const std::wstring & path)
 {
-    auto it = gameState->orphanSounds.find(GetCanonicalPath(path));
-    if (it != gameState->orphanSounds.end())
+    auto it = package->orphanSounds.find(GetCanonicalPath(path));
+    if (it != package->orphanSounds.end())
     {
         it->second->Stop();
     }
@@ -632,72 +632,72 @@ void Engine::StopOrphanSound(const std::wstring & path)
 
 void Engine::CacheSound(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
-    gameState->soundDevice->LoadSound(path, true, srcPos);
+    package->soundDevice->LoadSound(path, true, srcPos);
 }
 
 void Engine::RemoveSoundCache(const std::wstring & path)
 {
-    gameState->soundDevice->RemoveSoundCache(path);
+    package->soundDevice->RemoveSoundCache(path);
 }
 
 void Engine::ClearSoundCache()
 {
-    gameState->soundDevice->ClearSoundCache();
+    package->soundDevice->ClearSoundCache();
 }
 
 void Engine::SetObjectRenderPriority(const std::shared_ptr<ObjRender>& obj, int priority)
 {
-    gameState->objLayerList->SetRenderPriority(obj, priority);
+    package->objLayerList->SetRenderPriority(obj, priority);
 }
 
 void Engine::SetShader(int beginPriority, int endPriority, const std::shared_ptr<Shader>& shader)
 {
-    gameState->objLayerList->SetLayerShader(beginPriority, endPriority, shader);
+    package->objLayerList->SetLayerShader(beginPriority, endPriority, shader);
 }
 
 void Engine::ResetShader(int beginPriority, int endPriority)
 {
-    gameState->objLayerList->ResetLayerShader(beginPriority, endPriority);
+    package->objLayerList->ResetLayerShader(beginPriority, endPriority);
 }
 
 int Engine::GetStgFrameRenderPriorityMin() const
 {
-    return gameState->objLayerList->GetStgFrameRenderPriorityMin();
+    return package->objLayerList->GetStgFrameRenderPriorityMin();
 }
 
 void Engine::SetStgFrameRenderPriorityMin(int p)
 {
-    gameState->objLayerList->SetStgFrameRenderPriorityMin(p);
+    package->objLayerList->SetStgFrameRenderPriorityMin(p);
 }
 
 int Engine::GetStgFrameRenderPriorityMax() const
 {
-    return gameState->objLayerList->GetStgFrameRenderPriorityMax();
+    return package->objLayerList->GetStgFrameRenderPriorityMax();
 }
 
 void Engine::SetStgFrameRenderPriorityMax(int p)
 {
-    gameState->objLayerList->SetStgFrameRenderPriorityMax(p);
+    package->objLayerList->SetStgFrameRenderPriorityMax(p);
 }
 
 int Engine::GetShotRenderPriority() const
 {
-    return gameState->objLayerList->GetShotRenderPriority();
+    return package->objLayerList->GetShotRenderPriority();
 }
 
 void Engine::SetShotRenderPriority(int p)
 {
-    return gameState->objLayerList->SetShotRenderPriority(p);
+    return package->objLayerList->SetShotRenderPriority(p);
 }
 
 int Engine::GetItemRenderPriority() const
 {
-    return gameState->objLayerList->GetItemRenderPriority();
+    return package->objLayerList->GetItemRenderPriority();
 }
 
 void Engine::SetItemRenderPriority(int p)
 {
-    return gameState->objLayerList->SetItemRenderPriority(p);
+    return package->objLayerList->SetItemRenderPriority(p);
 }
 
 int Engine::GetPlayerRenderPriority() const
@@ -711,82 +711,82 @@ int Engine::GetPlayerRenderPriority() const
 
 int Engine::GetCameraFocusPermitRenderPriority() const
 {
-    return gameState->objLayerList->GetCameraFocusPermitRenderPriority();
+    return package->objLayerList->GetCameraFocusPermitRenderPriority();
 }
 
 void Engine::SetInvalidRenderPriority(int min, int max)
 {
-    gameState->objLayerList->SetInvalidRenderPriority(min, max);
+    package->objLayerList->SetInvalidRenderPriority(min, max);
 }
 
 void Engine::ClearInvalidRenderPriority()
 {
-    gameState->objLayerList->ClearInvalidRenderPriority();
+    package->objLayerList->ClearInvalidRenderPriority();
 }
 
 std::shared_ptr<Shader> Engine::GetShader(int p) const
 {
-    return gameState->objLayerList->GetLayerShader(p);
+    return package->objLayerList->GetLayerShader(p);
 }
 
 void Engine::SetFogEnable(bool enable)
 {
-    gameState->renderer->SetFogEnable(enable);
+    package->renderer->SetFogEnable(enable);
 }
 
 void Engine::SetFogParam(float fogStart, float fogEnd, int r, int g, int b)
 {
-    gameState->renderer->SetFogParam(fogStart, fogEnd, r, g, b);
+    package->renderer->SetFogParam(fogStart, fogEnd, r, g, b);
 }
 
 void Engine::SetCameraFocusX(float x)
 {
-    gameState->camera3D->SetFocusX(x);
+    package->camera3D->SetFocusX(x);
 }
 
 void Engine::SetCameraFocusY(float y)
 {
-    gameState->camera3D->SetFocusY(y);
+    package->camera3D->SetFocusY(y);
 }
 
 void Engine::SetCameraFocusZ(float z)
 {
-    gameState->camera3D->SetFocusZ(z);
+    package->camera3D->SetFocusZ(z);
 }
 
 void Engine::SetCameraFocusXYZ(float x, float y, float z)
 {
-    gameState->camera3D->SetFocusXYZ(x, y, z);
+    package->camera3D->SetFocusXYZ(x, y, z);
 }
 
 void Engine::SetCameraRadius(float r)
 {
-    gameState->camera3D->SetRadius(r);
+    package->camera3D->SetRadius(r);
 }
 
 void Engine::SetCameraAzimuthAngle(float angle)
 {
-    gameState->camera3D->SetAzimuthAngle(angle);
+    package->camera3D->SetAzimuthAngle(angle);
 }
 
 void Engine::SetCameraElevationAngle(float angle)
 {
-    gameState->camera3D->SetElevationAngle(angle);
+    package->camera3D->SetElevationAngle(angle);
 }
 
 void Engine::SetCameraYaw(float yaw)
 {
-    gameState->camera3D->SetYaw(yaw);
+    package->camera3D->SetYaw(yaw);
 }
 
 void Engine::SetCameraPitch(float pitch)
 {
-    gameState->camera3D->SetPitch(pitch);
+    package->camera3D->SetPitch(pitch);
 }
 
 void Engine::SetCameraRoll(float roll)
 {
-    gameState->camera3D->SetRoll(roll);
+    package->camera3D->SetRoll(roll);
 }
 
 void Engine::ResetCamera()
@@ -803,204 +803,204 @@ void Engine::ResetCamera()
 
 float Engine::GetCameraX() const
 {
-    return gameState->camera3D->GetX();
+    return package->camera3D->GetX();
 }
 
 float Engine::GetCameraY() const
 {
-    return gameState->camera3D->GetY();
+    return package->camera3D->GetY();
 }
 
 float Engine::GetCameraZ() const
 {
-    return gameState->camera3D->GetZ();
+    return package->camera3D->GetZ();
 }
 
 float Engine::GetCameraFocusX() const
 {
-    return gameState->camera3D->GetFocusX();
+    return package->camera3D->GetFocusX();
 }
 
 float Engine::GetCameraFocusY() const
 {
-    return gameState->camera3D->GetFocusY();
+    return package->camera3D->GetFocusY();
 }
 
 float Engine::GetCameraFocusZ() const
 {
-    return gameState->camera3D->GetFocusZ();
+    return package->camera3D->GetFocusZ();
 }
 
 float Engine::GetCameraRadius() const
 {
-    return gameState->camera3D->GetRadius();
+    return package->camera3D->GetRadius();
 }
 
 float Engine::GetCameraAzimuthAngle() const
 {
-    return gameState->camera3D->GetAzimuthAngle();
+    return package->camera3D->GetAzimuthAngle();
 }
 
 float Engine::GetCameraElevationAngle() const
 {
-    return gameState->camera3D->GetElevationAngle();
+    return package->camera3D->GetElevationAngle();
 }
 
 float Engine::GetCameraYaw() const
 {
-    return gameState->camera3D->GetYaw();
+    return package->camera3D->GetYaw();
 }
 
 float Engine::GetCameraPitch() const
 {
-    return gameState->camera3D->GetPitch();
+    return package->camera3D->GetPitch();
 }
 
 float Engine::GetCameraRoll() const
 {
-    return gameState->camera3D->GetRoll();
+    return package->camera3D->GetRoll();
 }
 
 void Engine::SetCameraPerspectiveClip(float nearClip, float farClip)
 {
-    return gameState->camera3D->SetPerspectiveClip(nearClip, farClip);
+    return package->camera3D->SetPerspectiveClip(nearClip, farClip);
 }
 
 void Engine::Set2DCameraFocusX(float x)
 {
-    gameState->camera2D->SetFocusX(x);
+    package->camera2D->SetFocusX(x);
 }
 
 void Engine::Set2DCameraFocusY(float y)
 {
-    gameState->camera2D->SetFocusY(y);
+    package->camera2D->SetFocusY(y);
 }
 
 void Engine::Set2DCameraAngleZ(float z)
 {
-    gameState->camera2D->SetAngleZ(z);
+    package->camera2D->SetAngleZ(z);
 }
 
 void Engine::Set2DCameraRatio(float r)
 {
-    gameState->camera2D->SetRatio(r);
+    package->camera2D->SetRatio(r);
 }
 
 void Engine::Set2DCameraRatioX(float x)
 {
-    gameState->camera2D->SetRatioX(x);
+    package->camera2D->SetRatioX(x);
 }
 
 void Engine::Set2DCameraRatioY(float y)
 {
-    gameState->camera2D->SetRatioY(y);
+    package->camera2D->SetRatioY(y);
 }
 
 void Engine::Reset2DCamera()
 {
-    gameState->camera2D->Reset(GetStgFrameCenterWorldX(), GetStgFrameCenterWorldY());
+    package->camera2D->Reset(GetStgFrameCenterWorldX(), GetStgFrameCenterWorldY());
 }
 
 float Engine::Get2DCameraX() const
 {
-    return gameState->camera2D->GetX();
+    return package->camera2D->GetX();
 }
 
 float Engine::Get2DCameraY() const
 {
-    return gameState->camera2D->GetY();
+    return package->camera2D->GetY();
 }
 
 float Engine::Get2DCameraAngleZ() const
 {
-    return gameState->camera2D->GetAngleZ();
+    return package->camera2D->GetAngleZ();
 }
 
 float Engine::Get2DCameraRatio() const
 {
-    return gameState->camera2D->GetRatio();
+    return package->camera2D->GetRatio();
 }
 
 float Engine::Get2DCameraRatioX() const
 {
-    return gameState->camera2D->GetRatioX();
+    return package->camera2D->GetRatioX();
 }
 
 float Engine::Get2DCameraRatioY() const
 {
-    return gameState->camera2D->GetRatioY();
+    return package->camera2D->GetRatioY();
 }
 
 void Engine::SetCommonData(const std::wstring & key, std::unique_ptr<DnhValue>&& value)
 {
-    gameState->commonDataDB->SetCommonData(key, std::move(value));
+    package->commonDataDB->SetCommonData(key, std::move(value));
 }
 
 const std::unique_ptr<DnhValue>& Engine::GetCommonData(const std::wstring & key, const std::unique_ptr<DnhValue>& defaultValue) const
 {
-    return gameState->commonDataDB->GetCommonData(key, defaultValue);
+    return package->commonDataDB->GetCommonData(key, defaultValue);
 }
 
 void Engine::ClearCommonData()
 {
-    gameState->commonDataDB->ClearCommonData();
+    package->commonDataDB->ClearCommonData();
 }
 
 void Engine::DeleteCommonData(const std::wstring & key)
 {
-    gameState->commonDataDB->DeleteCommonData(key);
+    package->commonDataDB->DeleteCommonData(key);
 }
 
 void Engine::SetAreaCommonData(const std::wstring & areaName, const std::wstring & key, std::unique_ptr<DnhValue>&& value)
 {
-    gameState->commonDataDB->SetAreaCommonData(areaName, key, std::move(value));
+    package->commonDataDB->SetAreaCommonData(areaName, key, std::move(value));
 }
 
 const std::unique_ptr<DnhValue>& Engine::GetAreaCommonData(const std::wstring & areaName, const std::wstring & key, const std::unique_ptr<DnhValue>& defaultValue) const
 {
-    return gameState->commonDataDB->GetAreaCommonData(areaName, key, defaultValue);
+    return package->commonDataDB->GetAreaCommonData(areaName, key, defaultValue);
 }
 
 void Engine::ClearAreaCommonData(const std::wstring & areaName)
 {
-    gameState->commonDataDB->ClearAreaCommonData(areaName);
+    package->commonDataDB->ClearAreaCommonData(areaName);
 }
 
 void Engine::DeleteAreaCommonData(const std::wstring & areaName, const std::wstring & key)
 {
-    gameState->commonDataDB->DeleteAreaCommonData(areaName, key);
+    package->commonDataDB->DeleteAreaCommonData(areaName, key);
 }
 
 void Engine::CreateCommonDataArea(const std::wstring & areaName)
 {
-    gameState->commonDataDB->CreateCommonDataArea(areaName);
+    package->commonDataDB->CreateCommonDataArea(areaName);
 }
 
 bool Engine::IsCommonDataAreaExists(const std::wstring & areaName) const
 {
-    return gameState->commonDataDB->IsCommonDataAreaExists(areaName);
+    return package->commonDataDB->IsCommonDataAreaExists(areaName);
 }
 
 void Engine::CopyCommonDataArea(const std::wstring & dest, const std::wstring & src)
 {
-    gameState->commonDataDB->CopyCommonDataArea(dest, src);
+    package->commonDataDB->CopyCommonDataArea(dest, src);
 }
 
 std::vector<std::wstring> Engine::GetCommonDataAreaKeyList() const
 {
-    return gameState->commonDataDB->GetCommonDataAreaKeyList();
+    return package->commonDataDB->GetCommonDataAreaKeyList();
 }
 
 std::vector<std::wstring> Engine::GetCommonDataValueKeyList(const std::wstring & areaName) const
 {
-    return gameState->commonDataDB->GetCommonDataValueKeyList(areaName);
+    return package->commonDataDB->GetCommonDataValueKeyList(areaName);
 }
 
 bool Engine::SaveCommonDataAreaA1(const std::wstring & areaName) const
 {
     try
     {
-        gameState->commonDataDB->SaveCommonDataArea(areaName, GetDefaultCommonDataSavePath(areaName));
+        package->commonDataDB->SaveCommonDataArea(areaName, GetDefaultCommonDataSavePath(areaName));
     } catch (Log& log)
     {
         Logger::WriteLog(std::move(log.SetLevel(Log::Level::LV_WARN)));
@@ -1013,7 +1013,7 @@ bool Engine::LoadCommonDataAreaA1(const std::wstring & areaName)
 {
     try
     {
-        gameState->commonDataDB->LoadCommonDataArea(areaName, GetDefaultCommonDataSavePath(areaName));
+        package->commonDataDB->LoadCommonDataArea(areaName, GetDefaultCommonDataSavePath(areaName));
     } catch (Log& log)
     {
         Logger::WriteLog(std::move(log.SetLevel(Log::Level::LV_WARN)));
@@ -1026,7 +1026,7 @@ bool Engine::SaveCommonDataAreaA2(const std::wstring & areaName, const std::wstr
 {
     try
     {
-        gameState->commonDataDB->SaveCommonDataArea(areaName, path);
+        package->commonDataDB->SaveCommonDataArea(areaName, path);
     } catch (Log& log)
     {
         Logger::WriteLog(std::move(log.SetLevel(Log::Level::LV_WARN)));
@@ -1039,7 +1039,7 @@ bool Engine::LoadCommonDataAreaA2(const std::wstring & areaName, const std::wstr
 {
     try
     {
-        gameState->commonDataDB->LoadCommonDataArea(areaName, path);
+        package->commonDataDB->LoadCommonDataArea(areaName, path);
     } catch (Log& log)
     {
         Logger::WriteLog(std::move(log.SetLevel(Log::Level::LV_WARN)));
@@ -1061,82 +1061,82 @@ std::wstring Engine::GetDefaultCommonDataSavePath(const std::wstring & areaName)
 
 void Engine::LoadPlayerShotData(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
-    gameState->playerShotDataTable->Load(path, gameState->fileLoader, gameState->textureCache, srcPos);
+    package->playerShotDataTable->Load(path, package->fileLoader, package->textureCache, srcPos);
 }
 
 void Engine::ReloadPlayerShotData(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
-    gameState->playerShotDataTable->Reload(path, gameState->fileLoader, gameState->textureCache, srcPos);
+    package->playerShotDataTable->Reload(path, package->fileLoader, package->textureCache, srcPos);
 }
 
 void Engine::LoadEnemyShotData(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
-    gameState->enemyShotDataTable->Load(path, gameState->fileLoader, gameState->textureCache, srcPos);
+    package->enemyShotDataTable->Load(path, package->fileLoader, package->textureCache, srcPos);
 }
 
 void Engine::ReloadEnemyShotData(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
-    gameState->enemyShotDataTable->Reload(path, gameState->fileLoader, gameState->textureCache, srcPos);
+    package->enemyShotDataTable->Reload(path, package->fileLoader, package->textureCache, srcPos);
 }
 
 void Engine::LoadItemData(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
-    gameState->itemDataTable->Load(path, gameState->fileLoader, gameState->textureCache, srcPos);
+    package->itemDataTable->Load(path, package->fileLoader, package->textureCache, srcPos);
 }
 
 void Engine::ReloadItemData(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
-    gameState->itemDataTable->Reload(path, gameState->fileLoader, gameState->textureCache, srcPos);
+    package->itemDataTable->Reload(path, package->fileLoader, package->textureCache, srcPos);
 }
 
 std::shared_ptr<ShotData> Engine::GetPlayerShotData(int id) const
 {
-    return gameState->playerShotDataTable->Get(id);
+    return package->playerShotDataTable->Get(id);
 }
 
 std::shared_ptr<ShotData> Engine::GetEnemyShotData(int id) const
 {
-    return gameState->enemyShotDataTable->Get(id);
+    return package->enemyShotDataTable->Get(id);
 }
 
 std::shared_ptr<ItemData> Engine::GetItemData(int id) const
 {
-    return gameState->itemDataTable->Get(id);
+    return package->itemDataTable->Get(id);
 }
 
 std::shared_ptr<ObjText> Engine::CreateObjText()
 {
-    auto obj = gameState->objTable->Create<ObjText>(gameState);
-    gameState->objLayerList->SetRenderPriority(obj, 50);
+    auto obj = package->objTable->Create<ObjText>(package);
+    package->objLayerList->SetRenderPriority(obj, 50);
     return obj;
 }
 
 std::shared_ptr<ObjSound> Engine::CreateObjSound()
 {
-    return gameState->objTable->Create<ObjSound>(gameState);
+    return package->objTable->Create<ObjSound>(package);
 }
 
 std::shared_ptr<ObjFileT> Engine::CreateObjFileT()
 {
-    return gameState->objTable->Create<ObjFileT>(gameState);
+    return package->objTable->Create<ObjFileT>(package);
 }
 
 std::shared_ptr<ObjFileB> Engine::CreateObjFileB()
 {
-    return gameState->objTable->Create<ObjFileB>(gameState);
+    return package->objTable->Create<ObjFileB>(package);
 }
 
 std::shared_ptr<ObjShader> Engine::CreateObjShader()
 {
-    auto obj = gameState->objTable->Create<ObjShader>(gameState);
-    gameState->objLayerList->SetRenderPriority(obj, 50);
+    auto obj = package->objTable->Create<ObjShader>(package);
+    package->objLayerList->SetRenderPriority(obj, 50);
     return obj;
 }
 
 std::shared_ptr<ObjShot> Engine::CreateObjShot(bool isPlayerShot)
 {
-    auto shot = gameState->objTable->Create<ObjShot>(isPlayerShot, gameState);
-    gameState->objLayerList->SetRenderPriority(shot, gameState->objLayerList->GetShotRenderPriority());
+    auto shot = package->objTable->Create<ObjShot>(isPlayerShot, package);
+    package->objLayerList->SetRenderPriority(shot, package->objLayerList->GetShotRenderPriority());
     return shot;
 }
 
@@ -1221,8 +1221,8 @@ std::shared_ptr<ObjShot> Engine::CreatePlayerShotA1(float x, float y, float spee
 
 std::shared_ptr<ObjLooseLaser> Engine::CreateObjLooseLaser(bool isPlayerShot)
 {
-    auto laser = gameState->objTable->Create<ObjLooseLaser>(isPlayerShot, gameState);
-    gameState->objLayerList->SetRenderPriority(laser, gameState->objLayerList->GetShotRenderPriority());
+    auto laser = package->objTable->Create<ObjLooseLaser>(isPlayerShot, package);
+    package->objLayerList->SetRenderPriority(laser, package->objLayerList->GetShotRenderPriority());
     return laser;
 }
 
@@ -1242,8 +1242,8 @@ std::shared_ptr<ObjLooseLaser> Engine::CreateLooseLaserA1(float x, float y, floa
 
 std::shared_ptr<ObjStLaser> Engine::CreateObjStLaser(bool isPlayerShot)
 {
-    auto laser = gameState->objTable->Create<ObjStLaser>(isPlayerShot, gameState);
-    gameState->objLayerList->SetRenderPriority(laser, gameState->objLayerList->GetShotRenderPriority());
+    auto laser = package->objTable->Create<ObjStLaser>(isPlayerShot, package);
+    package->objLayerList->SetRenderPriority(laser, package->objLayerList->GetShotRenderPriority());
     return laser;
 }
 
@@ -1263,8 +1263,8 @@ std::shared_ptr<ObjStLaser> Engine::CreateStraightLaserA1(float x, float y, floa
 
 std::shared_ptr<ObjCrLaser> Engine::CreateObjCrLaser(bool isPlayerShot)
 {
-    auto laser = gameState->objTable->Create<ObjCrLaser>(isPlayerShot, gameState);
-    gameState->objLayerList->SetRenderPriority(laser, gameState->objLayerList->GetShotRenderPriority());
+    auto laser = package->objTable->Create<ObjCrLaser>(isPlayerShot, package);
+    package->objLayerList->SetRenderPriority(laser, package->objLayerList->GetShotRenderPriority());
     return laser;
 }
 
@@ -1322,14 +1322,14 @@ std::shared_ptr<ObjItem> Engine::CreateItemU2(int itemDataId, float x, float y, 
 
 std::shared_ptr<ObjEnemy> Engine::CreateObjEnemy()
 {
-    auto enemy = gameState->objTable->Create<ObjEnemy>(false, gameState);
-    gameState->objLayerList->SetRenderPriority(enemy, DEFAULT_ENEMY_RENDER_PRIORITY);
+    auto enemy = package->objTable->Create<ObjEnemy>(false, package);
+    package->objLayerList->SetRenderPriority(enemy, DEFAULT_ENEMY_RENDER_PRIORITY);
     return enemy;
 }
 
 std::shared_ptr<ObjEnemyBossScene> Engine::CreateObjEnemyBossScene(const std::shared_ptr<SourcePos>& srcPos)
 {
-    if (auto bossScene = gameState->enemyBossSceneObj.lock())
+    if (auto bossScene = package->enemyBossSceneObj.lock())
     {
         if (!bossScene->IsDead())
         {
@@ -1340,47 +1340,47 @@ std::shared_ptr<ObjEnemyBossScene> Engine::CreateObjEnemyBossScene(const std::sh
             return bossScene;
         }
     }
-    auto bossScene = gameState->objTable->Create<ObjEnemyBossScene>(gameState);
-    gameState->enemyBossSceneObj = bossScene;
+    auto bossScene = package->objTable->Create<ObjEnemyBossScene>(package);
+    package->enemyBossSceneObj = bossScene;
     return bossScene;
 }
 
 std::shared_ptr<ObjSpell> Engine::CreateObjSpell()
 {
-    auto spell = gameState->objTable->Create<ObjSpell>(gameState);
-    gameState->objLayerList->SetRenderPriority(spell, 50);
+    auto spell = package->objTable->Create<ObjSpell>(package);
+    package->objLayerList->SetRenderPriority(spell, 50);
     return spell;
 }
 
 std::shared_ptr<ObjItem> Engine::CreateObjItem(int itemType)
 {
-    auto obj = gameState->objTable->Create<ObjItem>(itemType, gameState);
-    gameState->objLayerList->SetRenderPriority(obj, gameState->objLayerList->GetItemRenderPriority());
+    auto obj = package->objTable->Create<ObjItem>(itemType, package);
+    package->objLayerList->SetRenderPriority(obj, package->objLayerList->GetItemRenderPriority());
     obj->SetIntersection();
     return obj;
 }
 
 std::shared_ptr<Script> Engine::GetScript(int scriptId) const
 {
-    return gameState->scriptManager->Get(scriptId);
+    return package->scriptManager->Get(scriptId);
 }
 
 std::shared_ptr<Script> Engine::LoadScript(const std::wstring & path, const std::wstring & type, const std::wstring & version, const std::shared_ptr<SourcePos>& srcPos)
 {
-    auto script = gameState->scriptManager->Compile(path, type, version, srcPos);
+    auto script = package->scriptManager->Compile(path, type, version, srcPos);
     script->Load();
     return script;
 }
 
 std::shared_ptr<Script> Engine::LoadScriptInThread(const std::wstring & path, const std::wstring & type, const std::wstring & version, const std::shared_ptr<SourcePos>& srcPos)
 {
-    auto script = gameState->scriptManager->CompileInThread(path, type, version, srcPos);
+    auto script = package->scriptManager->CompileInThread(path, type, version, srcPos);
     return script;
 }
 
 void Engine::CloseStgScene()
 {
-    if (auto stageMain = gameState->stageMainScript.lock())
+    if (auto stageMain = package->stageMainScript.lock())
     {
         stageMain->Close();
     }
@@ -1388,27 +1388,27 @@ void Engine::CloseStgScene()
 
 void Engine::NotifyEventAll(int eventType)
 {
-    gameState->scriptManager->NotifyEventAll(eventType);
+    package->scriptManager->NotifyEventAll(eventType);
 }
 
 void Engine::NotifyEventAll(int eventType, const std::unique_ptr<DnhArray>& args)
 {
-    gameState->scriptManager->NotifyEventAll(eventType, args);
+    package->scriptManager->NotifyEventAll(eventType, args);
 }
 
 std::wstring Engine::GetPlayerID() const
 {
-    return gameState->stagePlayerScriptInfo.id;
+    return package->stagePlayerScriptInfo.id;
 }
 
 std::wstring Engine::GetPlayerReplayName() const
 {
-    return gameState->stagePlayerScriptInfo.replayName;
+    return package->stagePlayerScriptInfo.replayName;
 }
 
 std::shared_ptr<ObjPlayer> Engine::GetPlayerObject() const
 {
-    auto player = gameState->playerObj.lock();
+    auto player = package->playerObj.lock();
     if (player && !player->IsDead()) return player;
     return nullptr;
 }
@@ -1427,83 +1427,83 @@ std::shared_ptr<ObjEnemy> Engine::GetEnemyBossObject() const
 
 std::shared_ptr<ObjEnemyBossScene> Engine::GetEnemyBossSceneObject() const
 {
-    auto bossScene = gameState->enemyBossSceneObj.lock();
+    auto bossScene = package->enemyBossSceneObj.lock();
     if (bossScene && !bossScene->IsDead()) return bossScene;
     return nullptr;
 }
 
 std::shared_ptr<ObjSpellManage> Engine::GetSpellManageObject() const
 {
-    auto spellManage = gameState->spellManageObj.lock();
+    auto spellManage = package->spellManageObj.lock();
     if (spellManage && !spellManage->IsDead()) return spellManage;
     return nullptr;
 }
 
 void Engine::DeleteObject(int id)
 {
-    gameState->objTable->Delete(id);
+    package->objTable->Delete(id);
 }
 
 bool Engine::IsObjectDeleted(int id) const
 {
-    return gameState->objTable->IsDeleted(id);
+    return package->objTable->IsDeleted(id);
 }
 
 std::shared_ptr<ObjPrim2D> Engine::CreateObjPrim2D()
 {
-    auto obj = gameState->objTable->Create<ObjPrim2D>(gameState);
-    gameState->objLayerList->SetRenderPriority(obj, 50);
+    auto obj = package->objTable->Create<ObjPrim2D>(package);
+    package->objLayerList->SetRenderPriority(obj, 50);
     return obj;
 }
 
 std::shared_ptr<ObjSprite2D> Engine::CreateObjSprite2D()
 {
-    auto obj = gameState->objTable->Create<ObjSprite2D>(gameState);
-    gameState->objLayerList->SetRenderPriority(obj, 50);
+    auto obj = package->objTable->Create<ObjSprite2D>(package);
+    package->objLayerList->SetRenderPriority(obj, 50);
     return obj;
 }
 
 std::shared_ptr<ObjSpriteList2D> Engine::CreateObjSpriteList2D()
 {
-    auto obj = gameState->objTable->Create<ObjSpriteList2D>(gameState);
-    gameState->objLayerList->SetRenderPriority(obj, 50);
+    auto obj = package->objTable->Create<ObjSpriteList2D>(package);
+    package->objLayerList->SetRenderPriority(obj, 50);
     return obj;
 }
 
 std::shared_ptr<ObjPrim3D> Engine::CreateObjPrim3D()
 {
-    auto obj = gameState->objTable->Create<ObjPrim3D>(gameState);
-    gameState->objLayerList->SetRenderPriority(obj, 50);
+    auto obj = package->objTable->Create<ObjPrim3D>(package);
+    package->objLayerList->SetRenderPriority(obj, 50);
     return obj;
 }
 
 std::shared_ptr<ObjSprite3D> Engine::CreateObjSprite3D()
 {
-    auto obj = gameState->objTable->Create<ObjSprite3D>(gameState);
-    gameState->objLayerList->SetRenderPriority(obj, 50);
+    auto obj = package->objTable->Create<ObjSprite3D>(package);
+    package->objLayerList->SetRenderPriority(obj, 50);
     return obj;
 }
 
 std::shared_ptr<ObjMesh> Engine::CreateObjMesh()
 {
-    auto obj = gameState->objTable->Create<ObjMesh>(gameState);
-    gameState->objLayerList->SetRenderPriority(obj, 50);
+    auto obj = package->objTable->Create<ObjMesh>(package);
+    package->objLayerList->SetRenderPriority(obj, 50);
     return obj;
 }
 
 std::shared_ptr<Script> Engine::GetPlayerScript() const
 {
-    return gameState->stagePlayerScript.lock();
+    return package->stagePlayerScript.lock();
 }
 
 const std::unique_ptr<DnhValue>& Engine::GetScriptResult(int scriptId) const
 {
-    return gameState->scriptManager->GetScriptResult(scriptId);
+    return package->scriptManager->GetScriptResult(scriptId);
 }
 
 void Engine::SetScriptResult(int scriptId, std::unique_ptr<DnhValue>&& value)
 {
-    gameState->scriptManager->SetScriptResult(scriptId, std::move(value));
+    package->scriptManager->SetScriptResult(scriptId, std::move(value));
 }
 
 std::vector<ScriptInfo> Engine::GetScriptList(const std::wstring & dirPath, int scriptType, bool doRecursive)
@@ -1517,7 +1517,7 @@ std::vector<ScriptInfo> Engine::GetScriptList(const std::wstring & dirPath, int 
     {
         try
         {
-            auto info = ScanDnhScriptInfo(path, gameState->fileLoader);
+            auto info = ScanDnhScriptInfo(path, package->fileLoader);
             if (scriptType == TYPE_SCRIPT_ALL || scriptTypeName == info.type)
             {
                 infos.push_back(info);
@@ -1531,24 +1531,24 @@ std::vector<ScriptInfo> Engine::GetScriptList(const std::wstring & dirPath, int 
 
 void Engine::GetLoadFreePlayerScriptList()
 {
-    gameState->freePlayerScriptInfoList = GetScriptList(FREE_PLAYER_DIR, TYPE_SCRIPT_PLAYER, true);
+    package->freePlayerScriptInfoList = GetScriptList(FREE_PLAYER_DIR, TYPE_SCRIPT_PLAYER, true);
 }
 
 int Engine::GetFreePlayerScriptCount() const
 {
-    return gameState->freePlayerScriptInfoList.size();
+    return package->freePlayerScriptInfoList.size();
 }
 
 ScriptInfo Engine::GetFreePlayerScriptInfo(int idx) const
 {
-    return gameState->freePlayerScriptInfoList.at(idx);
+    return package->freePlayerScriptInfoList.at(idx);
 }
 
 ScriptInfo Engine::GetScriptInfo(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
     try
     {
-        return ScanDnhScriptInfo(path, gameState->fileLoader);
+        return ScanDnhScriptInfo(path, package->fileLoader);
     } catch (Log& log)
     {
         log.SetLevel(Log::Level::LV_WARN).AddSourcePos(srcPos);
@@ -1564,100 +1564,100 @@ ScriptInfo Engine::GetScriptInfo(const std::wstring & path, const std::shared_pt
 
 GameScore Engine::GetScore() const
 {
-    return gameState->globalPlayerParams->score;
+    return package->globalPlayerParams->score;
 }
 
 void Engine::AddScore(GameScore score)
 {
-    gameState->globalPlayerParams->score += score;
+    package->globalPlayerParams->score += score;
 }
 
 int64_t Engine::GetGraze() const
 {
-    return gameState->globalPlayerParams->graze;
+    return package->globalPlayerParams->graze;
 }
 
 void Engine::AddGraze(int64_t graze)
 {
-    gameState->globalPlayerParams->graze += graze;
+    package->globalPlayerParams->graze += graze;
 }
 
 int64_t Engine::GetPoint() const
 {
-    return gameState->globalPlayerParams->point;
+    return package->globalPlayerParams->point;
 }
 
 void Engine::AddPoint(int64_t point)
 {
-    gameState->globalPlayerParams->point += point;
+    package->globalPlayerParams->point += point;
 }
 
 void Engine::SetStgFrame(float left, float top, float right, float bottom)
 {
-    gameState->stgFrame->left = left;
-    gameState->stgFrame->top = top;
-    gameState->stgFrame->right = right;
-    gameState->stgFrame->bottom = bottom;
+    package->stgFrame->left = left;
+    package->stgFrame->top = top;
+    package->stgFrame->right = right;
+    package->stgFrame->bottom = bottom;
 }
 
 float Engine::GetStgFrameLeft() const
 {
-    return gameState->stgFrame->left;
+    return package->stgFrame->left;
 }
 
 float Engine::GetStgFrameTop() const
 {
-    return gameState->stgFrame->top;
+    return package->stgFrame->top;
 }
 
 float Engine::GetStgFrameWidth() const
 {
-    return gameState->stgFrame->right - gameState->stgFrame->left;
+    return package->stgFrame->right - package->stgFrame->left;
 }
 
 float Engine::GetStgFrameHeight() const
 {
-    return gameState->stgFrame->bottom - gameState->stgFrame->top;
+    return package->stgFrame->bottom - package->stgFrame->top;
 }
 
 float Engine::GetStgFrameCenterWorldX() const
 {
-    return (gameState->stgFrame->right - gameState->stgFrame->left) / 2.0f;
+    return (package->stgFrame->right - package->stgFrame->left) / 2.0f;
 }
 
 float Engine::GetStgFrameCenterWorldY() const
 {
-    return (gameState->stgFrame->bottom - gameState->stgFrame->top) / 2.0f;
+    return (package->stgFrame->bottom - package->stgFrame->top) / 2.0f;
 }
 
 float Engine::GetStgFrameCenterScreenX() const
 {
-    return (gameState->stgFrame->right + gameState->stgFrame->left) / 2.0f;
+    return (package->stgFrame->right + package->stgFrame->left) / 2.0f;
 }
 
 float Engine::GetStgFrameCenterScreenY() const
 {
-    return (gameState->stgFrame->bottom + gameState->stgFrame->top) / 2.0f;
+    return (package->stgFrame->bottom + package->stgFrame->top) / 2.0f;
 }
 
 int Engine::GetAllShotCount() const
 {
-    return gameState->shotCounter->playerShotCount + gameState->shotCounter->enemyShotCount;
+    return package->shotCounter->playerShotCount + package->shotCounter->enemyShotCount;
 }
 
 int Engine::GetEnemyShotCount() const
 {
-    return gameState->shotCounter->enemyShotCount;
+    return package->shotCounter->enemyShotCount;
 }
 
 int Engine::GetPlayerShotCount() const
 {
-    return gameState->shotCounter->playerShotCount;
+    return package->shotCounter->playerShotCount;
 }
 
 void Engine::SetShotAutoDeleteClip(float left, float top, float right, float bottom)
 {
-    gameState->shotAutoDeleteClip->SetClip(left, top, right, bottom);
+    package->shotAutoDeleteClip->SetClip(left, top, right, bottom);
 }
 
 void Engine::StartShotScript(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
@@ -1671,25 +1671,25 @@ void Engine::StartShotScript(const std::wstring & path, const std::shared_ptr<So
             .AddSourcePos(srcPos)));
         return;
     }
-    auto shotScript = LoadScript(path, SCRIPT_TYPE_SHOT_CUSTOM, gameState->stageMainScriptInfo.version, srcPos);
-    gameState->shotScript = shotScript;
+    auto shotScript = LoadScript(path, SCRIPT_TYPE_SHOT_CUSTOM, package->stageMainScriptInfo.version, srcPos);
+    package->shotScript = shotScript;
     shotScript->Start();
     shotScript->RunInitialize();
 }
 
 void Engine::SetDeleteShotImmediateEventOnShotScriptEnable(bool enable)
 {
-    gameState->deleteShotImmediateEventOnShotScriptEnable = enable;
+    package->deleteShotImmediateEventOnShotScriptEnable = enable;
 }
 
 void Engine::SetDeleteShotFadeEventOnShotScriptEnable(bool enable)
 {
-    gameState->deleteShotFadeEventOnShotScriptEnable = enable;
+    package->deleteShotFadeEventOnShotScriptEnable = enable;
 }
 
 void Engine::SetDeleteShotToItemEventOnShotScriptEnable(bool enable)
 {
-    gameState->deleteShotToItemEventOnShotScriptEnable = enable;
+    package->deleteShotToItemEventOnShotScriptEnable = enable;
 }
 
 void Engine::DeleteShotAll(int target, int behavior) const
@@ -1723,7 +1723,7 @@ void Engine::DeleteShotAll(int target, int behavior) const
 
 void Engine::DeleteShotInCircle(int target, int behavior, float x, float y, float r) const
 {
-    auto isects = gameState->colDetector->GetIntersectionsCollideWithShape(Shape(x, y, r), COL_GRP_ENEMY_SHOT);
+    auto isects = package->colDetector->GetIntersectionsCollideWithShape(Shape(x, y, r), COL_GRP_ENEMY_SHOT);
     for (auto& isect : isects)
     {
         if (auto shotIsect = std::dynamic_pointer_cast<ShotIntersection>(isect))
@@ -1753,7 +1753,7 @@ std::vector<std::shared_ptr<ObjShot>> Engine::GetShotInCircle(float x, float y, 
     // 同じショットに紐付いている判定が複数あるので、まずIDだけを集める
     std::unordered_set<int> shotIds;
 
-    auto isects = gameState->colDetector->GetIntersectionsCollideWithShape(Shape(x, y, r), -1);
+    auto isects = package->colDetector->GetIntersectionsCollideWithShape(Shape(x, y, r), -1);
     for (auto& isect : isects)
     {
         if (auto shotIsect = std::dynamic_pointer_cast<ShotIntersection>(isect))
@@ -1782,40 +1782,40 @@ std::vector<std::shared_ptr<ObjShot>> Engine::GetShotInCircle(float x, float y, 
 void Engine::SetShotIntersectoinCicle(float x, float y, float r)
 {
     auto isect = std::make_shared<TempEnemyShotIntersection>(x, y, r);
-    gameState->colDetector->Add(isect);
-    gameState->tempEnemyShotIsects.push_back(isect);
+    package->colDetector->Add(isect);
+    package->tempEnemyShotIsects.push_back(isect);
 }
 
 void Engine::SetShotIntersectoinLine(float x1, float y1, float x2, float y2, float width)
 {
     auto isect = std::make_shared<TempEnemyShotIntersection>(x1, y1, x2, y2, width);
-    gameState->colDetector->Add(isect);
-    gameState->tempEnemyShotIsects.push_back(isect);
+    package->colDetector->Add(isect);
+    package->tempEnemyShotIsects.push_back(isect);
 }
 
 void Engine::CollectAllItems()
 {
-    gameState->autoItemCollectionManager->CollectAllItems();
+    package->autoItemCollectionManager->CollectAllItems();
 }
 
 void Engine::CollectItemsByType(int itemType)
 {
-    gameState->autoItemCollectionManager->CollectItemsByType(itemType);
+    package->autoItemCollectionManager->CollectItemsByType(itemType);
 }
 
 void Engine::CollectItemsInCircle(float x, float y, float r)
 {
-    gameState->autoItemCollectionManager->CollectItemsInCircle(x, y, r);
+    package->autoItemCollectionManager->CollectItemsInCircle(x, y, r);
 }
 
 void Engine::CancelCollectItems()
 {
-    gameState->autoItemCollectionManager->CancelCollectItems();
+    package->autoItemCollectionManager->CancelCollectItems();
 }
 
 void Engine::SetDefaultBonusItemEnable(bool enable)
 {
-    gameState->defaultBonusItemEnable = enable;
+    package->defaultBonusItemEnable = enable;
 }
 
 void Engine::StartItemScript(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
@@ -1829,15 +1829,15 @@ void Engine::StartItemScript(const std::wstring & path, const std::shared_ptr<So
             .AddSourcePos(srcPos)));
         return;
     }
-    auto itemScript = LoadScript(path, SCRIPT_TYPE_ITEM_CUSTOM, gameState->stageMainScriptInfo.version, srcPos);
-    gameState->itemScript = itemScript;
+    auto itemScript = LoadScript(path, SCRIPT_TYPE_ITEM_CUSTOM, package->stageMainScriptInfo.version, srcPos);
+    package->itemScript = itemScript;
     itemScript->Start();
     itemScript->RunInitialize();
 }
 
 bool Engine::IsPackageFinished() const
 {
-    if (gameState->packageMainScript.lock())
+    if (package->packageMainScript.lock())
     {
         return false;
     }
@@ -1846,7 +1846,7 @@ bool Engine::IsPackageFinished() const
 
 void Engine::ClosePackage()
 {
-    if (auto packageMain = gameState->packageMainScript.lock())
+    if (auto packageMain = package->packageMainScript.lock())
     {
         packageMain->Close();
     }
@@ -1854,22 +1854,22 @@ void Engine::ClosePackage()
 
 void Engine::InitializeStageScene()
 {
-    gameState->objTable->DeleteStgSceneObject();
-    gameState->scriptManager->CloseStgSceneScript();
+    package->objTable->DeleteStgSceneObject();
+    package->scriptManager->CloseStgSceneScript();
     SetStgFrame(32.0f, 16.0f, 416.0f, 464.0f);
     SetShotAutoDeleteClip(64.0f, 64.0f, 64.0f, 64.0f);
     Reset2DCamera();
     SetDefaultBonusItemEnable(true);
-    gameState->stageSceneResult = 0;
-    gameState->stageMainScript.reset();
-    gameState->stagePlayerScript.reset();
-    gameState->globalPlayerParams = std::make_shared<GlobalPlayerParams>();
+    package->stageSceneResult = 0;
+    package->stageMainScript.reset();
+    package->stagePlayerScript.reset();
+    package->globalPlayerParams = std::make_shared<GlobalPlayerParams>();
     SetStgFrameRenderPriorityMin(DEFAULT_STG_FRAME_RENDER_PRIORITY_MIN);
     SetStgFrameRenderPriorityMax(DEFAULT_STG_FRAME_RENDER_PRIORITY_MAX);
     SetShotRenderPriority(DEFAULT_SHOT_RENDER_PRIORITY);
     SetItemRenderPriority(DEFAULT_ITEM_RENDER_PRIORITY);
-    gameState->stagePaused = true;
-    gameState->stageForceTerminated = false;
+    package->stagePaused = true;
+    package->stageForceTerminated = false;
     SetDeleteShotImmediateEventOnShotScriptEnable(false);
     SetDeleteShotFadeEventOnShotScriptEnable(false);
     SetDeleteShotToItemEventOnShotScriptEnable(false);
@@ -1887,10 +1887,10 @@ void Engine::StartPackage()
         Logger::WriteLog(Log::Level::LV_WARN, "package already started.");
         return;
     }
-    gameState->packageStartTime = std::make_shared<TimePoint>();
+    package->packageStartTime = std::make_shared<TimePoint>();
     Logger::WriteLog(Log::Level::LV_INFO, "start package.");
-    auto script = gameState->scriptManager->Compile(gameState->packageMainScriptInfo.path, SCRIPT_TYPE_PACKAGE, gameState->packageMainScriptInfo.version, nullptr);
-    gameState->packageMainScript = script;
+    auto script = package->scriptManager->Compile(package->packageMainScriptInfo.path, SCRIPT_TYPE_PACKAGE, package->packageMainScriptInfo.version, nullptr);
+    package->packageMainScript = script;
     script->Start();
     script->RunInitialize();
 }
@@ -1916,13 +1916,13 @@ void Engine::SetReplaySaveSceneScriptPath(const std::wstring & path)
 Point2D Engine::Get2DPosition(float x, float y, float z, bool isStgScene)
 {
     D3DXMATRIX view, proj, viewport, billboard;
-    gameState->camera3D->GenerateViewMatrix(&view, &billboard);
+    package->camera3D->GenerateViewMatrix(&view, &billboard);
     if (isStgScene)
     {
-        gameState->camera3D->GenerateProjMatrix(&proj, GetScreenWidth(), GetScreenHeight(), GetStgFrameCenterScreenX(), GetStgFrameCenterScreenY());
+        package->camera3D->GenerateProjMatrix(&proj, GetScreenWidth(), GetScreenHeight(), GetStgFrameCenterScreenX(), GetStgFrameCenterScreenY());
     } else
     {
-        gameState->camera3D->GenerateProjMatrix(&proj, GetScreenWidth(), GetScreenHeight(), GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f);
+        package->camera3D->GenerateProjMatrix(&proj, GetScreenWidth(), GetScreenHeight(), GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f);
     }
     {
         D3DXMatrixScaling(&viewport, GetScreenWidth() / 2.0f, -GetScreenHeight() / 2.0f, 1.0f);
@@ -1933,8 +1933,8 @@ Point2D Engine::Get2DPosition(float x, float y, float z, bool isStgScene)
     D3DXVec3TransformCoord(&pos, &pos, &(view * proj * viewport));
     if (isStgScene)
     {
-        gameState->camera2D->GenerateViewMatrix(&view);
-        gameState->camera2D->GenerateProjMatrix(&proj, GetScreenWidth(), GetScreenHeight(), GetStgFrameCenterScreenX(), GetStgFrameCenterScreenY());
+        package->camera2D->GenerateViewMatrix(&view);
+        package->camera2D->GenerateProjMatrix(&proj, GetScreenWidth(), GetScreenHeight(), GetStgFrameCenterScreenX(), GetStgFrameCenterScreenY());
         D3DXMATRIX viewProjViewport = view * proj * viewport;
         D3DXMatrixInverse(&viewProjViewport, NULL, &viewProjViewport);
         D3DXVec3TransformCoord(&pos, &pos, &viewProjViewport);
@@ -1944,20 +1944,20 @@ Point2D Engine::Get2DPosition(float x, float y, float z, bool isStgScene)
 
 void Engine::SetStageIndex(uint16_t idx)
 {
-    gameState->stageIdx = idx;
+    package->stageIdx = idx;
 }
 
 void Engine::SetStageMainScript(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
     try
     {
-        gameState->stageMainScriptInfo = ScanDnhScriptInfo(path, gameState->fileLoader);
+        package->stageMainScriptInfo = ScanDnhScriptInfo(path, package->fileLoader);
     } catch (Log& log)
     {
         log.SetLevel(Log::Level::LV_WARN).AddSourcePos(srcPos);
         Logger::WriteLog(log);
-        gameState->stageMainScriptInfo = ScriptInfo();
-        gameState->stageMainScriptInfo.path = path;
+        package->stageMainScriptInfo = ScriptInfo();
+        package->stageMainScriptInfo.path = path;
     }
 }
 
@@ -1965,34 +1965,34 @@ void Engine::SetStagePlayerScript(const std::wstring & path, const std::shared_p
 {
     try
     {
-        gameState->stagePlayerScriptInfo = ScanDnhScriptInfo(path, gameState->fileLoader);
+        package->stagePlayerScriptInfo = ScanDnhScriptInfo(path, package->fileLoader);
     } catch (Log& log)
     {
         log.SetLevel(Log::Level::LV_WARN).AddSourcePos(srcPos);
         Logger::WriteLog(log);
-        gameState->stageMainScriptInfo = ScriptInfo();
-        gameState->stageMainScriptInfo.path = path;
+        package->stageMainScriptInfo = ScriptInfo();
+        package->stageMainScriptInfo.path = path;
     }
 }
 
 void Engine::SetStageMainScript(const ScriptInfo & script)
 {
-    gameState->stageMainScriptInfo = script;
+    package->stageMainScriptInfo = script;
 }
 
 void Engine::SetStagePlayerScript(const ScriptInfo & script)
 {
-    gameState->stagePlayerScriptInfo = script;
+    package->stagePlayerScriptInfo = script;
 }
 
 void Engine::SetStageReplayFile(const std::wstring & path)
 {
-    gameState->stageReplayFilePath = path;
+    package->stageReplayFilePath = path;
 }
 
 bool Engine::IsStageFinished() const
 {
-    if (gameState->stageMainScript.lock())
+    if (package->stageMainScript.lock())
     {
         return false;
     }
@@ -2001,32 +2001,32 @@ bool Engine::IsStageFinished() const
 
 int Engine::GetStageSceneResult() const
 {
-    return gameState->stageSceneResult;
+    return package->stageSceneResult;
 }
 
 bool Engine::IsStagePaused() const
 {
-    return gameState->stagePaused;
+    return package->stagePaused;
 }
 
 void Engine::PauseStageScene(bool doPause)
 {
-    if (doPause && !gameState->stagePaused)
+    if (doPause && !package->stagePaused)
     {
         NotifyEventAll(EV_PAUSE_ENTER);
-    } else if (!doPause && gameState->stagePaused)
+    } else if (!doPause && package->stagePaused)
     {
         NotifyEventAll(EV_PAUSE_LEAVE);
     }
-    gameState->stagePaused = doPause;
+    package->stagePaused = doPause;
 }
 
 void Engine::TerminateStageScene()
 {
-    if (auto stageMain = gameState->stageMainScript.lock())
+    if (auto stageMain = package->stageMainScript.lock())
     {
         stageMain->Close();
-        gameState->stageForceTerminated = true;
+        package->stageForceTerminated = true;
     }
 }
 
@@ -2034,99 +2034,99 @@ void Engine::SetPackageMainScript(const std::wstring & path)
 {
     try
     {
-        gameState->packageMainScriptInfo = ScanDnhScriptInfo(path, gameState->fileLoader);
+        package->packageMainScriptInfo = ScanDnhScriptInfo(path, package->fileLoader);
     } catch (Log& log)
     {
         log.SetLevel(Log::Level::LV_WARN);
         Logger::WriteLog(log);
-        gameState->stageMainScriptInfo = ScriptInfo();
-        gameState->stageMainScriptInfo.path = path;
+        package->stageMainScriptInfo = ScriptInfo();
+        package->stageMainScriptInfo.path = path;
     }
 }
 
 void Engine::SetPackageMainScript(const ScriptInfo & script)
 {
-    gameState->packageMainScriptInfo = script;
+    package->packageMainScriptInfo = script;
 }
 
 void Engine::StartStageScene(const std::shared_ptr<SourcePos>& srcPos)
 {
-    gameState->objTable->DeleteStgSceneObject();
-    gameState->scriptManager->CloseStgSceneScript();
-    gameState->inputDevice->ResetInputState();
+    package->objTable->DeleteStgSceneObject();
+    package->scriptManager->CloseStgSceneScript();
+    package->inputDevice->ResetInputState();
     Reset2DCamera();
     ResetCamera();
     SetDefaultBonusItemEnable(true);
-    gameState->playerShotDataTable = std::make_shared<ShotDataTable>(ShotDataTable::Type::PLAYER);
-    gameState->enemyShotDataTable = std::make_shared<ShotDataTable>(ShotDataTable::Type::ENEMY);
-    gameState->itemDataTable = std::make_shared<ItemDataTable>();
-    gameState->stageMainScript.reset();
-    gameState->stagePlayerScript.reset();
+    package->playerShotDataTable = std::make_shared<ShotDataTable>(ShotDataTable::Type::PLAYER);
+    package->enemyShotDataTable = std::make_shared<ShotDataTable>(ShotDataTable::Type::ENEMY);
+    package->itemDataTable = std::make_shared<ItemDataTable>();
+    package->stageMainScript.reset();
+    package->stagePlayerScript.reset();
     ReloadItemData(DEFAULT_ITEM_DATA_PATH, nullptr);
-    gameState->stageSceneResult = 0;
-    gameState->stageForceTerminated = false;
+    package->stageSceneResult = 0;
+    package->stageForceTerminated = false;
     SetDeleteShotImmediateEventOnShotScriptEnable(false);
     SetDeleteShotFadeEventOnShotScriptEnable(false);
     SetDeleteShotToItemEventOnShotScriptEnable(false);
-    gameState->stagePaused = false;
-    gameState->renderer->SetFogEnable(false);
-    gameState->pseudoPlayerFps = gameState->pseudoEnemyFps = 60;
+    package->stagePaused = false;
+    package->renderer->SetFogEnable(false);
+    package->pseudoPlayerFps = package->pseudoEnemyFps = 60;
 
-    if (gameState->stageMainScriptInfo.systemPath.empty() || gameState->stageMainScriptInfo.systemPath == L"DEFAULT")
+    if (package->stageMainScriptInfo.systemPath.empty() || package->stageMainScriptInfo.systemPath == L"DEFAULT")
     {
-        gameState->stageMainScriptInfo.systemPath = DEFAULT_SYSTEM_PATH;
+        package->stageMainScriptInfo.systemPath = DEFAULT_SYSTEM_PATH;
     }
 
     // #System
-    auto systemScript = gameState->scriptManager->Compile(gameState->stageMainScriptInfo.systemPath, SCRIPT_TYPE_STAGE, gameState->stageMainScriptInfo.version, srcPos);
+    auto systemScript = package->scriptManager->Compile(package->stageMainScriptInfo.systemPath, SCRIPT_TYPE_STAGE, package->stageMainScriptInfo.version, srcPos);
     systemScript->Start();
     systemScript->RunInitialize();
 
     // Create Player
-    auto player = gameState->objTable->Create<ObjPlayer>(gameState, gameState->globalPlayerParams);
-    gameState->objLayerList->SetRenderPriority(player, DEFAULT_PLAYER_RENDER_PRIORITY);
+    auto player = package->objTable->Create<ObjPlayer>(package, package->globalPlayerParams);
+    package->objLayerList->SetRenderPriority(player, DEFAULT_PLAYER_RENDER_PRIORITY);
     player->AddIntersectionToItem();
-    gameState->playerObj = player;
+    package->playerObj = player;
     Logger::WriteLog(std::move(
         Log(Log::Level::LV_INFO)
         .SetMessage("create player object.")
         .AddSourcePos(srcPos)));
 
-    auto playerScript = gameState->scriptManager->Compile(gameState->stagePlayerScriptInfo.path, SCRIPT_TYPE_PLAYER, gameState->stagePlayerScriptInfo.version, srcPos);
-    gameState->stagePlayerScript = playerScript;
+    auto playerScript = package->scriptManager->Compile(package->stagePlayerScriptInfo.path, SCRIPT_TYPE_PLAYER, package->stagePlayerScriptInfo.version, srcPos);
+    package->stagePlayerScript = playerScript;
     playerScript->Start();
     playerScript->RunInitialize();
 
     // Main
-    auto stageMainScriptPath = gameState->stageMainScriptInfo.path;
-    if (gameState->stageMainScriptInfo.type == SCRIPT_TYPE_SINGLE)
+    auto stageMainScriptPath = package->stageMainScriptInfo.path;
+    if (package->stageMainScriptInfo.type == SCRIPT_TYPE_SINGLE)
     {
         stageMainScriptPath = SYSTEM_SINGLE_STAGE_PATH;
-    } else if (gameState->stageMainScriptInfo.type == SCRIPT_TYPE_PLURAL)
+    } else if (package->stageMainScriptInfo.type == SCRIPT_TYPE_PLURAL)
     {
         stageMainScriptPath = SYSTEM_PLURAL_STAGE_PATH;
     }
-    auto stageMainScript = gameState->scriptManager->Compile(stageMainScriptPath, SCRIPT_TYPE_STAGE, gameState->stageMainScriptInfo.version, srcPos);
-    gameState->stageMainScript = stageMainScript;
+    auto stageMainScript = package->scriptManager->Compile(stageMainScriptPath, SCRIPT_TYPE_STAGE, package->stageMainScriptInfo.version, srcPos);
+    package->stageMainScript = stageMainScript;
     stageMainScript->Start();
     stageMainScript->RunInitialize();
-    gameState->stageStartTime = std::make_shared<TimePoint>();
+    package->stageStartTime = std::make_shared<TimePoint>();
 
     // #Background
-    if (!gameState->stageMainScriptInfo.backgroundPath.empty() && gameState->stageMainScriptInfo.backgroundPath != L"DEFAULT")
+    if (!package->stageMainScriptInfo.backgroundPath.empty() && package->stageMainScriptInfo.backgroundPath != L"DEFAULT")
     {
-        auto backgroundScript = gameState->scriptManager->Compile(gameState->stageMainScriptInfo.backgroundPath, SCRIPT_TYPE_STAGE, gameState->stageMainScriptInfo.version, srcPos);
+        auto backgroundScript = package->scriptManager->Compile(package->stageMainScriptInfo.backgroundPath, SCRIPT_TYPE_STAGE, package->stageMainScriptInfo.version, srcPos);
         backgroundScript->Start();
         backgroundScript->RunInitialize();
     }
 
     // #BGM
-    if (!gameState->stageMainScriptInfo.bgmPath.empty() && gameState->stageMainScriptInfo.bgmPath != L"DEFAULT")
+    if (!package->stageMainScriptInfo.bgmPath.empty() && package->stageMainScriptInfo.bgmPath != L"DEFAULT")
     {
         try
         {
-            LoadOrphanSound(gameState->stageMainScriptInfo.bgmPath, nullptr); // TODO: #BGMヘッダのSourcePosを与える
-            auto& bgm = gameState->orphanSounds[GetCanonicalPath(gameState->packageMainScriptInfo.bgmPath)];
+            LoadOrphanSound(package->stageMainScriptInfo.bgmPath, nullptr); // TODO: #BGMヘッダのSourcePosを与える
+            auto& bgm = package->orphanSounds[GetCanonicalPath(package->packageMainScriptInfo.bgmPath)];
             bgm->SetLoopEnable(true);
             bgm->Play();
         } catch (Log& log)
@@ -2140,7 +2140,7 @@ void Engine::StartStageScene(const std::shared_ptr<SourcePos>& srcPos)
 
 void Engine::renderToTexture(const std::wstring& name, int begin, int end, int objId, bool doClear, bool renderToBackBuffer, bool checkInvalidRenderPriority, bool checkVisibleFlag)
 {
-    if (!gameState) return;
+    if (!package) return;
 
     if (renderToBackBuffer)
     {
@@ -2154,7 +2154,7 @@ void Engine::renderToTexture(const std::wstring& name, int begin, int end, int o
 
     D3DXMATRIX viewMatrix2D, projMatrix2D, viewMatrix3D, projMatrix3D, billboardMatrix;
     Camera2D outsideStgFrameCamera2D; outsideStgFrameCamera2D.Reset(0, 0);
-    gameState->renderer->InitRenderState();
+    package->renderer->InitRenderState();
 
     if (doClear)
     {
@@ -2164,34 +2164,34 @@ void Engine::renderToTexture(const std::wstring& name, int begin, int end, int o
     begin = std::max(begin, 0);
     end = std::min(end, MAX_RENDER_PRIORITY);
 
-    auto obj = gameState->objTable->Get<ObjRender>(objId);
+    auto obj = package->objTable->Get<ObjRender>(objId);
     if (obj && checkVisibleFlag && !obj->IsVisible()) return;
 
-    gameState->camera3D->GenerateViewMatrix(&viewMatrix3D, &billboardMatrix);
+    package->camera3D->GenerateViewMatrix(&viewMatrix3D, &billboardMatrix);
 
     // [0, stgFrameMin]
     {
-        gameState->renderer->DisableScissorTest();
+        package->renderer->DisableScissorTest();
 
         // set 2D matrix
         outsideStgFrameCamera2D.GenerateViewMatrix(&viewMatrix2D);
         outsideStgFrameCamera2D.GenerateProjMatrix(&projMatrix2D, GetScreenWidth(), GetScreenHeight(), 0, 0);
-        gameState->renderer->SetViewProjMatrix2D(viewMatrix2D, projMatrix2D);
+        package->renderer->SetViewProjMatrix2D(viewMatrix2D, projMatrix2D);
 
         // set 3D matrix
-        gameState->camera3D->GenerateProjMatrix(&projMatrix3D, GetScreenWidth(), GetScreenHeight(), GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f);
-        gameState->renderer->SetViewProjMatrix3D(viewMatrix3D, projMatrix3D, billboardMatrix);
+        package->camera3D->GenerateProjMatrix(&projMatrix3D, GetScreenWidth(), GetScreenHeight(), GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f);
+        package->renderer->SetViewProjMatrix3D(viewMatrix3D, projMatrix3D, billboardMatrix);
         for (int p = 0; p < GetStgFrameRenderPriorityMin(); p++)
         {
             if (obj && obj->getRenderPriority() == p)
             {
-                obj->Render(gameState->renderer);
+                obj->Render(package->renderer);
             }
             if (objId == ID_INVALID && p >= begin && p <= end)
             {
-                if (!(checkInvalidRenderPriority && gameState->objLayerList->IsInvalidRenderPriority(p)))
+                if (!(checkInvalidRenderPriority && package->objLayerList->IsInvalidRenderPriority(p)))
                 {
-                    gameState->objLayerList->RenderLayer(p, IsStagePaused(), checkVisibleFlag, gameState->renderer);
+                    package->objLayerList->RenderLayer(p, IsStagePaused(), checkVisibleFlag, package->renderer);
                 }
             }
         }
@@ -2200,43 +2200,43 @@ void Engine::renderToTexture(const std::wstring& name, int begin, int end, int o
     {
         if (!IsStagePaused())
         {
-            RECT scissorRect = { (LONG)gameState->stgFrame->left, (LONG)gameState->stgFrame->top, (LONG)gameState->stgFrame->right, (LONG)gameState->stgFrame->bottom };
+            RECT scissorRect = { (LONG)package->stgFrame->left, (LONG)package->stgFrame->top, (LONG)package->stgFrame->right, (LONG)package->stgFrame->bottom };
             if (renderToBackBuffer)
             {
-                scissorRect.left = gameState->stgFrame->left * graphicDevice->GetBackBufferWidth() / gameState->screenWidth;
-                scissorRect.top = gameState->stgFrame->top * graphicDevice->GetBackBufferHeight() / gameState->screenHeight;
-                scissorRect.right = gameState->stgFrame->right * graphicDevice->GetBackBufferWidth() / gameState->screenWidth;
-                scissorRect.bottom = gameState->stgFrame->bottom * graphicDevice->GetBackBufferHeight() / gameState->screenHeight;
+                scissorRect.left = package->stgFrame->left * graphicDevice->GetBackBufferWidth() / package->screenWidth;
+                scissorRect.top = package->stgFrame->top * graphicDevice->GetBackBufferHeight() / package->screenHeight;
+                scissorRect.right = package->stgFrame->right * graphicDevice->GetBackBufferWidth() / package->screenWidth;
+                scissorRect.bottom = package->stgFrame->bottom * graphicDevice->GetBackBufferHeight() / package->screenHeight;
             }
-            gameState->renderer->EnableScissorTest(scissorRect);
+            package->renderer->EnableScissorTest(scissorRect);
         }
 
         // set 2D matrix
         if (!IsStageFinished())
         {
-            gameState->camera2D->GenerateViewMatrix(&viewMatrix2D);
-            gameState->camera2D->GenerateProjMatrix(&projMatrix2D, GetScreenWidth(), GetScreenHeight(), GetStgFrameCenterScreenX(), GetStgFrameCenterScreenY());
-            gameState->renderer->SetViewProjMatrix2D(viewMatrix2D, projMatrix2D);
+            package->camera2D->GenerateViewMatrix(&viewMatrix2D);
+            package->camera2D->GenerateProjMatrix(&projMatrix2D, GetScreenWidth(), GetScreenHeight(), GetStgFrameCenterScreenX(), GetStgFrameCenterScreenY());
+            package->renderer->SetViewProjMatrix2D(viewMatrix2D, projMatrix2D);
         }
 
         // set 3D matrix
-        gameState->camera3D->GenerateProjMatrix(&projMatrix3D, GetScreenWidth(), GetScreenHeight(), GetStgFrameCenterScreenX(), GetStgFrameCenterScreenY());
-        gameState->renderer->SetViewProjMatrix3D(viewMatrix3D, projMatrix3D, billboardMatrix);
+        package->camera3D->GenerateProjMatrix(&projMatrix3D, GetScreenWidth(), GetScreenHeight(), GetStgFrameCenterScreenX(), GetStgFrameCenterScreenY());
+        package->renderer->SetViewProjMatrix3D(viewMatrix3D, projMatrix3D, billboardMatrix);
 
         for (int p = GetStgFrameRenderPriorityMin(); p <= GetStgFrameRenderPriorityMax(); p++)
         {
             if (obj && obj->getRenderPriority() == p)
             {
-                obj->Render(gameState->renderer);
+                obj->Render(package->renderer);
             }
             if (objId == ID_INVALID && p >= begin && p <= end)
             {
-                if (!(checkInvalidRenderPriority && gameState->objLayerList->IsInvalidRenderPriority(p)))
+                if (!(checkInvalidRenderPriority && package->objLayerList->IsInvalidRenderPriority(p)))
                 {
-                    gameState->objLayerList->RenderLayer(p, IsStagePaused(), checkVisibleFlag, gameState->renderer);
+                    package->objLayerList->RenderLayer(p, IsStagePaused(), checkVisibleFlag, package->renderer);
                 }
             }
-            if (p == gameState->objLayerList->GetCameraFocusPermitRenderPriority())
+            if (p == package->objLayerList->GetCameraFocusPermitRenderPriority())
             {
                 // cameraFocusPermitRenderPriorityより大きい優先度では別のビュー変換行列を使う
                 if (!IsStageFinished())
@@ -2244,34 +2244,34 @@ void Engine::renderToTexture(const std::wstring& name, int begin, int end, int o
                     Camera2D focusForbidCamera;
                     focusForbidCamera.Reset(GetStgFrameCenterWorldX(), GetStgFrameCenterWorldY());
                     focusForbidCamera.GenerateViewMatrix(&viewMatrix2D);
-                    gameState->renderer->SetViewProjMatrix2D(viewMatrix2D, projMatrix2D);
+                    package->renderer->SetViewProjMatrix2D(viewMatrix2D, projMatrix2D);
                 }
             }
         }
     }
     {
         // (stgFrameMax, MAX_RENDER_PRIORITY]
-        gameState->renderer->DisableScissorTest();
+        package->renderer->DisableScissorTest();
 
         // set 2D matrix
         outsideStgFrameCamera2D.GenerateViewMatrix(&viewMatrix2D);
         outsideStgFrameCamera2D.GenerateProjMatrix(&projMatrix2D, GetScreenWidth(), GetScreenHeight(), 0, 0);
-        gameState->renderer->SetViewProjMatrix2D(viewMatrix2D, projMatrix2D);
+        package->renderer->SetViewProjMatrix2D(viewMatrix2D, projMatrix2D);
 
         // set 3D matrix
-        gameState->camera3D->GenerateProjMatrix(&projMatrix3D, GetScreenWidth(), GetScreenHeight(), GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f);
-        gameState->renderer->SetViewProjMatrix3D(viewMatrix3D, projMatrix3D, billboardMatrix);
+        package->camera3D->GenerateProjMatrix(&projMatrix3D, GetScreenWidth(), GetScreenHeight(), GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f);
+        package->renderer->SetViewProjMatrix3D(viewMatrix3D, projMatrix3D, billboardMatrix);
         for (int p = GetStgFrameRenderPriorityMax() + 1; p <= MAX_RENDER_PRIORITY; p++)
         {
             if (obj && obj->getRenderPriority() == p)
             {
-                obj->Render(gameState->renderer);
+                obj->Render(package->renderer);
             }
             if (objId == ID_INVALID && p >= begin && p <= end)
             {
-                if (!(checkInvalidRenderPriority && gameState->objLayerList->IsInvalidRenderPriority(p)))
+                if (!(checkInvalidRenderPriority && package->objLayerList->IsInvalidRenderPriority(p)))
                 {
-                    gameState->objLayerList->RenderLayer(p, IsStagePaused(), checkVisibleFlag, gameState->renderer);
+                    package->objLayerList->RenderLayer(p, IsStagePaused(), checkVisibleFlag, package->renderer);
                 }
             }
         }
@@ -2281,11 +2281,11 @@ void Engine::renderToTexture(const std::wstring& name, int begin, int end, int o
 
 std::shared_ptr<Obj> Engine::GetObj(int id) const
 {
-    return gameState->objTable->Get<Obj>(id);
+    return package->objTable->Get<Obj>(id);
 }
 
 const std::map<int, std::shared_ptr<Obj>>& Engine::GetObjAll() const
 {
-    return gameState->objTable->GetAll();
+    return package->objTable->GetAll();
 }
 }

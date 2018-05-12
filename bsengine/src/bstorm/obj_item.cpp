@@ -9,14 +9,14 @@
 #include <bstorm/renderer.hpp>
 #include <bstorm/obj_player.hpp>
 #include <bstorm/obj_prim.hpp>
-#include <bstorm/game_state.hpp>
+#include <bstorm/package.hpp>
 
 namespace bstorm
 {
-ObjItem::ObjItem(int itemType, const std::shared_ptr<GameState>& gameState) :
-    ObjRender(gameState),
+ObjItem::ObjItem(int itemType, const std::shared_ptr<Package>& package) :
+    ObjRender(package),
     ObjMove(this),
-    ObjCol(gameState),
+    ObjCol(package),
     itemType_(itemType),
     score_(0),
     autoCollectEnable_(true),
@@ -35,7 +35,7 @@ ObjItem::ObjItem(int itemType, const std::shared_ptr<GameState>& gameState) :
 
     if (itemType != ITEM_USER)
     {
-        itemData_ = gameState->itemDataTable->Get(itemType);
+        itemData_ = package->itemDataTable->Get(itemType);
     }
 }
 
@@ -45,11 +45,11 @@ ObjItem::~ObjItem()
 
 void ObjItem::SetIntersection()
 {
-    if (auto gameState = GetGameState())
+    if (auto package = GetPackage().lock())
     {
         if (GetIntersections().size() == 0)
         {
-            PushBackIntersection(gameState->colDetector->Create<ItemIntersection>(GetX(), GetY(), 23.99999f, shared_from_this()));
+            PushBackIntersection(package->colDetector->Create<ItemIntersection>(GetX(), GetY(), 23.99999f, shared_from_this()));
         }
     }
 
@@ -57,15 +57,15 @@ void ObjItem::SetIntersection()
 
 void ObjItem::Update()
 {
-    auto state = GetGameState();
-    if (!state) return;
+    auto package = GetPackage().lock();
+    if (!package) return;
 
-    if (state->autoItemCollectionManager->IsAutoCollectCanceled())
+    if (package->autoItemCollectionManager->IsAutoCollectCanceled())
     {
         isAutoCollected_ = false;
     }
 
-    std::shared_ptr<ObjPlayer> player = state->playerObj.lock();
+    std::shared_ptr<ObjPlayer> player = package->playerObj.lock();
     if (isAutoCollected_)
     {
         // 自動回収時
@@ -108,8 +108,8 @@ void ObjItem::Update()
         Move();
         if (autoCollectEnable_)
         {
-            isAutoCollected_ = state->autoItemCollectionManager->IsAutoCollectTarget(GetItemType(), GetX(), GetY());
-            if (player && !state->autoItemCollectionManager->IsAutoCollectCanceled())
+            isAutoCollected_ = package->autoItemCollectionManager->IsAutoCollectTarget(GetItemType(), GetX(), GetY());
+            if (player && !package->autoItemCollectionManager->IsAutoCollectCanceled())
             {
                 if (player->GetY() <= player->GetAutoItemCollectLineY())
                 {
@@ -132,9 +132,9 @@ void ObjItem::Update()
         if (renderScoreEnable_ && IsScoreItem())
         {
             // 点数文字列生成
-            if (auto state = GetGameState())
+            if (auto package = GetPackage().lock())
             {
-                state->itemScoreTextSpawner->Spawn(GetX(), GetY(), GetScore(), state);
+                package->itemScoreTextSpawner->Spawn(GetX(), GetY(), GetScore(), package);
             }
         }
         Die();
@@ -327,8 +327,8 @@ void ObjItem::UpdateAnimationPosition()
     }
 }
 
-ObjItemScoreText::ObjItemScoreText(GameScore score, const std::shared_ptr<Texture>& texture, const std::shared_ptr<GameState>& gameState) :
-    ObjSpriteList2D(gameState),
+ObjItemScoreText::ObjItemScoreText(GameScore score, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Package>& package) :
+    ObjSpriteList2D(package),
     ObjMove(this),
     scoreTextDeleteTimer_(32),
     scoreTextAlpha_(0xff)
@@ -535,13 +535,13 @@ void MoveModeHoverItemScoreText::Move(float & x, float & y)
 ItemScoreTextSpawner::ItemScoreTextSpawner() {}
 ItemScoreTextSpawner::~ItemScoreTextSpawner() {}
 
-void ItemScoreTextSpawner::Spawn(float x, float y, GameScore score, const std::shared_ptr<GameState>& gameState)
+void ItemScoreTextSpawner::Spawn(float x, float y, GameScore score, const std::shared_ptr<Package>& package)
 {
-    if (gameState)
+    if (package)
     {
-        std::shared_ptr<Texture> texture = gameState->textureCache->Load(SYSTEM_STG_DIGIT_IMG_PATH, false, nullptr);
-        auto scoreText = gameState->objTable->Create<ObjItemScoreText>(score, texture, gameState);
-        gameState->objLayerList->SetRenderPriority(scoreText, gameState->objLayerList->GetItemRenderPriority());
+        std::shared_ptr<Texture> texture = package->textureCache->Load(SYSTEM_STG_DIGIT_IMG_PATH, false, nullptr);
+        auto scoreText = package->objTable->Create<ObjItemScoreText>(score, texture, package);
+        package->objLayerList->SetRenderPriority(scoreText, package->objLayerList->GetItemRenderPriority());
         scoreText->SetMovePosition(x, y);
     }
 }
@@ -549,17 +549,17 @@ void ItemScoreTextSpawner::Spawn(float x, float y, GameScore score, const std::s
 DefaultBonusItemSpawner::DefaultBonusItemSpawner() {}
 DefaultBonusItemSpawner::~DefaultBonusItemSpawner() {}
 
-void DefaultBonusItemSpawner::Spawn(float x, float y, const std::shared_ptr<GameState>& gameState)
+void DefaultBonusItemSpawner::Spawn(float x, float y, const std::shared_ptr<Package>& package)
 {
-    if (gameState)
+    if (package)
     {
-        auto bonusItem = std::make_shared<ObjItem>(ITEM_DEFAULT_BONUS, gameState);
-        gameState->objTable->Add(bonusItem);
-        gameState->objLayerList->SetRenderPriority(bonusItem, gameState->objLayerList->GetItemRenderPriority());
+        auto bonusItem = std::make_shared<ObjItem>(ITEM_DEFAULT_BONUS, package);
+        package->objTable->Add(bonusItem);
+        package->objLayerList->SetRenderPriority(bonusItem, package->objLayerList->GetItemRenderPriority());
         bonusItem->SetMovePosition(x, y);
         bonusItem->SetIntersection();
         bonusItem->SetScore(300);
-        bonusItem->SetMoveMode(std::make_shared<MoveModeItemToPlayer>(8.0f, gameState->playerObj.lock()));
+        bonusItem->SetMoveMode(std::make_shared<MoveModeItemToPlayer>(8.0f, package->playerObj.lock()));
     }
 }
 }

@@ -5,7 +5,7 @@
 #include <bstorm/texture.hpp>
 #include <bstorm/font.hpp>
 #include <bstorm/render_target.hpp>
-#include <bstorm/game_state.hpp>
+#include <bstorm/package.hpp>
 #include <bstorm/engine.hpp>
 
 #include <algorithm>
@@ -266,10 +266,10 @@ void Engine::backDoor<ResourceMonitor>()
     ImGui::Separator();
     if (selectedTab == Tab::TEXTURE)
     {
-        gameState->textureCache->BackDoor<ResourceMonitor>();
+        package->textureCache->BackDoor<ResourceMonitor>();
     } else if (selectedTab == Tab::FONT)
     {
-        gameState->fontCache->BackDoor<ResourceMonitor>();
+        package->fontCache->BackDoor<ResourceMonitor>();
     } else if (selectedTab == Tab::RENDER_TARGET)
     {
         backDoor<RenderTargetMonitor>();

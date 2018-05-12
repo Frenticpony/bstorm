@@ -5,13 +5,13 @@
 #include <bstorm/font.hpp>
 #include <bstorm/texture.hpp>
 #include <bstorm/renderer.hpp>
-#include <bstorm/game_state.hpp>
+#include <bstorm/package.hpp>
 
 #include <algorithm>
 
 namespace bstorm
 {
-ObjText::ObjText(const std::shared_ptr<GameState>& state) :
+ObjText::ObjText(const std::shared_ptr<Package>& state) :
     ObjRender(state),
     fontName_(L"ＭＳ ゴシック"),
     size_(20),
@@ -45,7 +45,7 @@ void ObjText::GenerateFonts()
 {
     if (isFontParamModified_)
     {
-        if (auto state = GetGameState())
+        if (auto package = GetPackage().lock())
         {
             bodyFonts_.clear();
             rubyFonts_.clear();
@@ -56,7 +56,7 @@ void ObjText::GenerateFonts()
                     bodyFonts_.push_back(std::shared_ptr<Font>());
                 } else
                 {
-                    bodyFonts_.push_back(state->fontCache->Create(FontParams(fontName_, size_, isBold_ ? FW_BOLD : FW_DONTCARE, topColor_, bottomColor_, borderType_, borderWidth_, borderColor_, c)));
+                    bodyFonts_.push_back(package->fontCache->Create(FontParams(fontName_, size_, isBold_ ? FW_BOLD : FW_DONTCARE, topColor_, bottomColor_, borderType_, borderWidth_, borderColor_, c)));
                 }
             }
             for (const Ruby<std::wstring>& ruby : rubies_)
@@ -64,7 +64,7 @@ void ObjText::GenerateFonts()
                 std::vector<std::shared_ptr<Font>> fonts;
                 for (wchar_t c : ruby.text)
                 {
-                    fonts.push_back(state->fontCache->Create(FontParams(fontName_, size_ / 2, FW_BOLD, topColor_, bottomColor_, borderType_, borderWidth_ / 2, borderColor_, c)));
+                    fonts.push_back(package->fontCache->Create(FontParams(fontName_, size_ / 2, FW_BOLD, topColor_, bottomColor_, borderType_, borderWidth_ / 2, borderColor_, c)));
                 }
                 rubyFonts_.emplace_back(ruby.begin, ruby.end, fonts);
             }
@@ -99,7 +99,7 @@ void ObjText::RenderFont(const std::shared_ptr<Font>& font, const D3DXMATRIX& wo
     vertices[1].x = vertices[3].x = font->GetWidth();
     vertices[2].y = vertices[3].y = font->GetHeight();
 
-    if (auto state = GetGameState())
+    if (auto package = GetPackage().lock())
     {
         renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), font->GetTexture(), GetBlendType(), world, GetAppliedShader(), IsPermitCamera(), true);
     }
@@ -280,7 +280,7 @@ int ObjText::GetMaxHeight() const
 
 void ObjText::Render(const std::unique_ptr<Renderer>& renderer)
 {
-    if (auto state = GetGameState())
+    if (auto package = GetPackage().lock())
     {
         GenerateFonts();
         int idx = 0;

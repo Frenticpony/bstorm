@@ -9,12 +9,12 @@
 #include <bstorm/render_target.hpp>
 #include <bstorm/obj_shot.hpp>
 #include <bstorm/shot_data.hpp>
-#include <bstorm/game_state.hpp>
+#include <bstorm/package.hpp>
 
 namespace bstorm
 {
-ObjRender::ObjRender(const std::shared_ptr<GameState>& gameState) :
-    Obj(gameState),
+ObjRender::ObjRender(const std::shared_ptr<Package>& package) :
+    Obj(package),
     visibleFlag_(true),
     priority_(-1),
     x_(0),
@@ -176,9 +176,9 @@ void ObjRender::SetShaderTexture(const std::string & name, const std::shared_ptr
 std::shared_ptr<Shader> ObjRender::GetAppliedShader() const
 {
     if (shader_) return shader_;
-    if (auto state = GetGameState())
+    if (auto package = GetPackage().lock())
     {
-        return state->objLayerList->GetLayerShader(priority_);
+        return package->objLayerList->GetLayerShader(priority_);
     }
     return nullptr;
 }
@@ -394,7 +394,7 @@ void ObjectLayerList::ClearInvalidRenderPriority()
     invalidRenderPriorityMin_ = invalidRenderPriorityMax_ = -1;
 }
 
-ObjShader::ObjShader(const std::shared_ptr<GameState>& gameState) : ObjRender(gameState)
+ObjShader::ObjShader(const std::shared_ptr<Package>& package) : ObjRender(package)
 {
     SetType(OBJ_SHADER);
 }

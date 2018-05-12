@@ -27,7 +27,7 @@ public:
 class ObjPlayer : public ObjSprite2D, public ObjMove, public ObjCol, public std::enable_shared_from_this<ObjPlayer>
 {
 public:
-    ObjPlayer(const std::shared_ptr<GameState>& gameState, const std::shared_ptr<GlobalPlayerParams>& globalParams);
+    ObjPlayer(const std::shared_ptr<Package>& package, const std::shared_ptr<GlobalPlayerParams>& globalParams);
     ~ObjPlayer();
     void Update() override;
     void Render(const std::unique_ptr<Renderer>& renderer) override;

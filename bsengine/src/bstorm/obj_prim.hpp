@@ -15,7 +15,7 @@ class RenderTarget;
 class ObjPrim : public ObjRender
 {
 public:
-    ObjPrim(const std::shared_ptr<GameState>& state);
+    ObjPrim(const std::shared_ptr<Package>& state);
     ~ObjPrim();
     void Update() override;
     int GetPrimitiveType() const;
@@ -48,14 +48,14 @@ private:
 class ObjPrim2D : public ObjPrim
 {
 public:
-    ObjPrim2D(const std::shared_ptr<GameState>& state);
+    ObjPrim2D(const std::shared_ptr<Package>& state);
     void Render(const std::unique_ptr<Renderer>& renderer) override;
 };
 
 class ObjSprite2D : public ObjPrim2D
 {
 public:
-    ObjSprite2D(const std::shared_ptr<GameState>& state);
+    ObjSprite2D(const std::shared_ptr<Package>& state);
     void SetSourceRect(float left, float top, float right, float bottom);
     void SetDestRect(float left, float top, float right, float bottom);
     void SetDestCenter();
@@ -64,7 +64,7 @@ public:
 class ObjSpriteList2D : public ObjPrim2D
 {
 public:
-    ObjSpriteList2D(const std::shared_ptr<GameState>& state);
+    ObjSpriteList2D(const std::shared_ptr<Package>& state);
     void Render(const std::unique_ptr<Renderer>& renderer) override;
     void SetSourceRect(float left, float top, float right, float bottom);
     void SetDestRect(float left, float top, float right, float bottom);
@@ -87,7 +87,7 @@ private:
 class ObjPrim3D : public ObjPrim
 {
 public:
-    ObjPrim3D(const std::shared_ptr<GameState>& state);
+    ObjPrim3D(const std::shared_ptr<Package>& state);
     void Render(const std::unique_ptr<Renderer>& renderer) override;
     bool IsBillboardEnabled() const;
 protected:
@@ -97,7 +97,7 @@ protected:
 class ObjSprite3D : public ObjPrim3D
 {
 public:
-    ObjSprite3D(const std::shared_ptr<GameState>& state);
+    ObjSprite3D(const std::shared_ptr<Package>& state);
     void SetSourceRect(float left, float top, float right, float bottom);
     void SetDestRect(float left, float top, float right, float bottom);
     void SetSourceDestRect(float left, float top, float right, float bottom);

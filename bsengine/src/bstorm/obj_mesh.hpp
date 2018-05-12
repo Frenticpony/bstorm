@@ -10,7 +10,7 @@ class Mesh;
 class ObjMesh : public ObjRender
 {
 public:
-    ObjMesh(const std::shared_ptr<GameState>& state);
+    ObjMesh(const std::shared_ptr<Package>& state);
     ~ObjMesh();
     void Update() override;
     void Render(const std::unique_ptr<Renderer>& renderer) override;

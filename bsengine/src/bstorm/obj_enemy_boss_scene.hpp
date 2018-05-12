@@ -10,7 +10,7 @@ class ObjEnemy;
 class ObjEnemyBossScene : public Obj
 {
 public:
-    ObjEnemyBossScene(const std::shared_ptr<GameState>& gameState);
+    ObjEnemyBossScene(const std::shared_ptr<Package>& package);
     void Update() override;
     void Regist(const std::shared_ptr<SourcePos>& srcPos);
     void Add(int step, const std::wstring& path);

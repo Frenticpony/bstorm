@@ -7,12 +7,12 @@
 namespace bstorm
 {
 class Intersection;
-class GameState;
+class Package;
 class Renderer;
 class ObjCol
 {
 public:
-    ObjCol(const std::shared_ptr<GameState>& gameState);
+    ObjCol(const std::shared_ptr<Package>& package);
     ~ObjCol();
     const std::deque<std::shared_ptr<Intersection>>& GetIntersections() const { return isects_; }
     const std::vector<std::shared_ptr<Intersection>>& GetTempIntersections() const { return oldTempIsects_; }
@@ -33,6 +33,6 @@ private:
     std::deque<std::shared_ptr<Intersection>> isects_;
     std::vector<std::shared_ptr<Intersection>> tempIsects_; // í«â¡óp
     std::vector<std::shared_ptr<Intersection>> oldTempIsects_; // ï€éùóp
-    std::weak_ptr<GameState> gameState_;
+    std::weak_ptr<Package> package_;
 };
 }

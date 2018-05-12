@@ -5,12 +5,12 @@
 
 namespace bstorm
 {
-Obj::Obj(const std::shared_ptr<GameState>& state) :
+Obj::Obj(const std::shared_ptr<Package>& state) :
     id_(ID_INVALID),
     type_(-1),
     isDead_(false),
     isStgSceneObj_(true),
-    gameState_(state)
+    package_(state)
 {
 }
 
@@ -50,8 +50,6 @@ const std::unordered_map<std::wstring, std::unique_ptr<DnhValue>>& Obj::GetPrope
 {
     return properties_;
 }
-
-std::shared_ptr<GameState> Obj::GetGameState() const { return gameState_.lock(); }
 
 ObjectTable::ObjectTable() :
     idGen_(0),

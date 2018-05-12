@@ -11,7 +11,7 @@ class FontCache;
 class ObjText : public ObjRender
 {
 public:
-    ObjText(const std::shared_ptr<GameState>& state);
+    ObjText(const std::shared_ptr<Package>& state);
     ~ObjText();
     void Update() override;
     void Render(const std::unique_ptr<Renderer>& renderer) override;

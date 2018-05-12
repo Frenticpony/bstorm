@@ -81,9 +81,6 @@
     <ClInclude Include="src\bstorm\fps_counter.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\bstorm\game_state.hpp">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="src\bstorm\graphic_device.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -225,6 +222,9 @@
     <ClInclude Include="src\bstorm\log_error.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="src\bstorm\package.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\bison\dnh.tab.cpp">
@@ -306,9 +306,6 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\bstorm\fps_counter.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="src\bstorm\game_state.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\bstorm\graphic_device.cpp">
@@ -423,6 +420,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\bstorm\log_error.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bstorm\package.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

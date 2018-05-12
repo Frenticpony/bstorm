@@ -10,12 +10,12 @@ namespace bstorm
 {
 class DnhValue;
 class ObjectTable;
-class GameState;
+class Package;
 class Obj : private NonCopyable
 {
 public:
     using Type = int;
-    Obj(const std::shared_ptr<GameState>& state);
+    Obj(const std::shared_ptr<Package>& state);
     virtual ~Obj();
     virtual void Update() = 0;
     const std::unique_ptr<DnhValue>& GetValue(const std::wstring& key) const;
@@ -32,13 +32,13 @@ public:
 protected:
     void SetType(Type t) { type_ = t; }
     void Die() { isDead_ = true; };
-    std::shared_ptr<GameState> GetGameState() const;
+    const std::weak_ptr<Package>& GetPackage() const { return package_; }
 private:
     int id_;
     Type type_;
     bool isDead_;
     std::unordered_map<std::wstring, std::unique_ptr<DnhValue>> properties_;
-    std::weak_ptr<GameState> gameState_;
+    std::weak_ptr<Package> package_;
     bool isStgSceneObj_;
     friend class ObjectTable;
 };

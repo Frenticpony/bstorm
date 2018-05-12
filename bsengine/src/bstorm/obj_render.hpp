@@ -21,7 +21,7 @@ class ObjectLayerList;
 class ObjRender : public Obj
 {
 public:
-    ObjRender(const std::shared_ptr<GameState>& gameState);
+    ObjRender(const std::shared_ptr<Package>& package);
     ~ObjRender();
     virtual void Render(const std::unique_ptr<Renderer>& renderer) = 0;
     bool IsVisible() const { return visibleFlag_; }
@@ -120,7 +120,7 @@ private:
 class ObjShader : public ObjRender
 {
 public:
-    ObjShader(const std::shared_ptr<GameState>& gameState);
+    ObjShader(const std::shared_ptr<Package>& package);
     ~ObjShader();
     void Update() override {}
     void Render(const std::unique_ptr<Renderer>& renderer) override {};

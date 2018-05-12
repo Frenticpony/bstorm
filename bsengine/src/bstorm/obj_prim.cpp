@@ -6,7 +6,7 @@
 #include <bstorm/texture.hpp>
 #include <bstorm/render_target.hpp>
 #include <bstorm/renderer.hpp>
-#include <bstorm/game_state.hpp>
+#include <bstorm/package.hpp>
 
 #include <d3dx9.h>
 
@@ -17,7 +17,7 @@ static bool isValidIndex(int i, const std::vector<bstorm::Vertex>& v)
 
 namespace bstorm
 {
-ObjPrim::ObjPrim(const std::shared_ptr<GameState>& state) :
+ObjPrim::ObjPrim(const std::shared_ptr<Package>& state) :
     ObjRender(state),
     primType_(D3DPT_TRIANGLELIST)
 {
@@ -170,7 +170,7 @@ _D3DPRIMITIVETYPE ObjPrim::GetD3DPrimitiveType() const
     return primType_;
 }
 
-ObjPrim2D::ObjPrim2D(const std::shared_ptr<GameState>& state) :
+ObjPrim2D::ObjPrim2D(const std::shared_ptr<Package>& state) :
     ObjPrim(state)
 {
     SetType(OBJ_PRIMITIVE_2D);
@@ -179,13 +179,13 @@ ObjPrim2D::ObjPrim2D(const std::shared_ptr<GameState>& state) :
 void ObjPrim2D::Render(const std::unique_ptr<Renderer>& renderer)
 {
     D3DXMATRIX world = CreateScaleRotTransMatrix(GetX(), GetY(), GetZ(), GetAngleX(), GetAngleY(), GetAngleZ(), GetScaleX(), GetScaleY(), GetScaleZ());
-    if (auto state = GetGameState())
+    if (auto package = GetPackage().lock())
     {
-        state->renderer->RenderPrim2D(GetD3DPrimitiveType(), vertices_.size(), vertices_.data(), GetD3DTexture(), GetBlendType(), world, GetAppliedShader(), IsPermitCamera(), true);
+        package->renderer->RenderPrim2D(GetD3DPrimitiveType(), vertices_.size(), vertices_.data(), GetD3DTexture(), GetBlendType(), world, GetAppliedShader(), IsPermitCamera(), true);
     }
 }
 
-ObjSprite2D::ObjSprite2D(const std::shared_ptr<GameState>& state) :
+ObjSprite2D::ObjSprite2D(const std::shared_ptr<Package>& state) :
     ObjPrim2D(state)
 {
     SetType(OBJ_SPRITE_2D);
@@ -221,7 +221,7 @@ void ObjSprite2D::SetDestCenter()
     }
 }
 
-ObjSpriteList2D::ObjSpriteList2D(const std::shared_ptr<GameState>& state) :
+ObjSpriteList2D::ObjSpriteList2D(const std::shared_ptr<Package>& state) :
     ObjPrim2D(state),
     isVertexClosed_(false),
     srcRectLeft_(0),
@@ -358,7 +358,7 @@ void ObjSpriteList2D::ClearVerexCount()
     isVertexClosed_ = false;
 }
 
-ObjPrim3D::ObjPrim3D(const std::shared_ptr<GameState>& state) :
+ObjPrim3D::ObjPrim3D(const std::shared_ptr<Package>& state) :
     ObjPrim(state),
     billboardEnable_(false)
 {
@@ -376,7 +376,7 @@ bool ObjPrim3D::IsBillboardEnabled() const
     return billboardEnable_;
 }
 
-ObjSprite3D::ObjSprite3D(const std::shared_ptr<GameState>& state) :
+ObjSprite3D::ObjSprite3D(const std::shared_ptr<Package>& state) :
     ObjPrim3D(state)
 {
     SetType(OBJ_SPRITE_3D);

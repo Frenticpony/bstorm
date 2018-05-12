@@ -23,7 +23,7 @@
 #include <bstorm/dnh_value.hpp>
 #include <bstorm/shot_data.hpp>
 #include <bstorm/item_data.hpp>
-#include <bstorm/game_state.hpp>
+#include <bstorm/package.hpp>
 #include <bstorm/engine.hpp>
 
 #include <unordered_set>
@@ -1063,7 +1063,7 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
 template <>
 void Engine::backDoor<ObjectBrowser>()
 {
-    const auto& table = gameState->objTable->GetAll();
+    const auto& table = package->objTable->GetAll();
     static int selectedId = 0;
     float sideBarWidth = ImGui::GetContentRegionAvailWidth() * 0.2;
     ImGui::BeginChild("SideBar", ImVec2(sideBarWidth, -1), true, ImGuiWindowFlags_HorizontalScrollbar);
@@ -1096,7 +1096,7 @@ void Engine::backDoor<ObjectBrowser>()
     auto it = table.find(selectedId);
     if (it != table.end())
     {
-        drawObjEditArea(it->second, gameState->objLayerList);
+        drawObjEditArea(it->second, package->objLayerList);
     }
     ImGui::EndChild();
 }

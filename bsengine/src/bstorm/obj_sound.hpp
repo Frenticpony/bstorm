@@ -16,7 +16,7 @@ public:
         BGM,
         SE
     };
-    ObjSound(const std::shared_ptr<GameState>& gameState);
+    ObjSound(const std::shared_ptr<Package>& package);
     ~ObjSound();
     void Update() override;
     void SetSound(const std::shared_ptr<SoundBuffer>& buf);

@@ -19,7 +19,7 @@ class ItemIntersection;
 class ObjItem : public ObjRender, public ObjMove, public ObjCol, public std::enable_shared_from_this<ObjItem>
 {
 public:
-    ObjItem(int itemType, const std::shared_ptr<GameState>& gameState);
+    ObjItem(int itemType, const std::shared_ptr<Package>& package);
     ~ObjItem();
     void SetIntersection();
     void Update() override;
@@ -60,7 +60,7 @@ private:
 class ObjItemScoreText : public ObjSpriteList2D, public ObjMove
 {
 public:
-    ObjItemScoreText(GameScore score, const std::shared_ptr<Texture>& texture, const std::shared_ptr<GameState>& gameState);
+    ObjItemScoreText(GameScore score, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Package>& package);
     ~ObjItemScoreText();
     void Update() override;
     void Render(const std::unique_ptr<Renderer>& renderer) override;
@@ -74,7 +74,7 @@ class ItemScoreTextSpawner
 public:
     ItemScoreTextSpawner();
     virtual ~ItemScoreTextSpawner();
-    virtual void Spawn(float x, float y, GameScore score, const std::shared_ptr<GameState>& gameState);
+    virtual void Spawn(float x, float y, GameScore score, const std::shared_ptr<Package>& package);
 };
 
 class DefaultBonusItemSpawner
@@ -82,7 +82,7 @@ class DefaultBonusItemSpawner
 public:
     DefaultBonusItemSpawner();
     virtual ~DefaultBonusItemSpawner();
-    virtual void Spawn(float x, float y, const std::shared_ptr<GameState>& gameState);
+    virtual void Spawn(float x, float y, const std::shared_ptr<Package>& package);
 };
 
 class ObjItem;

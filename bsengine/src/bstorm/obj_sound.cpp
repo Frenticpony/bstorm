@@ -2,12 +2,12 @@
 
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/sound_device.hpp>
-#include <bstorm/game_state.hpp>
+#include <bstorm/package.hpp>
 
 namespace bstorm
 {
-ObjSound::ObjSound(const std::shared_ptr<GameState>& gameState) :
-    Obj(gameState),
+ObjSound::ObjSound(const std::shared_ptr<Package>& package) :
+    Obj(package),
     soundBuffer_(NULL),
     restartEnable_(false),
     division_(SoundDivision::BGM),

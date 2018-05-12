@@ -2,13 +2,13 @@
 
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/intersection.hpp>
-#include <bstorm/game_state.hpp>
+#include <bstorm/package.hpp>
 
 namespace bstorm
 {
-ObjSpell::ObjSpell(const std::shared_ptr<GameState>& gameState) :
-    ObjPrim2D(gameState),
-    ObjCol(gameState),
+ObjSpell::ObjSpell(const std::shared_ptr<Package>& package) :
+    ObjPrim2D(package),
+    ObjCol(package),
     damage_(0),
     isRegistered_(false),
     eraseShotEnable_(true)
@@ -49,9 +49,9 @@ void ObjSpell::SetEraseShotEnable(bool enable) { eraseShotEnable_ = enable; }
 
 void ObjSpell::AddTempIntersection(const std::shared_ptr<SpellIntersection>& isect)
 {
-    if (auto gameState = GetGameState())
+    if (auto package = GetPackage().lock())
     {
-        gameState->colDetector->Add(isect);
+        package->colDetector->Add(isect);
         ObjCol::AddTempIntersection(isect);
     }
 }
@@ -65,8 +65,8 @@ void ObjSpell::AddTempIntersectionLine(float x1, float y1, float x2, float y2, f
 {
     AddTempIntersection(std::make_shared<SpellIntersection>(x1, y1, x2, y2, width, shared_from_this()));
 }
-ObjSpellManage::ObjSpellManage(const std::shared_ptr<GameState>& gameState) :
-    Obj(gameState)
+ObjSpellManage::ObjSpellManage(const std::shared_ptr<Package>& package) :
+    Obj(package)
 {
     SetType(OBJ_SPELL_MANAGE);
 }

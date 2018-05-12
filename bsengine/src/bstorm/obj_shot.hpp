@@ -24,7 +24,7 @@ public:
 class ObjShot : public ObjRender, public ObjMove, public ObjCol, public std::enable_shared_from_this<ObjShot>
 {
 public:
-    ObjShot(bool isPlayerShot, const std::shared_ptr<GameState>& gameState);
+    ObjShot(bool isPlayerShot, const std::shared_ptr<Package>& package);
     ~ObjShot();
 
     void Update() override;
@@ -153,7 +153,7 @@ private:
 class ObjLaser : public ObjShot
 {
 public:
-    ObjLaser(bool isPlayerShot, const std::shared_ptr<GameState>& gameState);
+    ObjLaser(bool isPlayerShot, const std::shared_ptr<Package>& package);
     void SetShotData(const std::shared_ptr<ShotData>& shotData) override;
     void Graze() override;
     bool IsGrazeEnabled() const override;
@@ -184,7 +184,7 @@ private:
 class ObjLooseLaser : public ObjLaser
 {
 public:
-    ObjLooseLaser(bool isPlayerShot, const std::shared_ptr<GameState>& gameState);
+    ObjLooseLaser(bool isPlayerShot, const std::shared_ptr<Package>& package);
     void Update() override;
     void Render(const std::unique_ptr<Renderer>& renderer) override;
     void GenerateDefaultBonusItem() override;
@@ -210,7 +210,7 @@ private:
 class ObjStLaser : public ObjLooseLaser
 {
 public:
-    ObjStLaser(bool isPlayerShot, const std::shared_ptr<GameState>& gameState);
+    ObjStLaser(bool isPlayerShot, const std::shared_ptr<Package>& package);
     void Update() override;
     void Render(const std::unique_ptr<Renderer>& renderer) override;
     Point2D GetTail() const override;
@@ -228,7 +228,7 @@ private:
 class ObjCrLaser : public ObjLaser
 {
 public:
-    ObjCrLaser(bool isPlayerShot, const std::shared_ptr<GameState>& gameState);
+    ObjCrLaser(bool isPlayerShot, const std::shared_ptr<Package>& package);
     void Update() override;
     void Render(const std::unique_ptr<Renderer>& renderer) override;
     void GenerateDefaultBonusItem() override;

@@ -1,7 +1,7 @@
 #include <imgui.h>
 #include <bstorm/camera2D.hpp>
 #include <bstorm/camera3D.hpp>
-#include <bstorm/game_state.hpp>
+#include <bstorm/package.hpp>
 #include <bstorm/engine.hpp>
 
 #include "util.hpp"
@@ -155,10 +155,10 @@ void Engine::backDoor<CameraBrowser>()
     ImGui::Separator();
     if (selectedCamera == 0)
     {
-        drawCamera2DInfo(*gameState->camera2D);
+        drawCamera2DInfo(*package->camera2D);
     } else
     {
-        drawCamera3DInfo(*gameState->camera3D);
+        drawCamera3DInfo(*package->camera3D);
     }
 }
 

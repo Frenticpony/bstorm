@@ -1,4 +1,4 @@
-﻿#include <bstorm/game_state.hpp>
+﻿#include <bstorm/package.hpp>
 
 #include <bstorm/renderer.hpp>
 #include <bstorm/dnh_const.hpp>
@@ -29,7 +29,7 @@
 
 namespace bstorm
 {
-GameState::GameState(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevice9* d3DDevice, const std::shared_ptr<conf::KeyConfig>& keyConfig, const std::shared_ptr<MousePositionProvider>& mousePosProvider, Engine* engine) :
+Package::Package(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevice9* d3DDevice, const std::shared_ptr<conf::KeyConfig>& keyConfig, const std::shared_ptr<MousePositionProvider>& mousePosProvider, Engine* engine) :
     fpsCounter(std::make_shared<FpsCounter>()),
     inputDevice(std::make_shared<InputDevice>(hWnd, mousePosProvider)),
     keyAssign(std::make_shared<KeyAssign>()),

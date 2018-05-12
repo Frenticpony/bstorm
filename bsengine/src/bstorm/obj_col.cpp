@@ -1,13 +1,13 @@
 #include <bstorm/obj_col.hpp>
 
 #include <bstorm/intersection.hpp>
-#include <bstorm/game_state.hpp>
+#include <bstorm/package.hpp>
 
 #include <iterator>
 
 namespace bstorm
 {
-ObjCol::ObjCol(const std::shared_ptr<GameState>& gameState) : gameState_(gameState) {}
+ObjCol::ObjCol(const std::shared_ptr<Package>& package) : package_(package) {}
 ObjCol::~ObjCol() {}
 
 void ObjCol::PushBackIntersection(const std::shared_ptr<Intersection>& isect)
@@ -27,7 +27,7 @@ void ObjCol::AddTempIntersection(const std::shared_ptr<Intersection>& isect)
 
 void ObjCol::TransIntersection(float dx, float dy)
 {
-    if (auto state = gameState_.lock())
+    if (auto state = package_.lock())
     {
         for (auto& isect : isects_)
         {
@@ -38,7 +38,7 @@ void ObjCol::TransIntersection(float dx, float dy)
 
 void ObjCol::SetWidthIntersection(float width)
 {
-    if (auto state = gameState_.lock())
+    if (auto state = package_.lock())
     {
         for (auto& isect : isects_)
         {
@@ -49,7 +49,7 @@ void ObjCol::SetWidthIntersection(float width)
 
 void ObjCol::RenderIntersection(const std::unique_ptr<Renderer>& renderer, bool isPermitCamera) const
 {
-    if (auto state = gameState_.lock())
+    if (auto state = package_.lock())
     {
         if (state->renderIntersectionEnable)
         {

@@ -51,10 +51,10 @@ class DefaultBonusItemSpawner;
 class AutoItemCollectionManager;
 class Engine;
 namespace conf { struct KeyConfig; }
-class GameState
+class Package
 {
 public:
-    GameState(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevice9* d3DDevice, const std::shared_ptr<conf::KeyConfig>& keyConfig, const std::shared_ptr<MousePositionProvider>& mousePosProvider, Engine* engine);
+    Package(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevice9* d3DDevice, const std::shared_ptr<conf::KeyConfig>& keyConfig, const std::shared_ptr<MousePositionProvider>& mousePosProvider, Engine* engine);
     std::shared_ptr<FpsCounter> fpsCounter;
     std::shared_ptr<InputDevice> inputDevice;
     std::shared_ptr<KeyAssign> keyAssign;

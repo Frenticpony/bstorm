@@ -7,7 +7,7 @@
 #include <bstorm/engine.hpp>
 #include <bstorm/dnh_value.hpp>
 #include <bstorm/common_data_db.hpp>
-#include <bstorm/game_state.hpp>
+#include <bstorm/package.hpp>
 
 #include "common_data_browser.hpp"
 
@@ -61,7 +61,7 @@ static void DrawCommonDataInfo(const std::map<CommonDataDB::DataAreaName, Common
 template <>
 void Engine::backDoor<CommonDataBrowser>()
 {
-    const auto& areaTable = gameState->commonDataDB->GetCommonDataAreaTable();
+    const auto& areaTable = package->commonDataDB->GetCommonDataAreaTable();
     DrawCommonDataInfo(areaTable);
 }
 

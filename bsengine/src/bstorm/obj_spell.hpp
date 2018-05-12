@@ -9,7 +9,7 @@ class SpellIntersection;
 class ObjSpell : public ObjPrim2D, public ObjCol, public std::enable_shared_from_this<ObjSpell>
 {
 public:
-    ObjSpell(const std::shared_ptr<GameState>& gameState);
+    ObjSpell(const std::shared_ptr<Package>& package);
     ~ObjSpell();
     void Update() override;
     void Render(const std::unique_ptr<Renderer>& renderer) override;
@@ -31,7 +31,7 @@ protected:
 class ObjSpellManage : public Obj
 {
 public:
-    ObjSpellManage(const std::shared_ptr<GameState>& gameState);
+    ObjSpellManage(const std::shared_ptr<Package>& package);
     ~ObjSpellManage();
     void Update() override;
 };

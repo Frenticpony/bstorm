@@ -1,15 +1,15 @@
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/util.hpp>
 #include <bstorm/renderer.hpp>
-#include <bstorm/game_state.hpp>
+#include <bstorm/package.hpp>
 #include <bstorm/obj_mesh.hpp>
 
 #include <d3d9.h>
 
 namespace bstorm
 {
-ObjMesh::ObjMesh(const std::shared_ptr<GameState>& gameState) :
-    ObjRender(gameState)
+ObjMesh::ObjMesh(const std::shared_ptr<Package>& package) :
+    ObjRender(package)
 {
     SetType(OBJ_MESH);
 }

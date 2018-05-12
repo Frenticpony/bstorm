@@ -12,7 +12,7 @@
 #include <bstorm/shot_data.hpp>
 #include <bstorm/auto_delete_clip.hpp>
 #include <bstorm/rand_generator.hpp>
-#include <bstorm/game_state.hpp>
+#include <bstorm/package.hpp>
 
 #include <algorithm>
 #include <d3dx9.h>
@@ -25,10 +25,10 @@ ShotCounter::ShotCounter() :
 {
 }
 
-ObjShot::ObjShot(bool isPlayerShot, const std::shared_ptr<GameState>& gameState) :
-    ObjRender(gameState),
+ObjShot::ObjShot(bool isPlayerShot, const std::shared_ptr<Package>& package) :
+    ObjRender(package),
     ObjMove(this),
-    ObjCol(gameState),
+    ObjCol(package),
     isPlayerShot_(isPlayerShot),
     isRegistered_(false),
     intersectionEnable_(true),
@@ -56,31 +56,31 @@ ObjShot::ObjShot(bool isPlayerShot, const std::shared_ptr<GameState>& gameState)
     SetBlendType(BLEND_NONE);
     if (isPlayerShot_)
     {
-        gameState->shotCounter->playerShotCount++;
+        package->shotCounter->playerShotCount++;
     } else
     {
-        gameState->shotCounter->enemyShotCount++;
+        package->shotCounter->enemyShotCount++;
     }
 }
 
 ObjShot::~ObjShot()
 {
-    if (auto state = GetGameState())
+    if (auto package = GetPackage().lock())
     {
         for (auto& addedShot : addedShots_)
         {
-            state->objTable->Delete(addedShot.objId);
+            package->objTable->Delete(addedShot.objId);
         }
     }
     // FUTURE :デストラクタではなくdead時にカウントする
-    if (auto gameState = GetGameState())
+    if (auto package = GetPackage().lock())
     {
         if (IsPlayerShot())
         {
-            gameState->shotCounter->playerShotCount--;
+            package->shotCounter->playerShotCount--;
         } else
         {
-            gameState->shotCounter->enemyShotCount--;
+            package->shotCounter->enemyShotCount--;
         }
     }
 }
@@ -173,7 +173,7 @@ void ObjShot::Render(const std::unique_ptr<Renderer>& renderer)
                 (animationIdx_ >= 0 && animationIdx_ < shotData_->animationData.size()) ? shotData_->animationData[animationIdx_].rect :
                                            shotData_->rect);
 
-            if (auto state = GetGameState())
+            if (auto package = GetPackage().lock())
             {
                 renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData_->texture->GetTexture(), shotBlend, world, GetAppliedShader(), IsPermitCamera(), true);
             }
@@ -283,9 +283,9 @@ void ObjShot::AddIntersection(const std::shared_ptr<ShotIntersection>& isect)
 {
     if (!isTempIntersectionMode_)
     {
-        if (auto state = GetGameState())
+        if (auto package = GetPackage().lock())
         {
-            state->colDetector->Add(isect);
+            package->colDetector->Add(isect);
         }
         ObjCol::PushBackIntersection(isect);
     }
@@ -298,9 +298,9 @@ void ObjShot::AddTempIntersection(const std::shared_ptr<ShotIntersection>& isect
         isTempIntersectionMode_ = true;
         ClearIntersection();
     }
-    if (auto state = GetGameState())
+    if (auto package = GetPackage().lock())
     {
-        state->colDetector->Add(isect);
+        package->colDetector->Add(isect);
     }
     ObjCol::AddTempIntersection(isect);
 }
@@ -370,7 +370,7 @@ void ObjShot::SetShotData(const std::shared_ptr<ShotData>& data)
         if (shotData_)
         {
             angularVelocity_ = shotData_->angularVelocity;
-            if (auto state = GetGameState())
+            if (auto package = GetPackage().lock())
             {
                 if (!isTempIntersectionMode_)
                 {
@@ -381,7 +381,7 @@ void ObjShot::SetShotData(const std::shared_ptr<ShotData>& data)
                 }
                 if (shotData_->useAngularVelocityRand)
                 {
-                    angularVelocity_ = state->randGenerator->RandDouble(shotData_->angularVelocityRandMin, shotData_->angularVelocityRandMax);
+                    angularVelocity_ = package->randGenerator->RandDouble(shotData_->angularVelocityRandMin, shotData_->angularVelocityRandMax);
                 }
             }
         }
@@ -401,9 +401,9 @@ int ObjShot::GetAnimationIndex() const
 void ObjShot::AddShotA1(int shotObjId, int frame)
 {
     if (IsDead()) return;
-    if (auto state = GetGameState())
+    if (auto package = GetPackage().lock())
     {
-        if (auto shot = state->objTable->Get<ObjShot>(shotObjId))
+        if (auto shot = package->objTable->Get<ObjShot>(shotObjId))
         {
             shot->isRegistered_ = false;
             addedShots_.emplace_back(shotObjId, frame);
@@ -414,9 +414,9 @@ void ObjShot::AddShotA1(int shotObjId, int frame)
 void ObjShot::AddShotA2(int shotObjId, int frame, float dist, float angle)
 {
     if (IsDead()) return;
-    if (auto state = GetGameState())
+    if (auto package = GetPackage().lock())
     {
-        if (auto shot = state->objTable->Get<ObjShot>(shotObjId))
+        if (auto shot = package->objTable->Get<ObjShot>(shotObjId))
         {
             shot->isRegistered_ = false;
             addedShots_.emplace_back(shotObjId, frame, dist, angle);
@@ -436,9 +436,9 @@ const std::list<ObjShot::AddedShot>& ObjShot::GetAddedShot() const
 
 void ObjShot::GenerateDefaultBonusItem()
 {
-    if (auto state = GetGameState())
+    if (auto package = GetPackage().lock())
     {
-        state->defaultBonusItemSpawner->Spawn(GetX(), GetY(), state);
+        package->defaultBonusItemSpawner->Spawn(GetX(), GetY(), package);
     }
 }
 
@@ -447,24 +447,24 @@ void ObjShot::ToItem()
     if (IsDead()) return;
     if (IsItemChangeEnabled())
     {
-        if (auto gameState = GetGameState())
+        if (auto package = GetPackage().lock())
         {
             // EV_DELETE_SHOT_TO_ITEM 
             auto evArgs = std::make_unique<DnhArray>();
             evArgs->PushBack(std::make_unique<DnhReal>(GetID()));
             evArgs->PushBack(std::make_unique<DnhArray>(Point2D(GetX(), GetY())));
-            if (auto itemScript = gameState->itemScript.lock())
+            if (auto itemScript = package->itemScript.lock())
             {
                 itemScript->NotifyEvent(EV_DELETE_SHOT_TO_ITEM, evArgs);
             }
-            if (gameState->deleteShotToItemEventOnShotScriptEnable)
+            if (package->deleteShotToItemEventOnShotScriptEnable)
             {
-                if (auto shotScript = gameState->shotScript.lock())
+                if (auto shotScript = package->shotScript.lock())
                 {
                     shotScript->NotifyEvent(EV_DELETE_SHOT_TO_ITEM, evArgs);
                 }
             }
-            if (gameState->defaultBonusItemEnable)
+            if (package->defaultBonusItemEnable)
             {
                 GenerateDefaultBonusItem();
             }
@@ -484,12 +484,12 @@ void ObjShot::EraseWithSpell()
 void ObjShot::DeleteImmediate()
 {
     if (IsDead()) return;
-    if (auto gameState = GetGameState())
+    if (auto package = GetPackage().lock())
     {
         // EV_DELETE_SHOT_IMMEDIATE
-        if (gameState->deleteShotImmediateEventOnShotScriptEnable)
+        if (package->deleteShotImmediateEventOnShotScriptEnable)
         {
-            if (auto shotScript = gameState->shotScript.lock())
+            if (auto shotScript = package->shotScript.lock())
             {
                 auto evArgs = std::make_unique<DnhArray>();
                 evArgs->PushBack(std::make_unique<DnhReal>(GetID()));
@@ -556,9 +556,9 @@ void ObjShot::RenderIntersection(const std::unique_ptr<Renderer>& renderer)
 
 void ObjShot::CheckAutoDelete(float x, float y)
 {
-    if (auto state = GetGameState())
+    if (auto package = GetPackage().lock())
     {
-        if (autoDeleteEnable_ && state->shotAutoDeleteClip->IsOutOfClip(x, y))
+        if (autoDeleteEnable_ && package->shotAutoDeleteClip->IsOutOfClip(x, y))
         {
             Die();
         }
@@ -612,9 +612,9 @@ void ObjShot::TickAddedShotFrameCount()
     {
         if (it->frame == addedShotFrameCnt_)
         {
-            if (auto state = GetGameState())
+            if (auto package = GetPackage().lock())
             {
-                if (auto shot = state->objTable->Get<ObjShot>(it->objId))
+                if (auto shot = package->objTable->Get<ObjShot>(it->objId))
                 {
                     float dx = 0;
                     float dy = 0;
@@ -657,12 +657,12 @@ void ObjShot::TickFadeDeleteTimer()
     fadeDeleteTimer_--;
     if (fadeDeleteTimer_ <= 0)
     {
-        if (auto gameState = GetGameState())
+        if (auto package = GetPackage().lock())
         {
             //EV_DELETE_SHOT_FADE
-            if (gameState->deleteShotFadeEventOnShotScriptEnable)
+            if (package->deleteShotFadeEventOnShotScriptEnable)
             {
-                if (auto shotScript = gameState->shotScript.lock())
+                if (auto shotScript = package->shotScript.lock())
                 {
                     auto evArgs = std::make_unique<DnhArray>();
                     evArgs->PushBack(std::make_unique<DnhReal>(GetID()));
@@ -703,8 +703,8 @@ ObjShot::AddedShot::AddedShot(int objId, int frame, float dist, float angle) :
 {
 }
 
-ObjLaser::ObjLaser(bool isPlayerShot, const std::shared_ptr<GameState>& gameState) :
-    ObjShot(isPlayerShot, gameState),
+ObjLaser::ObjLaser(bool isPlayerShot, const std::shared_ptr<Package>& package) :
+    ObjShot(isPlayerShot, package),
     length_(0),
     renderWidth_(0),
     intersectionWidth_(0),
@@ -807,8 +807,8 @@ void ObjLaser::TickGrazeInvalidTimer()
     }
 }
 
-ObjLooseLaser::ObjLooseLaser(bool isPlayerShot, const std::shared_ptr<GameState>& gameState) :
-    ObjLaser(isPlayerShot, gameState),
+ObjLooseLaser::ObjLooseLaser(bool isPlayerShot, const std::shared_ptr<Package>& package) :
+    ObjLaser(isPlayerShot, package),
     renderLength_(0),
     invalidLengthHead_(0),
     invalidLengthTail_(0),
@@ -858,7 +858,7 @@ void ObjLooseLaser::Render(const std::unique_ptr<Renderer>& renderer)
 
 void ObjLooseLaser::GenerateDefaultBonusItem()
 {
-    if (auto state = GetGameState())
+    if (auto package = GetPackage().lock())
     {
         const Point2D head = GetHead();
         const Point2D tail = GetTail();
@@ -871,7 +871,7 @@ void ObjLooseLaser::GenerateDefaultBonusItem()
         if (dist <= 0) return; // 無限ループ防止
         while (true)
         {
-            state->defaultBonusItemSpawner->Spawn(x, y, state);
+            package->defaultBonusItemSpawner->Spawn(x, y, package);
             x += dx;
             y += dy;
             distSum += dist;
@@ -978,7 +978,7 @@ void ObjLooseLaser::RenderLaser(float width, float length, float angle, const st
         float rectHeight = abs(vertices[0].y - vertices[2].y);
         D3DXMATRIX world = CreateScaleRotTransMatrix(centerX, centerY, 0.0f, 0.0f, 0.0f, angle + 90.0f, width / rectWidth, length / rectHeight, 1.0f);
 
-        if (auto state = GetGameState())
+        if (auto package = GetPackage().lock())
         {
             renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData->texture->GetTexture(), laserBlend, world, GetAppliedShader(), IsPermitCamera(), false);
         }
@@ -995,8 +995,8 @@ void ObjLooseLaser::Extend()
     }
 }
 
-ObjStLaser::ObjStLaser(bool isPlayerShot, const std::shared_ptr<GameState>& gameState) :
-    ObjLooseLaser(isPlayerShot, gameState),
+ObjStLaser::ObjStLaser(bool isPlayerShot, const std::shared_ptr<Package>& package) :
+    ObjLooseLaser(isPlayerShot, package),
     laserAngle_(270),
     laserSourceEnable_(true),
     laserWidthScale_(0)
@@ -1094,8 +1094,8 @@ float ObjStLaser::GetRenderLength() const
     return GetLength();
 }
 
-ObjCrLaser::ObjCrLaser(bool isPlayerShot, const std::shared_ptr<GameState>& gameState) :
-    ObjLaser(isPlayerShot, gameState),
+ObjCrLaser::ObjCrLaser(bool isPlayerShot, const std::shared_ptr<Package>& package) :
+    ObjLaser(isPlayerShot, package),
     totalLaserLength_(0),
     tailPos_(0),
     hasHead_(false),
@@ -1194,7 +1194,7 @@ void ObjCrLaser::Render(const std::unique_ptr<Renderer>& renderer)
 
 void ObjCrLaser::GenerateDefaultBonusItem()
 {
-    if (auto state = GetGameState())
+    if (auto package = GetPackage().lock())
     {
         if (GetLaserNodeCount() > 0)
         {
@@ -1202,7 +1202,7 @@ void ObjCrLaser::GenerateDefaultBonusItem()
             {
                 float x = (trail_[i].x + trail_[i + 1].x) / 2;
                 float y = (trail_[i].y + trail_[i + 1].y) / 2;
-                state->defaultBonusItemSpawner->Spawn(x, y, state);
+                package->defaultBonusItemSpawner->Spawn(x, y, package);
             }
         }
     }
