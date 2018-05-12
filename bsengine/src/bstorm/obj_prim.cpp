@@ -124,7 +124,7 @@ void ObjPrim::SetVertexColor(int vIdx, int r, int g, int b)
     if (isValidIndex(vIdx, vertices_))
     {
         ColorRGB rgb(r, g, b);
-        vertices_[vIdx].color = ToD3DCOLOR(rgb, (vertices_[vIdx].color) >> 24);
+        vertices_[vIdx].color = rgb.ToD3DCOLOR(vertices_[vIdx].color >> 24);
     }
 }
 

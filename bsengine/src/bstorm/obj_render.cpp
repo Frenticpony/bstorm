@@ -106,7 +106,7 @@ void ObjRender::SetColorHSV(int h, int s, int v)
 
 D3DCOLOR ObjRender::GetD3DCOLOR() const
 {
-    return ToD3DCOLOR(rgb_, alpha_);
+    return rgb_.ToD3DCOLOR(alpha_);
 }
 
 void ObjRender::SetShader(const std::shared_ptr<Shader>& s)

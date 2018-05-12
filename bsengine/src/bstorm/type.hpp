@@ -15,33 +15,6 @@ struct Rect
     T left, top, right, bottom;
 };
 
-class ColorRGB
-{
-public:
-    ColorRGB() : r_(0xff), g_(0xff), b_(0xff) {}
-    ColorRGB(int r, int g, int b) :
-        r_(std::min(::std::max(r, 0), 0xff)),
-        g_(std::min(::std::max(g, 0), 0xff)),
-        b_(std::min(::std::max(b, 0), 0xff))
-    {
-    }
-    bool operator==(const ColorRGB& other) const
-    {
-        return r_ == other.r_ && g_ == other.g_ && b_ == other.b_;
-    }
-    bool operator!=(const ColorRGB& other) const
-    {
-        return !(*this == other);
-    }
-    int GetR() const { return r_; }
-    int GetG() const { return g_; }
-    int GetB() const { return b_; }
-private:
-    int r_;
-    int g_;
-    int b_;
-};
-
 struct AnimationClip
 {
     AnimationClip(int f, int l, int t, int r, int b) : frame(f), rect(l, t, r, b) {}

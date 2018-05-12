@@ -1,6 +1,6 @@
 ﻿#include <bstorm/renderer.hpp>
 
-#include <bstorm/type.hpp>
+#include <bstorm/color_rgb.hpp>
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/util.hpp>
 #include <bstorm/camera2D.hpp>
@@ -432,6 +432,6 @@ void Renderer::SetFogParam(float start, float end, int r, int g, int b)
     fogEnable_ = true;
     fogStart_ = start;
     fogEnd_ = end;
-    fogColor_ = ToD3DCOLOR(ColorRGB(r, g, b), 0xff);
+    fogColor_ = ColorRGB(r, g, b).ToD3DCOLOR(0xff);
 }
 }

@@ -97,8 +97,6 @@ T constrain(const T& v, const T& min, const T& max)
     return std::min(std::max<T>(v, min), max);
 }
 
-D3DCOLOR ToD3DCOLOR(const ColorRGB& rgb, int alpha);
-
 void MakeDirectoryP(const std::wstring& dirName);
 
 std::wstring GetExt(const std::wstring& path);

@@ -5,12 +5,6 @@
 
 namespace bstorm
 {
-D3DCOLOR ToD3DCOLOR(const ColorRGB& rgb, int alpha)
-{
-    alpha = constrain(alpha, 0, 0xff);
-    return D3DCOLOR_ARGB(alpha, rgb.GetR(), rgb.GetG(), rgb.GetB());
-}
-
 void MakeDirectoryP(const std::wstring& dirName)
 {
     auto attr = GetFileAttributes(dirName.c_str());

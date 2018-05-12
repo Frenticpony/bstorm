@@ -57,11 +57,11 @@ size_t FontParams::hashValue() const
     hash_combine(h, fontName);
     hash_combine(h, size);
     hash_combine(h, weight);
-    hash_combine(h, bstorm::ToD3DCOLOR(topColor, 0xff));
-    hash_combine(h, bstorm::ToD3DCOLOR(bottomColor, 0xff));
+    hash_combine(h, topColor.ToD3DCOLOR(0xff));
+    hash_combine(h, bottomColor.ToD3DCOLOR(0xff));
     hash_combine(h, borderType);
     hash_combine(h, borderWidth);
-    hash_combine(h, bstorm::ToD3DCOLOR(borderColor, 0xff));
+    hash_combine(h, borderColor.ToD3DCOLOR(0xff));
     hash_combine(h, c);
     return h;
 }
@@ -118,7 +118,7 @@ Font::Font(const FontParams& params_, HWND hWnd, IDirect3DDevice9* d3DDevice_, i
                 BYTE alpha = (BYTE)(fontBmp[bmpPos] * 255.0 / (grad - 1));
                 if (alpha != 0)
                 {
-                    texMem[texPos] = ToD3DCOLOR(LerpColor(y, fontHeight, params_.topColor, params_.bottomColor), alpha);
+                    texMem[texPos] = LerpColor(y, fontHeight, params_.topColor, params_.bottomColor).ToD3DCOLOR(alpha);
                 } else
                 {
                     // BLEND_ADD_RGB時に色が加算されないようにするため0

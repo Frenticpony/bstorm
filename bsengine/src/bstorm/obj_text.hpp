@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include <bstorm/color_rgb.hpp>
 #include <bstorm/obj_render.hpp>
 
 #include <d3dx9.h>
