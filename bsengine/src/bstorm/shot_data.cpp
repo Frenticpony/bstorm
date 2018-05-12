@@ -28,8 +28,10 @@ ShotData::ShotData() :
 {
 }
 
-ShotDataTable::ShotDataTable(Type type) :
-    type_(type)
+ShotDataTable::ShotDataTable(Type type, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<FileLoader>& fileLoader) :
+    type_(type),
+    textureCache_(textureCache),
+    fileLoader_(fileLoader)
 {
 }
 
@@ -59,7 +61,7 @@ static Log::Param::Tag getElemTag(ShotDataTable::Type type)
     return Log::Param::Tag::TEXT;
 }
 
-void ShotDataTable::Load(const std::wstring & path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos)
+void ShotDataTable::Load(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
     if (IsLoaded(path))
     {
@@ -70,15 +72,15 @@ void ShotDataTable::Load(const std::wstring & path, const std::shared_ptr<FileLo
             .AddSourcePos(srcPos)));
     } else
     {
-        Reload(path, loader, textureCache, srcPos);
+        Reload(path, srcPos);
     }
 }
 
-void ShotDataTable::Reload(const std::wstring & path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos)
+void ShotDataTable::Reload(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
     std::wstring uniqPath = GetCanonicalPath(path);
-    auto userShotData = ParseUserShotData(uniqPath, loader);
-    auto texture = textureCache->Load(userShotData->imagePath, false, srcPos);
+    auto userShotData = ParseUserShotData(uniqPath, fileLoader_);
+    auto texture = textureCache_->Load(userShotData->imagePath, false, srcPos);
     for (auto& entry : userShotData->dataMap)
     {
         auto& data = entry.second;
@@ -101,7 +103,7 @@ void ShotDataTable::Reload(const std::wstring & path, const std::shared_ptr<File
         data.texture = texture;
         table_[data.id] = std::make_shared<ShotData>(data);
     }
-    loadedPaths_.insert(uniqPath);
+    alreadyLoadedPaths_.insert(uniqPath);
     Logger::WriteLog(std::move(
         Log(Log::Level::LV_INFO)
         .SetMessage("load " + std::string(GetTypeName(type_)) + " shot data.")
@@ -111,7 +113,7 @@ void ShotDataTable::Reload(const std::wstring & path, const std::shared_ptr<File
 
 bool ShotDataTable::IsLoaded(const std::wstring & path) const
 {
-    return loadedPaths_.count(GetCanonicalPath(path)) != 0;
+    return alreadyLoadedPaths_.count(GetCanonicalPath(path)) != 0;
 }
 
 std::shared_ptr<ShotData> ShotDataTable::Get(int id) const

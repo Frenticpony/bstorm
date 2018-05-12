@@ -58,6 +58,7 @@ public:
     std::shared_ptr<FpsCounter> fpsCounter;
     std::shared_ptr<InputDevice> inputDevice;
     std::shared_ptr<KeyAssign> keyAssign;
+    std::shared_ptr<FileLoader> fileLoader;
     std::shared_ptr<VirtualKeyInputSource> vKeyInputSource;
     std::shared_ptr<SoundDevice> soundDevice;
     std::unordered_map <std::wstring, std::shared_ptr<SoundBuffer>> orphanSounds;
@@ -73,7 +74,6 @@ public:
     std::shared_ptr<Camera3D> camera3D;
     std::shared_ptr<CommonDataDB> commonDataDB;
     std::shared_ptr<ScriptManager> scriptManager;
-    std::shared_ptr<FileLoader> fileLoader;
     std::shared_ptr<ShotDataTable> playerShotDataTable;
     std::shared_ptr<ShotDataTable> enemyShotDataTable;
     std::shared_ptr<ItemDataTable> itemDataTable;

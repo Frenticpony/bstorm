@@ -19,7 +19,9 @@ ItemData::ItemData() :
 {
 }
 
-ItemDataTable::ItemDataTable()
+ItemDataTable::ItemDataTable(const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<FileLoader>& fileLoader) :
+    textureCache_(textureCache),
+    fileLoader_(fileLoader)
 {
 }
 
@@ -35,7 +37,7 @@ void ItemDataTable::Add(const std::shared_ptr<ItemData>& data)
     }
 }
 
-void ItemDataTable::Load(const std::wstring & path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos)
+void ItemDataTable::Load(const std::wstring & path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<SourcePos>& srcPos)
 {
     if (IsLoaded(path))
     {
@@ -46,15 +48,15 @@ void ItemDataTable::Load(const std::wstring & path, const std::shared_ptr<FileLo
             .AddSourcePos(srcPos)));
     } else
     {
-        Reload(path, loader, textureCache, srcPos);
+        Reload(path, loader, srcPos);
     }
 }
 
-void ItemDataTable::Reload(const std::wstring & path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos)
+void ItemDataTable::Reload(const std::wstring & path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<SourcePos>& srcPos)
 {
     std::wstring uniqPath = GetCanonicalPath(path);
     auto userItemData = ParseUserItemData(uniqPath, loader);
-    auto texture = textureCache->Load(userItemData->imagePath, false, srcPos);
+    auto texture = textureCache_->Load(userItemData->imagePath, false, srcPos);
     for (auto& entry : userItemData->dataMap)
     {
         auto& data = entry.second;

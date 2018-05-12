@@ -574,7 +574,7 @@ bool Engine::IsPixelShaderSupported(int major, int minor)
 
 std::shared_ptr<Mesh> Engine::LoadMesh(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
-    return package->meshCache->Load(path, package->textureCache, srcPos);
+    return package->meshCache->Load(path, srcPos);
 }
 
 void Engine::ReleaseUnusedMeshCache()
@@ -1061,32 +1061,32 @@ std::wstring Engine::GetDefaultCommonDataSavePath(const std::wstring & areaName)
 
 void Engine::LoadPlayerShotData(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
-    package->playerShotDataTable->Load(path, package->fileLoader, package->textureCache, srcPos);
+    package->playerShotDataTable->Load(path, srcPos);
 }
 
 void Engine::ReloadPlayerShotData(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
-    package->playerShotDataTable->Reload(path, package->fileLoader, package->textureCache, srcPos);
+    package->playerShotDataTable->Reload(path, srcPos);
 }
 
 void Engine::LoadEnemyShotData(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
-    package->enemyShotDataTable->Load(path, package->fileLoader, package->textureCache, srcPos);
+    package->enemyShotDataTable->Load(path, srcPos);
 }
 
 void Engine::ReloadEnemyShotData(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
-    package->enemyShotDataTable->Reload(path, package->fileLoader, package->textureCache, srcPos);
+    package->enemyShotDataTable->Reload(path, srcPos);
 }
 
 void Engine::LoadItemData(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
-    package->itemDataTable->Load(path, package->fileLoader, package->textureCache, srcPos);
+    package->itemDataTable->Load(path, package->fileLoader, srcPos);
 }
 
 void Engine::ReloadItemData(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
-    package->itemDataTable->Reload(path, package->fileLoader, package->textureCache, srcPos);
+    package->itemDataTable->Reload(path, package->fileLoader, srcPos);
 }
 
 std::shared_ptr<ShotData> Engine::GetPlayerShotData(int id) const
@@ -2057,9 +2057,9 @@ void Engine::StartStageScene(const std::shared_ptr<SourcePos>& srcPos)
     Reset2DCamera();
     ResetCamera();
     SetDefaultBonusItemEnable(true);
-    package->playerShotDataTable = std::make_shared<ShotDataTable>(ShotDataTable::Type::PLAYER);
-    package->enemyShotDataTable = std::make_shared<ShotDataTable>(ShotDataTable::Type::ENEMY);
-    package->itemDataTable = std::make_shared<ItemDataTable>();
+    package->playerShotDataTable = std::make_shared<ShotDataTable>(ShotDataTable::Type::PLAYER, package->textureCache, package->fileLoader);
+    package->enemyShotDataTable = std::make_shared<ShotDataTable>(ShotDataTable::Type::ENEMY, package->textureCache, package->fileLoader);
+    package->itemDataTable = std::make_shared<ItemDataTable>(package->textureCache, package->fileLoader);
     package->stageMainScript.reset();
     package->stagePlayerScript.reset();
     ReloadItemData(DEFAULT_ITEM_DATA_PATH, nullptr);

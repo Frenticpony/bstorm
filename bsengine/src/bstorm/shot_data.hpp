@@ -68,11 +68,11 @@ public:
         ENEMY
     };
     static const char* GetTypeName(Type type);
-    ShotDataTable(Type type);
+    ShotDataTable(Type type, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<FileLoader>& fileLoader);
     ~ShotDataTable();
     void Add(const std::shared_ptr<ShotData>& data);
-    void Load(const std::wstring& path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos);
-    void Reload(const std::wstring& path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos);
+    void Load(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    void Reload(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
     bool IsLoaded(const std::wstring& path) const;
     std::shared_ptr<ShotData> Get(int id) const;
     Type GetType() const;
@@ -80,8 +80,10 @@ public:
     template <typename T>
     void BackDoor() const {}
 private:
-    Type type_;
-    std::unordered_set<std::wstring> loadedPaths_;
+    const Type type_;
+    const std::shared_ptr<TextureCache> textureCache_;
+    const std::shared_ptr<FileLoader> fileLoader_;
+    std::unordered_set<std::wstring> alreadyLoadedPaths_;
     std::map<int, std::shared_ptr<ShotData>> table_;
 };
 }

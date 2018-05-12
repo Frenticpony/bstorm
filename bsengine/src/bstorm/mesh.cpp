@@ -113,17 +113,14 @@ Mesh::~Mesh()
         .SetParam(Log::Param(Log::Param::Tag::MESH, path_))));
 }
 
-MeshCache::MeshCache() :
-    loader_(std::make_shared<FileLoaderFromTextFile>())
+
+MeshCache::MeshCache(const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<FileLoader>& fileLoader) :
+    textureCache_(textureCache),
+    fileLoader_(fileLoader)
 {
 }
 
-void MeshCache::SetLoader(const std::shared_ptr<FileLoader>& loader)
-{
-    this->loader_ = loader;
-}
-
-std::shared_ptr<Mesh> MeshCache::Load(const std::wstring & path, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos)
+std::shared_ptr<Mesh> MeshCache::Load(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
     const auto ext = GetLowerExt(path);
     if (ext != L".mqo")
@@ -141,9 +138,9 @@ std::shared_ptr<Mesh> MeshCache::Load(const std::wstring & path, const std::shar
         return it->second;
     } else
     {
-        if (auto mqo = ParseMqo(uniqPath, loader_))
+        if (auto mqo = ParseMqo(uniqPath, fileLoader_))
         {
-            auto mesh = MqoToMesh(*mqo, textureCache, srcPos);
+            auto mesh = MqoToMesh(*mqo, textureCache_, srcPos);
             Logger::WriteLog(std::move(
                 Log(Log::Level::LV_INFO).SetMessage("load mesh.")
                 .SetParam(Log::Param(Log::Param::Tag::MESH, uniqPath))

@@ -38,17 +38,19 @@ class TextureCache;
 class ItemDataTable
 {
 public:
-    ItemDataTable();
+    ItemDataTable(const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<FileLoader>& fileLoader);
     ~ItemDataTable();
     void Add(const std::shared_ptr<ItemData>& data);
-    void Load(const std::wstring& path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos);
-    void Reload(const std::wstring& path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos);
+    void Load(const std::wstring& path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<SourcePos>& srcPos);
+    void Reload(const std::wstring& path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<SourcePos>& srcPos);
     bool IsLoaded(const std::wstring& path) const;
     std::shared_ptr<ItemData> Get(int id) const;
     /* backdoor */
     template <typename T>
     void BackDoor() const {}
 private:
+    const std::shared_ptr<TextureCache> textureCache_;
+    const std::shared_ptr<FileLoader> fileLoader_;
     std::unordered_set<std::wstring> loadedPaths_;
     std::map<int, std::shared_ptr<ItemData>> table_;
 };

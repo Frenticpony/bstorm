@@ -59,12 +59,12 @@ class TextureCache;
 class MeshCache
 {
 public:
-    MeshCache();
-    void SetLoader(const std::shared_ptr<FileLoader>& loader);
-    std::shared_ptr<Mesh> Load(const std::wstring& path, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos);
+    MeshCache(const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<FileLoader>& fileLoader);
+    std::shared_ptr<Mesh> Load(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
     void ReleaseUnusedMesh();
 private:
+    std::shared_ptr<TextureCache> textureCache_;
+    std::shared_ptr<FileLoader> fileLoader_;
     std::unordered_map<std::wstring, std::shared_ptr<Mesh>> meshMap_;
-    std::shared_ptr<FileLoader> loader_;
 };
 }
