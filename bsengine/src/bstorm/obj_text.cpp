@@ -2,6 +2,7 @@
 
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/util.hpp>
+#include <bstorm/vertex.hpp>
 #include <bstorm/font.hpp>
 #include <bstorm/texture.hpp>
 #include <bstorm/renderer.hpp>

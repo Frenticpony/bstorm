@@ -3,6 +3,7 @@
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/const.hpp>
 #include <bstorm/util.hpp>
+#include <bstorm/vertex.hpp>
 #include <bstorm/intersection.hpp>
 #include <bstorm/item_data.hpp>
 #include <bstorm/texture.hpp>
@@ -222,7 +223,7 @@ void ObjItem::Render(const std::shared_ptr<Renderer>& renderer)
             }
         }
 
-        auto vertices = RectToVertices(renderColor, itemData_->texture->GetWidth(), itemData_->texture->GetHeight(), rect);
+        auto vertices = GetRectVertices(renderColor, itemData_->texture->GetWidth(), itemData_->texture->GetHeight(), rect);
         renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), itemData_->texture->GetTexture(), itemBlend, world, GetAppliedShader(), IsPermitCamera(), true);
     }
     ObjCol::RenderIntersection(renderer, IsPermitCamera());

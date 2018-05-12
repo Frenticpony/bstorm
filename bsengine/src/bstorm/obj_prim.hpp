@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <bstorm/type.hpp>
+#include <bstorm/vertex.hpp>
 #include <bstorm/obj_render.hpp>
 
 #include <memory>

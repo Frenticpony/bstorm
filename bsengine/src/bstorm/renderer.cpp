@@ -1,5 +1,6 @@
 ﻿#include <bstorm/renderer.hpp>
 
+#include <bstorm/vertex.hpp>
 #include <bstorm/color_rgb.hpp>
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/util.hpp>

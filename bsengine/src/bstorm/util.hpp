@@ -115,7 +115,6 @@ void GetDirsRecursively(const std::wstring& dir, std::vector<std::wstring>& dirL
 
 // 拡大、回転、移動の順番で掛けた行列を作る
 D3DXMATRIX CreateScaleRotTransMatrix(float x, float y, float z, float rx, float ry, float rz, float sx, float sy, float sz);
-std::array<Vertex, 4> RectToVertices(D3DCOLOR color, int textureWidth, int textureHeight, const Rect<int> &rect);
 
 inline int NextPow2(int x)
 {

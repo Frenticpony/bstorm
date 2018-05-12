@@ -169,7 +169,7 @@ void ObjShot::Render(const std::shared_ptr<Renderer>& renderer)
                 color = shotData_->delayColor.ToD3DCOLOR(0xff);
             }
 
-            auto vertices = RectToVertices(color, shotData_->texture->GetWidth(), shotData_->texture->GetHeight(), IsDelay() ? shotData_->delayRect :
+            auto vertices = GetRectVertices(color, shotData_->texture->GetWidth(), shotData_->texture->GetHeight(), IsDelay() ? shotData_->delayRect :
                 (animationIdx_ >= 0 && animationIdx_ < shotData_->animationData.size()) ? shotData_->animationData[animationIdx_].rect :
                                            shotData_->rect);
 
@@ -971,7 +971,7 @@ void ObjLooseLaser::RenderLaser(float width, float length, float angle, const st
 
         // 色と透明度を設定
         D3DCOLOR color = GetColor().ToD3DCOLOR((int)(GetFadeScale() * std::min(shotData->alpha, GetAlpha())));
-        auto vertices = RectToVertices(color, shotData->texture->GetWidth(), shotData->texture->GetHeight(), (GetAnimationIndex() >= 0 && GetAnimationIndex() < shotData->animationData.size()) ? shotData->animationData[GetAnimationIndex()].rect : shotData->rect);
+        auto vertices = GetRectVertices(color, shotData->texture->GetWidth(), shotData->texture->GetHeight(), (GetAnimationIndex() >= 0 && GetAnimationIndex() < shotData->animationData.size()) ? shotData->animationData[GetAnimationIndex()].rect : shotData->rect);
 
         /* 配置 */
         float rectWidth = abs(vertices[0].x - vertices[1].x);
@@ -1036,7 +1036,7 @@ void ObjStLaser::Render(const std::shared_ptr<Renderer>& renderer)
             if (laserSourceEnable_ && !IsFadeDeleteStarted())
             {
                 // レーザー源の描画
-                auto vertices = RectToVertices(shotData->delayColor.ToD3DCOLOR(0xff), shotData->texture->GetWidth(), shotData->texture->GetHeight(), shotData->delayRect);
+                auto vertices = GetRectVertices(shotData->delayColor.ToD3DCOLOR(0xff), shotData->texture->GetWidth(), shotData->texture->GetHeight(), shotData->delayRect);
 
                 /* 配置 */
                 const Point2D head = GetHead();
@@ -1153,7 +1153,7 @@ void ObjCrLaser::Render(const std::shared_ptr<Renderer>& renderer)
             } else
             {
                 // uv算出用
-                auto laserRect = RectToVertices(0, shotData->texture->GetWidth(), shotData->texture->GetHeight(), (GetAnimationIndex() >= 0 && GetAnimationIndex() < shotData->animationData.size()) ? shotData->animationData[GetAnimationIndex()].rect : shotData->rect);
+                auto laserRect = GetRectVertices(0, shotData->texture->GetWidth(), shotData->texture->GetHeight(), (GetAnimationIndex() >= 0 && GetAnimationIndex() < shotData->animationData.size()) ? shotData->animationData[GetAnimationIndex()].rect : shotData->rect);
 
                 // trailに色、UV値をセットする
                 // レーザー中心の透明度
