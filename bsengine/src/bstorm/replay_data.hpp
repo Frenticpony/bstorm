@@ -1,6 +1,7 @@
 #pragma once
 
 #include <bstorm/type.hpp>
+#include <bstorm/stage_common_player_params.hpp>
 #include <bstorm/common_data_db.hpp>
 
 #include <string>
@@ -37,12 +38,12 @@ public:
 
     void Save(const std::wstring& filePath,
               const std::wstring& userName,
-              GameScore totalScore,
+              PlayerScore totalScore,
               const std::wstring& playerName) noexcept(false);
     // ステージ情報記録開始
-    void StartRecordingStageInfo(StageIndex stageIdx, GameScore stageStartScore, RandSeed randSeed, const std::shared_ptr<TimePoint>& startTime);
+    void StartRecordingStageInfo(StageIndex stageIdx, PlayerScore stageStartScore, RandSeed randSeed, const std::shared_ptr<TimePoint>& startTime);
     // ステージ情報記録終了
-    void EndRecordingStageInfo(StageIndex stageIdx, GameScore stageLastScore, const std::shared_ptr<TimePoint>& endTime) noexcept(true);
+    void EndRecordingStageInfo(StageIndex stageIdx, PlayerScore stageLastScore, const std::shared_ptr<TimePoint>& endTime) noexcept(true);
     // フレーム毎のステージ情報を記録
     void RecordFrameStageInfo(StageIndex stageIdx, float fps, const std::unordered_map<VirtualKey, KeyState>& keyStates);
     // ポーズしたことを記録

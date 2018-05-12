@@ -5,6 +5,7 @@
 #include <bstorm/obj_move.hpp>
 #include <bstorm/obj_col.hpp>
 #include <bstorm/type.hpp>
+#include <bstorm/stage_common_player_params.hpp>
 
 #include <stdint.h>
 #include <memory>
@@ -25,8 +26,8 @@ public:
     void Update() override;
     void Render(const std::unique_ptr<Renderer>& renderer) override;
     int GetItemType() const;
-    GameScore GetScore() const;
-    void SetScore(GameScore score);
+    PlayerScore GetScore() const;
+    void SetScore(PlayerScore score);
     bool IsRenderScoreEnabled() const;
     void SetRenderScoreEnable(bool enable);
     bool IsAutoCollectEnabled() const;
@@ -51,7 +52,7 @@ private:
     int autoDeleteClipBottom_;
     float autoCollectSpeed_;
     int isObtained_;
-    GameScore score_;
+    PlayerScore score_;
     int animationFrameCnt_;
     int animationIdx_;
     std::shared_ptr<ItemData> itemData_;
@@ -60,7 +61,7 @@ private:
 class ObjItemScoreText : public ObjSpriteList2D, public ObjMove
 {
 public:
-    ObjItemScoreText(GameScore score, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Package>& package);
+    ObjItemScoreText(PlayerScore score, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Package>& package);
     ~ObjItemScoreText();
     void Update() override;
     void Render(const std::unique_ptr<Renderer>& renderer) override;
@@ -74,7 +75,7 @@ class ItemScoreTextSpawner
 public:
     ItemScoreTextSpawner();
     virtual ~ItemScoreTextSpawner();
-    virtual void Spawn(float x, float y, GameScore score, const std::shared_ptr<Package>& package);
+    virtual void Spawn(float x, float y, PlayerScore score, const std::shared_ptr<Package>& package);
 };
 
 class DefaultBonusItemSpawner

@@ -131,7 +131,7 @@ std::unordered_map<VirtualKey, KeyState> ReplayData::GetVirtualKeyStates(StageIn
     return ret;
 }
 
-void ReplayData::Save(const std::wstring & filePath, const std::wstring & userName, GameScore totalScore, const std::wstring & playerName) noexcept(false)
+void ReplayData::Save(const std::wstring & filePath, const std::wstring & userName, PlayerScore totalScore, const std::wstring & playerName) noexcept(false)
 {
     const auto uniqPath = GetCanonicalPath(filePath);
 
@@ -213,7 +213,7 @@ void ReplayData::Save(const std::wstring & filePath, const std::wstring & userNa
     }
 }
 
-void ReplayData::StartRecordingStageInfo(StageIndex stageIdx, GameScore stageStartScore, RandSeed randSeed, const std::shared_ptr<TimePoint>& startTime)
+void ReplayData::StartRecordingStageInfo(StageIndex stageIdx, PlayerScore stageStartScore, RandSeed randSeed, const std::shared_ptr<TimePoint>& startTime)
 {
     const auto stageInfoAreaName = StageInfoAreaName(stageIdx);
 
@@ -238,7 +238,7 @@ void ReplayData::StartRecordingStageInfo(StageIndex stageIdx, GameScore stageSta
     data_.SetAreaCommonData(stageInfoAreaName, StagePauseCountInfoKey, std::make_unique<DnhReal>(0.0));
 }
 
-void ReplayData::EndRecordingStageInfo(StageIndex stageIdx, GameScore stageLastScore, const std::shared_ptr<TimePoint>& endTime) noexcept(true)
+void ReplayData::EndRecordingStageInfo(StageIndex stageIdx, PlayerScore stageLastScore, const std::shared_ptr<TimePoint>& endTime) noexcept(true)
 {
     const auto stageInfoAreaName = StageInfoAreaName(stageIdx);
     {

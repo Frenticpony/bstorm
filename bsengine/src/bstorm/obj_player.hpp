@@ -4,6 +4,7 @@
 #include <bstorm/obj_move.hpp>
 #include <bstorm/obj_col.hpp>
 #include <bstorm/type.hpp>
+#include <bstorm/stage_common_player_params.hpp>
 
 namespace bstorm
 {
@@ -12,22 +13,10 @@ class PlayerIntersectionToItem;
 class ObjItem;
 class ObjShot;
 
-class GlobalPlayerParams
-{
-public:
-    GlobalPlayerParams();
-    double life;
-    double spell;
-    double power;
-    GameScore score;
-    int64_t graze;
-    int64_t point;
-};
-
 class ObjPlayer : public ObjSprite2D, public ObjMove, public ObjCol, public std::enable_shared_from_this<ObjPlayer>
 {
 public:
-    ObjPlayer(const std::shared_ptr<Package>& package, const std::shared_ptr<GlobalPlayerParams>& globalParams);
+    ObjPlayer(const std::shared_ptr<Package>& package);
     ~ObjPlayer();
     void Update() override;
     void Render(const std::unique_ptr<Renderer>& renderer) override;
@@ -37,9 +26,6 @@ public:
     void SetNormalSpeed(double speed);
     void SetSlowSpeed(double speed);
     void SetClip(float left, float top, float right, float bottom);
-    void SetLife(double life);
-    void SetSpell(double spell);
-    void SetPower(double power);
     void SetInvincibilityFrame(int frame) { invincibilityFrame_ = frame; }
     void SetDownStateFrame(int frame);
     void SetRebirthFrame(int frame);
@@ -53,9 +39,6 @@ public:
     float GetClipTop() const { return clipTop_; }
     float GetClipRight() const { return clipRight_; }
     float GetClipBottom() const { return clipBottom_; }
-    double GetLife() const;
-    double GetSpell() const;
-    double GetPower() const;
     int GetInvincibilityFrame() const { return invincibilityFrame_; }
     int GetDownStateFrame() const { return downStateFrame_; }
     int GetRebirthFrame() const { return rebirthFrame_; }
@@ -63,13 +46,21 @@ public:
     bool IsPermitPlayerSpell() const;
     bool IsLastSpellWait() const;
     bool IsSpellActive() const;
-    GameScore GetScore() const;
-    int64_t GetGraze() const;
-    int64_t GetPoint() const;
-    void AddScore(GameScore score);
-    void AddGraze(int64_t graze);
-    void AddGraze(int shotObjId, int64_t graze);
-    void AddPoint(int64_t point);
+
+    void SetLife(PlayerLife life);
+    void SetSpell(PlayerSpell spell);
+    void SetPower(PlayerPower power);
+    void SetScore(PlayerScore score);
+    void SetGraze(PlayerGraze graze);
+    void SetPoint(PlayerPoint point);
+    PlayerScore GetScore() const;
+    PlayerGraze GetGraze() const;
+    PlayerPoint GetPoint() const;
+    PlayerLife GetLife() const;
+    PlayerSpell GetSpell() const;
+    PlayerPower GetPower() const;
+
+    void GrazeToShot(int shotObjId, PlayerGraze grazeCnt);
     float GetAutoItemCollectLineY() const { return autoItemCollectLineY_; }
     void SetAutoItemCollectLineY(float y) { autoItemCollectLineY_ = y; }
     void Hit(int collisionObjId);
@@ -98,11 +89,10 @@ private:
     float clipTop_;
     float clipRight_;
     float clipBottom_;
-    std::shared_ptr<GlobalPlayerParams> globalParams_;
     float autoItemCollectLineY_;
-    int hitStateTimer_;
-    int downStateTimer_;
-    int64_t currentFrameGrazeCnt_;
+    FrameCount hitStateTimer_;
+    FrameCount downStateTimer_;
+    PlayerGraze currentFrameGrazeCnt_;
     std::vector<double> currentFrameGrazeObjIds_;
     std::vector<Point2D> currentFrameGrazeShotPoints_;
     std::shared_ptr<PlayerIntersectionToItem> isectToItem_;

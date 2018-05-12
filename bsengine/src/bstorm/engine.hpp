@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <bstorm/type.hpp>
+#include <bstorm/stage_common_player_params.hpp>
 
 #include <memory>
 #include <string>
@@ -284,10 +285,10 @@ public:
     std::shared_ptr<ObjStLaser> CreateStraightLaserA1(float x, float y, float angle, float length, float width, int deleteFrame, int shotDataId, int delay, bool isPlayerShot);
     std::shared_ptr<ObjCrLaser> CreateObjCrLaser(bool isPlayerShot);
     std::shared_ptr<ObjCrLaser> CreateCurveLaserA1(float x, float y, float speed, float angle, float length, float width, int shotDataId, int delay, bool isPlayerShot);
-    std::shared_ptr<ObjItem> CreateItemA1(int itemType, float x, float y, GameScore score);
-    std::shared_ptr<ObjItem> CreateItemA2(int itemType, float x, float y, float destX, float destY, GameScore score);
-    std::shared_ptr<ObjItem> CreateItemU1(int itemDataId, float x, float y, GameScore score);
-    std::shared_ptr<ObjItem> CreateItemU2(int itemDataId, float x, float y, float destX, float destY, GameScore score);
+    std::shared_ptr<ObjItem> CreateItemA1(int itemType, float x, float y, PlayerScore score);
+    std::shared_ptr<ObjItem> CreateItemA2(int itemType, float x, float y, float destX, float destY, PlayerScore score);
+    std::shared_ptr<ObjItem> CreateItemU1(int itemDataId, float x, float y, PlayerScore score);
+    std::shared_ptr<ObjItem> CreateItemU2(int itemDataId, float x, float y, float destX, float destY, PlayerScore score);
     std::shared_ptr<ObjEnemy> CreateObjEnemy();
     std::shared_ptr<ObjEnemyBossScene> CreateObjEnemyBossScene(const std::shared_ptr<SourcePos>& srcPos);
     std::shared_ptr<ObjSpell> CreateObjSpell();
@@ -310,8 +311,8 @@ public:
     ScriptInfo GetFreePlayerScriptInfo(int idx) const;
     ScriptInfo GetScriptInfo(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
     /* point */
-    GameScore GetScore() const;
-    void AddScore(GameScore score);
+    PlayerScore GetScore() const;
+    void AddScore(PlayerScore score);
     int64_t GetGraze() const;
     void AddGraze(int64_t graze);
     int64_t GetPoint() const;

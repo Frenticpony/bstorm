@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <bstorm/type.hpp>
+#include <bstorm/stage_common_player_params.hpp>
 #include <bstorm/script_info.hpp>
 
 #include <memory>
@@ -13,7 +14,6 @@
 namespace bstorm
 {
 constexpr uint8_t COLLISION_DETECTOR_MAX_LEVEL = 5;
-
 
 class FpsCounter;
 class TimePoint;
@@ -37,7 +37,7 @@ class Camera3D;
 class CommonDataDB;
 class Script;
 class ScriptManager;
-class GlobalPlayerParams;
+class StageCommonPlayerParams;
 class ObjPlayer;
 class ObjEnemyBossScene;
 class ObjSpellManage;
@@ -77,7 +77,6 @@ public:
     std::shared_ptr<ShotDataTable> playerShotDataTable;
     std::shared_ptr<ShotDataTable> enemyShotDataTable;
     std::shared_ptr<ItemDataTable> itemDataTable;
-    std::shared_ptr<GlobalPlayerParams> globalPlayerParams;
     std::weak_ptr<ObjPlayer> playerObj;
     std::weak_ptr<ObjEnemyBossScene> enemyBossSceneObj;
     std::weak_ptr<ObjSpellManage> spellManageObj;
@@ -115,5 +114,21 @@ public:
     bool renderIntersectionEnable;
     bool forcePlayerInvincibleEnable;
     bool defaultBonusItemEnable;
+
+    /* common player params */
+    PlayerLife GetPlayerLife() const;
+    PlayerSpell GetPlayerSpell() const;
+    PlayerPower GetPlayerPower() const;
+    PlayerScore GetPlayerScore() const;
+    PlayerGraze GetPlayerGraze() const;
+    PlayerPoint GetPlayerPoint() const;
+    void SetPlayerLife(PlayerLife life);
+    void SetPlayerSpell(PlayerSpell spell);
+    void SetPlayerPower(PlayerPower power);
+    void SetPlayerScore(PlayerScore score);
+    void SetPlayerGraze(PlayerGraze graze);
+    void SetPlayerPoint(PlayerPoint point);
+private:
+    StageCommonPlayerParams stageCommonPlayerParams_;
 };
 }

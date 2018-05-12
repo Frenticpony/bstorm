@@ -21,17 +21,8 @@
 
 namespace bstorm
 {
-GlobalPlayerParams::GlobalPlayerParams() :
-    life(2),
-    spell(3),
-    power(1),
-    score(0),
-    graze(0),
-    point(0)
-{
-}
 
-ObjPlayer::ObjPlayer(const std::shared_ptr<Package>& package, const std::shared_ptr<GlobalPlayerParams>& globalParams) :
+ObjPlayer::ObjPlayer(const std::shared_ptr<Package>& package) :
     ObjSprite2D(package),
     ObjMove(this),
     ObjCol(package),
@@ -48,7 +39,6 @@ ObjPlayer::ObjPlayer(const std::shared_ptr<Package>& package, const std::shared_
     downStateFrame_(120),
     rebirthFrame_(15),
     rebirthLossFrame_(3),
-    globalParams_(globalParams),
     autoItemCollectLineY_(-1),
     hitStateTimer_(0),
     downStateTimer_(0),
@@ -93,7 +83,6 @@ void ObjPlayer::Update()
         }
 
         // ボム入力処理
-        // hitStateTimerのカウント処理の後に行う
         if (state_ == STATE_NORMAL || state_ == STATE_HIT)
         {
             int spellKey = package->vKeyInputSource->GetVirtualKeyState(VK_SPELL);
@@ -175,12 +164,6 @@ void ObjPlayer::SetClip(float left, float top, float right, float bottom)
     clipBottom_ = bottom;
 }
 
-void ObjPlayer::SetLife(double life) { globalParams_->life = life; }
-
-void ObjPlayer::SetSpell(double spell) { globalParams_->spell = spell; }
-
-void ObjPlayer::SetPower(double power) { globalParams_->power = power; }
-
 void ObjPlayer::SetDownStateFrame(int frame)
 {
     downStateFrame_ = frame;
@@ -195,12 +178,6 @@ void ObjPlayer::SetRebirthLossFrame(int frame)
 {
     rebirthLossFrame_ = frame;
 }
-
-double ObjPlayer::GetLife() const { return globalParams_->life; }
-
-double ObjPlayer::GetSpell() const { return globalParams_->spell; }
-
-double ObjPlayer::GetPower() const { return globalParams_->power; }
 
 bool ObjPlayer::IsPermitPlayerSpell() const
 {
@@ -232,31 +209,122 @@ bool ObjPlayer::IsSpellActive() const
     return false;
 }
 
-GameScore ObjPlayer::GetScore() const { return globalParams_->score; }
+PlayerLife ObjPlayer::GetLife() const
+{
+    if (auto pacakge = GetPackage().lock())
+    {
+        return pacakge->GetPlayerLife();
+    }
+    return 0;
+}
 
-int64_t ObjPlayer::GetGraze() const { return globalParams_->graze; }
+PlayerSpell ObjPlayer::GetSpell() const
+{
+    if (auto pacakge = GetPackage().lock())
+    {
+        return pacakge->GetPlayerSpell();
+    }
+    return 0;
+}
 
-int64_t ObjPlayer::GetPoint() const { return globalParams_->point; }
+PlayerPower ObjPlayer::GetPower() const
+{
+    if (auto pacakge = GetPackage().lock())
+    {
+        return pacakge->GetPlayerPower();
+    }
+    return 0;
+}
 
-void ObjPlayer::AddScore(GameScore score) { globalParams_->score += score; }
 
-void ObjPlayer::AddGraze(int64_t graze) { globalParams_->graze += graze; }
+PlayerScore ObjPlayer::GetScore() const
+{
+    if (auto pacakge = GetPackage().lock())
+    {
+        return pacakge->GetPlayerScore();
+    }
+    return 0;
+}
 
-void ObjPlayer::AddGraze(int shotObjId, int64_t graze)
+PlayerGraze ObjPlayer::GetGraze() const
+{
+    if (auto pacakge = GetPackage().lock())
+    {
+        return pacakge->GetPlayerGraze();
+    }
+    return 0;
+}
+
+PlayerPoint ObjPlayer::GetPoint() const
+{
+    if (auto pacakge = GetPackage().lock())
+    {
+        return pacakge->GetPlayerPoint();
+    }
+    return 0;
+}
+
+void ObjPlayer::SetLife(PlayerLife life)
+{
+    if (auto package = GetPackage().lock())
+    {
+        package->SetPlayerLife(life);
+    }
+}
+
+void ObjPlayer::SetSpell(PlayerSpell spell)
+{
+    if (auto package = GetPackage().lock())
+    {
+        package->SetPlayerSpell(spell);
+    }
+}
+
+void ObjPlayer::SetPower(PlayerPower power)
+{
+    if (auto package = GetPackage().lock())
+    {
+        package->SetPlayerPower(power);
+    }
+}
+
+void ObjPlayer::SetScore(PlayerScore score)
+{
+    if (auto package = GetPackage().lock())
+    {
+        package->SetPlayerScore(score);
+    }
+}
+
+void ObjPlayer::SetGraze(PlayerGraze graze)
+{
+    if (auto package = GetPackage().lock())
+    {
+        package->SetPlayerGraze(graze);
+    }
+}
+
+void ObjPlayer::SetPoint(PlayerPoint point)
+{
+    if (auto package = GetPackage().lock())
+    {
+        package->SetPlayerPoint(point);
+    }
+}
+
+void ObjPlayer::GrazeToShot(int shotObjId, PlayerGraze grazeCnt)
 {
     if (auto package = GetPackage().lock())
     {
         if (auto shot = package->objTable->Get<ObjShot>(shotObjId))
         {
-            globalParams_->graze += graze;
-            currentFrameGrazeCnt_ += graze;
+            SetGraze(GetGraze() + grazeCnt);
+            currentFrameGrazeCnt_ += grazeCnt;
             currentFrameGrazeObjIds_.push_back((double)shot->GetID());
             currentFrameGrazeShotPoints_.emplace_back(shot->GetX(), shot->GetY());
         }
     }
 }
-
-void ObjPlayer::AddPoint(int64_t point) { globalParams_->point += point; }
 
 void ObjPlayer::Hit(int collisionObjId)
 {
@@ -298,7 +366,7 @@ bool ObjPlayer::IsInvincible() const
 void ObjPlayer::ShootDown()
 {
     downStateTimer_ = downStateFrame_;
-    globalParams_->life--;
+    SetLife(GetLife() - 1);
     if (auto package = GetPackage().lock())
     {
         if (auto bossScene = package->enemyBossSceneObj.lock())
@@ -308,7 +376,7 @@ void ObjPlayer::ShootDown()
         package->scriptManager->NotifyEventAll(EV_PLAYER_SHOOTDOWN);
     }
     // Eventを送ってから状態を変更する
-    if (globalParams_->life >= 0)
+    if (GetLife() >= 0)
     {
         state_ = STATE_DOWN;
     } else
@@ -410,7 +478,7 @@ void ObjPlayer::ObtainItem(int itemObjId)
         {
             if (item->IsScoreItem())
             {
-                AddScore(item->GetScore());
+                SetScore(GetScore() + item->GetScore());
             }
             // ボーナスアイテムの場合はイベントを送らない
             if (item->GetItemType() != ITEM_DEFAULT_BONUS)

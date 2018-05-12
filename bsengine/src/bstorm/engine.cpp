@@ -106,8 +106,12 @@ void Engine::TickFrame()
                 if (package->stageForceTerminated)
                 {
                     package->stageSceneResult = STAGE_RESULT_BREAK_OFF;
-                    package->globalPlayerParams = std::make_shared<GlobalPlayerParams>();
-                    package->globalPlayerParams->life = 0.0;
+                    package->SetPlayerLife(0);
+                    package->SetPlayerSpell(3);
+                    package->SetPlayerPower(1);
+                    package->SetPlayerScore(0);
+                    package->SetPlayerGraze(0);
+                    package->SetPlayerPoint(0);
                 } else if (auto player = GetPlayerObject())
                 {
                     package->stageSceneResult = player->GetState() != STATE_END ? STAGE_RESULT_CLEARED : STAGE_RESULT_PLAYER_DOWN;
@@ -1282,7 +1286,7 @@ std::shared_ptr<ObjCrLaser> Engine::CreateCurveLaserA1(float x, float y, float s
     return laser;
 }
 
-std::shared_ptr<ObjItem> Engine::CreateItemA1(int itemType, float x, float y, GameScore score)
+std::shared_ptr<ObjItem> Engine::CreateItemA1(int itemType, float x, float y, PlayerScore score)
 {
     auto item = CreateObjItem(itemType);
     item->SetMovePosition(x, y);
@@ -1291,7 +1295,7 @@ std::shared_ptr<ObjItem> Engine::CreateItemA1(int itemType, float x, float y, Ga
     return item;
 }
 
-std::shared_ptr<ObjItem> Engine::CreateItemA2(int itemType, float x, float y, float destX, float destY, GameScore score)
+std::shared_ptr<ObjItem> Engine::CreateItemA2(int itemType, float x, float y, float destX, float destY, PlayerScore score)
 {
     auto item = CreateObjItem(itemType);
     item->SetMovePosition(x, y);
@@ -1300,7 +1304,7 @@ std::shared_ptr<ObjItem> Engine::CreateItemA2(int itemType, float x, float y, fl
     return item;
 }
 
-std::shared_ptr<ObjItem> Engine::CreateItemU1(int itemDataId, float x, float y, GameScore score)
+std::shared_ptr<ObjItem> Engine::CreateItemU1(int itemDataId, float x, float y, PlayerScore score)
 {
     auto item = CreateObjItem(ITEM_USER);
     item->SetMovePosition(x, y);
@@ -1310,7 +1314,7 @@ std::shared_ptr<ObjItem> Engine::CreateItemU1(int itemDataId, float x, float y, 
     return item;
 }
 
-std::shared_ptr<ObjItem> Engine::CreateItemU2(int itemDataId, float x, float y, float destX, float destY, GameScore score)
+std::shared_ptr<ObjItem> Engine::CreateItemU2(int itemDataId, float x, float y, float destX, float destY, PlayerScore score)
 {
     auto item = CreateObjItem(ITEM_USER);
     item->SetMovePosition(x, y);
@@ -1562,34 +1566,34 @@ ScriptInfo Engine::GetScriptInfo(const std::wstring & path, const std::shared_pt
     }
 }
 
-GameScore Engine::GetScore() const
+PlayerScore Engine::GetScore() const
 {
-    return package->globalPlayerParams->score;
+    return package->GetPlayerScore();
 }
 
-void Engine::AddScore(GameScore score)
+void Engine::AddScore(PlayerScore score)
 {
-    package->globalPlayerParams->score += score;
+    package->SetPlayerScore(package->GetPlayerScore() + score);
 }
 
 int64_t Engine::GetGraze() const
 {
-    return package->globalPlayerParams->graze;
+    return package->GetPlayerGraze();
 }
 
 void Engine::AddGraze(int64_t graze)
 {
-    package->globalPlayerParams->graze += graze;
+    package->SetPlayerGraze(package->GetPlayerGraze() + graze);
 }
 
 int64_t Engine::GetPoint() const
 {
-    return package->globalPlayerParams->point;
+    return package->GetPlayerPoint();
 }
 
 void Engine::AddPoint(int64_t point)
 {
-    package->globalPlayerParams->point += point;
+    package->SetPlayerPoint(package->GetPlayerPoint() + point);
 }
 
 void Engine::SetStgFrame(float left, float top, float right, float bottom)
@@ -1863,7 +1867,14 @@ void Engine::InitializeStageScene()
     package->stageSceneResult = 0;
     package->stageMainScript.reset();
     package->stagePlayerScript.reset();
-    package->globalPlayerParams = std::make_shared<GlobalPlayerParams>();
+
+    package->SetPlayerLife(2);
+    package->SetPlayerSpell(3);
+    package->SetPlayerPower(1);
+    package->SetPlayerScore(0);
+    package->SetPlayerGraze(0);
+    package->SetPlayerPoint(0);
+
     SetStgFrameRenderPriorityMin(DEFAULT_STG_FRAME_RENDER_PRIORITY_MIN);
     SetStgFrameRenderPriorityMax(DEFAULT_STG_FRAME_RENDER_PRIORITY_MAX);
     SetShotRenderPriority(DEFAULT_SHOT_RENDER_PRIORITY);
@@ -2083,7 +2094,7 @@ void Engine::StartStageScene(const std::shared_ptr<SourcePos>& srcPos)
     systemScript->RunInitialize();
 
     // Create Player
-    auto player = package->objTable->Create<ObjPlayer>(package, package->globalPlayerParams);
+    auto player = package->objTable->Create<ObjPlayer>(package);
     package->objLayerList->SetRenderPriority(player, DEFAULT_PLAYER_RENDER_PRIORITY);
     player->AddIntersectionToItem();
     package->playerObj = player;

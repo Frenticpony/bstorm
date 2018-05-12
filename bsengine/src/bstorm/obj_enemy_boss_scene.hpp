@@ -2,6 +2,7 @@
 
 #include <bstorm/obj.hpp>
 #include <bstorm/type.hpp>
+#include <bstorm/stage_common_player_params.hpp>
 
 namespace bstorm
 {
@@ -16,9 +17,9 @@ public:
     void Add(int step, const std::wstring& path);
     void LoadInThread(const std::shared_ptr<SourcePos>& srcPos);
     int GetTimer() const;
-    int GetTimerF() const;
-    int GetOrgTimerF() const;
-    GameScore GetSpellScore() const;
+    FrameCount GetTimerF() const;
+    FrameCount GetOrgTimerF() const;
+    PlayerScore GetSpellScore() const;
     bool IsSpell() const;
     bool IsLastSpell() const;
     bool IsDurableSpell() const;
@@ -47,9 +48,9 @@ private:
         int scriptId;
         double life;
         double maxLife;
-        int timerF;
-        int orgTimerF;
-        GameScore spellScore;
+        FrameCount timerF;
+        FrameCount orgTimerF;
+        PlayerScore spellScore;
         bool isSpell;
         bool isLastSpell;
         bool isDurableSpell;
@@ -63,7 +64,7 @@ private:
     int maxStep_;
     int currentStep_;
     int currentPhase_;
-    bool registerFlag_;
+    bool isRegistered_;
     int playerSpellCount_;
     int playerShootDownCount_;
     std::weak_ptr<ObjEnemy> enemyBossObj_;

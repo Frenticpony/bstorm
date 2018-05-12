@@ -50,7 +50,6 @@ Package::Package(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevice9*
     playerShotDataTable(std::make_shared<ShotDataTable>(ShotDataTable::Type::PLAYER, textureCache, fileLoader)),
     enemyShotDataTable(std::make_shared<ShotDataTable>(ShotDataTable::Type::ENEMY, textureCache, fileLoader)),
     itemDataTable(std::make_shared<ItemDataTable>(textureCache, fileLoader)),
-    globalPlayerParams(std::make_shared<GlobalPlayerParams>()),
     stgFrame(std::make_shared<Rect<float>>(32.0f, 16.0f, 416.0f, 464.0f)),
     shotCounter(std::make_shared<ShotCounter>()),
     shotAutoDeleteClip(std::make_shared<AutoDeleteClip>(stgFrame, 64.0f, 64.0f, 64.0f, 64.0f)),
@@ -83,5 +82,53 @@ Package::Package(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevice9*
     {
         keyAssign->AddVirtualKey(keyMap.vkey, keyMap.key, keyMap.pad);
     }
+}
+PlayerLife Package::GetPlayerLife() const
+{
+    return stageCommonPlayerParams_.life;
+}
+PlayerSpell Package::GetPlayerSpell() const
+{
+    return stageCommonPlayerParams_.spell;
+}
+PlayerPower Package::GetPlayerPower() const
+{
+    return stageCommonPlayerParams_.power;
+}
+PlayerScore Package::GetPlayerScore() const
+{
+    return stageCommonPlayerParams_.score;
+}
+PlayerGraze Package::GetPlayerGraze() const
+{
+    return stageCommonPlayerParams_.graze;
+}
+PlayerPoint Package::GetPlayerPoint() const
+{
+    return stageCommonPlayerParams_.point;
+}
+void Package::SetPlayerLife(PlayerLife life)
+{
+    stageCommonPlayerParams_.life = life;
+}
+void Package::SetPlayerSpell(PlayerSpell spell)
+{
+    stageCommonPlayerParams_.spell = spell;
+}
+void Package::SetPlayerPower(PlayerPower power)
+{
+    stageCommonPlayerParams_.power = power;
+}
+void Package::SetPlayerScore(PlayerScore score)
+{
+    stageCommonPlayerParams_.score = score;
+}
+void Package::SetPlayerGraze(PlayerGraze graze)
+{
+    stageCommonPlayerParams_.graze = graze;
+}
+void Package::SetPlayerPoint(PlayerPoint point)
+{
+    stageCommonPlayerParams_.point = point;
 }
 }

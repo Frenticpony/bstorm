@@ -13,7 +13,7 @@ namespace bstorm
 {
 ObjEnemyBossScene::ObjEnemyBossScene(const std::shared_ptr<Package>& package) :
     Obj(package),
-    registerFlag_(false),
+    isRegistered_(false),
     currentStep_(0),
     currentPhase_(-1),
     playerSpellCount_(0),
@@ -30,7 +30,7 @@ void ObjEnemyBossScene::Update()
 {
     if (auto package = GetPackage().lock())
     {
-        if (registerFlag_)
+        if (isRegistered_)
         {
             Phase& phase = const_cast<Phase&>(GetCurrentPhase());
             auto enemyBoss = enemyBossObj_.lock();
@@ -72,7 +72,7 @@ void ObjEnemyBossScene::Update()
 
 void ObjEnemyBossScene::Regist(const std::shared_ptr<SourcePos>& srcPos)
 {
-    if (registerFlag_)
+    if (isRegistered_)
     {
         return;
     }
@@ -81,12 +81,12 @@ void ObjEnemyBossScene::Regist(const std::shared_ptr<SourcePos>& srcPos)
     {
         Die();
     }
-    registerFlag_ = true;
+    isRegistered_ = true;
 }
 
 void ObjEnemyBossScene::Add(int step, const std::wstring& path)
 {
-    if (registerFlag_) return;
+    if (isRegistered_) return;
     maxStep_ = std::max(step, maxStep_);
     if (steps_.count(step) == 0)
     {
@@ -99,7 +99,7 @@ void ObjEnemyBossScene::LoadInThread(const std::shared_ptr<SourcePos>& srcPos)
 {
     auto package = GetPackage().lock();
     if (!package) return;
-    if (registerFlag_) return;
+    if (isRegistered_) return;
     for (auto& entry : steps_)
     {
         for (auto& phase : entry.second)
@@ -116,21 +116,21 @@ int ObjEnemyBossScene::GetTimer() const
     return (int)(GetTimerF() / 60);
 }
 
-int ObjEnemyBossScene::GetTimerF() const
+FrameCount ObjEnemyBossScene::GetTimerF() const
 {
     if (!ExistPhase()) return -1;
     const Phase& phase = GetCurrentPhase();
     return phase.timerF;
 }
 
-int ObjEnemyBossScene::GetOrgTimerF() const
+FrameCount ObjEnemyBossScene::GetOrgTimerF() const
 {
     if (!ExistPhase()) return -1;
     const Phase& phase = GetCurrentPhase();
     return phase.orgTimerF;
 }
 
-GameScore ObjEnemyBossScene::GetSpellScore() const
+PlayerScore ObjEnemyBossScene::GetSpellScore() const
 {
     if (!ExistPhase()) return 0;
     const Phase& phase = GetCurrentPhase();

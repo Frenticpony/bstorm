@@ -230,9 +230,12 @@ void ObjItem::Render(const std::unique_ptr<Renderer>& renderer)
 
 int ObjItem::GetItemType() const { return itemType_; }
 
-GameScore ObjItem::GetScore() const { return score_; }
+PlayerScore ObjItem::GetScore() const { return score_; }
 
-void ObjItem::SetScore(GameScore score) { this->score_ = score; }
+void ObjItem::SetScore(PlayerScore score)
+{
+    score_ = score;
+}
 
 bool ObjItem::IsRenderScoreEnabled() const
 {
@@ -327,7 +330,7 @@ void ObjItem::UpdateAnimationPosition()
     }
 }
 
-ObjItemScoreText::ObjItemScoreText(GameScore score, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Package>& package) :
+ObjItemScoreText::ObjItemScoreText(PlayerScore score, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Package>& package) :
     ObjSpriteList2D(package),
     ObjMove(this),
     scoreTextDeleteTimer_(32),
@@ -535,7 +538,7 @@ void MoveModeHoverItemScoreText::Move(float & x, float & y)
 ItemScoreTextSpawner::ItemScoreTextSpawner() {}
 ItemScoreTextSpawner::~ItemScoreTextSpawner() {}
 
-void ItemScoreTextSpawner::Spawn(float x, float y, GameScore score, const std::shared_ptr<Package>& package)
+void ItemScoreTextSpawner::Spawn(float x, float y, PlayerScore score, const std::shared_ptr<Package>& package)
 {
     if (package)
     {

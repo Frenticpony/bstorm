@@ -914,7 +914,7 @@ static int GetScore(lua_State* L)
 static int AddScore(lua_State* L)
 {
     Engine* engine = getEngine(L);
-    GameScore score = DnhValue::ToNum(L, 1);
+    PlayerScore score = DnhValue::ToNum(L, 1);
     engine->AddScore(score);
     return 0;
 }
@@ -2070,7 +2070,7 @@ static int CreateItemA1(lua_State* L)
     int type = DnhValue::ToInt(L, 1);
     double x = DnhValue::ToNum(L, 2);
     double y = DnhValue::ToNum(L, 3);
-    GameScore score = DnhValue::ToNum(L, 4);
+    PlayerScore score = DnhValue::ToNum(L, 4);
     if (auto item = engine->CreateItemA1(type, x, y, score))
     {
         script->AddAutoDeleteTargetObjectId(item->GetID());
@@ -2091,7 +2091,7 @@ static int CreateItemA2(lua_State* L)
     double y = DnhValue::ToNum(L, 3);
     double destX = DnhValue::ToNum(L, 4);
     double destY = DnhValue::ToNum(L, 5);
-    GameScore score = DnhValue::ToNum(L, 6);
+    PlayerScore score = DnhValue::ToNum(L, 6);
     if (auto item = engine->CreateItemA2(type, x, y, destX, destY, score))
     {
         script->AddAutoDeleteTargetObjectId(item->GetID());
@@ -2110,7 +2110,7 @@ static int CreateItemU1(lua_State* L)
     int itemDataId = DnhValue::ToInt(L, 1);
     double x = DnhValue::ToNum(L, 2);
     double y = DnhValue::ToNum(L, 3);
-    GameScore score = DnhValue::ToNum(L, 4);
+    PlayerScore score = DnhValue::ToNum(L, 4);
     if (auto item = engine->CreateItemU1(itemDataId, x, y, score))
     {
         script->AddAutoDeleteTargetObjectId(item->GetID());
@@ -2131,7 +2131,7 @@ static int CreateItemU2(lua_State* L)
     double y = DnhValue::ToNum(L, 3);
     double destX = DnhValue::ToNum(L, 4);
     double destY = DnhValue::ToNum(L, 5);
-    GameScore score = DnhValue::ToNum(L, 6);
+    PlayerScore score = DnhValue::ToNum(L, 6);
     if (auto item = engine->CreateItemU2(itemDataId, x, y, destX, destY, score))
     {
         script->AddAutoDeleteTargetObjectId(item->GetID());

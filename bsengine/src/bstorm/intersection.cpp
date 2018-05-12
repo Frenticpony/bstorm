@@ -876,7 +876,7 @@ static void collideEnemyShotWithPlayerGraze(const std::shared_ptr<Intersection>&
             {
                 if (enemyShot->IsGrazeEnabled() && player->IsGrazeEnabled())
                 {
-                    player->AddGraze(enemyShot->GetID(), 1);
+                    player->GrazeToShot(enemyShot->GetID(), 1);
                     enemyShot->Graze();
                 }
             }
