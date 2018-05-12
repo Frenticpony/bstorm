@@ -74,7 +74,6 @@
     <ClInclude Include="src\bstorm\obj_shot.hpp" />
     <ClInclude Include="src\bstorm\obj_spell.hpp" />
     <ClInclude Include="src\bstorm\obj_text.hpp" />
-    <ClInclude Include="src\bstorm\auto_delete_clip.hpp" />
     <ClInclude Include="src\bstorm\rand_generator.hpp" />
     <ClInclude Include="src\bstorm\renderer.hpp" />
     <ClInclude Include="src\bstorm\render_target.hpp" />

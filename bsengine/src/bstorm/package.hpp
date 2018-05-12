@@ -83,9 +83,7 @@ public:
     std::weak_ptr<ObjPlayer> playerObj;
     std::weak_ptr<ObjEnemyBossScene> enemyBossSceneObj;
     std::weak_ptr<ObjSpellManage> spellManageObj;
-    std::shared_ptr<Rect<float>> stgFrame;
     std::shared_ptr<ShotCounter> shotCounter;
-    std::shared_ptr<AutoDeleteClip> shotAutoDeleteClip;
     std::shared_ptr<RandGenerator> randGenerator;
     std::shared_ptr<ItemScoreTextSpawner> itemScoreTextSpawner;
     std::shared_ptr<DefaultBonusItemSpawner> defaultBonusItemSpawner;
@@ -136,6 +134,26 @@ public:
     void SetPlayerScore(PlayerScore score);
     void SetPlayerGraze(PlayerGraze graze);
     void SetPlayerPoint(PlayerPoint point);
+
+    /* stg frame */
+    void SetStgFrame(float left, float top, float right, float bottom);
+    float GetStgFrameLeft() const;
+    float GetStgFrameTop() const;
+    float GetStgFrameRight() const;
+    float GetStgFrameBottom() const;
+    float GetStgFrameWidth() const;
+    float GetStgFrameHeight() const;
+    float GetStgFrameCenterWorldX() const;
+    float GetStgFrameCenterWorldY() const;
+    float GetStgFrameCenterScreenX() const;
+    float GetStgFrameCenterScreenY() const;
+
+    /* shot auto delete clip */
+    void SetShotAutoDeleteClip(float left, float top, float right, float bottom);
+    bool Package::IsOutOfShotAutoDeleteClip(float x, float y) const;
+
+    Rect<float> stgFrame_;
+    Rect<float> shotAutoDeleteClip_;
 private:
     const std::shared_ptr<FontCache> fontCache_;
     StageCommonPlayerParams stageCommonPlayerParams_;

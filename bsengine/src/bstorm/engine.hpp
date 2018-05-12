@@ -342,6 +342,7 @@ public:
     int GetEnemyShotCount() const;
     int GetPlayerShotCount() const;
     void SetShotAutoDeleteClip(float left, float top, float right, float bottom);
+    bool IsOutOfShotAutoDeleteClip(float x, float y) const;
     void StartShotScript(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
     void SetDeleteShotImmediateEventOnShotScriptEnable(bool enable);
     void SetDeleteShotFadeEventOnShotScriptEnable(bool enable);

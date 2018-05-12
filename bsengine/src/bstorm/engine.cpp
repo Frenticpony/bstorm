@@ -39,7 +39,6 @@
 #include <bstorm/intersection.hpp>
 #include <bstorm/shot_data.hpp>
 #include <bstorm/item_data.hpp>
-#include <bstorm/auto_delete_clip.hpp>
 #include <bstorm/rand_generator.hpp>
 #include <bstorm/file_loader.hpp>
 #include <bstorm/script_info.hpp>
@@ -1603,50 +1602,47 @@ void Engine::AddPoint(int64_t point)
 
 void Engine::SetStgFrame(float left, float top, float right, float bottom)
 {
-    package->stgFrame->left = left;
-    package->stgFrame->top = top;
-    package->stgFrame->right = right;
-    package->stgFrame->bottom = bottom;
+    package->SetStgFrame(left, top, right, bottom);
 }
 
 float Engine::GetStgFrameLeft() const
 {
-    return package->stgFrame->left;
+    return package->GetStgFrameLeft();
 }
 
 float Engine::GetStgFrameTop() const
 {
-    return package->stgFrame->top;
+    return package->GetStgFrameTop();
 }
 
 float Engine::GetStgFrameWidth() const
 {
-    return package->stgFrame->right - package->stgFrame->left;
+    return package->GetStgFrameWidth();
 }
 
 float Engine::GetStgFrameHeight() const
 {
-    return package->stgFrame->bottom - package->stgFrame->top;
+    return package->GetStgFrameHeight();
 }
 
 float Engine::GetStgFrameCenterWorldX() const
 {
-    return (package->stgFrame->right - package->stgFrame->left) / 2.0f;
+    return package->GetStgFrameCenterWorldX();
 }
 
 float Engine::GetStgFrameCenterWorldY() const
 {
-    return (package->stgFrame->bottom - package->stgFrame->top) / 2.0f;
+    return package->GetStgFrameCenterWorldY();
 }
 
 float Engine::GetStgFrameCenterScreenX() const
 {
-    return (package->stgFrame->right + package->stgFrame->left) / 2.0f;
+    return package->GetStgFrameCenterScreenX();
 }
 
 float Engine::GetStgFrameCenterScreenY() const
 {
-    return (package->stgFrame->bottom + package->stgFrame->top) / 2.0f;
+    return package->GetStgFrameCenterScreenY();
 }
 
 int Engine::GetAllShotCount() const
@@ -1666,7 +1662,12 @@ int Engine::GetPlayerShotCount() const
 
 void Engine::SetShotAutoDeleteClip(float left, float top, float right, float bottom)
 {
-    package->shotAutoDeleteClip->SetClip(left, top, right, bottom);
+    package->SetShotAutoDeleteClip(left, top, right, bottom);
+}
+
+bool Engine::IsOutOfShotAutoDeleteClip(float x, float y) const
+{
+    return package->IsOutOfShotAutoDeleteClip(x, y);
 }
 
 void Engine::StartShotScript(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
@@ -2216,13 +2217,13 @@ void Engine::RenderToTexture(const std::wstring& name, int begin, int end, int o
     {
         if (!IsStagePaused())
         {
-            RECT scissorRect = { (LONG)package->stgFrame->left, (LONG)package->stgFrame->top, (LONG)package->stgFrame->right, (LONG)package->stgFrame->bottom };
+            RECT scissorRect = { (LONG)package->stgFrame_.left, (LONG)package->stgFrame_.top, (LONG)package->stgFrame_.right, (LONG)package->stgFrame_.bottom };
             if (renderToBackBuffer)
             {
-                scissorRect.left = package->stgFrame->left * graphicDevice->GetBackBufferWidth() / package->screenWidth;
-                scissorRect.top = package->stgFrame->top * graphicDevice->GetBackBufferHeight() / package->screenHeight;
-                scissorRect.right = package->stgFrame->right * graphicDevice->GetBackBufferWidth() / package->screenWidth;
-                scissorRect.bottom = package->stgFrame->bottom * graphicDevice->GetBackBufferHeight() / package->screenHeight;
+                scissorRect.left = package->stgFrame_.left * graphicDevice->GetBackBufferWidth() / package->screenWidth;
+                scissorRect.top = package->stgFrame_.top * graphicDevice->GetBackBufferHeight() / package->screenHeight;
+                scissorRect.right = package->stgFrame_.right * graphicDevice->GetBackBufferWidth() / package->screenWidth;
+                scissorRect.bottom = package->stgFrame_.bottom * graphicDevice->GetBackBufferHeight() / package->screenHeight;
             }
             package->renderer->EnableScissorTest(scissorRect);
         }

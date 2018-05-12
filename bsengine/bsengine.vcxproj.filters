@@ -39,9 +39,6 @@
     <ClInclude Include="src\bstorm\api.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\bstorm\auto_delete_clip.hpp">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="src\bstorm\camera2D.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>

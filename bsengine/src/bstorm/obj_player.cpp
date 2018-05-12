@@ -431,7 +431,7 @@ void ObjPlayer::InitPosition()
 {
     if (auto package = GetPackage().lock())
     {
-        SetMovePosition((package->stgFrame->right - package->stgFrame->left) / 2.0f, package->stgFrame->bottom - 48.0f);
+        SetMovePosition(package->GetStgFrameCenterWorldX(), package->GetStgFrameBottom() - 48.0f);
     }
 }
 

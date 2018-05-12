@@ -10,7 +10,6 @@
 #include <bstorm/obj_item.hpp>
 #include <bstorm/intersection.hpp>
 #include <bstorm/shot_data.hpp>
-#include <bstorm/auto_delete_clip.hpp>
 #include <bstorm/rand_generator.hpp>
 #include <bstorm/package.hpp>
 
@@ -171,7 +170,7 @@ void ObjShot::Render(const std::shared_ptr<Renderer>& renderer)
 
             auto vertices = GetRectVertices(color, shotData_->texture->GetWidth(), shotData_->texture->GetHeight(), IsDelay() ? shotData_->delayRect :
                 (animationIdx_ >= 0 && animationIdx_ < shotData_->animationData.size()) ? shotData_->animationData[animationIdx_].rect :
-                                           shotData_->rect);
+                                            shotData_->rect);
 
             if (auto package = GetPackage().lock())
             {
@@ -558,7 +557,7 @@ void ObjShot::CheckAutoDelete(float x, float y)
 {
     if (auto package = GetPackage().lock())
     {
-        if (autoDeleteEnable_ && package->shotAutoDeleteClip->IsOutOfClip(x, y))
+        if (autoDeleteEnable_ && package->IsOutOfShotAutoDeleteClip(x, y))
         {
             Die();
         }

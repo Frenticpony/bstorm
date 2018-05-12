@@ -23,7 +23,6 @@
 #include <bstorm/script.hpp>
 #include <bstorm/shot_data.hpp>
 #include <bstorm/item_data.hpp>
-#include <bstorm/auto_delete_clip.hpp>
 #include <bstorm/rand_generator.hpp>
 #include <bstorm/dnh_value.hpp>
 #include <bstorm/config.hpp>
@@ -52,9 +51,7 @@ Package::Package(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevice9*
     playerShotDataTable(std::make_shared<ShotDataTable>(ShotDataTable::Type::PLAYER, textureCache, fileLoader)),
     enemyShotDataTable(std::make_shared<ShotDataTable>(ShotDataTable::Type::ENEMY, textureCache, fileLoader)),
     itemDataTable(std::make_shared<ItemDataTable>(textureCache, fileLoader)),
-    stgFrame(std::make_shared<Rect<float>>(32.0f, 16.0f, 416.0f, 464.0f)),
     shotCounter(std::make_shared<ShotCounter>()),
-    shotAutoDeleteClip(std::make_shared<AutoDeleteClip>(stgFrame, 64.0f, 64.0f, 64.0f, 64.0f)),
     randGenerator(std::make_shared<RandGenerator>((uint32_t)this)), // FUTURE : from rand
     itemScoreTextSpawner(std::make_shared<ItemScoreTextSpawner>()),
     defaultBonusItemSpawner(std::make_shared<DefaultBonusItemSpawner>()),
@@ -79,6 +76,8 @@ Package::Package(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevice9*
     renderIntersectionEnable(false),
     forcePlayerInvincibleEnable(false),
     defaultBonusItemEnable(true),
+    stgFrame_(32.0f, 16.0f, 416.0f, 464.0f),
+    shotAutoDeleteClip_(64.0f, 64.0f, 64.0f, 64.0f),
     fontCache_(std::make_shared<FontCache>(hWnd, d3DDevice))
 {
     for (const auto& keyMap : keyConfig->keyMaps)
@@ -149,5 +148,77 @@ void Package::SetPlayerGraze(PlayerGraze graze)
 void Package::SetPlayerPoint(PlayerPoint point)
 {
     stageCommonPlayerParams_.point = point;
+}
+
+void Package::SetStgFrame(float left, float top, float right, float bottom)
+{
+    stgFrame_.left = left;
+    stgFrame_.top = top;
+    stgFrame_.right = right;
+    stgFrame_.bottom = bottom;
+}
+
+float Package::GetStgFrameLeft() const
+{
+    return stgFrame_.left;
+}
+
+float Package::GetStgFrameTop() const
+{
+    return stgFrame_.top;
+}
+
+float Package::GetStgFrameRight() const
+{
+    return stgFrame_.right;
+}
+
+float Package::GetStgFrameBottom() const
+{
+    return stgFrame_.bottom;
+}
+
+float Package::GetStgFrameWidth() const
+{
+    return stgFrame_.right - stgFrame_.left;
+}
+
+float Package::GetStgFrameHeight() const
+{
+    return stgFrame_.bottom - stgFrame_.top;
+}
+
+float Package::GetStgFrameCenterWorldX() const
+{
+    return (stgFrame_.right - stgFrame_.left) / 2.0f;
+}
+
+float Package::GetStgFrameCenterWorldY() const
+{
+    return (stgFrame_.bottom - stgFrame_.top) / 2.0f;
+}
+
+float Package::GetStgFrameCenterScreenX() const
+{
+    return (stgFrame_.right + stgFrame_.left) / 2.0f;
+}
+
+float Package::GetStgFrameCenterScreenY() const
+{
+    return (stgFrame_.bottom + stgFrame_.top) / 2.0f;
+}
+
+
+void Package::SetShotAutoDeleteClip(float left, float top, float right, float bottom)
+{
+    shotAutoDeleteClip_ = Rect<float>(left, top, right, bottom);
+}
+
+bool Package::IsOutOfShotAutoDeleteClip(float x, float y) const
+{
+    return x <= -shotAutoDeleteClip_.left ||
+        y <= -shotAutoDeleteClip_.top ||
+        x >= shotAutoDeleteClip_.right + GetStgFrameWidth() ||
+        y >= shotAutoDeleteClip_.bottom + GetStgFrameHeight();
 }
 }
