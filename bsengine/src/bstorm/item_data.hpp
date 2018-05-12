@@ -1,6 +1,8 @@
 ﻿#pragma once
 
 #include <bstorm/type.hpp>
+#include <bstorm/rect.hpp>
+#include <bstorm/animation.hpp>
 #include <bstorm/nullable_shared_ptr.hpp>
 
 #include <string>

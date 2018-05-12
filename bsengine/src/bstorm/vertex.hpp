@@ -3,7 +3,7 @@
 #include <d3d9.h>
 #include <array>
 
-#include <bstorm/type.hpp>
+#include <bstorm/rect.hpp>
 
 namespace bstorm
 {

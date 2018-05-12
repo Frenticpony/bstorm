@@ -2,6 +2,7 @@
 
 #include <bstorm/type.hpp>
 #include <bstorm/font.hpp>
+#include <bstorm/animation.hpp>
 #include <bstorm/stage_common_player_params.hpp>
 #include <bstorm/script_info.hpp>
 

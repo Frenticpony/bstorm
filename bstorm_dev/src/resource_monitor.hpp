@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include <bstorm/type.hpp>
+#include <bstorm/rect.hpp>
 
 #include <memory>
 #include <vector>
