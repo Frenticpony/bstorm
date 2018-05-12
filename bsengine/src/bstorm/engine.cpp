@@ -366,9 +366,9 @@ void Engine::ResetFpsCounter()
     package->fpsCounter = std::make_shared<FpsCounter>();
 }
 
-void Engine::StartSlow(int pseudoFps, bool byPlayer)
+void Engine::StartSlow(FrameCount pseudoFps, bool byPlayer)
 {
-    pseudoFps = constrain(pseudoFps, 1, 60);
+    pseudoFps = constrain(pseudoFps, (FrameCount)1, (FrameCount)60);
     if (byPlayer)
     {
         package->pseudoPlayerFps = pseudoFps;

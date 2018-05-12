@@ -105,7 +105,7 @@ public:
     float GetPackageTime() const;
     void UpdateFpsCounter();
     void ResetFpsCounter();
-    void StartSlow(int pseudoFps, bool byPlayer);
+    void StartSlow(FrameCount pseudoFps, bool byPlayer);
     void StopSlow(bool byPlayer);
     int64_t GetElapsedFrame() const;
     /* path */

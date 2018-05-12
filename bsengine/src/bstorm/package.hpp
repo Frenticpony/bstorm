@@ -91,8 +91,8 @@ public:
     std::shared_ptr<TimePoint> packageStartTime;
     std::shared_ptr<TimePoint> stageStartTime;
     std::vector<ScriptInfo> freePlayerScriptInfoList;
-    int pseudoPlayerFps;
-    int pseudoEnemyFps;
+    FrameCount pseudoPlayerFps;
+    FrameCount pseudoEnemyFps;
     ScriptInfo packageMainScriptInfo;
     ScriptInfo stageMainScriptInfo;
     ScriptInfo stagePlayerScriptInfo;
