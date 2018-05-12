@@ -24,6 +24,7 @@
     <ClInclude Include="src\bstorm\camera3D.hpp" />
     <ClInclude Include="src\bstorm\code_generator.hpp" />
     <ClInclude Include="src\bstorm\common_data_db.hpp" />
+    <ClInclude Include="src\bstorm\nullable_shared_ptr.hpp" />
     <ClInclude Include="src\bstorm\stage_common_player_params.hpp" />
     <ClInclude Include="src\bstorm\config.hpp" />
     <ClInclude Include="src\bstorm\const.hpp" />

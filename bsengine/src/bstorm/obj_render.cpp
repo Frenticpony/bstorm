@@ -173,7 +173,7 @@ void ObjRender::SetShaderTexture(const std::string & name, const std::shared_ptr
     }
 }
 
-std::shared_ptr<Shader> ObjRender::GetAppliedShader() const
+NullableSharedPtr<Shader> ObjRender::GetAppliedShader() const
 {
     if (shader_) return shader_;
     if (auto package = GetPackage().lock())
@@ -324,7 +324,7 @@ void ObjectLayerList::ResetLayerShader(int beginPriority, int endPriority)
     }
 }
 
-std::shared_ptr<Shader> ObjectLayerList::GetLayerShader(int p) const
+NullableSharedPtr<Shader> ObjectLayerList::GetLayerShader(int p) const
 {
     if (p < 0 || p > MAX_RENDER_PRIORITY)
     {

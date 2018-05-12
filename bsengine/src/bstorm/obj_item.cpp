@@ -300,7 +300,7 @@ int ObjItem::GetAnimationFrameCount() const
     return animationFrameCnt_;
 }
 
-const std::shared_ptr<ItemData>& ObjItem::GetItemData() const
+const NullableSharedPtr<ItemData>& ObjItem::GetItemData() const
 {
     return itemData_;
 }

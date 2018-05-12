@@ -33,7 +33,7 @@ public:
     bool IsAutoCollectEnabled() const;
     void SetAutoCollectEnable(bool enable);
     bool IsAutoCollected() const;
-    const std::shared_ptr<ItemData>& GetItemData() const;
+    const NullableSharedPtr<ItemData>& GetItemData() const;
     void SetItemData(const std::shared_ptr<ItemData>& data);
     int GetAnimationFrameCount() const;
     int GetAnimationIndex() const;

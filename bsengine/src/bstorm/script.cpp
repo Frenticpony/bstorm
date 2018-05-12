@@ -543,7 +543,7 @@ void ScriptManager::RunAll(bool ignoreStgSceneScript)
     }
 }
 
-std::shared_ptr<Script> ScriptManager::Get(int id) const
+NullableSharedPtr<Script> ScriptManager::Get(int id) const
 {
     auto it = scriptMap_.find(id);
     if (it != scriptMap_.end())

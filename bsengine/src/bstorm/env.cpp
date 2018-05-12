@@ -4,7 +4,7 @@
 
 namespace bstorm
 {
-std::shared_ptr<NodeDef> Env::FindDef(const std::string & name) const
+NullableSharedPtr<NodeDef> Env::FindDef(const std::string & name) const
 {
     auto it = table.find(name);
     if (it != table.end())

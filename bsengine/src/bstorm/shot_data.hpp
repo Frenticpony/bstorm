@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <bstorm/type.hpp>
+#include <bstorm/nullable_shared_ptr.hpp>
 #include <bstorm/file_loader.hpp>
 
 #include <memory>
@@ -74,7 +75,7 @@ public:
     void Load(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
     void Reload(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
     bool IsLoaded(const std::wstring& path) const;
-    std::shared_ptr<ShotData> Get(int id) const;
+    NullableSharedPtr<ShotData> Get(int id) const;
     Type GetType() const;
     /* backdoor */
     template <typename T>

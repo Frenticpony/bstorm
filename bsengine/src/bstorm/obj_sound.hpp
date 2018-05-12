@@ -33,7 +33,7 @@ public:
     bool IsPlaying() const;
     float GetVolumeRate() const;
 private:
-    std::shared_ptr<SoundBuffer> soundBuffer_;
+    NullableSharedPtr<SoundBuffer> soundBuffer_;
     bool restartEnable_;
     float fadeRatePerSec_;
     SoundDivision division_;

@@ -356,7 +356,7 @@ void ObjShot::Regist()
 
 bool ObjShot::IsPlayerShot() const { return isPlayerShot_; }
 
-const std::shared_ptr<ShotData>& ObjShot::GetShotData() const
+const NullableSharedPtr<ShotData>& ObjShot::GetShotData() const
 {
     return shotData_;
 }

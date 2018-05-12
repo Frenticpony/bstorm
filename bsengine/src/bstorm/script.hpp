@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <bstorm/non_copyable.hpp>
+#include <bstorm/nullable_shared_ptr.hpp>
 #include <bstorm/code_generator.hpp>
 
 #include <string>
@@ -94,7 +95,7 @@ public:
     std::shared_ptr<Script> Compile(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<SourcePos>& srcPos);
     std::shared_ptr<Script> CompileInThread(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<SourcePos>& srcPos);
     void RunAll(bool ignoreStgSceneScript);
-    std::shared_ptr<Script> Get(int id) const;
+    NullableSharedPtr<Script> Get(int id) const;
     void NotifyEventAll(int eventType);
     void NotifyEventAll(int eventType, const std::unique_ptr<DnhArray>& args);
     void CleanClosedScript();

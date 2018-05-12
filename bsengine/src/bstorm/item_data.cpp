@@ -76,7 +76,7 @@ bool ItemDataTable::IsLoaded(const std::wstring & path) const
     return loadedPaths_.count(GetCanonicalPath(path)) != 0;
 }
 
-std::shared_ptr<ItemData> ItemDataTable::Get(int id) const
+NullableSharedPtr<ItemData> ItemDataTable::Get(int id) const
 {
     auto it = table_.find(id);
     if (it != table_.end())

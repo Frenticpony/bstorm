@@ -91,7 +91,7 @@ public:
     void SetShaderTexture(const std::string& name, const std::shared_ptr<Texture>& texture);
     void SetShaderTexture(const std::string& name, const std::shared_ptr<RenderTarget>& renderTarget);
 protected:
-    std::shared_ptr<Shader> GetAppliedShader() const;
+    NullableSharedPtr<Shader> GetAppliedShader() const;
     virtual void TransIntersection(float dx, float dy) {}
 private:
     bool visibleFlag_;
@@ -113,7 +113,7 @@ private:
     bool zTestEnable_;
     bool permitCamera_;
     std::list<std::weak_ptr<ObjRender>>::iterator posInLayer_;
-    std::shared_ptr<Shader> shader_;
+    NullableSharedPtr<Shader> shader_;
     friend class ObjectLayerList;
 };
 
@@ -135,7 +135,7 @@ public:
     void RenderLayer(int priority, bool ignoreStgSceneObj, bool checkVisibleFlag, const std::shared_ptr<Renderer>& renderer);
     void SetLayerShader(int beginPriority, int endPriority, const std::shared_ptr<Shader>& shader);
     void ResetLayerShader(int beginPriority, int endPriority);
-    std::shared_ptr<Shader> GetLayerShader(int p) const;
+    NullableSharedPtr<Shader> GetLayerShader(int p) const;
     int GetShotRenderPriority() const;
     void SetShotRenderPriority(int p);
     int GetItemRenderPriority() const;

@@ -46,7 +46,7 @@ public:
     bool IsTempIntersectionMode() const;
 
     // shot data
-    const std::shared_ptr<ShotData>& GetShotData() const;
+    const NullableSharedPtr<ShotData>& GetShotData() const;
     virtual void SetShotData(const std::shared_ptr<ShotData>& shotData);
     int GetAnimationFrameCount() const;
     int GetAnimationIndex() const;
@@ -120,7 +120,7 @@ protected:
     void TickDeleteFrameTimer();
     void TickAddedShotFrameCount();
     void TickFadeDeleteTimer();
-    std::shared_ptr<ShotData> shotData_;
+    NullableSharedPtr<ShotData> shotData_;
     bool isGrazeInvalid_;
     bool isTempIntersectionMode_;
 private:

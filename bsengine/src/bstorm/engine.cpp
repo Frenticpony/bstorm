@@ -169,22 +169,22 @@ void Engine::TickFrame()
 
 void Engine::Render()
 {
-    renderToTexture(L"", 0, MAX_RENDER_PRIORITY, ID_INVALID, true, true, true, true);
+    RenderToTexture(L"", 0, MAX_RENDER_PRIORITY, ID_INVALID, true, true, true, true);
 }
 
 void Engine::Render(const std::wstring& renderTargetName)
 {
-    renderToTexture(renderTargetName, 0, MAX_RENDER_PRIORITY, ID_INVALID, true, false, true, true);
+    RenderToTexture(renderTargetName, 0, MAX_RENDER_PRIORITY, ID_INVALID, true, false, true, true);
 }
 
 void Engine::RenderToTextureA1(const std::wstring& name, int begin, int end, bool doClear)
 {
-    renderToTexture(name, begin, end, ID_INVALID, doClear, false, false, false);
+    RenderToTexture(name, begin, end, ID_INVALID, doClear, false, false, false);
 }
 
 void Engine::RenderToTextureB1(const std::wstring& name, int objId, bool doClear)
 {
-    renderToTexture(name, 0, 0, objId, doClear, false, false, false);
+    RenderToTexture(name, 0, 0, objId, doClear, false, false, false);
 }
 
 void Engine::Reset(int screenWidth, int screenHeight)
@@ -476,7 +476,7 @@ void Engine::RemoveRenderTarget(const std::wstring & name, const std::shared_ptr
     }
 }
 
-std::shared_ptr<RenderTarget> Engine::GetRenderTarget(const std::wstring & name) const
+NullableSharedPtr<RenderTarget> Engine::GetRenderTarget(const std::wstring & name) const
 {
     auto it = renderTargets.find(name);
     if (it != renderTargets.end())
@@ -548,7 +548,7 @@ void Engine::SaveSnapShotA2(const std::wstring & path, int left, int top, int ri
     try
     {
         CreateRenderTarget(SNAP_SHOT_RENDER_TARGET_NAME, GetScreenWidth(), GetScreenHeight(), srcPos);
-        renderToTexture(SNAP_SHOT_RENDER_TARGET_NAME, 0, MAX_RENDER_PRIORITY, ID_INVALID, true, false, true, true);
+        RenderToTexture(SNAP_SHOT_RENDER_TARGET_NAME, 0, MAX_RENDER_PRIORITY, ID_INVALID, true, false, true, true);
         SaveRenderedTextureA2(SNAP_SHOT_RENDER_TARGET_NAME, path, left, top, right, bottom, srcPos);
     } catch (Log& log)
     {
@@ -729,7 +729,7 @@ void Engine::ClearInvalidRenderPriority()
     package->objLayerList->ClearInvalidRenderPriority();
 }
 
-std::shared_ptr<Shader> Engine::GetShader(int p) const
+NullableSharedPtr<Shader> Engine::GetShader(int p) const
 {
     return package->objLayerList->GetLayerShader(p);
 }
@@ -1094,17 +1094,17 @@ void Engine::ReloadItemData(const std::wstring & path, const std::shared_ptr<Sou
     package->itemDataTable->Reload(path, package->fileLoader, srcPos);
 }
 
-std::shared_ptr<ShotData> Engine::GetPlayerShotData(int id) const
+NullableSharedPtr<ShotData> Engine::GetPlayerShotData(int id) const
 {
     return package->playerShotDataTable->Get(id);
 }
 
-std::shared_ptr<ShotData> Engine::GetEnemyShotData(int id) const
+NullableSharedPtr<ShotData> Engine::GetEnemyShotData(int id) const
 {
     return package->enemyShotDataTable->Get(id);
 }
 
-std::shared_ptr<ItemData> Engine::GetItemData(int id) const
+NullableSharedPtr<ItemData> Engine::GetItemData(int id) const
 {
     return package->itemDataTable->Get(id);
 }
@@ -1165,8 +1165,7 @@ std::shared_ptr<ObjShot> Engine::CreateShotA2(float x, float y, float speed, flo
     return shot;
 }
 
-// NOTE: オブジェクトが存在しなかったら空ポインタを返す
-std::shared_ptr<ObjShot> Engine::CreateShotOA1(int objId, float speed, float angle, int shotDataId, int delay, bool isPlayerShot)
+NullableSharedPtr<ObjShot> Engine::CreateShotOA1(int objId, float speed, float angle, int shotDataId, int delay, bool isPlayerShot)
 {
     if (auto obj = GetObject<ObjRender>(objId))
     {
@@ -1193,7 +1192,7 @@ std::shared_ptr<ObjShot> Engine::CreateShotB2(float x, float y, float speedX, fl
     return shot;
 }
 
-std::shared_ptr<ObjShot> Engine::CreateShotOB1(int objId, float speedX, float speedY, int shotDataId, int delay, bool isPlayerShot)
+NullableSharedPtr<ObjShot> Engine::CreateShotOB1(int objId, float speedX, float speedY, int shotDataId, int delay, bool isPlayerShot)
 {
     if (auto obj = GetObject<ObjRender>(objId))
     {
@@ -1204,7 +1203,7 @@ std::shared_ptr<ObjShot> Engine::CreateShotOB1(int objId, float speedX, float sp
     }
 }
 
-std::shared_ptr<ObjShot> Engine::CreatePlayerShotA1(float x, float y, float speed, float angle, double damage, int penetration, int shotDataId)
+NullableSharedPtr<ObjShot> Engine::CreatePlayerShotA1(float x, float y, float speed, float angle, double damage, int penetration, int shotDataId)
 {
     if (auto player = GetPlayerObject())
     {
@@ -1411,14 +1410,14 @@ std::wstring Engine::GetPlayerReplayName() const
     return package->stagePlayerScriptInfo.replayName;
 }
 
-std::shared_ptr<ObjPlayer> Engine::GetPlayerObject() const
+NullableSharedPtr<ObjPlayer> Engine::GetPlayerObject() const
 {
     auto player = package->playerObj.lock();
     if (player && !player->IsDead()) return player;
     return nullptr;
 }
 
-std::shared_ptr<ObjEnemy> Engine::GetEnemyBossObject() const
+NullableSharedPtr<ObjEnemy> Engine::GetEnemyBossObject() const
 {
     if (auto bossScene = GetEnemyBossSceneObject())
     {
@@ -1430,14 +1429,14 @@ std::shared_ptr<ObjEnemy> Engine::GetEnemyBossObject() const
     return nullptr;
 }
 
-std::shared_ptr<ObjEnemyBossScene> Engine::GetEnemyBossSceneObject() const
+NullableSharedPtr<ObjEnemyBossScene> Engine::GetEnemyBossSceneObject() const
 {
     auto bossScene = package->enemyBossSceneObj.lock();
     if (bossScene && !bossScene->IsDead()) return bossScene;
     return nullptr;
 }
 
-std::shared_ptr<ObjSpellManage> Engine::GetSpellManageObject() const
+NullableSharedPtr<ObjSpellManage> Engine::GetSpellManageObject() const
 {
     auto spellManage = package->spellManageObj.lock();
     if (spellManage && !spellManage->IsDead()) return spellManage;
@@ -1496,7 +1495,7 @@ std::shared_ptr<ObjMesh> Engine::CreateObjMesh()
     return obj;
 }
 
-std::shared_ptr<Script> Engine::GetPlayerScript() const
+NullableSharedPtr<Script> Engine::GetPlayerScript() const
 {
     return package->stagePlayerScript.lock();
 }
@@ -2150,7 +2149,7 @@ void Engine::StartStageScene(const std::shared_ptr<SourcePos>& srcPos)
     }
 }
 
-void Engine::renderToTexture(const std::wstring& name, int begin, int end, int objId, bool doClear, bool renderToBackBuffer, bool checkInvalidRenderPriority, bool checkVisibleFlag)
+void Engine::RenderToTexture(const std::wstring& name, int begin, int end, int objId, bool doClear, bool renderToBackBuffer, bool checkInvalidRenderPriority, bool checkVisibleFlag)
 {
     if (!package) return;
 
@@ -2291,7 +2290,7 @@ void Engine::renderToTexture(const std::wstring& name, int begin, int end, int o
     SetBackBufferRenderTarget();
 }
 
-std::shared_ptr<Obj> Engine::GetObj(int id) const
+NullableSharedPtr<Obj> Engine::GetObj(int id) const
 {
     return package->objTable->Get<Obj>(id);
 }

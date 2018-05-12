@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <bstorm/non_copyable.hpp>
+#include <bstorm/nullable_shared_ptr.hpp>
 
 #include <map>
 #include <unordered_map>
@@ -49,12 +50,22 @@ public:
     ObjectTable();
     ~ObjectTable();
     template <class T>
-    std::shared_ptr<T> Get(int id)
+    NullableSharedPtr<T> Get(int id)
     {
         auto it = table_.find(id);
         if (it != table_.end() && !it->second->IsDead())
         {
             return std::dynamic_pointer_cast<T>(it->second);
+        }
+        return nullptr;
+    }
+    template <>
+    NullableSharedPtr<Obj> Get(int id)
+    {
+        auto it = table_.find(id);
+        if (it != table_.end() && !it->second->IsDead())
+        {
+            return it->second;
         }
         return nullptr;
     }

@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <bstorm/type.hpp>
+#include <bstorm/nullable_shared_ptr.hpp>
 #include <bstorm/stage_common_player_params.hpp>
 
 #include <memory>
@@ -123,7 +124,7 @@ public:
     /* render target */
     std::shared_ptr<RenderTarget> CreateRenderTarget(const std::wstring& name, int width, int height, const std::shared_ptr<SourcePos>& srcPos);
     void RemoveRenderTarget(const std::wstring& name, const std::shared_ptr<SourcePos>& srcPos);
-    std::shared_ptr<RenderTarget> GetRenderTarget(const std::wstring& name) const;
+    NullableSharedPtr<RenderTarget> GetRenderTarget(const std::wstring& name) const;
     std::wstring GetReservedRenderTargetName(int idx) const;
     std::wstring GetTransitionRenderTargetName() const;
     void SaveRenderedTextureA1(const std::wstring& name, const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
@@ -162,7 +163,7 @@ public:
     int GetCameraFocusPermitRenderPriority() const;
     void SetInvalidRenderPriority(int min, int max);
     void ClearInvalidRenderPriority();
-    std::shared_ptr<Shader> GetShader(int p) const;
+    NullableSharedPtr<Shader> GetShader(int p) const;
     /* renderer */
     void SetFogEnable(bool enable);
     void SetFogParam(float fogStart, float fogEnd, int r, int g, int b);
@@ -231,14 +232,20 @@ public:
     void ReloadEnemyShotData(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
     void LoadItemData(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
     void ReloadItemData(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
-    std::shared_ptr<ShotData> GetPlayerShotData(int id) const;
-    std::shared_ptr<ShotData> GetEnemyShotData(int id) const;
-    std::shared_ptr<ItemData> GetItemData(int id) const;
+    NullableSharedPtr<ShotData> GetPlayerShotData(int id) const;
+    NullableSharedPtr<ShotData> GetEnemyShotData(int id) const;
+    NullableSharedPtr<ItemData> GetItemData(int id) const;
     /* object */
     template <class T>
-    std::shared_ptr<T> GetObject(int id) const
+    NullableSharedPtr<T> GetObject(int id) const
     {
         return std::dynamic_pointer_cast<T>(GetObj(id));
+    };
+
+    template <>
+    NullableSharedPtr<Obj> GetObject(int id) const
+    {
+        return GetObj(id);
     };
 
     template <class T>
@@ -254,10 +261,10 @@ public:
         }
         return objs;
     }
-    std::shared_ptr<ObjPlayer> GetPlayerObject() const;
-    std::shared_ptr<ObjEnemy> GetEnemyBossObject() const;
-    std::shared_ptr<ObjEnemyBossScene> GetEnemyBossSceneObject() const;
-    std::shared_ptr<ObjSpellManage> GetSpellManageObject() const;
+    NullableSharedPtr<ObjPlayer> GetPlayerObject() const;
+    NullableSharedPtr<ObjEnemy> GetEnemyBossObject() const;
+    NullableSharedPtr<ObjEnemyBossScene> GetEnemyBossSceneObject() const;
+    NullableSharedPtr<ObjSpellManage> GetSpellManageObject() const;
     void DeleteObject(int id);
     bool IsObjectDeleted(int id) const;
     std::shared_ptr<ObjPrim2D> CreateObjPrim2D();
@@ -274,11 +281,11 @@ public:
     std::shared_ptr<ObjShot> CreateObjShot(bool isPlayerShot);
     std::shared_ptr<ObjShot> CreateShotA1(float x, float y, float speed, float angle, int shotDataId, int delay, bool isPlayerShot);
     std::shared_ptr<ObjShot> CreateShotA2(float x, float y, float speed, float angle, float accel, float maxSpeed, int shotDataId, int delay, bool isPlayerShot);
-    std::shared_ptr<ObjShot> CreateShotOA1(int objId, float speed, float angle, int shotDataId, int delay, bool isPlayerShot);
+    NullableSharedPtr<ObjShot> CreateShotOA1(int objId, float speed, float angle, int shotDataId, int delay, bool isPlayerShot);
     std::shared_ptr<ObjShot> CreateShotB1(float x, float y, float speedX, float speedY, int shotDataId, int delay, bool isPlayerShot);
     std::shared_ptr<ObjShot> CreateShotB2(float x, float y, float speedX, float speedY, float accelX, float accelY, float maxSpeedX, float maxSpeedY, int shotDataId, int delay, bool isPlayerShot);
-    std::shared_ptr<ObjShot> CreateShotOB1(int objId, float speedX, float speedY, int shotDataId, int delay, bool isPlayerShot);
-    std::shared_ptr<ObjShot> CreatePlayerShotA1(float x, float y, float speed, float angle, double damage, int penetration, int shotDataId);
+    NullableSharedPtr<ObjShot> CreateShotOB1(int objId, float speedX, float speedY, int shotDataId, int delay, bool isPlayerShot);
+    NullableSharedPtr<ObjShot> CreatePlayerShotA1(float x, float y, float speed, float angle, double damage, int penetration, int shotDataId);
     std::shared_ptr<ObjLooseLaser> CreateObjLooseLaser(bool isPlayerShot);
     std::shared_ptr<ObjLooseLaser> CreateLooseLaserA1(float x, float y, float speed, float angle, float length, float width, int shotDataId, int delay, bool isPlayerShot);
     std::shared_ptr<ObjStLaser> CreateObjStLaser(bool isPlayerShot);
@@ -302,7 +309,7 @@ public:
     void NotifyEventAll(int eventType, const std::unique_ptr<DnhArray>& args);
     std::wstring GetPlayerID() const;
     std::wstring GetPlayerReplayName() const;
-    std::shared_ptr<Script> GetPlayerScript() const;
+    NullableSharedPtr<Script> GetPlayerScript() const;
     const std::unique_ptr<DnhValue>& GetScriptResult(int scriptId) const;
     void SetScriptResult(int scriptId, std::unique_ptr<DnhValue>&& value);
     std::vector<ScriptInfo> GetScriptList(const std::wstring& dirPath, int scriptType, bool doRecursive);
@@ -378,8 +385,8 @@ public:
     template <typename T>
     void backDoor() {}
 protected:
-    void renderToTexture(const std::wstring& renderTargetName, int begin, int end, int objId, bool doClear, bool renderToBackBuffer, bool checkInvalidRenderPriority, bool checkVisibleFlag);
-    std::shared_ptr<Obj> GetObj(int id) const;
+    void RenderToTexture(const std::wstring& renderTargetName, int begin, int end, int objId, bool doClear, bool renderToBackBuffer, bool checkInvalidRenderPriority, bool checkVisibleFlag);
+    NullableSharedPtr<Obj> GetObj(int id) const;
     const std::map<int, std::shared_ptr<Obj>>& GetObjAll() const;
     HWND hWnd;
     std::unique_ptr<GraphicDevice> graphicDevice;
