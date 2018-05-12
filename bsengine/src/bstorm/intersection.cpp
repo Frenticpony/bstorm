@@ -266,7 +266,7 @@ void Shape::SetWidth(float width)
     UpdateBoundingBox();
 }
 
-void Shape::Render(const std::unique_ptr<Renderer>& renderer, bool permitCamera) const
+void Shape::Render(const std::shared_ptr<Renderer>& renderer, bool permitCamera) const
 {
     const D3DCOLOR color = D3DCOLOR_ARGB(128, 255, 0, 0);
     if (type_ == Type::CIRCLE)
@@ -446,7 +446,7 @@ bool Intersection::IsIntersected(const std::shared_ptr<Intersection>& isect) con
     return shape_.IsIntersected(isect->shape_);
 }
 
-void Intersection::Render(const std::unique_ptr<Renderer>& renderer, bool permitCamera) const
+void Intersection::Render(const std::shared_ptr<Renderer>& renderer, bool permitCamera) const
 {
     shape_.Render(renderer, permitCamera);
 }

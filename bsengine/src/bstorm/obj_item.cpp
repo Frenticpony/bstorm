@@ -152,7 +152,7 @@ void ObjItem::Update()
     }
 }
 
-void ObjItem::Render(const std::unique_ptr<Renderer>& renderer)
+void ObjItem::Render(const std::shared_ptr<Renderer>& renderer)
 {
     if (itemData_)
     {
@@ -374,7 +374,7 @@ void ObjItemScoreText::Update()
     }
 }
 
-void ObjItemScoreText::Render(const std::unique_ptr<Renderer>& renderer)
+void ObjItemScoreText::Render(const std::shared_ptr<Renderer>& renderer)
 {
     ObjSpriteList2D::Render(renderer);
 }

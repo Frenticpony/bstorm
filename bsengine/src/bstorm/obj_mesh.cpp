@@ -20,7 +20,7 @@ ObjMesh::~ObjMesh()
 
 void ObjMesh::Update() {}
 
-void ObjMesh::Render(const std::unique_ptr<Renderer>& renderer)
+void ObjMesh::Render(const std::shared_ptr<Renderer>& renderer)
 {
     if (mesh_)
     {

@@ -47,7 +47,7 @@ void ObjCol::SetWidthIntersection(float width)
     }
 }
 
-void ObjCol::RenderIntersection(const std::unique_ptr<Renderer>& renderer, bool isPermitCamera) const
+void ObjCol::RenderIntersection(const std::shared_ptr<Renderer>& renderer, bool isPermitCamera) const
 {
     if (auto state = package_.lock())
     {

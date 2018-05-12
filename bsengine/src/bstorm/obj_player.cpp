@@ -115,7 +115,7 @@ void ObjPlayer::Update()
     }
 }
 
-void ObjPlayer::Render(const std::unique_ptr<Renderer>& renderer)
+void ObjPlayer::Render(const std::shared_ptr<Renderer>& renderer)
 {
     ObjSprite2D::Render(renderer);
     ObjCol::RenderIntersection(renderer, IsPermitCamera());

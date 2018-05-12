@@ -216,7 +216,7 @@ void ObjectLayerList::SetRenderPriority(const std::shared_ptr<ObjRender>& obj, i
     obj->priority_ = p;
 }
 
-void ObjectLayerList::RenderLayer(int priority, bool ignoreStgSceneObj, bool checkVisibleFlag, const std::unique_ptr<Renderer>& renderer)
+void ObjectLayerList::RenderLayer(int priority, bool ignoreStgSceneObj, bool checkVisibleFlag, const std::shared_ptr<Renderer>& renderer)
 {
     if (priority < 0 || priority > MAX_RENDER_PRIORITY) return;
 

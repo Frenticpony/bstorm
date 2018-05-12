@@ -14,7 +14,7 @@ public:
     ObjEnemy(bool isBoss, const std::shared_ptr<Package>& package);
     ~ObjEnemy();
     void Update() override;
-    void Render(const std::unique_ptr<Renderer>& renderer) override;
+    void Render(const std::shared_ptr<Renderer>& renderer) override;
     bool IsBoss() const;
     bool IsRegistered() const;
     void Regist();

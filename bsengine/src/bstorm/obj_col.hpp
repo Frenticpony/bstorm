@@ -21,7 +21,7 @@ public:
     void AddTempIntersection(const std::shared_ptr<Intersection>& isect);
     void TransIntersection(float dx, float dy);
     void SetWidthIntersection(float width);
-    void RenderIntersection(const std::unique_ptr<Renderer>& renderer, bool isPermitCamera) const;
+    void RenderIntersection(const std::shared_ptr<Renderer>& renderer, bool isPermitCamera) const;
     void ClearIntersection();
     // update‚É•Û—p‚ğ‹ó‚É‚µ‚Ä’Ç‰Á—p‚Æ•Û—p‚ğ“ü‚ê‘Ö‚¦‚é,
     void ClearOldTempIntersection();

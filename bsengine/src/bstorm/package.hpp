@@ -62,7 +62,7 @@ public:
     std::shared_ptr<VirtualKeyInputSource> vKeyInputSource;
     std::shared_ptr<SoundDevice> soundDevice;
     std::unordered_map <std::wstring, std::shared_ptr<SoundBuffer>> orphanSounds;
-    std::unique_ptr<Renderer> renderer;
+    std::shared_ptr<Renderer> renderer;
     std::shared_ptr<ObjectTable> objTable;
     std::shared_ptr<ObjectLayerList> objLayerList;
     std::shared_ptr<CollisionDetector> colDetector;

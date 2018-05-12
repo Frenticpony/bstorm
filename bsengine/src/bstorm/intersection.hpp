@@ -38,7 +38,7 @@ public:
     const BoundingBox& GetBoundingBox() const;
     void Trans(float dx, float dy);
     void SetWidth(float width);
-    void Render(const std::unique_ptr<Renderer>& renderer, bool permitCamera) const;
+    void Render(const std::shared_ptr<Renderer>& renderer, bool permitCamera) const;
     Type GetType() const;
     void GetCircle(float& x, float &y, float& r) const;
     void GetRect(float& x1, float& y1, float& x2, float& y2, float& width) const;
@@ -87,7 +87,7 @@ public:
     virtual ~Intersection();
     CollisionGroup GetCollisionGroup() const { return colGroup_; }
     bool IsIntersected(const std::shared_ptr<Intersection>& isect) const;
-    virtual void Render(const std::unique_ptr<Renderer>& renderer, bool permitCamera) const;
+    virtual void Render(const std::shared_ptr<Renderer>& renderer, bool permitCamera) const;
     const Shape& GetShape() const;
     int GetTreeIndex() const;
     const std::vector<std::weak_ptr<Intersection>>& GetCollideIntersections() const;
@@ -232,7 +232,7 @@ class PlayerGrazeIntersection : public Intersection
 {
 public:
     PlayerGrazeIntersection(float x, float y, float r, const std::shared_ptr<ObjPlayer>& player);
-    virtual void Render(const std::unique_ptr<Renderer>& renderer, bool permitCamera) const override {};
+    virtual void Render(const std::shared_ptr<Renderer>& renderer, bool permitCamera) const override {};
     const std::weak_ptr<ObjPlayer>& GetPlayer() const { return player_; }
 private:
     std::weak_ptr<ObjPlayer> player_;

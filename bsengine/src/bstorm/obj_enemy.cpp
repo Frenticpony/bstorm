@@ -44,7 +44,7 @@ void ObjEnemy::Update()
     }
 }
 
-void ObjEnemy::Render(const std::unique_ptr<Renderer>& renderer)
+void ObjEnemy::Render(const std::shared_ptr<Renderer>& renderer)
 {
     if (IsRegistered())
     {

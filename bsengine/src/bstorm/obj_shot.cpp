@@ -108,7 +108,7 @@ void ObjShot::Update()
     ClearOldTempIntersection();
 }
 
-void ObjShot::Render(const std::unique_ptr<Renderer>& renderer)
+void ObjShot::Render(const std::shared_ptr<Renderer>& renderer)
 {
     if (IsRegistered())
     {
@@ -549,7 +549,7 @@ void ObjShot::TransIntersection(float dx, float dy)
     ObjCol::TransIntersection(dx, dy);
 }
 
-void ObjShot::RenderIntersection(const std::unique_ptr<Renderer>& renderer)
+void ObjShot::RenderIntersection(const std::shared_ptr<Renderer>& renderer)
 {
     ObjCol::RenderIntersection(renderer, IsPermitCamera());
 }
@@ -839,7 +839,7 @@ void ObjLooseLaser::Update()
     ClearOldTempIntersection();
 }
 
-void ObjLooseLaser::Render(const std::unique_ptr<Renderer>& renderer)
+void ObjLooseLaser::Render(const std::shared_ptr<Renderer>& renderer)
 {
     if (IsRegistered())
     {
@@ -956,7 +956,7 @@ void ObjLooseLaser::UpdateIntersection()
     }
 }
 
-void ObjLooseLaser::RenderLaser(float width, float length, float angle, const std::unique_ptr<Renderer>& renderer)
+void ObjLooseLaser::RenderLaser(float width, float length, float angle, const std::shared_ptr<Renderer>& renderer)
 {
     if (const auto& shotData = GetShotData())
     {
@@ -1027,7 +1027,7 @@ void ObjStLaser::Update()
     ClearOldTempIntersection();
 }
 
-void ObjStLaser::Render(const std::unique_ptr<Renderer>& renderer)
+void ObjStLaser::Render(const std::shared_ptr<Renderer>& renderer)
 {
     if (IsRegistered())
     {
@@ -1140,7 +1140,7 @@ void ObjCrLaser::Update()
     ClearOldTempIntersection();
 }
 
-void ObjCrLaser::Render(const std::unique_ptr<Renderer>& renderer)
+void ObjCrLaser::Render(const std::shared_ptr<Renderer>& renderer)
 {
     if (IsRegistered())
     {

@@ -49,7 +49,7 @@ class ObjPrim2D : public ObjPrim
 {
 public:
     ObjPrim2D(const std::shared_ptr<Package>& state);
-    void Render(const std::unique_ptr<Renderer>& renderer) override;
+    void Render(const std::shared_ptr<Renderer>& renderer) override;
 };
 
 class ObjSprite2D : public ObjPrim2D
@@ -65,7 +65,7 @@ class ObjSpriteList2D : public ObjPrim2D
 {
 public:
     ObjSpriteList2D(const std::shared_ptr<Package>& state);
-    void Render(const std::unique_ptr<Renderer>& renderer) override;
+    void Render(const std::shared_ptr<Renderer>& renderer) override;
     void SetSourceRect(float left, float top, float right, float bottom);
     void SetDestRect(float left, float top, float right, float bottom);
     void SetDestCenter();
@@ -88,7 +88,7 @@ class ObjPrim3D : public ObjPrim
 {
 public:
     ObjPrim3D(const std::shared_ptr<Package>& state);
-    void Render(const std::unique_ptr<Renderer>& renderer) override;
+    void Render(const std::shared_ptr<Renderer>& renderer) override;
     bool IsBillboardEnabled() const;
 protected:
     bool billboardEnable_;

@@ -86,7 +86,7 @@ int ObjText::GetNextLineOffsetY() const
     return font->GetNextLineOffsetY() + linePitch_;
 }
 
-void ObjText::RenderFont(const std::shared_ptr<Font>& font, const D3DXMATRIX& world, const std::unique_ptr<Renderer>& renderer)
+void ObjText::RenderFont(const std::shared_ptr<Font>& font, const D3DXMATRIX& world, const std::shared_ptr<Renderer>& renderer)
 {
     std::array<Vertex, 4> vertices;
     D3DCOLOR color = GetD3DCOLOR();
@@ -278,7 +278,7 @@ int ObjText::GetMaxHeight() const
     return maxHeight_;
 }
 
-void ObjText::Render(const std::unique_ptr<Renderer>& renderer)
+void ObjText::Render(const std::shared_ptr<Renderer>& renderer)
 {
     if (auto package = GetPackage().lock())
     {

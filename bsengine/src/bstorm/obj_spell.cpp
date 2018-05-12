@@ -23,7 +23,7 @@ void ObjSpell::Update()
     ClearOldTempIntersection();
 }
 
-void ObjSpell::Render(const std::unique_ptr<Renderer>& renderer)
+void ObjSpell::Render(const std::shared_ptr<Renderer>& renderer)
 {
     if (IsRegistered())
     {

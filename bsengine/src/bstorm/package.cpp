@@ -37,7 +37,7 @@ Package::Package(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevice9*
     fileLoader(std::make_shared<FileLoaderFromTextFile>()),
     vKeyInputSource(std::make_shared<RealDeviceInputSource>(inputDevice, keyAssign)),
     soundDevice(std::make_shared<SoundDevice>(hWnd)),
-    renderer(std::make_unique<Renderer>(d3DDevice)),
+    renderer(std::make_shared<Renderer>(d3DDevice)),
     objTable(std::make_shared<ObjectTable>()),
     objLayerList(std::make_shared<ObjectLayerList>()),
     colDetector(std::make_shared<CollisionDetector>(screenWidth, screenHeight, std::make_shared<CollisionMatrix>(DEFAULT_COLLISION_MATRIX_DIMENSION, DEFAULT_COLLISION_MATRIX))),

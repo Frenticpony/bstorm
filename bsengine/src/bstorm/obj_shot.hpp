@@ -28,7 +28,7 @@ public:
     ~ObjShot();
 
     void Update() override;
-    void Render(const std::unique_ptr<Renderer>& renderer) override;
+    void Render(const std::shared_ptr<Renderer>& renderer) override;
 
     bool IsRegistered() const;
     void Regist();
@@ -113,7 +113,7 @@ public:
     virtual void GenerateDefaultBonusItem();
 protected:
     void TransIntersection(float dx, float dy) override;
-    void RenderIntersection(const std::unique_ptr<Renderer>& renderer);
+    void RenderIntersection(const std::shared_ptr<Renderer>& renderer);
     void CheckAutoDelete(float x, float y);
     void UpdateAnimationPosition();
     void TickDelayTimer();
@@ -186,7 +186,7 @@ class ObjLooseLaser : public ObjLaser
 public:
     ObjLooseLaser(bool isPlayerShot, const std::shared_ptr<Package>& package);
     void Update() override;
-    void Render(const std::unique_ptr<Renderer>& renderer) override;
+    void Render(const std::shared_ptr<Renderer>& renderer) override;
     void GenerateDefaultBonusItem() override;
     float GetInvalidLengthHead() const;
     float GetInvalidLengthTail() const;
@@ -198,7 +198,7 @@ public:
     virtual float GetRenderLength() const;
 protected:
     void UpdateIntersection();
-    void RenderLaser(float width, float length, float angle, const std::unique_ptr<Renderer>& renderer);
+    void RenderLaser(float width, float length, float angle, const std::shared_ptr<Renderer>& renderer);
 private:
     void Extend();
     bool defaultInvalidLengthEnable_;
@@ -212,7 +212,7 @@ class ObjStLaser : public ObjLooseLaser
 public:
     ObjStLaser(bool isPlayerShot, const std::shared_ptr<Package>& package);
     void Update() override;
-    void Render(const std::unique_ptr<Renderer>& renderer) override;
+    void Render(const std::shared_ptr<Renderer>& renderer) override;
     Point2D GetTail() const override;
     float GetLaserAngle() const;
     void SetLaserAngle(float angle);
@@ -230,7 +230,7 @@ class ObjCrLaser : public ObjLaser
 public:
     ObjCrLaser(bool isPlayerShot, const std::shared_ptr<Package>& package);
     void Update() override;
-    void Render(const std::unique_ptr<Renderer>& renderer) override;
+    void Render(const std::shared_ptr<Renderer>& renderer) override;
     void GenerateDefaultBonusItem() override;
     void SetRenderWidth(float width) override;
     float GetTipDecrement() const;
