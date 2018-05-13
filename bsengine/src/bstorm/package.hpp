@@ -1,10 +1,10 @@
 ﻿#pragma once
 
 #include <bstorm/stage_types.hpp>
-#include <bstorm/font.hpp>
 #include <bstorm/animation.hpp>
 #include <bstorm/stage_common_player_params.hpp>
 #include <bstorm/script_info.hpp>
+#include <bstorm/font_params.hpp>
 
 #include <memory>
 #include <unordered_map>
@@ -34,7 +34,6 @@ class FileLoader;
 class TextureCache;
 class FontCache;
 class Font;
-class FontParams;
 class MeshCache;
 class Camera2D;
 class Camera3D;
@@ -117,7 +116,7 @@ public:
     bool defaultBonusItemEnable;
 
     /* font */
-    std::shared_ptr<Font> CreateFont(const FontParams* param);
+    std::shared_ptr<Font> CreateFont(const FontParams& param);
     void ReleaseUnusedFont();
     const std::unordered_map<FontParams, std::shared_ptr<Font>>& GetFontMap() const;
 

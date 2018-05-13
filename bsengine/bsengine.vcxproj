@@ -26,6 +26,7 @@
     <ClInclude Include="src\bstorm\code_generator.hpp" />
     <ClInclude Include="src\bstorm\color_rgb.hpp" />
     <ClInclude Include="src\bstorm\common_data_db.hpp" />
+    <ClInclude Include="src\bstorm\font_params.hpp" />
     <ClInclude Include="src\bstorm\key_types.hpp" />
     <ClInclude Include="src\bstorm\nullable_shared_ptr.hpp" />
     <ClInclude Include="src\bstorm\point2D.hpp" />
@@ -105,6 +106,7 @@
     <ClCompile Include="src\bison\mqo.tab.cpp" />
     <ClCompile Include="src\bison\user_def_data.tab.cpp" />
     <ClCompile Include="src\bstorm\color_rgb.cpp" />
+    <ClCompile Include="src\bstorm\font_params.cpp" />
     <ClCompile Include="src\bstorm\log_error.cpp" />
     <ClCompile Include="src\bstorm\camera2D.cpp" />
     <ClCompile Include="src\bstorm\camera3D.cpp" />

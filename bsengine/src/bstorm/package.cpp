@@ -87,9 +87,9 @@ Package::Package(int screenWidth, int screenHeight, HWND hWnd, IDirect3DDevice9*
     }
 }
 
-std::shared_ptr<Font> Package::CreateFont(const FontParams * param)
+std::shared_ptr<Font> Package::CreateFont(const FontParams& param)
 {
-    return fontCache_->Create(*param);
+    return fontCache_->Create(param);
 }
 
 void Package::ReleaseUnusedFont()
