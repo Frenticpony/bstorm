@@ -6,7 +6,7 @@
 #include <bstorm/font.hpp>
 #include <bstorm/render_target.hpp>
 #include <bstorm/package.hpp>
-#include <bstorm/engine.hpp>
+#include <bstorm/package.hpp>
 
 #include <algorithm>
 #include <imgui.h>
@@ -209,7 +209,7 @@ void DrawFontInfoTab(const std::unordered_map<FontParams, std::shared_ptr<Font>>
 
 struct RenderTargetMonitor;
 template <>
-void Engine::backDoor<RenderTargetMonitor>()
+void Package::backDoor<RenderTargetMonitor>()
 {
     static std::wstring selectedRenderTargetName;
     float sideBarWidth = ImGui::GetContentRegionAvailWidth() * 0.2;
@@ -242,7 +242,7 @@ enum class Tab
 };
 
 template <>
-void Engine::backDoor<ResourceMonitor>()
+void Package::backDoor<ResourceMonitor>()
 {
     ImGui::Columns(3, "resource tab");
     ImGui::Separator();
@@ -265,7 +265,7 @@ void Engine::backDoor<ResourceMonitor>()
     ImGui::Separator();
     if (selectedTab == Tab::TEXTURE)
     {
-        package->textureCache->BackDoor<ResourceMonitor>();
+        textureCache->BackDoor<ResourceMonitor>();
     } else if (selectedTab == Tab::FONT)
     {
         DrawFontInfoTab(GetFontMap());
@@ -286,14 +286,14 @@ ResourceMonitor::ResourceMonitor(int left, int top, int width, int height) :
 
 ResourceMonitor::~ResourceMonitor() {}
 
-void ResourceMonitor::draw(const std::shared_ptr<Engine>& engine)
+void ResourceMonitor::draw(const std::shared_ptr<Package>& package)
 {
     if (!isOpened()) return;
     ImGui::SetNextWindowPos(ImVec2(iniLeft, iniTop), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(iniWidth, iniHeight), ImGuiCond_FirstUseEver);
     if (ImGui::Begin("Resource", &openFlag, ImGuiWindowFlags_ResizeFromAnySide))
     {
-        engine->backDoor<ResourceMonitor>();
+        package->backDoor<ResourceMonitor>();
     }
     ImGui::End();
 }

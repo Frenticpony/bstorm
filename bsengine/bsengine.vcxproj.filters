@@ -63,9 +63,6 @@
     <ClInclude Include="src\bstorm\dnh_value.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\bstorm\engine.hpp">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="src\bstorm\env.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -216,9 +213,6 @@
     <ClInclude Include="src\bstorm\log_error.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\bstorm\package.hpp">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="src\bstorm\stage_common_player_params.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -253,6 +247,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\bstorm\font_params.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\bstorm\package.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -321,9 +318,6 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\bstorm\dnh_value.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="src\bstorm\engine.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\bstorm\env.cpp">
@@ -452,9 +446,6 @@
     <ClCompile Include="src\bstorm\log_error.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\bstorm\package.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="src\bstorm\time_point.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -465,6 +456,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\bstorm\font_params.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bstorm\package.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

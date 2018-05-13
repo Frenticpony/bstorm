@@ -7,7 +7,7 @@
 
 namespace bstorm
 {
-class Engine;
+class Package;
 class Texture;
 class Font;
 class RenderTarget;
@@ -16,7 +16,7 @@ class ResourceMonitor
 public:
     ResourceMonitor(int left, int top, int width, int height);
     ~ResourceMonitor();
-    void draw(const std::shared_ptr<Engine>& engine);
+    void draw(const std::shared_ptr<Package>& package);
     bool isOpened() const { return openFlag; }
     void setOpen(bool b) { openFlag = b; }
 private:

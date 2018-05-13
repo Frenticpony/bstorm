@@ -7,13 +7,13 @@
 #include <bstorm/parser.hpp>
 #include <bstorm/obj.hpp>
 #include <bstorm/dnh_value.hpp>
-#include <bstorm/engine.hpp>
+#include <bstorm/package.hpp>
 #include <bstorm/semantics_checker.hpp>
 #include <bstorm/code_generator.hpp>
 #include <bstorm/api.hpp>
 #include <bstorm/file_loader.hpp>
 #include <bstorm/logger.hpp>
-#include <bstorm/engine.hpp>
+#include <bstorm/package.hpp>
 #include <bstorm/time_point.hpp>
 #include <bstorm/script_runtime.h>
 
@@ -26,7 +26,7 @@ const std::unordered_set<std::wstring> ignoreScriptExts{ L".png", L".jpg", L".jp
 
 // NOTE: 必ずメンバ関数の冒頭でlockを行う。compile中に他の動作をすることはないのでロックして損はない。
 
-Script::Script(const std::wstring& p, const std::wstring& type, const std::wstring& version, int id, Engine* engine, const std::shared_ptr<SourcePos>& srcPos) :
+Script::Script(const std::wstring& p, const std::wstring& type, const std::wstring& version, int id, Package* package, const std::shared_ptr<SourcePos>& srcPos) :
     L_(NULL),
     path_(GetCanonicalPath(p)),
     type_(type),
@@ -37,7 +37,7 @@ Script::Script(const std::wstring& p, const std::wstring& type, const std::wstri
     luaStateBusy_(false),
     isStgSceneScript_(type != SCRIPT_TYPE_PACKAGE),
     autoDeleteObjectEnable_(false),
-    engine_(engine)
+    package_(package)
 {
 }
 
@@ -58,7 +58,7 @@ Script::~Script()
         {
             for (auto objId : autoDeleteTargetObjIds_)
             {
-                engine_->DeleteObject(objId);
+                package_->DeleteObject(objId);
             }
         }
 
@@ -187,7 +187,7 @@ void Script::ExecCompile()
         lua_register(L_, "c_raiseerror", c_raiseerror);
 
         // ポインタ設定
-        setEngine(L_, engine_);
+        setPackage(L_, package_);
         SetScript(L_, this);
 
         // パース
@@ -441,13 +441,13 @@ void Script::AddAutoDeleteTargetObjectId(int id)
 
 const std::unique_ptr<DnhValue>& Script::GetScriptResult() const
 {
-    return engine_->GetScriptResult(GetID());
+    return package_->GetScriptResult(GetID());
 }
 
 void Script::SetScriptResult(std::unique_ptr<DnhValue>&& value)
 {
     std::lock_guard<std::recursive_mutex> lock(criticalSection_);
-    engine_->SetScriptResult(GetID(), std::move(value));
+    package_->SetScriptResult(GetID(), std::move(value));
 }
 
 void Script::SetScriptArgument(int idx, std::unique_ptr<DnhValue>&& value)
@@ -489,9 +489,9 @@ void Script::RethrowError() const
     std::rethrow_exception(err_);
 }
 
-ScriptManager::ScriptManager(Engine * engine) :
+ScriptManager::ScriptManager(Package * package) :
     idGen_(0),
-    engine_(engine)
+    package_(package)
 {
 }
 
@@ -499,7 +499,7 @@ ScriptManager::~ScriptManager() {}
 
 std::shared_ptr<Script> ScriptManager::Compile(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<SourcePos>& srcPos)
 {
-    auto script = std::make_shared<Script>(path, type, version, idGen_++, engine_, srcPos);
+    auto script = std::make_shared<Script>(path, type, version, idGen_++, package_, srcPos);
     script->Compile();
     scriptList_.push_back(script);
     scriptMap_[script->GetID()] = script;
@@ -508,7 +508,7 @@ std::shared_ptr<Script> ScriptManager::Compile(const std::wstring& path, const s
 
 std::shared_ptr<Script> ScriptManager::CompileInThread(const std::wstring & path, const std::wstring & type, const std::wstring & version, const std::shared_ptr<SourcePos>& srcPos)
 {
-    auto script = std::make_shared<Script>(path, type, version, idGen_++, engine_, srcPos);
+    auto script = std::make_shared<Script>(path, type, version, idGen_++, package_, srcPos);
     script->CompileInThread();
     scriptList_.push_back(script);
     scriptMap_[script->GetID()] = script;

@@ -2,7 +2,7 @@
 #include <bstorm/camera2D.hpp>
 #include <bstorm/camera3D.hpp>
 #include <bstorm/package.hpp>
-#include <bstorm/engine.hpp>
+#include <bstorm/package.hpp>
 
 #include "util.hpp"
 #include "camera_browser.hpp"
@@ -137,7 +137,7 @@ static void drawCamera3DInfo(Camera3D& camera3D)
 }
 
 template <>
-void Engine::backDoor<CameraBrowser>()
+void Package::backDoor<CameraBrowser>()
 {
     ImGui::Columns(2, "camera tab");
     ImGui::Separator();
@@ -155,10 +155,10 @@ void Engine::backDoor<CameraBrowser>()
     ImGui::Separator();
     if (selectedCamera == 0)
     {
-        drawCamera2DInfo(*package->camera2D);
+        drawCamera2DInfo(*camera2D);
     } else
     {
-        drawCamera3DInfo(*package->camera3D);
+        drawCamera3DInfo(*camera3D);
     }
 }
 
@@ -173,14 +173,14 @@ CameraBrowser::CameraBrowser(int left, int top, int width, int height) :
 
 CameraBrowser::~CameraBrowser() {}
 
-void CameraBrowser::draw(const std::shared_ptr<Engine>& engine)
+void CameraBrowser::draw(const std::shared_ptr<Package>& package)
 {
     if (!isOpened()) return;
     ImGui::SetNextWindowPos(ImVec2(iniLeft, iniTop), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(iniWidth, iniHeight), ImGuiCond_FirstUseEver);
     if (ImGui::Begin("Camera", &openFlag, ImGuiWindowFlags_ResizeFromAnySide))
     {
-        engine->backDoor<CameraBrowser>();
+        package->backDoor<CameraBrowser>();
     }
     ImGui::End();
 }

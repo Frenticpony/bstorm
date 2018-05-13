@@ -23,9 +23,9 @@ int UnsafeFunction(lua_State* L)
 void* GetPointer(lua_State* L, const char* key);
 void SetPointer(lua_State* L, const char* key, void* p);
 
-class Engine;
-Engine* getEngine(lua_State* L);
-void setEngine(lua_State* L, Engine*);
+class Package;
+Package* getPackage(lua_State* L);
+void setPackage(lua_State* L, Package*);
 
 class Script;
 Script* GetScript(lua_State* L);

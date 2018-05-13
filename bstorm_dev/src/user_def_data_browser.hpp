@@ -4,7 +4,7 @@
 
 namespace bstorm
 {
-class Engine;
+class Package;
 class ShotData;
 class ItemData;
 class UserDefDataBrowser
@@ -12,7 +12,7 @@ class UserDefDataBrowser
 public:
     UserDefDataBrowser(int left, int top, int width, int height);
     ~UserDefDataBrowser();
-    void draw(const std::shared_ptr<Engine>& engine);
+    void draw(const std::shared_ptr<Package>& package);
     bool isOpened() const { return openFlag; }
     void setOpen(bool b) { openFlag = b; }
 private:

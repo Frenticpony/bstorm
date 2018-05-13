@@ -4,13 +4,13 @@
 
 namespace bstorm
 {
-class Engine;
+class Package;
 class ObjectBrowser
 {
 public:
     ObjectBrowser(int x, int y, int width, int height);
     ~ObjectBrowser();
-    void draw(const std::shared_ptr<Engine>& engine);
+    void draw(const std::shared_ptr<Package>& package);
     bool isOpened() const { return openFlag; }
     void setOpen(bool b) { openFlag = b; }
 private:

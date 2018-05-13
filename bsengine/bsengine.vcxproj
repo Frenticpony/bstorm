@@ -54,10 +54,9 @@
     <ClInclude Include="src\bstorm\script_info.hpp" />
     <ClInclude Include="src\bstorm\script_runtime.h" />
     <ClInclude Include="src\bstorm\shader.hpp" />
-    <ClInclude Include="src\bstorm\engine.hpp" />
+    <ClInclude Include="src\bstorm\package.hpp" />
     <ClInclude Include="src\bstorm\file_loader.hpp" />
     <ClInclude Include="src\bstorm\font.hpp" />
-    <ClInclude Include="src\bstorm\package.hpp" />
     <ClInclude Include="src\bstorm\graphic_device.hpp" />
     <ClInclude Include="src\bstorm\intersection.hpp" />
     <ClInclude Include="src\bstorm\item_data.hpp" />
@@ -134,10 +133,9 @@
     <ClCompile Include="src\reflex\user_def_data_lexer.cpp" />
     <ClCompile Include="src\bstorm\script_info.cpp" />
     <ClCompile Include="src\bstorm\shader.cpp" />
-    <ClCompile Include="src\bstorm\engine.cpp" />
+    <ClCompile Include="src\bstorm\package.cpp" />
     <ClCompile Include="src\bstorm\file_loader.cpp" />
     <ClCompile Include="src\bstorm\font.cpp" />
-    <ClCompile Include="src\bstorm\package.cpp" />
     <ClCompile Include="src\bstorm\graphic_device.cpp" />
     <ClCompile Include="src\bstorm\intersection.cpp" />
     <ClCompile Include="src\bstorm\item_data.cpp" />

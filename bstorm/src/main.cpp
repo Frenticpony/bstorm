@@ -1,5 +1,5 @@
 ﻿#include <bstorm/logger.hpp>
-#include <bstorm/engine.hpp>
+#include <bstorm/package.hpp>
 #include <bstorm/util.hpp>
 #include <bstorm/input_device.hpp>
 #include <bstorm/dnh_const.hpp>
@@ -109,21 +109,21 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
         ShowWindow(hWnd, SW_RESTORE);
         UpdateWindow(hWnd);
 
-        auto engine = std::make_shared<Engine>(hWnd, screenWidth, screenHeight, std::make_shared<conf::KeyConfig>(config.keyConfig));
-        engine->SetMousePostionProvider(std::make_shared<WinMousePositionProvider>(hWnd));
+        auto package = std::make_shared<Package>(hWnd, screenWidth, screenHeight, std::make_shared<conf::KeyConfig>(config.keyConfig));
+        package->SetMousePostionProvider(std::make_shared<WinMousePositionProvider>(hWnd));
 
         if (packageMainScriptPath.empty())
         {
             throw Log(Log::Level::LV_ERROR).SetMessage("package main script not specified.");
         }
 
-        engine->SetPackageMainScript(packageMainScriptPath);
-        engine->StartPackage();
+        package->SetPackageMainScript(packageMainScriptPath);
+        package->StartPackage();
 
         /* message loop */
         while (true)
         {
-            auto d3DDevice_ = engine->GetDirect3DDevice();
+            auto d3DDevice_ = package->GetDirect3DDevice();
             if (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
             {
                 BOOL result = GetMessage(&msg, NULL, 0, 0);
@@ -142,21 +142,21 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
             }
             if (SUCCEEDED(d3DDevice_->BeginScene()))
             {
-                engine->UpdateFpsCounter();
-                engine->SetBackBufferRenderTarget();
+                package->UpdateFpsCounter();
+                package->SetBackBufferRenderTarget();
                 d3DDevice_->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(114, 144, 154), 1.0f, 0);
-                if (engine->IsPackageFinished()) break;
-                engine->TickFrame();
-                engine->Render();
+                if (package->IsPackageFinished()) break;
+                package->TickFrame();
+                package->Render();
                 d3DDevice_->EndScene();
                 switch (d3DDevice_->Present(NULL, NULL, NULL, NULL))
                 {
                     case D3DERR_DEVICELOST:
                         if (d3DDevice_->TestCooperativeLevel() == D3DERR_DEVICENOTRESET)
                         {
-                            engine->ReleaseLostableGraphicResource();
-                            engine->ResetGraphicDevice();
-                            engine->RestoreLostableGraphicDevice();
+                            package->ReleaseLostableGraphicResource();
+                            package->ResetGraphicDevice();
+                            package->RestoreLostableGraphicDevice();
                         } else
                         {
                             Sleep(1);

@@ -4,7 +4,7 @@
 
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/util.hpp>
-#include <bstorm/engine.hpp>
+#include <bstorm/package.hpp>
 #include <bstorm/dnh_value.hpp>
 #include <bstorm/common_data_db.hpp>
 #include <bstorm/package.hpp>
@@ -59,9 +59,9 @@ static void DrawCommonDataInfo(const std::map<CommonDataDB::DataAreaName, Common
 }
 
 template <>
-void Engine::backDoor<CommonDataBrowser>()
+void Package::backDoor<CommonDataBrowser>()
 {
-    const auto& areaTable = package->commonDataDB->GetCommonDataAreaTable();
+    const auto& areaTable = commonDataDB->GetCommonDataAreaTable();
     DrawCommonDataInfo(areaTable);
 }
 
@@ -75,14 +75,14 @@ CommonDataBrowser::CommonDataBrowser(int left, int top, int width, int height) :
 }
 CommonDataBrowser::~CommonDataBrowser() {}
 
-void CommonDataBrowser::draw(const std::shared_ptr<Engine>& engine)
+void CommonDataBrowser::draw(const std::shared_ptr<Package>& package)
 {
     if (!isOpened()) return;
     ImGui::SetNextWindowPos(ImVec2(iniLeft, iniTop), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(iniWidth, iniHeight), ImGuiCond_FirstUseEver);
     if (ImGui::Begin("Common Data", &openFlag, ImGuiWindowFlags_ResizeFromAnySide))
     {
-        engine->backDoor<CommonDataBrowser>();
+        package->backDoor<CommonDataBrowser>();
     }
     ImGui::End();
 }

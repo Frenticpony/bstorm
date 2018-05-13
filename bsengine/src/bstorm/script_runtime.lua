@@ -467,7 +467,7 @@ function dnh_GetEventArgument(idx)
   return r_cp(script_event_args[idx]);
 end
 
---- task engine ---
+--- task package ---
 
 local Task = {RUNNING = 0, SUSPENDED = 1}; Task.__index = Task;
 

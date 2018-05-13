@@ -10,7 +10,7 @@
 #include "play_controller.hpp"
 
 #include <bstorm/logger.hpp>
-#include <bstorm/engine.hpp>
+#include <bstorm/package.hpp>
 #include <bstorm/util.hpp>
 #include <bstorm/input_device.hpp>
 #include <bstorm/dnh_const.hpp>
@@ -134,17 +134,17 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
         auto userDefDataBrowser = std::make_shared<UserDefDataBrowser>(600, 19, 300, 530);
         auto cameraBrowser = std::make_shared<CameraBrowser>(0, 39, 300, 530);
         auto objectBrowser = std::make_shared<ObjectBrowser>(0, 39, 300, 530);
-        auto engine = std::make_shared<Engine>(hWnd, screenWidth, screenHeight, std::make_shared<conf::KeyConfig>(config.keyConfig));
-        auto playController = std::make_shared<PlayController>(engine);
+        auto package = std::make_shared<Package>(hWnd, screenWidth, screenHeight, std::make_shared<conf::KeyConfig>(config.keyConfig));
+        auto playController = std::make_shared<PlayController>(package);
         auto gameView = std::make_shared<GameView>(windowWidth / 2 - 320, 60, 640, 480, playController);
         auto gameViewMousePosProvider = std::make_shared<GameViewMousePositionProvider>(hWnd);
         gameViewMousePosProvider->SetScreenPos(gameView->getViewPosX(), gameView->getViewPosY());
         gameViewMousePosProvider->SetGameViewSize(gameView->getViewWidth(), gameView->getViewHeight());
-        engine->SetMousePostionProvider(gameViewMousePosProvider);
+        package->SetMousePostionProvider(gameViewMousePosProvider);
 
 
         ImGui::CreateContext();
-        ImGui_ImplDX9_Init(hWnd, engine->GetDirect3DDevice());
+        ImGui_ImplDX9_Init(hWnd, package->GetDirect3DDevice());
         {
             // フォント設定
             ImGuiIO& io = ImGui::GetIO();
@@ -167,7 +167,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
         /* message loop */
         while (true)
         {
-            auto d3DDevice_ = engine->GetDirect3DDevice();
+            auto d3DDevice_ = package->GetDirect3DDevice();
             if (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
             {
                 BOOL result = GetMessage(&msg, NULL, 0, 0);
@@ -187,23 +187,23 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
             if (SUCCEEDED(d3DDevice_->BeginScene()))
             {
                 // NOTE : PlayController, 及びPlayControllerを使っているモジュールは他より先に描画(tickでテクスチャの解放が行われる可能性があるので)
-                engine->SetBackBufferRenderTarget();
+                package->SetBackBufferRenderTarget();
                 d3DDevice_->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(114, 144, 154), 1.0f, 0);
-                engine->UpdateFpsCounter();
+                package->UpdateFpsCounter();
                 ImGui_ImplDX9_NewFrame();
                 playController->setScript(scriptExplorer->getSelectedMainScript(), scriptExplorer->getSelectedPlayerScript());
                 if (!playController->isPaused())
                 {
                     playController->tick();
                 }
-                auto gameViewRenderTarget = engine->GetRenderTarget(GAME_VIEW_RENDER_TARGET);
+                auto gameViewRenderTarget = package->GetRenderTarget(GAME_VIEW_RENDER_TARGET);
                 if (!gameViewRenderTarget)
                 {
                     Logger::SetEnable(false);
-                    gameViewRenderTarget = engine->CreateRenderTarget(GAME_VIEW_RENDER_TARGET, screenWidth, screenHeight, nullptr);
+                    gameViewRenderTarget = package->CreateRenderTarget(GAME_VIEW_RENDER_TARGET, screenWidth, screenHeight, nullptr);
                     Logger::SetEnable(true);
                 }
-                engine->Render(GAME_VIEW_RENDER_TARGET);
+                package->Render(GAME_VIEW_RENDER_TARGET);
                 gameView->draw(gameViewRenderTarget);
                 {
                     // main menu bar
@@ -238,11 +238,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
                 }
                 logWindow->draw();
                 scriptExplorer->draw();
-                resourceMonitor->draw(engine);
-                commonDataBrowser->draw(engine);
-                userDefDataBrowser->draw(engine);
-                cameraBrowser->draw(engine);
-                objectBrowser->draw(engine);
+                resourceMonitor->draw(package);
+                commonDataBrowser->draw(package);
+                userDefDataBrowser->draw(package);
+                cameraBrowser->draw(package);
+                objectBrowser->draw(package);
 #ifdef _DEBUG
                 ImGui::ShowDemoWindow();
                 ImGui::ShowMetricsWindow();
@@ -260,10 +260,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
                     case D3DERR_DEVICELOST:
                         if (d3DDevice_->TestCooperativeLevel() == D3DERR_DEVICENOTRESET)
                         {
-                            engine->ReleaseLostableGraphicResource();
+                            package->ReleaseLostableGraphicResource();
                             ImGui_ImplDX9_InvalidateDeviceObjects();
-                            engine->ResetGraphicDevice();
-                            engine->RestoreLostableGraphicDevice();
+                            package->ResetGraphicDevice();
+                            package->RestoreLostableGraphicDevice();
                             ImGui_ImplDX9_CreateDeviceObjects();
                         } else
                         {

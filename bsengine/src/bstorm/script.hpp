@@ -17,7 +17,7 @@
 namespace bstorm
 {
 class Log;
-class Engine;
+class Package;
 class DnhValue;
 class DnhArray;
 class ScriptManager;
@@ -36,7 +36,7 @@ public:
         SCRIPT_INITIALIZED, // @Initialize完了
         SCRIPT_CLOSED // 終了(実行時エラー含む)
     };
-    Script(const std::wstring& path, const std::wstring& type, const std::wstring& version, int id, Engine* engine, const std::shared_ptr<SourcePos>& compileSrcPos);
+    Script(const std::wstring& path, const std::wstring& type, const std::wstring& version, int id, Package* package, const std::shared_ptr<SourcePos>& compileSrcPos);
     ~Script();
     void Compile();
     void CompileInThread();
@@ -84,13 +84,13 @@ private:
     bool autoDeleteObjectEnable_;
     mutable std::recursive_mutex criticalSection_;
     std::thread compileThread_;
-    Engine* engine_;
+    Package* package_;
 };
 
 class ScriptManager
 {
 public:
-    ScriptManager(Engine* engine);
+    ScriptManager(Package* package);
     ~ScriptManager();
     std::shared_ptr<Script> Compile(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<SourcePos>& srcPos);
     std::shared_ptr<Script> CompileInThread(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<SourcePos>& srcPos);
@@ -104,7 +104,7 @@ public:
     void SetScriptResult(int scriptId, std::unique_ptr<DnhValue>&& value);
     void ClearScriptResult();
 private:
-    Engine * engine_;
+    Package * package_;
     int idGen_;
     std::list<std::shared_ptr<Script>> scriptList_;
     std::unordered_map <int, std::shared_ptr<Script>> scriptMap_;

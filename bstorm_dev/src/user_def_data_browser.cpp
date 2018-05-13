@@ -8,7 +8,7 @@
 #include <bstorm/shot_data.hpp>
 #include <bstorm/item_data.hpp>
 #include <bstorm/package.hpp>
-#include <bstorm/engine.hpp>
+#include <bstorm/package.hpp>
 
 #include <algorithm>
 #include <imgui.h>
@@ -343,7 +343,7 @@ enum class Tab
 };
 
 template <>
-void Engine::backDoor<UserDefDataBrowser>()
+void Package::backDoor<UserDefDataBrowser>()
 {
     ImGui::Columns(3, "userdefdata tab");
     ImGui::Separator();
@@ -366,13 +366,13 @@ void Engine::backDoor<UserDefDataBrowser>()
     ImGui::Separator();
     if (selectedTab == Tab::PLAYER_SHOT)
     {
-        package->playerShotDataTable->BackDoor<PlayerShotData>();
+       playerShotDataTable->BackDoor<PlayerShotData>();
     } else if (selectedTab == Tab::ENEMY_SHOT)
     {
-        package->enemyShotDataTable->BackDoor<EnemyShotData>();
+        enemyShotDataTable->BackDoor<EnemyShotData>();
     } else if (selectedTab == Tab::ITEM)
     {
-        package->itemDataTable->BackDoor<UserDefDataBrowser>();
+        itemDataTable->BackDoor<UserDefDataBrowser>();
     }
 }
 
@@ -387,14 +387,14 @@ UserDefDataBrowser::UserDefDataBrowser(int left, int top, int width, int height)
 
 UserDefDataBrowser::~UserDefDataBrowser() {}
 
-void UserDefDataBrowser::draw(const std::shared_ptr<Engine>& engine)
+void UserDefDataBrowser::draw(const std::shared_ptr<Package>& package)
 {
     if (!isOpened()) return;
     ImGui::SetNextWindowPos(ImVec2(iniLeft, iniTop), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(iniWidth, iniHeight), ImGuiCond_FirstUseEver);
     if (ImGui::Begin("UserDefData", &openFlag, ImGuiWindowFlags_ResizeFromAnySide))
     {
-        engine->backDoor<UserDefDataBrowser>();
+        package->backDoor<UserDefDataBrowser>();
     }
     ImGui::End();
 }

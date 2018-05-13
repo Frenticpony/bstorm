@@ -2,18 +2,18 @@
 
 #include <bstorm/const.hpp>
 #include <bstorm/logger.hpp>
-#include <bstorm/engine.hpp>
+#include <bstorm/package.hpp>
 
 #include <algorithm>
 
 namespace bstorm
 {
-PlayController::PlayController(const std::shared_ptr<Engine>& engine) :
-    engine(engine),
+PlayController::PlayController(const std::shared_ptr<Package>& package) :
+    package(package),
     playSpeed(1),
     paused(true),
-    screenWidth(engine->GetScreenWidth()),
-    screenHeight(engine->GetScreenHeight()),
+    screenWidth(package->GetScreenWidth()),
+    screenHeight(package->GetScreenHeight()),
     renderIntersectionEnable(false),
     playerInvincibleEnable(false),
     inputEnable(false)
@@ -26,22 +26,25 @@ void PlayController::tick()
     {
         for (int i = 0; i < playSpeed; i++)
         {
-            if (engine->IsPackageFinished()) break;
-            engine->TickFrame();
+            if (package->IsPackageFinished()) break;
+            package->TickFrame();
         }
     } catch (Log& log)
     {
         Logger::WriteLog(log);
-        engine->Reset(screenWidth, screenHeight);
+#ifndef _DEBUG
+        FIXME!
+       package->Reset(screenWidth, screenHeight);
+#endif
     }
 }
 
 void PlayController::pause(bool doPause)
 {
-    if (paused == true && doPause == false && engine->IsPackageFinished())
+    if (paused == true && doPause == false && package->IsPackageFinished())
     {
         reload();
-        if (!engine->IsPackageFinished())
+        if (!package->IsPackageFinished())
         {
             paused = false;
         }
@@ -53,7 +56,10 @@ void PlayController::pause(bool doPause)
 
 void PlayController::close()
 {
-    engine->Reset(screenWidth, screenHeight);
+#ifndef _DEBUG
+    FIXME!
+        package->Reset(screenWidth, screenHeight);
+#endif
     pause(true);
 }
 
@@ -63,9 +69,13 @@ void PlayController::reload()
     {
         if (mainScript.type == SCRIPT_TYPE_PACKAGE)
         {
-            engine->Reset(screenWidth, screenHeight);
-            engine->SetPackageMainScript(mainScript);
-            engine->StartPackage();
+
+#ifndef _DEBUG
+            FIXME!
+                package->Reset(screenWidth, screenHeight);
+#endif
+            package->SetPackageMainScript(mainScript);
+            package->StartPackage();
         } else
         {
             if (mainScript.path.empty())
@@ -82,25 +92,29 @@ void PlayController::reload()
                 {
                     mainScript.type = SCRIPT_TYPE_SINGLE;
                 }
-                engine->Reset(screenWidth, screenHeight);
-                engine->SetStageMainScript(mainScript);
-                engine->SetStagePlayerScript(playerScript);
+#ifndef _DEBUG
+                package->Reset(screenWidth, screenHeight);
+#endif
+                package->SetStageMainScript(mainScript);
+                package->SetStagePlayerScript(playerScript);
                 ScriptInfo defaultPackageMainScript;
                 defaultPackageMainScript.path = DEFAULT_PACKAGE_PATH;
                 defaultPackageMainScript.type = SCRIPT_TYPE_PACKAGE;
                 defaultPackageMainScript.version = SCRIPT_VERSION_PH3;
-                engine->SetPackageMainScript(defaultPackageMainScript);
-                engine->StartPackage();
+                package->SetPackageMainScript(defaultPackageMainScript);
+                package->StartPackage();
             }
         }
     } catch (Log& log)
     {
         Logger::WriteLog(log);
-        engine->Reset(screenWidth, screenHeight);
+#ifndef _DEBUG
+        package->Reset(screenWidth, screenHeight);
+#endif
     }
-    engine->SetRenderIntersectionEnable(renderIntersectionEnable);
-    engine->SetForcePlayerInvincibleEnable(playerInvincibleEnable);
-    engine->SetInputEnable(inputEnable);
+    package->SetRenderIntersectionEnable(renderIntersectionEnable);
+    package->SetForcePlayerInvincibleEnable(playerInvincibleEnable);
+    package->SetInputEnable(inputEnable);
 }
 
 bool PlayController::isPaused() const
@@ -126,7 +140,7 @@ void PlayController::setScript(const ScriptInfo & mainScript, const ScriptInfo &
 
 int64_t PlayController::getElapsedFrame() const
 {
-    return engine->GetElapsedFrame();
+    return package->GetElapsedFrame();
 }
 
 void PlayController::setScreenSize(int width, int height)
@@ -137,7 +151,7 @@ void PlayController::setScreenSize(int width, int height)
 
 bool PlayController::isPackageFinished() const
 {
-    return engine->IsPackageFinished();
+    return package->IsPackageFinished();
 }
 
 bool PlayController::isRenderIntersectionEnabled() const
@@ -148,7 +162,7 @@ bool PlayController::isRenderIntersectionEnabled() const
 void PlayController::setRenderIntersectionEnable(bool enable)
 {
     renderIntersectionEnable = enable;
-    engine->SetRenderIntersectionEnable(enable);
+    package->SetRenderIntersectionEnable(enable);
 }
 
 bool PlayController::isPlayerInvincibleEnabled() const
@@ -159,13 +173,13 @@ bool PlayController::isPlayerInvincibleEnabled() const
 void PlayController::setPlayerInvincibleEnable(bool enable)
 {
     playerInvincibleEnable = enable;
-    engine->SetForcePlayerInvincibleEnable(enable);
+    package->SetForcePlayerInvincibleEnable(enable);
 }
 
 void PlayController::setInputEnable(bool enable)
 {
     inputEnable = enable;
-    engine->SetInputEnable(enable);
+    package->SetInputEnable(enable);
 }
 
 const ScriptInfo& PlayController::getMainScriptInfo() const

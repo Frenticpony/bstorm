@@ -7,11 +7,11 @@
 
 namespace bstorm
 {
-class Engine;
+class Package;
 class PlayController
 {
 public:
-    PlayController(const std::shared_ptr<Engine>& engine);
+    PlayController(const std::shared_ptr<Package>& package);
     void tick();
     void pause(bool doPause);
     void close();
@@ -30,7 +30,7 @@ public:
     void setInputEnable(bool enable);
     const ScriptInfo& getMainScriptInfo() const;
 private:
-    std::shared_ptr<Engine> engine;
+    std::shared_ptr<Package> package;
     ScriptInfo mainScript;
     ScriptInfo playerScript;
     int64_t elapsedFrame;

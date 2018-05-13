@@ -24,7 +24,7 @@
 #include <bstorm/shot_data.hpp>
 #include <bstorm/item_data.hpp>
 #include <bstorm/package.hpp>
-#include <bstorm/engine.hpp>
+#include <bstorm/package.hpp>
 
 #include <unordered_set>
 #include <imgui.h>
@@ -1061,9 +1061,9 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
 }
 
 template <>
-void Engine::backDoor<ObjectBrowser>()
+void Package::backDoor<ObjectBrowser>()
 {
-    const auto& table = package->objTable->GetAll();
+    const auto& table = objTable->GetAll();
     static int selectedId = 0;
     float sideBarWidth = ImGui::GetContentRegionAvailWidth() * 0.2;
     ImGui::BeginChild("SideBar", ImVec2(sideBarWidth, -1), true, ImGuiWindowFlags_HorizontalScrollbar);
@@ -1096,7 +1096,7 @@ void Engine::backDoor<ObjectBrowser>()
     auto it = table.find(selectedId);
     if (it != table.end())
     {
-        drawObjEditArea(it->second, package->objLayerList);
+        drawObjEditArea(it->second, objLayerList);
     }
     ImGui::EndChild();
 }
@@ -1112,14 +1112,14 @@ ObjectBrowser::ObjectBrowser(int left, int top, int width, int height) :
 
 ObjectBrowser::~ObjectBrowser() {}
 
-void ObjectBrowser::draw(const std::shared_ptr<Engine>& engine)
+void ObjectBrowser::draw(const std::shared_ptr<Package>& package)
 {
     if (!isOpened()) return;
     ImGui::SetNextWindowPos(ImVec2(iniLeft, iniTop), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(iniWidth, iniHeight), ImGuiCond_FirstUseEver);
     if (ImGui::Begin("Object", &openFlag, ImGuiWindowFlags_ResizeFromAnySide))
     {
-        engine->backDoor<ObjectBrowser>();
+        package->backDoor<ObjectBrowser>();
     }
     ImGui::End();
 }
