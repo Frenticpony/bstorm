@@ -11,6 +11,7 @@
 #include <bstorm/intersection.hpp>
 #include <bstorm/shot_data.hpp>
 #include <bstorm/rand_generator.hpp>
+#include <bstorm/shot_counter.hpp>
 #include <bstorm/package.hpp>
 
 #include <algorithm>
@@ -18,12 +19,6 @@
 
 namespace bstorm
 {
-ShotCounter::ShotCounter() :
-    playerShotCount(0),
-    enemyShotCount(0)
-{
-}
-
 ObjShot::ObjShot(bool isPlayerShot, const std::shared_ptr<Package>& package) :
     ObjRender(package),
     ObjMove(this),

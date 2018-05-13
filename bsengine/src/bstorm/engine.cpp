@@ -36,6 +36,7 @@
 #include <bstorm/obj_spell.hpp>
 #include <bstorm/obj_item.hpp>
 #include <bstorm/obj_player.hpp>
+#include <bstorm/shot_counter.hpp>
 #include <bstorm/intersection.hpp>
 #include <bstorm/shot_data.hpp>
 #include <bstorm/item_data.hpp>

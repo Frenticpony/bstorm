@@ -16,6 +16,7 @@
 #include <bstorm/obj_shot.hpp>
 #include <bstorm/obj_item.hpp>
 #include <bstorm/obj_player.hpp>
+#include <bstorm/shot_counter.hpp>
 #include <bstorm/intersection.hpp>
 #include <bstorm/camera2D.hpp>
 #include <bstorm/camera3D.hpp>

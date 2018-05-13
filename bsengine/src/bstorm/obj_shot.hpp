@@ -14,13 +14,7 @@ namespace bstorm
 class ShotData;
 class ShotIntersection;
 
-class ShotCounter
-{
-public:
-    ShotCounter();
-    int playerShotCount;
-    int enemyShotCount;
-};
+class ShotCounter;
 
 class ObjShot : public ObjRender, public ObjMove, public ObjCol, public std::enable_shared_from_this<ObjShot>
 {
