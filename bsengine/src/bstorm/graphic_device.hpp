@@ -14,7 +14,7 @@ public:
     ~GraphicDevice();
     void Reset();
     IDirect3DDevice9* GetDevice() const;
-    void SetBackbufferRenderTarget();
+    void SwitchRenderTargetToBackBuffer();
     DWORD GetBackBufferWidth() const;
     DWORD GetBackBufferHeight() const;
 private:

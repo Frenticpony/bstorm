@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <bstorm/non_copyable.hpp>
+#include <bstorm/nullable_shared_ptr.hpp>
 #include <bstorm/key_types.hpp>
 
 #include <windows.h>
@@ -31,7 +32,7 @@ private:
 class InputDevice : private NonCopyable
 {
 public:
-    InputDevice(HWND hWnd, const std::shared_ptr<MousePositionProvider>& mousePosProvider);
+    InputDevice(HWND hWnd);
     ~InputDevice();
     void UpdateInputState();
     void ResetInputState();
@@ -59,7 +60,7 @@ private:
     DIJOYSTATE* padInputState_;
     DIJOYSTATE* prevPadInputState_;
     int mouseMoveZ_;
-    std::shared_ptr<MousePositionProvider> mousePosProvider_;
+    NullableSharedPtr<MousePositionProvider> mousePosProvider_;
     bool inputEnable_;
 };
 }

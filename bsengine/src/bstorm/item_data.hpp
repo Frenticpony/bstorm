@@ -43,8 +43,8 @@ public:
     ItemDataTable(const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<FileLoader>& fileLoader);
     ~ItemDataTable();
     void Add(const std::shared_ptr<ItemData>& data);
-    void Load(const std::wstring& path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<SourcePos>& srcPos);
-    void Reload(const std::wstring& path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<SourcePos>& srcPos);
+    void Load(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    void Reload(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
     bool IsLoaded(const std::wstring& path) const;
     NullableSharedPtr<ItemData> Get(int id) const;
     /* backdoor */

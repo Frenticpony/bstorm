@@ -76,7 +76,7 @@ IDirect3DDevice9 * GraphicDevice::GetDevice() const
     return d3DDevice_;
 }
 
-void GraphicDevice::SetBackbufferRenderTarget()
+void GraphicDevice::SwitchRenderTargetToBackBuffer()
 {
     D3DVIEWPORT9 viewport = { 0, 0, presentParams_.BackBufferWidth, presentParams_.BackBufferHeight, 0.0f, 1.0f };
     d3DDevice_->SetViewport(&viewport);

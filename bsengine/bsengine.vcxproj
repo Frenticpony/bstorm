@@ -26,9 +26,13 @@
     <ClInclude Include="src\bstorm\code_generator.hpp" />
     <ClInclude Include="src\bstorm\color_rgb.hpp" />
     <ClInclude Include="src\bstorm\common_data_db.hpp" />
+    <ClInclude Include="src\bstorm\engine.hpp" />
+    <ClInclude Include="src\bstorm\engine_develop_options.hpp" />
     <ClInclude Include="src\bstorm\font_params.hpp" />
     <ClInclude Include="src\bstorm\key_types.hpp" />
+    <ClInclude Include="src\bstorm\lua_util.hpp" />
     <ClInclude Include="src\bstorm\nullable_shared_ptr.hpp" />
+    <ClInclude Include="src\bstorm\obj_stage.hpp" />
     <ClInclude Include="src\bstorm\point2D.hpp" />
     <ClInclude Include="src\bstorm\rect.hpp" />
     <ClInclude Include="src\bstorm\shot_counter.hpp" />
@@ -105,6 +109,7 @@
     <ClCompile Include="src\bison\mqo.tab.cpp" />
     <ClCompile Include="src\bison\user_def_data.tab.cpp" />
     <ClCompile Include="src\bstorm\color_rgb.cpp" />
+    <ClCompile Include="src\bstorm\engine.cpp" />
     <ClCompile Include="src\bstorm\font_params.cpp" />
     <ClCompile Include="src\bstorm\log_error.cpp" />
     <ClCompile Include="src\bstorm\camera2D.cpp" />

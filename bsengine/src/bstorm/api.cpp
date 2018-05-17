@@ -36,6 +36,8 @@
 #undef VK_CANCEL
 #undef VK_PAUSE
 
+#undef GetObject
+
 namespace bstorm
 {
 static int GetModuleDirectory(lua_State* L)
@@ -5339,7 +5341,7 @@ static int SetShotDeleteEventEnable(lua_State* L)
 static int ClosePackage(lua_State* L)
 {
     Package* package = getPackage(L);
-    package->ClosePackage();
+    package->Close();
     return 0;
 }
 

@@ -19,6 +19,7 @@
 #include <d3d9.h>
 
 #undef CreateFont
+#undef GetObject
 
 namespace bstorm
 {
@@ -46,7 +47,6 @@ class LostableGraphicResource;
 class LostableGraphicResourceManager;
 class Mesh;
 class MeshCache;
-class MousePositionProvider;
 class Obj;
 class ObjCrLaser;
 class ObjEnemy;
@@ -95,10 +95,16 @@ namespace conf { struct KeyConfig; }
 class Package : public std::enable_shared_from_this<Package>
 {
 public:
-    Package(HWND hWnd, int screenWidth, int screenHeight, const std::shared_ptr<conf::KeyConfig>& defaultKeyConfig);
-    virtual ~Package();
-    void AddLostableGraphicResource(const std::shared_ptr<LostableGraphicResource>& resource);
-    HWND GetWindowHandle() const;
+    Package(HWND hWnd,
+            int screenWidth,
+            int screenHeight,
+            const std::wstring packageMainScriptPath,
+            const std::shared_ptr<conf::KeyConfig>& keyConfig,
+            const std::shared_ptr<GraphicDevice>& graphicDevice,
+            const std::shared_ptr<InputDevice>& inputDevice,
+            const std::shared_ptr<FpsCounter>& fpsCounter,
+            const std::shared_ptr<LostableGraphicResourceManager>& lostableGraphicResourceManager);
+    ~Package();
     /* package control */
     void TickFrame();
     void Render(); // render to backbuffer
@@ -111,15 +117,7 @@ public:
     void SetRenderIntersectionEnable(bool enable);
     bool IsForcePlayerInvincibleEnabled() const;
     void SetForcePlayerInvincibleEnable(bool enable);
-    /* graphic device control */
-    IDirect3DDevice9* GetDirect3DDevice() const;
-    // should call only to reset device
-    void ResetGraphicDevice();
-    void ReleaseLostableGraphicResource();
-    void RestoreLostableGraphicDevice();
-    // set backbuffer to render-target
-    void SetBackBufferRenderTarget();
-    void ReleaseUnusedLostableGraphicResource();
+
     /* input */
     KeyState GetKeyState(Key k);
     KeyState GetVirtualKeyState(VirtualKey vk);
@@ -129,17 +127,15 @@ public:
     int GetMouseX();
     int GetMouseY();
     int GetMouseMoveZ();
-    void SetMousePostionProvider(const std::shared_ptr<MousePositionProvider>& provider);
-    void SetInputEnable(bool enable);
+
     /* logging function */
     void WriteLog(const std::string&& msg, const std::shared_ptr<SourcePos>& srcPos);
+
     /* time */
     std::wstring GetCurrentDateTimeS();
     float GetCurrentFps() const;
     float GetStageTime() const;
     float GetPackageTime() const;
-    void UpdateFpsCounter();
-    void ResetFpsCounter();
     void StartSlow(int pseudoFps, bool byPlayer);
     void StopSlow(bool byPlayer);
     int64_t GetElapsedFrame() const;
@@ -207,9 +203,11 @@ public:
     void SetInvalidRenderPriority(int min, int max);
     void ClearInvalidRenderPriority();
     NullableSharedPtr<Shader> GetShader(int p) const;
+
     /* renderer */
     void SetFogEnable(bool enable);
     void SetFogParam(float fogStart, float fogEnd, int r, int g, int b);
+
     /* 3D camera */
     void SetCameraFocusX(float x);
     void SetCameraFocusY(float y);
@@ -235,6 +233,7 @@ public:
     float GetCameraPitch() const;
     float GetCameraRoll() const;
     void SetCameraPerspectiveClip(float nearClip, float farClip);
+
     /* 2D camera */
     void Set2DCameraFocusX(float x);
     void Set2DCameraFocusY(float y);
@@ -249,6 +248,7 @@ public:
     float Get2DCameraRatio() const;
     float Get2DCameraRatioX() const;
     float Get2DCameraRatioY() const;
+
     /* common data */
     void SetCommonData(const std::wstring& key, std::unique_ptr<DnhValue>&& value);
     const std::unique_ptr<DnhValue>& GetCommonData(const std::wstring& key, const std::unique_ptr<DnhValue>& defaultValue) const;
@@ -268,7 +268,9 @@ public:
     bool SaveCommonDataAreaA2(const std::wstring& areaName, const std::wstring& path) const;
     bool LoadCommonDataAreaA2(const std::wstring& areaName, const std::wstring& path);
     std::wstring GetDefaultCommonDataSavePath(const std::wstring& areaName) const;
+
     /* user def data */
+    // TODO: あとで消す
     void LoadPlayerShotData(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
     void ReloadPlayerShotData(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
     void LoadEnemyShotData(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
@@ -278,6 +280,7 @@ public:
     NullableSharedPtr<ShotData> GetPlayerShotData(int id) const;
     NullableSharedPtr<ShotData> GetEnemyShotData(int id) const;
     NullableSharedPtr<ItemData> GetItemData(int id) const;
+
     /* object */
     template <class T>
     NullableSharedPtr<T> GetObject(int id) const
@@ -304,12 +307,17 @@ public:
         }
         return objs;
     }
+
+    // TODO: 消す
     NullableSharedPtr<ObjPlayer> GetPlayerObject() const;
     NullableSharedPtr<ObjEnemy> GetEnemyBossObject() const;
     NullableSharedPtr<ObjEnemyBossScene> GetEnemyBossSceneObject() const;
     NullableSharedPtr<ObjSpellManage> GetSpellManageObject() const;
+
     void DeleteObject(int id);
     bool IsObjectDeleted(int id) const;
+
+    // TODO: 消す
     std::shared_ptr<ObjPrim2D> CreateObjPrim2D();
     std::shared_ptr<ObjSprite2D> CreateObjSprite2D();
     std::shared_ptr<ObjSpriteList2D> CreateObjSpriteList2D();
@@ -343,6 +351,7 @@ public:
     std::shared_ptr<ObjEnemyBossScene> CreateObjEnemyBossScene(const std::shared_ptr<SourcePos>& srcPos);
     std::shared_ptr<ObjSpell> CreateObjSpell();
     std::shared_ptr<ObjItem> CreateObjItem(int itemType);
+
     /* script */
     std::shared_ptr<Script> GetScript(int scriptId) const;
     std::shared_ptr<Script> LoadScript(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<SourcePos>& srcPos);
@@ -387,10 +396,12 @@ public:
     float GetStgFrameCenterWorldY() const;
     float GetStgFrameCenterScreenX() const;
     float GetStgFrameCenterScreenY() const;
+
     /* shot */
     int GetAllShotCount() const;
     int GetEnemyShotCount() const;
     int GetPlayerShotCount() const;
+
     /* shot auto delete clip */
     void SetShotAutoDeleteClip(float left, float top, float right, float bottom);
     bool IsOutOfShotAutoDeleteClip(float x, float y) const;
@@ -403,6 +414,7 @@ public:
     std::vector<std::shared_ptr<ObjShot>> GetShotInCircle(float x, float y, float r, int tarGet) const;
     void SetShotIntersectoinCicle(float x, float y, float r);
     void SetShotIntersectoinLine(float x1, float y1, float x2, float y2, float width);
+
     /* item */
     void CollectAllItems();
     void CollectItemsByType(int itemType);
@@ -410,9 +422,10 @@ public:
     void CancelCollectItems();
     void SetDefaultBonusItemEnable(bool enable);
     void StartItemScript(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+
     /* package */
-    bool IsPackageFinished() const;
-    void ClosePackage();
+    bool IsFinished() const;
+    void Close();
     void InitializeStageScene();
     void FinalizeStageScene();
     void StartStageScene(const std::shared_ptr<SourcePos>& srcPos);
@@ -427,9 +440,7 @@ public:
     bool IsStagePaused() const;
     void PauseStageScene(bool doPause);
     void TerminateStageScene();
-    void SetPackageMainScript(const std::wstring& path);
-    void SetPackageMainScript(const ScriptInfo& script);
-    void StartPackage();
+    void Start();
 
     /* for default package */
     void SetPauseScriptPath(const std::wstring& path);
@@ -442,18 +453,16 @@ public:
     /* backdoor */
     template <typename T>
     void backDoor() {}
-//private:
+    //private:
     void RenderToTexture(const std::wstring& renderTargetName, int begin, int end, int objId, bool doClear, bool renderToBackBuffer, bool checkInvalidRenderPriority, bool checkVisibleFlag);
     NullableSharedPtr<Obj> GetObj(int id) const;
     const std::map<int, std::shared_ptr<Obj>>& GetObjAll() const;
-    HWND hWnd;
-    std::unique_ptr<GraphicDevice> graphicDevice;
-    std::unique_ptr<LostableGraphicResourceManager> lostableGraphicResourceManager;
-    std::shared_ptr<conf::KeyConfig> defaultKeyConfig;
-    std::shared_ptr<MousePositionProvider> mousePosProvider;
+    HWND hWnd_;
+    std::shared_ptr<GraphicDevice> graphicDevice_;
+    std::shared_ptr<InputDevice> inputDevice_;
+    std::shared_ptr<FpsCounter> fpsCounter_;
+    std::shared_ptr<LostableGraphicResourceManager> lostableGraphicResourceManager_;
     std::unordered_map<std::wstring, std::shared_ptr<RenderTarget>> renderTargets;
-    std::shared_ptr<FpsCounter> fpsCounter;
-    std::shared_ptr<InputDevice> inputDevice;
     std::shared_ptr<KeyAssign> keyAssign;
     std::shared_ptr<FileLoader> fileLoader;
     std::shared_ptr<VirtualKeyInputSource> vKeyInputSource;
@@ -482,16 +491,15 @@ public:
     std::shared_ptr<DefaultBonusItemSpawner> defaultBonusItemSpawner;
     std::shared_ptr<AutoItemCollectionManager> autoItemCollectionManager;
     int elapsedFrame;
-    std::shared_ptr<TimePoint> packageStartTime;
     std::shared_ptr<TimePoint> stageStartTime;
     std::vector<ScriptInfo> freePlayerScriptInfoList;
     int pseudoPlayerFps;
     int pseudoEnemyFps;
-    ScriptInfo packageMainScriptInfo;
+    const ScriptInfo packageMainScriptInfo_;
     ScriptInfo stageMainScriptInfo;
     ScriptInfo stagePlayerScriptInfo;
     std::weak_ptr<Script> packageMainScript;
-    std::weak_ptr<Script> stageMainScript;
+    std::weak_ptr<Script> stageMainScript_;
     std::weak_ptr<Script> stagePlayerScript;
     std::weak_ptr<Script> shotScript;
     std::weak_ptr<Script> itemScript;
@@ -513,5 +521,7 @@ public:
     Rect<float> shotAutoDeleteClip_;
     const std::shared_ptr<FontCache> fontCache_;
     StageCommonPlayerParams stageCommonPlayerParams_;
+
+    const std::shared_ptr<TimePoint> packageStartTime;
 };
 }

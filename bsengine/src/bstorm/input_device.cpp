@@ -27,7 +27,7 @@ static BOOL CALLBACK enumAxesCallback(LPCDIDEVICEOBJECTINSTANCE pdidoi, LPVOID d
     return DIENUM_CONTINUE;
 }
 
-InputDevice::InputDevice(HWND hWnd, const std::shared_ptr<MousePositionProvider>& mousePosProvider) :
+InputDevice::InputDevice(HWND hWnd) :
     hWnd_(hWnd),
     dInput_(NULL),
     keyboardDevice_(NULL),
@@ -36,7 +36,7 @@ InputDevice::InputDevice(HWND hWnd, const std::shared_ptr<MousePositionProvider>
     padInputState_(NULL),
     prevPadInputState_(NULL),
     mouseMoveZ_(0),
-    mousePosProvider_(mousePosProvider),
+    mousePosProvider_(nullptr),
     inputEnable_(true)
 {
     try

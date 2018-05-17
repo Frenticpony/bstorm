@@ -37,7 +37,7 @@ void ItemDataTable::Add(const std::shared_ptr<ItemData>& data)
     }
 }
 
-void ItemDataTable::Load(const std::wstring & path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<SourcePos>& srcPos)
+void ItemDataTable::Load(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
     if (IsLoaded(path))
     {
@@ -48,14 +48,14 @@ void ItemDataTable::Load(const std::wstring & path, const std::shared_ptr<FileLo
             .AddSourcePos(srcPos)));
     } else
     {
-        Reload(path, loader, srcPos);
+        Reload(path, srcPos);
     }
 }
 
-void ItemDataTable::Reload(const std::wstring & path, const std::shared_ptr<FileLoader>& loader, const std::shared_ptr<SourcePos>& srcPos)
+void ItemDataTable::Reload(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
     std::wstring uniqPath = GetCanonicalPath(path);
-    auto userItemData = ParseUserItemData(uniqPath, loader);
+    auto userItemData = ParseUserItemData(uniqPath, fileLoader_);
     auto texture = textureCache_->Load(userItemData->imagePath, false, srcPos);
     for (auto& entry : userItemData->dataMap)
     {

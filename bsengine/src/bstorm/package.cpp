@@ -57,33 +57,37 @@
 #undef VK_PAUSE
 
 #undef CreateFont
-
+#undef GetObject
 
 namespace bstorm
 {
-Package::Package(HWND hWnd, int screenWidth, int screenHeight, const std::shared_ptr<conf::KeyConfig>& defaultKeyConfig) :
-    hWnd(hWnd),
-    graphicDevice(std::make_unique<GraphicDevice>(hWnd)),
-    lostableGraphicResourceManager(std::make_unique<LostableGraphicResourceManager>()),
-    defaultKeyConfig(defaultKeyConfig),
-    fpsCounter(std::make_shared<FpsCounter>()),
-    inputDevice(std::make_shared<InputDevice>(hWnd, mousePosProvider)),
+Package::Package(HWND hWnd,
+                 int screenWidth,
+                 int screenHeight,
+                 const std::wstring packageMainScriptPath,
+                 const std::shared_ptr<conf::KeyConfig>& keyConfig,
+                 const std::shared_ptr<GraphicDevice>& graphicDevice,
+                 const std::shared_ptr<InputDevice>& inputDevice,
+                 const std::shared_ptr<FpsCounter>& fpsCounter,
+                 const std::shared_ptr<LostableGraphicResourceManager>& lostableGraphicResourceManager) :
+    hWnd_(hWnd),
+    graphicDevice_(graphicDevice),
+    inputDevice_(inputDevice),
+    lostableGraphicResourceManager_(lostableGraphicResourceManager),
+    fpsCounter_(fpsCounter),
     keyAssign(std::make_shared<KeyAssign>()),
     fileLoader(std::make_shared<FileLoaderFromTextFile>()),
-    vKeyInputSource(std::make_shared<RealDeviceInputSource>(inputDevice, keyAssign)),
+    vKeyInputSource(std::make_shared<RealDeviceInputSource>(inputDevice_, keyAssign)),
     soundDevice(std::make_shared<SoundDevice>(hWnd)),
-    renderer(std::make_shared<Renderer>(graphicDevice->GetDevice())),
+    renderer(std::make_shared<Renderer>(graphicDevice_->GetDevice())),
     objTable(std::make_shared<ObjectTable>()),
     objLayerList(std::make_shared<ObjectLayerList>()),
     colDetector(std::make_shared<CollisionDetector>(screenWidth, screenHeight, std::make_shared<CollisionMatrix>(DEFAULT_COLLISION_MATRIX_DIMENSION, DEFAULT_COLLISION_MATRIX))),
-    textureCache(std::make_shared<TextureCache>(graphicDevice->GetDevice())),
+    textureCache(std::make_shared<TextureCache>(graphicDevice_->GetDevice())),
     meshCache(std::make_shared<MeshCache>(textureCache, fileLoader)),
     camera2D(std::make_shared<Camera2D>()),
     camera3D(std::make_shared<Camera3D>()),
     commonDataDB(std::make_shared<CommonDataDB>()),
-#ifndef _DEBUG 
-    FIXME!
-#endif
     scriptManager(std::make_shared<ScriptManager>(this)),
     playerShotDataTable(std::make_shared<ShotDataTable>(ShotDataTable::Type::PLAYER, textureCache, fileLoader)),
     enemyShotDataTable(std::make_shared<ShotDataTable>(ShotDataTable::Type::ENEMY, textureCache, fileLoader)),
@@ -94,11 +98,10 @@ Package::Package(HWND hWnd, int screenWidth, int screenHeight, const std::shared
     defaultBonusItemSpawner(std::make_shared<DefaultBonusItemSpawner>()),
     autoItemCollectionManager(std::make_shared<AutoItemCollectionManager>()),
     elapsedFrame(0),
-    packageStartTime(std::make_shared<TimePoint>()),
     stageStartTime(std::make_shared<TimePoint>()),
     pseudoPlayerFps(60),
     pseudoEnemyFps(60),
-    packageMainScriptInfo(),
+    packageMainScriptInfo_(ScanDnhScriptInfo(packageMainScriptPath, fileLoader)),
     stageMainScriptInfo(),
     stagePlayerScriptInfo(),
     stageIdx(ID_INVALID),
@@ -115,7 +118,8 @@ Package::Package(HWND hWnd, int screenWidth, int screenHeight, const std::shared
     defaultBonusItemEnable(true),
     stgFrame_(32.0f, 16.0f, 416.0f, 464.0f),
     shotAutoDeleteClip_(64.0f, 64.0f, 64.0f, 64.0f),
-    fontCache_(std::make_shared<FontCache>(hWnd, graphicDevice->GetDevice()))
+    fontCache_(std::make_shared<FontCache>(hWnd, graphicDevice_->GetDevice())),
+    packageStartTime(std::make_shared<TimePoint>())
 {
     Logger::SetEnable(false);
     Reset2DCamera();
@@ -127,8 +131,8 @@ Package::Package(HWND hWnd, int screenWidth, int screenHeight, const std::shared
     renderer->SetForbidCameraViewProjMatrix2D(GetScreenWidth(), GetScreenHeight());
     renderer->SetFogEnable(false);
     Logger::SetEnable(true);
-    Logger::WriteLog(Log::Level::LV_INFO, "boot package.");
-    for (const auto& keyMap : defaultKeyConfig->keyMaps)
+
+    for (const auto& keyMap : keyConfig->keyMaps)
     {
         keyAssign->AddVirtualKey(keyMap.vkey, keyMap.key, keyMap.pad);
     }
@@ -136,17 +140,14 @@ Package::Package(HWND hWnd, int screenWidth, int screenHeight, const std::shared
 
 Package::~Package()
 {
-    Logger::WriteLog(Log::Level::LV_INFO, "shutdown package.");
-}
-
-HWND Package::GetWindowHandle() const
-{
-    return hWnd;
+    objTable.reset();
+    scriptManager.reset();
+    Logger::WriteLog(Log::Level::LV_INFO, "close package.");
 }
 
 void Package::TickFrame()
 {
-    if (IsPackageFinished())
+    if (IsFinished())
     {
         Logger::WriteLog(Log::Level::LV_WARN, "package is not setted, please select package.");
         return;
@@ -164,7 +165,7 @@ void Package::TickFrame()
 
     if (GetElapsedFrame() % (60 / std::min(pseudoEnemyFps, pseudoPlayerFps)) == 0)
     {
-        if (auto stageMain = stageMainScript.lock())
+        if (auto stageMain = stageMainScript_.lock())
         {
             if (stageMain->IsClosed())
             {
@@ -187,7 +188,7 @@ void Package::TickFrame()
                 RenderToTextureA1(GetTransitionRenderTargetName(), 0, MAX_RENDER_PRIORITY, true);
                 objTable->DeleteStgSceneObject();
                 scriptManager->CloseStgSceneScript();
-                stageMainScript.reset();
+                stageMainScript_.reset();
                 stagePlayerScript.reset();
                 stageForceTerminated = false;
                 stagePaused = true;
@@ -204,7 +205,7 @@ void Package::TickFrame()
         // SetShotIntersection{Circle, Line}で設定した判定削除
         tempEnemyShotIsects.clear();
 
-        inputDevice->UpdateInputState();
+        inputDevice_->UpdateInputState();
 
         scriptManager->RunAll(IsStagePaused());
 
@@ -215,9 +216,6 @@ void Package::TickFrame()
     // 使われなくなったリソース開放
     switch (GetElapsedFrame() % 1920)
     {
-        case 0:
-            ReleaseUnusedLostableGraphicResource();
-            break;
         case 480:
             ReleaseUnusedTexture();
             break;
@@ -281,44 +279,9 @@ void Package::SetForcePlayerInvincibleEnable(bool enable)
     forcePlayerInvincibleEnable = enable;
 }
 
-IDirect3DDevice9* Package::GetDirect3DDevice() const
-{
-    return graphicDevice->GetDevice();
-}
-
-void Package::ResetGraphicDevice()
-{
-    graphicDevice->Reset();
-}
-
-void Package::AddLostableGraphicResource(const std::shared_ptr<LostableGraphicResource>& resource)
-{
-    lostableGraphicResourceManager->AddResource(resource);
-}
-
-void Package::ReleaseLostableGraphicResource()
-{
-    lostableGraphicResourceManager->OnLostDeviceAll();
-}
-
-void Package::RestoreLostableGraphicDevice()
-{
-    lostableGraphicResourceManager->OnResetDeviceAll();
-}
-
-void Package::SetBackBufferRenderTarget()
-{
-    graphicDevice->SetBackbufferRenderTarget();
-}
-
-void Package::ReleaseUnusedLostableGraphicResource()
-{
-    lostableGraphicResourceManager->ReleaseUnusedResource();
-}
-
 KeyState Package::GetKeyState(Key k)
 {
-    return inputDevice->GetKeyState(k);
+    return inputDevice_->GetKeyState(k);
 }
 
 KeyState Package::GetVirtualKeyState(VirtualKey vk)
@@ -338,33 +301,22 @@ void Package::AddVirtualKey(VirtualKey vk, Key k, PadButton btn)
 
 KeyState Package::GetMouseState(MouseButton btn)
 {
-    return inputDevice->GetMouseState(btn);
+    return inputDevice_->GetMouseState(btn);
 }
 
 int Package::GetMouseX()
 {
-    return inputDevice->GetMouseX(GetScreenWidth(), GetScreenHeight());
+    return inputDevice_->GetMouseX(GetScreenWidth(), GetScreenHeight());
 }
 
 int Package::GetMouseY()
 {
-    return inputDevice->GetMouseY(GetScreenWidth(), GetScreenHeight());
+    return inputDevice_->GetMouseY(GetScreenWidth(), GetScreenHeight());
 }
 
 int Package::GetMouseMoveZ()
 {
-    return inputDevice->GetMouseMoveZ();
-}
-
-void Package::SetMousePostionProvider(const std::shared_ptr<MousePositionProvider>& provider)
-{
-    mousePosProvider = provider;
-    inputDevice->SetMousePositionProvider(mousePosProvider);
-}
-
-void Package::SetInputEnable(bool enable)
-{
-    inputDevice->SetInputEnable(enable);
+    return inputDevice_->GetMouseMoveZ();
 }
 
 void Package::WriteLog(const std::string && msg, const std::shared_ptr<SourcePos>& srcPos)
@@ -386,7 +338,7 @@ std::wstring Package::GetCurrentDateTimeS()
 
 float Package::GetCurrentFps() const
 {
-    return fpsCounter->GetStable();
+    return fpsCounter_->GetStable();
 }
 
 float Package::GetStageTime() const
@@ -401,16 +353,6 @@ float Package::GetStageTime() const
 float Package::GetPackageTime() const
 {
     return packageStartTime->GetElapsedMilliSec();
-}
-
-void Package::UpdateFpsCounter()
-{
-    fpsCounter->Update();
-}
-
-void Package::ResetFpsCounter()
-{
-    fpsCounter = std::make_shared<FpsCounter>();
 }
 
 void Package::StartSlow(int pseudoFps, bool byPlayer)
@@ -453,7 +395,7 @@ std::wstring Package::GetMainStgScriptDirectory() const
 
 std::wstring Package::GetMainPackageScriptPath() const
 {
-    return packageMainScriptInfo.path;
+    return packageMainScriptInfo_.path;
 }
 
 std::shared_ptr<Texture> Package::LoadTexture(const std::wstring & path, bool reserve, const std::shared_ptr<SourcePos>& srcPos)
@@ -507,10 +449,10 @@ bool Package::InstallFont(const std::wstring & path, const std::shared_ptr<Sourc
 
 std::shared_ptr<RenderTarget> Package::CreateRenderTarget(const std::wstring & name, int width, int height, const std::shared_ptr<SourcePos>& srcPos)
 {
-    auto renderTarget = std::make_shared<RenderTarget>(name, width, height, GetDirect3DDevice());
+    auto renderTarget = std::make_shared<RenderTarget>(name, width, height, graphicDevice_->GetDevice());
     renderTarget->SetViewport(0, 0, GetScreenWidth(), GetScreenHeight());
     renderTargets[name] = renderTarget;
-    AddLostableGraphicResource(renderTarget);
+    lostableGraphicResourceManager_->AddResource(renderTarget);
     Logger::WriteLog(std::move(
         Log(Log::Level::LV_INFO)
         .SetMessage("create render target.")
@@ -622,15 +564,15 @@ void Package::SaveSnapShotA2(const std::wstring & path, int left, int top, int r
 
 std::shared_ptr<Shader> Package::CreateShader(const std::wstring & path, bool precompiled)
 {
-    auto shader = std::make_shared<Shader>(path, precompiled, GetDirect3DDevice());
-    AddLostableGraphicResource(shader);
+    auto shader = std::make_shared<Shader>(path, precompiled, graphicDevice_->GetDevice());
+    lostableGraphicResourceManager_->AddResource(shader);
     return shader;
 }
 
 bool Package::IsPixelShaderSupported(int major, int minor)
 {
     D3DCAPS9 caps;
-    GetDirect3DDevice()->GetDeviceCaps(&caps);
+    graphicDevice_->GetDevice()->GetDeviceCaps(&caps);
     return caps.PixelShaderVersion >= D3DPS_VERSION(major, minor);
 }
 
@@ -1143,12 +1085,12 @@ void Package::ReloadEnemyShotData(const std::wstring & path, const std::shared_p
 
 void Package::LoadItemData(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
-    itemDataTable->Load(path, fileLoader, srcPos);
+    itemDataTable->Load(path, srcPos);
 }
 
 void Package::ReloadItemData(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
-    itemDataTable->Reload(path, fileLoader, srcPos);
+    itemDataTable->Reload(path, srcPos);
 }
 
 NullableSharedPtr<ShotData> Package::GetPlayerShotData(int id) const
@@ -1441,7 +1383,7 @@ std::shared_ptr<Script> Package::LoadScriptInThread(const std::wstring & path, c
 
 void Package::CloseStgScene()
 {
-    if (auto stageMain = stageMainScript.lock())
+    if (auto stageMain = stageMainScript_.lock())
     {
         stageMain->Close();
     }
@@ -1729,6 +1671,7 @@ float Package::GetStgFrameCenterScreenY() const
 {
     return (stgFrame_.bottom + stgFrame_.top) / 2.0f;
 }
+
 int Package::GetAllShotCount() const
 {
     return shotCounter->playerShotCount + shotCounter->enemyShotCount;
@@ -1932,7 +1875,7 @@ void Package::StartItemScript(const std::wstring & path, const std::shared_ptr<S
     itemScript->RunInitialize();
 }
 
-bool Package::IsPackageFinished() const
+bool Package::IsFinished() const
 {
     if (packageMainScript.lock())
     {
@@ -1941,7 +1884,7 @@ bool Package::IsPackageFinished() const
     return true;
 }
 
-void Package::ClosePackage()
+void Package::Close()
 {
     if (auto packageMain = packageMainScript.lock())
     {
@@ -1958,7 +1901,7 @@ void Package::InitializeStageScene()
     Reset2DCamera();
     SetDefaultBonusItemEnable(true);
     stageSceneResult = 0;
-    stageMainScript.reset();
+    stageMainScript_.reset();
     stagePlayerScript.reset();
 
     SetPlayerLife(2);
@@ -1984,16 +1927,10 @@ void Package::FinalizeStageScene()
     // FUTURE : impl
 }
 
-void Package::StartPackage()
+void Package::Start()
 {
-    if (!IsPackageFinished())
-    {
-        Logger::WriteLog(Log::Level::LV_WARN, "package already started.");
-        return;
-    }
-    packageStartTime = std::make_shared<TimePoint>();
     Logger::WriteLog(Log::Level::LV_INFO, "start package.");
-    auto script = scriptManager->Compile(packageMainScriptInfo.path, SCRIPT_TYPE_PACKAGE, packageMainScriptInfo.version, nullptr);
+    auto script = scriptManager->Compile(packageMainScriptInfo_.path, SCRIPT_TYPE_PACKAGE, packageMainScriptInfo_.version, nullptr);
     packageMainScript = script;
     script->Start();
     script->RunInitialize();
@@ -2096,7 +2033,7 @@ void Package::SetStageReplayFile(const std::wstring & path)
 
 bool Package::IsStageFinished() const
 {
-    if (stageMainScript.lock())
+    if (stageMainScript_.lock())
     {
         return false;
     }
@@ -2127,44 +2064,25 @@ void Package::PauseStageScene(bool doPause)
 
 void Package::TerminateStageScene()
 {
-    if (auto stageMain = stageMainScript.lock())
+    if (auto stageMain = stageMainScript_.lock())
     {
         stageMain->Close();
         stageForceTerminated = true;
     }
 }
 
-void Package::SetPackageMainScript(const std::wstring & path)
-{
-    try
-    {
-        packageMainScriptInfo = ScanDnhScriptInfo(path, fileLoader);
-    } catch (Log& log)
-    {
-        log.SetLevel(Log::Level::LV_WARN);
-        Logger::WriteLog(log);
-        stageMainScriptInfo = ScriptInfo();
-        stageMainScriptInfo.path = path;
-    }
-}
-
-void Package::SetPackageMainScript(const ScriptInfo & script)
-{
-    packageMainScriptInfo = script;
-}
-
 void Package::StartStageScene(const std::shared_ptr<SourcePos>& srcPos)
 {
     objTable->DeleteStgSceneObject();
     scriptManager->CloseStgSceneScript();
-    inputDevice->ResetInputState();
+    inputDevice_->ResetInputState();
     Reset2DCamera();
     ResetCamera();
     SetDefaultBonusItemEnable(true);
     playerShotDataTable = std::make_shared<ShotDataTable>(ShotDataTable::Type::PLAYER, textureCache, fileLoader);
     enemyShotDataTable = std::make_shared<ShotDataTable>(ShotDataTable::Type::ENEMY, textureCache, fileLoader);
     itemDataTable = std::make_shared<ItemDataTable>(textureCache, fileLoader);
-    stageMainScript.reset();
+    stageMainScript_.reset();
     stagePlayerScript.reset();
     ReloadItemData(DEFAULT_ITEM_DATA_PATH, nullptr);
     stageSceneResult = 0;
@@ -2211,7 +2129,7 @@ void Package::StartStageScene(const std::shared_ptr<SourcePos>& srcPos)
         stageMainScriptPath = SYSTEM_PLURAL_STAGE_PATH;
     }
     auto stageMainScript = scriptManager->Compile(stageMainScriptPath, SCRIPT_TYPE_STAGE, stageMainScriptInfo.version, srcPos);
-    stageMainScript = stageMainScript;
+    stageMainScript_ = stageMainScript;
     stageMainScript->Start();
     stageMainScript->RunInitialize();
     stageStartTime = std::make_shared<TimePoint>();
@@ -2230,7 +2148,7 @@ void Package::StartStageScene(const std::shared_ptr<SourcePos>& srcPos)
         try
         {
             LoadOrphanSound(stageMainScriptInfo.bgmPath, nullptr); // TODO: #BGMヘッダのSourcePosを与える
-            auto& bgm = orphanSounds[GetCanonicalPath(packageMainScriptInfo.bgmPath)];
+            auto& bgm = orphanSounds[GetCanonicalPath(packageMainScriptInfo_.bgmPath)];
             bgm->SetLoopEnable(true);
             bgm->Play();
         } catch (Log& log)
@@ -2246,7 +2164,7 @@ void Package::RenderToTexture(const std::wstring& name, int begin, int end, int 
 {
     if (renderToBackBuffer)
     {
-        graphicDevice->SetBackbufferRenderTarget();
+        graphicDevice_->SwitchRenderTargetToBackBuffer();
     } else
     {
         auto renderTarget = GetRenderTarget(name);
@@ -2260,7 +2178,7 @@ void Package::RenderToTexture(const std::wstring& name, int begin, int end, int 
 
     if (doClear)
     {
-        graphicDevice->GetDevice()->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+        graphicDevice_->GetDevice()->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
     }
 
     begin = std::max(begin, 0);
@@ -2305,10 +2223,10 @@ void Package::RenderToTexture(const std::wstring& name, int begin, int end, int 
             RECT scissorRect = { (LONG)stgFrame_.left, (LONG)stgFrame_.top, (LONG)stgFrame_.right, (LONG)stgFrame_.bottom };
             if (renderToBackBuffer)
             {
-                scissorRect.left = stgFrame_.left * graphicDevice->GetBackBufferWidth() / screenWidth;
-                scissorRect.top = stgFrame_.top * graphicDevice->GetBackBufferHeight() / screenHeight;
-                scissorRect.right = stgFrame_.right * graphicDevice->GetBackBufferWidth() / screenWidth;
-                scissorRect.bottom = stgFrame_.bottom * graphicDevice->GetBackBufferHeight() / screenHeight;
+                scissorRect.left = stgFrame_.left * graphicDevice_->GetBackBufferWidth() / screenWidth;
+                scissorRect.top = stgFrame_.top * graphicDevice_->GetBackBufferHeight() / screenHeight;
+                scissorRect.right = stgFrame_.right * graphicDevice_->GetBackBufferWidth() / screenWidth;
+                scissorRect.bottom = stgFrame_.bottom * graphicDevice_->GetBackBufferHeight() / screenHeight;
             }
             renderer->EnableScissorTest(scissorRect);
         }
@@ -2378,7 +2296,7 @@ void Package::RenderToTexture(const std::wstring& name, int begin, int end, int 
             }
         }
     }
-    SetBackBufferRenderTarget();
+    graphicDevice_->SwitchRenderTargetToBackBuffer();
 }
 
 NullableSharedPtr<Obj> Package::GetObj(int id) const
