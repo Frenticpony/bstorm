@@ -27,31 +27,31 @@ void ObjCol::AddTempIntersection(const std::shared_ptr<Intersection>& isect)
 
 void ObjCol::TransIntersection(float dx, float dy)
 {
-    if (auto state = package_.lock())
+    if (auto package = package_.lock())
     {
         for (auto& isect : isects_)
         {
-            state->colDetector->Trans(isect, dx, dy);
+            package->colDetector->Trans(isect, dx, dy);
         }
     }
 }
 
 void ObjCol::SetWidthIntersection(float width)
 {
-    if (auto state = package_.lock())
+    if (auto package = package_.lock())
     {
         for (auto& isect : isects_)
         {
-            state->colDetector->SetWidth(isect, width);
+            package->colDetector->SetWidth(isect, width);
         }
     }
 }
 
 void ObjCol::RenderIntersection(const std::shared_ptr<Renderer>& renderer, bool isPermitCamera) const
 {
-    if (auto state = package_.lock())
+    if (auto package = package_.lock())
     {
-        if (state->renderIntersectionEnable)
+        if (package->renderIntersectionEnable)
         {
             for (auto& isect : GetIntersections())
             {
