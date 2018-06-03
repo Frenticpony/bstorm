@@ -258,9 +258,6 @@
     <ClInclude Include="src\bstorm\engine.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\bstorm\lua_util.hpp">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="src\bstorm\engine_develop_options.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>

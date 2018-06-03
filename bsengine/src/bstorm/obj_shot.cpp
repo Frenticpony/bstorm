@@ -167,10 +167,7 @@ void ObjShot::Render(const std::shared_ptr<Renderer>& renderer)
                 (animationIdx_ >= 0 && animationIdx_ < shotData_->animationData.size()) ? shotData_->animationData[animationIdx_].rect :
                                             shotData_->rect);
 
-            if (auto package = GetPackage().lock())
-            {
-                renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData_->texture->GetTexture(), shotBlend, world, GetAppliedShader(), IsPermitCamera(), true);
-            }
+            renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData_->texture->GetTexture(), shotBlend, world, GetAppliedShader(), IsPermitCamera(), true);
         }
         RenderIntersection(renderer);
     }
@@ -972,10 +969,7 @@ void ObjLooseLaser::RenderLaser(float width, float length, float angle, const st
         float rectHeight = abs(vertices[0].y - vertices[2].y);
         D3DXMATRIX world = CreateScaleRotTransMatrix(centerX, centerY, 0.0f, 0.0f, 0.0f, angle + 90.0f, width / rectWidth, length / rectHeight, 1.0f);
 
-        if (auto package = GetPackage().lock())
-        {
-            renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData->texture->GetTexture(), laserBlend, world, GetAppliedShader(), IsPermitCamera(), false);
-        }
+        renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData->texture->GetTexture(), laserBlend, world, GetAppliedShader(), IsPermitCamera(), false);
     }
 }
 

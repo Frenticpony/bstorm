@@ -102,10 +102,7 @@ void ObjText::RenderFont(const std::shared_ptr<Font>& font, const D3DXMATRIX& wo
     vertices[1].x = vertices[3].x = font->GetWidth();
     vertices[2].y = vertices[3].y = font->GetHeight();
 
-    if (auto package = GetPackage().lock())
-    {
-        renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), font->GetTexture(), GetBlendType(), world, GetAppliedShader(), IsPermitCamera(), true);
-    }
+    renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), font->GetTexture(), GetBlendType(), world, GetAppliedShader(), IsPermitCamera(), true);
 }
 
 void ObjText::SetText(const std::wstring& t)

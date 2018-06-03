@@ -30,7 +30,6 @@
     <ClInclude Include="src\bstorm\engine_develop_options.hpp" />
     <ClInclude Include="src\bstorm\font_params.hpp" />
     <ClInclude Include="src\bstorm\key_types.hpp" />
-    <ClInclude Include="src\bstorm\lua_util.hpp" />
     <ClInclude Include="src\bstorm\nullable_shared_ptr.hpp" />
     <ClInclude Include="src\bstorm\obj_stage.hpp" />
     <ClInclude Include="src\bstorm\point2D.hpp" />
