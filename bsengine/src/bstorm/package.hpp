@@ -106,6 +106,7 @@ public:
             const std::shared_ptr<LostableGraphicResourceManager>& lostableGraphicResourceManager,
             const std::shared_ptr<EngineDevelopOptions>& engineDevelopOptions);
     ~Package();
+
     /* package control */
     void TickFrame();
     void Render(); // render to backbuffer

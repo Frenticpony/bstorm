@@ -213,6 +213,9 @@ void Package::TickFrame()
     // 使われなくなったリソース開放
     switch (GetElapsedFrame() % 1920)
     {
+        case 0:
+            lostableGraphicResourceManager_->ReleaseUnusedResource();
+            break;
         case 480:
             ReleaseUnusedTexture();
             break;
