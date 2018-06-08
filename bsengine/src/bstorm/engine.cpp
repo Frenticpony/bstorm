@@ -25,7 +25,7 @@ Engine::Engine(HWND hWnd, const conf::KeyConfig* keyConfig) :
 
 std::shared_ptr<Package> Engine::CreatePackage(int screenWidth, int screenHeight, const std::wstring & packageMainScriptPath) noexcept(false)
 {
-    return std::make_shared<Package>(hWnd_, screenWidth, screenHeight, packageMainScriptPath, keyConfig_, graphicDevice_, inputDevice_, fpsCounter_, lostableGraphicResourceManager_);
+    return std::make_shared<Package>(hWnd_, screenWidth, screenHeight, packageMainScriptPath, keyConfig_, graphicDevice_, inputDevice_, fpsCounter_, lostableGraphicResourceManager_, engineDevelopOptions_);
 }
 
 IDirect3DDevice9* Engine::GetDirect3DDevice() const

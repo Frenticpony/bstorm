@@ -490,7 +490,10 @@ CollisionDetector::~CollisionDetector()
 
 void CollisionDetector::Add(const std::shared_ptr<Intersection>& isect)
 {
-    assert(isect->treeIdx_ < 0);
+    if (isect->treeIdx_ >= 0)
+    {
+        Remove(isect);
+    }
     isect->treeIdx_ = CalcTreeIndexFromBoundingBox(isect->shape_.GetBoundingBox());
     auto& cell = quadTree_[isect->treeIdx_];
     isect->posInCell_ = cell.insert(cell.end(), isect);
@@ -498,9 +501,11 @@ void CollisionDetector::Add(const std::shared_ptr<Intersection>& isect)
 
 void CollisionDetector::Remove(const std::shared_ptr<Intersection>& isect)
 {
-    assert(isect->treeIdx_ >= 0);
-    isect->posInCell_->reset();
-    isect->treeIdx_ = -1;
+    if (isect->treeIdx_ >= 0)
+    {
+        isect->posInCell_->reset();
+        isect->treeIdx_ = -1;
+    }
 }
 
 void CollisionDetector::Update(const std::shared_ptr<Intersection>& isect)

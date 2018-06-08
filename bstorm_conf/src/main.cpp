@@ -131,7 +131,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
     MSG msg;
     try
     {
-        InputDevice inputDevice(hWnd, nullptr);
+        InputDevice inputDevice(hWnd);
 
         {
             /* init imgui */

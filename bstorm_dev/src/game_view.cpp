@@ -3,6 +3,7 @@
 #include <IconsFontAwesome_c.h>
 
 #include <bstorm/render_target.hpp>
+#include <bstorm/package.hpp>
 #include <bstorm/util.hpp>
 
 #include "play_controller.hpp"
@@ -25,7 +26,7 @@ GameView::GameView(int iniLeft, int iniTop, int iniWidth, int iniHeight, const s
 
 GameView::~GameView() {}
 
-void GameView::draw(const std::shared_ptr<RenderTarget>& renderTarget)
+void GameView::draw()
 {
     ImGui::SetNextWindowPos(ImVec2(iniLeft, iniTop), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(iniWidth, iniHeight + 65), ImGuiCond_FirstUseEver);
@@ -36,7 +37,7 @@ void GameView::draw(const std::shared_ptr<RenderTarget>& renderTarget)
         ImGuiWindowFlags_NoScrollWithMouse;
     if (ImGui::Begin("Game View", NULL, windowFlags))
     {
-        playController->setInputEnable(ImGui::IsWindowFocused());
+        playController->SetInputEnable(ImGui::IsWindowFocused());
         {
             // menu bar
             ImGui::PopStyleVar();
@@ -107,12 +108,12 @@ void GameView::draw(const std::shared_ptr<RenderTarget>& renderTarget)
             {
                 // info text
                 ImGui::BeginGroup();
-                ImGui::Text(" elapsed: %lld (%.1f fps)", playController->getElapsedFrame(), ImGui::GetIO().Framerate);
+                ImGui::Text(" elapsed: %d (%.1f fps)", playController->GetElapsedFrame(), ImGui::GetIO().Framerate);
 
                 {
-                    const ScriptInfo& mainScriptInfo = playController->getMainScriptInfo();
+                    const ScriptInfo& mainScriptInfo = playController->GetMainScriptInfo();
                     auto scriptName = mainScriptInfo.title.empty() ? ToUTF8(mainScriptInfo.path) : ToUTF8(mainScriptInfo.title);
-                    if (playController->isPackageFinished())
+                    if (playController->IsPackageFinished())
                     {
                         if (scriptName.empty())
                         {
@@ -123,7 +124,7 @@ void GameView::draw(const std::shared_ptr<RenderTarget>& renderTarget)
                         }
                     } else
                     {
-                        if (playController->isPaused())
+                        if (playController->IsPaused())
                         {
                             ImGui::Text((" pause: " + scriptName).c_str());
                         } else
@@ -139,14 +140,14 @@ void GameView::draw(const std::shared_ptr<RenderTarget>& renderTarget)
                 // option
                 ImGui::BeginGroup();
                 {
-                    bool renderIntersectionEnable = playController->isRenderIntersectionEnabled();
+                    bool renderIntersectionEnable = playController->IsRenderIntersectionEnabled();
                     ImGui::Checkbox("show intersection", &renderIntersectionEnable);
-                    playController->setRenderIntersectionEnable(renderIntersectionEnable);
+                    playController->SetRenderIntersectionEnable(renderIntersectionEnable);
                 }
                 {
-                    bool playerInvincibleEnable = playController->isPlayerInvincibleEnabled();
+                    bool playerInvincibleEnable = playController->IsPlayerInvincibleEnabled();
                     ImGui::Checkbox("never hit", &playerInvincibleEnable);
-                    playController->setPlayerInvincibleEnable(playerInvincibleEnable);
+                    playController->SetPlayerInvincibleEnable(playerInvincibleEnable);
                 }
                 ImGui::EndGroup();
             }
@@ -158,40 +159,40 @@ void GameView::draw(const std::shared_ptr<RenderTarget>& renderTarget)
                     // row 1
                     if (ImGui::Button(ICON_FA_REFRESH))
                     {
-                        playController->reload();
+                        playController->Reload();
                     }
                     ImGui::SameLine();
                     if (ImGui::Button(ICON_FA_STOP))
                     {
-                        playController->close();
+                        playController->Stop();
                     }
                     ImGui::SameLine();
-                    if (playController->isPaused())
+                    if (playController->IsPaused())
                     {
                         if (ImGui::Button(ICON_FA_PLAY))
                         {
-                            playController->pause(false);
+                            playController->Pause(false);
                         }
                     } else
                     {
                         if (ImGui::Button(ICON_FA_PAUSE))
                         {
-                            playController->pause(true);
+                            playController->Pause(true);
                         }
                     }
                     ImGui::SameLine();
                     if (ImGui::Button(ICON_FA_STEP_FORWARD))
                     {
-                        playController->tick();
+                        playController->Tick();
                     }
                 }
                 {
                     // row2
                     {
                         ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
-                        int playSpeed = playController->getPlaySpeed();
+                        int playSpeed = playController->GetPlaySpeed();
                         ImGui::InputInt("##playSpeed", &playSpeed, 1, 5);
-                        playController->setPlaySpeed(std::max(playSpeed, 1));
+                        playController->SetPlaySpeed(std::max(playSpeed, 1));
                         ImGui::PopItemWidth();
                     }
                     if (ImGui::IsItemHovered())
@@ -212,7 +213,20 @@ void GameView::draw(const std::shared_ptr<RenderTarget>& renderTarget)
         auto sideMargin = ImGui::GetWindowWidth() - ImGui::GetContentRegionAvailWidth();
         auto topMargin = ImGui::GetWindowSize().y - ImGui::GetContentRegionAvail().y;
         ImGui::SetWindowSize(ImVec2(*viewWidth + sideMargin, *viewHeight + topMargin), ImGuiCond_Always);
-        ImGui::Image(renderTarget->GetTexture(), ImVec2(*viewWidth, *viewHeight));
+        if (auto package = playController->GetCurrentPackage())
+        {
+            constexpr wchar_t* GAME_VIEW_RENDER_TARGET = L"___GAME_VIEW_RENDER_TARGET___";
+            auto gameViewRenderTarget = package->GetRenderTarget(GAME_VIEW_RENDER_TARGET);
+            if (!gameViewRenderTarget)
+            {
+                gameViewRenderTarget = package->CreateRenderTarget(GAME_VIEW_RENDER_TARGET, package->GetScreenWidth(), package->GetScreenHeight(), nullptr);
+            }
+            package->Render(GAME_VIEW_RENDER_TARGET);
+            ImGui::Image(gameViewRenderTarget->GetTexture(), ImVec2(*viewWidth, *viewHeight));
+        } else
+        {
+            ImGui::Image(NULL, ImVec2(*viewWidth, *viewHeight), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 1));
+        }
         {
             // set view pos to pointer
             auto windowPos = ImGui::GetWindowPos();

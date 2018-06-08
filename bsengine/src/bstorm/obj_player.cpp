@@ -10,6 +10,7 @@
 #include <bstorm/obj_spell.hpp>
 #include <bstorm/item_data.hpp>
 #include <bstorm/dnh_value.hpp>
+#include <bstorm/engine_develop_options.hpp>
 #include <bstorm/package.hpp>
 
 #undef VK_RIGHT
@@ -21,11 +22,10 @@
 
 namespace bstorm
 {
-
-ObjPlayer::ObjPlayer(const std::shared_ptr<Package>& package) :
+ObjPlayer::ObjPlayer(const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package) :
     ObjSprite2D(package),
     ObjMove(this),
-    ObjCol(package),
+    ObjCol(colDetector, package),
     permitPlayerShot_(true),
     permitPlayerSpell_(true),
     state_(STATE_NORMAL),
@@ -60,7 +60,7 @@ void ObjPlayer::Update()
             ApplyClip();
             if (currentFrameGrazeCnt_ > 0)
             {
-                if (auto playerScript = package->stagePlayerScript.lock())
+                if (auto playerScript = package->GetPlayerScript())
                 {
                     // Notify EV_GRAZE
                     auto grazeInfo = std::make_unique<DnhArray>();
@@ -85,7 +85,7 @@ void ObjPlayer::Update()
         // ボム入力処理
         if (state_ == STATE_NORMAL || state_ == STATE_HIT)
         {
-            int spellKey = package->vKeyInputSource->GetVirtualKeyState(VK_SPELL);
+            int spellKey = package->GetVirtualKeyState(VK_SPELL);
             if (spellKey == KEY_PUSH)
             {
                 CallSpell();
@@ -125,8 +125,8 @@ void ObjPlayer::AddIntersectionCircleA1(float dx, float dy, float r, float dr)
 {
     if (auto package = GetPackage().lock())
     {
-        ObjCol::PushBackIntersection(package->colDetector->Create<PlayerIntersection>(GetX() + dx, GetY() + dy, r, shared_from_this()));
-        ObjCol::PushBackIntersection(package->colDetector->Create<PlayerGrazeIntersection>(GetX() + dx, GetY() + dy, r + dr, shared_from_this()));
+        ObjCol::AddIntersection(std::make_shared<PlayerIntersection>(GetX() + dx, GetY() + dy, r, shared_from_this()));
+        ObjCol::AddIntersection(std::make_shared<PlayerGrazeIntersection>(GetX() + dx, GetY() + dy, r + dr, shared_from_this()));
     }
 }
 
@@ -134,7 +134,7 @@ void ObjPlayer::AddIntersectionCircleA2(float dx, float dy, float r)
 {
     if (auto package = GetPackage().lock())
     {
-        ObjCol::PushBackIntersection(package->colDetector->Create<PlayerGrazeIntersection>(GetX() + dx, GetY() + dy, r, shared_from_this()));
+        ObjCol::AddIntersection(std::make_shared<PlayerGrazeIntersection>(GetX() + dx, GetY() + dy, r, shared_from_this()));
     }
 }
 
@@ -142,8 +142,14 @@ void ObjPlayer::AddIntersectionToItem()
 {
     if (auto package = GetPackage().lock())
     {
-        isectToItem_ = package->colDetector->Create<PlayerIntersectionToItem>(GetX(), GetY(), shared_from_this());
+        ObjCol::AddIntersection(std::make_shared<PlayerIntersectionToItem>(GetX(), GetY(), shared_from_this()));
     }
+}
+
+void ObjPlayer::ClearIntersection()
+{
+    ObjCol::ClearIntersection();
+    AddIntersectionToItem();
 }
 
 void ObjPlayer::SetNormalSpeed(double speed)
@@ -183,10 +189,12 @@ bool ObjPlayer::IsPermitPlayerSpell() const
 {
     if (auto package = GetPackage().lock())
     {
-        auto bossScene = package->enemyBossSceneObj.lock();
-        if (bossScene && bossScene->IsLastSpell())
+        if (auto bossScene = package->GetEnemyBossSceneObject())
         {
-            return false;
+            if (bossScene->IsLastSpell())
+            {
+                return false;
+            }
         }
     }
     return permitPlayerSpell_;
@@ -201,7 +209,7 @@ bool ObjPlayer::IsSpellActive() const
 {
     if (auto package = GetPackage().lock())
     {
-        if (package->spellManageObj.lock())
+        if (package->GetSpellManageObject())
         {
             return true;
         }
@@ -316,7 +324,7 @@ void ObjPlayer::GrazeToShot(int shotObjId, PlayerGraze grazeCnt)
 {
     if (auto package = GetPackage().lock())
     {
-        if (auto shot = package->objTable->Get<ObjShot>(shotObjId))
+        if (auto shot = package->GetObject<ObjShot>(shotObjId))
         {
             SetGraze(GetGraze() + grazeCnt);
             currentFrameGrazeCnt_ += grazeCnt;
@@ -330,31 +338,27 @@ void ObjPlayer::Hit(int collisionObjId)
 {
     if (auto package = GetPackage().lock())
     {
-        if (package->forcePlayerInvincibleEnable) return;
+        if (package->GetEngineDevelopOptions()->forcePlayerInvincibleEnable) return;
         if (state_ == STATE_NORMAL && !IsInvincible())
         {
             state_ = STATE_HIT;
             hitStateTimer_ = rebirthFrame_;
             // NOTE: 状態を変更してからイベントを送る
-            if (auto playerScript = package->stagePlayerScript.lock())
+            if (auto playerScript = package->GetPlayerScript())
             {
                 playerScript->NotifyEvent(EV_HIT, std::make_unique<DnhArray>(std::vector<double>{ (double)collisionObjId }));
             }
             // アイテム自動回収をキャンセル
-            package->autoItemCollectionManager->CancelCollectItems();
+            package->CancelCollectItems();
         }
     }
 }
 
-void ObjPlayer::TransIntersection(float dx, float dy)
+void ObjPlayer::OnTrans(float dx, float dy)
 {
     if (auto package = GetPackage().lock())
     {
         ObjCol::TransIntersection(dx, dy);
-        if (isectToItem_)
-        {
-            package->colDetector->Trans(isectToItem_, dx, dy);
-        }
     }
 }
 
@@ -369,11 +373,11 @@ void ObjPlayer::ShootDown()
     SetLife(GetLife() - 1);
     if (auto package = GetPackage().lock())
     {
-        if (auto bossScene = package->enemyBossSceneObj.lock())
+        if (auto bossScene = package->GetEnemyBossSceneObject())
         {
             bossScene->AddPlayerShootDownCount(1);
         }
-        package->scriptManager->NotifyEventAll(EV_PLAYER_SHOOTDOWN);
+        package->NotifyEventAll(EV_PLAYER_SHOOTDOWN);
     }
     // Eventを送ってから状態を変更する
     if (GetLife() >= 0)
@@ -393,7 +397,7 @@ void ObjPlayer::Rebirth()
     if (auto package = GetPackage().lock())
     {
         InitPosition();
-        package->scriptManager->NotifyEventAll(EV_PLAYER_REBIRTH);
+        package->NotifyEventAll(EV_PLAYER_REBIRTH);
     }
 }
 
@@ -401,12 +405,12 @@ void ObjPlayer::MoveByKeyInput()
 {
     if (auto package = GetPackage().lock())
     {
-        auto r = package->vKeyInputSource->GetVirtualKeyState(VK_RIGHT);
-        auto l = package->vKeyInputSource->GetVirtualKeyState(VK_LEFT);
-        auto u = package->vKeyInputSource->GetVirtualKeyState(VK_UP);
-        auto d = package->vKeyInputSource->GetVirtualKeyState(VK_DOWN);
+        auto r = package->GetVirtualKeyState(VK_RIGHT);
+        auto l = package->GetVirtualKeyState(VK_LEFT);
+        auto u = package->GetVirtualKeyState(VK_UP);
+        auto d = package->GetVirtualKeyState(VK_DOWN);
 
-        auto shift = package->vKeyInputSource->GetVirtualKeyState(VK_SLOWMOVE);
+        auto shift = package->GetVirtualKeyState(VK_SLOWMOVE);
         bool isSlowMode = shift == KEY_HOLD || shift == KEY_PUSH;
         float speed = (isSlowMode ? slowSpeed_ : normalSpeed_);
 
@@ -439,16 +443,16 @@ void ObjPlayer::CallSpell()
 {
     auto package = GetPackage().lock();
     if (!package) return;
-    auto playerScript = package->stagePlayerScript.lock();
-    auto spellManageObj = package->spellManageObj.lock();
-    if ((!spellManageObj || spellManageObj->IsDead()) && IsPermitPlayerSpell() && playerScript)
+    auto playerScript = package->GetPlayerScript();
+    bool notExistSpellManageObj = !package->GetSpellManageObject();
+    if (notExistSpellManageObj && IsPermitPlayerSpell() && playerScript)
     {
-        package->spellManageObj = package->objTable->Create<ObjSpellManage>(package);
+        package->GenerateSpellManageObject();
         playerScript->NotifyEvent(EV_REQUEST_SPELL);
         if (playerScript->GetScriptResult()->ToBool())
         {
             // スペル発動
-            if (auto bossScene = package->enemyBossSceneObj.lock())
+            if (auto bossScene = package->GetEnemyBossSceneObject())
             {
                 bossScene->AddPlayerSpellCount(1);
             }
@@ -458,13 +462,13 @@ void ObjPlayer::CallSpell()
                 rebirthFrame_ = std::max(0, rebirthFrame_ - rebirthLossFrame_);
                 state_ = STATE_NORMAL;
             }
-            package->scriptManager->NotifyEventAll(EV_PLAYER_SPELL);
+            package->NotifyEventAll(EV_PLAYER_SPELL);
         } else
         {
             // スペル不発
-            if (package->spellManageObj.lock())
+            if (auto spellManageObj = package->GetSpellManageObject())
             {
-                package->objTable->Delete(package->spellManageObj.lock()->GetID());
+                package->DeleteObject(spellManageObj->GetID());
             }
         }
     }
@@ -474,7 +478,7 @@ void ObjPlayer::ObtainItem(int itemObjId)
 {
     if (auto package = GetPackage().lock())
     {
-        if (auto item = package->objTable->Get<ObjItem>(itemObjId))
+        if (auto item = package->GetObject<ObjItem>(itemObjId))
         {
             if (item->IsScoreItem())
             {
@@ -495,11 +499,11 @@ void ObjPlayer::ObtainItem(int itemObjId)
                 {
                     // EV_GET_ITEM
                     auto evArgs = std::make_unique<DnhArray>(std::vector<double>{ (double)itemType, (double)item->GetID() });
-                    if (auto playerScript = package->stagePlayerScript.lock())
+                    if (auto playerScript = package->GetPlayerScript())
                     {
                         playerScript->NotifyEvent(EV_GET_ITEM, evArgs);
                     }
-                    if (auto itemScript = package->itemScript.lock())
+                    if (auto itemScript = package->GetItemScript())
                     {
                         itemScript->NotifyEvent(EV_GET_ITEM, evArgs);
                     }

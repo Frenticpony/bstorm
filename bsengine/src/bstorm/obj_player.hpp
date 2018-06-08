@@ -16,13 +16,14 @@ class ObjShot;
 class ObjPlayer : public ObjSprite2D, public ObjMove, public ObjCol, public std::enable_shared_from_this<ObjPlayer>
 {
 public:
-    ObjPlayer(const std::shared_ptr<Package>& package);
+    ObjPlayer(const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package);
     ~ObjPlayer();
     void Update() override;
     void Render(const std::shared_ptr<Renderer>& renderer) override;
     void AddIntersectionCircleA1(float dx, float dy, float r, float dr);
     void AddIntersectionCircleA2(float dx, float dy, float r);
     void AddIntersectionToItem();
+    void ClearIntersection();
     void SetNormalSpeed(double speed);
     void SetSlowSpeed(double speed);
     void SetClip(float left, float top, float right, float bottom);
@@ -68,7 +69,7 @@ public:
     void ObtainItem(int itemObjId);
     bool IsGrazeEnabled() const;
 protected:
-    void TransIntersection(float dx, float dy);
+    void OnTrans(float dx, float dy) override;
 private:
     bool IsInvincible() const;
     void ShootDown();
@@ -95,6 +96,5 @@ private:
     PlayerGraze currentFrameGrazeCnt_;
     std::vector<double> currentFrameGrazeObjIds_;
     std::vector<Point2D> currentFrameGrazeShotPoints_;
-    std::shared_ptr<PlayerIntersectionToItem> isectToItem_;
 };
 }

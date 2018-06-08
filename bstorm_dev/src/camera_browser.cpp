@@ -155,10 +155,10 @@ void Package::backDoor<CameraBrowser>()
     ImGui::Separator();
     if (selectedCamera == 0)
     {
-        drawCamera2DInfo(*camera2D);
+        drawCamera2DInfo(*camera2D_);
     } else
     {
-        drawCamera3DInfo(*camera3D);
+        drawCamera3DInfo(*camera3D_);
     }
 }
 
@@ -180,7 +180,7 @@ void CameraBrowser::draw(const std::shared_ptr<Package>& package)
     ImGui::SetNextWindowSize(ImVec2(iniWidth, iniHeight), ImGuiCond_FirstUseEver);
     if (ImGui::Begin("Camera", &openFlag, ImGuiWindowFlags_ResizeFromAnySide))
     {
-        package->backDoor<CameraBrowser>();
+    if (package) package->backDoor<CameraBrowser>();
     }
     ImGui::End();
 }

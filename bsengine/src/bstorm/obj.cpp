@@ -14,7 +14,10 @@ Obj::Obj(const std::shared_ptr<Package>& state) :
 {
 }
 
-Obj::~Obj() {}
+Obj::~Obj()
+{
+    Die();
+}
 
 const std::unique_ptr<DnhValue>& Obj::GetValue(const std::wstring& key) const
 {
@@ -57,7 +60,9 @@ ObjectTable::ObjectTable() :
 {
 }
 
-ObjectTable::~ObjectTable() {}
+ObjectTable::~ObjectTable()
+{
+}
 
 void ObjectTable::Add(const std::shared_ptr<Obj>& obj)
 {

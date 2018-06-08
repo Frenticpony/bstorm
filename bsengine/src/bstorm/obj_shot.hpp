@@ -13,16 +13,15 @@ namespace bstorm
 {
 class ShotData;
 class ShotIntersection;
-
 class ShotCounter;
-
 class ObjShot : public ObjRender, public ObjMove, public ObjCol, public std::enable_shared_from_this<ObjShot>
 {
 public:
-    ObjShot(bool isPlayerShot, const std::shared_ptr<Package>& package);
+    ObjShot(bool isPlayerShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package);
     ~ObjShot();
 
     void Update() override;
+    void OnDead() noexcept override;
     void Render(const std::shared_ptr<Renderer>& renderer) override;
 
     bool IsRegistered() const;
@@ -105,9 +104,9 @@ public:
     void AddShotA2(int shotObjId, int frame, float dist, float angle);
     int GetFrameCountForAddShot() const;
     const std::list<AddedShot>& GetAddedShot() const;
-    virtual void GenerateDefaultBonusItem();
+    virtual void GenerateBonusItem();
 protected:
-    void TransIntersection(float dx, float dy) override;
+    void OnTrans(float dx, float dy) override;
     void RenderIntersection(const std::shared_ptr<Renderer>& renderer);
     void CheckAutoDelete(float x, float y);
     void UpdateAnimationPosition();
@@ -148,7 +147,7 @@ private:
 class ObjLaser : public ObjShot
 {
 public:
-    ObjLaser(bool isPlayerShot, const std::shared_ptr<Package>& package);
+    ObjLaser(bool isPlayerShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package);
     void SetShotData(const std::shared_ptr<ShotData>& shotData) override;
     void Graze() override;
     bool IsGrazeEnabled() const override;
@@ -164,7 +163,7 @@ public:
     float GetItemDistance() const;
     void SetItemDistance(float distance);
 protected:
-    void TransIntersection(float dx, float dy) override {}
+    void OnTrans(float dx, float dy) override {}
     void TickGrazeInvalidTimer();
 private:
     float length_;
@@ -179,10 +178,10 @@ private:
 class ObjLooseLaser : public ObjLaser
 {
 public:
-    ObjLooseLaser(bool isPlayerShot, const std::shared_ptr<Package>& package);
+    ObjLooseLaser(bool isPlayerShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package);
     void Update() override;
     void Render(const std::shared_ptr<Renderer>& renderer) override;
-    void GenerateDefaultBonusItem() override;
+    void GenerateBonusItem() override;
     float GetInvalidLengthHead() const;
     float GetInvalidLengthTail() const;
     bool IsDefaultInvalidLengthEnabled() const;
@@ -205,7 +204,7 @@ private:
 class ObjStLaser : public ObjLooseLaser
 {
 public:
-    ObjStLaser(bool isPlayerShot, const std::shared_ptr<Package>& package);
+    ObjStLaser(bool isPlayerShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package);
     void Update() override;
     void Render(const std::shared_ptr<Renderer>& renderer) override;
     Point2D GetTail() const override;
@@ -223,10 +222,10 @@ private:
 class ObjCrLaser : public ObjLaser
 {
 public:
-    ObjCrLaser(bool isPlayerShot, const std::shared_ptr<Package>& package);
+    ObjCrLaser(bool isPlayerShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package);
     void Update() override;
     void Render(const std::shared_ptr<Renderer>& renderer) override;
-    void GenerateDefaultBonusItem() override;
+    void GenerateBonusItem() override;
     void SetRenderWidth(float width) override;
     float GetTipDecrement() const;
     void SetTipDecrement(float dec);

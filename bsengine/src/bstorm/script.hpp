@@ -34,7 +34,9 @@ public:
         SCRIPT_LOADING_COMPLETED, // トップレベル & @Loading完了
         SCRIPT_STARTED, // 実行開始 -- イベント受理開始
         SCRIPT_INITIALIZED, // @Initialize完了
-        SCRIPT_CLOSED // 終了(実行時エラー含む)
+        SCRIPT_CLOSED, // 正常終了
+        SCRIPT_RUNTIME_FAILED, // 実行時エラー
+        SCRIPT_FINALIZED // 正常終了→@Finalize完了
     };
     Script(const std::wstring& path, const std::wstring& type, const std::wstring& version, int id, Package* package, const std::shared_ptr<SourcePos>& compileSrcPos);
     ~Script();
@@ -54,6 +56,7 @@ public:
     void Start();
     void RunInitialize();
     void RunMainLoop();
+    void RunFinalize();
     void NotifyEvent(int eventType);
     void NotifyEvent(int eventType, const std::unique_ptr<DnhArray>& args);
     bool IsStgSceneScript() const;
@@ -99,6 +102,7 @@ public:
     void NotifyEventAll(int eventType);
     void NotifyEventAll(int eventType, const std::unique_ptr<DnhArray>& args);
     void CleanClosedScript();
+    void FinalizeAll();
     void CloseStgSceneScript();
     const std::unique_ptr<DnhValue>& GetScriptResult(int scriptId) const;
     void SetScriptResult(int scriptId, std::unique_ptr<DnhValue>&& value);

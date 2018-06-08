@@ -366,13 +366,13 @@ void Package::backDoor<UserDefDataBrowser>()
     ImGui::Separator();
     if (selectedTab == Tab::PLAYER_SHOT)
     {
-       playerShotDataTable->BackDoor<PlayerShotData>();
+        playerShotDataTable_->BackDoor<PlayerShotData>();
     } else if (selectedTab == Tab::ENEMY_SHOT)
     {
-        enemyShotDataTable->BackDoor<EnemyShotData>();
+        enemyShotDataTable_->BackDoor<EnemyShotData>();
     } else if (selectedTab == Tab::ITEM)
     {
-        itemDataTable->BackDoor<UserDefDataBrowser>();
+        itemDataTable_->BackDoor<UserDefDataBrowser>();
     }
 }
 
@@ -394,7 +394,7 @@ void UserDefDataBrowser::draw(const std::shared_ptr<Package>& package)
     ImGui::SetNextWindowSize(ImVec2(iniWidth, iniHeight), ImGuiCond_FirstUseEver);
     if (ImGui::Begin("UserDefData", &openFlag, ImGuiWindowFlags_ResizeFromAnySide))
     {
-        package->backDoor<UserDefDataBrowser>();
+        if (package) package->backDoor<UserDefDataBrowser>();
     }
     ImGui::End();
 }

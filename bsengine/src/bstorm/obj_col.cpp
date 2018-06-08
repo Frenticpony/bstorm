@@ -2,65 +2,65 @@
 
 #include <bstorm/intersection.hpp>
 #include <bstorm/package.hpp>
+#include <bstorm/engine_develop_options.hpp>
 
 #include <iterator>
 
 namespace bstorm
 {
-ObjCol::ObjCol(const std::shared_ptr<Package>& package) : package_(package) {}
+ObjCol::ObjCol(const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package) :
+    colDetector_(colDetector),
+    package_(package)
+{
+}
 ObjCol::~ObjCol() {}
 
-void ObjCol::PushBackIntersection(const std::shared_ptr<Intersection>& isect)
+void ObjCol::AddIntersection(const std::shared_ptr<Intersection>& isect)
 {
+    colDetector_->Add(isect);
     isects_.push_back(isect);
 }
 
-void ObjCol::PopFrontIntersection()
+void ObjCol::RemoveOldestIntersection()
 {
     isects_.pop_front();
 }
 
 void ObjCol::AddTempIntersection(const std::shared_ptr<Intersection>& isect)
 {
-    tempIsects_.push_back(isect);
+    addedTempIsects_.push_back(isect);
 }
 
 void ObjCol::TransIntersection(float dx, float dy)
 {
-    if (auto package = package_.lock())
+    for (auto& isect : isects_)
     {
-        for (auto& isect : isects_)
-        {
-            package->colDetector->Trans(isect, dx, dy);
-        }
+        colDetector_->Trans(isect, dx, dy);
     }
 }
 
 void ObjCol::SetWidthIntersection(float width)
 {
-    if (auto package = package_.lock())
+    for (auto& isect : isects_)
     {
-        for (auto& isect : isects_)
-        {
-            package->colDetector->SetWidth(isect, width);
-        }
+        colDetector_->SetWidth(isect, width);
     }
 }
 
 void ObjCol::RenderIntersection(const std::shared_ptr<Renderer>& renderer, bool isPermitCamera) const
 {
-    if (auto package = package_.lock())
+    auto package = package_.lock();
+    bool renderIntersectionEnable = package == nullptr || package->GetEngineDevelopOptions()->renderIntersectionEnable;
+
+    if (renderIntersectionEnable)
     {
-        if (package->renderIntersectionEnable)
+        for (auto& isect : GetIntersections())
         {
-            for (auto& isect : GetIntersections())
-            {
-                isect->Render(renderer, isPermitCamera);
-            }
-            for (auto& isect : GetTempIntersections())
-            {
-                isect->Render(renderer, isPermitCamera);
-            }
+            isect->Render(renderer, isPermitCamera);
+        }
+        for (auto& isect : GetTempIntersections())
+        {
+            isect->Render(renderer, isPermitCamera);
         }
     }
 }
@@ -70,10 +70,14 @@ void ObjCol::ClearIntersection()
     isects_.clear();
 }
 
-void ObjCol::ClearOldTempIntersection()
+void ObjCol::UpdateTempIntersection()
 {
-    oldTempIsects_.clear();
-    std::swap(tempIsects_, oldTempIsects_);
+    tempIsects_.clear();
+    for (auto isect : addedTempIsects_)
+    {
+        colDetector_->Add(isect);
+    }
+    std::swap(addedTempIsects_, tempIsects_);
 }
 
 bool ObjCol::IsIntersected(const std::shared_ptr<ObjCol>& col) const
@@ -117,7 +121,7 @@ int ObjCol::GetIntersectedCount() const
     {
         cnt += isect->GetCollideIntersections().size();
     }
-    for (const auto& isect : oldTempIsects_)
+    for (const auto& isect : tempIsects_)
     {
         cnt += isect->GetCollideIntersections().size();
     }
@@ -126,7 +130,7 @@ int ObjCol::GetIntersectedCount() const
 
 std::vector<std::weak_ptr<Intersection>> ObjCol::GetCollideIntersections() const
 {
-    // TODO: コピーのコストが勿体無いのでTempは別の関数にする
+    // TODO: コピーのコストが勿体無いのでTempは別の関数で取得するようにする
     std::vector<std::weak_ptr<Intersection>> ret;
     for (const auto& isect : GetIntersections())
     {

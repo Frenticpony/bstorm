@@ -61,7 +61,7 @@ static void DrawCommonDataInfo(const std::map<CommonDataDB::DataAreaName, Common
 template <>
 void Package::backDoor<CommonDataBrowser>()
 {
-    const auto& areaTable = commonDataDB->GetCommonDataAreaTable();
+    const auto& areaTable = commonDataDB_->GetCommonDataAreaTable();
     DrawCommonDataInfo(areaTable);
 }
 
@@ -82,7 +82,7 @@ void CommonDataBrowser::draw(const std::shared_ptr<Package>& package)
     ImGui::SetNextWindowSize(ImVec2(iniWidth, iniHeight), ImGuiCond_FirstUseEver);
     if (ImGui::Begin("Common Data", &openFlag, ImGuiWindowFlags_ResizeFromAnySide))
     {
-        package->backDoor<CommonDataBrowser>();
+    if (package) package->backDoor<CommonDataBrowser>();
     }
     ImGui::End();
 }

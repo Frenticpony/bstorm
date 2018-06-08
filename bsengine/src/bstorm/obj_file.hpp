@@ -14,6 +14,7 @@ class ObjFile : public Obj
 public:
     ObjFile(const std::shared_ptr<Package>& state);
     ~ObjFile();
+    void OnDead() noexcept override;
     virtual bool Open(const std::wstring& path) = 0;
     virtual bool OpenNW(const std::wstring& path) = 0;
     virtual void Store() = 0;

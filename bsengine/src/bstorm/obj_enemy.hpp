@@ -11,7 +11,7 @@ class Intersection;
 class ObjEnemy : public ObjSprite2D, public ObjMove, public ObjCol, public std::enable_shared_from_this<ObjEnemy>
 {
 public:
-    ObjEnemy(bool isBoss, const std::shared_ptr<Package>& package);
+    ObjEnemy(bool isBoss, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package);
     ~ObjEnemy();
     void Update() override;
     void Render(const std::shared_ptr<Renderer>& renderer) override;
@@ -26,8 +26,7 @@ public:
     void AddLife(double life);
     void SetDamageRateShot(double rate);
     void SetDamageRateSpell(double rate);
-    const std::vector<Point2D>& GetAllIntersectionToShotPosition() const;
-    void AddTempIntersection(const std::shared_ptr<Intersection>& isect);
+    const std::vector<Point2D>& GetIntersectionToShotPositions() const;
     void AddTempIntersectionCircleToShot(float x, float y, float r);
     void AddTempIntersectionCircleToPlayer(float x, float y, float r);
     void AddShotDamage(double damage);
@@ -40,6 +39,6 @@ private:
     double damageRateSpell_;
     int shotHitCount_;
     int prevFrameShotHitCount_;
-    std::vector<Point2D> prevTempIsectToShotPositions_;
+    std::vector<Point2D> tempIsectToShotPositions_;
 };
 }

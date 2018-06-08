@@ -11,7 +11,7 @@ class GameView
 public:
     GameView(int iniLeft, int iniTop, int iniWidth, int iniHeight, const std::shared_ptr<PlayController>& playController);
     ~GameView();
-    void draw(const std::shared_ptr<RenderTarget>& renderTarget);
+    void draw();
     std::shared_ptr<int> getViewPosX() const;
     std::shared_ptr<int> getViewPosY() const;
     std::shared_ptr<int> getViewWidth() const;

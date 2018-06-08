@@ -30,12 +30,12 @@ public:
     float GetX() const { return x_; }
     float GetY() const { return y_; }
     float GetZ() const { return z_; }
-    void SetX(float x) { TransIntersection(x - this->x_, 0); this->x_ = x; }
-    void SetY(float y) { TransIntersection(0, y - this->y_); this->y_ = y; }
+    void SetX(float x) { OnTrans(x - this->x_, 0); this->x_ = x; }
+    void SetY(float y) { OnTrans(0, y - this->y_); this->y_ = y; }
     void SetZ(float z) { this->z_ = z; }
     void SetPosition(float x, float y, float z)
     {
-        TransIntersection(x - this->x_, y - this->y_);
+        OnTrans(x - this->x_, y - this->y_);
         this->x_ = x;
         this->y_ = y;
         this->z_ = z;
@@ -92,7 +92,8 @@ public:
     void SetShaderTexture(const std::string& name, const std::shared_ptr<RenderTarget>& renderTarget);
 protected:
     NullableSharedPtr<Shader> GetAppliedShader() const;
-    virtual void TransIntersection(float dx, float dy) {}
+    // 移動時コールバック
+    virtual void OnTrans(float dx, float dy) {}
 private:
     bool visibleFlag_;
     int priority_;

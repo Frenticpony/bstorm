@@ -14,10 +14,10 @@
 
 namespace bstorm
 {
-ObjItem::ObjItem(int itemType, const std::shared_ptr<Package>& package) :
+ObjItem::ObjItem(int itemType, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package) :
     ObjRender(package),
     ObjMove(this),
-    ObjCol(package),
+    ObjCol(colDetector, package),
     itemType_(itemType),
     score_(0),
     autoCollectEnable_(true),
@@ -36,7 +36,7 @@ ObjItem::ObjItem(int itemType, const std::shared_ptr<Package>& package) :
 
     if (itemType != ITEM_USER)
     {
-        itemData_ = package->itemDataTable->Get(itemType);
+        itemData_ = package->GetItemData(itemType);
     }
 }
 
@@ -46,12 +46,9 @@ ObjItem::~ObjItem()
 
 void ObjItem::SetIntersection()
 {
-    if (auto package = GetPackage().lock())
+    if (GetIntersections().size() == 0)
     {
-        if (GetIntersections().size() == 0)
-        {
-            PushBackIntersection(package->colDetector->Create<ItemIntersection>(GetX(), GetY(), 23.99999f, shared_from_this()));
-        }
+        AddIntersection(std::make_shared<ItemIntersection>(GetX(), GetY(), 23.99999f, shared_from_this()));
     }
 
 }
@@ -61,12 +58,12 @@ void ObjItem::Update()
     auto package = GetPackage().lock();
     if (!package) return;
 
-    if (package->autoItemCollectionManager->IsAutoCollectCanceled())
+    if (package->IsAutoCollectCanceled())
     {
         isAutoCollected_ = false;
     }
 
-    std::shared_ptr<ObjPlayer> player = package->playerObj.lock();
+    NullableSharedPtr<ObjPlayer> player = package->GetPlayerObject();
     if (isAutoCollected_)
     {
         // 自動回収時
@@ -109,8 +106,8 @@ void ObjItem::Update()
         Move();
         if (autoCollectEnable_)
         {
-            isAutoCollected_ = package->autoItemCollectionManager->IsAutoCollectTarget(GetItemType(), GetX(), GetY());
-            if (player && !package->autoItemCollectionManager->IsAutoCollectCanceled())
+            isAutoCollected_ = package->IsAutoCollectTarget(GetItemType(), GetX(), GetY());
+            if (player && !package->IsAutoCollectCanceled())
             {
                 if (player->GetY() <= player->GetAutoItemCollectLineY())
                 {
@@ -135,7 +132,7 @@ void ObjItem::Update()
             // 点数文字列生成
             if (auto package = GetPackage().lock())
             {
-                package->itemScoreTextSpawner->Spawn(GetX(), GetY(), GetScore(), package);
+                package->GenerateItemScoreText(GetX(), GetY(), GetScore());
             }
         }
         Die();
@@ -226,6 +223,7 @@ void ObjItem::Render(const std::shared_ptr<Renderer>& renderer)
         auto vertices = GetRectVertices(renderColor, itemData_->texture->GetWidth(), itemData_->texture->GetHeight(), rect);
         renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), itemData_->texture->GetTexture(), itemBlend, world, GetAppliedShader(), IsPermitCamera(), true);
     }
+
     ObjCol::RenderIntersection(renderer, IsPermitCamera());
 }
 
@@ -306,7 +304,7 @@ const NullableSharedPtr<ItemData>& ObjItem::GetItemData() const
     return itemData_;
 }
 
-void ObjItem::TransIntersection(float dx, float dy)
+void ObjItem::OnTrans(float dx, float dy)
 {
     ObjCol::TransIntersection(dx, dy);
 }
@@ -534,36 +532,5 @@ MoveModeHoverItemScoreText::MoveModeHoverItemScoreText(float speed) :
 void MoveModeHoverItemScoreText::Move(float & x, float & y)
 {
     y -= speed_;
-}
-
-ItemScoreTextSpawner::ItemScoreTextSpawner() {}
-ItemScoreTextSpawner::~ItemScoreTextSpawner() {}
-
-void ItemScoreTextSpawner::Spawn(float x, float y, PlayerScore score, const std::shared_ptr<Package>& package)
-{
-    if (package)
-    {
-        std::shared_ptr<Texture> texture = package->textureCache->Load(SYSTEM_STG_DIGIT_IMG_PATH, false, nullptr);
-        auto scoreText = package->objTable->Create<ObjItemScoreText>(score, texture, package);
-        package->objLayerList->SetRenderPriority(scoreText, package->objLayerList->GetItemRenderPriority());
-        scoreText->SetMovePosition(x, y);
-    }
-}
-
-DefaultBonusItemSpawner::DefaultBonusItemSpawner() {}
-DefaultBonusItemSpawner::~DefaultBonusItemSpawner() {}
-
-void DefaultBonusItemSpawner::Spawn(float x, float y, const std::shared_ptr<Package>& package)
-{
-    if (package)
-    {
-        auto bonusItem = std::make_shared<ObjItem>(ITEM_DEFAULT_BONUS, package);
-        package->objTable->Add(bonusItem);
-        package->objLayerList->SetRenderPriority(bonusItem, package->objLayerList->GetItemRenderPriority());
-        bonusItem->SetMovePosition(x, y);
-        bonusItem->SetIntersection();
-        bonusItem->SetScore(300);
-        bonusItem->SetMoveMode(std::make_shared<MoveModeItemToPlayer>(8.0f, package->playerObj.lock()));
-    }
 }
 }

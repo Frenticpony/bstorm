@@ -1063,10 +1063,10 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
 template <>
 void Package::backDoor<ObjectBrowser>()
 {
-    const auto& table = objTable->GetAll();
     static int selectedId = 0;
     float sideBarWidth = ImGui::GetContentRegionAvailWidth() * 0.2;
     ImGui::BeginChild("SideBar", ImVec2(sideBarWidth, -1), true, ImGuiWindowFlags_HorizontalScrollbar);
+    const auto& table = objTable_->GetAll();
     for (const auto& entry : table)
     {
         auto id = entry.first;
@@ -1096,7 +1096,7 @@ void Package::backDoor<ObjectBrowser>()
     auto it = table.find(selectedId);
     if (it != table.end())
     {
-        drawObjEditArea(it->second, objLayerList);
+        drawObjEditArea(it->second, objLayerList_);
     }
     ImGui::EndChild();
 }
@@ -1119,7 +1119,7 @@ void ObjectBrowser::draw(const std::shared_ptr<Package>& package)
     ImGui::SetNextWindowSize(ImVec2(iniWidth, iniHeight), ImGuiCond_FirstUseEver);
     if (ImGui::Begin("Object", &openFlag, ImGuiWindowFlags_ResizeFromAnySide))
     {
-        package->backDoor<ObjectBrowser>();
+        if (package) package->backDoor<ObjectBrowser>();
     }
     ImGui::End();
 }

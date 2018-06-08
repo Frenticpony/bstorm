@@ -19,7 +19,7 @@ class ItemIntersection;
 class ObjItem : public ObjRender, public ObjMove, public ObjCol, public std::enable_shared_from_this<ObjItem>
 {
 public:
-    ObjItem(int itemType, const std::shared_ptr<Package>& package);
+    ObjItem(int itemType, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package);
     ~ObjItem();
     void SetIntersection();
     void Update() override;
@@ -40,7 +40,7 @@ public:
     void Obtained();
     bool IsScoreItem() const;
 private:
-    void TransIntersection(float dx, float dy) override;
+    void OnTrans(float dx, float dy) override;
     void UpdateAnimationPosition();
     int itemType_;
     bool autoCollectEnable_;
@@ -67,22 +67,6 @@ public:
 protected:
     int scoreTextDeleteTimer_;
     int scoreTextAlpha_;
-};
-
-class ItemScoreTextSpawner
-{
-public:
-    ItemScoreTextSpawner();
-    virtual ~ItemScoreTextSpawner();
-    virtual void Spawn(float x, float y, PlayerScore score, const std::shared_ptr<Package>& package);
-};
-
-class DefaultBonusItemSpawner
-{
-public:
-    DefaultBonusItemSpawner();
-    virtual ~DefaultBonusItemSpawner();
-    virtual void Spawn(float x, float y, const std::shared_ptr<Package>& package);
 };
 
 class ObjItem;

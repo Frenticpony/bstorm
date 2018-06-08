@@ -69,57 +69,55 @@ Package::Package(HWND hWnd,
                  const std::shared_ptr<GraphicDevice>& graphicDevice,
                  const std::shared_ptr<InputDevice>& inputDevice,
                  const std::shared_ptr<FpsCounter>& fpsCounter,
-                 const std::shared_ptr<LostableGraphicResourceManager>& lostableGraphicResourceManager) :
+                 const std::shared_ptr<LostableGraphicResourceManager>& lostableGraphicResourceManager,
+                 const std::shared_ptr<EngineDevelopOptions>& engineDevelopOptions) :
     hWnd_(hWnd),
+    screenWidth_(screenWidth),
+    screenHeight_(screenHeight),
     graphicDevice_(graphicDevice),
     inputDevice_(inputDevice),
-    lostableGraphicResourceManager_(lostableGraphicResourceManager),
     fpsCounter_(fpsCounter),
-    keyAssign(std::make_shared<KeyAssign>()),
-    fileLoader(std::make_shared<FileLoaderFromTextFile>()),
-    vKeyInputSource(std::make_shared<RealDeviceInputSource>(inputDevice_, keyAssign)),
+    lostableGraphicResourceManager_(lostableGraphicResourceManager),
+    engineDevelopOptions_(engineDevelopOptions),
+    keyAssign_(std::make_shared<KeyAssign>()),
+    fileLoader_(std::make_shared<FileLoaderFromTextFile>()),
+    vKeyInputSource_(std::make_shared<RealDeviceInputSource>(inputDevice_, keyAssign_)),
     soundDevice(std::make_shared<SoundDevice>(hWnd)),
-    renderer(std::make_shared<Renderer>(graphicDevice_->GetDevice())),
-    objTable(std::make_shared<ObjectTable>()),
-    objLayerList(std::make_shared<ObjectLayerList>()),
-    colDetector(std::make_shared<CollisionDetector>(screenWidth, screenHeight, std::make_shared<CollisionMatrix>(DEFAULT_COLLISION_MATRIX_DIMENSION, DEFAULT_COLLISION_MATRIX))),
-    textureCache(std::make_shared<TextureCache>(graphicDevice_->GetDevice())),
-    meshCache(std::make_shared<MeshCache>(textureCache, fileLoader)),
-    camera2D(std::make_shared<Camera2D>()),
-    camera3D(std::make_shared<Camera3D>()),
-    commonDataDB(std::make_shared<CommonDataDB>()),
-    scriptManager(std::make_shared<ScriptManager>(this)),
-    playerShotDataTable(std::make_shared<ShotDataTable>(ShotDataTable::Type::PLAYER, textureCache, fileLoader)),
-    enemyShotDataTable(std::make_shared<ShotDataTable>(ShotDataTable::Type::ENEMY, textureCache, fileLoader)),
-    itemDataTable(std::make_shared<ItemDataTable>(textureCache, fileLoader)),
-    shotCounter(std::make_shared<ShotCounter>()),
-    randGenerator(std::make_shared<RandGenerator>((uint32_t)this)), // FUTURE : from rand
-    itemScoreTextSpawner(std::make_shared<ItemScoreTextSpawner>()),
-    defaultBonusItemSpawner(std::make_shared<DefaultBonusItemSpawner>()),
-    autoItemCollectionManager(std::make_shared<AutoItemCollectionManager>()),
-    elapsedFrame(0),
-    stageStartTime(std::make_shared<TimePoint>()),
-    pseudoPlayerFps(60),
-    pseudoEnemyFps(60),
-    packageMainScriptInfo_(ScanDnhScriptInfo(packageMainScriptPath, fileLoader)),
-    stageMainScriptInfo(),
-    stagePlayerScriptInfo(),
-    stageIdx(ID_INVALID),
-    stageSceneResult(0),
-    stagePaused(true),
-    stageForceTerminated(false),
-    deleteShotImmediateEventOnShotScriptEnable(false),
-    deleteShotFadeEventOnShotScriptEnable(false),
-    deleteShotToItemEventOnShotScriptEnable(false),
-    screenWidth(screenWidth),
-    screenHeight(screenHeight),
-    renderIntersectionEnable(false),
-    forcePlayerInvincibleEnable(false),
-    defaultBonusItemEnable(true),
+    renderer_(std::make_shared<Renderer>(graphicDevice_->GetDevice())),
+    objTable_(std::make_shared<ObjectTable>()),
+    objLayerList_(std::make_shared<ObjectLayerList>()),
+    colDetector_(std::make_shared<CollisionDetector>(screenWidth, screenHeight, std::make_shared<CollisionMatrix>(DEFAULT_COLLISION_MATRIX_DIMENSION, DEFAULT_COLLISION_MATRIX))),
+    textureCache_(std::make_shared<TextureCache>(graphicDevice_->GetDevice())),
+    meshCache_(std::make_shared<MeshCache>(textureCache_, fileLoader_)),
+    camera2D_(std::make_shared<Camera2D>()),
+    camera3D_(std::make_shared<Camera3D>()),
+    commonDataDB_(std::make_shared<CommonDataDB>()),
+    scriptManager_(std::make_shared<ScriptManager>(this)),
+    playerShotDataTable_(std::make_shared<ShotDataTable>(ShotDataTable::Type::PLAYER, textureCache_, fileLoader_)),
+    enemyShotDataTable_(std::make_shared<ShotDataTable>(ShotDataTable::Type::ENEMY, textureCache_, fileLoader_)),
+    itemDataTable_(std::make_shared<ItemDataTable>(textureCache_, fileLoader_)),
+    shotCounter_(std::make_shared<ShotCounter>()),
+    randGenerator_(std::make_shared<RandGenerator>((uint32_t)this)), // FUTURE : from rand
+    autoItemCollectionManager_(std::make_shared<AutoItemCollectionManager>()),
+    elapsedFrame_(0),
+    stageStartTime_(std::make_shared<TimePoint>()),
+    pseudoPlayerFps_(60),
+    pseudoEnemyFps_(60),
+    packageMainScriptInfo_(ScanDnhScriptInfo(packageMainScriptPath, fileLoader_)),
+    stageMainScriptInfo_(),
+    stagePlayerScriptInfo_(),
+    stageIdx_(ID_INVALID),
+    stageSceneResult_(0),
+    stagePaused_(true),
+    stageForceTerminated_(false),
+    deleteShotImmediateEventOnShotScriptEnable_(false),
+    deleteShotFadeEventOnShotScriptEnable_(false),
+    deleteShotToItemEventOnShotScriptEnable_(false),
+    defaultBonusItemEnable_(true),
     stgFrame_(32.0f, 16.0f, 416.0f, 464.0f),
     shotAutoDeleteClip_(64.0f, 64.0f, 64.0f, 64.0f),
     fontCache_(std::make_shared<FontCache>(hWnd, graphicDevice_->GetDevice())),
-    packageStartTime(std::make_shared<TimePoint>())
+    packageStartTime_(std::make_shared<TimePoint>())
 {
     Logger::SetEnable(false);
     Reset2DCamera();
@@ -128,20 +126,19 @@ Package::Package(HWND hWnd,
     CreateRenderTarget(GetReservedRenderTargetName(0), 1024, 512, nullptr);
     CreateRenderTarget(GetReservedRenderTargetName(1), 1024, 512, nullptr);
     CreateRenderTarget(GetReservedRenderTargetName(2), 1024, 512, nullptr);
-    renderer->SetForbidCameraViewProjMatrix2D(GetScreenWidth(), GetScreenHeight());
-    renderer->SetFogEnable(false);
+    renderer_->SetForbidCameraViewProjMatrix2D(GetScreenWidth(), GetScreenHeight());
+    renderer_->SetFogEnable(false);
     Logger::SetEnable(true);
 
     for (const auto& keyMap : keyConfig->keyMaps)
     {
-        keyAssign->AddVirtualKey(keyMap.vkey, keyMap.key, keyMap.pad);
+        keyAssign_->AddVirtualKey(keyMap.vkey, keyMap.key, keyMap.pad);
     }
 }
 
 Package::~Package()
 {
-    objTable.reset();
-    scriptManager.reset();
+    scriptManager_->FinalizeAll();
     Logger::WriteLog(Log::Level::LV_INFO, "close package.");
 }
 
@@ -153,25 +150,25 @@ void Package::TickFrame()
         return;
     }
 
-    if (auto packageMain = packageMainScript.lock())
+    if (auto packageMain = packageMainScript_.lock())
     {
         if (packageMain->IsClosed())
         {
             Logger::WriteLog(Log::Level::LV_INFO, "finish package.");
-            packageMainScript.reset();
+            packageMainScript_.reset();
             return;
         }
     }
 
-    if (GetElapsedFrame() % (60 / std::min(pseudoEnemyFps, pseudoPlayerFps)) == 0)
+    if (GetElapsedFrame() % (60 / std::min(pseudoEnemyFps_, pseudoPlayerFps_)) == 0)
     {
         if (auto stageMain = stageMainScript_.lock())
         {
             if (stageMain->IsClosed())
             {
-                if (stageForceTerminated)
+                if (stageForceTerminated_)
                 {
-                    stageSceneResult = STAGE_RESULT_BREAK_OFF;
+                    stageSceneResult_ = STAGE_RESULT_BREAK_OFF;
                     SetPlayerLife(0);
                     SetPlayerSpell(3);
                     SetPlayerPower(1);
@@ -180,38 +177,38 @@ void Package::TickFrame()
                     SetPlayerPoint(0);
                 } else if (auto player = GetPlayerObject())
                 {
-                    stageSceneResult = player->GetState() != STATE_END ? STAGE_RESULT_CLEARED : STAGE_RESULT_PLAYER_DOWN;
+                    stageSceneResult_ = player->GetState() != STATE_END ? STAGE_RESULT_CLEARED : STAGE_RESULT_PLAYER_DOWN;
                 } else
                 {
-                    stageSceneResult = STAGE_RESULT_PLAYER_DOWN;
+                    stageSceneResult_ = STAGE_RESULT_PLAYER_DOWN;
                 }
                 RenderToTextureA1(GetTransitionRenderTargetName(), 0, MAX_RENDER_PRIORITY, true);
-                objTable->DeleteStgSceneObject();
-                scriptManager->CloseStgSceneScript();
+                objTable_->DeleteStgSceneObject();
+                scriptManager_->CloseStgSceneScript();
                 stageMainScript_.reset();
-                stagePlayerScript.reset();
-                stageForceTerminated = false;
-                stagePaused = true;
-                pseudoPlayerFps = pseudoEnemyFps = 60;
+                stagePlayerScript_.reset();
+                stageForceTerminated_ = false;
+                stagePaused_ = true;
+                pseudoPlayerFps_ = pseudoEnemyFps_ = 60;
             }
         }
-        scriptManager->CleanClosedScript();
+        scriptManager_->CleanClosedScript();
 
         if (!IsStagePaused())
         {
-            colDetector->TestAllCollision();
+            colDetector_->TestAllCollision();
         }
 
         // SetShotIntersection{Circle, Line}で設定した判定削除
-        tempEnemyShotIsects.clear();
+        tempEnemyShotIsects_.clear();
 
         inputDevice_->UpdateInputState();
 
-        scriptManager->RunAll(IsStagePaused());
+        scriptManager_->RunAll(IsStagePaused());
 
-        objTable->UpdateAll(IsStagePaused());
+        objTable_->UpdateAll(IsStagePaused());
 
-        autoItemCollectionManager->Reset();
+        autoItemCollectionManager_->Reset();
     }
     // 使われなくなったリソース開放
     switch (GetElapsedFrame() % 1920)
@@ -226,7 +223,7 @@ void Package::TickFrame()
             ReleaseUnusedMesh();
             break;
     }
-    elapsedFrame += 1;
+    elapsedFrame_ += 1;
 }
 
 void Package::Render()
@@ -251,32 +248,12 @@ void Package::RenderToTextureB1(const std::wstring& name, int objId, bool doClea
 
 int Package::GetScreenWidth() const
 {
-    return screenWidth;
+    return screenWidth_;
 }
 
 int Package::GetScreenHeight() const
 {
-    return screenHeight;
-}
-
-bool Package::IsRenderIntersectionEnabled() const
-{
-    return renderIntersectionEnable;
-}
-
-void Package::SetRenderIntersectionEnable(bool enable)
-{
-    renderIntersectionEnable = enable;
-}
-
-bool Package::IsForcePlayerInvincibleEnabled() const
-{
-    return forcePlayerInvincibleEnable;
-}
-
-void Package::SetForcePlayerInvincibleEnable(bool enable)
-{
-    forcePlayerInvincibleEnable = enable;
+    return screenHeight_;
 }
 
 KeyState Package::GetKeyState(Key k)
@@ -286,17 +263,17 @@ KeyState Package::GetKeyState(Key k)
 
 KeyState Package::GetVirtualKeyState(VirtualKey vk)
 {
-    return vKeyInputSource->GetVirtualKeyState(vk);
+    return vKeyInputSource_->GetVirtualKeyState(vk);
 }
 
 void Package::SetVirtualKeyState(VirtualKey vk, KeyState state)
 {
-    vKeyInputSource->SetVirtualKeyState(vk, state);
+    vKeyInputSource_->SetVirtualKeyState(vk, state);
 }
 
 void Package::AddVirtualKey(VirtualKey vk, Key k, PadButton btn)
 {
-    keyAssign->AddVirtualKey(vk, k, btn);
+    keyAssign_->AddVirtualKey(vk, k, btn);
 }
 
 KeyState Package::GetMouseState(MouseButton btn)
@@ -347,12 +324,12 @@ float Package::GetStageTime() const
     {
         return 0.0;
     }
-    return stageStartTime->GetElapsedMilliSec();
+    return stageStartTime_->GetElapsedMilliSec();
 }
 
 float Package::GetPackageTime() const
 {
-    return packageStartTime->GetElapsedMilliSec();
+    return packageStartTime_->GetElapsedMilliSec();
 }
 
 void Package::StartSlow(int pseudoFps, bool byPlayer)
@@ -360,10 +337,10 @@ void Package::StartSlow(int pseudoFps, bool byPlayer)
     pseudoFps = constrain(pseudoFps, 1, 60);
     if (byPlayer)
     {
-        pseudoPlayerFps = pseudoFps;
+        pseudoPlayerFps_ = pseudoFps;
     } else
     {
-        pseudoEnemyFps = pseudoFps;
+        pseudoEnemyFps_ = pseudoFps;
     }
 }
 
@@ -371,26 +348,26 @@ void Package::StopSlow(bool byPlayer)
 {
     if (byPlayer)
     {
-        pseudoPlayerFps = 60;
+        pseudoPlayerFps_ = 60;
     } else
     {
-        pseudoEnemyFps = 60;
+        pseudoEnemyFps_ = 60;
     }
 }
 
-int64_t Package::GetElapsedFrame() const
+int Package::GetElapsedFrame() const
 {
-    return elapsedFrame;
+    return elapsedFrame_;
 }
 
 std::wstring Package::GetMainStgScriptPath() const
 {
-    return stageMainScriptInfo.path;
+    return stageMainScriptInfo_.path;
 }
 
 std::wstring Package::GetMainStgScriptDirectory() const
 {
-    return GetParentPath(stageMainScriptInfo.path) + L"/";
+    return GetParentPath(stageMainScriptInfo_.path) + L"/";
 }
 
 std::wstring Package::GetMainPackageScriptPath() const
@@ -400,22 +377,22 @@ std::wstring Package::GetMainPackageScriptPath() const
 
 std::shared_ptr<Texture> Package::LoadTexture(const std::wstring & path, bool reserve, const std::shared_ptr<SourcePos>& srcPos)
 {
-    return textureCache->Load(path, reserve, srcPos);
+    return textureCache_->Load(path, reserve, srcPos);
 }
 
 void Package::LoadTextureInThread(const std::wstring & path, bool reserve, const std::shared_ptr<SourcePos>& srcPos) noexcept(true)
 {
-    textureCache->LoadInThread(path, reserve, srcPos);
+    textureCache_->LoadInThread(path, reserve, srcPos);
 }
 
 void Package::RemoveTextureReservedFlag(const std::wstring & path)
 {
-    textureCache->RemoveReservedFlag(path);
+    textureCache_->RemoveReservedFlag(path);
 }
 
 void Package::ReleaseUnusedTexture()
 {
-    textureCache->ReleaseUnusedTexture();
+    textureCache_->ReleaseUnusedTexture();
 }
 
 std::shared_ptr<Font> Package::CreateFont(const FontParams& param)
@@ -451,7 +428,7 @@ std::shared_ptr<RenderTarget> Package::CreateRenderTarget(const std::wstring & n
 {
     auto renderTarget = std::make_shared<RenderTarget>(name, width, height, graphicDevice_->GetDevice());
     renderTarget->SetViewport(0, 0, GetScreenWidth(), GetScreenHeight());
-    renderTargets[name] = renderTarget;
+    renderTargets_[name] = renderTarget;
     lostableGraphicResourceManager_->AddResource(renderTarget);
     Logger::WriteLog(std::move(
         Log(Log::Level::LV_INFO)
@@ -463,10 +440,10 @@ std::shared_ptr<RenderTarget> Package::CreateRenderTarget(const std::wstring & n
 
 void Package::RemoveRenderTarget(const std::wstring & name, const std::shared_ptr<SourcePos>& srcPos)
 {
-    auto it = renderTargets.find(name);
-    if (it != renderTargets.end())
+    auto it = renderTargets_.find(name);
+    if (it != renderTargets_.end())
     {
-        renderTargets.erase(it);
+        renderTargets_.erase(it);
         Logger::WriteLog(std::move(
             Log(Log::Level::LV_INFO)
             .SetMessage("remove render target.")
@@ -477,8 +454,8 @@ void Package::RemoveRenderTarget(const std::wstring & name, const std::shared_pt
 
 NullableSharedPtr<RenderTarget> Package::GetRenderTarget(const std::wstring & name) const
 {
-    auto it = renderTargets.find(name);
-    if (it != renderTargets.end())
+    auto it = renderTargets_.find(name);
+    if (it != renderTargets_.end())
     {
         return it->second;
     }
@@ -578,12 +555,12 @@ bool Package::IsPixelShaderSupported(int major, int minor)
 
 std::shared_ptr<Mesh> Package::LoadMesh(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
-    return meshCache->Load(path, srcPos);
+    return meshCache_->Load(path, srcPos);
 }
 
 void Package::ReleaseUnusedMesh()
 {
-    meshCache->ReleaseUnusedMesh();
+    meshCache_->ReleaseUnusedMesh();
 }
 
 std::shared_ptr<SoundBuffer> Package::LoadSound(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
@@ -593,18 +570,18 @@ std::shared_ptr<SoundBuffer> Package::LoadSound(const std::wstring & path, const
 
 void Package::LoadOrphanSound(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
-    orphanSounds[GetCanonicalPath(path)] = LoadSound(path, srcPos);
+    orphanSounds_[GetCanonicalPath(path)] = LoadSound(path, srcPos);
 }
 
 void Package::RemoveOrphanSound(const std::wstring & path)
 {
-    orphanSounds.erase(GetCanonicalPath(path));
+    orphanSounds_.erase(GetCanonicalPath(path));
 }
 
 void Package::PlayBGM(const std::wstring & path, double loopStartSec, double loopEndSec)
 {
-    auto it = orphanSounds.find(GetCanonicalPath(path));
-    if (it != orphanSounds.end())
+    auto it = orphanSounds_.find(GetCanonicalPath(path));
+    if (it != orphanSounds_.end())
     {
         auto& sound = it->second;
         if (sound->IsPlaying()) sound->Seek(0);
@@ -616,8 +593,8 @@ void Package::PlayBGM(const std::wstring & path, double loopStartSec, double loo
 
 void Package::PlaySE(const std::wstring & path)
 {
-    auto it = orphanSounds.find(GetCanonicalPath(path));
-    if (it != orphanSounds.end())
+    auto it = orphanSounds_.find(GetCanonicalPath(path));
+    if (it != orphanSounds_.end())
     {
         auto& sound = it->second;
         if (sound->IsPlaying()) sound->Seek(0);
@@ -627,8 +604,8 @@ void Package::PlaySE(const std::wstring & path)
 
 void Package::StopOrphanSound(const std::wstring & path)
 {
-    auto it = orphanSounds.find(GetCanonicalPath(path));
-    if (it != orphanSounds.end())
+    auto it = orphanSounds_.find(GetCanonicalPath(path));
+    if (it != orphanSounds_.end())
     {
         it->second->Stop();
     }
@@ -651,57 +628,57 @@ void Package::ClearSoundCache()
 
 void Package::SetObjectRenderPriority(const std::shared_ptr<ObjRender>& obj, int priority)
 {
-    objLayerList->SetRenderPriority(obj, priority);
+    objLayerList_->SetRenderPriority(obj, priority);
 }
 
-void Package::SetShader(int beginPriority, int endPriority, const std::shared_ptr<Shader>& shader)
+void Package::SetLayerShader(int beginPriority, int endPriority, const std::shared_ptr<Shader>& shader)
 {
-    objLayerList->SetLayerShader(beginPriority, endPriority, shader);
+    objLayerList_->SetLayerShader(beginPriority, endPriority, shader);
 }
 
 void Package::ResetShader(int beginPriority, int endPriority)
 {
-    objLayerList->ResetLayerShader(beginPriority, endPriority);
+    objLayerList_->ResetLayerShader(beginPriority, endPriority);
 }
 
 int Package::GetStgFrameRenderPriorityMin() const
 {
-    return objLayerList->GetStgFrameRenderPriorityMin();
+    return objLayerList_->GetStgFrameRenderPriorityMin();
 }
 
 void Package::SetStgFrameRenderPriorityMin(int p)
 {
-    objLayerList->SetStgFrameRenderPriorityMin(p);
+    objLayerList_->SetStgFrameRenderPriorityMin(p);
 }
 
 int Package::GetStgFrameRenderPriorityMax() const
 {
-    return objLayerList->GetStgFrameRenderPriorityMax();
+    return objLayerList_->GetStgFrameRenderPriorityMax();
 }
 
 void Package::SetStgFrameRenderPriorityMax(int p)
 {
-    objLayerList->SetStgFrameRenderPriorityMax(p);
+    objLayerList_->SetStgFrameRenderPriorityMax(p);
 }
 
 int Package::GetShotRenderPriority() const
 {
-    return objLayerList->GetShotRenderPriority();
+    return objLayerList_->GetShotRenderPriority();
 }
 
 void Package::SetShotRenderPriority(int p)
 {
-    return objLayerList->SetShotRenderPriority(p);
+    return objLayerList_->SetShotRenderPriority(p);
 }
 
 int Package::GetItemRenderPriority() const
 {
-    return objLayerList->GetItemRenderPriority();
+    return objLayerList_->GetItemRenderPriority();
 }
 
 void Package::SetItemRenderPriority(int p)
 {
-    return objLayerList->SetItemRenderPriority(p);
+    return objLayerList_->SetItemRenderPriority(p);
 }
 
 int Package::GetPlayerRenderPriority() const
@@ -715,82 +692,82 @@ int Package::GetPlayerRenderPriority() const
 
 int Package::GetCameraFocusPermitRenderPriority() const
 {
-    return objLayerList->GetCameraFocusPermitRenderPriority();
+    return objLayerList_->GetCameraFocusPermitRenderPriority();
 }
 
 void Package::SetInvalidRenderPriority(int min, int max)
 {
-    objLayerList->SetInvalidRenderPriority(min, max);
+    objLayerList_->SetInvalidRenderPriority(min, max);
 }
 
 void Package::ClearInvalidRenderPriority()
 {
-    objLayerList->ClearInvalidRenderPriority();
+    objLayerList_->ClearInvalidRenderPriority();
 }
 
-NullableSharedPtr<Shader> Package::GetShader(int p) const
+NullableSharedPtr<Shader> Package::GetLayerShader(int p) const
 {
-    return objLayerList->GetLayerShader(p);
+    return objLayerList_->GetLayerShader(p);
 }
 
 void Package::SetFogEnable(bool enable)
 {
-    renderer->SetFogEnable(enable);
+    renderer_->SetFogEnable(enable);
 }
 
 void Package::SetFogParam(float fogStart, float fogEnd, int r, int g, int b)
 {
-    renderer->SetFogParam(fogStart, fogEnd, r, g, b);
+    renderer_->SetFogParam(fogStart, fogEnd, r, g, b);
 }
 
 void Package::SetCameraFocusX(float x)
 {
-    camera3D->SetFocusX(x);
+    camera3D_->SetFocusX(x);
 }
 
 void Package::SetCameraFocusY(float y)
 {
-    camera3D->SetFocusY(y);
+    camera3D_->SetFocusY(y);
 }
 
 void Package::SetCameraFocusZ(float z)
 {
-    camera3D->SetFocusZ(z);
+    camera3D_->SetFocusZ(z);
 }
 
 void Package::SetCameraFocusXYZ(float x, float y, float z)
 {
-    camera3D->SetFocusXYZ(x, y, z);
+    camera3D_->SetFocusXYZ(x, y, z);
 }
 
 void Package::SetCameraRadius(float r)
 {
-    camera3D->SetRadius(r);
+    camera3D_->SetRadius(r);
 }
 
 void Package::SetCameraAzimuthAngle(float angle)
 {
-    camera3D->SetAzimuthAngle(angle);
+    camera3D_->SetAzimuthAngle(angle);
 }
 
 void Package::SetCameraElevationAngle(float angle)
 {
-    camera3D->SetElevationAngle(angle);
+    camera3D_->SetElevationAngle(angle);
 }
 
 void Package::SetCameraYaw(float yaw)
 {
-    camera3D->SetYaw(yaw);
+    camera3D_->SetYaw(yaw);
 }
 
 void Package::SetCameraPitch(float pitch)
 {
-    camera3D->SetPitch(pitch);
+    camera3D_->SetPitch(pitch);
 }
 
 void Package::SetCameraRoll(float roll)
 {
-    camera3D->SetRoll(roll);
+    camera3D_->SetRoll(roll);
 }
 
 void Package::ResetCamera()
@@ -807,204 +784,204 @@ void Package::ResetCamera()
 
 float Package::GetCameraX() const
 {
-    return camera3D->GetX();
+    return camera3D_->GetX();
 }
 
 float Package::GetCameraY() const
 {
-    return camera3D->GetY();
+    return camera3D_->GetY();
 }
 
 float Package::GetCameraZ() const
 {
-    return camera3D->GetZ();
+    return camera3D_->GetZ();
 }
 
 float Package::GetCameraFocusX() const
 {
-    return camera3D->GetFocusX();
+    return camera3D_->GetFocusX();
 }
 
 float Package::GetCameraFocusY() const
 {
-    return camera3D->GetFocusY();
+    return camera3D_->GetFocusY();
 }
 
 float Package::GetCameraFocusZ() const
 {
-    return camera3D->GetFocusZ();
+    return camera3D_->GetFocusZ();
 }
 
 float Package::GetCameraRadius() const
 {
-    return camera3D->GetRadius();
+    return camera3D_->GetRadius();
 }
 
 float Package::GetCameraAzimuthAngle() const
 {
-    return camera3D->GetAzimuthAngle();
+    return camera3D_->GetAzimuthAngle();
 }
 
 float Package::GetCameraElevationAngle() const
 {
-    return camera3D->GetElevationAngle();
+    return camera3D_->GetElevationAngle();
 }
 
 float Package::GetCameraYaw() const
 {
-    return camera3D->GetYaw();
+    return camera3D_->GetYaw();
 }
 
 float Package::GetCameraPitch() const
 {
-    return camera3D->GetPitch();
+    return camera3D_->GetPitch();
 }
 
 float Package::GetCameraRoll() const
 {
-    return camera3D->GetRoll();
+    return camera3D_->GetRoll();
 }
 
 void Package::SetCameraPerspectiveClip(float nearClip, float farClip)
 {
-    return camera3D->SetPerspectiveClip(nearClip, farClip);
+    return camera3D_->SetPerspectiveClip(nearClip, farClip);
 }
 
 void Package::Set2DCameraFocusX(float x)
 {
-    camera2D->SetFocusX(x);
+    camera2D_->SetFocusX(x);
 }
 
 void Package::Set2DCameraFocusY(float y)
 {
-    camera2D->SetFocusY(y);
+    camera2D_->SetFocusY(y);
 }
 
 void Package::Set2DCameraAngleZ(float z)
 {
-    camera2D->SetAngleZ(z);
+    camera2D_->SetAngleZ(z);
 }
 
 void Package::Set2DCameraRatio(float r)
 {
-    camera2D->SetRatio(r);
+    camera2D_->SetRatio(r);
 }
 
 void Package::Set2DCameraRatioX(float x)
 {
-    camera2D->SetRatioX(x);
+    camera2D_->SetRatioX(x);
 }
 
 void Package::Set2DCameraRatioY(float y)
 {
-    camera2D->SetRatioY(y);
+    camera2D_->SetRatioY(y);
 }
 
 void Package::Reset2DCamera()
 {
-    camera2D->Reset(GetStgFrameCenterWorldX(), GetStgFrameCenterWorldY());
+    camera2D_->Reset(GetStgFrameCenterWorldX(), GetStgFrameCenterWorldY());
 }
 
 float Package::Get2DCameraX() const
 {
-    return camera2D->GetX();
+    return camera2D_->GetX();
 }
 
 float Package::Get2DCameraY() const
 {
-    return camera2D->GetY();
+    return camera2D_->GetY();
 }
 
 float Package::Get2DCameraAngleZ() const
 {
-    return camera2D->GetAngleZ();
+    return camera2D_->GetAngleZ();
 }
 
 float Package::Get2DCameraRatio() const
 {
-    return camera2D->GetRatio();
+    return camera2D_->GetRatio();
 }
 
 float Package::Get2DCameraRatioX() const
 {
-    return camera2D->GetRatioX();
+    return camera2D_->GetRatioX();
 }
 
 float Package::Get2DCameraRatioY() const
 {
-    return camera2D->GetRatioY();
+    return camera2D_->GetRatioY();
 }
 
 void Package::SetCommonData(const std::wstring & key, std::unique_ptr<DnhValue>&& value)
 {
-    commonDataDB->SetCommonData(key, std::move(value));
+    commonDataDB_->SetCommonData(key, std::move(value));
 }
 
 const std::unique_ptr<DnhValue>& Package::GetCommonData(const std::wstring & key, const std::unique_ptr<DnhValue>& defaultValue) const
 {
-    return commonDataDB->GetCommonData(key, defaultValue);
+    return commonDataDB_->GetCommonData(key, defaultValue);
 }
 
 void Package::ClearCommonData()
 {
-    commonDataDB->ClearCommonData();
+    commonDataDB_->ClearCommonData();
 }
 
 void Package::DeleteCommonData(const std::wstring & key)
 {
-    commonDataDB->DeleteCommonData(key);
+    commonDataDB_->DeleteCommonData(key);
 }
 
 void Package::SetAreaCommonData(const std::wstring & areaName, const std::wstring & key, std::unique_ptr<DnhValue>&& value)
 {
-    commonDataDB->SetAreaCommonData(areaName, key, std::move(value));
+    commonDataDB_->SetAreaCommonData(areaName, key, std::move(value));
 }
 
 const std::unique_ptr<DnhValue>& Package::GetAreaCommonData(const std::wstring & areaName, const std::wstring & key, const std::unique_ptr<DnhValue>& defaultValue) const
 {
-    return commonDataDB->GetAreaCommonData(areaName, key, defaultValue);
+    return commonDataDB_->GetAreaCommonData(areaName, key, defaultValue);
 }
 
 void Package::ClearAreaCommonData(const std::wstring & areaName)
 {
-    commonDataDB->ClearAreaCommonData(areaName);
+    commonDataDB_->ClearAreaCommonData(areaName);
 }
 
 void Package::DeleteAreaCommonData(const std::wstring & areaName, const std::wstring & key)
 {
-    commonDataDB->DeleteAreaCommonData(areaName, key);
+    commonDataDB_->DeleteAreaCommonData(areaName, key);
 }
 
 void Package::CreateCommonDataArea(const std::wstring & areaName)
 {
-    commonDataDB->CreateCommonDataArea(areaName);
+    commonDataDB_->CreateCommonDataArea(areaName);
 }
 
 bool Package::IsCommonDataAreaExists(const std::wstring & areaName) const
 {
-    return commonDataDB->IsCommonDataAreaExists(areaName);
+    return commonDataDB_->IsCommonDataAreaExists(areaName);
 }
 
 void Package::CopyCommonDataArea(const std::wstring & dest, const std::wstring & src)
 {
-    commonDataDB->CopyCommonDataArea(dest, src);
+    commonDataDB_->CopyCommonDataArea(dest, src);
 }
 
 std::vector<std::wstring> Package::GetCommonDataAreaKeyList() const
 {
-    return commonDataDB->GetCommonDataAreaKeyList();
+    return commonDataDB_->GetCommonDataAreaKeyList();
 }
 
 std::vector<std::wstring> Package::GetCommonDataValueKeyList(const std::wstring & areaName) const
 {
-    return commonDataDB->GetCommonDataValueKeyList(areaName);
+    return commonDataDB_->GetCommonDataValueKeyList(areaName);
 }
 
 bool Package::SaveCommonDataAreaA1(const std::wstring & areaName) const
 {
     try
     {
-        commonDataDB->SaveCommonDataArea(areaName, GetDefaultCommonDataSavePath(areaName));
+        commonDataDB_->SaveCommonDataArea(areaName, GetDefaultCommonDataSavePath(areaName));
     } catch (Log& log)
     {
         Logger::WriteLog(std::move(log.SetLevel(Log::Level::LV_WARN)));
@@ -1017,7 +994,7 @@ bool Package::LoadCommonDataAreaA1(const std::wstring & areaName)
 {
     try
     {
-        commonDataDB->LoadCommonDataArea(areaName, GetDefaultCommonDataSavePath(areaName));
+        commonDataDB_->LoadCommonDataArea(areaName, GetDefaultCommonDataSavePath(areaName));
     } catch (Log& log)
     {
         Logger::WriteLog(std::move(log.SetLevel(Log::Level::LV_WARN)));
@@ -1030,7 +1007,7 @@ bool Package::SaveCommonDataAreaA2(const std::wstring & areaName, const std::wst
 {
     try
     {
-        commonDataDB->SaveCommonDataArea(areaName, path);
+        commonDataDB_->SaveCommonDataArea(areaName, path);
     } catch (Log& log)
     {
         Logger::WriteLog(std::move(log.SetLevel(Log::Level::LV_WARN)));
@@ -1043,7 +1020,7 @@ bool Package::LoadCommonDataAreaA2(const std::wstring & areaName, const std::wst
 {
     try
     {
-        commonDataDB->LoadCommonDataArea(areaName, path);
+        commonDataDB_->LoadCommonDataArea(areaName, path);
     } catch (Log& log)
     {
         Logger::WriteLog(std::move(log.SetLevel(Log::Level::LV_WARN)));
@@ -1059,88 +1036,88 @@ std::wstring Package::GetDefaultCommonDataSavePath(const std::wstring & areaName
     {
         basePath = GetMainPackageScriptPath();
     }
-    if (basePath.empty()) return false;
+    if (basePath.empty()) return L"";
     return GetParentPath(basePath) + L"/data/" + GetStem(basePath) + L"_common_" + areaName + L".dat";
 }
 
 void Package::LoadPlayerShotData(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
-    playerShotDataTable->Load(path, srcPos);
+    playerShotDataTable_->Load(path, srcPos);
 }
 
 void Package::ReloadPlayerShotData(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
-    playerShotDataTable->Reload(path, srcPos);
+    playerShotDataTable_->Reload(path, srcPos);
 }
 
 void Package::LoadEnemyShotData(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
-    enemyShotDataTable->Load(path, srcPos);
+    enemyShotDataTable_->Load(path, srcPos);
 }
 
 void Package::ReloadEnemyShotData(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
-    enemyShotDataTable->Reload(path, srcPos);
+    enemyShotDataTable_->Reload(path, srcPos);
 }
 
 void Package::LoadItemData(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
-    itemDataTable->Load(path, srcPos);
+    itemDataTable_->Load(path, srcPos);
 }
 
 void Package::ReloadItemData(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
-    itemDataTable->Reload(path, srcPos);
+    itemDataTable_->Reload(path, srcPos);
 }
 
 NullableSharedPtr<ShotData> Package::GetPlayerShotData(int id) const
 {
-    return playerShotDataTable->Get(id);
+    return playerShotDataTable_->Get(id);
 }
 
 NullableSharedPtr<ShotData> Package::GetEnemyShotData(int id) const
 {
-    return enemyShotDataTable->Get(id);
+    return enemyShotDataTable_->Get(id);
 }
 
 NullableSharedPtr<ItemData> Package::GetItemData(int id) const
 {
-    return itemDataTable->Get(id);
+    return itemDataTable_->Get(id);
 }
 
 std::shared_ptr<ObjText> Package::CreateObjText()
 {
-    auto obj = objTable->Create<ObjText>(shared_from_this());
-    objLayerList->SetRenderPriority(obj, 50);
+    auto obj = objTable_->Create<ObjText>(shared_from_this());
+    objLayerList_->SetRenderPriority(obj, 50);
     return obj;
 }
 
 std::shared_ptr<ObjSound> Package::CreateObjSound()
 {
-    return objTable->Create<ObjSound>(shared_from_this());
+    return objTable_->Create<ObjSound>(shared_from_this());
 }
 
 std::shared_ptr<ObjFileT> Package::CreateObjFileT()
 {
-    return objTable->Create<ObjFileT>(shared_from_this());
+    return objTable_->Create<ObjFileT>(shared_from_this());
 }
 
 std::shared_ptr<ObjFileB> Package::CreateObjFileB()
 {
-    return objTable->Create<ObjFileB>(shared_from_this());
+    return objTable_->Create<ObjFileB>(shared_from_this());
 }
 
 std::shared_ptr<ObjShader> Package::CreateObjShader()
 {
-    auto obj = objTable->Create<ObjShader>(shared_from_this());
-    objLayerList->SetRenderPriority(obj, 50);
+    auto obj = objTable_->Create<ObjShader>(shared_from_this());
+    objLayerList_->SetRenderPriority(obj, 50);
     return obj;
 }
 
 std::shared_ptr<ObjShot> Package::CreateObjShot(bool isPlayerShot)
 {
-    auto shot = objTable->Create<ObjShot>(isPlayerShot, shared_from_this());
-    objLayerList->SetRenderPriority(shot, objLayerList->GetShotRenderPriority());
+    auto shot = objTable_->Create<ObjShot>(isPlayerShot, colDetector_, shared_from_this());
+    objLayerList_->SetRenderPriority(shot, objLayerList_->GetShotRenderPriority());
     return shot;
 }
 
@@ -1224,8 +1201,8 @@ NullableSharedPtr<ObjShot> Package::CreatePlayerShotA1(float x, float y, float s
 
 std::shared_ptr<ObjLooseLaser> Package::CreateObjLooseLaser(bool isPlayerShot)
 {
-    auto laser = objTable->Create<ObjLooseLaser>(isPlayerShot, shared_from_this());
-    objLayerList->SetRenderPriority(laser, objLayerList->GetShotRenderPriority());
+    auto laser = objTable_->Create<ObjLooseLaser>(isPlayerShot, colDetector_, shared_from_this());
+    objLayerList_->SetRenderPriority(laser, objLayerList_->GetShotRenderPriority());
     return laser;
 }
 
@@ -1245,8 +1222,8 @@ std::shared_ptr<ObjLooseLaser> Package::CreateLooseLaserA1(float x, float y, flo
 
 std::shared_ptr<ObjStLaser> Package::CreateObjStLaser(bool isPlayerShot)
 {
-    auto laser = objTable->Create<ObjStLaser>(isPlayerShot, shared_from_this());
-    objLayerList->SetRenderPriority(laser, objLayerList->GetShotRenderPriority());
+    auto laser = objTable_->Create<ObjStLaser>(isPlayerShot, colDetector_, shared_from_this());
+    objLayerList_->SetRenderPriority(laser, objLayerList_->GetShotRenderPriority());
     return laser;
 }
 
@@ -1266,8 +1243,8 @@ std::shared_ptr<ObjStLaser> Package::CreateStraightLaserA1(float x, float y, flo
 
 std::shared_ptr<ObjCrLaser> Package::CreateObjCrLaser(bool isPlayerShot)
 {
-    auto laser = objTable->Create<ObjCrLaser>(isPlayerShot, shared_from_this());
-    objLayerList->SetRenderPriority(laser, objLayerList->GetShotRenderPriority());
+    auto laser = objTable_->Create<ObjCrLaser>(isPlayerShot, colDetector_, shared_from_this());
+    objLayerList_->SetRenderPriority(laser, objLayerList_->GetShotRenderPriority());
     return laser;
 }
 
@@ -1283,6 +1260,36 @@ std::shared_ptr<ObjCrLaser> Package::CreateCurveLaserA1(float x, float y, float 
     laser->SetDelay(delay);
     laser->Regist();
     return laser;
+}
+
+std::shared_ptr<ObjItem> Package::CreateObjItem(int itemType)
+{
+    auto obj = objTable_->Create<ObjItem>(itemType, colDetector_, shared_from_this());
+    objLayerList_->SetRenderPriority(obj, objLayerList_->GetItemRenderPriority());
+    obj->SetIntersection();
+    return obj;
+}
+
+void Package::GenerateBonusItem(float x, float y)
+{
+    if (IsDefaultBonusItemEnabled())
+    {
+        auto bonusItem = std::make_shared<ObjItem>(ITEM_DEFAULT_BONUS, colDetector_, shared_from_this());
+        objTable_->Add(bonusItem);
+        objLayerList_->SetRenderPriority(bonusItem, objLayerList_->GetItemRenderPriority());
+        bonusItem->SetMovePosition(x, y);
+        bonusItem->SetIntersection();
+        bonusItem->SetScore(300);
+        bonusItem->SetMoveMode(std::make_shared<MoveModeItemToPlayer>(8.0f, playerObj_.lock()));
+    }
+}
+
+void Package::GenerateItemScoreText(float x, float y, PlayerScore score)
+{
+    std::shared_ptr<Texture> texture = textureCache_->Load(SYSTEM_STG_DIGIT_IMG_PATH, false, nullptr);
+    auto scoreText = objTable_->Create<ObjItemScoreText>(score, texture, shared_from_this());
+    objLayerList_->SetRenderPriority(scoreText, objLayerList_->GetItemRenderPriority());
+    scoreText->SetMovePosition(x, y);
 }
 
 std::shared_ptr<ObjItem> Package::CreateItemA1(int itemType, float x, float y, PlayerScore score)
@@ -1325,14 +1332,21 @@ std::shared_ptr<ObjItem> Package::CreateItemU2(int itemDataId, float x, float y,
 
 std::shared_ptr<ObjEnemy> Package::CreateObjEnemy()
 {
-    auto enemy = objTable->Create<ObjEnemy>(false, shared_from_this());
-    objLayerList->SetRenderPriority(enemy, DEFAULT_ENEMY_RENDER_PRIORITY);
+    auto enemy = objTable_->Create<ObjEnemy>(false, colDetector_, shared_from_this());
+    objLayerList_->SetRenderPriority(enemy, DEFAULT_ENEMY_RENDER_PRIORITY);
+    return enemy;
+}
+
+std::shared_ptr<ObjEnemy> Package::CreateObjEnemyBoss()
+{
+    auto enemy = objTable_->Create<ObjEnemy>(true, colDetector_, shared_from_this());
+    objLayerList_->SetRenderPriority(enemy, DEFAULT_ENEMY_RENDER_PRIORITY);
     return enemy;
 }
 
 std::shared_ptr<ObjEnemyBossScene> Package::CreateObjEnemyBossScene(const std::shared_ptr<SourcePos>& srcPos)
 {
-    if (auto bossScene = enemyBossSceneObj.lock())
+    if (auto bossScene = enemyBossSceneObj_.lock())
     {
         if (!bossScene->IsDead())
         {
@@ -1343,41 +1357,33 @@ std::shared_ptr<ObjEnemyBossScene> Package::CreateObjEnemyBossScene(const std::s
             return bossScene;
         }
     }
-    auto bossScene = objTable->Create<ObjEnemyBossScene>(shared_from_this());
-    enemyBossSceneObj = bossScene;
+    auto bossScene = objTable_->Create<ObjEnemyBossScene>(shared_from_this());
+    enemyBossSceneObj_ = bossScene;
     return bossScene;
 }
 
 std::shared_ptr<ObjSpell> Package::CreateObjSpell()
 {
-    auto spell = objTable->Create<ObjSpell>(shared_from_this());
-    objLayerList->SetRenderPriority(spell, 50);
+    auto spell = objTable_->Create<ObjSpell>(colDetector_, shared_from_this());
+    objLayerList_->SetRenderPriority(spell, 50);
     return spell;
 }
 
-std::shared_ptr<ObjItem> Package::CreateObjItem(int itemType)
+NullableSharedPtr<Script> Package::GetScript(int scriptId) const
 {
-    auto obj = objTable->Create<ObjItem>(itemType, shared_from_this());
-    objLayerList->SetRenderPriority(obj, objLayerList->GetItemRenderPriority());
-    obj->SetIntersection();
-    return obj;
-}
-
-std::shared_ptr<Script> Package::GetScript(int scriptId) const
-{
-    return scriptManager->Get(scriptId);
+    return scriptManager_->Get(scriptId);
 }
 
 std::shared_ptr<Script> Package::LoadScript(const std::wstring & path, const std::wstring & type, const std::wstring & version, const std::shared_ptr<SourcePos>& srcPos)
 {
-    auto script = scriptManager->Compile(path, type, version, srcPos);
+    auto script = scriptManager_->Compile(path, type, version, srcPos);
     script->Load();
     return script;
 }
 
 std::shared_ptr<Script> Package::LoadScriptInThread(const std::wstring & path, const std::wstring & type, const std::wstring & version, const std::shared_ptr<SourcePos>& srcPos)
 {
-    auto script = scriptManager->CompileInThread(path, type, version, srcPos);
+    auto script = scriptManager_->CompileInThread(path, type, version, srcPos);
     return script;
 }
 
@@ -1391,27 +1397,27 @@ void Package::CloseStgScene()
 
 void Package::NotifyEventAll(int eventType)
 {
-    scriptManager->NotifyEventAll(eventType);
+    scriptManager_->NotifyEventAll(eventType);
 }
 
 void Package::NotifyEventAll(int eventType, const std::unique_ptr<DnhArray>& args)
 {
-    scriptManager->NotifyEventAll(eventType, args);
+    scriptManager_->NotifyEventAll(eventType, args);
 }
 
 std::wstring Package::GetPlayerID() const
 {
-    return stagePlayerScriptInfo.id;
+    return stagePlayerScriptInfo_.id;
 }
 
 std::wstring Package::GetPlayerReplayName() const
 {
-    return stagePlayerScriptInfo.replayName;
+    return stagePlayerScriptInfo_.replayName;
 }
 
 NullableSharedPtr<ObjPlayer> Package::GetPlayerObject() const
 {
-    auto player = playerObj.lock();
+    auto player = playerObj_.lock();
     if (player && !player->IsDead()) return player;
     return nullptr;
 }
@@ -1430,83 +1436,93 @@ NullableSharedPtr<ObjEnemy> Package::GetEnemyBossObject() const
 
 NullableSharedPtr<ObjEnemyBossScene> Package::GetEnemyBossSceneObject() const
 {
-    auto bossScene = enemyBossSceneObj.lock();
+    auto bossScene = enemyBossSceneObj_.lock();
     if (bossScene && !bossScene->IsDead()) return bossScene;
     return nullptr;
 }
 
 NullableSharedPtr<ObjSpellManage> Package::GetSpellManageObject() const
 {
-    auto spellManage = spellManageObj.lock();
+    auto spellManage = spellManageObj_.lock();
     if (spellManage && !spellManage->IsDead()) return spellManage;
     return nullptr;
 }
 
+void Package::GenerateSpellManageObject()
+{
+    if (auto spellManageObj = spellManageObj_.lock())
+    {
+        // 既にある場合は削除
+        DeleteObject(spellManageObj->GetID());
+    }
+    spellManageObj_ = objTable_->Create<ObjSpellManage>(shared_from_this());
+}
+
 void Package::DeleteObject(int id)
 {
-    objTable->Delete(id);
+    objTable_->Delete(id);
 }
 
 bool Package::IsObjectDeleted(int id) const
 {
-    return objTable->IsDeleted(id);
+    return objTable_->IsDeleted(id);
 }
 
 std::shared_ptr<ObjPrim2D> Package::CreateObjPrim2D()
 {
-    auto obj = objTable->Create<ObjPrim2D>(shared_from_this());
-    objLayerList->SetRenderPriority(obj, 50);
+    auto obj = objTable_->Create<ObjPrim2D>(shared_from_this());
+    objLayerList_->SetRenderPriority(obj, 50);
     return obj;
 }
 
 std::shared_ptr<ObjSprite2D> Package::CreateObjSprite2D()
 {
-    auto obj = objTable->Create<ObjSprite2D>(shared_from_this());
-    objLayerList->SetRenderPriority(obj, 50);
+    auto obj = objTable_->Create<ObjSprite2D>(shared_from_this());
+    objLayerList_->SetRenderPriority(obj, 50);
     return obj;
 }
 
 std::shared_ptr<ObjSpriteList2D> Package::CreateObjSpriteList2D()
 {
-    auto obj = objTable->Create<ObjSpriteList2D>(shared_from_this());
-    objLayerList->SetRenderPriority(obj, 50);
+    auto obj = objTable_->Create<ObjSpriteList2D>(shared_from_this());
+    objLayerList_->SetRenderPriority(obj, 50);
     return obj;
 }
 
 std::shared_ptr<ObjPrim3D> Package::CreateObjPrim3D()
 {
-    auto obj = objTable->Create<ObjPrim3D>(shared_from_this());
-    objLayerList->SetRenderPriority(obj, 50);
+    auto obj = objTable_->Create<ObjPrim3D>(shared_from_this());
+    objLayerList_->SetRenderPriority(obj, 50);
     return obj;
 }
 
 std::shared_ptr<ObjSprite3D> Package::CreateObjSprite3D()
 {
-    auto obj = objTable->Create<ObjSprite3D>(shared_from_this());
-    objLayerList->SetRenderPriority(obj, 50);
+    auto obj = objTable_->Create<ObjSprite3D>(shared_from_this());
+    objLayerList_->SetRenderPriority(obj, 50);
     return obj;
 }
 
 std::shared_ptr<ObjMesh> Package::CreateObjMesh()
 {
-    auto obj = objTable->Create<ObjMesh>(shared_from_this());
-    objLayerList->SetRenderPriority(obj, 50);
+    auto obj = objTable_->Create<ObjMesh>(shared_from_this());
+    objLayerList_->SetRenderPriority(obj, 50);
     return obj;
 }
 
 NullableSharedPtr<Script> Package::GetPlayerScript() const
 {
-    return stagePlayerScript.lock();
+    return stagePlayerScript_.lock();
 }
 
 const std::unique_ptr<DnhValue>& Package::GetScriptResult(int scriptId) const
 {
-    return scriptManager->GetScriptResult(scriptId);
+    return scriptManager_->GetScriptResult(scriptId);
 }
 
 void Package::SetScriptResult(int scriptId, std::unique_ptr<DnhValue>&& value)
 {
-    scriptManager->SetScriptResult(scriptId, std::move(value));
+    scriptManager_->SetScriptResult(scriptId, std::move(value));
 }
 
 std::vector<ScriptInfo> Package::GetScriptList(const std::wstring & dirPath, int scriptType, bool doRecursive)
@@ -1520,7 +1536,7 @@ std::vector<ScriptInfo> Package::GetScriptList(const std::wstring & dirPath, int
     {
         try
         {
-            auto info = ScanDnhScriptInfo(path, fileLoader);
+            auto info = ScanDnhScriptInfo(path, fileLoader_);
             if (scriptType == TYPE_SCRIPT_ALL || scriptTypeName == info.type)
             {
                 infos.push_back(info);
@@ -1534,24 +1550,24 @@ std::vector<ScriptInfo> Package::GetScriptList(const std::wstring & dirPath, int
 
 void Package::GetLoadFreePlayerScriptList()
 {
-    freePlayerScriptInfoList = GetScriptList(FREE_PLAYER_DIR, TYPE_SCRIPT_PLAYER, true);
+    freePlayerScriptInfoList_ = GetScriptList(FREE_PLAYER_DIR, TYPE_SCRIPT_PLAYER, true);
 }
 
 int Package::GetFreePlayerScriptCount() const
 {
-    return freePlayerScriptInfoList.size();
+    return freePlayerScriptInfoList_.size();
 }
 
 ScriptInfo Package::GetFreePlayerScriptInfo(int idx) const
 {
-    return freePlayerScriptInfoList.at(idx);
+    return freePlayerScriptInfoList_.at(idx);
 }
 
 ScriptInfo Package::GetScriptInfo(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
     try
     {
-        return ScanDnhScriptInfo(path, fileLoader);
+        return ScanDnhScriptInfo(path, fileLoader_);
     } catch (Log& log)
     {
         log.SetLevel(Log::Level::LV_WARN).AddSourcePos(srcPos);
@@ -1674,17 +1690,37 @@ float Package::GetStgFrameCenterScreenY() const
 
 int Package::GetAllShotCount() const
 {
-    return shotCounter->playerShotCount + shotCounter->enemyShotCount;
+    return shotCounter_->playerShotCount + shotCounter_->enemyShotCount;
 }
 
 int Package::GetEnemyShotCount() const
 {
-    return shotCounter->enemyShotCount;
+    return shotCounter_->enemyShotCount;
 }
 
 int Package::GetPlayerShotCount() const
 {
-    return shotCounter->playerShotCount;
+    return shotCounter_->playerShotCount;
+}
+
+void Package::SuccPlayerShotCount()
+{
+    shotCounter_->playerShotCount++;
+}
+
+void Package::SuccEnemyShotCount()
+{
+    shotCounter_->enemyShotCount++;
+}
+
+void Package::PredPlayerShotCount()
+{
+    shotCounter_->playerShotCount--;
+}
+
+void Package::PredEnemyShotCount()
+{
+    shotCounter_->enemyShotCount--;
 }
 
 void Package::SetShotAutoDeleteClip(float left, float top, float right, float bottom)
@@ -1711,25 +1747,45 @@ void Package::StartShotScript(const std::wstring & path, const std::shared_ptr<S
             .AddSourcePos(srcPos)));
         return;
     }
-    auto shotScript = LoadScript(path, SCRIPT_TYPE_SHOT_CUSTOM, stageMainScriptInfo.version, srcPos);
+    auto shotScript = LoadScript(path, SCRIPT_TYPE_SHOT_CUSTOM, stageMainScriptInfo_.version, srcPos);
     shotScript = shotScript;
     shotScript->Start();
     shotScript->RunInitialize();
 }
 
+NullableSharedPtr<Script> Package::GetShotScript() const
+{
+    return shotScript_.lock();
+}
+
 void Package::SetDeleteShotImmediateEventOnShotScriptEnable(bool enable)
 {
-    deleteShotImmediateEventOnShotScriptEnable = enable;
+    deleteShotImmediateEventOnShotScriptEnable_ = enable;
 }
 
 void Package::SetDeleteShotFadeEventOnShotScriptEnable(bool enable)
 {
-    deleteShotFadeEventOnShotScriptEnable = enable;
+    deleteShotFadeEventOnShotScriptEnable_ = enable;
 }
 
 void Package::SetDeleteShotToItemEventOnShotScriptEnable(bool enable)
 {
-    deleteShotToItemEventOnShotScriptEnable = enable;
+    deleteShotToItemEventOnShotScriptEnable_ = enable;
+}
+
+bool Package::IsDeleteShotImmediateEventOnShotScriptEnabled() const
+{
+    return deleteShotImmediateEventOnShotScriptEnable_;
+}
+
+bool Package::IsDeleteShotFadeEventOnShotScriptEnabled() const
+{
+    return deleteShotFadeEventOnShotScriptEnable_;
+}
+
+bool Package::IsDeleteShotToItemEventOnShotScriptEnabled() const
+{
+    return deleteShotToItemEventOnShotScriptEnable_;
 }
 
 void Package::DeleteShotAll(int target, int behavior) const
@@ -1763,7 +1819,7 @@ void Package::DeleteShotAll(int target, int behavior) const
 
 void Package::DeleteShotInCircle(int target, int behavior, float x, float y, float r) const
 {
-    auto isects = colDetector->GetIntersectionsCollideWithShape(Shape(x, y, r), COL_GRP_ENEMY_SHOT);
+    auto isects = colDetector_->GetIntersectionsCollideWithShape(Shape(x, y, r), COL_GRP_ENEMY_SHOT);
     for (auto& isect : isects)
     {
         if (auto shotIsect = std::dynamic_pointer_cast<ShotIntersection>(isect))
@@ -1793,7 +1849,7 @@ std::vector<std::shared_ptr<ObjShot>> Package::GetShotInCircle(float x, float y,
     // 同じショットに紐付いている判定が複数あるので、まずIDだけを集める
     std::unordered_set<int> shotIds;
 
-    auto isects = colDetector->GetIntersectionsCollideWithShape(Shape(x, y, r), -1);
+    auto isects = colDetector_->GetIntersectionsCollideWithShape(Shape(x, y, r), -1);
     for (auto& isect : isects)
     {
         if (auto shotIsect = std::dynamic_pointer_cast<ShotIntersection>(isect))
@@ -1822,40 +1878,55 @@ std::vector<std::shared_ptr<ObjShot>> Package::GetShotInCircle(float x, float y,
 void Package::SetShotIntersectoinCicle(float x, float y, float r)
 {
     auto isect = std::make_shared<TempEnemyShotIntersection>(x, y, r);
-    colDetector->Add(isect);
-    tempEnemyShotIsects.push_back(isect);
+    colDetector_->Add(isect);
+    tempEnemyShotIsects_.push_back(isect);
 }
 
 void Package::SetShotIntersectoinLine(float x1, float y1, float x2, float y2, float width)
 {
     auto isect = std::make_shared<TempEnemyShotIntersection>(x1, y1, x2, y2, width);
-    colDetector->Add(isect);
-    tempEnemyShotIsects.push_back(isect);
+    colDetector_->Add(isect);
+    tempEnemyShotIsects_.push_back(isect);
 }
 
 void Package::CollectAllItems()
 {
-    autoItemCollectionManager->CollectAllItems();
+    autoItemCollectionManager_->CollectAllItems();
 }
 
 void Package::CollectItemsByType(int itemType)
 {
-    autoItemCollectionManager->CollectItemsByType(itemType);
+    autoItemCollectionManager_->CollectItemsByType(itemType);
 }
 
 void Package::CollectItemsInCircle(float x, float y, float r)
 {
-    autoItemCollectionManager->CollectItemsInCircle(x, y, r);
+    autoItemCollectionManager_->CollectItemsInCircle(x, y, r);
 }
 
 void Package::CancelCollectItems()
 {
-    autoItemCollectionManager->CancelCollectItems();
+    autoItemCollectionManager_->CancelCollectItems();
+}
+
+bool Package::IsAutoCollectCanceled() const
+{
+    return autoItemCollectionManager_->IsAutoCollectCanceled();
+}
+
+bool Package::IsAutoCollectTarget(int itemType, float x, float y) const
+{
+    return autoItemCollectionManager_->IsAutoCollectTarget(itemType, x, y);
 }
 
 void Package::SetDefaultBonusItemEnable(bool enable)
 {
-    defaultBonusItemEnable = enable;
+    defaultBonusItemEnable_ = enable;
+}
+
+bool Package::IsDefaultBonusItemEnabled() const
+{
+    return defaultBonusItemEnable_;
 }
 
 void Package::StartItemScript(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
@@ -1869,15 +1940,20 @@ void Package::StartItemScript(const std::wstring & path, const std::shared_ptr<S
             .AddSourcePos(srcPos)));
         return;
     }
-    auto itemScript = LoadScript(path, SCRIPT_TYPE_ITEM_CUSTOM, stageMainScriptInfo.version, srcPos);
+    auto itemScript = LoadScript(path, SCRIPT_TYPE_ITEM_CUSTOM, stageMainScriptInfo_.version, srcPos);
     itemScript = itemScript;
     itemScript->Start();
     itemScript->RunInitialize();
 }
 
+NullableSharedPtr<Script> Package::GetItemScript() const
+{
+    return itemScript_.lock();
+}
+
 bool Package::IsFinished() const
 {
-    if (packageMainScript.lock())
+    if (packageMainScript_.lock())
     {
         return false;
     }
@@ -1886,7 +1962,7 @@ bool Package::IsFinished() const
 
 void Package::Close()
 {
-    if (auto packageMain = packageMainScript.lock())
+    if (auto packageMain = packageMainScript_.lock())
     {
         packageMain->Close();
     }
@@ -1894,15 +1970,15 @@ void Package::Close()
 
 void Package::InitializeStageScene()
 {
-    objTable->DeleteStgSceneObject();
-    scriptManager->CloseStgSceneScript();
+    objTable_->DeleteStgSceneObject();
+    scriptManager_->CloseStgSceneScript();
     SetStgFrame(32.0f, 16.0f, 416.0f, 464.0f);
     SetShotAutoDeleteClip(64.0f, 64.0f, 64.0f, 64.0f);
     Reset2DCamera();
     SetDefaultBonusItemEnable(true);
-    stageSceneResult = 0;
+    stageSceneResult_ = 0;
     stageMainScript_.reset();
-    stagePlayerScript.reset();
+    stagePlayerScript_.reset();
 
     SetPlayerLife(2);
     SetPlayerSpell(3);
@@ -1915,8 +1991,8 @@ void Package::InitializeStageScene()
     SetStgFrameRenderPriorityMax(DEFAULT_STG_FRAME_RENDER_PRIORITY_MAX);
     SetShotRenderPriority(DEFAULT_SHOT_RENDER_PRIORITY);
     SetItemRenderPriority(DEFAULT_ITEM_RENDER_PRIORITY);
-    stagePaused = true;
-    stageForceTerminated = false;
+    stagePaused_ = true;
+    stageForceTerminated_ = false;
     SetDeleteShotImmediateEventOnShotScriptEnable(false);
     SetDeleteShotFadeEventOnShotScriptEnable(false);
     SetDeleteShotToItemEventOnShotScriptEnable(false);
@@ -1929,9 +2005,10 @@ void Package::FinalizeStageScene()
 
 void Package::Start()
 {
+    packageStartTime_ = std::make_shared<TimePoint>();
     Logger::WriteLog(Log::Level::LV_INFO, "start package.");
-    auto script = scriptManager->Compile(packageMainScriptInfo_.path, SCRIPT_TYPE_PACKAGE, packageMainScriptInfo_.version, nullptr);
-    packageMainScript = script;
+    auto script = scriptManager_->Compile(packageMainScriptInfo_.path, SCRIPT_TYPE_PACKAGE, packageMainScriptInfo_.version, nullptr);
+    packageMainScript_ = script;
     script->Start();
     script->RunInitialize();
 }
@@ -1957,13 +2034,13 @@ void Package::SetReplaySaveSceneScriptPath(const std::wstring & path)
 Point2D Package::Get2DPosition(float x, float y, float z, bool isStgScene)
 {
     D3DXMATRIX view, proj, viewport, billboard;
-    camera3D->GenerateViewMatrix(&view, &billboard);
+    camera3D_->GenerateViewMatrix(&view, &billboard);
     if (isStgScene)
     {
-        camera3D->GenerateProjMatrix(&proj, GetScreenWidth(), GetScreenHeight(), GetStgFrameCenterScreenX(), GetStgFrameCenterScreenY());
+        camera3D_->GenerateProjMatrix(&proj, GetScreenWidth(), GetScreenHeight(), GetStgFrameCenterScreenX(), GetStgFrameCenterScreenY());
     } else
     {
-        camera3D->GenerateProjMatrix(&proj, GetScreenWidth(), GetScreenHeight(), GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f);
+        camera3D_->GenerateProjMatrix(&proj, GetScreenWidth(), GetScreenHeight(), GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f);
     }
     {
         D3DXMatrixScaling(&viewport, GetScreenWidth() / 2.0f, -GetScreenHeight() / 2.0f, 1.0f);
@@ -1974,8 +2051,8 @@ Point2D Package::Get2DPosition(float x, float y, float z, bool isStgScene)
     D3DXVec3TransformCoord(&pos, &pos, &(view * proj * viewport));
     if (isStgScene)
     {
-        camera2D->GenerateViewMatrix(&view);
-        camera2D->GenerateProjMatrix(&proj, GetScreenWidth(), GetScreenHeight(), GetStgFrameCenterScreenX(), GetStgFrameCenterScreenY());
+        camera2D_->GenerateViewMatrix(&view);
+        camera2D_->GenerateProjMatrix(&proj, GetScreenWidth(), GetScreenHeight(), GetStgFrameCenterScreenX(), GetStgFrameCenterScreenY());
         D3DXMATRIX viewProjViewport = view * proj * viewport;
         D3DXMatrixInverse(&viewProjViewport, NULL, &viewProjViewport);
         D3DXVec3TransformCoord(&pos, &pos, &viewProjViewport);
@@ -1983,22 +2060,32 @@ Point2D Package::Get2DPosition(float x, float y, float z, bool isStgScene)
     return Point2D(pos.x, pos.y);
 }
 
+double Package::GetRandDouble(double min, double max)
+{
+    return randGenerator_->RandDouble(min, max);
+}
+
+const std::shared_ptr<EngineDevelopOptions>& Package::GetEngineDevelopOptions() const
+{
+    return engineDevelopOptions_;
+}
+
 void Package::SetStageIndex(uint16_t idx)
 {
-    stageIdx = idx;
+    stageIdx_ = idx;
 }
 
 void Package::SetStageMainScript(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
     try
     {
-        stageMainScriptInfo = ScanDnhScriptInfo(path, fileLoader);
+        stageMainScriptInfo_ = ScanDnhScriptInfo(path, fileLoader_);
     } catch (Log& log)
     {
         log.SetLevel(Log::Level::LV_WARN).AddSourcePos(srcPos);
         Logger::WriteLog(log);
-        stageMainScriptInfo = ScriptInfo();
-        stageMainScriptInfo.path = path;
+        stageMainScriptInfo_ = ScriptInfo();
+        stageMainScriptInfo_.path = path;
     }
 }
 
@@ -2006,29 +2093,29 @@ void Package::SetStagePlayerScript(const std::wstring & path, const std::shared_
 {
     try
     {
-        stagePlayerScriptInfo = ScanDnhScriptInfo(path, fileLoader);
+        stagePlayerScriptInfo_ = ScanDnhScriptInfo(path, fileLoader_);
     } catch (Log& log)
     {
         log.SetLevel(Log::Level::LV_WARN).AddSourcePos(srcPos);
         Logger::WriteLog(log);
-        stageMainScriptInfo = ScriptInfo();
-        stageMainScriptInfo.path = path;
+        stageMainScriptInfo_ = ScriptInfo();
+        stageMainScriptInfo_.path = path;
     }
 }
 
 void Package::SetStageMainScript(const ScriptInfo & script)
 {
-    stageMainScriptInfo = script;
+    stageMainScriptInfo_ = script;
 }
 
 void Package::SetStagePlayerScript(const ScriptInfo & script)
 {
-    stagePlayerScriptInfo = script;
+    stagePlayerScriptInfo_ = script;
 }
 
 void Package::SetStageReplayFile(const std::wstring & path)
 {
-    stageReplayFilePath = path;
+    stageReplayFilePath_ = path;
 }
 
 bool Package::IsStageFinished() const
@@ -2042,24 +2129,24 @@ bool Package::IsStageFinished() const
 
 int Package::GetStageSceneResult() const
 {
-    return stageSceneResult;
+    return stageSceneResult_;
 }
 
 bool Package::IsStagePaused() const
 {
-    return stagePaused;
+    return stagePaused_;
 }
 
 void Package::PauseStageScene(bool doPause)
 {
-    if (doPause && !stagePaused)
+    if (doPause && !stagePaused_)
     {
         NotifyEventAll(EV_PAUSE_ENTER);
-    } else if (!doPause && stagePaused)
+    } else if (!doPause && stagePaused_)
     {
         NotifyEventAll(EV_PAUSE_LEAVE);
     }
-    stagePaused = doPause;
+    stagePaused_ = doPause;
 }
 
 void Package::TerminateStageScene()
@@ -2067,88 +2154,88 @@ void Package::TerminateStageScene()
     if (auto stageMain = stageMainScript_.lock())
     {
         stageMain->Close();
-        stageForceTerminated = true;
+        stageForceTerminated_ = true;
     }
 }
 
 void Package::StartStageScene(const std::shared_ptr<SourcePos>& srcPos)
 {
-    objTable->DeleteStgSceneObject();
-    scriptManager->CloseStgSceneScript();
+    objTable_->DeleteStgSceneObject();
+    scriptManager_->CloseStgSceneScript();
     inputDevice_->ResetInputState();
     Reset2DCamera();
     ResetCamera();
     SetDefaultBonusItemEnable(true);
-    playerShotDataTable = std::make_shared<ShotDataTable>(ShotDataTable::Type::PLAYER, textureCache, fileLoader);
-    enemyShotDataTable = std::make_shared<ShotDataTable>(ShotDataTable::Type::ENEMY, textureCache, fileLoader);
-    itemDataTable = std::make_shared<ItemDataTable>(textureCache, fileLoader);
+    playerShotDataTable_ = std::make_shared<ShotDataTable>(ShotDataTable::Type::PLAYER, textureCache_, fileLoader_);
+    enemyShotDataTable_ = std::make_shared<ShotDataTable>(ShotDataTable::Type::ENEMY, textureCache_, fileLoader_);
+    itemDataTable_ = std::make_shared<ItemDataTable>(textureCache_, fileLoader_);
     stageMainScript_.reset();
-    stagePlayerScript.reset();
+    stagePlayerScript_.reset();
     ReloadItemData(DEFAULT_ITEM_DATA_PATH, nullptr);
-    stageSceneResult = 0;
-    stageForceTerminated = false;
+    stageSceneResult_ = 0;
+    stageForceTerminated_ = false;
     SetDeleteShotImmediateEventOnShotScriptEnable(false);
     SetDeleteShotFadeEventOnShotScriptEnable(false);
     SetDeleteShotToItemEventOnShotScriptEnable(false);
-    stagePaused = false;
-    renderer->SetFogEnable(false);
-    pseudoPlayerFps = pseudoEnemyFps = 60;
+    stagePaused_ = false;
+    renderer_->SetFogEnable(false);
+    pseudoPlayerFps_ = pseudoEnemyFps_ = 60;
 
-    if (stageMainScriptInfo.systemPath.empty() || stageMainScriptInfo.systemPath == L"DEFAULT")
+    if (stageMainScriptInfo_.systemPath.empty() || stageMainScriptInfo_.systemPath == L"DEFAULT")
     {
-        stageMainScriptInfo.systemPath = DEFAULT_SYSTEM_PATH;
+        stageMainScriptInfo_.systemPath = DEFAULT_SYSTEM_PATH;
     }
 
     // #System
-    auto systemScript = scriptManager->Compile(stageMainScriptInfo.systemPath, SCRIPT_TYPE_STAGE, stageMainScriptInfo.version, srcPos);
+    auto systemScript = scriptManager_->Compile(stageMainScriptInfo_.systemPath, SCRIPT_TYPE_STAGE, stageMainScriptInfo_.version, srcPos);
     systemScript->Start();
     systemScript->RunInitialize();
 
     // Create Player
-    auto player = objTable->Create<ObjPlayer>(shared_from_this());
-    objLayerList->SetRenderPriority(player, DEFAULT_PLAYER_RENDER_PRIORITY);
+    auto player = objTable_->Create<ObjPlayer>(colDetector_, shared_from_this());
+    objLayerList_->SetRenderPriority(player, DEFAULT_PLAYER_RENDER_PRIORITY);
     player->AddIntersectionToItem();
-    playerObj = player;
+    playerObj_ = player;
     Logger::WriteLog(std::move(
         Log(Log::Level::LV_INFO)
         .SetMessage("create player object.")
         .AddSourcePos(srcPos)));
 
-    auto playerScript = scriptManager->Compile(stagePlayerScriptInfo.path, SCRIPT_TYPE_PLAYER, stagePlayerScriptInfo.version, srcPos);
-    stagePlayerScript = playerScript;
+    auto playerScript = scriptManager_->Compile(stagePlayerScriptInfo_.path, SCRIPT_TYPE_PLAYER, stagePlayerScriptInfo_.version, srcPos);
+    stagePlayerScript_ = playerScript;
     playerScript->Start();
     playerScript->RunInitialize();
 
     // Main
-    auto stageMainScriptPath = stageMainScriptInfo.path;
-    if (stageMainScriptInfo.type == SCRIPT_TYPE_SINGLE)
+    auto stageMainScriptPath = stageMainScriptInfo_.path;
+    if (stageMainScriptInfo_.type == SCRIPT_TYPE_SINGLE)
     {
         stageMainScriptPath = SYSTEM_SINGLE_STAGE_PATH;
-    } else if (stageMainScriptInfo.type == SCRIPT_TYPE_PLURAL)
+    } else if (stageMainScriptInfo_.type == SCRIPT_TYPE_PLURAL)
     {
         stageMainScriptPath = SYSTEM_PLURAL_STAGE_PATH;
     }
-    auto stageMainScript = scriptManager->Compile(stageMainScriptPath, SCRIPT_TYPE_STAGE, stageMainScriptInfo.version, srcPos);
+    auto stageMainScript = scriptManager_->Compile(stageMainScriptPath, SCRIPT_TYPE_STAGE, stageMainScriptInfo_.version, srcPos);
     stageMainScript_ = stageMainScript;
     stageMainScript->Start();
     stageMainScript->RunInitialize();
-    stageStartTime = std::make_shared<TimePoint>();
+    stageStartTime_ = std::make_shared<TimePoint>();
 
     // #Background
-    if (!stageMainScriptInfo.backgroundPath.empty() && stageMainScriptInfo.backgroundPath != L"DEFAULT")
+    if (!stageMainScriptInfo_.backgroundPath.empty() && stageMainScriptInfo_.backgroundPath != L"DEFAULT")
     {
-        auto backgroundScript = scriptManager->Compile(stageMainScriptInfo.backgroundPath, SCRIPT_TYPE_STAGE, stageMainScriptInfo.version, srcPos);
+        auto backgroundScript = scriptManager_->Compile(stageMainScriptInfo_.backgroundPath, SCRIPT_TYPE_STAGE, stageMainScriptInfo_.version, srcPos);
         backgroundScript->Start();
         backgroundScript->RunInitialize();
     }
 
     // #BGM
-    if (!stageMainScriptInfo.bgmPath.empty() && stageMainScriptInfo.bgmPath != L"DEFAULT")
+    if (!stageMainScriptInfo_.bgmPath.empty() && stageMainScriptInfo_.bgmPath != L"DEFAULT")
     {
         try
         {
-            LoadOrphanSound(stageMainScriptInfo.bgmPath, nullptr); // TODO: #BGMヘッダのSourcePosを与える
-            auto& bgm = orphanSounds[GetCanonicalPath(packageMainScriptInfo_.bgmPath)];
+            LoadOrphanSound(stageMainScriptInfo_.bgmPath, nullptr); // TODO: #BGMヘッダのSourcePosを与える
+            auto& bgm = orphanSounds_[GetCanonicalPath(packageMainScriptInfo_.bgmPath)];
             bgm->SetLoopEnable(true);
             bgm->Play();
         } catch (Log& log)
@@ -2174,7 +2261,7 @@ void Package::RenderToTexture(const std::wstring& name, int begin, int end, int 
 
     D3DXMATRIX viewMatrix2D, projMatrix2D, viewMatrix3D, projMatrix3D, billboardMatrix;
     Camera2D outsideStgFrameCamera2D; outsideStgFrameCamera2D.Reset(0, 0);
-    renderer->InitRenderState();
+    renderer_->InitRenderState();
 
     if (doClear)
     {
@@ -2184,34 +2271,34 @@ void Package::RenderToTexture(const std::wstring& name, int begin, int end, int 
     begin = std::max(begin, 0);
     end = std::min(end, MAX_RENDER_PRIORITY);
 
-    auto obj = objTable->Get<ObjRender>(objId);
+    auto obj = objTable_->Get<ObjRender>(objId);
     if (obj && checkVisibleFlag && !obj->IsVisible()) return;
 
-    camera3D->GenerateViewMatrix(&viewMatrix3D, &billboardMatrix);
+    camera3D_->GenerateViewMatrix(&viewMatrix3D, &billboardMatrix);
 
     // [0, stgFrameMin]
     {
-        renderer->DisableScissorTest();
+        renderer_->DisableScissorTest();
 
         // set 2D matrix
         outsideStgFrameCamera2D.GenerateViewMatrix(&viewMatrix2D);
         outsideStgFrameCamera2D.GenerateProjMatrix(&projMatrix2D, GetScreenWidth(), GetScreenHeight(), 0, 0);
-        renderer->SetViewProjMatrix2D(viewMatrix2D, projMatrix2D);
+        renderer_->SetViewProjMatrix2D(viewMatrix2D, projMatrix2D);
 
         // set 3D matrix
-        camera3D->GenerateProjMatrix(&projMatrix3D, GetScreenWidth(), GetScreenHeight(), GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f);
-        renderer->SetViewProjMatrix3D(viewMatrix3D, projMatrix3D, billboardMatrix);
+        camera3D_->GenerateProjMatrix(&projMatrix3D, GetScreenWidth(), GetScreenHeight(), GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f);
+        renderer_->SetViewProjMatrix3D(viewMatrix3D, projMatrix3D, billboardMatrix);
         for (int p = 0; p < GetStgFrameRenderPriorityMin(); p++)
         {
             if (obj && obj->getRenderPriority() == p)
             {
-                obj->Render(renderer);
+                obj->Render(renderer_);
             }
             if (objId == ID_INVALID && p >= begin && p <= end)
             {
-                if (!(checkInvalidRenderPriority && objLayerList->IsInvalidRenderPriority(p)))
+                if (!(checkInvalidRenderPriority && objLayerList_->IsInvalidRenderPriority(p)))
                 {
-                    objLayerList->RenderLayer(p, IsStagePaused(), checkVisibleFlag, renderer);
+                    objLayerList_->RenderLayer(p, IsStagePaused(), checkVisibleFlag, renderer_);
                 }
             }
         }
@@ -2223,40 +2310,40 @@ void Package::RenderToTexture(const std::wstring& name, int begin, int end, int 
             RECT scissorRect = { (LONG)stgFrame_.left, (LONG)stgFrame_.top, (LONG)stgFrame_.right, (LONG)stgFrame_.bottom };
             if (renderToBackBuffer)
             {
-                scissorRect.left = stgFrame_.left * graphicDevice_->GetBackBufferWidth() / screenWidth;
-                scissorRect.top = stgFrame_.top * graphicDevice_->GetBackBufferHeight() / screenHeight;
-                scissorRect.right = stgFrame_.right * graphicDevice_->GetBackBufferWidth() / screenWidth;
-                scissorRect.bottom = stgFrame_.bottom * graphicDevice_->GetBackBufferHeight() / screenHeight;
+                scissorRect.left = stgFrame_.left * graphicDevice_->GetBackBufferWidth() / screenWidth_;
+                scissorRect.top = stgFrame_.top * graphicDevice_->GetBackBufferHeight() / screenHeight_;
+                scissorRect.right = stgFrame_.right * graphicDevice_->GetBackBufferWidth() / screenWidth_;
+                scissorRect.bottom = stgFrame_.bottom * graphicDevice_->GetBackBufferHeight() / screenHeight_;
             }
-            renderer->EnableScissorTest(scissorRect);
+            renderer_->EnableScissorTest(scissorRect);
         }
 
         // set 2D matrix
         if (!IsStageFinished())
         {
-            camera2D->GenerateViewMatrix(&viewMatrix2D);
-            camera2D->GenerateProjMatrix(&projMatrix2D, GetScreenWidth(), GetScreenHeight(), GetStgFrameCenterScreenX(), GetStgFrameCenterScreenY());
-            renderer->SetViewProjMatrix2D(viewMatrix2D, projMatrix2D);
+            camera2D_->GenerateViewMatrix(&viewMatrix2D);
+            camera2D_->GenerateProjMatrix(&projMatrix2D, GetScreenWidth(), GetScreenHeight(), GetStgFrameCenterScreenX(), GetStgFrameCenterScreenY());
+            renderer_->SetViewProjMatrix2D(viewMatrix2D, projMatrix2D);
         }
 
         // set 3D matrix
-        camera3D->GenerateProjMatrix(&projMatrix3D, GetScreenWidth(), GetScreenHeight(), GetStgFrameCenterScreenX(), GetStgFrameCenterScreenY());
-        renderer->SetViewProjMatrix3D(viewMatrix3D, projMatrix3D, billboardMatrix);
+        camera3D_->GenerateProjMatrix(&projMatrix3D, GetScreenWidth(), GetScreenHeight(), GetStgFrameCenterScreenX(), GetStgFrameCenterScreenY());
+        renderer_->SetViewProjMatrix3D(viewMatrix3D, projMatrix3D, billboardMatrix);
 
         for (int p = GetStgFrameRenderPriorityMin(); p <= GetStgFrameRenderPriorityMax(); p++)
         {
             if (obj && obj->getRenderPriority() == p)
             {
-                obj->Render(renderer);
+                obj->Render(renderer_);
             }
             if (objId == ID_INVALID && p >= begin && p <= end)
             {
-                if (!(checkInvalidRenderPriority && objLayerList->IsInvalidRenderPriority(p)))
+                if (!(checkInvalidRenderPriority && objLayerList_->IsInvalidRenderPriority(p)))
                 {
-                    objLayerList->RenderLayer(p, IsStagePaused(), checkVisibleFlag, renderer);
+                    objLayerList_->RenderLayer(p, IsStagePaused(), checkVisibleFlag, renderer_);
                 }
             }
-            if (p == objLayerList->GetCameraFocusPermitRenderPriority())
+            if (p == objLayerList_->GetCameraFocusPermitRenderPriority())
             {
                 // cameraFocusPermitRenderPriorityより大きい優先度では別のビュー変換行列を使う
                 if (!IsStageFinished())
@@ -2264,34 +2351,34 @@ void Package::RenderToTexture(const std::wstring& name, int begin, int end, int 
                     Camera2D focusForbidCamera;
                     focusForbidCamera.Reset(GetStgFrameCenterWorldX(), GetStgFrameCenterWorldY());
                     focusForbidCamera.GenerateViewMatrix(&viewMatrix2D);
-                    renderer->SetViewProjMatrix2D(viewMatrix2D, projMatrix2D);
+                    renderer_->SetViewProjMatrix2D(viewMatrix2D, projMatrix2D);
                 }
             }
         }
     }
     {
         // (stgFrameMax, MAX_RENDER_PRIORITY]
-        renderer->DisableScissorTest();
+        renderer_->DisableScissorTest();
 
         // set 2D matrix
         outsideStgFrameCamera2D.GenerateViewMatrix(&viewMatrix2D);
         outsideStgFrameCamera2D.GenerateProjMatrix(&projMatrix2D, GetScreenWidth(), GetScreenHeight(), 0, 0);
-        renderer->SetViewProjMatrix2D(viewMatrix2D, projMatrix2D);
+        renderer_->SetViewProjMatrix2D(viewMatrix2D, projMatrix2D);
 
         // set 3D matrix
-        camera3D->GenerateProjMatrix(&projMatrix3D, GetScreenWidth(), GetScreenHeight(), GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f);
-        renderer->SetViewProjMatrix3D(viewMatrix3D, projMatrix3D, billboardMatrix);
+        camera3D_->GenerateProjMatrix(&projMatrix3D, GetScreenWidth(), GetScreenHeight(), GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f);
+        renderer_->SetViewProjMatrix3D(viewMatrix3D, projMatrix3D, billboardMatrix);
         for (int p = GetStgFrameRenderPriorityMax() + 1; p <= MAX_RENDER_PRIORITY; p++)
         {
             if (obj && obj->getRenderPriority() == p)
             {
-                obj->Render(renderer);
+                obj->Render(renderer_);
             }
             if (objId == ID_INVALID && p >= begin && p <= end)
             {
-                if (!(checkInvalidRenderPriority && objLayerList->IsInvalidRenderPriority(p)))
+                if (!(checkInvalidRenderPriority && objLayerList_->IsInvalidRenderPriority(p)))
                 {
-                    objLayerList->RenderLayer(p, IsStagePaused(), checkVisibleFlag, renderer);
+                    objLayerList_->RenderLayer(p, IsStagePaused(), checkVisibleFlag, renderer_);
                 }
             }
         }
@@ -2301,11 +2388,11 @@ void Package::RenderToTexture(const std::wstring& name, int begin, int end, int 
 
 NullableSharedPtr<Obj> Package::GetObj(int id) const
 {
-    return objTable->Get<Obj>(id);
+    return objTable_->Get<Obj>(id);
 }
 
 const std::map<int, std::shared_ptr<Obj>>& Package::GetObjAll() const
 {
-    return objTable->GetAll();
+    return objTable_->GetAll();
 }
 }

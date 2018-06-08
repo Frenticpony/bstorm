@@ -32,7 +32,13 @@ public:
     const std::unordered_map<std::wstring, std::unique_ptr<DnhValue>>& GetProperties() const;
 protected:
     void SetType(Type t) { type_ = t; }
-    void Die() { isDead_ = true; };
+    void Die() noexcept
+    {
+        if (isDead_) return;
+        OnDead();
+        isDead_ = true;
+    };
+    virtual void OnDead() noexcept {}
     const std::weak_ptr<Package>& GetPackage() const { return package_; }
 private:
     int id_;

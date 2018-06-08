@@ -214,7 +214,7 @@ void Package::backDoor<RenderTargetMonitor>()
     static std::wstring selectedRenderTargetName;
     float sideBarWidth = ImGui::GetContentRegionAvailWidth() * 0.2;
     ImGui::BeginChild("ResourceRenderTargetTabSideBar", ImVec2(sideBarWidth, -1), true, ImGuiWindowFlags_HorizontalScrollbar);
-    for (const auto& entry : renderTargets)
+    for (const auto& entry : renderTargets_)
     {
         const std::wstring& name = entry.first;
         if (ImGui::Selectable(ToUTF8(name).c_str(), selectedRenderTargetName == name))
@@ -225,9 +225,9 @@ void Package::backDoor<RenderTargetMonitor>()
     ImGui::EndChild();
     ImGui::SameLine();
     ImGui::BeginChild("ResourceRenderTargetTabInfoArea", ImVec2(-1, -1), false, ImGuiWindowFlags_HorizontalScrollbar);
-    auto it = renderTargets.find(selectedRenderTargetName);
+    auto it = renderTargets_.find(selectedRenderTargetName);
     ImGui::Text("RenderTarget Info");
-    if (it != renderTargets.end())
+    if (it != renderTargets_.end())
     {
         drawRenderTargetInfo(it->second, std::vector<Rect<int>>());
     }
@@ -265,7 +265,7 @@ void Package::backDoor<ResourceMonitor>()
     ImGui::Separator();
     if (selectedTab == Tab::TEXTURE)
     {
-        textureCache->BackDoor<ResourceMonitor>();
+        textureCache_->BackDoor<ResourceMonitor>();
     } else if (selectedTab == Tab::FONT)
     {
         DrawFontInfoTab(GetFontMap());
@@ -293,7 +293,7 @@ void ResourceMonitor::draw(const std::shared_ptr<Package>& package)
     ImGui::SetNextWindowSize(ImVec2(iniWidth, iniHeight), ImGuiCond_FirstUseEver);
     if (ImGui::Begin("Resource", &openFlag, ImGuiWindowFlags_ResizeFromAnySide))
     {
-        package->backDoor<ResourceMonitor>();
+        if (package) package->backDoor<ResourceMonitor>();
     }
     ImGui::End();
 }

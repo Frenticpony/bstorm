@@ -135,13 +135,6 @@ public:
     CollisionDetector(int fieldWidth, int fieldHeight, const std::shared_ptr<CollisionMatrix>& colMatrix);
     ~CollisionDetector();
     void Add(const std::shared_ptr<Intersection>&);
-    template <class T, class... Args>
-    std::shared_ptr<T> Create(Args... args)
-    {
-        std::shared_ptr<T> isect = std::make_shared<T>(args...);
-        Add(isect);
-        return isect;
-    }
     void Remove(const std::shared_ptr<Intersection>&);
     void Update(const std::shared_ptr<Intersection>&);
     void Trans(const std::shared_ptr<Intersection>&, float dx, float dy);
@@ -264,6 +257,7 @@ class ItemIntersection : public Intersection
 public:
     ItemIntersection(float x, float y, float r, const std::shared_ptr<ObjItem>& item);
     const std::weak_ptr<ObjItem>& GetItem() const { return item_; }
+    void Render(const std::shared_ptr<Renderer>& renderer, bool permitCamera) const override {};
 private:
     std::weak_ptr<ObjItem> item_;
 };

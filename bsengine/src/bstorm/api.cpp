@@ -48,28 +48,28 @@ static int GetModuleDirectory(lua_State* L)
 
 static int GetMainStgScriptPath(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     DnhArray(package->GetMainStgScriptPath()).Push(L);
     return 1;
 }
 
 static int GetMainStgScriptDirectory(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     DnhArray(package->GetMainStgScriptDirectory()).Push(L);
     return 1;
 }
 
 static int GetMainPackageScriptPath(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     DnhArray(package->GetMainPackageScriptPath()).Push(L);
     return 1;
 }
 
 static int GetScriptPathList(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto dirPath = DnhValue::ToString(L, 1);
     int scriptType = DnhValue::ToInt(L, 2);
     auto scriptList = package->GetScriptList(dirPath, scriptType, false);
@@ -84,28 +84,28 @@ static int GetScriptPathList(lua_State* L)
 
 static int GetCurrentDateTimeS(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     DnhArray(package->GetCurrentDateTimeS()).Push(L);
     return 1;
 }
 
 static int GetStageTime(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushnumber(L, package->GetStageTime());
     return 1;
 }
 
 static int GetPackageTime(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushnumber(L, package->GetPackageTime());
     return 1;
 }
 
 static int GetCurrentFps(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushnumber(L, package->GetCurrentFps());
     return 1;
 }
@@ -113,7 +113,7 @@ static int GetCurrentFps(lua_State* L)
 // API
 static int InstallFont(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto path = DnhValue::ToString(L, 1);
     lua_pushboolean(L, package->InstallFont(path, GetSourcePos(L)));
     return 1;
@@ -135,7 +135,7 @@ static int GetReplayFps(lua_State* L)
 
 static int WriteLog(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::string msg = DnhValue::ToStringU8(L, 1);
     package->WriteLog(std::move(msg), GetSourcePos(L));
     return 0;
@@ -165,7 +165,7 @@ static int assert(lua_State* L)
 
 static int SetCommonData(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring key = DnhValue::ToString(L, 1);
     auto value = DnhValue::Get(L, 2);
     package->SetCommonData(key, std::move(value));
@@ -174,7 +174,7 @@ static int SetCommonData(lua_State* L)
 
 static int GetCommonData(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring key = DnhValue::ToString(L, 1);
     auto defaultValue = DnhValue::Get(L, 2);
     package->GetCommonData(key, defaultValue)->Push(L);
@@ -183,14 +183,14 @@ static int GetCommonData(lua_State* L)
 
 static int ClearCommonData(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     package->ClearCommonData();
     return 0;
 }
 
 static int DeleteCommonData(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring key = DnhValue::ToString(L, 1);
     package->DeleteCommonData(key);
     return 0;
@@ -198,7 +198,7 @@ static int DeleteCommonData(lua_State* L)
 
 static int SetAreaCommonData(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring area = DnhValue::ToString(L, 1);
     std::wstring key = DnhValue::ToString(L, 2);
     auto value = DnhValue::Get(L, 3);
@@ -208,7 +208,7 @@ static int SetAreaCommonData(lua_State* L)
 
 static int GetAreaCommonData(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring area = DnhValue::ToString(L, 1);
     std::wstring key = DnhValue::ToString(L, 2);
     auto defaultValue = DnhValue::Get(L, 3);
@@ -218,7 +218,7 @@ static int GetAreaCommonData(lua_State* L)
 
 static int ClearAreaCommonData(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring area = DnhValue::ToString(L, 1);
     package->ClearAreaCommonData(area);
     return 0;
@@ -226,7 +226,7 @@ static int ClearAreaCommonData(lua_State* L)
 
 static int DeleteAreaCommonData(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring area = DnhValue::ToString(L, 1);
     std::wstring key = DnhValue::ToString(L, 2);
     package->DeleteAreaCommonData(area, key);
@@ -235,7 +235,7 @@ static int DeleteAreaCommonData(lua_State* L)
 
 static int CreateCommonDataArea(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring area = DnhValue::ToString(L, 1);
     package->CreateCommonDataArea(area);
     return 0;
@@ -243,7 +243,7 @@ static int CreateCommonDataArea(lua_State* L)
 
 static int IsCommonDataAreaExists(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring area = DnhValue::ToString(L, 1);
     lua_pushboolean(L, package->IsCommonDataAreaExists(area));
     return 1;
@@ -251,7 +251,7 @@ static int IsCommonDataAreaExists(lua_State* L)
 
 static int CopyCommonDataArea(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring dst = DnhValue::ToString(L, 1);
     std::wstring src = DnhValue::ToString(L, 2);
     package->CopyCommonDataArea(dst, src);
@@ -260,7 +260,7 @@ static int CopyCommonDataArea(lua_State* L)
 
 static int GetCommonDataAreaKeyList(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto keyList = package->GetCommonDataAreaKeyList();
     DnhArray ret(keyList.size());
     for (const auto& key : keyList)
@@ -273,7 +273,7 @@ static int GetCommonDataAreaKeyList(lua_State* L)
 
 static int GetCommonDataValueKeyList(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring area = DnhValue::ToString(L, 1);
     DnhArray ret;
     for (const auto& key : package->GetCommonDataValueKeyList(area))
@@ -286,7 +286,7 @@ static int GetCommonDataValueKeyList(lua_State* L)
 
 static int SaveCommonDataAreaA1(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring area = DnhValue::ToString(L, 1);
     lua_pushboolean(L, package->SaveCommonDataAreaA1(area));
     return 1;
@@ -294,7 +294,7 @@ static int SaveCommonDataAreaA1(lua_State* L)
 
 static int LoadCommonDataAreaA1(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring area = DnhValue::ToString(L, 1);
     lua_pushboolean(L, package->LoadCommonDataAreaA1(area));
     return 1;
@@ -302,7 +302,7 @@ static int LoadCommonDataAreaA1(lua_State* L)
 
 static int SaveCommonDataAreaA2(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring area = DnhValue::ToString(L, 1);
     std::wstring saveFilePath = DnhValue::ToString(L, 2);
     lua_pushboolean(L, package->SaveCommonDataAreaA2(area, saveFilePath));
@@ -311,7 +311,7 @@ static int SaveCommonDataAreaA2(lua_State* L)
 
 static int LoadCommonDataAreaA2(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring area = DnhValue::ToString(L, 1);
     std::wstring saveFilePath = DnhValue::ToString(L, 2);
     lua_pushboolean(L, package->LoadCommonDataAreaA2(area, saveFilePath));
@@ -320,21 +320,21 @@ static int LoadCommonDataAreaA2(lua_State* L)
 
 static int SaveCommonDataAreaToReplayFile(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushboolean(L, false);
     return 1;
 }
 
 static int LoadCommonDataAreaFromReplayFile(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushboolean(L, false);
     return 1;
 }
 
 static int LoadSound(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto path = DnhValue::ToString(L, 1);
     package->LoadOrphanSound(path, GetSourcePos(L));
     return 0;
@@ -342,7 +342,7 @@ static int LoadSound(lua_State* L)
 
 static int RemoveSound(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto path = DnhValue::ToString(L, 1);
     package->RemoveOrphanSound(path);
     return 0;
@@ -350,7 +350,7 @@ static int RemoveSound(lua_State* L)
 
 static int PlayBGM(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto path = DnhValue::ToString(L, 1);
     double loopStartSec = DnhValue::ToNum(L, 2);
     double loopEndSec = DnhValue::ToNum(L, 3);
@@ -360,7 +360,7 @@ static int PlayBGM(lua_State* L)
 
 static int PlaySE(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto path = DnhValue::ToString(L, 1);
     package->PlaySE(path);
     return 0;
@@ -368,7 +368,7 @@ static int PlaySE(lua_State* L)
 
 static int StopSound(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto path = DnhValue::ToString(L, 1);
     package->StopOrphanSound(path);
     return 0;
@@ -376,7 +376,7 @@ static int StopSound(lua_State* L)
 
 static int GetVirtualKeyState(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int vk = DnhValue::ToInt(L, 1);
     lua_pushnumber(L, package->GetVirtualKeyState(vk));
     return 1;
@@ -384,7 +384,7 @@ static int GetVirtualKeyState(lua_State* L)
 
 static int SetVirtualKeyState(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int vk = DnhValue::ToInt(L, 1);
     int state = DnhValue::ToInt(L, 2);
     package->SetVirtualKeyState(vk, state);
@@ -393,7 +393,7 @@ static int SetVirtualKeyState(lua_State* L)
 
 static int AddVirtualKey(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int vk = DnhValue::ToInt(L, 1);
     int k = DnhValue::ToInt(L, 2);
     int btn = DnhValue::ToInt(L, 3);
@@ -404,13 +404,13 @@ static int AddVirtualKey(lua_State* L)
 static int AddReplayTargetVirtualKey(lua_State* L)
 {
     // FUTURE : impl
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     return 0;
 }
 
 static int GetKeyState(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int k = DnhValue::ToInt(L, 1);
     lua_pushnumber(L, package->GetKeyState(k));
     return 1;
@@ -418,7 +418,7 @@ static int GetKeyState(lua_State* L)
 
 static int GetMouseState(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int btn = DnhValue::ToInt(L, 1);
     lua_pushnumber(L, package->GetMouseState(btn));
     return 1;
@@ -426,21 +426,21 @@ static int GetMouseState(lua_State* L)
 
 static int GetMouseX(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushnumber(L, package->GetMouseX());
     return 1;
 }
 
 static int GetMouseY(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushnumber(L, package->GetMouseY());
     return 1;
 }
 
 static int GetMouseMoveZ(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushnumber(L, package->GetMouseMoveZ());
     return 1;
 }
@@ -453,7 +453,7 @@ static int SetSkipModeKey(lua_State* L)
 
 static int CreateRenderTarget(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring name = DnhValue::ToString(L, 1);
     try
     {
@@ -471,7 +471,7 @@ static int CreateRenderTarget(lua_State* L)
 
 static int RenderToTextureA1(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring name = DnhValue::ToString(L, 1);
     int begin = DnhValue::ToInt(L, 2);
     int end = DnhValue::ToInt(L, 3);
@@ -482,7 +482,7 @@ static int RenderToTextureA1(lua_State* L)
 
 static int RenderToTextureB1(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring name = DnhValue::ToString(L, 1);
     int objId = DnhValue::ToInt(L, 2);
     bool doClear = DnhValue::ToBool(L, 3);
@@ -492,7 +492,7 @@ static int RenderToTextureB1(lua_State* L)
 
 static int SaveRenderedTextureA1(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring name = DnhValue::ToString(L, 1);
     auto path = DnhValue::ToString(L, 2);
     package->SaveRenderedTextureA1(name, path, GetSourcePos(L));
@@ -501,7 +501,7 @@ static int SaveRenderedTextureA1(lua_State* L)
 
 static int SaveRenderedTextureA2(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring name = DnhValue::ToString(L, 1);
     auto path = DnhValue::ToString(L, 2);
     int l = DnhValue::ToInt(L, 3);
@@ -514,7 +514,7 @@ static int SaveRenderedTextureA2(lua_State* L)
 
 static int SaveSnapShotA1(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto path = DnhValue::ToString(L, 1);
     package->SaveSnapShotA1(path, GetSourcePos(L));
     return 0;
@@ -522,7 +522,7 @@ static int SaveSnapShotA1(lua_State* L)
 
 static int SaveSnapShotA2(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto path = DnhValue::ToString(L, 1);
     int l = DnhValue::ToInt(L, 2);
     int t = DnhValue::ToInt(L, 3);
@@ -534,7 +534,7 @@ static int SaveSnapShotA2(lua_State* L)
 
 static int IsPixelShaderSupported(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int major = DnhValue::ToInt(L, 1);
     int minor = DnhValue::ToInt(L, 2);
     lua_pushboolean(L, package->IsPixelShaderSupported(major, minor));
@@ -543,33 +543,33 @@ static int IsPixelShaderSupported(lua_State* L)
 
 static int SetShader(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double begin = DnhValue::ToNum(L, 2);
     double end = DnhValue::ToNum(L, 3);
     if (auto obj = package->GetObject<ObjRender>(objId))
     {
-        package->SetShader((int)(begin * MAX_RENDER_PRIORITY), (int)(end * MAX_RENDER_PRIORITY), obj->GetShader());
+        package->SetLayerShader((int)(begin * MAX_RENDER_PRIORITY), (int)(end * MAX_RENDER_PRIORITY), obj->GetShader());
     }
     return 0;
 }
 
 static int SetShaderI(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int begin = DnhValue::ToInt(L, 2);
     int end = DnhValue::ToInt(L, 3);
     if (auto obj = package->GetObject<ObjRender>(objId))
     {
-        package->SetShader(begin, end, obj->GetShader());
+        package->SetLayerShader(begin, end, obj->GetShader());
     }
     return 0;
 }
 
 static int ResetShader(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     double begin = DnhValue::ToNum(L, 1);
     double end = DnhValue::ToNum(L, 2);
     package->ResetShader((int)(begin * MAX_RENDER_PRIORITY), (int)(end * MAX_RENDER_PRIORITY));
@@ -578,7 +578,7 @@ static int ResetShader(lua_State* L)
 
 static int ResetShaderI(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int begin = DnhValue::ToInt(L, 1);
     int end = DnhValue::ToInt(L, 2);
     package->ResetShader(begin, end);
@@ -587,7 +587,7 @@ static int ResetShaderI(lua_State* L)
 
 static int LoadTextureInLoadThread(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto path = DnhValue::ToString(L, 1);
     package->LoadTextureInThread(path, true, GetSourcePos(L));
     return 0;
@@ -600,7 +600,7 @@ static int LoadTexture(lua_State* L)
 
 static int RemoveTexture(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto path = DnhValue::ToString(L, 1);
     package->RemoveTextureReservedFlag(path);
     return 0;
@@ -608,7 +608,7 @@ static int RemoveTexture(lua_State* L)
 
 static int GetTextureWidth(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring name = DnhValue::ToString(L, 1);
     if (auto target = package->GetRenderTarget(name))
     {
@@ -631,7 +631,7 @@ static int GetTextureWidth(lua_State* L)
 
 static int GetTextureHeight(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring name = DnhValue::ToString(L, 1);
     if (auto target = package->GetRenderTarget(name))
     {
@@ -654,7 +654,7 @@ static int GetTextureHeight(lua_State* L)
 
 static int SetFogEnable(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     bool enable = DnhValue::ToBool(L, 1);
     package->SetFogEnable(enable);
     return 0;
@@ -662,7 +662,7 @@ static int SetFogEnable(lua_State* L)
 
 static int SetFogParam(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     double fogStart = DnhValue::ToNum(L, 1);
     double fogEnd = DnhValue::ToNum(L, 2);
     int r = DnhValue::ToInt(L, 3);
@@ -674,14 +674,14 @@ static int SetFogParam(lua_State* L)
 
 static int ClearInvalidRenderPriority(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     package->ClearInvalidRenderPriority();
     return 0;
 }
 
 static int SetInvalidRenderPriorityA1(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int begin = DnhValue::ToInt(L, 1);
     int end = DnhValue::ToInt(L, 2);
     package->SetInvalidRenderPriority(begin, end);
@@ -690,7 +690,7 @@ static int SetInvalidRenderPriorityA1(lua_State* L)
 
 static int GetReservedRenderTargetName(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int n = DnhValue::ToInt(L, 1);
     DnhArray(package->GetReservedRenderTargetName(n)).Push(L);
     return 1;
@@ -699,7 +699,7 @@ static int GetReservedRenderTargetName(lua_State* L)
 template <void (Package::*func)(float)>
 static int SetCamera(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     double v = DnhValue::ToNum(L, 1);
     (package->*func)(v);
     return 0;
@@ -711,7 +711,7 @@ static int SetCameraFocusZ(lua_State* L) { return SetCamera<&Package::SetCameraF
 
 static int SetCameraFocusXYZ(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     double x = DnhValue::ToNum(L, 1);
     double y = DnhValue::ToNum(L, 2);
     double z = DnhValue::ToNum(L, 3);
@@ -729,7 +729,7 @@ static int SetCameraRoll(lua_State* L) { return SetCamera<&Package::SetCameraRol
 template <float (Package::*func)() const>
 static int GetCamera(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushnumber(L, (package->*func)());
     return 1;
 }
@@ -749,7 +749,7 @@ static int GetCameraRoll(lua_State* L) { return GetCamera<&Package::GetCameraRol
 
 static int SetCameraPerspectiveClip(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     double n = DnhValue::ToNum(L, 1);
     double f = DnhValue::ToNum(L, 2);
     package->SetCameraPerspectiveClip(n, f);
@@ -759,7 +759,7 @@ static int SetCameraPerspectiveClip(lua_State* L)
 template <void (Package::*func)(float)>
 static int Set2DCamera(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     float v = DnhValue::ToNum(L, 1);
     (package->*func)(v);
     return 0;
@@ -774,7 +774,7 @@ static int Set2DCameraRatioY(lua_State* L) { return Set2DCamera<&Package::Set2DC
 
 static int Reset2DCamera(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     package->Reset2DCamera();
     return 0;
 }
@@ -782,7 +782,7 @@ static int Reset2DCamera(lua_State* L)
 template <float (Package::*func)() const>
 static int Get2DCamera(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushnumber(L, (package->*func)());
     return 1;
 }
@@ -796,7 +796,7 @@ static int Get2DCameraRatioY(lua_State* L) { return Get2DCamera<&Package::Get2DC
 
 static int LoadScript(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring path = DnhValue::ToString(L, 1);
     if (std::shared_ptr<Script> script = package->LoadScript(path, GetScript(L)->GetType(), SCRIPT_VERSION_PH3, GetSourcePos(L)))
     {
@@ -807,7 +807,7 @@ static int LoadScript(lua_State* L)
 
 static int LoadScriptInThread(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring path = DnhValue::ToString(L, 1);
     if (std::shared_ptr<Script> script = package->LoadScriptInThread(path, GetScript(L)->GetType(), SCRIPT_VERSION_PH3, GetSourcePos(L)))
     {
@@ -818,7 +818,7 @@ static int LoadScriptInThread(lua_State* L)
 
 static int StartScript(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int scriptId = DnhValue::ToInt(L, 1);
     if (auto script = package->GetScript(scriptId))
     {
@@ -830,7 +830,7 @@ static int StartScript(lua_State* L)
 
 static int CloseScript(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int scriptId = DnhValue::ToInt(L, 1);
     if (auto script = package->GetScript(scriptId))
     {
@@ -841,7 +841,7 @@ static int CloseScript(lua_State* L)
 
 static int IsCloseScript(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int scriptId = DnhValue::ToInt(L, 1);
     if (auto script = package->GetScript(scriptId))
     {
@@ -855,7 +855,7 @@ static int IsCloseScript(lua_State* L)
 
 static int SetScriptArgument(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int scriptId = DnhValue::ToInt(L, 1);
     int idx = DnhValue::ToInt(L, 2);
     auto value = DnhValue::Get(L, 3);
@@ -883,14 +883,14 @@ static int GetScriptArgumentCount(lua_State* L)
 
 static int CloseStgScene(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     package->CloseStgScene();
     return 0;
 }
 
 static int SetStgFrame(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int l = DnhValue::ToInt(L, 1);
     int t = DnhValue::ToInt(L, 2);
     int r = DnhValue::ToInt(L, 3);
@@ -908,14 +908,14 @@ static int SetStgFrame(lua_State* L)
 
 static int GetScore(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushnumber(L, package->GetPlayerScore());
     return 1;
 }
 
 static int AddScore(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     PlayerScore score = DnhValue::ToNum(L, 1);
     package->SetPlayerScore(package->GetPlayerScore() + score);
     return 0;
@@ -923,14 +923,14 @@ static int AddScore(lua_State* L)
 
 static int GetGraze(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushnumber(L, package->GetPlayerGraze());
     return 1;
 }
 
 static int AddGraze(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     PlayerGraze graze = DnhValue::ToNum(L, 1);
     package->SetPlayerGraze(package->GetPlayerGraze() + graze);
     return 0;
@@ -938,14 +938,14 @@ static int AddGraze(lua_State* L)
 
 static int GetPoint(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushnumber(L, package->GetPlayerPoint());
     return 1;
 }
 
 static int AddPoint(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     PlayerPoint point = DnhValue::ToNum(L, 1);
     package->SetPlayerPoint(package->GetPlayerPoint() + point);
     return 0;
@@ -953,7 +953,7 @@ static int AddPoint(lua_State* L)
 
 static int SetItemRenderPriorityI(lua_State *L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int p = DnhValue::ToInt(L, 1);
     package->SetItemRenderPriority(p);
     return 0;
@@ -961,7 +961,7 @@ static int SetItemRenderPriorityI(lua_State *L)
 
 static int SetShotRenderPriorityI(lua_State *L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int p = DnhValue::ToInt(L, 1);
     package->SetShotRenderPriority(p);
     return 0;
@@ -969,84 +969,84 @@ static int SetShotRenderPriorityI(lua_State *L)
 
 static int GetStgFrameRenderPriorityMinI(lua_State *L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushnumber(L, package->GetStgFrameRenderPriorityMin());
     return 1;
 }
 
 static int GetStgFrameRenderPriorityMaxI(lua_State *L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushnumber(L, package->GetStgFrameRenderPriorityMax());
     return 1;
 }
 
 static int GetItemRenderPriorityI(lua_State *L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushnumber(L, package->GetItemRenderPriority());
     return 1;
 }
 
 static int GetShotRenderPriorityI(lua_State *L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushnumber(L, package->GetShotRenderPriority());
     return 1;
 }
 
 static int GetPlayerRenderPriorityI(lua_State *L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushnumber(L, package->GetPlayerRenderPriority());
     return 1;
 }
 
 static int GetCameraFocusPermitPriorityI(lua_State *L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushnumber(L, package->GetCameraFocusPermitRenderPriority());
     return 1;
 }
 
 static int GetStgFrameLeft(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushnumber(L, package->GetStgFrameLeft());
     return 1;
 }
 
 static int GetStgFrameTop(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushnumber(L, package->GetStgFrameTop());
     return 1;
 }
 
 static int GetStgFrameWidth(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushnumber(L, package->GetStgFrameWidth());
     return 1;
 }
 
 static int GetStgFrameHeight(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushnumber(L, package->GetStgFrameHeight());
     return 1;
 }
 
 static int GetScreenWidth(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushnumber(L, package->GetScreenWidth());
     return 1;
 }
 
 static int GetScreenHeight(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushnumber(L, package->GetScreenHeight());
     return 1;
 }
@@ -1058,7 +1058,7 @@ static int SCREEN_HEIGHT(lua_State* L) { return GetScreenHeight(L); }
 static int IsReplay(lua_State* L)
 {
     // FUTURE : impl
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushboolean(L, false);
     return 1;
 }
@@ -1066,14 +1066,14 @@ static int IsReplay(lua_State* L)
 static int AddArchiveFile(lua_State* L)
 {
     // FUTURE : impl
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushboolean(L, false);
     return 1;
 }
 
 static int GetPlayerObjectID(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto player = package->GetPlayerObject();
     lua_pushnumber(L, player ? player->GetID() : ID_INVALID);
     return 1;
@@ -1081,7 +1081,7 @@ static int GetPlayerObjectID(lua_State* L)
 
 static int GetPlayerScriptID(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     if (auto playerScript = package->GetPlayerScript())
     {
         lua_pushnumber(L, playerScript->GetID());
@@ -1094,7 +1094,7 @@ static int GetPlayerScriptID(lua_State* L)
 
 static int SetPlayerSpeed(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     double normalSpeed = DnhValue::ToNum(L, 1);
     double slowSpeed = DnhValue::ToNum(L, 2);
     if (auto player = package->GetPlayerObject())
@@ -1107,7 +1107,7 @@ static int SetPlayerSpeed(lua_State* L)
 
 static int SetPlayerClip(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     double left = DnhValue::ToNum(L, 1);
     double top = DnhValue::ToNum(L, 2);
     double right = DnhValue::ToNum(L, 3);
@@ -1122,7 +1122,7 @@ static int SetPlayerClip(lua_State* L)
 
 static int SetPlayerLife(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     double life = DnhValue::ToNum(L, 1);
     if (auto player = package->GetPlayerObject())
     {
@@ -1133,7 +1133,7 @@ static int SetPlayerLife(lua_State* L)
 
 static int SetPlayerSpell(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     double spell = DnhValue::ToNum(L, 1);
     if (auto player = package->GetPlayerObject())
     {
@@ -1144,7 +1144,7 @@ static int SetPlayerSpell(lua_State* L)
 
 static int SetPlayerPower(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     double power = DnhValue::ToNum(L, 1);
     if (auto player = package->GetPlayerObject())
     {
@@ -1155,7 +1155,7 @@ static int SetPlayerPower(lua_State* L)
 
 static int SetPlayerInvincibilityFrame(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int frame = DnhValue::ToInt(L, 1);
     if (auto player = package->GetPlayerObject())
     {
@@ -1166,7 +1166,7 @@ static int SetPlayerInvincibilityFrame(lua_State* L)
 
 static int SetPlayerDownStateFrame(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int frame = DnhValue::ToInt(L, 1);
     if (auto player = package->GetPlayerObject())
     {
@@ -1177,7 +1177,7 @@ static int SetPlayerDownStateFrame(lua_State* L)
 
 static int SetPlayerRebirthFrame(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int frame = DnhValue::ToInt(L, 1);
     if (auto player = package->GetPlayerObject())
     {
@@ -1188,7 +1188,7 @@ static int SetPlayerRebirthFrame(lua_State* L)
 
 static int SetPlayerRebirthLossFrame(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int frame = DnhValue::ToInt(L, 1);
     if (auto player = package->GetPlayerObject())
     {
@@ -1199,7 +1199,7 @@ static int SetPlayerRebirthLossFrame(lua_State* L)
 
 static int SetPlayerAutoItemCollectLine(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     double lineY = DnhValue::ToNum(L, 1);
     if (auto player = package->GetPlayerObject())
     {
@@ -1210,7 +1210,7 @@ static int SetPlayerAutoItemCollectLine(lua_State* L)
 
 static int SetForbidPlayerShot(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     bool forbid = DnhValue::ToBool(L, 1);
     if (auto player = package->GetPlayerObject())
     {
@@ -1221,7 +1221,7 @@ static int SetForbidPlayerShot(lua_State* L)
 
 static int SetForbidPlayerSpell(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     bool forbid = DnhValue::ToBool(L, 1);
     if (auto player = package->GetPlayerObject())
     {
@@ -1232,7 +1232,7 @@ static int SetForbidPlayerSpell(lua_State* L)
 
 static int GetPlayerState(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     if (auto player = package->GetPlayerObject())
     {
         lua_pushnumber(L, (double)player->GetState());
@@ -1245,7 +1245,7 @@ static int GetPlayerState(lua_State* L)
 
 static int GetPlayerSpeed(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     if (auto player = package->GetPlayerObject())
     {
         Point2D speeds{ player->GetNormalSpeed(), player->GetSlowSpeed() };
@@ -1259,7 +1259,7 @@ static int GetPlayerSpeed(lua_State* L)
 
 static int GetPlayerClip(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto player = package->GetPlayerObject();
     std::vector<double> clipRect;
     clipRect.push_back(!player ? 0 : player->GetClipLeft());
@@ -1272,7 +1272,7 @@ static int GetPlayerClip(lua_State* L)
 
 static int GetPlayerLife(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto player = package->GetPlayerObject();
     lua_pushnumber(L, !player ? 0 : player->GetLife());
     return 1;
@@ -1280,7 +1280,7 @@ static int GetPlayerLife(lua_State* L)
 
 static int GetPlayerSpell(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto player = package->GetPlayerObject();
     lua_pushnumber(L, !player ? 0 : player->GetSpell());
     return 1;
@@ -1288,7 +1288,7 @@ static int GetPlayerSpell(lua_State* L)
 
 static int GetPlayerPower(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto player = package->GetPlayerObject();
     lua_pushnumber(L, !player ? 0 : player->GetPower());
     return 1;
@@ -1296,7 +1296,7 @@ static int GetPlayerPower(lua_State* L)
 
 static int GetPlayerInvincibilityFrame(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto player = package->GetPlayerObject();
     lua_pushnumber(L, !player ? 0 : player->GetInvincibilityFrame());
     return 1;
@@ -1304,7 +1304,7 @@ static int GetPlayerInvincibilityFrame(lua_State* L)
 
 static int GetPlayerDownStateFrame(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto player = package->GetPlayerObject();
     lua_pushnumber(L, player ? player->GetDownStateFrame() : 0);
     return 1;
@@ -1312,7 +1312,7 @@ static int GetPlayerDownStateFrame(lua_State* L)
 
 static int GetPlayerRebirthFrame(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto player = package->GetPlayerObject();
     lua_pushnumber(L, player ? player->GetRebirthFrame() : 0);
     return 1;
@@ -1320,7 +1320,7 @@ static int GetPlayerRebirthFrame(lua_State* L)
 
 static int IsPermitPlayerShot(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto player = package->GetPlayerObject();
     lua_pushboolean(L, player && player->IsPermitPlayerShot());
     return 1;
@@ -1328,7 +1328,7 @@ static int IsPermitPlayerShot(lua_State* L)
 
 static int IsPermitPlayerSpell(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto player = package->GetPlayerObject();
     lua_pushboolean(L, player && player->IsPermitPlayerSpell());
     return 1;
@@ -1336,7 +1336,7 @@ static int IsPermitPlayerSpell(lua_State* L)
 
 static int IsPlayerLastSpellWait(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto player = package->GetPlayerObject();
     lua_pushboolean(L, player && player->IsLastSpellWait());
     return 1;
@@ -1344,7 +1344,7 @@ static int IsPlayerLastSpellWait(lua_State* L)
 
 static int IsPlayerSpellActive(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto player = package->GetPlayerObject();
     lua_pushboolean(L, player && player->IsSpellActive());
     return 1;
@@ -1352,14 +1352,14 @@ static int IsPlayerSpellActive(lua_State* L)
 
 static int GetPlayerX(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto player = package->GetPlayerObject();
     lua_pushnumber(L, !player ? 0 : player->GetX());
     return 1;
 }
 static int GetPlayerY(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto player = package->GetPlayerObject();
     lua_pushnumber(L, !player ? 0 : player->GetY());
     return 1;
@@ -1367,7 +1367,7 @@ static int GetPlayerY(lua_State* L)
 
 static int GetAngleToPlayer(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjRender>(objId))
     {
@@ -1383,14 +1383,14 @@ static int GetAngleToPlayer(lua_State* L)
 
 static int GetPlayerID(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     DnhArray(package->GetPlayerID()).Push(L);
     return 1;
 }
 
 static int GetPlayerReplayName(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     DnhArray(package->GetPlayerReplayName()).Push(L);
     return 1;
 }
@@ -1415,7 +1415,7 @@ static void getEnemyIntersectionPositionFromPoint(std::vector<Point2D>& ps, cons
     ps.clear();
     for (auto& enemy : enemies)
     {
-        const std::vector<Point2D>& tmp = enemy->GetAllIntersectionToShotPosition();
+        const std::vector<Point2D>& tmp = enemy->GetIntersectionToShotPositions();
         // psの後ろに結合
         std::copy(tmp.begin(), tmp.end(), std::back_inserter(ps));
     }
@@ -1424,7 +1424,7 @@ static void getEnemyIntersectionPositionFromPoint(std::vector<Point2D>& ps, cons
 
 static int GetEnemyIntersectionPosition(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     double x = DnhValue::ToNum(L, 1);
     double y = DnhValue::ToNum(L, 2);
     int n = DnhValue::ToInt(L, 3);
@@ -1438,7 +1438,7 @@ static int GetEnemyIntersectionPosition(lua_State* L)
 
 static int GetEnemyBossSceneObjectID(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto obj = package->GetEnemyBossSceneObject();
     lua_pushnumber(L, obj ? obj->GetID() : ID_INVALID);
     return 1;
@@ -1446,7 +1446,7 @@ static int GetEnemyBossSceneObjectID(lua_State* L)
 
 static int GetEnemyBossObjectID(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     if (auto boss = package->GetEnemyBossObject())
     {
         DnhArray(std::vector<double>{(double)boss->GetID()}).Push(L);
@@ -1459,7 +1459,7 @@ static int GetEnemyBossObjectID(lua_State* L)
 
 static int GetAllEnemyID(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     DnhArray ids;
     for (const auto& enemy : package->GetObjectAll<ObjEnemy>())
     {
@@ -1471,11 +1471,11 @@ static int GetAllEnemyID(lua_State* L)
 
 static int GetIntersectionRegistedEnemyID(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     DnhArray ids;
     for (const auto& enemy : package->GetObjectAll<ObjEnemy>())
     {
-        if (!enemy->GetAllIntersectionToShotPosition().empty())
+        if (!enemy->GetIntersectionToShotPositions().empty())
         {
             ids.PushBack(std::make_unique<DnhReal>((double)enemy->GetID()));
         }
@@ -1486,11 +1486,11 @@ static int GetIntersectionRegistedEnemyID(lua_State* L)
 
 static int GetAllEnemyIntersectionPosition(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     DnhArray poss;
     for (const auto& enemy : package->GetObjectAll<ObjEnemy>())
     {
-        for (const auto& pos : enemy->GetAllIntersectionToShotPosition())
+        for (const auto& pos : enemy->GetIntersectionToShotPositions())
         {
             poss.PushBack(std::make_unique<DnhArray>(pos));
         }
@@ -1501,7 +1501,7 @@ static int GetAllEnemyIntersectionPosition(lua_State* L)
 
 static int GetEnemyIntersectionPositionByIdA1(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     std::vector<Point2D> ps;
     if (auto obj = package->GetObject<ObjEnemy>(objId))
@@ -1514,7 +1514,7 @@ static int GetEnemyIntersectionPositionByIdA1(lua_State* L)
 
 static int GetEnemyIntersectionPositionByIdA2(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     float x = DnhValue::ToNum(L, 2);
     float y = DnhValue::ToNum(L, 3);
@@ -1529,7 +1529,7 @@ static int GetEnemyIntersectionPositionByIdA2(lua_State* L)
 
 static int LoadEnemyShotData(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring path = DnhValue::ToString(L, 1);
     package->LoadEnemyShotData(path, GetSourcePos(L));
     return 0;
@@ -1537,7 +1537,7 @@ static int LoadEnemyShotData(lua_State* L)
 
 static int ReloadEnemyShotData(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring path = DnhValue::ToString(L, 1);
     package->ReloadEnemyShotData(path, GetSourcePos(L));
     return 0;
@@ -1700,7 +1700,7 @@ static int GetDirectoryList(lua_State* L)
 
 static int DeleteShotAll(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int target = DnhValue::ToInt(L, 1);
     int behavior = DnhValue::ToInt(L, 2);
     package->DeleteShotAll(target, behavior);
@@ -1709,7 +1709,7 @@ static int DeleteShotAll(lua_State* L)
 
 static int DeleteShotInCircle(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int target = DnhValue::ToInt(L, 1);
     int behavior = DnhValue::ToInt(L, 2);
     float x = DnhValue::ToNum(L, 3);
@@ -1721,7 +1721,7 @@ static int DeleteShotInCircle(lua_State* L)
 
 static int CreateShotA1(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     Script* script = GetScript(L);
     double x = DnhValue::ToNum(L, 1);
     double y = DnhValue::ToNum(L, 2);
@@ -1742,7 +1742,7 @@ static int CreateShotA1(lua_State* L)
 
 static int CreateShotA2(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     Script* script = GetScript(L);
     double x = DnhValue::ToNum(L, 1);
     double y = DnhValue::ToNum(L, 2);
@@ -1765,7 +1765,7 @@ static int CreateShotA2(lua_State* L)
 
 static int CreateShotOA1(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     Script* script = GetScript(L);
     int objId = DnhValue::ToInt(L, 1);
     double speed = DnhValue::ToNum(L, 2);
@@ -1785,7 +1785,7 @@ static int CreateShotOA1(lua_State* L)
 
 static int CreateShotB1(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     Script* script = GetScript(L);
     double x = DnhValue::ToNum(L, 1);
     double y = DnhValue::ToNum(L, 2);
@@ -1806,7 +1806,7 @@ static int CreateShotB1(lua_State* L)
 
 static int CreateShotB2(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     Script* script = GetScript(L);
     double x = DnhValue::ToNum(L, 1);
     double y = DnhValue::ToNum(L, 2);
@@ -1831,7 +1831,7 @@ static int CreateShotB2(lua_State* L)
 
 static int CreateShotOB1(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     Script* script = GetScript(L);
     int objId = DnhValue::ToInt(L, 1);
     double speedX = DnhValue::ToNum(L, 2);
@@ -1851,7 +1851,7 @@ static int CreateShotOB1(lua_State* L)
 
 static int CreateLooseLaserA1(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     Script* script = GetScript(L);
     double x = DnhValue::ToNum(L, 1);
     double y = DnhValue::ToNum(L, 2);
@@ -1874,7 +1874,7 @@ static int CreateLooseLaserA1(lua_State* L)
 
 static int CreateStraightLaserA1(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     Script* script = GetScript(L);
     double x = DnhValue::ToNum(L, 1);
     double y = DnhValue::ToNum(L, 2);
@@ -1897,7 +1897,7 @@ static int CreateStraightLaserA1(lua_State* L)
 
 static int CreateCurveLaserA1(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     Script* script = GetScript(L);
     double x = DnhValue::ToNum(L, 1);
     double y = DnhValue::ToNum(L, 2);
@@ -1920,7 +1920,7 @@ static int CreateCurveLaserA1(lua_State* L)
 
 static int SetShotIntersectionCircle(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     double x = DnhValue::ToNum(L, 1);
     double y = DnhValue::ToNum(L, 2);
     double r = DnhValue::ToNum(L, 3);
@@ -1930,7 +1930,7 @@ static int SetShotIntersectionCircle(lua_State* L)
 
 static int SetShotIntersectionLine(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     double x1 = DnhValue::ToNum(L, 1);
     double y1 = DnhValue::ToNum(L, 2);
     double x2 = DnhValue::ToNum(L, 3);
@@ -1942,7 +1942,7 @@ static int SetShotIntersectionLine(lua_State* L)
 
 static int GetShotIdInCircleA1(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     Script* script = GetScript(L);
     double x = DnhValue::ToNum(L, 1);
     double y = DnhValue::ToNum(L, 2);
@@ -1961,7 +1961,7 @@ static int GetShotIdInCircleA1(lua_State* L)
 
 static int GetShotIdInCircleA2(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     double x = DnhValue::ToNum(L, 1);
     double y = DnhValue::ToNum(L, 2);
     double r = DnhValue::ToNum(L, 3);
@@ -1980,7 +1980,7 @@ static int GetShotIdInCircleA2(lua_State* L)
 
 static int GetShotCount(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int target = DnhValue::ToInt(L, 1);
     int cnt = 0;
     switch (target)
@@ -2001,7 +2001,7 @@ static int GetShotCount(lua_State* L)
 
 static int SetShotAutoDeleteClip(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     double l = DnhValue::ToNum(L, 1);
     double t = DnhValue::ToNum(L, 2);
     double r = DnhValue::ToNum(L, 3);
@@ -2012,7 +2012,7 @@ static int SetShotAutoDeleteClip(lua_State* L)
 
 static int GetShotDataInfoA1(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int id = DnhValue::ToInt(L, 1);
     bool isPlayerShot = DnhValue::ToInt(L, 2) == TARGET_PLAYER;
     int infoType = DnhValue::ToInt(L, 3);
@@ -2059,7 +2059,7 @@ static int GetShotDataInfoA1(lua_State* L)
 
 static int StartShotScript(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto path = DnhValue::ToString(L, 1);
     package->StartShotScript(path, GetSourcePos(L));
     return 0;
@@ -2067,7 +2067,7 @@ static int StartShotScript(lua_State* L)
 
 static int CreateItemA1(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     Script* script = GetScript(L);
     int type = DnhValue::ToInt(L, 1);
     double x = DnhValue::ToNum(L, 2);
@@ -2086,7 +2086,7 @@ static int CreateItemA1(lua_State* L)
 
 static int CreateItemA2(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     Script* script = GetScript(L);
     int type = DnhValue::ToInt(L, 1);
     double x = DnhValue::ToNum(L, 2);
@@ -2107,7 +2107,7 @@ static int CreateItemA2(lua_State* L)
 
 static int CreateItemU1(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     Script* script = GetScript(L);
     int itemDataId = DnhValue::ToInt(L, 1);
     double x = DnhValue::ToNum(L, 2);
@@ -2126,7 +2126,7 @@ static int CreateItemU1(lua_State* L)
 
 static int CreateItemU2(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     Script* script = GetScript(L);
     int itemDataId = DnhValue::ToInt(L, 1);
     double x = DnhValue::ToNum(L, 2);
@@ -2147,14 +2147,14 @@ static int CreateItemU2(lua_State* L)
 
 static int CollectAllItems(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     package->CollectAllItems();
     return 0;
 }
 
 static int CollectItemsByType(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int type = DnhValue::ToInt(L, 1);
     package->CollectItemsByType(type);
     return 0;
@@ -2162,7 +2162,7 @@ static int CollectItemsByType(lua_State* L)
 
 static int CollectItemsInCircle(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     double x = DnhValue::ToNum(L, 1);
     double y = DnhValue::ToNum(L, 2);
     double r = DnhValue::ToNum(L, 3);
@@ -2172,14 +2172,14 @@ static int CollectItemsInCircle(lua_State* L)
 
 static int CancelCollectItems(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     package->CancelCollectItems();
     return 0;
 }
 
 static int StartItemScript(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto path = DnhValue::ToString(L, 1);
     package->StartItemScript(path, GetSourcePos(L));
     return 0;
@@ -2187,7 +2187,7 @@ static int StartItemScript(lua_State* L)
 
 static int SetDefaultBonusItemEnable(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     bool enable = DnhValue::ToBool(L, 1);
     package->SetDefaultBonusItemEnable(enable);
     return 0;
@@ -2195,7 +2195,7 @@ static int SetDefaultBonusItemEnable(lua_State* L)
 
 static int LoadItemData(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring path = DnhValue::ToString(L, 1);
     package->LoadItemData(path, GetSourcePos(L));
     return 0;
@@ -2203,7 +2203,7 @@ static int LoadItemData(lua_State* L)
 
 static int ReloadItemData(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring path = DnhValue::ToString(L, 1);
     package->ReloadItemData(path, GetSourcePos(L));
     return 0;
@@ -2211,7 +2211,7 @@ static int ReloadItemData(lua_State* L)
 
 static int StartSlow(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     Script* script = GetScript(L);
     int fps = DnhValue::ToInt(L, 2);
     package->StartSlow(fps, script->GetType() == SCRIPT_TYPE_PLAYER);
@@ -2220,7 +2220,7 @@ static int StartSlow(lua_State* L)
 
 static int StopSlow(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     Script* script = GetScript(L);
     package->StopSlow(script->GetType() == SCRIPT_TYPE_PLAYER);
     return 0;
@@ -2242,7 +2242,7 @@ static int IsIntersected_Line_Circle(lua_State* L)
 
 static int IsIntersected_Obj_Obj(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId1 = DnhValue::ToInt(L, 1);
     int objId2 = DnhValue::ToInt(L, 2);
     auto obj1 = package->GetObject<ObjCol>(objId1);
@@ -2253,7 +2253,7 @@ static int IsIntersected_Obj_Obj(lua_State* L)
 
 static int GetObjectDistance(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId1 = DnhValue::ToInt(L, 1);
     int objId2 = DnhValue::ToInt(L, 2);
     if (auto obj1 = package->GetObject<ObjRender>(objId1))
@@ -2272,7 +2272,7 @@ static int GetObjectDistance(lua_State* L)
 
 static int GetObject2dPosition(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjRender>(objId))
     {
@@ -2286,7 +2286,7 @@ static int GetObject2dPosition(lua_State* L)
 
 static int Get2dPosition(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     Script* script = GetScript(L);
     float x = DnhValue::ToNum(L, 1);
     float y = DnhValue::ToNum(L, 2);
@@ -2304,7 +2304,7 @@ static int GetOwnScriptID(lua_State* L)
 
 static int SetScriptResult(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     Script* script = GetScript(L);
     auto result = DnhValue::Get(L, 1);
     package->SetScriptResult(script->GetID(), std::move(result));
@@ -2313,7 +2313,7 @@ static int SetScriptResult(lua_State* L)
 
 static int GetScriptResult(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int scriptId = DnhValue::ToInt(L, 1);
     package->GetScriptResult(scriptId)->Push(L);
     return 1;
@@ -2329,7 +2329,7 @@ static int SetAutoDeleteObject(lua_State* L)
 
 static int NotifyEvent(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int scriptId = DnhValue::ToInt(L, 1);
     int eventType = DnhValue::ToInt(L, 2);
     auto arg = DnhValue::Get(L, 3);
@@ -2344,7 +2344,7 @@ static int NotifyEvent(lua_State* L)
 
 static int NotifyEventAll(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int eventType = DnhValue::ToInt(L, 1);
     auto arg = DnhValue::Get(L, 2);
     auto args = std::make_unique<DnhArray>();
@@ -2355,7 +2355,7 @@ static int NotifyEventAll(lua_State* L)
 
 static int GetScriptInfoA1(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto path = DnhValue::ToString(L, 1);
     int infoType = DnhValue::ToInt(L, 2);
     ScriptInfo info = package->GetScriptInfo(path, GetSourcePos(L));
@@ -2391,7 +2391,7 @@ static int GetScriptInfoA1(lua_State* L)
 
 static int Obj_Delete(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     package->DeleteObject(objId);
     return 0;
@@ -2399,7 +2399,7 @@ static int Obj_Delete(lua_State* L)
 
 static int Obj_IsDeleted(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     lua_pushboolean(L, package->IsObjectDeleted(objId));
     return 1;
@@ -2407,7 +2407,7 @@ static int Obj_IsDeleted(lua_State* L)
 
 static int Obj_SetVisible(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     bool b = DnhValue::ToBool(L, 2);
     if (auto obj = package->GetObject<ObjRender>(objId))
@@ -2419,7 +2419,7 @@ static int Obj_SetVisible(lua_State* L)
 
 static int Obj_IsVisible(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     auto obj = package->GetObject<ObjRender>(objId);
     lua_pushboolean(L, obj && obj->IsVisible());
@@ -2428,7 +2428,7 @@ static int Obj_IsVisible(lua_State* L)
 
 static int Obj_SetRenderPriority(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double p = DnhValue::ToNum(L, 2);
     if (auto obj = package->GetObject<ObjRender>(objId))
@@ -2440,7 +2440,7 @@ static int Obj_SetRenderPriority(lua_State* L)
 
 static int Obj_SetRenderPriorityI(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int p = DnhValue::ToInt(L, 2);
     if (auto obj = package->GetObject<ObjRender>(objId))
@@ -2452,7 +2452,7 @@ static int Obj_SetRenderPriorityI(lua_State* L)
 
 static int Obj_GetRenderPriority(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     auto obj = package->GetObject<ObjRender>(objId);
     lua_pushnumber(L, obj ? 1.0 * obj->getRenderPriority() / MAX_RENDER_PRIORITY : 0);
@@ -2461,7 +2461,7 @@ static int Obj_GetRenderPriority(lua_State* L)
 
 static int Obj_GetRenderPriorityI(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     auto obj = package->GetObject<ObjRender>(objId);
     lua_pushnumber(L, obj ? obj->getRenderPriority() : 0);
@@ -2470,7 +2470,7 @@ static int Obj_GetRenderPriorityI(lua_State* L)
 
 static int Obj_GetValue(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     std::wstring key = DnhValue::ToString(L, 2);
     if (auto obj = package->GetObject<Obj>(objId))
@@ -2483,7 +2483,7 @@ static int Obj_GetValue(lua_State* L)
 
 static int Obj_GetValueD(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     std::wstring key = DnhValue::ToString(L, 2);
     auto defaultValue = DnhValue::Get(L, 3);
@@ -2499,7 +2499,7 @@ static int Obj_GetValueD(lua_State* L)
 
 static int Obj_SetValue(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     std::wstring key = DnhValue::ToString(L, 2);
     auto value = DnhValue::Get(L, 3);
@@ -2512,7 +2512,7 @@ static int Obj_SetValue(lua_State* L)
 
 static int Obj_DeleteValue(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     std::wstring key = DnhValue::ToString(L, 2);
     if (auto obj = package->GetObject<Obj>(objId))
@@ -2524,7 +2524,7 @@ static int Obj_DeleteValue(lua_State* L)
 
 static int Obj_IsValueExists(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     std::wstring key = DnhValue::ToString(L, 2);
     auto obj = package->GetObject<Obj>(objId);
@@ -2534,7 +2534,7 @@ static int Obj_IsValueExists(lua_State* L)
 
 static int Obj_GetType(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<Obj>(objId))
     {
@@ -2549,7 +2549,7 @@ static int Obj_GetType(lua_State* L)
 template <void (ObjRender::*func)(float)>
 static int ObjRender_Set(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     float v = DnhValue::ToNum(L, 2);
     if (auto obj = package->GetObject<ObjRender>(objId))
@@ -2565,7 +2565,7 @@ static int ObjRender_SetZ(lua_State* L) { return ObjRender_Set<&ObjRender::SetZ>
 
 static int ObjRender_SetPosition(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double x = DnhValue::ToNum(L, 2);
     double y = DnhValue::ToNum(L, 3);
@@ -2580,7 +2580,7 @@ static int ObjRender_SetAngleZ(lua_State* L) { return ObjRender_Set<&ObjRender::
 
 static int ObjRender_SetAngleXYZ(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double rx = DnhValue::ToNum(L, 2);
     double ry = DnhValue::ToNum(L, 3);
@@ -2595,7 +2595,7 @@ static int ObjRender_SetScaleZ(lua_State* L) { return ObjRender_Set<&ObjRender::
 
 static int ObjRender_SetScaleXYZ(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double sx = DnhValue::ToNum(L, 2);
     double sy = DnhValue::ToNum(L, 3);
@@ -2606,7 +2606,7 @@ static int ObjRender_SetScaleXYZ(lua_State* L)
 
 static int ObjRender_SetColor(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int r = DnhValue::ToInt(L, 2);
     int g = DnhValue::ToInt(L, 3);
@@ -2632,7 +2632,7 @@ static int ObjRender_SetColor(lua_State* L)
 
 static int ObjRender_SetColorHSV(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int h = DnhValue::ToInt(L, 2);
     int s = DnhValue::ToInt(L, 3);
@@ -2659,7 +2659,7 @@ static int ObjRender_SetColorHSV(lua_State* L)
 
 static int ObjRender_SetAlpha(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int a = DnhValue::ToInt(L, 2);
     if (auto obj = package->GetObject<ObjRender>(objId)) { obj->SetAlpha(a); }
@@ -2677,7 +2677,7 @@ static int ObjRender_SetAlpha(lua_State* L)
 
 static int ObjRender_SetBlendType(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int blendType = DnhValue::ToInt(L, 2);
     if (auto obj = package->GetObject<ObjRender>(objId)) { obj->SetBlendType(blendType); }
@@ -2687,7 +2687,7 @@ static int ObjRender_SetBlendType(lua_State* L)
 template <float (ObjRender::*func)() const>
 static int ObjRender_Get(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     auto obj = package->GetObject<ObjRender>(objId);
     lua_pushnumber(L, obj ? ((obj.get())->*func)() : 0);
@@ -2706,7 +2706,7 @@ static int ObjRender_GetScaleZ(lua_State* L) { return ObjRender_Get<&ObjRender::
 
 static int ObjRender_GetBlendType(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     auto obj = package->GetObject<ObjRender>(objId);
     lua_pushnumber(L, obj ? obj->GetBlendType() : BLEND_NONE);
@@ -2715,7 +2715,7 @@ static int ObjRender_GetBlendType(lua_State* L)
 
 static int ObjRender_SetZWrite(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     bool enable = DnhValue::ToBool(L, 2);
     if (auto obj = package->GetObject<ObjRender>(objId)) { obj->SetZWrite(enable); }
@@ -2724,7 +2724,7 @@ static int ObjRender_SetZWrite(lua_State* L)
 
 static int ObjRender_SetZTest(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     bool enable = DnhValue::ToBool(L, 2);
     if (auto obj = package->GetObject<ObjRender>(objId)) { obj->SetZTest(enable); }
@@ -2733,7 +2733,7 @@ static int ObjRender_SetZTest(lua_State* L)
 
 static int ObjRender_SetFogEnable(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     bool enable = DnhValue::ToBool(L, 2);
     if (auto obj = package->GetObject<ObjRender>(objId)) { obj->SetFogEnable(enable); }
@@ -2742,7 +2742,7 @@ static int ObjRender_SetFogEnable(lua_State* L)
 
 static int ObjRender_SetPermitCamera(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     bool enable = DnhValue::ToBool(L, 2);
     if (auto obj = package->GetObject<ObjRender>(objId)) { obj->SetPermitCamera(enable); }
@@ -2756,7 +2756,7 @@ static int ObjRender_SetCullingMode(lua_State* L)
 
 static int ObjPrim_Create(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     Script* script = GetScript(L);
     int type = DnhValue::ToInt(L, 1);
     int objId = ID_INVALID;
@@ -2789,7 +2789,7 @@ static int ObjPrim_Create(lua_State* L)
 
 static int ObjPrim_SetPrimitiveType(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int type = DnhValue::ToInt(L, 2);
     if (auto obj = package->GetObject<ObjPrim>(objId))
@@ -2801,7 +2801,7 @@ static int ObjPrim_SetPrimitiveType(lua_State* L)
 
 static int ObjPrim_SetVertexCount(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int cnt = DnhValue::ToInt(L, 2);
     if (auto obj = package->GetObject<ObjPrim>(objId))
@@ -2813,7 +2813,7 @@ static int ObjPrim_SetVertexCount(lua_State* L)
 
 static int ObjPrim_GetVertexCount(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     auto obj = package->GetObject<ObjPrim>(objId);
     lua_pushnumber(L, obj ? obj->GetVertexCount() : 0);
@@ -2822,7 +2822,7 @@ static int ObjPrim_GetVertexCount(lua_State* L)
 
 static int ObjPrim_SetTexture(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     std::wstring name = DnhValue::ToString(L, 2);
     if (auto obj = package->GetObject<ObjPrim>(objId))
@@ -2840,7 +2840,7 @@ static int ObjPrim_SetTexture(lua_State* L)
 
 static int ObjPrim_SetVertexPosition(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int vIdx = DnhValue::ToInt(L, 2);
     double x = DnhValue::ToNum(L, 3);
@@ -2855,7 +2855,7 @@ static int ObjPrim_SetVertexPosition(lua_State* L)
 
 static int ObjPrim_GetVertexPosition(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int vIdx = DnhValue::ToInt(L, 2);
     auto obj = package->GetObject<ObjPrim>(objId);
@@ -2872,7 +2872,7 @@ static int ObjPrim_GetVertexPosition(lua_State* L)
 
 static int ObjPrim_SetVertexUV(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int vIdx = DnhValue::ToInt(L, 2);
     double u = DnhValue::ToNum(L, 3);
@@ -2883,7 +2883,7 @@ static int ObjPrim_SetVertexUV(lua_State* L)
 
 static int ObjPrim_SetVertexUVT(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int vIdx = DnhValue::ToInt(L, 2);
     double u = DnhValue::ToNum(L, 3);
@@ -2894,7 +2894,7 @@ static int ObjPrim_SetVertexUVT(lua_State* L)
 
 static int ObjPrim_SetVertexColor(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int vIdx = DnhValue::ToInt(L, 2);
     int r = DnhValue::ToInt(L, 3);
@@ -2906,7 +2906,7 @@ static int ObjPrim_SetVertexColor(lua_State* L)
 
 static int ObjPrim_SetVertexAlpha(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int vIdx = DnhValue::ToInt(L, 2);
     int a = DnhValue::ToInt(L, 3);
@@ -2916,7 +2916,7 @@ static int ObjPrim_SetVertexAlpha(lua_State* L)
 
 static int ObjSprite2D_SetSourceRect(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double l = DnhValue::ToNum(L, 2);
     double t = DnhValue::ToNum(L, 3);
@@ -2931,7 +2931,7 @@ static int ObjSprite2D_SetSourceRect(lua_State* L)
 
 static int ObjSprite2D_SetDestRect(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double l = DnhValue::ToNum(L, 2);
     double t = DnhValue::ToNum(L, 3);
@@ -2946,7 +2946,7 @@ static int ObjSprite2D_SetDestRect(lua_State* L)
 
 static int ObjSprite2D_SetDestCenter(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjSprite2D>(objId))
     {
@@ -2957,7 +2957,7 @@ static int ObjSprite2D_SetDestCenter(lua_State* L)
 
 static int ObjSpriteList2D_SetSourceRect(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double l = DnhValue::ToNum(L, 2);
     double t = DnhValue::ToNum(L, 3);
@@ -2972,7 +2972,7 @@ static int ObjSpriteList2D_SetSourceRect(lua_State* L)
 
 static int ObjSpriteList2D_SetDestRect(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double l = DnhValue::ToNum(L, 2);
     double t = DnhValue::ToNum(L, 3);
@@ -2987,7 +2987,7 @@ static int ObjSpriteList2D_SetDestRect(lua_State* L)
 
 static int ObjSpriteList2D_SetDestCenter(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjSpriteList2D>(objId))
     {
@@ -2998,7 +2998,7 @@ static int ObjSpriteList2D_SetDestCenter(lua_State* L)
 
 static int ObjSpriteList2D_AddVertex(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjSpriteList2D>(objId))
     {
@@ -3009,7 +3009,7 @@ static int ObjSpriteList2D_AddVertex(lua_State* L)
 
 static int ObjSpriteList2D_CloseVertex(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjSpriteList2D>(objId))
     {
@@ -3020,7 +3020,7 @@ static int ObjSpriteList2D_CloseVertex(lua_State* L)
 
 static int ObjSpriteList2D_ClearVertexCount(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjSpriteList2D>(objId))
     {
@@ -3031,7 +3031,7 @@ static int ObjSpriteList2D_ClearVertexCount(lua_State* L)
 
 static int ObjSprite3D_SetSourceRect(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double l = DnhValue::ToNum(L, 2);
     double t = DnhValue::ToNum(L, 3);
@@ -3046,7 +3046,7 @@ static int ObjSprite3D_SetSourceRect(lua_State* L)
 
 static int ObjSprite3D_SetDestRect(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double l = DnhValue::ToNum(L, 2);
     double t = DnhValue::ToNum(L, 3);
@@ -3061,7 +3061,7 @@ static int ObjSprite3D_SetDestRect(lua_State* L)
 
 static int ObjSprite3D_SetSourceDestRect(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double l = DnhValue::ToNum(L, 2);
     double t = DnhValue::ToNum(L, 3);
@@ -3076,7 +3076,7 @@ static int ObjSprite3D_SetSourceDestRect(lua_State* L)
 
 static int ObjSprite3D_SetBillboard(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     bool enable = DnhValue::ToBool(L, 2);
     if (auto obj = package->GetObject<ObjSprite3D>(objId))
@@ -3103,7 +3103,7 @@ static int ObjTrajectory3D_SetInitialPoint(lua_State* L)
 
 static int ObjMesh_Create(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     Script* script = GetScript(L);
     if (auto obj = package->CreateObjMesh())
     {
@@ -3119,7 +3119,7 @@ static int ObjMesh_Create(lua_State* L)
 
 static int ObjMesh_Load(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     auto path = DnhValue::ToString(L, 2);
     if (auto obj = package->GetObject<ObjMesh>(objId))
@@ -3163,7 +3163,7 @@ static int ObjMesh_GetPath(lua_State* L)
 
 static int ObjText_Create(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     Script* script = GetScript(L);
     if (auto obj = package->CreateObjText())
     {
@@ -3179,7 +3179,7 @@ static int ObjText_Create(lua_State* L)
 
 static int ObjText_SetText(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     std::wstring text = DnhValue::ToString(L, 2);
     if (auto obj = package->GetObject<ObjText>(objId))
@@ -3191,7 +3191,7 @@ static int ObjText_SetText(lua_State* L)
 
 static int ObjText_SetFontType(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     std::wstring name = DnhValue::ToString(L, 2);
     if (auto obj = package->GetObject<ObjText>(objId))
@@ -3203,7 +3203,7 @@ static int ObjText_SetFontType(lua_State* L)
 
 static int ObjText_SetFontSize(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int size = DnhValue::ToInt(L, 2);
     if (auto obj = package->GetObject<ObjText>(objId))
@@ -3215,7 +3215,7 @@ static int ObjText_SetFontSize(lua_State* L)
 
 static int ObjText_SetFontBold(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     bool bold = DnhValue::ToBool(L, 2);
     if (auto obj = package->GetObject<ObjText>(objId))
@@ -3227,7 +3227,7 @@ static int ObjText_SetFontBold(lua_State* L)
 
 static int ObjText_SetFontColorTop(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int r = DnhValue::ToInt(L, 2);
     int g = DnhValue::ToInt(L, 3);
@@ -3241,7 +3241,7 @@ static int ObjText_SetFontColorTop(lua_State* L)
 
 static int ObjText_SetFontColorBottom(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int r = DnhValue::ToInt(L, 2);
     int g = DnhValue::ToInt(L, 3);
@@ -3255,7 +3255,7 @@ static int ObjText_SetFontColorBottom(lua_State* L)
 
 static int ObjText_SetFontBorderWidth(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int width = DnhValue::ToInt(L, 2);
     if (auto obj = package->GetObject<ObjText>(objId))
@@ -3267,7 +3267,7 @@ static int ObjText_SetFontBorderWidth(lua_State* L)
 
 static int ObjText_SetFontBorderType(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int t = DnhValue::ToInt(L, 2);
     if (auto obj = package->GetObject<ObjText>(objId))
@@ -3279,7 +3279,7 @@ static int ObjText_SetFontBorderType(lua_State* L)
 
 static int ObjText_SetFontBorderColor(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int r = DnhValue::ToInt(L, 2);
     int g = DnhValue::ToInt(L, 3);
@@ -3293,7 +3293,7 @@ static int ObjText_SetFontBorderColor(lua_State* L)
 
 static int ObjText_SetMaxWidth(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int width = DnhValue::ToInt(L, 2);
     if (auto obj = package->GetObject<ObjText>(objId))
@@ -3305,7 +3305,7 @@ static int ObjText_SetMaxWidth(lua_State* L)
 
 static int ObjText_SetMaxHeight(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int height = DnhValue::ToInt(L, 2);
     if (auto obj = package->GetObject<ObjText>(objId))
@@ -3317,7 +3317,7 @@ static int ObjText_SetMaxHeight(lua_State* L)
 
 static int ObjText_SetLinePitch(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int pitch = DnhValue::ToInt(L, 2);
     if (auto obj = package->GetObject<ObjText>(objId))
@@ -3329,7 +3329,7 @@ static int ObjText_SetLinePitch(lua_State* L)
 
 static int ObjText_SetSidePitch(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int pitch = DnhValue::ToInt(L, 2);
     if (auto obj = package->GetObject<ObjText>(objId))
@@ -3341,7 +3341,7 @@ static int ObjText_SetSidePitch(lua_State* L)
 
 static int ObjText_SetTransCenter(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double x = DnhValue::ToNum(L, 2);
     double y = DnhValue::ToNum(L, 3);
@@ -3354,7 +3354,7 @@ static int ObjText_SetTransCenter(lua_State* L)
 
 static int ObjText_SetAutoTransCenter(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     bool enable = DnhValue::ToBool(L, 2);
     if (auto obj = package->GetObject<ObjText>(objId))
@@ -3366,7 +3366,7 @@ static int ObjText_SetAutoTransCenter(lua_State* L)
 
 static int ObjText_SetHorizontalAlignment(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int alignment = DnhValue::ToInt(L, 2);
     if (auto obj = package->GetObject<ObjText>(objId))
@@ -3378,7 +3378,7 @@ static int ObjText_SetHorizontalAlignment(lua_State* L)
 
 static int ObjText_SetSyntacticAnalysis(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     bool enable = DnhValue::ToBool(L, 2);
     if (auto obj = package->GetObject<ObjText>(objId))
@@ -3390,7 +3390,7 @@ static int ObjText_SetSyntacticAnalysis(lua_State* L)
 
 static int ObjText_GetTextLength(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     auto obj = package->GetObject<ObjText>(objId);
     lua_pushnumber(L, obj ? obj->GetTextLength() : 0);
@@ -3399,7 +3399,7 @@ static int ObjText_GetTextLength(lua_State* L)
 
 static int ObjText_GetTextLengthCU(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     auto obj = package->GetObject<ObjText>(objId);
     lua_pushnumber(L, obj ? obj->GetTextLengthCU() : 0);
@@ -3408,7 +3408,7 @@ static int ObjText_GetTextLengthCU(lua_State* L)
 
 static int ObjText_GetTextLengthCUL(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjText>(objId))
     {
@@ -3429,7 +3429,7 @@ static int ObjText_GetTextLengthCUL(lua_State* L)
 
 static int ObjText_GetTotalWidth(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjText>(objId))
     {
@@ -3444,7 +3444,7 @@ static int ObjText_GetTotalWidth(lua_State* L)
 
 static int ObjText_GetTotalHeight(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjText>(objId))
     {
@@ -3459,7 +3459,7 @@ static int ObjText_GetTotalHeight(lua_State* L)
 
 static int ObjShader_Create(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     Script* script = GetScript(L);
     if (auto obj = package->CreateObjShader())
     {
@@ -3475,7 +3475,7 @@ static int ObjShader_Create(lua_State* L)
 
 static int ObjShader_SetShaderF(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     std::wstring path = DnhValue::ToString(L, 2);
 
@@ -3499,7 +3499,7 @@ static int ObjShader_SetShaderF(lua_State* L)
 
 static int ObjShader_SetShaderO(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int shaderObjId = DnhValue::ToInt(L, 2);
     if (auto obj = package->GetObject<ObjRender>(objId))
@@ -3512,7 +3512,7 @@ static int ObjShader_SetShaderO(lua_State* L)
 
 static int ObjShader_ResetShader(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjRender>(objId))
     {
@@ -3523,7 +3523,7 @@ static int ObjShader_ResetShader(lua_State* L)
 
 static int ObjShader_SetTechnique(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     std::string technique = DnhValue::ToStringU8(L, 2);
     if (auto obj = package->GetObject<ObjRender>(objId))
@@ -3535,7 +3535,7 @@ static int ObjShader_SetTechnique(lua_State* L)
 
 static int ObjShader_SetVector(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     std::string name = DnhValue::ToStringU8(L, 2);
     double x = DnhValue::ToNum(L, 3);
@@ -3551,7 +3551,7 @@ static int ObjShader_SetVector(lua_State* L)
 
 static int ObjShader_SetFloat(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     std::string name = DnhValue::ToStringU8(L, 2);
     double f = DnhValue::ToNum(L, 3);
@@ -3564,7 +3564,7 @@ static int ObjShader_SetFloat(lua_State* L)
 
 static int ObjShader_SetFloatArray(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     std::string name = DnhValue::ToStringU8(L, 2);
     auto value = DnhValue::Get(L, 3);
@@ -3586,7 +3586,7 @@ static int ObjShader_SetFloatArray(lua_State* L)
 
 static int ObjShader_SetTexture(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     std::string name = DnhValue::ToStringU8(L, 2);
     std::wstring path = DnhValue::ToString(L, 3);
@@ -3605,7 +3605,7 @@ static int ObjShader_SetTexture(lua_State* L)
 
 static int ObjSound_Create(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     Script* script = GetScript(L);
     if (auto obj = package->CreateObjSound())
     {
@@ -3621,7 +3621,7 @@ static int ObjSound_Create(lua_State* L)
 
 static int ObjSound_Load(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     auto path = DnhValue::ToString(L, 2);
     if (auto obj = package->GetObject<ObjSound>(objId))
@@ -3634,7 +3634,7 @@ static int ObjSound_Load(lua_State* L)
 
 static int ObjSound_Play(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjSound>(objId))
     {
@@ -3645,7 +3645,7 @@ static int ObjSound_Play(lua_State* L)
 
 static int ObjSound_Stop(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjSound>(objId))
     {
@@ -3656,7 +3656,7 @@ static int ObjSound_Stop(lua_State* L)
 
 static int ObjSound_SetVolumeRate(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     float vol = DnhValue::ToNum(L, 2);
     if (auto obj = package->GetObject<ObjSound>(objId))
@@ -3668,7 +3668,7 @@ static int ObjSound_SetVolumeRate(lua_State* L)
 
 static int ObjSound_SetPanRate(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     float pan = DnhValue::ToNum(L, 2);
     if (auto obj = package->GetObject<ObjSound>(objId))
@@ -3680,7 +3680,7 @@ static int ObjSound_SetPanRate(lua_State* L)
 
 static int ObjSound_SetFade(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     float fade = DnhValue::ToNum(L, 2);
     if (auto obj = package->GetObject<ObjSound>(objId))
@@ -3692,7 +3692,7 @@ static int ObjSound_SetFade(lua_State* L)
 
 static int ObjSound_SetLoopEnable(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     bool enable = DnhValue::ToBool(L, 2);
     if (auto obj = package->GetObject<ObjSound>(objId))
@@ -3704,7 +3704,7 @@ static int ObjSound_SetLoopEnable(lua_State* L)
 
 static int ObjSound_SetLoopTime(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double start = (DWORD)DnhValue::ToNum(L, 2);
     double end = (DWORD)DnhValue::ToNum(L, 3);
@@ -3717,7 +3717,7 @@ static int ObjSound_SetLoopTime(lua_State* L)
 
 static int ObjSound_SetLoopSampleCount(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     DWORD start = (DWORD)DnhValue::ToNum(L, 2);
     DWORD end = (DWORD)DnhValue::ToNum(L, 3);
@@ -3730,7 +3730,7 @@ static int ObjSound_SetLoopSampleCount(lua_State* L)
 
 static int ObjSound_SetRestartEnable(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     bool enable = DnhValue::ToBool(L, 2);
     if (auto obj = package->GetObject<ObjSound>(objId))
@@ -3742,7 +3742,7 @@ static int ObjSound_SetRestartEnable(lua_State* L)
 
 static int ObjSound_SetSoundDivision(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int division = DnhValue::ToInt(L, 2);
     if (auto obj = package->GetObject<ObjSound>(objId))
@@ -3754,7 +3754,7 @@ static int ObjSound_SetSoundDivision(lua_State* L)
 
 static int ObjSound_IsPlaying(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     auto obj = package->GetObject<ObjSound>(objId);
     lua_pushboolean(L, obj && obj->IsPlaying());
@@ -3763,7 +3763,7 @@ static int ObjSound_IsPlaying(lua_State* L)
 
 static int ObjSound_GetVolumeRate(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     auto obj = package->GetObject<ObjSound>(objId);
     lua_pushnumber(L, obj ? obj->GetVolumeRate() : 0);
@@ -3772,7 +3772,7 @@ static int ObjSound_GetVolumeRate(lua_State* L)
 
 static int ObjFile_Create(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     Script* script = GetScript(L);
     int type = DnhValue::ToInt(L, 1);
     int objId = ID_INVALID;
@@ -3794,7 +3794,7 @@ static int ObjFile_Create(lua_State* L)
 
 static int ObjFile_Open(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     auto path = DnhValue::ToString(L, 2);
     auto obj = package->GetObject<ObjFile>(objId);
@@ -3804,7 +3804,7 @@ static int ObjFile_Open(lua_State* L)
 
 static int ObjFile_OpenNW(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     auto path = DnhValue::ToString(L, 2);
     auto obj = package->GetObject<ObjFile>(objId);
@@ -3814,7 +3814,7 @@ static int ObjFile_OpenNW(lua_State* L)
 
 static int ObjFile_Store(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjFile>(objId))
     {
@@ -3825,7 +3825,7 @@ static int ObjFile_Store(lua_State* L)
 
 static int ObjFile_GetSize(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjFile>(objId))
     {
@@ -3839,7 +3839,7 @@ static int ObjFile_GetSize(lua_State* L)
 
 static int ObjFileT_GetLineCount(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjFileT>(objId))
     {
@@ -3853,7 +3853,7 @@ static int ObjFileT_GetLineCount(lua_State* L)
 
 static int ObjFileT_GetLineText(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int lineNum = DnhValue::ToInt(L, 2);
     if (auto obj = package->GetObject<ObjFileT>(objId))
@@ -3868,7 +3868,7 @@ static int ObjFileT_GetLineText(lua_State* L)
 
 static int ObjFileT_SplitLineText(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int lineNum = DnhValue::ToInt(L, 2);
     std::wstring delim = DnhValue::ToString(L, 3);
@@ -3889,7 +3889,7 @@ static int ObjFileT_SplitLineText(lua_State* L)
 
 static int ObjFileT_AddLine(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     std::wstring line = DnhValue::ToString(L, 2);
     if (auto obj = package->GetObject<ObjFileT>(objId))
@@ -3901,7 +3901,7 @@ static int ObjFileT_AddLine(lua_State* L)
 
 static int ObjFileT_ClearLine(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjFileT>(objId))
     {
@@ -3912,7 +3912,7 @@ static int ObjFileT_ClearLine(lua_State* L)
 
 static int ObjFileB_SetByteOrder(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int endian = DnhValue::ToInt(L, 2);
     if (auto obj = package->GetObject<ObjFileB>(objId))
@@ -3929,7 +3929,7 @@ static int ObjFileB_SetByteOrder(lua_State* L)
 }
 static int ObjFileB_SetCharacterCode(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int code = DnhValue::ToInt(L, 2);
     if (auto obj = package->GetObject<ObjFileB>(objId))
@@ -3955,7 +3955,7 @@ static int ObjFileB_SetCharacterCode(lua_State* L)
 
 static int ObjFileB_GetPointer(lua_State*L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjFileB>(objId))
     {
@@ -3969,7 +3969,7 @@ static int ObjFileB_GetPointer(lua_State*L)
 
 static int ObjFileB_Seek(lua_State*L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int pos = DnhValue::ToInt(L, 2);
     if (auto obj = package->GetObject<ObjFileB>(objId))
@@ -3981,7 +3981,7 @@ static int ObjFileB_Seek(lua_State*L)
 
 static int ObjFileB_ReadBoolean(lua_State*L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     auto obj = package->GetObject<ObjFileB>(objId);
     lua_pushboolean(L, obj && obj->ReadBoolean());
@@ -3990,7 +3990,7 @@ static int ObjFileB_ReadBoolean(lua_State*L)
 
 static int ObjFileB_ReadByte(lua_State*L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjFileB>(objId))
     {
@@ -4004,7 +4004,7 @@ static int ObjFileB_ReadByte(lua_State*L)
 
 static int ObjFileB_ReadShort(lua_State*L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjFileB>(objId))
     {
@@ -4018,7 +4018,7 @@ static int ObjFileB_ReadShort(lua_State*L)
 
 static int ObjFileB_ReadInteger(lua_State*L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjFileB>(objId))
     {
@@ -4032,7 +4032,7 @@ static int ObjFileB_ReadInteger(lua_State*L)
 
 static int ObjFileB_ReadLong(lua_State*L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjFileB>(objId))
     {
@@ -4046,7 +4046,7 @@ static int ObjFileB_ReadLong(lua_State*L)
 
 static int ObjFileB_ReadFloat(lua_State*L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjFileB>(objId))
     {
@@ -4060,7 +4060,7 @@ static int ObjFileB_ReadFloat(lua_State*L)
 
 static int ObjFileB_ReadDouble(lua_State*L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjFileB>(objId))
     {
@@ -4074,7 +4074,7 @@ static int ObjFileB_ReadDouble(lua_State*L)
 
 static int ObjFileB_ReadString(lua_State*L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int size = DnhValue::ToInt(L, 2);
     if (auto obj = package->GetObject<ObjFileB>(objId))
@@ -4090,7 +4090,7 @@ static int ObjFileB_ReadString(lua_State*L)
 template <void (ObjMove::*func)(float)>
 static int ObjMove_Set(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     float v = DnhValue::ToNum(L, 2);
     if (auto obj = package->GetObject<ObjMove>(objId))
@@ -4105,7 +4105,7 @@ static int ObjMove_SetY(lua_State* L) { return ObjMove_Set<&ObjMove::SetMoveY>(L
 
 static int ObjMove_SetPosition(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double x = DnhValue::ToNum(L, 2);
     double y = DnhValue::ToNum(L, 3);
@@ -4124,7 +4124,7 @@ static int ObjMove_SetAngularVelocity(lua_State* L) { return ObjMove_Set<&ObjMov
 
 static int ObjMove_SetDestAtSpeed(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double x = DnhValue::ToNum(L, 2);
     double y = DnhValue::ToNum(L, 3);
@@ -4138,7 +4138,7 @@ static int ObjMove_SetDestAtSpeed(lua_State* L)
 
 static int ObjMove_SetDestAtFrame(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double x = DnhValue::ToNum(L, 2);
     double y = DnhValue::ToNum(L, 3);
@@ -4152,7 +4152,7 @@ static int ObjMove_SetDestAtFrame(lua_State* L)
 
 static int ObjMove_SetDestAtWeight(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double x = DnhValue::ToNum(L, 2);
     double y = DnhValue::ToNum(L, 3);
@@ -4167,7 +4167,7 @@ static int ObjMove_SetDestAtWeight(lua_State* L)
 
 static int ObjMove_AddPatternA1(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int frame = DnhValue::ToInt(L, 2);
     float speed = DnhValue::ToNum(L, 3);
@@ -4181,7 +4181,7 @@ static int ObjMove_AddPatternA1(lua_State* L)
 
 static int ObjMove_AddPatternA2(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int frame = DnhValue::ToInt(L, 2);
     float speed = DnhValue::ToNum(L, 3);
@@ -4198,7 +4198,7 @@ static int ObjMove_AddPatternA2(lua_State* L)
 
 static int ObjMove_AddPatternA3(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int frame = DnhValue::ToInt(L, 2);
     float speed = DnhValue::ToNum(L, 3);
@@ -4221,7 +4221,7 @@ static int ObjMove_AddPatternA3(lua_State* L)
 
 static int ObjMove_AddPatternA4(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int frame = DnhValue::ToInt(L, 2);
     float speed = DnhValue::ToNum(L, 3);
@@ -4245,7 +4245,7 @@ static int ObjMove_AddPatternA4(lua_State* L)
 
 static int ObjMove_AddPatternB1(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int frame = DnhValue::ToInt(L, 2);
     float speedX = DnhValue::ToNum(L, 3);
@@ -4259,7 +4259,7 @@ static int ObjMove_AddPatternB1(lua_State* L)
 
 static int ObjMove_AddPatternB2(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int frame = DnhValue::ToInt(L, 2);
     float speedX = DnhValue::ToNum(L, 3);
@@ -4277,7 +4277,7 @@ static int ObjMove_AddPatternB2(lua_State* L)
 
 static int ObjMove_AddPatternB3(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int frame = DnhValue::ToInt(L, 2);
     float speedX = DnhValue::ToNum(L, 3);
@@ -4302,7 +4302,7 @@ static int ObjMove_AddPatternB3(lua_State* L)
 template <float (ObjMove::*func)() const>
 static int ObjMove_Get(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     auto obj = package->GetObject<ObjMove>(objId);
     lua_pushnumber(L, obj ? ((obj.get())->*func)() : 0.0);
@@ -4316,7 +4316,7 @@ static int ObjMove_GetAngle(lua_State* L) { return ObjMove_Get<&ObjMove::GetAngl
 
 static int ObjEnemy_Create(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     Script* script = GetScript(L);
     int type = DnhValue::ToInt(L, 1);
     int objId = ID_INVALID;
@@ -4340,7 +4340,7 @@ static int ObjEnemy_Create(lua_State* L)
 
 static int ObjEnemy_Regist(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjEnemy>(objId)) { obj->Regist(); }
     return 0;
@@ -4348,7 +4348,7 @@ static int ObjEnemy_Regist(lua_State* L)
 
 static int ObjEnemy_GetInfo(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int info = DnhValue::ToInt(L, 2);
     double ret = 0;
@@ -4374,7 +4374,7 @@ static int ObjEnemy_GetInfo(lua_State* L)
 
 static int ObjEnemy_SetLife(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double life = DnhValue::ToNum(L, 2);
     if (auto obj = package->GetObject<ObjEnemy>(objId))
@@ -4386,7 +4386,7 @@ static int ObjEnemy_SetLife(lua_State* L)
 
 static int ObjEnemy_AddLife(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double life = DnhValue::ToNum(L, 2);
     if (auto obj = package->GetObject<ObjEnemy>(objId))
@@ -4398,7 +4398,7 @@ static int ObjEnemy_AddLife(lua_State* L)
 
 static int ObjEnemy_SetDamageRate(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double damageRateShot = DnhValue::ToNum(L, 2);
     double damageRateSpell = DnhValue::ToNum(L, 3);
@@ -4412,7 +4412,7 @@ static int ObjEnemy_SetDamageRate(lua_State* L)
 
 static int ObjEnemy_SetIntersectionCircleToShot(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double x = DnhValue::ToNum(L, 2);
     double y = DnhValue::ToNum(L, 3);
@@ -4426,7 +4426,7 @@ static int ObjEnemy_SetIntersectionCircleToShot(lua_State* L)
 
 static int ObjEnemy_SetIntersectionCircleToPlayer(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double x = DnhValue::ToNum(L, 2);
     double y = DnhValue::ToNum(L, 3);
@@ -4440,7 +4440,7 @@ static int ObjEnemy_SetIntersectionCircleToPlayer(lua_State* L)
 
 static int ObjEnemyBossScene_Create(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     Script* script = GetScript(L);
     if (auto obj = package->CreateObjEnemyBossScene(GetSourcePos(L)))
     {
@@ -4455,7 +4455,7 @@ static int ObjEnemyBossScene_Create(lua_State* L)
 
 static int ObjEnemyBossScene_Regist(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjEnemyBossScene>(objId))
     {
@@ -4466,7 +4466,7 @@ static int ObjEnemyBossScene_Regist(lua_State* L)
 
 static int ObjEnemyBossScene_Add(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int step = DnhValue::ToInt(L, 2);
     auto scriptPath = DnhValue::ToString(L, 3);
@@ -4480,7 +4480,7 @@ static int ObjEnemyBossScene_Add(lua_State* L)
 static int ObjEnemyBossScene_LoadInThread(lua_State* L)
 {
     // FUTURE : multi thread
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjEnemyBossScene>(objId))
     {
@@ -4491,7 +4491,7 @@ static int ObjEnemyBossScene_LoadInThread(lua_State* L)
 
 static int ObjEnemyBossScene_GetInfo(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int info = DnhValue::ToInt(L, 2);
     auto obj = package->GetObject<ObjEnemyBossScene>(objId);
@@ -4566,7 +4566,7 @@ static int ObjEnemyBossScene_GetInfo(lua_State* L)
 
 static int ObjEnemyBossScene_SetSpellTimer(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int sec = DnhValue::ToInt(L, 2);
     if (auto obj = package->GetObject<ObjEnemyBossScene>(objId))
@@ -4578,7 +4578,7 @@ static int ObjEnemyBossScene_SetSpellTimer(lua_State* L)
 
 static int ObjEnemyBossScene_StartSpell(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjEnemyBossScene>(objId))
     {
@@ -4590,7 +4590,7 @@ static int ObjEnemyBossScene_StartSpell(lua_State* L)
 
 static int ObjShot_Create(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     Script* script = GetScript(L);
     int shotType = DnhValue::ToInt(L, 1);
     int objId = ID_INVALID;
@@ -4617,7 +4617,7 @@ static int ObjShot_Create(lua_State* L)
 
 static int ObjShot_Regist(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjShot>(objId))
     {
@@ -4636,7 +4636,7 @@ static int ObjShot_Regist(lua_State* L)
 
 static int ObjShot_SetAutoDelete(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     bool autoDelete = DnhValue::ToBool(L, 2);
     if (auto obj = package->GetObject<ObjShot>(objId)) { obj->SetAutoDeleteEnable(autoDelete); }
@@ -4645,7 +4645,7 @@ static int ObjShot_SetAutoDelete(lua_State* L)
 
 static int ObjShot_FadeDelete(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjShot>(objId)) { obj->FadeDelete(); }
     return 0;
@@ -4653,7 +4653,7 @@ static int ObjShot_FadeDelete(lua_State* L)
 
 static int ObjShot_SetDeleteFrame(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int deleteFrame = DnhValue::ToInt(L, 2);
     if (auto obj = package->GetObject<ObjShot>(objId)) { obj->SetDeleteFrame(deleteFrame); }
@@ -4662,7 +4662,7 @@ static int ObjShot_SetDeleteFrame(lua_State* L)
 
 static int ObjShot_SetDamage(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double damage = DnhValue::ToNum(L, 2);
     if (auto obj = package->GetObject<ObjShot>(objId)) { obj->SetDamage(damage); }
@@ -4671,7 +4671,7 @@ static int ObjShot_SetDamage(lua_State* L)
 
 static int ObjShot_SetDelay(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int delay = DnhValue::ToInt(L, 2);
     if (auto obj = package->GetObject<ObjShot>(objId)) { obj->SetDelay(delay); }
@@ -4680,7 +4680,7 @@ static int ObjShot_SetDelay(lua_State* L)
 
 static int ObjShot_SetSpellResist(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     bool spellResist = DnhValue::ToBool(L, 2);
     if (auto obj = package->GetObject<ObjShot>(objId)) { obj->SetSpellResistEnable(spellResist); }
@@ -4689,7 +4689,7 @@ static int ObjShot_SetSpellResist(lua_State* L)
 
 static int ObjShot_SetGraphic(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int shotDataId = DnhValue::ToInt(L, 2);
     if (auto obj = package->GetObject<ObjShot>(objId))
@@ -4707,7 +4707,7 @@ static int ObjShot_SetGraphic(lua_State* L)
 
 static int ObjShot_SetSourceBlendType(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int blendType = DnhValue::ToInt(L, 2);
     if (auto obj = package->GetObject<ObjShot>(objId)) { obj->SetSourceBlendType(blendType); }
@@ -4716,7 +4716,7 @@ static int ObjShot_SetSourceBlendType(lua_State* L)
 
 static int ObjShot_SetPenetration(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int penetration = DnhValue::ToInt(L, 2);
     if (auto obj = package->GetObject<ObjShot>(objId)) { obj->SetPenetration(penetration); }
@@ -4725,7 +4725,7 @@ static int ObjShot_SetPenetration(lua_State* L)
 
 static int ObjShot_SetEraseShot(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     bool eraseShot = DnhValue::ToBool(L, 2);
     if (auto obj = package->GetObject<ObjShot>(objId)) { obj->SetEraseShotEnable(eraseShot); }
@@ -4734,7 +4734,7 @@ static int ObjShot_SetEraseShot(lua_State* L)
 
 static int ObjShot_SetSpellFactor(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     bool spellFactor = DnhValue::ToBool(L, 2);
     if (auto obj = package->GetObject<ObjShot>(objId)) { obj->SetSpellFactor(spellFactor); }
@@ -4743,7 +4743,7 @@ static int ObjShot_SetSpellFactor(lua_State* L)
 
 static int ObjShot_ToItem(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjShot>(objId)) obj->ToItem();
     return 0;
@@ -4751,7 +4751,7 @@ static int ObjShot_ToItem(lua_State* L)
 
 static int ObjShot_AddShotA1(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int addShotId = DnhValue::ToInt(L, 2);
     int frame = DnhValue::ToInt(L, 3);
@@ -4761,7 +4761,7 @@ static int ObjShot_AddShotA1(lua_State* L)
 
 static int ObjShot_AddShotA2(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int addShotId = DnhValue::ToInt(L, 2);
     int frame = DnhValue::ToInt(L, 3);
@@ -4773,7 +4773,7 @@ static int ObjShot_AddShotA2(lua_State* L)
 
 static int ObjShot_SetIntersectionEnable(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     bool enable = DnhValue::ToBool(L, 2);
     if (auto obj = package->GetObject<ObjShot>(objId)) obj->SetIntersectionEnable(enable);
@@ -4782,7 +4782,7 @@ static int ObjShot_SetIntersectionEnable(lua_State* L)
 
 static int ObjShot_SetIntersectionCircleA1(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double r = DnhValue::ToNum(L, 2);
     if (auto obj = package->GetObject<ObjShot>(objId)) obj->AddTempIntersectionCircleA1(r);
@@ -4791,7 +4791,7 @@ static int ObjShot_SetIntersectionCircleA1(lua_State* L)
 
 static int ObjShot_SetIntersectionCircleA2(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double x = DnhValue::ToNum(L, 2);
     double y = DnhValue::ToNum(L, 3);
@@ -4802,7 +4802,7 @@ static int ObjShot_SetIntersectionCircleA2(lua_State* L)
 
 static int ObjShot_SetIntersectionLine(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double x1 = DnhValue::ToNum(L, 2);
     double y1 = DnhValue::ToNum(L, 3);
@@ -4815,7 +4815,7 @@ static int ObjShot_SetIntersectionLine(lua_State* L)
 
 static int ObjShot_SetItemChange(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     bool itemChange = DnhValue::ToBool(L, 2);
     if (auto obj = package->GetObject<ObjShot>(objId)) obj->SetItemChangeEnable(itemChange);
@@ -4824,7 +4824,7 @@ static int ObjShot_SetItemChange(lua_State* L)
 
 static int ObjShot_GetDamage(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     auto obj = package->GetObject<ObjShot>(objId);
     lua_pushnumber(L, obj ? obj->GetDamage() : 0);
@@ -4833,7 +4833,7 @@ static int ObjShot_GetDamage(lua_State* L)
 
 static int ObjShot_GetPenetration(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     auto obj = package->GetObject<ObjShot>(objId);
     lua_pushnumber(L, obj ? obj->GetPenetration() : 0);
@@ -4842,7 +4842,7 @@ static int ObjShot_GetPenetration(lua_State* L)
 
 static int ObjShot_GetDelay(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     auto obj = package->GetObject<ObjShot>(objId);
     lua_pushnumber(L, obj ? obj->GetDelay() : 0);
@@ -4851,7 +4851,7 @@ static int ObjShot_GetDelay(lua_State* L)
 
 static int ObjShot_IsSpellResist(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     auto obj = package->GetObject<ObjShot>(objId);
     lua_pushboolean(L, obj && obj->IsSpellResistEnabled());
@@ -4860,7 +4860,7 @@ static int ObjShot_IsSpellResist(lua_State* L)
 
 static int ObjShot_GetImageID(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjShot>(objId))
     {
@@ -4876,7 +4876,7 @@ static int ObjShot_GetImageID(lua_State* L)
 
 static int ObjLaser_SetLength(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double length = DnhValue::ToNum(L, 2);
     if (auto obj = package->GetObject<ObjLaser>(objId))
@@ -4888,7 +4888,7 @@ static int ObjLaser_SetLength(lua_State* L)
 
 static int ObjLaser_SetRenderWidth(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double width = DnhValue::ToNum(L, 2);
     if (auto obj = package->GetObject<ObjLaser>(objId))
@@ -4900,7 +4900,7 @@ static int ObjLaser_SetRenderWidth(lua_State* L)
 
 static int ObjLaser_SetIntersectionWidth(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double width = DnhValue::ToNum(L, 2);
     if (auto obj = package->GetObject<ObjLaser>(objId))
@@ -4912,7 +4912,7 @@ static int ObjLaser_SetIntersectionWidth(lua_State* L)
 
 static int ObjLaser_SetGrazeInvalidFrame(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int frame = DnhValue::ToInt(L, 2);
     if (auto obj = package->GetObject<ObjLaser>(objId))
@@ -4924,7 +4924,7 @@ static int ObjLaser_SetGrazeInvalidFrame(lua_State* L)
 
 static int ObjLaser_SetInvalidLength(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double head = DnhValue::ToNum(L, 2);
     double tail = DnhValue::ToNum(L, 3);
@@ -4937,7 +4937,7 @@ static int ObjLaser_SetInvalidLength(lua_State* L)
 
 static int ObjLaser_SetItemDistance(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double dist = DnhValue::ToNum(L, 2);
     if (auto obj = package->GetObject<ObjLaser>(objId))
@@ -4949,7 +4949,7 @@ static int ObjLaser_SetItemDistance(lua_State* L)
 
 static int ObjLaser_GetLength(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     auto obj = package->GetObject<ObjLaser>(objId);
     lua_pushnumber(L, obj ? obj->GetLength() : 0);
@@ -4958,7 +4958,7 @@ static int ObjLaser_GetLength(lua_State* L)
 
 static int ObjStLaser_SetAngle(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double angle = DnhValue::ToNum(L, 2);
     if (auto obj = package->GetObject<ObjStLaser>(objId))
@@ -4970,7 +4970,7 @@ static int ObjStLaser_SetAngle(lua_State* L)
 
 static int ObjStLaser_GetAngle(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     auto obj = package->GetObject<ObjStLaser>(objId);
     lua_pushnumber(L, obj ? obj->GetLaserAngle() : 0);
@@ -4979,7 +4979,7 @@ static int ObjStLaser_GetAngle(lua_State* L)
 
 static int ObjStLaser_SetSource(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     bool source = DnhValue::ToBool(L, 2);
     if (auto obj = package->GetObject<ObjStLaser>(objId))
@@ -4991,7 +4991,7 @@ static int ObjStLaser_SetSource(lua_State* L)
 
 static int ObjCrLaser_SetTipDecrement(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double decr = DnhValue::ToNum(L, 2);
     if (auto obj = package->GetObject<ObjCrLaser>(objId))
@@ -5003,7 +5003,7 @@ static int ObjCrLaser_SetTipDecrement(lua_State* L)
 
 static int ObjItem_SetItemID(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int itemDataId = DnhValue::ToInt(L, 2);
     if (auto item = package->GetObject<ObjItem>(objId))
@@ -5015,7 +5015,7 @@ static int ObjItem_SetItemID(lua_State* L)
 
 static int ObjItem_SetRenderScoreEnable(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     bool enable = DnhValue::ToBool(L, 2);
     if (auto item = package->GetObject<ObjItem>(objId))
@@ -5027,7 +5027,7 @@ static int ObjItem_SetRenderScoreEnable(lua_State* L)
 
 static int ObjItem_SetAutoCollectEnable(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     bool enable = DnhValue::ToBool(L, 2);
     if (auto item = package->GetObject<ObjItem>(objId))
@@ -5039,7 +5039,7 @@ static int ObjItem_SetAutoCollectEnable(lua_State* L)
 
 static int ObjItem_SetDefinedMovePatternA1(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int pattern = DnhValue::ToInt(L, 2);
     if (auto item = package->GetObject<ObjItem>(objId))
@@ -5057,7 +5057,7 @@ static int ObjItem_SetDefinedMovePatternA1(lua_State* L)
 
 static int ObjItem_GetInfo(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     int info = DnhValue::ToInt(L, 2);
     if (auto item = package->GetObject<ObjItem>(objId))
@@ -5073,7 +5073,7 @@ static int ObjItem_GetInfo(lua_State* L)
 
 static int ObjPlayer_AddIntersectionCircleA1(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double dx = DnhValue::ToNum(L, 2);
     double dy = DnhValue::ToNum(L, 3);
@@ -5088,7 +5088,7 @@ static int ObjPlayer_AddIntersectionCircleA1(lua_State* L)
 
 static int ObjPlayer_AddIntersectionCircleA2(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double dx = DnhValue::ToNum(L, 2);
     double dy = DnhValue::ToNum(L, 3);
@@ -5102,7 +5102,7 @@ static int ObjPlayer_AddIntersectionCircleA2(lua_State* L)
 
 static int ObjPlayer_ClearIntersection(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjPlayer>(objId))
     {
@@ -5113,7 +5113,7 @@ static int ObjPlayer_ClearIntersection(lua_State* L)
 
 static int ObjCol_IsIntersected(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     auto obj = package->GetObject<ObjCol>(objId);
     lua_pushboolean(L, obj && obj->IsIntersected());
@@ -5122,7 +5122,7 @@ static int ObjCol_IsIntersected(lua_State* L)
 
 static int ObjCol_GetListOfIntersectedEnemyID(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     DnhArray enemyIds;
     if (auto obj = package->GetObject<ObjCol>(objId))
@@ -5153,7 +5153,7 @@ static int ObjCol_GetListOfIntersectedEnemyID(lua_State* L)
 
 static int ObjCol_GetIntersectedCount(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     auto obj = package->GetObject<ObjCol>(objId);
     lua_pushnumber(L, obj ? obj->GetIntersectedCount() : 0);
@@ -5162,7 +5162,7 @@ static int ObjCol_GetIntersectedCount(lua_State* L)
 
 static int CallSpell(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     if (auto player = package->GetPlayerObject())
     {
         player->CallSpell();
@@ -5172,7 +5172,7 @@ static int CallSpell(lua_State* L)
 
 static int LoadPlayerShotData(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring path = DnhValue::ToString(L, 1);
     package->LoadPlayerShotData(path, GetSourcePos(L));
     return 0;
@@ -5180,7 +5180,7 @@ static int LoadPlayerShotData(lua_State* L)
 
 static int ReloadPlayerShotData(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     std::wstring path = DnhValue::ToString(L, 1);
     package->ReloadPlayerShotData(path, GetSourcePos(L));
     return 0;
@@ -5188,7 +5188,7 @@ static int ReloadPlayerShotData(lua_State* L)
 
 static int GetSpellManageObject(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto obj = package->GetSpellManageObject();
     lua_pushnumber(L, obj ? obj->GetID() : ID_INVALID);
     return 1;
@@ -5196,7 +5196,7 @@ static int GetSpellManageObject(lua_State* L)
 
 static int ObjSpell_Create(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     Script* script = GetScript(L);
     if (auto obj = package->CreateObjSpell())
     {
@@ -5211,7 +5211,7 @@ static int ObjSpell_Create(lua_State* L)
 
 static int ObjSpell_Regist(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     if (auto obj = package->GetObject<ObjSpell>(objId)) { obj->Regist(); }
     return 0;
@@ -5219,7 +5219,7 @@ static int ObjSpell_Regist(lua_State* L)
 
 static int ObjSpell_SetDamage(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double damage = DnhValue::ToNum(L, 2);
     if (auto obj = package->GetObject<ObjSpell>(objId)) { obj->SetDamage(damage); }
@@ -5228,7 +5228,7 @@ static int ObjSpell_SetDamage(lua_State* L)
 
 static int ObjSpell_SetEraseShot(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     bool eraseShot = DnhValue::ToBool(L, 2);
     if (auto obj = package->GetObject<ObjSpell>(objId)) { obj->SetEraseShotEnable(eraseShot); }
@@ -5237,7 +5237,7 @@ static int ObjSpell_SetEraseShot(lua_State* L)
 
 static int ObjSpell_SetIntersectionCircle(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double x = DnhValue::ToNum(L, 2);
     double y = DnhValue::ToNum(L, 3);
@@ -5251,7 +5251,7 @@ static int ObjSpell_SetIntersectionCircle(lua_State* L)
 
 static int ObjSpell_SetIntersectionLine(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int objId = DnhValue::ToInt(L, 1);
     double x1 = DnhValue::ToNum(L, 2);
     double y1 = DnhValue::ToNum(L, 3);
@@ -5267,7 +5267,7 @@ static int ObjSpell_SetIntersectionLine(lua_State* L)
 
 static int SetPauseScriptPath(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto path = DnhValue::ToString(L, 1);
     package->SetPauseScriptPath(path);
     return 0;
@@ -5275,7 +5275,7 @@ static int SetPauseScriptPath(lua_State* L)
 
 static int SetEndSceneScriptPath(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto path = DnhValue::ToString(L, 1);
     package->SetEndSceneScriptPath(path);
     return 0;
@@ -5283,7 +5283,7 @@ static int SetEndSceneScriptPath(lua_State* L)
 
 static int SetReplaySaveSceneScriptPath(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto path = DnhValue::ToString(L, 1);
     package->SetReplaySaveSceneScriptPath(path);
     return 0;
@@ -5291,7 +5291,7 @@ static int SetReplaySaveSceneScriptPath(lua_State* L)
 
 static int CreatePlayerShotA1(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     Script* script = GetScript(L);
     double x = DnhValue::ToNum(L, 1);
     double y = DnhValue::ToNum(L, 2);
@@ -5313,14 +5313,14 @@ static int CreatePlayerShotA1(lua_State* L)
 
 static int GetTransitionRenderTargetName(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     DnhArray(package->GetTransitionRenderTargetName()).Push(L);
     return 1;
 }
 
 static int SetShotDeleteEventEnable(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int targetEvent = DnhValue::ToInt(L, 1);
     bool enable = DnhValue::ToBool(L, 2);
     switch (targetEvent)
@@ -5340,35 +5340,35 @@ static int SetShotDeleteEventEnable(lua_State* L)
 
 static int ClosePackage(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     package->Close();
     return 0;
 }
 
 static int InitializeStageScene(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     package->InitializeStageScene();
     return 0;
 }
 
 static int FinalizeStageScene(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     package->FinalizeStageScene();
     return 0;
 }
 
 static int StartStageScene(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     package->StartStageScene(GetSourcePos(L));
     return 0;
 }
 
 static int SetStageIndex(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int idx = DnhValue::ToInt(L, 1);
     package->SetStageIndex(idx);
     return 0;
@@ -5376,7 +5376,7 @@ static int SetStageIndex(lua_State* L)
 
 static int SetStageMainScript(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto path = DnhValue::ToString(L, 1);
     package->SetStageMainScript(path, GetSourcePos(L));
     return 0;
@@ -5384,7 +5384,7 @@ static int SetStageMainScript(lua_State* L)
 
 static int SetStagePlayerScript(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto path = DnhValue::ToString(L, 1);
     package->SetStagePlayerScript(path, GetSourcePos(L));
     return 0;
@@ -5392,7 +5392,7 @@ static int SetStagePlayerScript(lua_State* L)
 
 static int SetStageReplayFile(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     auto path = DnhValue::ToString(L, 1);
     package->SetStageReplayFile(path);
     return 0;
@@ -5400,21 +5400,21 @@ static int SetStageReplayFile(lua_State* L)
 
 static int GetStageSceneState(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushnumber(L, package->IsStageFinished() ? STAGE_STATE_FINISHED : -1);
     return 1;
 }
 
 static int GetStageSceneResult(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushnumber(L, package->GetStageSceneResult());
     return 1;
 }
 
 static int PauseStageScene(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     bool doPause = DnhValue::ToBool(L, 1);
     package->PauseStageScene(doPause);
     return 0;
@@ -5422,28 +5422,28 @@ static int PauseStageScene(lua_State* L)
 
 static int TerminateStageScene(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     package->TerminateStageScene();
     return 0;
 }
 
 static int GetLoadFreePlayerScriptList(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     package->GetLoadFreePlayerScriptList();
     return 0;
 }
 
 static int GetFreePlayerScriptCount(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     lua_pushnumber(L, package->GetFreePlayerScriptCount());
     return 1;
 }
 
 static int GetFreePlayerScriptInfo(lua_State* L)
 {
-    Package* package = getPackage(L);
+    Package* package = GetPackage(L);
     int idx = DnhValue::ToInt(L, 1);
     int infoType = DnhValue::ToInt(L, 2);
     if (idx >= 0 && idx < package->GetFreePlayerScriptCount())
@@ -5607,12 +5607,12 @@ void* GetPointer(lua_State* L, const char* key)
     return p;
 }
 
-Package* getPackage(lua_State* L)
+Package* GetPackage(lua_State* L)
 {
     return (Package*)GetPointer(L, "Package");
 }
 
-void setPackage(lua_State* L, Package* p)
+void SetPackage(lua_State* L, Package* p)
 {
     SetPointer(L, "Package", p);
 }

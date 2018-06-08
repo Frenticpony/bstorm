@@ -39,7 +39,7 @@ void ObjEnemyBossScene::Update()
             {
                 phase.life = 0;
                 if (enemyBoss) enemyBoss->SetLife(0);
-                package->scriptManager->NotifyEventAll(EV_TIMEOUT);
+                package->NotifyEventAll(EV_TIMEOUT);
             }
             if (enemyBoss)
             {
@@ -56,11 +56,11 @@ void ObjEnemyBossScene::Update()
                         // ノーボムノーミスなら取得
                         if (playerSpellCount_ == 0 && playerShootDownCount_ == 0)
                         {
-                            package->scriptManager->NotifyEventAll(EV_GAIN_SPELL);
+                            package->NotifyEventAll(EV_GAIN_SPELL);
                         }
                     }
                 }
-                package->scriptManager->NotifyEventAll(EV_END_BOSS_STEP);
+                package->NotifyEventAll(EV_END_BOSS_STEP);
                 if (!LoadNext())
                 {
                     Die();
@@ -105,7 +105,9 @@ void ObjEnemyBossScene::LoadInThread(const std::shared_ptr<SourcePos>& srcPos)
         for (auto& phase : entry.second)
         {
             if (phase.scriptId < 0)
-                phase.scriptId = package->scriptManager->CompileInThread(phase.path, SCRIPT_TYPE_SINGLE, package->stageMainScriptInfo.version, srcPos)->GetID();
+            {
+                phase.scriptId = package->LoadScriptInThread(phase.path, SCRIPT_TYPE_SINGLE, SCRIPT_VERSION_PH3, srcPos)->GetID();
+            }
         }
     }
 }
@@ -253,7 +255,7 @@ void ObjEnemyBossScene::StartSpell()
     phase.isSpell = true;
     if (auto package = GetPackage().lock())
     {
-        package->scriptManager->NotifyEventAll(EV_START_BOSS_SPELL);
+        package->NotifyEventAll(EV_START_BOSS_SPELL);
     }
 }
 
@@ -330,7 +332,7 @@ bool ObjEnemyBossScene::LoadNext()
         for (auto& phase : steps_[currentStep_])
         {
             // ステップ内の全てのフェーズのスクリプトを開始させる
-            if (auto script = package->scriptManager->Get(phase.scriptId))
+            if (auto script = package->GetScript(phase.scriptId))
             {
                 // コンパイルと@Loadingが終了してなければブロックして完了させる
                 script->Start();
@@ -374,16 +376,16 @@ bool ObjEnemyBossScene::LoadNext()
     playerSpellCount_ = playerShootDownCount_ = 0;
     const Phase& phase = GetCurrentPhase();
 
-    if (auto script = package->scriptManager->Get(phase.scriptId))
+    if (auto script = package->GetScript(phase.scriptId))
     {
-        auto boss = package->objTable->Create<ObjEnemy>(true, package);
-        package->objLayerList->SetRenderPriority(boss, DEFAULT_ENEMY_RENDER_PRIORITY);
+        auto boss = package->CreateObjEnemyBoss();
+        enemyBossObj_ = boss;
         boss->Regist();
         boss->SetMovePosition(lastEnemyBossX_, lastEnemyBossY_);
         boss->SetLife(GetCurrentLife());
-        enemyBossObj_ = boss;
+        script->AddAutoDeleteTargetObjectId(boss->GetID());
         script->RunInitialize();
-        package->scriptManager->NotifyEventAll(EV_START_BOSS_STEP);
+        package->NotifyEventAll(EV_START_BOSS_STEP);
     }
 
     return true;

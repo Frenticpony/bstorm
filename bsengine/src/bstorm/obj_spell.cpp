@@ -6,9 +6,9 @@
 
 namespace bstorm
 {
-ObjSpell::ObjSpell(const std::shared_ptr<Package>& package) :
+ObjSpell::ObjSpell(const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package) :
     ObjPrim2D(package),
-    ObjCol(package),
+    ObjCol(colDetector, package),
     damage_(0),
     isRegistered_(false),
     eraseShotEnable_(true)
@@ -20,7 +20,7 @@ ObjSpell::~ObjSpell() {}
 
 void ObjSpell::Update()
 {
-    ClearOldTempIntersection();
+    UpdateTempIntersection();
 }
 
 void ObjSpell::Render(const std::shared_ptr<Renderer>& renderer)
@@ -46,15 +46,6 @@ void ObjSpell::SetDamage(double damage) { this->damage_ = damage; }
 bool ObjSpell::IsEraseShotEnabled() const { return eraseShotEnable_; }
 
 void ObjSpell::SetEraseShotEnable(bool enable) { eraseShotEnable_ = enable; }
-
-void ObjSpell::AddTempIntersection(const std::shared_ptr<SpellIntersection>& isect)
-{
-    if (auto package = GetPackage().lock())
-    {
-        package->colDetector->Add(isect);
-        ObjCol::AddTempIntersection(isect);
-    }
-}
 
 void ObjSpell::AddTempIntersectionCircle(float x, float y, float r)
 {

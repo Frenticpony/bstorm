@@ -24,8 +24,6 @@ namespace bstorm
 {
 const std::unordered_set<std::wstring> ignoreScriptExts{ L".png", L".jpg", L".jpeg", L".bmp", L".gif", L".dds", L".hdr", L".dib", L".pfm", L".tif", L".tiff", L".ttf", L".otf", L".mqo", L".mp3", L".mp4", L".avi", L".ogg", L".wav", L".wave", L".def", L".dat", L".fx", L".exe" };
 
-// NOTE: 必ずメンバ関数の冒頭でlockを行う。compile中に他の動作をすることはないのでロックして損はない。
-
 Script::Script(const std::wstring& p, const std::wstring& type, const std::wstring& version, int id, Package* package, const std::shared_ptr<SourcePos>& srcPos) :
     L_(NULL),
     path_(GetCanonicalPath(p)),
@@ -44,28 +42,9 @@ Script::Script(const std::wstring& p, const std::wstring& type, const std::wstri
 Script::~Script()
 {
     // NOTE: ここでロックを取ってはいけない。サブスレッドより先にロックを取るとデッドロックされる。
-    // compileThreadはメインスレッドで代入されているので、アクセスにロックは必要ない
     while (compileThread_.joinable())
     {
         Sleep(1);
-    }
-
-    if (state_ != State::SCRIPT_NOT_COMPILED && state_ != State::SCRIPT_COMPILE_FAILED)
-    {
-        RunBuiltInSub("Finalize");
-
-        if (autoDeleteObjectEnable_)
-        {
-            for (auto objId : autoDeleteTargetObjIds_)
-            {
-                package_->DeleteObject(objId);
-            }
-        }
-
-        Logger::WriteLog(std::move(
-            Log(Log::Level::LV_INFO)
-            .SetMessage("release script.")
-            .SetParam(Log::Param(Log::Param(Log::Param::Tag::SCRIPT, path_)))));
     }
     if (L_) lua_close(L_);
 }
@@ -152,7 +131,10 @@ void Script::Close()
 
 bool Script::IsClosed() const
 {
-    return state_ == State::SCRIPT_CLOSED;
+    return state_ == State::SCRIPT_CLOSED ||
+        state_ == State::SCRIPT_COMPILE_FAILED ||
+        state_ == State::SCRIPT_RUNTIME_FAILED ||
+        state_ == State::SCRIPT_FINALIZED;
 }
 
 void Script::ExecCompile()
@@ -187,7 +169,7 @@ void Script::ExecCompile()
         lua_register(L_, "c_raiseerror", c_raiseerror);
 
         // ポインタ設定
-        setPackage(L_, package_);
+        SetPackage(L_, package_);
         SetScript(L_, this);
 
         // パース
@@ -392,6 +374,23 @@ void Script::RunMainLoop()
     }
 }
 
+void Script::RunFinalize()
+{
+    std::lock_guard<std::recursive_mutex> lock(criticalSection_);
+    if (state_ == State::SCRIPT_CLOSED)
+    {
+        RunBuiltInSub("Finalize");
+    }
+
+    if (autoDeleteObjectEnable_)
+    {
+        for (auto objId : autoDeleteTargetObjIds_)
+        {
+            package_->DeleteObject(objId);
+        }
+    }
+}
+
 void Script::NotifyEvent(int eventType)
 {
     std::lock_guard<std::recursive_mutex> lock(criticalSection_);
@@ -407,6 +406,8 @@ void Script::NotifyEvent(int eventType, const std::unique_ptr<DnhArray>& args)
         case State::SCRIPT_COMPILE_FAILED:
         case State::SCRIPT_COMPILED:
         case State::SCRIPT_LOADING_COMPLETED:
+        case State::SCRIPT_RUNTIME_FAILED:
+        case State::SCRIPT_FINALIZED:
             break;
         default:
             DnhReal((double)eventType).Push(L_);
@@ -589,10 +590,21 @@ void ScriptManager::CleanClosedScript()
         auto& script = *it;
         if (script->IsClosed())
         {
+            script->RunFinalize();
             scriptMap_.erase(script->GetID());
             it = scriptList_.erase(it);
         } else ++it;
     }
+}
+
+void ScriptManager::FinalizeAll()
+{
+    for (auto& script : scriptList_)
+    {
+        script->RunFinalize();
+    }
+    scriptList_.clear();
+    scriptMap_.clear();
 }
 
 void ScriptManager::CloseStgSceneScript()

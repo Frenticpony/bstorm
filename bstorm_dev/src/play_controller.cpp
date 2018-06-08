@@ -3,187 +3,170 @@
 #include <bstorm/const.hpp>
 #include <bstorm/logger.hpp>
 #include <bstorm/package.hpp>
+#include <bstorm/engine.hpp>
+#include <bstorm/engine_develop_options.hpp>
 
 #include <algorithm>
 
 namespace bstorm
 {
-PlayController::PlayController(const std::shared_ptr<Package>& package) :
-    package(package),
-    playSpeed(1),
-    paused(true),
-    screenWidth(package->GetScreenWidth()),
-    screenHeight(package->GetScreenHeight()),
-    renderIntersectionEnable(false),
-    playerInvincibleEnable(false),
-    inputEnable(false)
+PlayController::PlayController(const std::shared_ptr<Engine>& engine) :
+    engine_(engine),
+    package_(nullptr),
+    playSpeed_(1),
+    isPaused_(true),
+    screenWidth_(640),
+    screenHeight_(480)
 {
 }
 
-void PlayController::tick()
+void PlayController::Tick()
 {
+    if (!package_) return;
+    if (package_->IsFinished())
+    {
+        package_ = nullptr;
+        return;
+    }
     try
     {
-        for (int i = 0; i < playSpeed; i++)
+        for (int i = 0; i < playSpeed_; i++)
         {
-            if (package->IsPackageFinished()) break;
-            package->TickFrame();
+            if (package_->IsFinished()) break;
+            package_->TickFrame();
         }
     } catch (Log& log)
     {
+        package_ = nullptr;
         Logger::WriteLog(log);
-#ifndef _DEBUG
-        FIXME!
-       package->Reset(screenWidth, screenHeight);
-#endif
     }
 }
 
-void PlayController::pause(bool doPause)
+void PlayController::Pause(bool doPause)
 {
-    if (paused == true && doPause == false && package->IsPackageFinished())
+    if (isPaused_ == true && doPause == false && IsPackageFinished())
     {
-        reload();
-        if (!package->IsPackageFinished())
+        // パッケージ再生開始
+        Reload();
+        if (!IsPackageFinished())
         {
-            paused = false;
+            isPaused_ = false;
         }
     } else
     {
-        paused = doPause;
+        isPaused_ = doPause;
     }
 }
 
-void PlayController::close()
+void PlayController::Stop()
 {
-#ifndef _DEBUG
-    FIXME!
-        package->Reset(screenWidth, screenHeight);
-#endif
-    pause(true);
+    Pause(true);
+    package_ = nullptr;
 }
 
-void PlayController::reload()
+void PlayController::Reload()
 {
     try
     {
-        if (mainScript.type == SCRIPT_TYPE_PACKAGE)
+        if (mainScript_.type == SCRIPT_TYPE_PACKAGE)
         {
-
-#ifndef _DEBUG
-            FIXME!
-                package->Reset(screenWidth, screenHeight);
-#endif
-            package->SetPackageMainScript(mainScript);
-            package->StartPackage();
+            package_ = engine_->CreatePackage(screenWidth_, screenHeight_, mainScript_.path);
+            package_->Start();
         } else
         {
-            if (mainScript.path.empty())
+            if (mainScript_.path.empty())
             {
                 Logger::WriteLog(Log::Level::LV_ERROR, "main script is not selected.");
             }
-            if (playerScript.path.empty())
+            if (playerScript_.path.empty())
             {
                 Logger::WriteLog(Log::Level::LV_ERROR, "player script is not selected.");
             }
-            if (!mainScript.path.empty() && !playerScript.path.empty())
+            if (!mainScript_.path.empty() && !playerScript_.path.empty())
             {
-                if (mainScript.type == SCRIPT_TYPE_UNKNOWN)
+                if (mainScript_.type == SCRIPT_TYPE_UNKNOWN)
                 {
-                    mainScript.type = SCRIPT_TYPE_SINGLE;
+                    mainScript_.type = SCRIPT_TYPE_SINGLE;
                 }
-#ifndef _DEBUG
-                package->Reset(screenWidth, screenHeight);
-#endif
-                package->SetStageMainScript(mainScript);
-                package->SetStagePlayerScript(playerScript);
-                ScriptInfo defaultPackageMainScript;
-                defaultPackageMainScript.path = DEFAULT_PACKAGE_PATH;
-                defaultPackageMainScript.type = SCRIPT_TYPE_PACKAGE;
-                defaultPackageMainScript.version = SCRIPT_VERSION_PH3;
-                package->SetPackageMainScript(defaultPackageMainScript);
-                package->StartPackage();
+
+                package_ = engine_->CreatePackage(screenWidth_, screenHeight_, DEFAULT_PACKAGE_PATH);
+                package_->SetStageMainScript(mainScript_);
+                package_->SetStagePlayerScript(playerScript_);
+                package_->Start();
             }
         }
     } catch (Log& log)
     {
+        package_ = nullptr;
         Logger::WriteLog(log);
-#ifndef _DEBUG
-        package->Reset(screenWidth, screenHeight);
-#endif
     }
-    package->SetRenderIntersectionEnable(renderIntersectionEnable);
-    package->SetForcePlayerInvincibleEnable(playerInvincibleEnable);
-    package->SetInputEnable(inputEnable);
 }
 
-bool PlayController::isPaused() const
+bool PlayController::IsPaused() const
 {
-    return paused;
+    return isPaused_;
 }
 
-int PlayController::getPlaySpeed() const
+int PlayController::GetPlaySpeed() const
 {
-    return playSpeed;
+    return playSpeed_;
 }
 
-void PlayController::setPlaySpeed(int speed)
+void PlayController::SetPlaySpeed(int speed)
 {
-    playSpeed = std::max(speed, 1);
+    playSpeed_ = std::max(speed, 1);
 }
 
-void PlayController::setScript(const ScriptInfo & mainScript, const ScriptInfo & playerScript)
+void PlayController::SetScript(const ScriptInfo & mainScript, const ScriptInfo & playerScript)
 {
-    this->mainScript = mainScript;
-    this->playerScript = playerScript;
+    mainScript_ = mainScript;
+    playerScript_ = playerScript;
 }
 
-int64_t PlayController::getElapsedFrame() const
+int PlayController::GetElapsedFrame() const
 {
-    return package->GetElapsedFrame();
+    if (IsPackageFinished()) return 0;
+    return package_->GetElapsedFrame();
 }
 
-void PlayController::setScreenSize(int width, int height)
+void PlayController::SetScreenSize(int width, int height)
 {
-    screenWidth = width;
-    screenHeight = height;
+    screenWidth_ = width;
+    screenHeight_ = height;
 }
 
-bool PlayController::isPackageFinished() const
+bool PlayController::IsPackageFinished() const
 {
-    return package->IsPackageFinished();
+    return !package_ || package_->IsFinished();
 }
 
-bool PlayController::isRenderIntersectionEnabled() const
+bool PlayController::IsRenderIntersectionEnabled() const
 {
-    return renderIntersectionEnable;
+    return engine_->GetDevelopOptions()->renderIntersectionEnable;
 }
 
-void PlayController::setRenderIntersectionEnable(bool enable)
+void PlayController::SetRenderIntersectionEnable(bool enable)
 {
-    renderIntersectionEnable = enable;
-    package->SetRenderIntersectionEnable(enable);
+    engine_->GetDevelopOptions()->renderIntersectionEnable = enable;
 }
 
-bool PlayController::isPlayerInvincibleEnabled() const
+bool PlayController::IsPlayerInvincibleEnabled() const
 {
-    return playerInvincibleEnable;
+    return engine_->GetDevelopOptions()->forcePlayerInvincibleEnable;
 }
 
-void PlayController::setPlayerInvincibleEnable(bool enable)
+void PlayController::SetPlayerInvincibleEnable(bool enable)
 {
-    playerInvincibleEnable = enable;
-    package->SetForcePlayerInvincibleEnable(enable);
+    engine_->GetDevelopOptions()->forcePlayerInvincibleEnable = enable;
 }
 
-void PlayController::setInputEnable(bool enable)
+void PlayController::SetInputEnable(bool enable)
 {
-    inputEnable = enable;
-    package->SetInputEnable(enable);
+    engine_->SetInputEnable(enable);
 }
 
-const ScriptInfo& PlayController::getMainScriptInfo() const
+const ScriptInfo& PlayController::GetMainScriptInfo() const
 {
-    return mainScript;
+    return mainScript_;
 }
 }

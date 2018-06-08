@@ -178,7 +178,7 @@ NullableSharedPtr<Shader> ObjRender::GetAppliedShader() const
     if (shader_) return shader_;
     if (auto package = GetPackage().lock())
     {
-        return package->objLayerList->GetLayerShader(priority_);
+        return package->GetLayerShader(priority_);
     }
     return nullptr;
 }

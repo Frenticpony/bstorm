@@ -19,10 +19,10 @@
 
 namespace bstorm
 {
-ObjShot::ObjShot(bool isPlayerShot, const std::shared_ptr<Package>& package) :
+ObjShot::ObjShot(bool isPlayerShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package) :
     ObjRender(package),
     ObjMove(this),
-    ObjCol(package),
+    ObjCol(colDetector, package),
     isPlayerShot_(isPlayerShot),
     isRegistered_(false),
     intersectionEnable_(true),
@@ -50,33 +50,15 @@ ObjShot::ObjShot(bool isPlayerShot, const std::shared_ptr<Package>& package) :
     SetBlendType(BLEND_NONE);
     if (isPlayerShot_)
     {
-        package->shotCounter->playerShotCount++;
+        package->SuccPlayerShotCount();
     } else
     {
-        package->shotCounter->enemyShotCount++;
+        package->SuccEnemyShotCount();
     }
 }
 
 ObjShot::~ObjShot()
 {
-    if (auto package = GetPackage().lock())
-    {
-        for (auto& addedShot : addedShots_)
-        {
-            package->objTable->Delete(addedShot.objId);
-        }
-    }
-    // FUTURE :デストラクタではなくdead時にカウントする
-    if (auto package = GetPackage().lock())
-    {
-        if (IsPlayerShot())
-        {
-            package->shotCounter->playerShotCount--;
-        } else
-        {
-            package->shotCounter->enemyShotCount--;
-        }
-    }
 }
 
 void ObjShot::Update()
@@ -99,7 +81,25 @@ void ObjShot::Update()
         TickDeleteFrameTimer();
         TickFadeDeleteTimer();
     }
-    ClearOldTempIntersection();
+    UpdateTempIntersection();
+}
+
+void ObjShot::OnDead() noexcept
+{
+    if (auto package = GetPackage().lock())
+    {
+        for (auto& addedShot : addedShots_)
+        {
+            package->DeleteObject(addedShot.objId);
+        }
+        if (IsPlayerShot())
+        {
+            package->PredPlayerShotCount();
+        } else
+        {
+            package->PredEnemyShotCount();
+        }
+    }
 }
 
 void ObjShot::Render(const std::shared_ptr<Renderer>& renderer)
@@ -274,11 +274,7 @@ void ObjShot::AddIntersection(const std::shared_ptr<ShotIntersection>& isect)
 {
     if (!isTempIntersectionMode_)
     {
-        if (auto package = GetPackage().lock())
-        {
-            package->colDetector->Add(isect);
-        }
-        ObjCol::PushBackIntersection(isect);
+        ObjCol::AddIntersection(isect);
     }
 }
 
@@ -288,10 +284,6 @@ void ObjShot::AddTempIntersection(const std::shared_ptr<ShotIntersection>& isect
     {
         isTempIntersectionMode_ = true;
         ClearIntersection();
-    }
-    if (auto package = GetPackage().lock())
-    {
-        package->colDetector->Add(isect);
     }
     ObjCol::AddTempIntersection(isect);
 }
@@ -372,7 +364,7 @@ void ObjShot::SetShotData(const std::shared_ptr<ShotData>& data)
                 }
                 if (shotData_->useAngularVelocityRand)
                 {
-                    angularVelocity_ = package->randGenerator->RandDouble(shotData_->angularVelocityRandMin, shotData_->angularVelocityRandMax);
+                    angularVelocity_ = package->GetRandDouble(shotData_->angularVelocityRandMin, shotData_->angularVelocityRandMax);
                 }
             }
         }
@@ -394,7 +386,7 @@ void ObjShot::AddShotA1(int shotObjId, int frame)
     if (IsDead()) return;
     if (auto package = GetPackage().lock())
     {
-        if (auto shot = package->objTable->Get<ObjShot>(shotObjId))
+        if (auto shot = package->GetObject<ObjShot>(shotObjId))
         {
             shot->isRegistered_ = false;
             addedShots_.emplace_back(shotObjId, frame);
@@ -407,7 +399,7 @@ void ObjShot::AddShotA2(int shotObjId, int frame, float dist, float angle)
     if (IsDead()) return;
     if (auto package = GetPackage().lock())
     {
-        if (auto shot = package->objTable->Get<ObjShot>(shotObjId))
+        if (auto shot = package->GetObject<ObjShot>(shotObjId))
         {
             shot->isRegistered_ = false;
             addedShots_.emplace_back(shotObjId, frame, dist, angle);
@@ -425,11 +417,11 @@ const std::list<ObjShot::AddedShot>& ObjShot::GetAddedShot() const
     return addedShots_;
 }
 
-void ObjShot::GenerateDefaultBonusItem()
+void ObjShot::GenerateBonusItem()
 {
     if (auto package = GetPackage().lock())
     {
-        package->defaultBonusItemSpawner->Spawn(GetX(), GetY(), package);
+        package->GenerateBonusItem(GetX(), GetY());
     }
 }
 
@@ -444,21 +436,18 @@ void ObjShot::ToItem()
             auto evArgs = std::make_unique<DnhArray>();
             evArgs->PushBack(std::make_unique<DnhReal>(GetID()));
             evArgs->PushBack(std::make_unique<DnhArray>(Point2D(GetX(), GetY())));
-            if (auto itemScript = package->itemScript.lock())
+            if (auto itemScript = package->GetItemScript())
             {
                 itemScript->NotifyEvent(EV_DELETE_SHOT_TO_ITEM, evArgs);
             }
-            if (package->deleteShotToItemEventOnShotScriptEnable)
+            if (package->IsDeleteShotToItemEventOnShotScriptEnabled())
             {
-                if (auto shotScript = package->shotScript.lock())
+                if (auto shotScript = package->GetShotScript())
                 {
                     shotScript->NotifyEvent(EV_DELETE_SHOT_TO_ITEM, evArgs);
                 }
             }
-            if (package->defaultBonusItemEnable)
-            {
-                GenerateDefaultBonusItem();
-            }
+            GenerateBonusItem();
         }
     }
     Die();
@@ -478,9 +467,9 @@ void ObjShot::DeleteImmediate()
     if (auto package = GetPackage().lock())
     {
         // EV_DELETE_SHOT_IMMEDIATE
-        if (package->deleteShotImmediateEventOnShotScriptEnable)
+        if (package->IsDeleteShotImmediateEventOnShotScriptEnabled())
         {
-            if (auto shotScript = package->shotScript.lock())
+            if (auto shotScript = package->GetShotScript())
             {
                 auto evArgs = std::make_unique<DnhArray>();
                 evArgs->PushBack(std::make_unique<DnhReal>(GetID()));
@@ -535,7 +524,7 @@ void ObjShot::SetDeleteFrame(int frame)
     deleteFrameTimer_ = frame;
 }
 
-void ObjShot::TransIntersection(float dx, float dy)
+void ObjShot::OnTrans(float dx, float dy)
 {
     ObjCol::TransIntersection(dx, dy);
 }
@@ -605,7 +594,7 @@ void ObjShot::TickAddedShotFrameCount()
         {
             if (auto package = GetPackage().lock())
             {
-                if (auto shot = package->objTable->Get<ObjShot>(it->objId))
+                if (auto shot = package->GetObject<ObjShot>(it->objId))
                 {
                     float dx = 0;
                     float dy = 0;
@@ -651,9 +640,9 @@ void ObjShot::TickFadeDeleteTimer()
         if (auto package = GetPackage().lock())
         {
             //EV_DELETE_SHOT_FADE
-            if (package->deleteShotFadeEventOnShotScriptEnable)
+            if (package->IsDeleteShotFadeEventOnShotScriptEnabled())
             {
-                if (auto shotScript = package->shotScript.lock())
+                if (auto shotScript = package->GetShotScript())
                 {
                     auto evArgs = std::make_unique<DnhArray>();
                     evArgs->PushBack(std::make_unique<DnhReal>(GetID()));
@@ -694,8 +683,8 @@ ObjShot::AddedShot::AddedShot(int objId, int frame, float dist, float angle) :
 {
 }
 
-ObjLaser::ObjLaser(bool isPlayerShot, const std::shared_ptr<Package>& package) :
-    ObjShot(isPlayerShot, package),
+ObjLaser::ObjLaser(bool isPlayerShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package) :
+    ObjShot(isPlayerShot, colDetector, package),
     length_(0),
     renderWidth_(0),
     intersectionWidth_(0),
@@ -798,8 +787,8 @@ void ObjLaser::TickGrazeInvalidTimer()
     }
 }
 
-ObjLooseLaser::ObjLooseLaser(bool isPlayerShot, const std::shared_ptr<Package>& package) :
-    ObjLaser(isPlayerShot, package),
+ObjLooseLaser::ObjLooseLaser(bool isPlayerShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package) :
+    ObjLaser(isPlayerShot, colDetector, package),
     renderLength_(0),
     invalidLengthHead_(0),
     invalidLengthTail_(0),
@@ -827,7 +816,7 @@ void ObjLooseLaser::Update()
         TickFadeDeleteTimer();
         TickGrazeInvalidTimer();
     }
-    ClearOldTempIntersection();
+    UpdateTempIntersection();
 }
 
 void ObjLooseLaser::Render(const std::shared_ptr<Renderer>& renderer)
@@ -847,7 +836,7 @@ void ObjLooseLaser::Render(const std::shared_ptr<Renderer>& renderer)
     }
 }
 
-void ObjLooseLaser::GenerateDefaultBonusItem()
+void ObjLooseLaser::GenerateBonusItem()
 {
     if (auto package = GetPackage().lock())
     {
@@ -862,7 +851,7 @@ void ObjLooseLaser::GenerateDefaultBonusItem()
         if (dist <= 0) return; // 無限ループ防止
         while (true)
         {
-            package->defaultBonusItemSpawner->Spawn(x, y, package);
+            package->GenerateBonusItem(x, y);
             x += dx;
             y += dy;
             distSum += dist;
@@ -983,8 +972,8 @@ void ObjLooseLaser::Extend()
     }
 }
 
-ObjStLaser::ObjStLaser(bool isPlayerShot, const std::shared_ptr<Package>& package) :
-    ObjLooseLaser(isPlayerShot, package),
+ObjStLaser::ObjStLaser(bool isPlayerShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package) :
+    ObjLooseLaser(isPlayerShot, colDetector, package),
     laserAngle_(270),
     laserSourceEnable_(true),
     laserWidthScale_(0)
@@ -1012,7 +1001,7 @@ void ObjStLaser::Update()
         // 10フレームで1倍になるようにする
         laserWidthScale_ = IsDelay() ? 0.0f : std::min(1.0f, laserWidthScale_ + 0.1f);
     }
-    ClearOldTempIntersection();
+    UpdateTempIntersection();
 }
 
 void ObjStLaser::Render(const std::shared_ptr<Renderer>& renderer)
@@ -1082,8 +1071,8 @@ float ObjStLaser::GetRenderLength() const
     return GetLength();
 }
 
-ObjCrLaser::ObjCrLaser(bool isPlayerShot, const std::shared_ptr<Package>& package) :
-    ObjLaser(isPlayerShot, package),
+ObjCrLaser::ObjCrLaser(bool isPlayerShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package) :
+    ObjLaser(isPlayerShot, colDetector, package),
     totalLaserLength_(0),
     tailPos_(0),
     hasHead_(false),
@@ -1125,7 +1114,7 @@ void ObjCrLaser::Update()
         TickFadeDeleteTimer();
         TickGrazeInvalidTimer();
     }
-    ClearOldTempIntersection();
+    UpdateTempIntersection();
 }
 
 void ObjCrLaser::Render(const std::shared_ptr<Renderer>& renderer)
@@ -1180,7 +1169,7 @@ void ObjCrLaser::Render(const std::shared_ptr<Renderer>& renderer)
     RenderIntersection(renderer);
 }
 
-void ObjCrLaser::GenerateDefaultBonusItem()
+void ObjCrLaser::GenerateBonusItem()
 {
     if (auto package = GetPackage().lock())
     {
@@ -1190,7 +1179,7 @@ void ObjCrLaser::GenerateDefaultBonusItem()
             {
                 float x = (trail_[i].x + trail_[i + 1].x) / 2;
                 float y = (trail_[i].y + trail_[i + 1].y) / 2;
-                package->defaultBonusItemSpawner->Spawn(x, y, package);
+                package->GenerateBonusItem(x, y);
             }
         }
     }
@@ -1284,7 +1273,7 @@ void ObjCrLaser::Extend(float x, float y)
             laserNodeLengthList_.pop_front();
             if (GetIntersections().size() > 0)
             {
-                ObjCol::PopFrontIntersection();
+                ObjCol::RemoveOldestIntersection();
             }
         }
     } else

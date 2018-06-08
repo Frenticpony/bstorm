@@ -9,10 +9,10 @@
 
 namespace bstorm
 {
-ObjEnemy::ObjEnemy(bool isBoss, const std::shared_ptr<Package>& package) :
+ObjEnemy::ObjEnemy(bool isBoss, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package) :
     ObjSprite2D(package),
     ObjMove(this),
-    ObjCol(package),
+    ObjCol(colDetector, package),
     isRegistered_(false),
     life_(0),
     damageRateShot_(1.0),
@@ -34,12 +34,12 @@ void ObjEnemy::Update()
     }
     prevFrameShotHitCount_ = 0;
     std::swap(shotHitCount_, prevFrameShotHitCount_);
-    ClearOldTempIntersection();
+    UpdateTempIntersection();
     for (const auto& isect : GetTempIntersections())
     {
         if (auto toShot = std::dynamic_pointer_cast<EnemyIntersectionToShot>(isect))
         {
-            prevTempIsectToShotPositions_.emplace_back(toShot->GetX(), toShot->GetY());
+            tempIsectToShotPositions_.emplace_back(toShot->GetX(), toShot->GetY());
         }
     }
 }
@@ -82,18 +82,9 @@ void ObjEnemy::SetDamageRateShot(double rate) { damageRateShot_ = rate / 100.0; 
 
 void ObjEnemy::SetDamageRateSpell(double rate) { damageRateSpell_ = rate / 100.0; }
 
-const std::vector<Point2D>& ObjEnemy::GetAllIntersectionToShotPosition() const
+const std::vector<Point2D>& ObjEnemy::GetIntersectionToShotPositions() const
 {
-    return prevTempIsectToShotPositions_;
-}
-
-void ObjEnemy::AddTempIntersection(const std::shared_ptr<Intersection>& isect)
-{
-    if (auto package = GetPackage().lock())
-    {
-        package->colDetector->Add(isect);
-    }
-    ObjCol::AddTempIntersection(isect);
+    return tempIsectToShotPositions_;
 }
 
 void ObjEnemy::AddTempIntersectionCircleToShot(float x, float y, float r)
@@ -115,7 +106,7 @@ void ObjEnemy::AddShotDamage(double damage)
     {
         if (auto package = GetPackage().lock())
         {
-            if (auto bossScene = package->enemyBossSceneObj.lock())
+            if (auto bossScene = package->GetEnemyBossSceneObject())
             {
                 bossScene->AddDamage(damage);
             }
@@ -131,7 +122,7 @@ void ObjEnemy::AddSpellDamage(double damage)
     {
         if (auto package = GetPackage().lock())
         {
-            if (auto bossScene = package->enemyBossSceneObj.lock())
+            if (auto bossScene = package->GetEnemyBossSceneObject())
             {
                 bossScene->AddDamage(damage);
             }

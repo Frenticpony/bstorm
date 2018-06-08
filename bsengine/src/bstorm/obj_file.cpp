@@ -11,6 +11,10 @@ ObjFile::ObjFile(const std::shared_ptr<Package>& state) : Obj(state)
 
 ObjFile::~ObjFile()
 {
+}
+
+void ObjFile::OnDead() noexcept
+{
     file_.close();
 }
 
