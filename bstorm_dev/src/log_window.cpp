@@ -15,7 +15,7 @@ LogWindow::LogWindow() :
     iniWidth(0),
     iniHeight(0),
     scrollToBottom(false),
-    showInfoLevel(true),
+    showInfoLevel(false),
     showWarnLevel(true),
     showErrorLevel(true),
     showUserLevel(true),
@@ -114,12 +114,16 @@ void LogWindow::draw()
             if (ImGui::BeginMenu(ICON_FA_EYE" Levels"))
             {
                 {
-                    // Default
+                    // All
                     ImGui::PushItemFlag(ImGuiItemFlags_SelectableDontClosePopup, true);
-                    if (ImGui::MenuItem(ICON_FA_ASTERISK" Default", NULL))
+                    if (ImGui::MenuItem(ICON_FA_ASTERISK" All", NULL))
                     {
-                        showInfoLevel = showWarnLevel = showErrorLevel = showUserLevel = true;
-                        showDetailLevel = false;
+                        bool show = true;
+                        if (showInfoLevel && showWarnLevel && showErrorLevel && showUserLevel && showDetailLevel)
+                        {
+                            show = false;
+                        }
+                        showInfoLevel = showWarnLevel = showErrorLevel = showUserLevel = showDetailLevel = show;
                     }
                     ImGui::PopItemFlag();
                 }
