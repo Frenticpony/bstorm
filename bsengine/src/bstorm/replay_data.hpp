@@ -17,6 +17,7 @@ class ReplayData
 {
 public:
     ReplayData();
+    void Init();
 
     // =======
     // Ä¶—p

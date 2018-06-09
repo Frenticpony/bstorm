@@ -39,6 +39,7 @@ public:
     void SaveCommonDataArea(const DataAreaName& areaName, const std::wstring& path) const noexcept(false);
     void LoadCommonDataArea(const DataAreaName& areaName, std::istream& stream) noexcept(false);
     void LoadCommonDataArea(const DataAreaName& areaName, const std::wstring& path) noexcept(false);
+    void ClearAllCommonDataArea();
     static constexpr wchar_t* DefaultDataAreaName = L"";
     const std::map<DataAreaName, CommonDataArea>& GetCommonDataAreaTable() const;
 private:

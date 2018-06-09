@@ -18,7 +18,13 @@ namespace bstorm
 
 ReplayData::ReplayData()
 {
+    Init();
+}
+
+void ReplayData::Init()
+{
     // リプレイ情報の初期値を設定
+    data_.ClearAllCommonDataArea();
     data_.CreateCommonDataArea(ReplayInfoAreaName);
     data_.SetAreaCommonData(ReplayInfoAreaName, FilePathInfoKey, std::make_unique<DnhArray>(L""));
     data_.SetAreaCommonData(ReplayInfoAreaName, DateTimeInfoKey, std::make_unique<DnhArray>(L""));
@@ -48,12 +54,12 @@ void ReplayData::Load(const std::wstring & filePath) noexcept(false)
         throw illegal_replay_format(filePath);
     }
 
-    CommonDataDB tmp;
     try
     {
+        data_.ClearAllCommonDataArea();
         // リプレイ情報エリアをロード
-        tmp.LoadCommonDataArea(ReplayInfoAreaName, fstream);
-        const auto& areaNameList = tmp.GetAreaCommonData(ReplayInfoAreaName, AreaNameListInfoKey, DnhValue::Nil());
+        data_.LoadCommonDataArea(ReplayInfoAreaName, fstream);
+        const auto& areaNameList = data_.GetAreaCommonData(ReplayInfoAreaName, AreaNameListInfoKey, DnhValue::Nil());
         if (auto areaNameListArr = dynamic_cast<DnhArray*>(areaNameList.get()))
         {
             // リプレイ情報エリア以外のエリアをロード
@@ -62,15 +68,15 @@ void ReplayData::Load(const std::wstring & filePath) noexcept(false)
                 const auto areaName = areaNameListArr->Index(i)->ToString();
                 if (areaName != ReplayInfoAreaName)
                 {
-                    tmp.LoadCommonDataArea(areaName, fstream);
+                    data_.LoadCommonDataArea(areaName, fstream);
                 }
             }
         }
     } catch (const Log&)
     {
+        Init();
         throw illegal_replay_format(filePath);
     }
-    data_ = std::move(tmp);
 }
 
 const std::unique_ptr<DnhValue>& ReplayData::GetReplayInfo(const CommonDataDB::DataKey & infoKey) const

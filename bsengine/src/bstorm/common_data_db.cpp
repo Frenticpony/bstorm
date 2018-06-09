@@ -300,6 +300,11 @@ void CommonDataDB::LoadCommonDataArea(const DataAreaName& areaName, const std::w
     }
 }
 
+void CommonDataDB::ClearAllCommonDataArea()
+{
+    areaTable_.clear();
+}
+
 const std::map<CommonDataDB::DataAreaName, CommonDataDB::CommonDataArea>& CommonDataDB::GetCommonDataAreaTable() const
 {
     return areaTable_;
