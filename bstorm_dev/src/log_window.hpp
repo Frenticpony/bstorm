@@ -12,8 +12,8 @@ public:
     LogWindow();
     ~LogWindow();
     void setInitWindowPos(int left, int top, int width, int height);
-    void log(Log& lg) override;
-    void log(Log&& lg) override;
+    void log(Log& lg) noexcept(false) override;
+    void log(Log&& lg) noexcept(false) override;
     void draw();
     void clear();
 private:

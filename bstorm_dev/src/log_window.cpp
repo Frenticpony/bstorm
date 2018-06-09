@@ -36,12 +36,12 @@ void LogWindow::setInitWindowPos(int left, int top, int width, int height)
     iniHeight = height;
 }
 
-void LogWindow::log(Log& lg)
+void LogWindow::log(Log& lg) noexcept(false)
 {
     log(std::move(Log(lg)));
 }
 
-void LogWindow::log(Log&& lg)
+void LogWindow::log(Log&& lg) noexcept(false)
 {
     logs[validIdx(headIdx + logCnt)] = std::move(lg);
     if (logCnt != MaxLogCnt)

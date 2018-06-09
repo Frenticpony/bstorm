@@ -83,8 +83,8 @@ public:
     static void Shutdown();
     static void SetEnable(bool enable);
     virtual ~Logger() {}
-    virtual void log(Log& lg) = 0;
-    virtual void log(Log&& lg) = 0;
+    virtual void log(Log& lg) noexcept(false) = 0;
+    virtual void log(Log&& lg) noexcept(false) = 0;
     void log(Log::Level level, const std::string& text);
     void log(Log::Level level, const std::wstring& text);
     void log(Log::Level level, std::string&& text);
@@ -99,11 +99,11 @@ class DummyLogger : public Logger
 public:
     DummyLogger() {}
 private:
-    void log(Log& lg) override
+    void log(Log& lg) noexcept(false) override
     {
         log(std::move(Log(lg)));
     };
-    void log(Log&& lg) override
+    void log(Log&& lg) noexcept(false) override
     {
         OutputDebugStringA(lg.ToString().c_str());
         OutputDebugStringA("\n");
@@ -115,8 +115,8 @@ class FileLogger : public Logger
 public:
     FileLogger(const std::wstring& filePath, const std::shared_ptr<Logger>& cc);
     ~FileLogger() override;
-    void log(Log& lg) override;
-    void log(Log&& lg) override;
+    void log(Log& lg) noexcept(false) override;
+    void log(Log&& lg) noexcept(false) override;
 private:
     std::ofstream file_;
     std::shared_ptr<Logger> cc_;

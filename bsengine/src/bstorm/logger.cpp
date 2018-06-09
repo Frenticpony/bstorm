@@ -37,7 +37,13 @@ void Logger::WriteLog(Log::Level level, std::string && text)
 void Logger::Init(const std::shared_ptr<Logger>& l)
 {
     std::lock_guard<std::mutex> lock(mutex);
-    logger = l;
+    if (l == nullptr)
+    {
+        logger = std::make_shared<DummyLogger>();
+    } else
+    {
+        logger = l;
+    }
 }
 
 void Logger::Shutdown()
@@ -67,7 +73,7 @@ void Logger::log(Log::Level level, std::string && text)
     log(std::move(Log(level).SetMessage(std::move(text))));
 }
 
-std::shared_ptr<Logger> Logger::logger;
+std::shared_ptr<Logger> Logger::logger = std::make_shared<DummyLogger>();
 std::mutex Logger::mutex;
 bool Logger::logEnabled = true;
 
@@ -204,13 +210,13 @@ static void logToFile(const Log& lg, std::ofstream& file)
     file << lg.ToString() << std::endl;
 }
 
-void FileLogger::log(Log& lg)
+void FileLogger::log(Log& lg) noexcept(false)
 {
     logToFile(lg, file_);
     if (cc_) cc_->log(lg);
 }
 
-void FileLogger::log(Log&& lg)
+void FileLogger::log(Log&& lg) noexcept(false)
 {
     logToFile(lg, file_);
     if (cc_) cc_->log(std::move(lg));
