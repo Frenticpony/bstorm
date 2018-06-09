@@ -123,12 +123,12 @@ std::unordered_map<VirtualKey, KeyState> ReplayData::GetVirtualKeyStates(StageIn
         {
             // ‚»‚ÌƒtƒŒ[ƒ€‚Ì“ü—Íî•ñ
             const auto& vkStates = vkStateListArr->Index(stageElapsedFrame);
-            if (const auto vkStatesArr = dynamic_cast<DnhArray*>(vkStates.get()))
+            if (const auto vkStatesArr = dynamic_cast<DnhUInt16Array*>(vkStates.get()))
             {
                 for (int i = 0; i < vkStatesArr->GetSize(); i += 2)
                 {
-                    VirtualKey vk = vkStatesArr->Index(i)->ToInt();
-                    KeyState s = vkStatesArr->Index(i + 1)->ToInt();
+                    VirtualKey vk = vkStatesArr->Index(i);
+                    KeyState s = vkStatesArr->Index(i + 1);
                     ret[vk] = s;
                 }
             }
@@ -270,11 +270,11 @@ void ReplayData::RecordFrameStageInfo(StageIndex stageIdx, float fps, const std:
     const auto& vkStateList = data_.GetAreaCommonData(stageInfoAreaName, StageVirtualKeyStateListInfoKey, DnhValue::Nil());
     if (const auto vkStateListArr = dynamic_cast<DnhArray*>(vkStateList.get()))
     {
-        auto vkStates = std::make_unique<DnhArray>(keyStates.size() * 2);
+        auto vkStates = std::make_unique<DnhUInt16Array>(keyStates.size() * 2);
         for (const auto& entry : keyStates)
         {
-            vkStates->PushBack(std::make_unique<DnhReal>((double)(entry.first)));
-            vkStates->PushBack(std::make_unique<DnhReal>((double)(entry.second)));
+            vkStates->PushBack(entry.first);
+            vkStates->PushBack(entry.second);
         }
         vkStateListArr->PushBack(std::move(vkStates));
     }

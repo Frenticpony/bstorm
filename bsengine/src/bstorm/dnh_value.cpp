@@ -82,6 +82,19 @@ std::unique_ptr<DnhValue> DnhValue::Deserialize(std::istream& in)
             }
             return std::move(arr);
         }
+        case Type::UINT16_ARRAY:
+        {
+            uint32_t length;
+            in.read((char*)&length, sizeof(length));
+            auto arr = std::make_unique<DnhUInt16Array>((size_t)(length));
+            for (int i = 0; i < length; i++)
+            {
+                uint16_t x;
+                in.read((char*)&x, sizeof(x));
+                arr->PushBack(x);
+            }
+            return std::move(arr);
+        }
         default:
             return std::make_unique<DnhNil>();
     }
@@ -507,6 +520,107 @@ std::unique_ptr<DnhValue> DnhRealArray::Clone() const
 }
 
 void DnhRealArray::Reserve(size_t size)
+{
+    values_.reserve(size);
+}
+
+DnhUInt16Array::DnhUInt16Array() :
+    DnhValue(Type::UINT16_ARRAY)
+{
+}
+
+DnhUInt16Array::DnhUInt16Array(size_t reserveSize) :
+    DnhValue(Type::UINT16_ARRAY)
+{
+    Reserve(reserveSize);
+}
+
+DnhUInt16Array::DnhUInt16Array(const std::vector<uint16_t>& is) :
+    DnhValue(Type::UINT16_ARRAY)
+{
+    values_ = is;
+}
+
+DnhUInt16Array::DnhUInt16Array(std::vector<uint16_t>&& is) :
+    DnhValue(Type::UINT16_ARRAY)
+{
+    values_ = std::move(is);
+}
+
+size_t DnhUInt16Array::GetSize() const
+{
+    return values_.size();
+}
+
+void DnhUInt16Array::PushBack(uint16_t i)
+{
+    values_.push_back(i);
+}
+
+double DnhUInt16Array::ToNum() const
+{
+    return 0.0;
+}
+
+bool DnhUInt16Array::ToBool() const
+{
+    return GetSize() != 0;
+}
+
+std::wstring DnhUInt16Array::ToString() const
+{
+    // 空         => 空文字列
+    // それ以外   => [1, 2, 3]
+    size_t size = GetSize();
+    if (size == 0) return L"";
+    std::wstring result = L"[";
+    for (size_t i = 0; i < size; i++)
+    {
+        if (i != 0) result += L",";
+        result += std::to_wstring(values_[i]);
+    }
+    result += L"]";
+    return result;
+}
+
+uint16_t DnhUInt16Array::Index(int idx) const
+{
+    if (idx < 0 || idx >= GetSize())
+    {
+        return 0;
+    }
+    return values_[idx];
+}
+
+void DnhUInt16Array::Push(lua_State * L) const
+{
+    size_t size = GetSize();
+    lua_createtable(L, size, 0);
+    for (size_t i = 0; i < size; i++)
+    {
+        lua_pushnumber(L, (double)values_[i]);
+        lua_rawseti(L, -2, i + 1);
+    }
+}
+
+void DnhUInt16Array::Serialize(std::ostream & out) const
+{
+    uint32_t header = (uint32_t)GetType();
+    out.write((char*)&header, sizeof(header));
+    uint32_t length = GetSize();
+    out.write((char*)&length, sizeof(length));
+    for (auto i = 0; i < length; i++)
+    {
+        out.write((char*)&(values_[i]), sizeof(values_[i]));
+    }
+}
+
+std::unique_ptr<DnhValue> DnhUInt16Array::Clone() const
+{
+    return std::make_unique<DnhUInt16Array>(values_);
+}
+
+void DnhUInt16Array::Reserve(size_t size)
 {
     values_.reserve(size);
 }

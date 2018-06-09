@@ -3,6 +3,7 @@
 #include <bstorm/point2D.hpp>
 
 #include <string>
+#include <cstdint>
 #include <vector>
 #include <memory>
 #include <iostream>
@@ -20,6 +21,7 @@ public:
         BOOL = 2,
         ARRAY = 3,
         REAL_ARRAY = 0x77,
+        UINT16_ARRAY = 0x88,
         NIL = 0xaa
     };
     DnhValue(Type t) : type_(t) {}
@@ -146,4 +148,25 @@ private:
     std::vector<double> values_;
 };
 
+// DnhRealArrayのuint16_t版
+class DnhUInt16Array : public DnhValue
+{
+public:
+    DnhUInt16Array();
+    DnhUInt16Array(size_t reserveSize);
+    DnhUInt16Array(const std::vector<uint16_t>& rs);
+    DnhUInt16Array(std::vector<uint16_t>&& rs);
+    size_t GetSize() const;
+    void PushBack(uint16_t i);
+    double ToNum() const override;
+    bool ToBool() const override;
+    std::wstring ToString() const override;
+    uint16_t Index(int idx) const;
+    void Push(lua_State* L) const override;
+    void Serialize(std::ostream& out) const override;
+    std::unique_ptr<DnhValue> Clone() const override;
+    void Reserve(size_t size);
+private:
+    std::vector<uint16_t> values_;
+};
 }
