@@ -42,9 +42,9 @@ std::unique_ptr<DnhValue> DnhValue::Deserialize(std::istream& in)
     {
         case Type::REAL:
         {
-            double n;
-            in.read((char*)&n, sizeof(n));
-            return std::make_unique<DnhReal>(n);
+            double r;
+            in.read((char*)&r, sizeof(r));
+            return std::make_unique<DnhReal>(r);
         }
         case Type::CHAR:
         {
@@ -66,6 +66,19 @@ std::unique_ptr<DnhValue> DnhValue::Deserialize(std::istream& in)
             for (int i = 0; i < length; i++)
             {
                 arr->PushBack(DnhValue::Deserialize(in));
+            }
+            return std::move(arr);
+        }
+        case Type::REAL_ARRAY:
+        {
+            uint32_t length;
+            in.read((char*)&length, sizeof(length));
+            auto arr = std::make_unique<DnhRealArray>((size_t)(length));
+            for (int i = 0; i < length; i++)
+            {
+                double r;
+                in.read((char*)&r, sizeof(r));
+                arr->PushBack(r);
             }
             return std::move(arr);
         }
@@ -260,6 +273,16 @@ DnhArray::DnhArray(std::vector<std::unique_ptr<DnhValue>>&& a) :
 {
 }
 
+DnhArray::DnhArray(const std::vector<double>& rs) :
+    DnhValue(Type::ARRAY)
+{
+    Reserve(rs.size());
+    for (auto r : rs)
+    {
+        PushBack(std::make_unique<DnhReal>(r));
+    }
+}
+
 DnhArray::DnhArray(const std::wstring & s) :
     DnhValue(Type::ARRAY)
 {
@@ -267,16 +290,6 @@ DnhArray::DnhArray(const std::wstring & s) :
     for (wchar_t c : s)
     {
         PushBack(std::make_unique<DnhChar>(c));
-    }
-}
-
-DnhArray::DnhArray(const std::vector<double>& ns) :
-    DnhValue(Type::ARRAY)
-{
-    Reserve(ns.size());
-    for (double n : ns)
-    {
-        PushBack(std::make_unique<DnhReal>(n));
     }
 }
 
@@ -395,5 +408,106 @@ void DnhNil::Serialize(std::ostream & out) const
 std::unique_ptr<DnhValue> DnhNil::Clone() const
 {
     return std::make_unique<DnhNil>();
+}
+
+DnhRealArray::DnhRealArray() :
+    DnhValue(Type::REAL_ARRAY)
+{
+}
+
+DnhRealArray::DnhRealArray(size_t reserveSize) :
+    DnhValue(Type::REAL_ARRAY)
+{
+    Reserve(reserveSize);
+}
+
+DnhRealArray::DnhRealArray(const std::vector<double>& rs) :
+    DnhValue(Type::REAL_ARRAY)
+{
+    values_ = rs;
+}
+
+DnhRealArray::DnhRealArray(std::vector<double>&& rs) :
+    DnhValue(Type::REAL_ARRAY)
+{
+    values_ = std::move(rs);
+}
+
+size_t DnhRealArray::GetSize() const
+{
+    return values_.size();
+}
+
+void DnhRealArray::PushBack(double r)
+{
+    values_.push_back(r);
+}
+
+double DnhRealArray::ToNum() const
+{
+    return 0.0;
+}
+
+bool DnhRealArray::ToBool() const
+{
+    return GetSize() != 0;
+}
+
+std::wstring DnhRealArray::ToString() const
+{
+    // 空         => 空文字列
+    // それ以外   => [1, 2, 3]
+    size_t size = GetSize();
+    if (size == 0) return L"";
+    std::wstring result = L"[";
+    for (size_t i = 0; i < size; i++)
+    {
+        if (i != 0) result += L",";
+        result += std::to_wstring(values_[i]);
+    }
+    result += L"]";
+    return result;
+}
+
+double DnhRealArray::Index(int idx) const
+{
+    if (idx < 0 || idx >= GetSize())
+    {
+        return 0.0;
+    }
+    return values_[idx];
+}
+
+void DnhRealArray::Push(lua_State * L) const
+{
+    size_t size = GetSize();
+    lua_createtable(L, size, 0);
+    for (size_t i = 0; i < size; i++)
+    {
+        lua_pushnumber(L, values_[i]);
+        lua_rawseti(L, -2, i + 1);
+    }
+}
+
+void DnhRealArray::Serialize(std::ostream & out) const
+{
+    uint32_t header = (uint32_t)GetType();
+    out.write((char*)&header, sizeof(header));
+    uint32_t length = GetSize();
+    out.write((char*)&length, sizeof(length));
+    for (auto i = 0; i < length; i++)
+    {
+        out.write((char*)&(values_[i]), sizeof(values_[i]));
+    }
+}
+
+std::unique_ptr<DnhValue> DnhRealArray::Clone() const
+{
+    return std::make_unique<DnhRealArray>(values_);
+}
+
+void DnhRealArray::Reserve(size_t size)
+{
+    values_.reserve(size);
 }
 }

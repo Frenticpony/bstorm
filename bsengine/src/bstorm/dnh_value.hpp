@@ -10,8 +10,6 @@
 
 namespace bstorm
 {
-
-
 class DnhValue
 {
 public:
@@ -21,6 +19,7 @@ public:
         CHAR = 1,
         BOOL = 2,
         ARRAY = 3,
+        REAL_ARRAY = 0x77,
         NIL = 0xaa
     };
     DnhValue(Type t) : type_(t) {}
@@ -93,8 +92,8 @@ public:
     DnhArray();
     DnhArray(size_t reserveSize);
     DnhArray(std::vector<std::unique_ptr<DnhValue>>&& a);
+    DnhArray(const std::vector<double>& rs);
     DnhArray(const std::wstring& s);
-    DnhArray(const std::vector<double>& ns);
     DnhArray(const Point2D& p);
     DnhArray(const std::vector<Point2D>& ps);
     size_t GetSize() const;
@@ -122,4 +121,29 @@ public:
     void Serialize(std::ostream& out) const override;
     std::unique_ptr<DnhValue> Clone() const override;
 };
+
+// DnhRealArray: 要素が全てrealの配列
+// シリアライズ時にDnhArrayに比べてメモリ消費量が少ない（要素がrealと分かっているので要素のヘッダを作る必要がない
+// 弾幕風にはないフォーマットなので互換を保ちたい部分ではシリアライズしてはいけない(Luaスタックに持っていく分には問題ない)
+class DnhRealArray : public DnhValue
+{
+public:
+    DnhRealArray();
+    DnhRealArray(size_t reserveSize);
+    DnhRealArray(const std::vector<double>& rs);
+    DnhRealArray(std::vector<double>&& rs);
+    size_t GetSize() const;
+    void PushBack(double r);
+    double ToNum() const override;
+    bool ToBool() const override;
+    std::wstring ToString() const override;
+    double Index(int idx) const;
+    void Push(lua_State* L) const override;
+    void Serialize(std::ostream& out) const override;
+    std::unique_ptr<DnhValue> Clone() const override;
+    void Reserve(size_t size);
+private:
+    std::vector<double> values_;
+};
+
 }

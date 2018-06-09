@@ -1266,7 +1266,7 @@ static int GetPlayerClip(lua_State* L)
     clipRect.push_back(!player ? 0 : player->GetClipTop());
     clipRect.push_back(!player ? 0 : player->GetClipRight());
     clipRect.push_back(!player ? 0 : player->GetClipBottom());
-    DnhArray(clipRect).Push(L);
+    DnhRealArray(clipRect).Push(L);
     return 1;
 }
 
@@ -1449,10 +1449,10 @@ static int GetEnemyBossObjectID(lua_State* L)
     Package* package = GetPackage(L);
     if (auto boss = package->GetEnemyBossObject())
     {
-        DnhArray(std::vector<double>{(double)boss->GetID()}).Push(L);
+        DnhRealArray(std::vector<double>{(double)boss->GetID()}).Push(L);
     } else
     {
-        DnhArray().Push(L);
+        DnhRealArray().Push(L);
     }
     return 1;
 }
@@ -2021,10 +2021,10 @@ static int GetShotDataInfoA1(lua_State* L)
         switch (infoType)
         {
             case INFO_RECT:
-                DnhArray(std::vector<double>{(double)shotData->rect.left, (double)shotData->rect.top, (double)shotData->rect.left, (double)shotData->rect.bottom}).Push(L);
+                DnhRealArray(std::vector<double>{(double)shotData->rect.left, (double)shotData->rect.top, (double)shotData->rect.left, (double)shotData->rect.bottom}).Push(L);
                 break;
             case INFO_DELAY_COLOR:
-                DnhArray(std::vector<double>{(double)shotData->delayColor.GetR(), (double)shotData->delayColor.GetG(), (double)shotData->delayColor.GetB()}).Push(L);
+                DnhRealArray(std::vector<double>{(double)shotData->delayColor.GetR(), (double)shotData->delayColor.GetG(), (double)shotData->delayColor.GetB()}).Push(L);
                 break;
             case INFO_BLEND:
                 lua_pushnumber(L, shotData->render);

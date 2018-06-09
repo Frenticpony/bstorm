@@ -20,14 +20,14 @@ ReplayData::ReplayData()
 {
     // リプレイ情報の初期値を設定
     data_.CreateCommonDataArea(ReplayInfoAreaName);
-    data_.SetAreaCommonData(ReplayInfoAreaName, FilePathInfoKey, std::make_unique<DnhArray>());
-    data_.SetAreaCommonData(ReplayInfoAreaName, DateTimeInfoKey, std::make_unique<DnhArray>());
-    data_.SetAreaCommonData(ReplayInfoAreaName, UserNameInfoKey, std::make_unique<DnhArray>());
+    data_.SetAreaCommonData(ReplayInfoAreaName, FilePathInfoKey, std::make_unique<DnhArray>(L""));
+    data_.SetAreaCommonData(ReplayInfoAreaName, DateTimeInfoKey, std::make_unique<DnhArray>(L""));
+    data_.SetAreaCommonData(ReplayInfoAreaName, UserNameInfoKey, std::make_unique<DnhArray>(L""));
     data_.SetAreaCommonData(ReplayInfoAreaName, TotalScoreInfoKey, std::make_unique<DnhReal>(0.0));
     data_.SetAreaCommonData(ReplayInfoAreaName, FpsAverageInfoKey, std::make_unique<DnhReal>(0.0));
-    data_.SetAreaCommonData(ReplayInfoAreaName, PlayerNameInfoKey, std::make_unique<DnhArray>());
+    data_.SetAreaCommonData(ReplayInfoAreaName, PlayerNameInfoKey, std::make_unique<DnhArray>(L""));
     data_.SetAreaCommonData(ReplayInfoAreaName, StageIndexListInfoKey, std::make_unique<DnhArray>());
-    data_.SetAreaCommonData(ReplayInfoAreaName, CommentInfoKey, std::make_unique<DnhArray>());
+    data_.SetAreaCommonData(ReplayInfoAreaName, CommentInfoKey, std::make_unique<DnhArray>(L""));
 }
 
 void ReplayData::Load(const std::wstring & filePath) noexcept(false)
@@ -99,9 +99,9 @@ float ReplayData::GetFps(StageIndex stageIdx, int stageElapsedFrame) const
 {
     const auto stageInfoAreaName = StageInfoAreaName(stageIdx);
     const auto& fpsList = data_.GetAreaCommonData(stageInfoAreaName, StageFpsListInfoKey, DnhValue::Nil());
-    if (auto fpsListArr = dynamic_cast<DnhArray*>(fpsList.get()))
+    if (auto fpsListArr = dynamic_cast<DnhRealArray*>(fpsList.get()))
     {
-        return (float)fpsListArr->Index(stageElapsedFrame)->ToNum();
+        return (float)fpsListArr->Index(stageElapsedFrame);
     }
     return 0.0f;
 }
@@ -137,7 +137,7 @@ void ReplayData::Save(const std::wstring & filePath, const std::wstring & userNa
 
     // 各種リプレイ情報保存
     data_.SetAreaCommonData(ReplayInfoAreaName, FilePathInfoKey, std::make_unique<DnhArray>(uniqPath));
-    data_.SetAreaCommonData(ReplayInfoAreaName, DateTimeInfoKey, std::make_unique<DnhArray>());
+    data_.SetAreaCommonData(ReplayInfoAreaName, DateTimeInfoKey, std::make_unique<DnhArray>(L"")); // TODO: 日付を設定
     data_.SetAreaCommonData(ReplayInfoAreaName, UserNameInfoKey, std::make_unique<DnhArray>(userName));
     data_.SetAreaCommonData(ReplayInfoAreaName, TotalScoreInfoKey, std::make_unique<DnhReal>((double)totalScore));
     {
@@ -152,7 +152,7 @@ void ReplayData::Save(const std::wstring & filePath, const std::wstring & userNa
                 {
                     StageIndex stageIdx = indexListArr->Index(i)->ToInt();
                     const auto stageInfoAreaName = StageInfoAreaName(stageIdx);
-                    if (const auto fpsListArr = dynamic_cast<DnhArray*>(data_.GetAreaCommonData(stageInfoAreaName, StageFpsListInfoKey, DnhValue::Nil()).get()))
+                    if (const auto fpsListArr = dynamic_cast<DnhRealArray*>(data_.GetAreaCommonData(stageInfoAreaName, StageFpsListInfoKey, DnhValue::Nil()).get()))
                     {
                         fpsSum += data_.GetAreaCommonData(stageInfoAreaName, StageFpsSumInfoKey, DnhValue::Nil())->ToNum();
                         fpsCnt += fpsListArr->GetSize();
@@ -232,7 +232,7 @@ void ReplayData::StartRecordingStageInfo(StageIndex stageIdx, PlayerScore stageS
     // その他初期値を設定
     data_.SetAreaCommonData(stageInfoAreaName, StageLastScoreInfoKey, std::make_unique<DnhReal>(0.0));
     data_.SetAreaCommonData(stageInfoAreaName, StageFpsSumInfoKey, std::make_unique<DnhReal>(0.0));
-    data_.SetAreaCommonData(stageInfoAreaName, StageFpsListInfoKey, std::make_unique<DnhArray>());
+    data_.SetAreaCommonData(stageInfoAreaName, StageFpsListInfoKey, std::make_unique<DnhRealArray>());
     data_.SetAreaCommonData(stageInfoAreaName, StageVirtualKeyStateListInfoKey, std::make_unique<DnhArray>());
     data_.SetAreaCommonData(stageInfoAreaName, StageEndTimeInfoKey, std::make_unique<DnhReal>(0.0));
     data_.SetAreaCommonData(stageInfoAreaName, StagePauseCountInfoKey, std::make_unique<DnhReal>(0.0));
@@ -276,9 +276,9 @@ void ReplayData::RecordFrameStageInfo(StageIndex stageIdx, float fps, const std:
     // FPSを記録
     {
         const auto& fpsList = data_.GetAreaCommonData(stageInfoAreaName, StageFpsListInfoKey, DnhValue::Nil());
-        if (auto fpsListArr = dynamic_cast<DnhArray*>(fpsList.get()))
+        if (auto fpsListArr = dynamic_cast<DnhRealArray*>(fpsList.get()))
         {
-            fpsListArr->PushBack(std::make_unique<DnhReal>((double)fps));
+            fpsListArr->PushBack((double)fps);
         }
     }
 

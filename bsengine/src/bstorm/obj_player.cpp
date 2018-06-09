@@ -63,9 +63,9 @@ void ObjPlayer::Update()
                 if (auto playerScript = package->GetPlayerScript())
                 {
                     // Notify EV_GRAZE
-                    auto grazeInfo = std::make_unique<DnhArray>();
+                    auto grazeInfo = std::make_unique<DnhArray>(3);
                     grazeInfo->PushBack(std::make_unique<DnhReal>((double)currentFrameGrazeCnt_));
-                    grazeInfo->PushBack(std::make_unique<DnhArray>(currentFrameGrazeObjIds_));
+                    grazeInfo->PushBack(std::make_unique<DnhRealArray>(currentFrameGrazeObjIds_));
                     grazeInfo->PushBack(std::make_unique<DnhArray>(currentFrameGrazeShotPoints_));
                     playerScript->NotifyEvent(EV_GRAZE, grazeInfo);
                 }
