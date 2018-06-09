@@ -127,32 +127,36 @@ void TextureCache::BackDoor<ResourceMonitor>()
     const float sideBarWidth = ImGui::GetContentRegionAvailWidth() * 0.2;
     ImGui::BeginChild("ResourceTextureTabSideBar", ImVec2(sideBarWidth, -1), true, ImGuiWindowFlags_HorizontalScrollbar);
     {
-        std::lock_guard<std::recursive_mutex> lock(memberAccessSection_);
         for (const auto& entry : textureMap_)
         {
             std::wstring path = entry.first;
             auto pathU8 = ToUTF8(path);
-            ImGui::PushID(pathU8.c_str());
-            auto& texture = entry.second;
-            ImGui::BeginGroup();
-            if (ImGui::Button(ICON_FA_REFRESH))
+            try
             {
-                Reload(path, texture->IsReserved(), nullptr);
-            }
-            ImGui::SameLine();
-            float iconWidth = std::min(sideBarWidth * 0.4f, 1.0f * texture->GetWidth());
-            float iconHeight = std::max(iconWidth / texture->GetWidth() * texture->GetHeight(), ImGui::GetTextLineHeight());
-            if (ImGui::ImageButton(texture->GetTexture(), ImVec2(iconWidth, iconHeight), ImVec2(0, 0), ImVec2(1, 1), 0, ImVec4(0, 0, 0, 1)))
+                ImGui::PushID(pathU8.c_str());
+                auto& texture = entry.second.get();
+                ImGui::BeginGroup();
+                if (ImGui::Button(ICON_FA_REFRESH))
+                {
+                    Reload(path, texture->IsReserved(), nullptr);
+                }
+                ImGui::SameLine();
+                float iconWidth = std::min(sideBarWidth * 0.4f, 1.0f * texture->GetWidth());
+                float iconHeight = std::max(iconWidth / texture->GetWidth() * texture->GetHeight(), ImGui::GetTextLineHeight());
+                if (ImGui::ImageButton(texture->GetTexture(), ImVec2(iconWidth, iconHeight), ImVec2(0, 0), ImVec2(1, 1), 0, ImVec4(0, 0, 0, 1)))
+                {
+                    selectedTexturePath = path;
+                }
+                ImGui::SameLine();
+                if (ImGui::Selectable(pathU8.c_str(), selectedTexturePath == path))
+                {
+                    selectedTexturePath = path;
+                }
+                ImGui::EndGroup();
+                ImGui::PopID();
+            } catch (...)
             {
-                selectedTexturePath = path;
             }
-            ImGui::SameLine();
-            if (ImGui::Selectable(pathU8.c_str(), selectedTexturePath == path))
-            {
-                selectedTexturePath = path;
-            }
-            ImGui::EndGroup();
-            ImGui::PopID();
         }
         ImGui::EndChild();
         ImGui::SameLine();
@@ -161,7 +165,11 @@ void TextureCache::BackDoor<ResourceMonitor>()
         auto it = textureMap_.find(selectedTexturePath);
         if (it != textureMap_.end())
         {
-            drawTextureInfo(it->second, std::vector<Rect<int>>());
+            try
+            {
+                auto& texture = it->second.get();
+                drawTextureInfo(texture, std::vector<Rect<int>>());
+            } catch (...) {}
         }
     }
     ImGui::EndChild();
