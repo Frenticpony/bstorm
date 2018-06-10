@@ -6,6 +6,8 @@
 #include <windows.h>
 #include <algorithm>
 #include <unordered_set>
+#include <future>
+#include <chrono>
 #include <d3dx9.h>
 
 namespace bstorm
@@ -130,4 +132,10 @@ std::wstring GetCanonicalPath(const std::wstring& path);
 std::wstring ConcatPath(const std::wstring& a, const std::wstring& b);
 std::wstring GetParentPath(const std::wstring& path);
 std::wstring ExpandIncludePath(const std::wstring& includerPath, const std::wstring& includeePath);
+
+template <typename T>
+bool is_shared_future_ready(const std::shared_future<T>& f)
+{
+    return f.wait_for(std::chrono::seconds(0)) == future_status::ready;
+}
 }
