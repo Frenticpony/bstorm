@@ -7,6 +7,7 @@
 #include <bstorm/log_error.hpp>
 
 #include <fstream>
+#include <ctime>
 
 namespace
 {
@@ -143,7 +144,14 @@ void ReplayData::Save(const std::wstring & filePath, const std::wstring & userNa
 
     // 各種リプレイ情報保存
     data_.SetAreaCommonData(ReplayInfoAreaName, FilePathInfoKey, std::make_unique<DnhArray>(uniqPath));
-    data_.SetAreaCommonData(ReplayInfoAreaName, DateTimeInfoKey, std::make_unique<DnhArray>(L"")); // TODO: 日付を設定
+    {
+        // 保存日時を設定
+        time_t now = std::time(nullptr);
+        struct tm* local = std::localtime(&now);
+        std::string buf(16, '\0');
+        sprintf(&buf[0], "%04d/%02d/%02d %02d:%02d", local->tm_year + 1900, local->tm_mon + 1, local->tm_mday, local->tm_hour, local->tm_min);
+        data_.SetAreaCommonData(ReplayInfoAreaName, DateTimeInfoKey, std::make_unique<DnhArray>(ToUnicode(buf)));
+    }
     data_.SetAreaCommonData(ReplayInfoAreaName, UserNameInfoKey, std::make_unique<DnhArray>(userName));
     data_.SetAreaCommonData(ReplayInfoAreaName, TotalScoreInfoKey, std::make_unique<DnhReal>((double)totalScore));
     {
