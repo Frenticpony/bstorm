@@ -146,7 +146,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
                 engine.UpdateFpsCounter();
                 engine.SwitchRenderTargetToBackBuffer();
                 d3DDevice_->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(114, 144, 154), 1.0f, 0);
-                if (package->IsFinished()) break;
+                if (package->IsClosed()) break;
                 package->TickFrame();
                 package->Render();
                 d3DDevice_->EndScene();
@@ -169,6 +169,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
                 }
             }
         }
+        package->Finalize();
     } catch (Log& log)
     {
         Logger::WriteLog(log);

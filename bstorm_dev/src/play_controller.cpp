@@ -22,9 +22,10 @@ PlayController::PlayController(const std::shared_ptr<Engine>& engine) :
 
 void PlayController::Tick()
 {
-    if (!package_) return;
-    if (package_->IsFinished())
+    if (HasPackage()) return;
+    if (package_->IsClosed())
     {
+        package_->Finalize();
         package_ = nullptr;
         return;
     }
@@ -32,7 +33,12 @@ void PlayController::Tick()
     {
         for (int i = 0; i < playSpeed_; i++)
         {
-            if (package_->IsFinished()) break;
+            if (package_->IsClosed())
+            {
+                package_->Finalize();
+                package_ = nullptr;
+                break;
+            }
             package_->TickFrame();
         }
     } catch (Log& log)
@@ -44,11 +50,11 @@ void PlayController::Tick()
 
 void PlayController::Pause(bool doPause)
 {
-    if (isPaused_ == true && doPause == false && IsPackageFinished())
+    if (isPaused_ == true && doPause == false && HasPackage())
     {
         // パッケージ再生開始
         Reload();
-        if (!IsPackageFinished())
+        if (!HasPackage())
         {
             isPaused_ = false;
         }
@@ -61,6 +67,10 @@ void PlayController::Pause(bool doPause)
 void PlayController::Stop()
 {
     Pause(true);
+    if (package_)
+    {
+        package_->Finalize();
+    }
     package_ = nullptr;
 }
 
@@ -125,7 +135,7 @@ void PlayController::SetScript(const ScriptInfo & mainScript, const ScriptInfo &
 
 int PlayController::GetElapsedFrame() const
 {
-    if (IsPackageFinished()) return 0;
+    if (HasPackage()) return 0;
     return package_->GetElapsedFrame();
 }
 
@@ -135,9 +145,9 @@ void PlayController::SetScreenSize(int width, int height)
     screenHeight_ = height;
 }
 
-bool PlayController::IsPackageFinished() const
+bool PlayController::HasPackage() const
 {
-    return !package_ || package_->IsFinished();
+    return !package_;
 }
 
 bool PlayController::IsRenderIntersectionEnabled() const

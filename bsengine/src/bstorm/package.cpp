@@ -92,7 +92,7 @@ Package::Package(HWND hWnd,
     camera2D_(std::make_shared<Camera2D>()),
     camera3D_(std::make_shared<Camera3D>()),
     commonDataDB_(std::make_shared<CommonDataDB>()),
-    scriptManager_(std::make_shared<ScriptManager>(this)),
+    scriptManager_(std::make_shared<ScriptManager>()),
     playerShotDataTable_(std::make_shared<ShotDataTable>(ShotDataTable::Type::PLAYER, textureCache_, fileLoader_)),
     enemyShotDataTable_(std::make_shared<ShotDataTable>(ShotDataTable::Type::ENEMY, textureCache_, fileLoader_)),
     itemDataTable_(std::make_shared<ItemDataTable>(textureCache_, fileLoader_)),
@@ -119,7 +119,6 @@ Package::Package(HWND hWnd,
     fontCache_(std::make_shared<FontCache>(hWnd, graphicDevice_->GetDevice())),
     packageStartTime_(std::make_shared<TimePoint>())
 {
-    Logger::SetEnable(false);
     Reset2DCamera();
     ResetCamera();
     CreateRenderTarget(GetTransitionRenderTargetName(), GetScreenWidth(), GetScreenHeight(), nullptr);
@@ -128,7 +127,6 @@ Package::Package(HWND hWnd,
     CreateRenderTarget(GetReservedRenderTargetName(2), 1024, 512, nullptr);
     renderer_->SetForbidCameraViewProjMatrix2D(GetScreenWidth(), GetScreenHeight());
     renderer_->SetFogEnable(false);
-    Logger::SetEnable(true);
 
     for (const auto& keyMap : keyConfig->keyMaps)
     {
@@ -138,26 +136,17 @@ Package::Package(HWND hWnd,
 
 Package::~Package()
 {
-    scriptManager_->FinalizeAll();
-    Logger::WriteLog(Log::Level::LV_INFO, "close package.");
+    Logger::WriteLog(std::move(
+        Log(Log::Level::LV_INFO)
+        .SetMessage("close package.")
+        .SetParam(Log::Param(Log::Param::Tag::SCRIPT, GetMainScriptPath()))));
 }
 
 void Package::TickFrame()
 {
-    if (IsFinished())
+    if (IsClosed())
     {
-        Logger::WriteLog(Log::Level::LV_WARN, "package is not setted, please select package.");
         return;
-    }
-
-    if (auto packageMain = packageMainScript_.lock())
-    {
-        if (packageMain->IsClosed())
-        {
-            Logger::WriteLog(Log::Level::LV_INFO, "finish package.");
-            packageMainScript_.reset();
-            return;
-        }
     }
 
     if (GetElapsedFrame() % (60 / std::min(pseudoEnemyFps_, pseudoPlayerFps_)) == 0)
@@ -192,7 +181,7 @@ void Package::TickFrame()
                 pseudoPlayerFps_ = pseudoEnemyFps_ = 60;
             }
         }
-        scriptManager_->CleanClosedScript();
+        scriptManager_->RunFinalizeOnClosedScript();
 
         if (!IsStagePaused())
         {
@@ -204,7 +193,7 @@ void Package::TickFrame()
 
         inputDevice_->UpdateInputState();
 
-        scriptManager_->RunAll(IsStagePaused());
+        scriptManager_->RunMainLoopAll(IsStagePaused());
 
         objTable_->UpdateAll(IsStagePaused());
 
@@ -376,6 +365,11 @@ std::wstring Package::GetMainStgScriptDirectory() const
 std::wstring Package::GetMainPackageScriptPath() const
 {
     return packageMainScriptInfo_.path;
+}
+
+std::wstring Package::GetMainScriptPath() const
+{
+    return GetMainPackageScriptPath() == DEFAULT_PACKAGE_PATH ? GetMainStgScriptPath() : GetMainPackageScriptPath();
 }
 
 std::shared_ptr<Texture> Package::LoadTexture(const std::wstring & path, bool reserve, const std::shared_ptr<SourcePos>& srcPos)
@@ -1034,12 +1028,11 @@ bool Package::LoadCommonDataAreaA2(const std::wstring & areaName, const std::wst
 
 std::wstring Package::GetDefaultCommonDataSavePath(const std::wstring & areaName) const
 {
-    std::wstring basePath = GetMainPackageScriptPath() == DEFAULT_PACKAGE_PATH ? GetMainStgScriptPath() : GetMainPackageScriptPath();
+    std::wstring basePath = GetMainScriptPath();
     if (basePath.empty())
     {
         basePath = GetMainPackageScriptPath();
     }
-    if (basePath.empty()) return L"";
     return GetParentPath(basePath) + L"/data/" + GetStem(basePath) + L"_common_" + areaName + L".dat";
 }
 
@@ -1379,14 +1372,14 @@ NullableSharedPtr<Script> Package::GetScript(int scriptId) const
 
 std::shared_ptr<Script> Package::LoadScript(const std::wstring & path, const std::wstring & type, const std::wstring & version, const std::shared_ptr<SourcePos>& srcPos)
 {
-    auto script = scriptManager_->Compile(path, type, version, srcPos);
+    auto script = scriptManager_->Compile(path, type, version, shared_from_this(), srcPos);
     script->Load();
     return script;
 }
 
 std::shared_ptr<Script> Package::LoadScriptInThread(const std::wstring & path, const std::wstring & type, const std::wstring & version, const std::shared_ptr<SourcePos>& srcPos)
 {
-    auto script = scriptManager_->CompileInThread(path, type, version, srcPos);
+    auto script = scriptManager_->CompileInThread(path, type, version, shared_from_this(), srcPos);
     return script;
 }
 
@@ -1752,7 +1745,6 @@ void Package::StartShotScript(const std::wstring & path, const std::shared_ptr<S
     }
     auto shotScript = LoadScript(path, SCRIPT_TYPE_SHOT_CUSTOM, stageMainScriptInfo_.version, srcPos);
     shotScript = shotScript;
-    shotScript->Start();
     shotScript->RunInitialize();
 }
 
@@ -1945,7 +1937,6 @@ void Package::StartItemScript(const std::wstring & path, const std::shared_ptr<S
     }
     auto itemScript = LoadScript(path, SCRIPT_TYPE_ITEM_CUSTOM, stageMainScriptInfo_.version, srcPos);
     itemScript = itemScript;
-    itemScript->Start();
     itemScript->RunInitialize();
 }
 
@@ -1954,11 +1945,11 @@ NullableSharedPtr<Script> Package::GetItemScript() const
     return itemScript_.lock();
 }
 
-bool Package::IsFinished() const
+bool Package::IsClosed() const
 {
-    if (packageMainScript_.lock())
+    if (auto packageMainScript = packageMainScript_.lock())
     {
-        return false;
+        return packageMainScript->IsClosed();
     }
     return true;
 }
@@ -1968,7 +1959,13 @@ void Package::Close()
     if (auto packageMain = packageMainScript_.lock())
     {
         packageMain->Close();
+        packageMainScript_.reset();
     }
+}
+
+void Package::Finalize()
+{
+    scriptManager_->RunFinalizeAll();
 }
 
 void Package::InitializeStageScene()
@@ -2009,10 +2006,12 @@ void Package::FinalizeStageScene()
 void Package::Start()
 {
     packageStartTime_ = std::make_shared<TimePoint>();
-    Logger::WriteLog(Log::Level::LV_INFO, "start package.");
-    auto script = scriptManager_->Compile(packageMainScriptInfo_.path, SCRIPT_TYPE_PACKAGE, packageMainScriptInfo_.version, nullptr);
+    Logger::WriteLog(std::move(
+        Log(Log::Level::LV_INFO)
+        .SetMessage("start package.")
+        .SetParam(Log::Param(Log::Param::Tag::SCRIPT, GetMainScriptPath()))));
+    auto script = scriptManager_->Compile(packageMainScriptInfo_.path, SCRIPT_TYPE_PACKAGE, packageMainScriptInfo_.version, shared_from_this(), nullptr);
     packageMainScript_ = script;
-    script->Start();
     script->RunInitialize();
 }
 
@@ -2190,8 +2189,7 @@ void Package::StartStageScene(const std::shared_ptr<SourcePos>& srcPos)
     }
 
     // #System
-    auto systemScript = scriptManager_->Compile(stageMainScriptInfo_.systemPath, SCRIPT_TYPE_STAGE, stageMainScriptInfo_.version, srcPos);
-    systemScript->Start();
+    auto systemScript = scriptManager_->Compile(stageMainScriptInfo_.systemPath, SCRIPT_TYPE_STAGE, stageMainScriptInfo_.version, shared_from_this(), srcPos);
     systemScript->RunInitialize();
 
     // Create Player
@@ -2204,9 +2202,8 @@ void Package::StartStageScene(const std::shared_ptr<SourcePos>& srcPos)
         .SetMessage("create player object.")
         .AddSourcePos(srcPos)));
 
-    auto playerScript = scriptManager_->Compile(stagePlayerScriptInfo_.path, SCRIPT_TYPE_PLAYER, stagePlayerScriptInfo_.version, srcPos);
+    auto playerScript = scriptManager_->Compile(stagePlayerScriptInfo_.path, SCRIPT_TYPE_PLAYER, stagePlayerScriptInfo_.version, shared_from_this(), srcPos);
     stagePlayerScript_ = playerScript;
-    playerScript->Start();
     playerScript->RunInitialize();
 
     // Main
@@ -2218,17 +2215,15 @@ void Package::StartStageScene(const std::shared_ptr<SourcePos>& srcPos)
     {
         stageMainScriptPath = SYSTEM_PLURAL_STAGE_PATH;
     }
-    auto stageMainScript = scriptManager_->Compile(stageMainScriptPath, SCRIPT_TYPE_STAGE, stageMainScriptInfo_.version, srcPos);
+    auto stageMainScript = scriptManager_->Compile(stageMainScriptPath, SCRIPT_TYPE_STAGE, stageMainScriptInfo_.version, shared_from_this(), srcPos);
     stageMainScript_ = stageMainScript;
-    stageMainScript->Start();
     stageMainScript->RunInitialize();
     stageStartTime_ = std::make_shared<TimePoint>();
 
     // #Background
     if (!stageMainScriptInfo_.backgroundPath.empty() && stageMainScriptInfo_.backgroundPath != L"DEFAULT")
     {
-        auto backgroundScript = scriptManager_->Compile(stageMainScriptInfo_.backgroundPath, SCRIPT_TYPE_STAGE, stageMainScriptInfo_.version, srcPos);
-        backgroundScript->Start();
+        auto backgroundScript = scriptManager_->Compile(stageMainScriptInfo_.backgroundPath, SCRIPT_TYPE_STAGE, stageMainScriptInfo_.version, shared_from_this(), srcPos);
         backgroundScript->RunInitialize();
     }
 

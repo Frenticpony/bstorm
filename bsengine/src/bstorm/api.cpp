@@ -3,6 +3,7 @@
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/const.hpp>
 #include <bstorm/util.hpp>
+#include <bstorm/node.hpp>
 #include <bstorm/texture.hpp>
 #include <bstorm/font.hpp>
 #include <bstorm/render_target.hpp>

@@ -142,6 +142,8 @@ public:
     std::wstring GetMainStgScriptPath() const;
     std::wstring Package::GetMainStgScriptDirectory() const;
     std::wstring GetMainPackageScriptPath() const;
+    // スクリプトタイプがPackageの場合はMainPackageScript、それ以外の場合はMainStgScript
+    std::wstring GetMainScriptPath() const;
 
     /* texture */
     std::shared_ptr<Texture> LoadTexture(const std::wstring& path, bool reserve, const std::shared_ptr<SourcePos>& srcPos);
@@ -437,8 +439,9 @@ public:
     NullableSharedPtr<Script> GetItemScript() const;
 
     /* package */
-    bool IsFinished() const;
+    bool IsClosed() const;
     void Close();
+    void Finalize(); // エラー時は呼ばない
     void InitializeStageScene();
     void FinalizeStageScene();
     void StartStageScene(const std::shared_ptr<SourcePos>& srcPos);

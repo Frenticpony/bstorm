@@ -113,7 +113,7 @@ void GameView::draw()
                 {
                     const ScriptInfo& mainScriptInfo = playController->GetMainScriptInfo();
                     auto scriptName = mainScriptInfo.title.empty() ? ToUTF8(mainScriptInfo.path) : ToUTF8(mainScriptInfo.title);
-                    if (playController->IsPackageFinished())
+                    if (playController->HasPackage())
                     {
                         if (scriptName.empty())
                         {

@@ -24,7 +24,7 @@ public:
     void SetScript(const ScriptInfo& mainScript, const ScriptInfo& playerScript);
     int GetElapsedFrame() const;
     void SetScreenSize(int width, int height);
-    bool IsPackageFinished() const;
+    bool HasPackage() const;
     bool IsRenderIntersectionEnabled() const;
     void SetRenderIntersectionEnable(bool enable);
     bool IsPlayerInvincibleEnabled() const;
