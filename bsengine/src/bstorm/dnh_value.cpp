@@ -95,6 +95,19 @@ std::unique_ptr<DnhValue> DnhValue::Deserialize(std::istream& in)
             }
             return std::move(arr);
         }
+        case Type::INT64_ARRAY:
+        {
+            uint32_t length;
+            in.read((char*)&length, sizeof(length));
+            auto arr = std::make_unique<DnhInt64Array>((size_t)(length));
+            for (int i = 0; i < length; i++)
+            {
+                int64_t x;
+                in.read((char*)&x, sizeof(x));
+                arr->PushBack(x);
+            }
+            return std::move(arr);
+        }
         default:
             return std::make_unique<DnhNil>();
     }
@@ -621,6 +634,107 @@ std::unique_ptr<DnhValue> DnhUInt16Array::Clone() const
 }
 
 void DnhUInt16Array::Reserve(size_t size)
+{
+    values_.reserve(size);
+}
+
+DnhInt64Array::DnhInt64Array() :
+    DnhValue(Type::INT64_ARRAY)
+{
+}
+
+DnhInt64Array::DnhInt64Array(size_t reserveSize) :
+    DnhValue(Type::INT64_ARRAY)
+{
+    Reserve(reserveSize);
+}
+
+DnhInt64Array::DnhInt64Array(const std::vector<int64_t>& is) :
+    DnhValue(Type::INT64_ARRAY)
+{
+    values_ = is;
+}
+
+DnhInt64Array::DnhInt64Array(std::vector<int64_t>&& is) :
+    DnhValue(Type::INT64_ARRAY)
+{
+    values_ = std::move(is);
+}
+
+size_t DnhInt64Array::GetSize() const
+{
+    return values_.size();
+}
+
+void DnhInt64Array::PushBack(int64_t i)
+{
+    values_.push_back(i);
+}
+
+double DnhInt64Array::ToNum() const
+{
+    return 0.0;
+}
+
+bool DnhInt64Array::ToBool() const
+{
+    return GetSize() != 0;
+}
+
+std::wstring DnhInt64Array::ToString() const
+{
+    // 空         => 空文字列
+    // それ以外   => [1, 2, 3]
+    size_t size = GetSize();
+    if (size == 0) return L"";
+    std::wstring result = L"[";
+    for (size_t i = 0; i < size; i++)
+    {
+        if (i != 0) result += L",";
+        result += std::to_wstring(values_[i]);
+    }
+    result += L"]";
+    return result;
+}
+
+int64_t DnhInt64Array::Index(int idx) const
+{
+    if (idx < 0 || idx >= GetSize())
+    {
+        return 0;
+    }
+    return values_[idx];
+}
+
+void DnhInt64Array::Push(lua_State * L) const
+{
+    size_t size = GetSize();
+    lua_createtable(L, size, 0);
+    for (size_t i = 0; i < size; i++)
+    {
+        lua_pushnumber(L, (double)values_[i]);
+        lua_rawseti(L, -2, i + 1);
+    }
+}
+
+void DnhInt64Array::Serialize(std::ostream & out) const
+{
+    uint32_t header = (uint32_t)GetType();
+    out.write((char*)&header, sizeof(header));
+    uint32_t length = GetSize();
+    out.write((char*)&length, sizeof(length));
+    for (auto i = 0; i < length; i++)
+    {
+        out.write((char*)&(values_[i]), sizeof(values_[i]));
+    }
+}
+
+std::unique_ptr<DnhValue> DnhInt64Array::Clone() const
+{
+    return std::make_unique<DnhInt64Array>(values_);
+}
+
+void DnhInt64Array::Reserve(size_t size)
 {
     values_.reserve(size);
 }

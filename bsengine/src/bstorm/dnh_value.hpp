@@ -22,6 +22,7 @@ public:
         ARRAY = 3,
         REAL_ARRAY = 0x77,
         UINT16_ARRAY = 0x88,
+        INT64_ARRAY = 0x99,
         NIL = 0xaa
     };
     DnhValue(Type t) : type_(t) {}
@@ -144,6 +145,7 @@ public:
     void Serialize(std::ostream& out) const override;
     std::unique_ptr<DnhValue> Clone() const override;
     void Reserve(size_t size);
+    std::vector<double>& GetValues() { return values_; }
 private:
     std::vector<double> values_;
 };
@@ -166,7 +168,30 @@ public:
     void Serialize(std::ostream& out) const override;
     std::unique_ptr<DnhValue> Clone() const override;
     void Reserve(size_t size);
+    std::vector<uint16_t>& GetValues() { return values_; }
 private:
     std::vector<uint16_t> values_;
+};
+
+class DnhInt64Array : public DnhValue
+{
+public:
+    DnhInt64Array();
+    DnhInt64Array(size_t reserveSize);
+    DnhInt64Array(const std::vector<int64_t>& rs);
+    DnhInt64Array(std::vector<int64_t>&& rs);
+    size_t GetSize() const;
+    void PushBack(int64_t i);
+    double ToNum() const override;
+    bool ToBool() const override;
+    std::wstring ToString() const override;
+    int64_t Index(int idx) const;
+    void Push(lua_State* L) const override;
+    void Serialize(std::ostream& out) const override;
+    std::unique_ptr<DnhValue> Clone() const override;
+    void Reserve(size_t size);
+    std::vector<int64_t>& GetValues() { return values_; }
+private:
+    std::vector<int64_t> values_;
 };
 }
