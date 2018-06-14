@@ -19,11 +19,6 @@ namespace bstorm
 
 ReplayData::ReplayData()
 {
-    Init();
-}
-
-void ReplayData::Init()
-{
     // ÉäÉvÉåÉCèÓïÒÇÃèâä˙ílÇê›íË
     data_.ClearAllCommonDataArea();
     data_.CreateCommonDataArea(ReplayInfoAreaName);
@@ -37,7 +32,7 @@ void ReplayData::Init()
     data_.SetAreaCommonData(ReplayInfoAreaName, CommentInfoKey, std::make_unique<DnhArray>(L""));
 }
 
-void ReplayData::Load(const std::wstring & filePath) noexcept(false)
+ReplayData::ReplayData(const std::wstring & filePath)
 {
     std::fstream fstream;
     fstream.open(filePath, std::ios::in | std::ios::binary);
@@ -75,7 +70,6 @@ void ReplayData::Load(const std::wstring & filePath) noexcept(false)
         }
     } catch (const Log&)
     {
-        Init();
         throw illegal_replay_format(filePath);
     }
 }
@@ -83,23 +77,6 @@ void ReplayData::Load(const std::wstring & filePath) noexcept(false)
 const std::unique_ptr<DnhValue>& ReplayData::GetReplayInfo(const CommonDataDB::DataKey & infoKey) const
 {
     return data_.GetAreaCommonData(ReplayInfoAreaName, infoKey, DnhValue::Nil());
-}
-
-std::unique_ptr<DnhValue> ReplayData::GetStageInfoList(const CommonDataDB::DataKey & infoKey) const
-{
-    std::unique_ptr<DnhArray> stageInfoList = std::make_unique<DnhArray>();
-    const auto& indexList = GetReplayInfo(StageIndexListInfoKey);
-    if (const auto indexListArr = dynamic_cast<DnhArray*>(indexList.get()))
-    {
-        stageInfoList->Reserve(indexListArr->GetSize());
-        for (int i = 0; i < indexListArr->GetSize(); ++i)
-        {
-            StageIndex stageIndex = indexListArr->Index(i)->ToInt();
-            const auto stageInfoAreaName = StageInfoAreaName(stageIndex);
-            stageInfoList->PushBack(data_.GetAreaCommonData(stageInfoAreaName, infoKey, DnhValue::Nil())->Clone());
-        }
-    }
-    return std::move(stageInfoList);
 }
 
 float ReplayData::GetFps(StageIndex stageIdx, int stageElapsedFrame) const
@@ -313,9 +290,9 @@ bool ReplayData::SaveCommonDataArea(StageIndex stageIdx, const CommonDataDB::Dat
     return data_.CopyCommonDataAreaFromOtherDB(StageCommonDataAreaName(stageIdx, areaName), areaName, src);
 }
 
-void ReplayData::SetComment(const std::wstring & comment)
+void ReplayData::SetReplayInfo(const CommonDataDB::DataKey & key, std::unique_ptr<DnhValue>&& value)
 {
-    data_.SetAreaCommonData(ReplayInfoAreaName, CommentInfoKey, std::make_unique<DnhArray>(comment));
+    data_.SetAreaCommonData(ReplayInfoAreaName, key, std::move(value));
 }
 
 bool ReplayData::LoadCommonDataArea(StageIndex stageIdx, const CommonDataDB::DataAreaName & areaName, CommonDataDB & dst) const
@@ -326,7 +303,7 @@ bool ReplayData::LoadCommonDataArea(StageIndex stageIdx, const CommonDataDB::Dat
 
 std::wstring ReplayData::StageInfoAreaName(StageIndex stageIdx)
 {
-    return L"STAGE_" + std::to_wstring(stageIdx);
+    return L"stage_" + std::to_wstring(stageIdx);
 }
 
 std::wstring ReplayData::StageCommonDataAreaName(StageIndex stageIdx, const CommonDataDB::DataAreaName& areaName)

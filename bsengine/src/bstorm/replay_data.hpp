@@ -16,18 +16,15 @@ class TimePoint;
 class ReplayData
 {
 public:
-    ReplayData();
-    void Init();
+    ReplayData(); // 作成
+    ReplayData(const std::wstring& filePath); // 読み込み
 
     // =======
     // 再生用
     // =======
 
-    void Load(const std::wstring& filePath) noexcept(false);
     // リプレイの情報を取得する
     const std::unique_ptr<DnhValue>& GetReplayInfo(const CommonDataDB::DataKey& infoKey) const;
-    // 全ステージの情報をステージのインデックスリスト順に取得する
-    std::unique_ptr<DnhValue> GetStageInfoList(const CommonDataDB::DataKey& infoKey) const;
     // プレイ時のFPSを取得
     float GetFps(StageIndex stageIdx, int stageElapsedFrame) const;
     // プレイ時のキー入力を取得
@@ -53,8 +50,8 @@ public:
     void RecordPause(StageIndex stageIdx);
     // ステージに共通データエリアを保存する
     bool SaveCommonDataArea(StageIndex stageIdx, const CommonDataDB::DataAreaName& areaName, const CommonDataDB& src);
-    // コメントを設定
-    void SetComment(const std::wstring& comment);
+    // リプレイ情報設定
+    void SetReplayInfo(const CommonDataDB::DataKey& key, std::unique_ptr<DnhValue>&& value);
 
     // ========
     // キー一覧
@@ -85,7 +82,7 @@ private:
     CommonDataDB data_;
     // 各データエリアは以下参照。
     // INFO: リプレイ全体の情報を記録するエリア
-    static constexpr wchar_t* ReplayInfoAreaName = CommonDataDB::DefaultDataAreaName;
+    static constexpr wchar_t* ReplayInfoAreaName = L"replay_info";
     // STAGE_<stageIdx>: ステージの情報を記録するエリア
     static std::wstring StageInfoAreaName(StageIndex stageIdx);
     // STAGE_<stageIdx>_<areaName>: ステージに保存された共通データ用エリア
