@@ -6750,7 +6750,7 @@ void addStandardAPI(const std::wstring& typeName, const std::wstring& version, N
         safe(SetStageIndex, 1);
         safe(SetStageMainScript, 1);
         safe(SetStagePlayerScript, 1);
-        safe(SetStageReplayFile, 1);
+        unsafe(SetStageReplayFile, 1);
         safe(GetStageSceneState, 0);
         safe(GetStageSceneResult, 0);
         unsafe(PauseStageScene, 1); // NotifyEvent
