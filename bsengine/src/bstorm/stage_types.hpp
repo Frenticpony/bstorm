@@ -2,5 +2,5 @@
 
 namespace bstorm
 {
-using StageIndex = int;
+using StageIndex = uint16_t;
 }
