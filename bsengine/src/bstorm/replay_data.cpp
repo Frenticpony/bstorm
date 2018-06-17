@@ -1,5 +1,6 @@
 #include <bstorm/replay_data.hpp>
 
+#include <bstorm/dnh_const.hpp>
 #include <bstorm/dnh_value.hpp>
 #include <bstorm/time_point.hpp>
 #include <bstorm/util.hpp>
@@ -77,6 +78,11 @@ ReplayData::ReplayData(const std::wstring & filePath)
 const std::unique_ptr<DnhValue>& ReplayData::GetReplayInfo(const CommonDataDB::DataKey & infoKey) const
 {
     return data_.GetAreaCommonData(ReplayInfoAreaName, infoKey, DnhValue::Nil());
+}
+
+const std::unique_ptr<DnhValue>& ReplayData::GetStageInfo(StageIndex stageIdx, const std::wstring & infoKey) const
+{
+    return data_.GetAreaCommonData(StageInfoAreaName(stageIdx), infoKey, DnhValue::Nil());
 }
 
 float ReplayData::GetFps(StageIndex stageIdx, int stageElapsedFrame) const
@@ -255,11 +261,17 @@ void ReplayData::RecordFrameStageInfo(StageIndex stageIdx, float fps, const std:
     const auto& vkStateList = data_.GetAreaCommonData(stageInfoAreaName, StageVirtualKeyStateListInfoKey, DnhValue::Nil());
     if (const auto vkStateListArr = dynamic_cast<DnhArray*>(vkStateList.get()))
     {
-        auto vkStates = std::make_unique<DnhUInt16Array>(keyStates.size() * 2);
+        auto vkStates = std::make_unique<DnhUInt16Array>();
         for (const auto& entry : keyStates)
         {
-            vkStates->PushBack(entry.first);
-            vkStates->PushBack(entry.second);
+            auto vk = entry.first;
+            auto state = entry.second;
+            // KEY_FREE‚Ìê‡‚Í•Û‘¶‚µ‚È‚¢(—e—ÊíŒ¸)
+            if (state != KEY_FREE)
+            {
+                vkStates->PushBack(entry.first);
+                vkStates->PushBack(entry.second);
+            }
         }
         vkStateListArr->PushBack(std::move(vkStates));
     }

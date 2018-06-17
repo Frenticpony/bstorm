@@ -25,6 +25,8 @@ public:
 
     // リプレイの情報を取得する
     const std::unique_ptr<DnhValue>& GetReplayInfo(const CommonDataDB::DataKey& infoKey) const;
+    // ステージ情報を取得する
+    const std::unique_ptr<DnhValue>& GetStageInfo(StageIndex stageIdx, const std::wstring& infoKey) const;
     // プレイ時のFPSを取得
     float GetFps(StageIndex stageIdx, int stageElapsedFrame) const;
     // プレイ時のキー入力を取得
