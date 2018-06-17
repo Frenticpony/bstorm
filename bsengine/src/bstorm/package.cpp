@@ -9,8 +9,6 @@
 #include <bstorm/time_point.hpp>
 #include <bstorm/fps_counter.hpp>
 #include <bstorm/input_device.hpp>
-#include <bstorm/virtual_key_input_source.hpp>
-#include <bstorm/real_device_input_source.hpp>
 #include <bstorm/sound_device.hpp>
 #include <bstorm/renderer.hpp>
 #include <bstorm/lostable_graphic_resource.hpp>
@@ -79,9 +77,7 @@ Package::Package(HWND hWnd,
     fpsCounter_(fpsCounter),
     lostableGraphicResourceManager_(lostableGraphicResourceManager),
     engineDevelopOptions_(engineDevelopOptions),
-    keyAssign_(std::make_shared<KeyAssign>()),
     fileLoader_(std::make_shared<FileLoaderFromTextFile>()),
-    vKeyInputSource_(std::make_shared<RealDeviceInputSource>(inputDevice_, keyAssign_)),
     soundDevice(std::make_shared<SoundDevice>(hWnd)),
     renderer_(std::make_shared<Renderer>(graphicDevice_->GetDevice())),
     objTable_(std::make_shared<ObjectTable>()),
@@ -108,8 +104,9 @@ Package::Package(HWND hWnd,
     stagePlayerScriptInfo_(),
     stageIdx_(ID_INVALID),
     stageSceneResult_(0),
-    stagePaused_(true),
-    stageForceTerminated_(false),
+    isStagePaused_(true),
+    isStageForceTerminated_(false),
+    isReplay_(false),
     deleteShotImmediateEventOnShotScriptEnable_(false),
     deleteShotFadeEventOnShotScriptEnable_(false),
     deleteShotToItemEventOnShotScriptEnable_(false),
@@ -130,7 +127,7 @@ Package::Package(HWND hWnd,
 
     for (const auto& keyMap : keyConfig->keyMaps)
     {
-        keyAssign_->AddVirtualKey(keyMap.vkey, keyMap.key, keyMap.pad);
+        AddVirtualKey(keyMap.vkey, keyMap.key, keyMap.pad);
     }
 }
 
@@ -155,7 +152,7 @@ void Package::TickFrame()
         {
             if (stageMain->IsClosed())
             {
-                if (stageForceTerminated_)
+                if (isStageForceTerminated_)
                 {
                     stageSceneResult_ = STAGE_RESULT_BREAK_OFF;
                     SetPlayerLife(0);
@@ -176,8 +173,8 @@ void Package::TickFrame()
                 scriptManager_->CloseStgSceneScript();
                 stageMainScript_.reset();
                 stagePlayerScript_.reset();
-                stageForceTerminated_ = false;
-                stagePaused_ = true;
+                isStageForceTerminated_ = false;
+                isStagePaused_ = true;
                 pseudoPlayerFps_ = pseudoEnemyFps_ = 60;
             }
         }
@@ -191,7 +188,31 @@ void Package::TickFrame()
         // SetShotIntersection{Circle, Line}で設定した判定削除
         tempEnemyShotIsects_.clear();
 
-        inputDevice_->UpdateInputState();
+        {
+            // 入力更新
+            inputDevice_->UpdateInputState();
+
+            // VirtualKey状態更新
+            virtualKeyStates_.clear();
+            if (IsReplay())
+            {
+            } else
+            {
+                // キーボードの入力がパッドより優先
+                for (auto& entry : virtualKeyAssign_)
+                {
+                    auto vk = entry.first;
+                    auto k = entry.second.first;
+                    auto pad = entry.second.second;
+                    KeyState keyState = inputDevice_->GetKeyState(k);
+                    if (keyState == KEY_FREE)
+                    {
+                        keyState = inputDevice_->GetPadButtonState(pad);
+                    }
+                    virtualKeyStates_[vk] = keyState;
+                }
+            }
+        }
 
         scriptManager_->RunMainLoopAll(IsStagePaused());
 
@@ -199,6 +220,7 @@ void Package::TickFrame()
 
         autoItemCollectionManager_->Reset();
     }
+
     // 使われなくなったリソース開放
     switch (GetElapsedFrame() % 1920)
     {
@@ -253,19 +275,32 @@ KeyState Package::GetKeyState(Key k)
     return inputDevice_->GetKeyState(k);
 }
 
-KeyState Package::GetVirtualKeyState(VirtualKey vk)
+KeyState Package::GetVirtualKeyState(VirtualKey vk) const
 {
-    return vKeyInputSource_->GetVirtualKeyState(vk);
+    // AddVirtualKeyされていない場合はKEY_FREEを返す
+    if (virtualKeyAssign_.count(vk))
+    {
+        auto it = virtualKeyStates_.find(vk);
+        if (it != virtualKeyStates_.end())
+        {
+            return it->second;
+        }
+    }
+    return KEY_FREE;
 }
 
 void Package::SetVirtualKeyState(VirtualKey vk, KeyState state)
 {
-    vKeyInputSource_->SetVirtualKeyState(vk, state);
+    // AddVirtualKeyされていない場合は何もしない
+    if (virtualKeyAssign_.count(vk))
+    {
+        virtualKeyStates_[vk] = state;
+    }
 }
 
 void Package::AddVirtualKey(VirtualKey vk, Key k, PadButton btn)
 {
-    keyAssign_->AddVirtualKey(vk, k, btn);
+    virtualKeyAssign_[vk] = std::make_pair(k, btn);
 }
 
 KeyState Package::GetMouseState(MouseButton btn)
@@ -1991,8 +2026,8 @@ void Package::InitializeStageScene()
     SetStgFrameRenderPriorityMax(DEFAULT_STG_FRAME_RENDER_PRIORITY_MAX);
     SetShotRenderPriority(DEFAULT_SHOT_RENDER_PRIORITY);
     SetItemRenderPriority(DEFAULT_ITEM_RENDER_PRIORITY);
-    stagePaused_ = true;
-    stageForceTerminated_ = false;
+    isStagePaused_ = true;
+    isStageForceTerminated_ = false;
     SetDeleteShotImmediateEventOnShotScriptEnable(false);
     SetDeleteShotFadeEventOnShotScriptEnable(false);
     SetDeleteShotToItemEventOnShotScriptEnable(false);
@@ -2013,6 +2048,11 @@ void Package::Start()
     auto script = scriptManager_->Compile(packageMainScriptInfo_.path, SCRIPT_TYPE_PACKAGE, packageMainScriptInfo_.version, shared_from_this(), nullptr);
     packageMainScript_ = script;
     script->RunInitialize();
+}
+
+bool Package::IsReplay() const
+{
+    return isReplay_;
 }
 
 void Package::SetPauseScriptPath(const std::wstring & path)
@@ -2136,19 +2176,19 @@ int Package::GetStageSceneResult() const
 
 bool Package::IsStagePaused() const
 {
-    return stagePaused_;
+    return isStagePaused_;
 }
 
 void Package::PauseStageScene(bool doPause)
 {
-    if (doPause && !stagePaused_)
+    if (doPause && !isStagePaused_)
     {
         NotifyEventAll(EV_PAUSE_ENTER);
-    } else if (!doPause && stagePaused_)
+    } else if (!doPause && isStagePaused_)
     {
         NotifyEventAll(EV_PAUSE_LEAVE);
     }
-    stagePaused_ = doPause;
+    isStagePaused_ = doPause;
 }
 
 void Package::TerminateStageScene()
@@ -2156,7 +2196,7 @@ void Package::TerminateStageScene()
     if (auto stageMain = stageMainScript_.lock())
     {
         stageMain->Close();
-        stageForceTerminated_ = true;
+        isStageForceTerminated_ = true;
     }
 }
 
@@ -2175,11 +2215,11 @@ void Package::StartStageScene(const std::shared_ptr<SourcePos>& srcPos)
     stagePlayerScript_.reset();
     ReloadItemData(DEFAULT_ITEM_DATA_PATH, nullptr);
     stageSceneResult_ = 0;
-    stageForceTerminated_ = false;
+    isStageForceTerminated_ = false;
     SetDeleteShotImmediateEventOnShotScriptEnable(false);
     SetDeleteShotFadeEventOnShotScriptEnable(false);
     SetDeleteShotToItemEventOnShotScriptEnable(false);
-    stagePaused_ = false;
+    isStagePaused_ = false;
     renderer_->SetFogEnable(false);
     pseudoPlayerFps_ = pseudoEnemyFps_ = 60;
 

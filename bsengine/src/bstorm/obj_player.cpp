@@ -1,7 +1,6 @@
 ﻿#include <bstorm/obj_player.hpp>
 
 #include <bstorm/dnh_const.hpp>
-#include <bstorm/virtual_key_input_source.hpp>
 #include <bstorm/script.hpp>
 #include <bstorm/intersection.hpp>
 #include <bstorm/obj_enemy_boss_scene.hpp>

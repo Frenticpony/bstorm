@@ -51,7 +51,6 @@
     <ClInclude Include="src\bstorm\obj_mesh.hpp" />
     <ClInclude Include="src\bstorm\obj_sound.hpp" />
     <ClInclude Include="src\bstorm\parser.hpp" />
-    <ClInclude Include="src\bstorm\real_device_input_source.hpp" />
     <ClInclude Include="src\bstorm\replay_data.hpp" />
     <ClInclude Include="src\bstorm\script_info.hpp" />
     <ClInclude Include="src\bstorm\script_runtime.h" />
@@ -92,7 +91,6 @@
     <ClInclude Include="src\bstorm\util.hpp" />
     <ClInclude Include="src\bstorm\version.hpp" />
     <ClInclude Include="src\bstorm\vertex.hpp" />
-    <ClInclude Include="src\bstorm\virtual_key_input_source.hpp" />
     <ClInclude Include="src\bison\dnh.tab.hpp" />
     <ClInclude Include="src\bison\mqo.tab.hpp" />
     <ClInclude Include="src\bison\stack.hh" />
@@ -127,7 +125,6 @@
     <ClCompile Include="src\bstorm\obj_player.cpp" />
     <ClCompile Include="src\bstorm\obj_sound.cpp" />
     <ClCompile Include="src\bstorm\parser.cpp" />
-    <ClCompile Include="src\bstorm\real_device_input_source.cpp" />
     <ClCompile Include="src\bstorm\replay_data.cpp" />
     <ClCompile Include="src\bstorm\time_point.cpp" />
     <ClCompile Include="src\bstorm\vertex.cpp" />

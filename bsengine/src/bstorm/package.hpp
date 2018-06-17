@@ -14,6 +14,7 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
+#include <unordered_set>
 #include <windows.h>
 #include <bstorm/stage_common_player_params.hpp>
 #include <d3d9.h>
@@ -41,7 +42,7 @@ class Intersection;
 class ItemData;
 class ItemDataTable;
 class ItemScoreTextSpawner;
-class KeyAssign;
+class VirtualKeyAssign;
 class LostableGraphicResource;
 class LostableGraphicResourceManager;
 class Mesh;
@@ -118,7 +119,7 @@ public:
 
     /* input */
     KeyState GetKeyState(Key k);
-    KeyState GetVirtualKeyState(VirtualKey vk);
+    KeyState GetVirtualKeyState(VirtualKey vk) const;
     void SetVirtualKeyState(VirtualKey vk, KeyState state);
     void AddVirtualKey(VirtualKey vk, Key k, PadButton btn);
     KeyState GetMouseState(MouseButton btn);
@@ -458,6 +459,9 @@ public:
     void TerminateStageScene();
     void Start();
 
+    /* replay */
+    bool IsReplay() const;
+
     /* for default package */
     void SetPauseScriptPath(const std::wstring& path);
     void SetEndSceneScriptPath(const std::wstring& path);
@@ -489,9 +493,9 @@ private:
     const std::shared_ptr<EngineDevelopOptions> engineDevelopOptions_;
 
     std::unordered_map<std::wstring, std::shared_ptr<RenderTarget>> renderTargets_;
-    std::shared_ptr<KeyAssign> keyAssign_;
+    std::unordered_map<VirtualKey, std::pair<Key, PadButton>> virtualKeyAssign_; // AddVirtualKeyの追加先
+    std::unordered_set<VirtualKey> replayTargetVirtualKeys_;
     std::shared_ptr<FileLoader> fileLoader_;
-    std::shared_ptr<VirtualKeyInputSource> vKeyInputSource_;
     std::shared_ptr<SoundDevice> soundDevice;
     std::unordered_map <std::wstring, std::shared_ptr<SoundBuffer>> orphanSounds_;
     std::shared_ptr<Renderer> renderer_;
@@ -536,11 +540,17 @@ private:
     std::weak_ptr<Script> shotScript_;
     std::weak_ptr<Script> itemScript_;
 
+    // 入力orリプレイから得たVirtualKeyの状態
+    // SetVirtualKeyStateで上書き可
+    std::unordered_map<VirtualKey, KeyState> virtualKeyStates_;
+
     std::wstring stageReplayFilePath_;
     StageIndex stageIdx_;
     int stageSceneResult_;
-    bool stagePaused_;
-    bool stageForceTerminated_;
+    bool isStagePaused_;
+    bool isStageForceTerminated_;
+
+    bool isReplay_;
 
     bool deleteShotImmediateEventOnShotScriptEnable_;
     bool deleteShotFadeEventOnShotScriptEnable_;
