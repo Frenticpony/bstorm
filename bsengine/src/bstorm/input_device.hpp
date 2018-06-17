@@ -36,7 +36,7 @@ public:
     ~InputDevice();
     void UpdateInputState();
     void ResetInputState();
-    KeyState GetKeyState(Key key);
+    KeyState GetKeyState(Key key) const;
     KeyState GetMouseState(MouseButton btn) const;
     KeyState GetPadButtonState(PadButton btn) const;
     int GetMouseX(int screenWidth, int screenHeight) const;

@@ -166,7 +166,7 @@ void InputDevice::ResetInputState()
     mouseMoveZ_ = 0;
 }
 
-KeyState InputDevice::GetKeyState(Key k)
+KeyState InputDevice::GetKeyState(Key k) const
 {
     if (!inputEnable_) return KEY_FREE;
     if (k < 0 || k > 255) return KEY_FREE;
@@ -177,9 +177,9 @@ KeyState InputDevice::GetMouseState(MouseButton btn) const
 {
     if (!inputEnable_) return KEY_FREE;
     if (btn < 0 || btn > 2) return KEY_FREE;
-    //MOUSE_LEFT = 0;
-    //MOUSE_RIGHT = 1;
-    //MOUSE_MIDDLE = 2;
+    //MOUSE_LEFT : 0
+    //MOUSE_RIGHT : 1
+    //MOUSE_MIDDLE : 2
     return ((prevMouseButtonInputStates_[btn] >> 6) | (mouseButtonInputStates_[btn] >> 7));
 }
 
