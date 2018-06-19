@@ -119,9 +119,10 @@ public:
 
     /* input */
     KeyState GetKeyState(Key k);
-    KeyState GetVirtualKeyState(VirtualKey vk) const;
+    KeyState GetVirtualKeyState(VirtualKey vk, bool isStgScene = true) const;
     void SetVirtualKeyState(VirtualKey vk, KeyState state);
     void AddVirtualKey(VirtualKey vk, Key k, PadButton btn);
+    bool IsAddedVirtualKey(VirtualKey vk) const;
     KeyState GetMouseState(MouseButton btn);
     int GetMouseX();
     int GetMouseY();
@@ -540,9 +541,8 @@ private:
     std::weak_ptr<Script> shotScript_;
     std::weak_ptr<Script> itemScript_;
 
-    // 入力orリプレイから得たVirtualKeyの状態
-    // SetVirtualKeyStateで上書き可
     std::unordered_map<VirtualKey, KeyState> virtualKeyStates_;
+    std::unordered_map<VirtualKey, KeyState> replayVirtualKeyStates_;
 
     std::wstring stageReplayFilePath_;
     StageIndex stageIdx_;

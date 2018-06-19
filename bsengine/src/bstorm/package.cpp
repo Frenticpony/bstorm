@@ -194,23 +194,18 @@ void Package::TickFrame()
 
             // VirtualKey状態更新
             virtualKeyStates_.clear();
-            if (IsReplay())
+            // キーボードの入力がパッドより優先
+            for (auto& entry : virtualKeyAssign_)
             {
-            } else
-            {
-                // キーボードの入力がパッドより優先
-                for (auto& entry : virtualKeyAssign_)
+                auto vk = entry.first;
+                auto k = entry.second.first;
+                auto pad = entry.second.second;
+                KeyState keyState = inputDevice_->GetKeyState(k);
+                if (keyState == KEY_FREE)
                 {
-                    auto vk = entry.first;
-                    auto k = entry.second.first;
-                    auto pad = entry.second.second;
-                    KeyState keyState = inputDevice_->GetKeyState(k);
-                    if (keyState == KEY_FREE)
-                    {
-                        keyState = inputDevice_->GetPadButtonState(pad);
-                    }
-                    virtualKeyStates_[vk] = keyState;
+                    keyState = inputDevice_->GetPadButtonState(pad);
                 }
+                virtualKeyStates_[vk] = keyState;
             }
         }
 
@@ -275,13 +270,14 @@ KeyState Package::GetKeyState(Key k)
     return inputDevice_->GetKeyState(k);
 }
 
-KeyState Package::GetVirtualKeyState(VirtualKey vk) const
+KeyState Package::GetVirtualKeyState(VirtualKey vk, bool isStgScene) const
 {
     // AddVirtualKeyされていない場合はKEY_FREEを返す
-    if (virtualKeyAssign_.count(vk))
+    if (IsAddedVirtualKey(vk))
     {
-        auto it = virtualKeyStates_.find(vk);
-        if (it != virtualKeyStates_.end())
+        const auto& keyStates = (isStgScene && IsReplay()) ? replayVirtualKeyStates_ : virtualKeyStates_;
+        auto it = keyStates.find(vk);
+        if (it != keyStates.end())
         {
             return it->second;
         }
@@ -295,12 +291,18 @@ void Package::SetVirtualKeyState(VirtualKey vk, KeyState state)
     if (virtualKeyAssign_.count(vk))
     {
         virtualKeyStates_[vk] = state;
+        replayVirtualKeyStates_[vk] = state;
     }
 }
 
 void Package::AddVirtualKey(VirtualKey vk, Key k, PadButton btn)
 {
     virtualKeyAssign_[vk] = std::make_pair(k, btn);
+}
+
+bool Package::IsAddedVirtualKey(VirtualKey vk) const
+{
+    return virtualKeyAssign_.count(vk) != 0;
 }
 
 KeyState Package::GetMouseState(MouseButton btn)
