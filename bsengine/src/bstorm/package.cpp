@@ -209,6 +209,12 @@ void Package::TickFrame()
             }
         }
 
+        if (IsReplay())
+        {
+            // リプレイVirtualKey状態更新
+            replayVirtualKeyStates_.clear();
+        }
+
         scriptManager_->RunMainLoopAllNonStgScript();
 
         if (!IsStagePaused())

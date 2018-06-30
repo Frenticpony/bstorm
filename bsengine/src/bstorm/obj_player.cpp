@@ -84,7 +84,7 @@ void ObjPlayer::Update()
         // ボム入力処理
         if (state_ == STATE_NORMAL || state_ == STATE_HIT)
         {
-            int spellKey = package->GetVirtualKeyState(VK_SPELL);
+            int spellKey = package->GetVirtualKeyState(VK_SPELL, true);
             if (spellKey == KEY_PUSH)
             {
                 CallSpell();
@@ -404,12 +404,12 @@ void ObjPlayer::MoveByKeyInput()
 {
     if (auto package = GetPackage().lock())
     {
-        auto r = package->GetVirtualKeyState(VK_RIGHT);
-        auto l = package->GetVirtualKeyState(VK_LEFT);
-        auto u = package->GetVirtualKeyState(VK_UP);
-        auto d = package->GetVirtualKeyState(VK_DOWN);
+        auto r = package->GetVirtualKeyState(VK_RIGHT, true);
+        auto l = package->GetVirtualKeyState(VK_LEFT, true);
+        auto u = package->GetVirtualKeyState(VK_UP, true);
+        auto d = package->GetVirtualKeyState(VK_DOWN, true);
 
-        auto shift = package->GetVirtualKeyState(VK_SLOWMOVE);
+        auto shift = package->GetVirtualKeyState(VK_SLOWMOVE, true);
         bool isSlowMode = shift == KEY_HOLD || shift == KEY_PUSH;
         float speed = (isSlowMode ? slowSpeed_ : normalSpeed_);
 

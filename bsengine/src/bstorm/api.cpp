@@ -377,9 +377,10 @@ static int StopSound(lua_State* L)
 
 static int GetVirtualKeyState(lua_State* L)
 {
+    Script* script = GetScript(L);
     Package* package = GetPackage(L);
     int vk = DnhValue::ToInt(L, 1);
-    lua_pushnumber(L, package->GetVirtualKeyState(vk));
+    lua_pushnumber(L, package->GetVirtualKeyState(vk, script->IsStgSceneScript()));
     return 1;
 }
 

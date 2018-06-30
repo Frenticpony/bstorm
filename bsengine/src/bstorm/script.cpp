@@ -32,7 +32,7 @@ Script::Script(const std::wstring& p, const std::wstring& type, const std::wstri
     id_(id),
     compileSrcPos_(srcPos),
     luaStateBusy_(false),
-    isStgSceneScript_(type != SCRIPT_TYPE_PACKAGE),
+    isStgSceneScript_(bstorm::IsStgSceneScript(type)),
     autoDeleteObjectEnable_(false),
     package_(package)
 {
