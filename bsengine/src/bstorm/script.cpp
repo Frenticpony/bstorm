@@ -422,7 +422,7 @@ void ScriptManager::RunMainLoopAllNonStgScript()
 {
     for (auto& entry : scriptMap_)
     {
-        if (!IsStgSceneScript(entry.second->GetType()))
+        if (!entry.second->IsStgSceneScript())
         {
             entry.second->RunMainLoop();
         }
@@ -433,7 +433,7 @@ void ScriptManager::RunMainLoopAllStgScript()
 {
     for (auto& entry : scriptMap_)
     {
-        if (IsStgSceneScript(entry.second->GetType()))
+        if (entry.second->IsStgSceneScript())
         {
             entry.second->RunMainLoop();
         }
