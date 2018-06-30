@@ -409,7 +409,6 @@ ScriptManager::~ScriptManager() {}
 std::shared_ptr<Script> ScriptManager::Compile(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& srcPos)
 {
     auto script = std::make_shared<Script>(path, type, version, idGen_++, package, srcPos);
-    scriptList_.push_back(script);
     scriptMap_[script->GetID()] = script;
     return script;
 }
@@ -419,13 +418,24 @@ std::shared_ptr<Script> ScriptManager::CompileInThread(const std::wstring & path
     return Compile(path, type, version, package, srcPos);
 }
 
-void ScriptManager::RunMainLoopAll(bool ignoreStgSceneScript)
+void ScriptManager::RunMainLoopAllNonStgScript()
 {
-    for (auto& script : scriptList_)
+    for (auto& entry : scriptMap_)
     {
-        if (!(ignoreStgSceneScript && script->IsStgSceneScript()))
+        if (!IsStgSceneScript(entry.second->GetType()))
         {
-            script->RunMainLoop();
+            entry.second->RunMainLoop();
+        }
+    }
+}
+
+void ScriptManager::RunMainLoopAllStgScript()
+{
+    for (auto& entry : scriptMap_)
+    {
+        if (IsStgSceneScript(entry.second->GetType()))
+        {
+            entry.second->RunMainLoop();
         }
     }
 }
@@ -446,8 +456,9 @@ NullableSharedPtr<Script> ScriptManager::Get(int id) const
 
 void ScriptManager::NotifyEventAll(int eventType)
 {
-    for (auto& script : scriptList_)
+    for (auto& entry : scriptMap_)
     {
+        auto& script = entry.second;
         // NOTE: NotifyEventAllで送るとcloseされたスクリプトには届かない仕様
         if (!script->IsClosed())
         {
@@ -458,8 +469,9 @@ void ScriptManager::NotifyEventAll(int eventType)
 
 void ScriptManager::NotifyEventAll(int eventType, const std::unique_ptr<DnhArray>& args)
 {
-    for (auto& script : scriptList_)
+    for (auto& entry : scriptMap_)
     {
+        auto& script = entry.second;
         // NOTE: NotifyEventAllで送るとcloseされたスクリプトには届かない仕様
         if (!script->IsClosed())
         {
@@ -470,33 +482,32 @@ void ScriptManager::NotifyEventAll(int eventType, const std::unique_ptr<DnhArray
 
 void ScriptManager::RunFinalizeOnClosedScript()
 {
-    auto it = scriptList_.begin();
-    while (it != scriptList_.end())
+    auto it = scriptMap_.begin();
+    while (it != scriptMap_.end())
     {
-        auto& script = *it;
+        auto& script = it->second;
         if (script->IsClosed())
         {
             script->RunFinalize();
-            scriptMap_.erase(script->GetID());
-            it = scriptList_.erase(it);
+            it = scriptMap_.erase(it);
         } else ++it;
     }
 }
 
 void ScriptManager::RunFinalizeAll()
 {
-    for (auto& script : scriptList_)
+    for (auto& entry : scriptMap_)
     {
-        script->RunFinalize();
+        entry.second->RunFinalize();
     }
-    scriptList_.clear();
     scriptMap_.clear();
 }
 
 void ScriptManager::CloseStgSceneScript()
 {
-    for (auto& script : scriptList_)
+    for (auto& entry : scriptMap_)
     {
+        auto& script = entry.second;
         if (script->IsStgSceneScript())
         {
             script->Close();

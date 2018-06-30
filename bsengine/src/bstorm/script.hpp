@@ -9,6 +9,7 @@
 #include <deque>
 #include <utility>
 #include <unordered_set>
+#include <map>
 #include <unordered_map>
 #include <exception>
 #include <luajit/lua.hpp>
@@ -84,7 +85,8 @@ public:
     ~ScriptManager();
     std::shared_ptr<Script> Compile(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& srcPos);
     std::shared_ptr<Script> CompileInThread(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& srcPos);
-    void RunMainLoopAll(bool ignoreStgSceneScript);
+    void RunMainLoopAllNonStgScript();
+    void RunMainLoopAllStgScript();
     NullableSharedPtr<Script> Get(int id) const;
     void NotifyEventAll(int eventType);
     void NotifyEventAll(int eventType, const std::unique_ptr<DnhArray>& args);
@@ -96,8 +98,7 @@ public:
     void ClearScriptResult();
 private:
     int idGen_;
-    std::list<std::shared_ptr<Script>> scriptList_;
-    std::unordered_map <int, std::shared_ptr<Script>> scriptMap_;
+    std::map<int, std::shared_ptr<Script>> scriptMap_; // IDが若い順に走査される
     std::unordered_map<int, std::unique_ptr<DnhValue>> scriptResults_;
 };
 }

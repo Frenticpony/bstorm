@@ -33,5 +33,6 @@ public:
 };
 
 int GetScriptTypeConstFromName(const std::wstring& name);
+bool IsStgSceneScript(const std::wstring& name);
 std::wstring GetScriptTypeNameFromConst(int c);
 }

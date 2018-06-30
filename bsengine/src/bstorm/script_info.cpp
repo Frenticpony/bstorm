@@ -14,6 +14,11 @@ int GetScriptTypeConstFromName(const std::wstring& name)
     return -1;
 }
 
+bool IsStgSceneScript(const std::wstring & name)
+{
+    return name != SCRIPT_TYPE_PACKAGE;
+}
+
 std::wstring GetScriptTypeNameFromConst(int c)
 {
     switch (c)

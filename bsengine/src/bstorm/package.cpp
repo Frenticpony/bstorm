@@ -209,7 +209,12 @@ void Package::TickFrame()
             }
         }
 
-        scriptManager_->RunMainLoopAll(IsStagePaused());
+        scriptManager_->RunMainLoopAllNonStgScript();
+
+        if (!IsStagePaused())
+        {
+            scriptManager_->RunMainLoopAllStgScript();
+        }
 
         objTable_->UpdateAll(IsStagePaused());
 
