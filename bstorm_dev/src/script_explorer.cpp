@@ -153,8 +153,8 @@ ScriptExplorer::~ScriptExplorer()
 void ScriptExplorer::draw()
 {
     std::lock_guard<std::mutex> lock(memberAccessSection);
-    ImGui::SetNextWindowPos(ImVec2(iniLeft, iniTop), ImGuiSetCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2(iniWidth, iniHeight), ImGuiSetCond_FirstUseEver);
+    ImGui::SetNextWindowPos(ImVec2(iniLeft, iniTop), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(iniWidth, iniHeight), ImGuiCond_FirstUseEver);
     if (ImGui::Begin("Script Explorer", NULL, ImGuiWindowFlags_ResizeFromAnySide))
     {
         float contentWidth = ImGui::GetContentRegionAvailWidth();

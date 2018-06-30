@@ -102,8 +102,8 @@ static bool matchLog(const std::string& searchText, const Log& log)
 
 void LogWindow::draw()
 {
-    ImGui::SetNextWindowPos(ImVec2(iniLeft, iniTop), ImGuiSetCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2(iniWidth, iniHeight), ImGuiSetCond_FirstUseEver);
+    ImGui::SetNextWindowPos(ImVec2(iniLeft, iniTop), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(iniWidth, iniHeight), ImGuiCond_FirstUseEver);
     constexpr ImGuiWindowFlags windowFlags = ImGuiWindowFlags_ResizeFromAnySide |
         ImGuiWindowFlags_NoScrollbar |
         ImGuiWindowFlags_MenuBar;

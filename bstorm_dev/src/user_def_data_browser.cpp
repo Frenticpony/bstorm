@@ -39,7 +39,7 @@ void drawShotDataInfo(const std::shared_ptr<ShotData>& shotData)
                 ImGui::TreePop();
             }
         }
-        ImGui::BulletText("render           : %s", getBlendTypeName(shotData->render));
+        ImGui::BulletText("render           : %s", GetBlendTypeName(shotData->render));
         ImGui::BulletText("alpha            : %d", shotData->alpha);
         ImGui::BulletText("delay-rect       : (%d %d %d %d) %s", shotData->delayRect.left, shotData->delayRect.top, shotData->delayRect.right, shotData->delayRect.bottom, shotData->useDelayRect ? "" : "[derived]");
         {
@@ -53,7 +53,7 @@ void drawShotDataInfo(const std::shared_ptr<ShotData>& shotData)
                 ImGui::ColorEdit3("delay-color [derived]", delayColor, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_NoInputs);
             }
         }
-        ImGui::BulletText("delay-render     : %s", getBlendTypeName(shotData->delayRender));
+        ImGui::BulletText("delay-render     : %s", GetBlendTypeName(shotData->delayRender));
         if (shotData->useAngularVelocityRand)
         {
             ImGui::BulletText("angular-velocity : rand(%f, %f)", shotData->angularVelocityRandMin, shotData->angularVelocityRandMax);
@@ -77,10 +77,10 @@ void drawShotDataInfo(const std::shared_ptr<ShotData>& shotData)
                     float areaTop = ImGui::GetCursorScreenPos().y;
                     if (shotData->animationData.empty())
                     {
-                        drawCroppedImage(shotData->rect, shotData->texture);
+                        DrawCroppedImage(shotData->rect, shotData->texture);
                     } else
                     {
-                        drawCroppedImage(shotData->animationData[0].rect, shotData->texture);
+                        DrawCroppedImage(shotData->animationData[0].rect, shotData->texture);
                     }
                     float rectCenterX = std::abs(shotData->rect.right - shotData->rect.left) / 2.0f;
                     float rectCenterY = std::abs(shotData->rect.bottom - shotData->rect.top) / 2.0f;
@@ -110,16 +110,16 @@ void drawShotDataInfo(const std::shared_ptr<ShotData>& shotData)
             // normal
             if (shotData->animationData.empty())
             {
-                drawCroppedImage(shotData->rect, shotData->texture);
+                DrawCroppedImage(shotData->rect, shotData->texture);
             } else
             {
-                drawCroppedImage(shotData->animationData[0].rect, shotData->texture);
+                DrawCroppedImage(shotData->animationData[0].rect, shotData->texture);
             }
         }
         ImGui::NextColumn();
         {
             // delay
-            drawCroppedImage(shotData->delayRect, shotData->texture);
+            DrawCroppedImage(shotData->delayRect, shotData->texture);
         }
         ImGui::NextColumn();
         ImGui::Columns(1);
@@ -171,7 +171,7 @@ void drawItemDataInfo(const std::shared_ptr<ItemData>& itemData)
             }
         }
         ImGui::BulletText("out              : (%d %d %d %d)", itemData->out.left, itemData->out.top, itemData->out.right, itemData->out.bottom);
-        ImGui::BulletText("render           : %s", getBlendTypeName(itemData->render));
+        ImGui::BulletText("render           : %s", GetBlendTypeName(itemData->render));
         ImGui::EndGroup();
     }
     ImGui::SameLine();
@@ -189,16 +189,16 @@ void drawItemDataInfo(const std::shared_ptr<ItemData>& itemData)
             // normal
             if (itemData->animationData.empty())
             {
-                drawCroppedImage(itemData->rect, itemData->texture);
+                DrawCroppedImage(itemData->rect, itemData->texture);
             } else
             {
-                drawCroppedImage(itemData->animationData[0].rect, itemData->texture);
+                DrawCroppedImage(itemData->animationData[0].rect, itemData->texture);
             }
         }
         ImGui::NextColumn();
         {
             // delay
-            drawCroppedImage(itemData->out, itemData->texture);
+            DrawCroppedImage(itemData->out, itemData->texture);
         }
         ImGui::NextColumn();
         ImGui::Columns(1);

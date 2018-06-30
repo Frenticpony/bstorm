@@ -57,10 +57,13 @@
     <ClCompile Include="..\imgui\imgui_draw.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="..\imgui\examples\directx9_example\imgui_impl_dx9.cpp">
+    <ClCompile Include="src\game_view_mouse_position_provider.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\game_view_mouse_position_provider.cpp">
+    <ClCompile Include="..\imgui\examples\imgui_impl_dx9.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\imgui\examples\imgui_impl_win32.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

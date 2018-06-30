@@ -14,7 +14,7 @@
 
 namespace bstorm
 {
-const char* getBlendTypeName(int blendType)
+const char* GetBlendTypeName(int blendType)
 {
     switch (blendType)
     {
@@ -39,7 +39,7 @@ const char* getBlendTypeName(int blendType)
     }
 }
 
-const char * getObjTypeName(int objType)
+const char * GetObjTypeName(int objType)
 {
     switch (objType)
     {
@@ -70,7 +70,7 @@ const char * getObjTypeName(int objType)
     return "UNKNOWN";
 }
 
-const char* getPrimitiveTypeName(int primType)
+const char* GetPrimitiveTypeName(int primType)
 {
     switch (primType)
     {
@@ -84,7 +84,7 @@ const char* getPrimitiveTypeName(int primType)
     return "UNKNOWN";
 }
 
-const char * getItemTypeName(int itemType)
+const char * GetItemTypeName(int itemType)
 {
     switch (itemType)
     {
@@ -101,7 +101,7 @@ const char * getItemTypeName(int itemType)
     return "UNKNOWN";
 }
 
-const char * getCollisionGroupName(CollisionGroup colGroup)
+const char * GetCollisionGroupName(CollisionGroup colGroup)
 {
     switch (colGroup)
     {
@@ -119,7 +119,7 @@ const char * getCollisionGroupName(CollisionGroup colGroup)
     return "UNKNOWN";
 }
 
-const char * getMoveModeName(const std::shared_ptr<MoveMode>& mode)
+const char * GetMoveModeName(const std::shared_ptr<MoveMode>& mode)
 {
     if (std::dynamic_pointer_cast<MoveModeA>(mode)) return "A";
     if (std::dynamic_pointer_cast<MoveModeB>(mode)) return "B";
@@ -132,7 +132,7 @@ const char * getMoveModeName(const std::shared_ptr<MoveMode>& mode)
     return "Unknown";
 }
 
-void drawCroppedImage(const Rect<int>& rect, const std::shared_ptr<Texture>& texture)
+void DrawCroppedImage(const Rect<int>& rect, const std::shared_ptr<Texture>& texture)
 {
     float u1 = 1.0f * rect.left / texture->GetWidth();
     float v1 = 1.0f * rect.top / texture->GetHeight();
@@ -143,12 +143,12 @@ void drawCroppedImage(const Rect<int>& rect, const std::shared_ptr<Texture>& tex
     ImGui::Image(texture->GetTexture(), ImVec2(rectWidth, rectHeight), ImVec2(u1, v1), ImVec2(u2, v2));
 }
 
-void drawIntersectionInfo(const std::shared_ptr<Intersection>& isect)
+void DrawIntersectionInfo(const std::shared_ptr<Intersection>& isect)
 {
     if (!isect) return;
     {
         ImGui::BeginGroup();
-        ImGui::BulletText("collision-group : %s", getCollisionGroupName(isect->GetCollisionGroup()));
+        ImGui::BulletText("collision-group : %s", GetCollisionGroupName(isect->GetCollisionGroup()));
         ImGui::BulletText("tree-index      : %d", isect->GetTreeIndex());
         ImGui::EndGroup();
     }
@@ -180,10 +180,9 @@ void drawIntersectionInfo(const std::shared_ptr<Intersection>& isect)
 }
 void InputInt64(const char* label, int64_t* i)
 {
-    std::string buf = std::to_string(*i);
-    buf.resize(std::max((size_t)21, buf.size() + 1), '\0');
-    ImGui::InputText(label, &buf[0], buf.size(), ImGuiInputTextFlags_CharsDecimal);
-    *i = std::atoll(buf.data());
+    const int64_t step = 1;
+    const int64_t fastStep = 5;
+    ImGui::InputScalar(label, ImGuiDataType_S64, i, &step, &fastStep);
 }
 void InputDouble(const char * label, double * f)
 {
@@ -216,37 +215,37 @@ void ViewTextRow(const char * name, const char * value)
 }
 void InputIntRow(const char * name, const char * id, int * i)
 {
-    ImGui::AlignFirstTextHeightToWidgets();
+    ImGui::AlignTextToFramePadding();
     ImGui::Text(name); ImGui::NextColumn(); ImGui::PushItemWidth(-1); ImGui::InputInt(id, i, 1, 5); ImGui::PopItemWidth(); ImGui::NextColumn();
 }
 void InputInt64Row(const char * name, const char * id, int64_t * i)
 {
-    ImGui::AlignFirstTextHeightToWidgets();
+    ImGui::AlignTextToFramePadding();
     ImGui::Text(name); ImGui::NextColumn(); ImGui::PushItemWidth(-1); InputInt64(id, i); ImGui::PopItemWidth(); ImGui::NextColumn();
 }
 void InputFloatRow(const char * name, const char * id, float * f)
 {
-    ImGui::AlignFirstTextHeightToWidgets();
+    ImGui::AlignTextToFramePadding();
     ImGui::Text(name); ImGui::NextColumn(); ImGui::PushItemWidth(-1); ImGui::InputFloat(id, f, 1.0f); ImGui::PopItemWidth(); ImGui::NextColumn();
 }
 void InputFloat2Row(const char * name, const char * id, float * fs)
 {
-    ImGui::AlignFirstTextHeightToWidgets();
+    ImGui::AlignTextToFramePadding();
     ImGui::Text(name); ImGui::NextColumn(); ImGui::PushItemWidth(-1); ImGui::InputFloat2(id, fs); ImGui::PopItemWidth(); ImGui::NextColumn();
 }
 void InputDoubleRow(const char * name, const char * id, double * f)
 {
-    ImGui::AlignFirstTextHeightToWidgets();
+    ImGui::AlignTextToFramePadding();
     ImGui::Text(name); ImGui::NextColumn(); ImGui::PushItemWidth(-1); InputDouble(id, f); ImGui::PopItemWidth(); ImGui::NextColumn();
 }
 void InputStringRow(const char * name, const char * id, size_t limit, std::string & str)
 {
-    ImGui::AlignFirstTextHeightToWidgets();
+    ImGui::AlignTextToFramePadding();
     ImGui::Text(name); ImGui::NextColumn(); ImGui::PushItemWidth(-1); InputString(id, limit, str); ImGui::PopItemWidth(); ImGui::NextColumn();
 }
 void SliderFloatRow(const char * name, const char * id, float * f, float min, float max)
 {
-    ImGui::AlignFirstTextHeightToWidgets();
+    ImGui::AlignTextToFramePadding();
     ImGui::Text(name); ImGui::NextColumn(); ImGui::PushItemWidth(-1); ImGui::SliderFloat(id, f, min, max); ImGui::PopItemWidth(); ImGui::NextColumn();
 }
 void SliderAngleRow(const char * name, const char * id, float * f)
@@ -255,7 +254,7 @@ void SliderAngleRow(const char * name, const char * id, float * f)
 }
 void DragFloatRow(const char * name, const char * id, float * f, float speed, float min, float max)
 {
-    ImGui::AlignFirstTextHeightToWidgets();
+    ImGui::AlignTextToFramePadding();
     ImGui::Text(name); ImGui::NextColumn(); ImGui::PushItemWidth(-1); ImGui::DragFloat(id, f, speed, min, max); ImGui::PopItemWidth(); ImGui::NextColumn();
 }
 void DragAngleRow(const char * name, const char * id, float * f)
@@ -264,22 +263,22 @@ void DragAngleRow(const char * name, const char * id, float * f)
 }
 void CheckboxRow(const char * name, const char * id, bool * b)
 {
-    ImGui::AlignFirstTextHeightToWidgets();
+    ImGui::AlignTextToFramePadding();
     ImGui::Text(name); ImGui::NextColumn(); ImGui::PushItemWidth(-1); ImGui::Checkbox(id, b); ImGui::PopItemWidth(); ImGui::NextColumn();
 }
 void ComboRow(const char * name, const char * id, int * i, const char * items)
 {
-    ImGui::AlignFirstTextHeightToWidgets();
+    ImGui::AlignTextToFramePadding();
     ImGui::Text(name); ImGui::NextColumn(); ImGui::PushItemWidth(-1); ImGui::Combo(id, i, items); ImGui::PopItemWidth(); ImGui::NextColumn();
 }
 void ColorEdit3Row(const char * name, const char * id, float * color)
 {
-    ImGui::AlignFirstTextHeightToWidgets();
+    ImGui::AlignTextToFramePadding();
     ImGui::Text(name); ImGui::NextColumn();  ImGui::PushItemWidth(-1); ImGui::ColorEdit3(id, color); ImGui::PopItemWidth();  ImGui::NextColumn();
 }
 void ColorEdit4Row(const char * name, const char * id, float * color)
 {
-    ImGui::AlignFirstTextHeightToWidgets();
+    ImGui::AlignTextToFramePadding();
     ImGui::Text(name); ImGui::NextColumn();  ImGui::PushItemWidth(-1); ImGui::ColorEdit4(id, color, ImGuiColorEditFlags_AlphaPreviewHalf); ImGui::PopItemWidth();  ImGui::NextColumn();
 }
 }

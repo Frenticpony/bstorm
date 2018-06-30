@@ -47,7 +47,7 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
             ImGui::Separator();
             ViewIntRow("id", obj->GetID());
             ImGui::Separator();
-            ViewTextRow("type", getObjTypeName(obj->GetType()));
+            ViewTextRow("type", GetObjTypeName(obj->GetType()));
             ImGui::Separator();
             ViewBoolRow("dead", obj->IsDead());
             ImGui::Separator();
@@ -197,7 +197,7 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                 }
                 ImGui::Separator();
                 {
-                    ImGui::AlignFirstTextHeightToWidgets();
+                    ImGui::AlignTextToFramePadding();
                     bool verticesOpen = ImGui::TreeNode("vertices##primVertices"); ImGui::NextColumn();
                     {
                         int vertexCount = objPrim->GetVertexCount();
@@ -248,7 +248,7 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                             ImGui::PopID();
                         }
                         ImGui::Separator();
-                        ImGui::AlignFirstTextHeightToWidgets();
+                        ImGui::AlignTextToFramePadding();
                         ImGui::Text("use ObjRender::color"); ImGui::NextColumn();
                         bool useObjRenderColor = ImGui::Button("apply##primVertexColorAll"); ImGui::NextColumn();
                         if (useObjRenderColor)
@@ -305,7 +305,7 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                 ImGui::Text("Name"); ImGui::NextColumn(); ImGui::Text("Value"); ImGui::NextColumn();
                 ImGui::Separator();
                 ImGui::Separator();
-                ViewTextRow("mode", getMoveModeName(mode));
+                ViewTextRow("mode", GetMoveModeName(mode));
                 ImGui::Separator();
                 {
                     float speed = objMove->GetSpeed();
@@ -448,7 +448,7 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                 ImGui::Separator();
                 ViewIntRow("text-length-cu", objText->GetTextLengthCU());
                 ImGui::Separator();
-                ImGui::AlignFirstTextHeightToWidgets();
+                ImGui::AlignTextToFramePadding();
                 bool openFontParams = ImGui::TreeNodeEx("font-params##textFontParams", ImGuiTreeNodeFlags_DefaultOpen); ImGui::NextColumn(); ImGui::PushItemWidth(-1);
                 if (objText->IsFontParamModified())
                 {
@@ -704,7 +704,7 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                         ImGui::PushID(isectId++);
                         if (ImGui::TreeNode("intersection##shotIntersection"))
                         {
-                            drawIntersectionInfo(isect);
+                            DrawIntersectionInfo(isect);
                             ImGui::TreePop();
                         }
                         ImGui::PopID();
@@ -720,7 +720,7 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                         ImGui::PushID(isectId++);
                         if (ImGui::TreeNode("intersection##shotTempIntersection"))
                         {
-                            drawIntersectionInfo(isect);
+                            DrawIntersectionInfo(isect);
                             ImGui::TreePop();
                         }
                         ImGui::PopID();
@@ -929,7 +929,7 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                         ImGui::PushID(isectId++);
                         if (ImGui::TreeNode("intersection##enemyTempIntersection"))
                         {
-                            drawIntersectionInfo(isect);
+                            DrawIntersectionInfo(isect);
                             ImGui::TreePop();
                         }
                         ImGui::PopID();
@@ -973,7 +973,7 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                         ImGui::PushID(isectId++);
                         if (ImGui::TreeNode("intersection##spellTempIntersection"))
                         {
-                            drawIntersectionInfo(isect);
+                            DrawIntersectionInfo(isect);
                             ImGui::TreePop();
                         }
                         ImGui::PopID();
@@ -994,7 +994,7 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                 ImGui::Text("Name"); ImGui::NextColumn(); ImGui::Text("Value"); ImGui::NextColumn();
                 ImGui::Separator();
                 ImGui::Separator();
-                ViewTextRow("item-type", getItemTypeName(objItem->GetItemType()));
+                ViewTextRow("item-type", GetItemTypeName(objItem->GetItemType()));
                 ImGui::Separator();
                 {
                     int64_t score = objItem->GetScore();
@@ -1047,7 +1047,7 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                         ImGui::PushID(isectId++);
                         if (ImGui::TreeNode("intersection##itemIntersection"))
                         {
-                            drawIntersectionInfo(isect);
+                            DrawIntersectionInfo(isect);
                             ImGui::TreePop();
                         }
                         ImGui::PopID();
@@ -1080,7 +1080,7 @@ void Package::backDoor<ObjectBrowser>()
             name = ToUTF8(nameProp->ToString());
         } else
         {
-            name = getObjTypeName(obj->GetType());
+            name = GetObjTypeName(obj->GetType());
         }
         std::string label = name;
         if (ImGui::Selectable(label.c_str(), selectedId == id))

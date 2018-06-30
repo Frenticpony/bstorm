@@ -24,7 +24,8 @@
 #include <crtdbg.h>
 #include <string>
 #include <imgui.h>
-#include "../../imgui/examples/directx9_example/imgui_impl_dx9.h"
+#include "../../imgui/examples/imgui_impl_win32.h"
+#include "../../imgui/examples/imgui_impl_dx9.h"
 #include "../../fonts/ja/glyph_ranges_ja.hpp"
 #include <IconsFontAwesome_c.h>
 
@@ -144,9 +145,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
 
         playController->SetScreenSize(screenWidth, screenHeight);
 
-
+        IMGUI_CHECKVERSION();
         ImGui::CreateContext();
-        ImGui_ImplDX9_Init(hWnd, engine->GetDirect3DDevice());
+        ImGui_ImplWin32_Init(hWnd);
+        ImGui_ImplDX9_Init(engine->GetDirect3DDevice());
         {
             // フォント設定
             ImGuiIO& io = ImGui::GetIO();
@@ -193,14 +195,16 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
 
                 engine->SwitchRenderTargetToBackBuffer();
                 d3DDevice_->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(114, 144, 154), 1.0f, 0);
-                engine->UpdateFpsCounter();
                 ImGui_ImplDX9_NewFrame();
+                ImGui_ImplWin32_NewFrame();
+                ImGui::NewFrame();
+                engine->UpdateFpsCounter();
+
                 playController->SetScript(scriptExplorer->getSelectedMainScript(), scriptExplorer->getSelectedPlayerScript());
                 if (!playController->IsPaused())
                 {
                     playController->Tick();
                 }
-
 
                 gameView->draw();
 
@@ -286,6 +290,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
     }
     Logger::Shutdown();
     ImGui_ImplDX9_Shutdown();
+    ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
     return (int)msg.wParam;
 }

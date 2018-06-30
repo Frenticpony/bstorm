@@ -13,7 +13,8 @@
 #include <d3d9.h>
 #include <windows.h>
 #include <imgui.h>
-#include "../../imgui/examples/directx9_example/imgui_impl_dx9.h"
+#include "../../imgui/examples/imgui_impl_win32.h"
+#include "../../imgui/examples/imgui_impl_dx9.h"
 #include "../../IconFontCppHeaders/IconsFontAwesome_c.h"
 #include "../../fonts/ja/glyph_ranges_ja.hpp"
 
@@ -135,8 +136,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
 
         {
             /* init imgui */
+            IMGUI_CHECKVERSION();
             ImGui::CreateContext();
-            ImGui_ImplDX9_Init(hWnd, d3DDevice_);
+            ImGui_ImplWin32_Init(hWnd);
+            ImGui_ImplDX9_Init(d3DDevice_);
             ImGuiIO& io = ImGui::GetIO();
 
             // prevent imgui.ini generation
@@ -190,9 +193,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
             if (SUCCEEDED(d3DDevice_->BeginScene()))
             {
                 ImGui_ImplDX9_NewFrame();
+                ImGui_ImplWin32_NewFrame();
+                ImGui::NewFrame();
                 d3DDevice_->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(114, 144, 154), 1.0f, 0);
-                ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiSetCond_Once);
-                ImGui::SetNextWindowSize(ImVec2(configWindowWidth, configWindowHeight), ImGuiSetCond_Once);
+                ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Once);
+                ImGui::SetNextWindowSize(ImVec2(configWindowWidth, configWindowHeight), ImGuiCond_Once);
                 ImGuiWindowFlags windowFlag = ImGuiWindowFlags_NoTitleBar |
                     ImGuiWindowFlags_NoResize |
                     ImGuiWindowFlags_NoMove;
@@ -333,6 +338,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
 
     // clean
     ImGui_ImplDX9_Shutdown();
+    ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
     d3DDevice_->Release();
     d3D->Release();
