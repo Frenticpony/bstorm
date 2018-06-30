@@ -1307,8 +1307,7 @@ void Package::GenerateBonusItem(float x, float y)
 {
     if (IsDefaultBonusItemEnabled())
     {
-        auto bonusItem = std::make_shared<ObjItem>(ITEM_DEFAULT_BONUS, colDetector_, shared_from_this());
-        objTable_->Add(bonusItem);
+        auto bonusItem = objTable_->Create<ObjItem>(ITEM_DEFAULT_BONUS, colDetector_, shared_from_this());
         objLayerList_->SetRenderPriority(bonusItem, objLayerList_->GetItemRenderPriority());
         bonusItem->SetMovePosition(x, y);
         bonusItem->SetIntersection();

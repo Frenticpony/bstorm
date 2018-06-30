@@ -75,7 +75,6 @@ public:
         }
         return nullptr;
     }
-    void Add(const std::shared_ptr<Obj>& obj);
     template <class T, class... Args>
     std::shared_ptr<T> Create(Args... args)
     {
@@ -89,6 +88,7 @@ public:
     void DeleteStgSceneObject();
     const std::map<int, std::shared_ptr<Obj>>& GetAll();
 private:
+    void Add(const std::shared_ptr<Obj>& obj);
     int idGen_;
     std::map<int, std::shared_ptr<Obj>> table_;
     bool isUpdating_;
