@@ -106,7 +106,7 @@ void ObjectTable::UpdateAll(bool ignoreStgSceneObj)
         auto& obj = it->second;
         if (!obj->IsDead())
         {
-            if (!ignoreStgSceneObj || !obj->IsStgSceneObject())
+            if (!(ignoreStgSceneObj && obj->IsStgSceneObject()))
             {
                 obj->Update();
             }

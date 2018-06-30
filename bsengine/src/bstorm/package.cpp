@@ -42,6 +42,7 @@
 #include <bstorm/file_loader.hpp>
 #include <bstorm/script_info.hpp>
 #include <bstorm/script.hpp>
+#include <bstorm/replay_data.hpp>
 #include <bstorm/config.hpp>
 
 #include <exception>
@@ -96,6 +97,7 @@ Package::Package(HWND hWnd,
     randGenerator_(std::make_shared<RandGenerator>((uint32_t)this)), // FUTURE : from rand
     autoItemCollectionManager_(std::make_shared<AutoItemCollectionManager>()),
     elapsedFrame_(0),
+    stageElapesdFrame_(0),
     stageStartTime_(std::make_shared<TimePoint>()),
     pseudoPlayerFps_(60),
     pseudoEnemyFps_(60),
@@ -107,6 +109,7 @@ Package::Package(HWND hWnd,
     isStagePaused_(true),
     isStageForceTerminated_(false),
     isReplay_(false),
+    replayData_(std::make_shared<ReplayData>()),
     deleteShotImmediateEventOnShotScriptEnable_(false),
     deleteShotFadeEventOnShotScriptEnable_(false),
     deleteShotToItemEventOnShotScriptEnable_(false),
@@ -146,85 +149,87 @@ void Package::TickFrame()
         return;
     }
 
-    if (GetElapsedFrame() % (60 / std::min(pseudoEnemyFps_, pseudoPlayerFps_)) == 0)
+    if (auto stageMain = stageMainScript_.lock())
     {
-        if (auto stageMain = stageMainScript_.lock())
+        if (stageMain->IsClosed())
         {
-            if (stageMain->IsClosed())
+            if (isStageForceTerminated_)
             {
-                if (isStageForceTerminated_)
-                {
-                    stageSceneResult_ = STAGE_RESULT_BREAK_OFF;
-                    SetPlayerLife(0);
-                    SetPlayerSpell(3);
-                    SetPlayerPower(1);
-                    SetPlayerScore(0);
-                    SetPlayerGraze(0);
-                    SetPlayerPoint(0);
-                } else if (auto player = GetPlayerObject())
-                {
-                    stageSceneResult_ = player->GetState() != STATE_END ? STAGE_RESULT_CLEARED : STAGE_RESULT_PLAYER_DOWN;
-                } else
-                {
-                    stageSceneResult_ = STAGE_RESULT_PLAYER_DOWN;
-                }
-                RenderToTextureA1(GetTransitionRenderTargetName(), 0, MAX_RENDER_PRIORITY, true);
-                objTable_->DeleteStgSceneObject();
-                scriptManager_->CloseStgSceneScript();
-                stageMainScript_.reset();
-                stagePlayerScript_.reset();
-                isStageForceTerminated_ = false;
-                isStagePaused_ = true;
-                pseudoPlayerFps_ = pseudoEnemyFps_ = 60;
+                stageSceneResult_ = STAGE_RESULT_BREAK_OFF;
+                SetPlayerLife(0);
+                SetPlayerSpell(3);
+                SetPlayerPower(1);
+                SetPlayerScore(0);
+                SetPlayerGraze(0);
+                SetPlayerPoint(0);
+            } else if (auto player = GetPlayerObject())
+            {
+                stageSceneResult_ = player->GetState() != STATE_END ? STAGE_RESULT_CLEARED : STAGE_RESULT_PLAYER_DOWN;
+            } else
+            {
+                stageSceneResult_ = STAGE_RESULT_PLAYER_DOWN;
             }
+            RenderToTextureA1(GetTransitionRenderTargetName(), 0, MAX_RENDER_PRIORITY, true);
+            objTable_->DeleteStgSceneObject();
+            scriptManager_->CloseStgSceneScript();
+            stageMainScript_.reset();
+            stagePlayerScript_.reset();
+            isStageForceTerminated_ = false;
+            isStagePaused_ = true;
+            pseudoPlayerFps_ = pseudoEnemyFps_ = 60;
         }
-        scriptManager_->RunFinalizeOnClosedScript();
+    }
 
-        if (!IsStagePaused())
+    scriptManager_->RunFinalizeOnClosedScript();
+
+    {
+        // 入力更新
+        inputDevice_->UpdateInputState();
+
+        // VirtualKey状態更新
+        virtualKeyStates_.clear();
+        // キーボードの入力がパッドより優先
+        for (auto& entry : virtualKeyAssign_)
+        {
+            auto vk = entry.first;
+            auto k = entry.second.first;
+            auto pad = entry.second.second;
+            KeyState keyState = inputDevice_->GetKeyState(k);
+            if (keyState == KEY_FREE)
+            {
+                keyState = inputDevice_->GetPadButtonState(pad);
+            }
+            virtualKeyStates_[vk] = keyState;
+        }
+    }
+
+    if (IsReplay())
+    {
+        // リプレイVirtualKey状態更新
+        replayVirtualKeyStates_.clear();
+    }
+
+    scriptManager_->RunMainLoopAllNonStgScript();
+
+    if (IsStagePaused())
+    {
+        objTable_->UpdateAll(true);
+    } else
+    {
+        if (stageElapesdFrame_ % (60 / std::min(pseudoEnemyFps_, pseudoPlayerFps_)) == 0)
         {
             colDetector_->TestAllCollision();
-        }
 
-        // SetShotIntersection{Circle, Line}で設定した判定削除
-        tempEnemyShotIsects_.clear();
+            // SetShotIntersection{Circle, Line}で設定した判定削除
+            tempEnemyShotIsects_.clear();
 
-        {
-            // 入力更新
-            inputDevice_->UpdateInputState();
-
-            // VirtualKey状態更新
-            virtualKeyStates_.clear();
-            // キーボードの入力がパッドより優先
-            for (auto& entry : virtualKeyAssign_)
-            {
-                auto vk = entry.first;
-                auto k = entry.second.first;
-                auto pad = entry.second.second;
-                KeyState keyState = inputDevice_->GetKeyState(k);
-                if (keyState == KEY_FREE)
-                {
-                    keyState = inputDevice_->GetPadButtonState(pad);
-                }
-                virtualKeyStates_[vk] = keyState;
-            }
-        }
-
-        if (IsReplay())
-        {
-            // リプレイVirtualKey状態更新
-            replayVirtualKeyStates_.clear();
-        }
-
-        scriptManager_->RunMainLoopAllNonStgScript();
-
-        if (!IsStagePaused())
-        {
             scriptManager_->RunMainLoopAllStgScript();
+
+            objTable_->UpdateAll(false);
+
+            autoItemCollectionManager_->Reset();
         }
-
-        objTable_->UpdateAll(IsStagePaused());
-
-        autoItemCollectionManager_->Reset();
+        stageElapesdFrame_++;
     }
 
     // 使われなくなったリソース開放
@@ -243,7 +248,7 @@ void Package::TickFrame()
             ReleaseUnusedMesh();
             break;
     }
-    elapsedFrame_ += 1;
+    elapsedFrame_++;
 }
 
 void Package::Render()
@@ -2169,6 +2174,7 @@ void Package::SetStagePlayerScript(const ScriptInfo & script)
 
 void Package::SetStageReplayFile(const std::wstring & path)
 {
+    replayData_ = std::make_shared<ReplayData>(path);
     stageReplayFilePath_ = path;
 }
 
@@ -2234,6 +2240,12 @@ void Package::StartStageScene(const std::shared_ptr<SourcePos>& srcPos)
     isStagePaused_ = false;
     renderer_->SetFogEnable(false);
     pseudoPlayerFps_ = pseudoEnemyFps_ = 60;
+    stageElapesdFrame_ = 0;
+
+    if (!IsReplay())
+    {
+        replayData_ = std::make_shared<ReplayData>();
+    }
 
     if (stageMainScriptInfo_.systemPath.empty() || stageMainScriptInfo_.systemPath == L"DEFAULT")
     {

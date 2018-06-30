@@ -75,6 +75,7 @@ class ObjectTable;
 class RandGenerator;
 class RenderTarget;
 class Renderer;
+class ReplayData;
 class Script;
 class ScriptInfo;
 class ScriptManager;
@@ -524,6 +525,7 @@ private:
     std::shared_ptr<AutoItemCollectionManager> autoItemCollectionManager_;
 
     int elapsedFrame_;
+    int stageElapesdFrame_;
 
     std::shared_ptr<TimePoint> stageStartTime_;
     std::vector<ScriptInfo> freePlayerScriptInfoList_;
@@ -551,6 +553,7 @@ private:
     bool isStageForceTerminated_;
 
     bool isReplay_;
+    std::shared_ptr<ReplayData> replayData_;
 
     bool deleteShotImmediateEventOnShotScriptEnable_;
     bool deleteShotFadeEventOnShotScriptEnable_;
