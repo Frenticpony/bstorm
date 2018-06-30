@@ -158,39 +158,39 @@ void ScriptExplorer::draw()
     if (ImGui::Begin("Script Explorer", NULL, ImGuiWindowFlags_ResizeFromAnySide))
     {
         float contentWidth = ImGui::GetContentRegionAvailWidth();
-        {
-            // ツールバー
-            ImGui::BeginGroup();
-            ImGui::InputText(ICON_FA_SEARCH"##filterMain", filterInputMain.data(), filterInputMain.size());
-            ImGui::SameLine(contentWidth - 45);
-            if (isLoadingNow())
-            {
-                // reload中
-                ImGui::Button(ICON_FA_SPINNER);
-            } else
-            {
-                if (ImGui::Button(ICON_FA_REFRESH))
-                {
-                    reload();
-                }
-            }
-            if (ImGui::IsItemHovered())
-                ImGui::SetTooltip("reload");
-            ImGui::SameLine();
-            if (ImGui::Button(useTreeView ? ICON_FA_LIST : ICON_FA_FILES_O))
-            {
-                useTreeView = !useTreeView;
-            }
-            if (ImGui::IsItemHovered())
-                ImGui::SetTooltip(useTreeView ? "flat view" : "tree view");
-            ImGui::EndGroup();
-        }
-
         float contentHeight = ImGui::GetContentRegionAvail().y;
 
         bool mainScriptListOpened = false;
         if (mainScriptListOpened = ImGui::CollapsingHeader("Main Script", ImGuiTreeNodeFlags_DefaultOpen))
         {
+            {
+                // ツールバー
+                ImGui::BeginGroup();
+                ImGui::InputText(ICON_FA_SEARCH"##filterMain", filterInputMain.data(), filterInputMain.size());
+                ImGui::SameLine(contentWidth - 45);
+                if (isLoadingNow())
+                {
+                    // reload中
+                    ImGui::Button(ICON_FA_SPINNER);
+                } else
+                {
+                    if (ImGui::Button(ICON_FA_REFRESH))
+                    {
+                        reload();
+                    }
+                }
+                if (ImGui::IsItemHovered())
+                    ImGui::SetTooltip("reload");
+                ImGui::SameLine();
+                if (ImGui::Button(useTreeView ? ICON_FA_LIST : ICON_FA_FILES_O))
+                {
+                    useTreeView = !useTreeView;
+                }
+                if (ImGui::IsItemHovered())
+                    ImGui::SetTooltip(useTreeView ? "flat view" : "tree view");
+                ImGui::EndGroup();
+            }
+
             // スクリプト一覧
             ImGui::BeginChildFrame(ImGui::GetID("main script list"), ImVec2(contentWidth, contentHeight * 0.4), ImGuiWindowFlags_HorizontalScrollbar);
             std::string searchTextMain(filterInputMain.data()); // delete null sequence
