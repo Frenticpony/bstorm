@@ -64,14 +64,6 @@ ObjectTable::~ObjectTable()
 {
 }
 
-void ObjectTable::Add(const std::shared_ptr<Obj>& obj)
-{
-    if (obj->id_ != ID_INVALID) return;
-    table_[idGen_] = obj;
-    obj->id_ = idGen_;
-    idGen_++;
-}
-
 void ObjectTable::Delete(int id)
 {
     auto it = table_.find(id);

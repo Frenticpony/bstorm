@@ -409,7 +409,7 @@ ScriptManager::~ScriptManager() {}
 std::shared_ptr<Script> ScriptManager::Compile(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& srcPos)
 {
     auto script = std::make_shared<Script>(path, type, version, idGen_++, package, srcPos);
-    scriptMap_[script->GetID()] = script;
+    scriptMap_.emplace_hint(scriptMap_.end(), script->GetID(), script);
     return script;
 }
 

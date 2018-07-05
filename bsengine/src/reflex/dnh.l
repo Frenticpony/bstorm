@@ -30,7 +30,7 @@ public :
     }
     SourcePos GetSourcePos() const
     {
-        return {(int)lineno(), (int)columno() + 1, GetCurrentFilePath()};
+        return SourcePos((int)lineno(), (int)columno() + 1, GetCurrentFilePath());
     }
     void SetLoader(const std::shared_ptr<FileLoader>& loader)
     {

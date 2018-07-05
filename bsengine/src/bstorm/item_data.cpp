@@ -33,7 +33,7 @@ void ItemDataTable::Add(const std::shared_ptr<ItemData>& data)
 {
     if (data->texture)
     {
-        table_[data->id] = data;
+        table_.emplace(data->id, data);
     }
 }
 
@@ -61,7 +61,7 @@ void ItemDataTable::Reload(const std::wstring & path, const std::shared_ptr<Sour
     {
         auto& data = entry.second;
         data.texture = texture;
-        table_[data.id] = std::make_shared<ItemData>(data);
+        table_.emplace(data.id, std::make_shared<ItemData>(data));
     }
     loadedPaths_.insert(uniqPath);
     Logger::WriteLog(std::move(

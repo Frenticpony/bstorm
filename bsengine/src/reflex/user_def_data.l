@@ -43,7 +43,7 @@ public :
     }
     SourcePos GetSourcePos() const
     {
-        return {(int)lineno(), (int)columno() + 1, getFilePath()};
+        return SourcePos((int)lineno(), (int)columno() + 1, getFilePath());
     }
     std::wstring GetWString() const
     {

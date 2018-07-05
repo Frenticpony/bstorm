@@ -8,6 +8,9 @@ namespace bstorm
 {
 struct SourcePos
 {
+    SourcePos() : line(-1), column(-1), filename(nullptr) { }
+    SourcePos(int line, int column, const std::shared_ptr<std::wstring>& path) :
+        line(line), column(column), filename(path) {}
     int line;
     int column;
     std::shared_ptr<std::wstring> filename;

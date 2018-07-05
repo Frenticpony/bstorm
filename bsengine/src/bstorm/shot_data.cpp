@@ -43,7 +43,7 @@ void ShotDataTable::Add(const std::shared_ptr<ShotData>& data)
 {
     if (data->texture)
     {
-        table_[data->id] = data;
+        table_.emplace(data->id, data);
     }
 }
 
@@ -101,7 +101,7 @@ void ShotDataTable::Reload(const std::wstring & path, const std::shared_ptr<Sour
             data.collisions.push_back({ r, 0.0f, 0.0f });
         }
         data.texture = texture;
-        table_[data.id] = std::make_shared<ShotData>(data);
+        table_.emplace(data.id, std::make_shared<ShotData>(data));
     }
     alreadyLoadedPaths_.insert(uniqPath);
     Logger::WriteLog(std::move(

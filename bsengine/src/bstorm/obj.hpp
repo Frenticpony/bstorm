@@ -79,7 +79,8 @@ public:
     std::shared_ptr<T> Create(Args... args)
     {
         std::shared_ptr<T> obj = std::make_shared<T>(args...);
-        Add(obj);
+        obj->id_ = idGen_++;
+        table_.emplace_hint(table_.end(), obj->id_, obj);
         return obj;
     }
     void Delete(int id);
@@ -88,7 +89,6 @@ public:
     void DeleteStgSceneObject();
     const std::map<int, std::shared_ptr<Obj>>& GetAll();
 private:
-    void Add(const std::shared_ptr<Obj>& obj);
     int idGen_;
     std::map<int, std::shared_ptr<Obj>> table_;
     bool isUpdating_;

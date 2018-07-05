@@ -11,7 +11,7 @@ std::string SourcePos::ToString() const
 
 void SourceMap::LogSourcePos(int outputLine, const std::shared_ptr<std::wstring>& path, int srcLine)
 {
-    srcMap_[outputLine] = { srcLine, -1, path };
+    srcMap_.emplace(std::piecewise_construct, std::forward_as_tuple(outputLine), std::forward_as_tuple(srcLine, -1, path ));
 }
 
 std::shared_ptr<SourcePos> SourceMap::GetSourcePos(int outputLine) const
