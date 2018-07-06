@@ -16,7 +16,7 @@ class TimePoint;
 class ReplayData
 {
 public:
-    ReplayData(); // ì¬
+    ReplayData(); // ‹óƒf[ƒ^ì¬
     ReplayData(const std::wstring& filePath); // “Ç‚İ‚İ
 
     // =======

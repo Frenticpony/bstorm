@@ -1,5 +1,5 @@
 #include <bstorm/dnh_const.hpp>
-#include <bstorm/util.hpp>
+#include <bstorm/dx_util.hpp>
 #include <bstorm/renderer.hpp>
 #include <bstorm/package.hpp>
 #include <bstorm/obj_mesh.hpp>

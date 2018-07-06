@@ -5,6 +5,7 @@
 #include <bstorm/obj_shot.hpp>
 
 #include <algorithm>
+#include <d3dx9.h>
 
 namespace bstorm
 {

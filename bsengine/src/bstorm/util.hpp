@@ -1,14 +1,10 @@
 ﻿#pragma once
 
 #include <string>
-#include <array>
 #include <vector>
 #include <windows.h>
 #include <algorithm>
 #include <unordered_set>
-#include <future>
-#include <chrono>
-#include <d3dx9.h>
 
 namespace bstorm
 {
@@ -113,9 +109,6 @@ void GetFilePathsRecursively(const std::wstring& dir, std::vector<std::wstring>&
 void GetDirs(const std::wstring& dir, std::vector<std::wstring>& dirList, bool doRecursive);
 void GetDirsRecursively(const std::wstring& dir, std::vector<std::wstring>& dirList);
 
-// 拡大、回転、移動の順番で掛けた行列を作る
-D3DXMATRIX CreateScaleRotTransMatrix(float x, float y, float z, float rx, float ry, float rz, float sx, float sy, float sz);
-
 inline int NextPow2(int x)
 {
     if (x < 0) return 0;
@@ -132,10 +125,4 @@ std::wstring GetCanonicalPath(const std::wstring& path);
 std::wstring ConcatPath(const std::wstring& a, const std::wstring& b);
 std::wstring GetParentPath(const std::wstring& path);
 std::wstring ExpandIncludePath(const std::wstring& includerPath, const std::wstring& includeePath);
-
-template <typename T>
-bool is_shared_future_ready(const std::shared_future<T>& f)
-{
-    return f.wait_for(std::chrono::seconds(0)) == future_status::ready;
-}
 }

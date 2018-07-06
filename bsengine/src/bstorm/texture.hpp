@@ -1,13 +1,10 @@
 ﻿#pragma once
 
 #include <bstorm/non_copyable.hpp>
-#include <bstorm/nullable_shared_ptr.hpp>
 #include <bstorm/cache_store.hpp> 
 
 #include <string>
 #include <memory>
-#include <unordered_map>
-#include <future>
 #include <d3d9.h>
 
 namespace bstorm
@@ -22,7 +19,6 @@ public:
     const std::wstring& GetPath() const;
     int GetWidth() const;
     int GetHeight() const;
-    bool IsReserved() const;
     IDirect3DTexture9* GetTexture() const;
     void Reload();
 private:
@@ -33,7 +29,6 @@ private:
     const std::shared_ptr<GraphicDevice> graphicDevice_;
 };
 
-struct SourcePos;
 class TextureStore
 {
 public:

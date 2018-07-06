@@ -2,6 +2,7 @@
 
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/util.hpp>
+#include <bstorm/dx_util.hpp>
 #include <bstorm/texture.hpp>
 #include <bstorm/render_target.hpp>
 #include <bstorm/renderer.hpp>

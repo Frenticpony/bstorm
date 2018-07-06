@@ -4,6 +4,7 @@
 #include <bstorm/point2D.hpp>
 #include <bstorm/vertex.hpp>
 #include <bstorm/util.hpp>
+#include <bstorm/dx_util.hpp>
 #include <bstorm/renderer.hpp>
 #include <bstorm/obj_enemy.hpp>
 #include <bstorm/obj_shot.hpp>

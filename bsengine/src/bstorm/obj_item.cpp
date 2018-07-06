@@ -2,7 +2,7 @@
 
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/const.hpp>
-#include <bstorm/util.hpp>
+#include <bstorm/dx_util.hpp>
 #include <bstorm/vertex.hpp>
 #include <bstorm/intersection.hpp>
 #include <bstorm/item_data.hpp>
