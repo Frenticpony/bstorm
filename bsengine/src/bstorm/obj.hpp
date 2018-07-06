@@ -76,9 +76,9 @@ public:
         return nullptr;
     }
     template <class T, class... Args>
-    std::shared_ptr<T> Create(Args... args)
+    std::shared_ptr<T> Create(Args&&... args)
     {
-        std::shared_ptr<T> obj = std::make_shared<T>(args...);
+        std::shared_ptr<T> obj = std::make_shared<T>(std::forward<Args>(args)...);
         obj->id_ = idGen_++;
         table_.emplace_hint(table_.end(), obj->id_, obj);
         return obj;
