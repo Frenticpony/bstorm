@@ -44,5 +44,6 @@ bstorm.exe
 /DxSDK/Include/*
 /DxSDK/Lib/Win32/*
 /DxSDK/Lib/x64/*
+.vscode/
 
 !.gitkeep
