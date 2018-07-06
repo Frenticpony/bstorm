@@ -80,7 +80,7 @@ void ShotDataTable::Reload(const std::wstring & path, const std::shared_ptr<Sour
 {
     std::wstring uniqPath = GetCanonicalPath(path);
     auto userShotData = ParseUserShotData(uniqPath, fileLoader_);
-    auto texture = textureStore_->Load(userShotData->imagePath);
+    auto& texture = textureStore_->Load(userShotData->imagePath);
     for (auto& entry : userShotData->dataMap)
     {
         auto& data = entry.second;
