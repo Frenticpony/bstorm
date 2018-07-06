@@ -29,15 +29,23 @@ static D3DXVECTOR3 CalcFaceNormal(const D3DXVECTOR3& a, const D3DXVECTOR3& b, co
     return n;
 }
 
-std::shared_ptr<Mesh> MqoToMesh(const Mqo & mqo, const std::shared_ptr<TextureStore>& textureStore, const std::shared_ptr<SourcePos>& srcPos)
+static void CreateMeshMaterials(const Mqo & mqo, const std::shared_ptr<TextureStore>& textureStore, std::vector<MeshMaterial>& materials)
 {
-    auto mesh = std::make_shared<Mesh>(mqo.path);
+    auto mqoDir = GetParentPath(mqo.path);
+
+    // テクスチャをプレロード
+    for (const auto& mqoMat : mqo.materials)
+    {
+        textureStore->LoadInThread(ConcatPath(mqoDir, mqoMat.tex));
+    }
+
+    materials.reserve(mqo.materials.size());
 
     // 材質情報をコピー
     for (const auto& mqoMat : mqo.materials)
     {
-        auto texture = textureStore->Load(ConcatPath(GetParentPath(mqo.path), mqoMat.tex));
-        mesh->materials.emplace_back(mqoMat.col.r, mqoMat.col.g, mqoMat.col.b, mqoMat.col.a, mqoMat.dif, mqoMat.amb, mqoMat.emi, texture);
+        auto& texture = textureStore->Load(ConcatPath(mqoDir, mqoMat.tex));
+        materials.emplace_back(mqoMat.col.r, mqoMat.col.g, mqoMat.col.b, mqoMat.col.a, mqoMat.dif, mqoMat.amb, mqoMat.emi, texture);
     }
 
     // 材質別に頂点配列を生成
@@ -81,7 +89,7 @@ std::shared_ptr<Mesh> MqoToMesh(const Mqo & mqo, const std::shared_ptr<TextureSt
         for (int faceIdx = 0; faceIdx < obj.faces.size(); faceIdx++)
         {
             const auto& face = obj.faces[faceIdx];
-            auto& meshMat = mesh->materials[face.materialIndex];
+            auto& meshMat = materials[face.materialIndex];
             for (int i = 0; i < face.vertexIndices.size() - 2; i++)
             {
                 const auto& faceNormal = faceNormals[faceIdx][i];
@@ -98,11 +106,20 @@ std::shared_ptr<Mesh> MqoToMesh(const Mqo & mqo, const std::shared_ptr<TextureSt
             }
         }
     }
-    return mesh;
 }
 
-Mesh::Mesh(const std::wstring & path) : path_(path)
+Mesh::Mesh(const std::wstring& path, const std::shared_ptr<TextureStore>& textureStore, const std::shared_ptr<FileLoader>& fileLoader) :
+    path_(path)
 {
+    if (auto mqo = ParseMqo(path, fileLoader))
+    {
+        CreateMeshMaterials(*mqo, textureStore, materials);
+    } else
+    {
+        throw Log(Log::Level::LV_ERROR)
+            .SetMessage("failed to load mesh.")
+            .SetParam(Log::Param(Log::Param::Tag::TEXT, path));
+    }
 }
 
 Mesh::~Mesh()
@@ -114,56 +131,36 @@ Mesh::~Mesh()
 }
 
 
-MeshCache::MeshCache(const std::shared_ptr<TextureStore>& textureStore, const std::shared_ptr<FileLoader>& fileLoader) :
+MeshStore::MeshStore(const std::shared_ptr<TextureStore>& textureStore, const std::shared_ptr<FileLoader>& fileLoader) :
     textureStore_(textureStore),
     fileLoader_(fileLoader)
 {
 }
 
-std::shared_ptr<Mesh> MeshCache::Load(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
+const std::shared_ptr<Mesh>& MeshStore::Load(const std::wstring & path)
 {
     const auto ext = GetLowerExt(path);
     if (ext != L".mqo")
     {
         throw Log(Log::Level::LV_ERROR)
             .SetMessage("this file format is not supported.")
-            .SetParam(Log::Param(Log::Param::Tag::TEXT, path))
-            .AddSourcePos(srcPos);
+            .SetParam(Log::Param(Log::Param::Tag::TEXT, path));
     }
 
     auto uniqPath = GetCanonicalPath(path);
-    auto it = meshMap_.find(uniqPath);
-    if (it != meshMap_.end())
+    if (cacheStore_.Contains(uniqPath))
     {
-        return it->second;
-    } else
-    {
-        if (auto mqo = ParseMqo(uniqPath, fileLoader_))
-        {
-            auto mesh = MqoToMesh(*mqo, textureStore_, srcPos);
-            Logger::WriteLog(std::move(
-                Log(Log::Level::LV_INFO).SetMessage("load mesh.")
-                .SetParam(Log::Param(Log::Param::Tag::MESH, uniqPath))
-                .AddSourcePos(srcPos)));
-            return meshMap_[uniqPath] = std::move(mesh);
-        }
-        throw Log(Log::Level::LV_ERROR)
-            .SetMessage("failed to load mesh.")
-            .SetParam(Log::Param(Log::Param::Tag::TEXT, path))
-            .AddSourcePos(srcPos);
+        return cacheStore_.Get(uniqPath);
     }
+    auto & mesh = cacheStore_.Load(uniqPath, uniqPath, textureStore_, fileLoader_);
+    Logger::WriteLog(std::move(
+        Log(Log::Level::LV_INFO).SetMessage("load mesh.")
+        .SetParam(Log::Param(Log::Param::Tag::MESH, path))));
+    return mesh;
 }
 
-void MeshCache::ReleaseUnusedMesh()
+void MeshStore::RemoveUnusedMesh()
 {
-    auto it = meshMap_.begin();
-    while (it != meshMap_.end())
-    {
-        auto& mesh = it->second;
-        if (mesh.use_count() <= 1)
-        {
-            meshMap_.erase(it++);
-        } else ++it;
-    }
+    cacheStore_.RemoveUnused();
 }
 }

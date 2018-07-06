@@ -46,7 +46,7 @@ class VirtualKeyAssign;
 class LostableGraphicResource;
 class LostableGraphicResourceManager;
 class Mesh;
-class MeshCache;
+class MeshStore;
 class Obj;
 class ObjCrLaser;
 class ObjEnemy;
@@ -176,8 +176,8 @@ public:
     bool IsPixelShaderSupported(int major, int minor);
 
     /* mesh */
-    std::shared_ptr<Mesh> LoadMesh(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
-    void ReleaseUnusedMesh();
+    const std::shared_ptr<Mesh>& LoadMesh(const std::wstring& path);
+    void RemoveUnusedMesh();
 
     /* sound */
     std::shared_ptr<SoundBuffer> LoadSound(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
@@ -506,7 +506,7 @@ private:
     std::shared_ptr<CollisionDetector> colDetector_;
     std::vector<std::shared_ptr<Intersection>> tempEnemyShotIsects_;
     std::shared_ptr<TextureStore> textureStore_;
-    std::shared_ptr<MeshCache> meshCache_;
+    std::shared_ptr<MeshStore> meshStore_;
     std::shared_ptr<Camera2D> camera2D_;
     std::shared_ptr<Camera3D> camera3D_;
     std::shared_ptr<CommonDataDB> commonDataDB_;

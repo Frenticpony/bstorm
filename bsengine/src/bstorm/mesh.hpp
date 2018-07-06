@@ -1,5 +1,7 @@
 #pragma once
 
+#include <bstorm/cache_store.hpp>
+
 #include <vector>
 #include <memory>
 #include <unordered_map>
@@ -38,10 +40,12 @@ struct MeshMaterial
     std::shared_ptr<Texture> texture;
 };
 
+class TextureStore;
+class FileLoader;
 class Mesh
 {
 public:
-    Mesh(const std::wstring& path);
+    Mesh(const std::wstring& path, const std::shared_ptr<TextureStore>& textureStore, const std::shared_ptr<FileLoader>& fileLoader);
     ~Mesh();
     std::vector<MeshMaterial> materials;
     const std::wstring& GetPath() const { return path_; }
@@ -49,22 +53,15 @@ private:
     std::wstring path_;
 };
 
-struct SourcePos;
-class TextureStore;
-struct Mqo;
-std::shared_ptr<Mesh> MqoToMesh(const Mqo& mqo, const std::shared_ptr<TextureStore>& textureStore, const std::shared_ptr<SourcePos>& srcPos);
-
-class FileLoader;
-class TextureStore;
-class MeshCache
+class MeshStore
 {
 public:
-    MeshCache(const std::shared_ptr<TextureStore>& textureStore, const std::shared_ptr<FileLoader>& fileLoader);
-    std::shared_ptr<Mesh> Load(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
-    void ReleaseUnusedMesh();
+    MeshStore(const std::shared_ptr<TextureStore>& textureStore, const std::shared_ptr<FileLoader>& fileLoader);
+    const std::shared_ptr<Mesh>& Load(const std::wstring& path);
+    void RemoveUnusedMesh();
 private:
     std::shared_ptr<TextureStore> textureStore_;
     std::shared_ptr<FileLoader> fileLoader_;
-    std::unordered_map<std::wstring, std::shared_ptr<Mesh>> meshMap_;
+    CacheStore<std::wstring, Mesh> cacheStore_;
 };
 }

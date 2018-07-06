@@ -3127,7 +3127,7 @@ static int ObjMesh_Load(lua_State* L)
     auto path = DnhValue::ToString(L, 2);
     if (auto obj = package->GetObject<ObjMesh>(objId))
     {
-        if (auto mesh = package->LoadMesh(path, GetSourcePos(L)))
+        if (auto& mesh = package->LoadMesh(path))
         {
             obj->SetMesh(mesh);
         }

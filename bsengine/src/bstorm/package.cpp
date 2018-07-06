@@ -85,7 +85,7 @@ Package::Package(HWND hWnd,
     objLayerList_(std::make_shared<ObjectLayerList>()),
     colDetector_(std::make_shared<CollisionDetector>(screenWidth, screenHeight, std::make_shared<CollisionMatrix>(DEFAULT_COLLISION_MATRIX_DIMENSION, DEFAULT_COLLISION_MATRIX))),
     textureStore_(std::make_shared<TextureStore>(graphicDevice_)),
-    meshCache_(std::make_shared<MeshCache>(textureStore_, fileLoader_)),
+    meshStore_(std::make_shared<MeshStore>(textureStore_, fileLoader_)),
     camera2D_(std::make_shared<Camera2D>()),
     camera3D_(std::make_shared<Camera3D>()),
     commonDataDB_(std::make_shared<CommonDataDB>()),
@@ -234,6 +234,7 @@ void Package::TickFrame()
 
     // 使われなくなったリソース開放
     RemoveUnusedTexture();
+    RemoveUnusedMesh();
     switch (GetElapsedFrame() % 1920)
     {
         case 0:
@@ -241,9 +242,6 @@ void Package::TickFrame()
             break;
         case 960:
             ReleaseUnusedFont();
-            break;
-        case 1440:
-            ReleaseUnusedMesh();
             break;
     }
     elapsedFrame_++;
@@ -601,14 +599,14 @@ bool Package::IsPixelShaderSupported(int major, int minor)
     return caps.PixelShaderVersion >= D3DPS_VERSION(major, minor);
 }
 
-std::shared_ptr<Mesh> Package::LoadMesh(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
+const std::shared_ptr<Mesh>& Package::LoadMesh(const std::wstring & path)
 {
-    return meshCache_->Load(path, srcPos);
+    return meshStore_->Load(path);
 }
 
-void Package::ReleaseUnusedMesh()
+void Package::RemoveUnusedMesh()
 {
-    meshCache_->ReleaseUnusedMesh();
+    meshStore_->RemoveUnusedMesh();
 }
 
 std::shared_ptr<SoundBuffer> Package::LoadSound(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
@@ -1332,7 +1330,7 @@ void Package::GenerateBonusItem(float x, float y)
 
 void Package::GenerateItemScoreText(float x, float y, PlayerScore score)
 {
-    std::shared_ptr<Texture> texture = textureStore_->Load(SYSTEM_STG_DIGIT_IMG_PATH);
+    auto& texture = textureStore_->Load(SYSTEM_STG_DIGIT_IMG_PATH);
     auto scoreText = objTable_->Create<ObjItemScoreText>(score, texture, shared_from_this());
     objLayerList_->SetRenderPriority(scoreText, objLayerList_->GetItemRenderPriority());
     scoreText->SetMovePosition(x, y);
