@@ -6,56 +6,66 @@
 
 namespace bstorm
 {
-enum class CacheMode
-{
-    REF_COUNT,
-    PERSISTENT
-};
-
 // SharedCache: flyweight pattern, 非同期ロード機能付き
 // NOTE: メインスレッド終了前に破棄しなければならない
 
-// K: require operator==, copyable, moveable
-// V: require GetCacheMode, SetCacheMode
+// K: require operator==, copyable
+
 template <class K, class V>
 class CacheStore
 {
+private:
+    template <class V>
+    struct CacheEntry
+    {
+        CacheEntry(bool reserve, std::shared_future<std::shared_ptr<V>>& future) :
+            isReserved(reserve),
+            future(future)
+        {
+        }
+        bool isReserved;
+        std::shared_future<std::shared_ptr<V>> future;
+    };
+    std::unordered_map<K, CacheEntry<V>> cacheMap_;
 public:
-    template <class... Args>
-    std::shared_ptr<V> Get(const K& key)
+    // blocking
+    std::shared_ptr<V> Get(const K& key) noexcept(false)
     {
         auto it = cacheMap_.find(key);
         if (it != cacheMap_.end())
         {
-            return it->second.get();
+            return it->second.future.get();
         }
         return nullptr;
     }
 
-    template <class... Args>
-    std::shared_ptr<V> Load(const K& key, CacheMode mode, Args&&... args)
+    bool Has(const K& key) noexcept(false)
     {
-        return LoadAsync(key, mode, std::forward<Args>(args)...).get();
+        return cacheMap_.count(key) != 0;
     }
 
     template <class... Args>
-    std::shared_future<std::shared_ptr<V>> LoadAsync(const K& key, CacheMode mode, Args&&... args)
+    std::shared_ptr<V> Load(const K& key, Args&&... args) noexcept(false)
+    {
+        return LoadAsync(key, std::forward<Args>(args)...).get();
+    }
+
+    template <class... Args>
+    std::shared_future<std::shared_ptr<V>> LoadAsync(const K& key, Args&&... args) noexcept(true)
     {
         auto it = cacheMap_.find(key);
         if (it != cacheMap_.end())
         {
-            auto& cache = it->second.get();
-            if (mode == CacheMode::PERSISTENT)
-            {
-                cache->SetCacheMode(mode);
-            }
-            return it->second;
+            return it->second.future;
         }
 
-        return cacheMap_[key] = std::async(std::launch::async | std::launch::deferred, [key, mode, args...]()
+        auto future = std::async(std::launch::async | std::launch::deferred, [args...]()
         {
-            return std::make_shared<V>(key, mode, args...);
+            return std::make_shared<V>(args...);
         }).share();
+
+        cacheMap_.emplace(std::piecewise_construct, std::forward_as_tuple(key), std::forward_as_tuple(false, future));
+        return future;
     }
 
     void Remove(const K& key)
@@ -66,30 +76,72 @@ public:
     void RemoveAll()
     {
         // 中身を空にしてメモリを解放
-        std::unordered_map<K, std::shared_future<std::shared_ptr<V>>>().swap(cacheMap_);
+        std::unordered_map<K, CacheEntry<V>>().swap(cacheMap_);
     }
 
+    // non blocking
     void RemoveUnused()
     {
         auto it = cacheMap_.begin();
         while (it != cacheMap_.end())
         {
+            const auto& entry = it->second;
             try
             {
-                auto& cache = it->second.get();
-                if (cache->GetCacheMode() == CacheMode::REF_COUNT && cache.use_count() <= 1)
+                if (!entry.isReserved)
                 {
-                    cacheMap_.erase(it++);
-                } else ++it;
-            } catch (...)
-            {
-                ++it;
-            }
+                    if (entry.future.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
+                    {
+                        const auto& cache = entry.future.get();
+                        if (cache.use_count() <= 1)
+                        {
+                            cacheMap_.erase(it++);
+                            continue;
+                        }
+                    }
+                }
+            } catch (...) {}
+            ++it;
         }
     }
 
-    const std::unordered_map<K, std::shared_future<std::shared_ptr<V>>>& GetCacheMap() { return cacheMap_; }
-private:
-    std::unordered_map<K, std::shared_future<std::shared_ptr<V>>> cacheMap_;
+    void SetReserveFlag(const K& key, bool reserve)
+    {
+        auto it = cacheMap_.find(key);
+        if (it != cacheMap_.end())
+        {
+            auto& entry = it->second;
+            entry.isReserved = reserve;
+        }
+    }
+
+    bool IsReserved(const K& key)
+    {
+        auto it = cacheMap_.find(key);
+        if (it != cacheMap_.end())
+        {
+            auto& entry = it->second;
+            return entry.isReserved;
+        }
+        return false;
+    }
+
+    // non blocking
+    template <class Fn>
+    void ForEach(Fn func)
+    {
+        for (auto& pair : cacheMap_)
+        {
+            const K& key = pair.first;
+            CacheEntry<V>& entry = pair.second;
+            bool& reserved = entry.isReserved;
+            auto& future = entry.future;
+            if (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
+            {
+                std::shared_ptr<V>& cache = future.get();
+                func(pair.first, reserved, cache);
+            }
+        }
+    }
 };
 };
