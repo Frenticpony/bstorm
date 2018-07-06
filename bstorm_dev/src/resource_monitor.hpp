@@ -27,7 +27,7 @@ private:
     bool openFlag;
 };
 
-void drawTextureInfo(const std::shared_ptr<Texture>& texture, const std::vector<Rect<int>>& rects);
-void drawFontInfo(const std::shared_ptr<Font>& font);
-void drawRenderTargetInfo(const std::shared_ptr<RenderTarget>& renderTarget, const std::vector<Rect<int>>& rects);
+void DrawTextureInfo(const std::shared_ptr<Texture>& texture, const std::vector<Rect<int>>& rects, bool* reserved);
+void DrawFontInfo(const std::shared_ptr<Font>& font);
+void DrawRenderTargetInfo(const std::shared_ptr<RenderTarget>& renderTarget, const std::vector<Rect<int>>& rects);
 }

@@ -87,7 +87,7 @@ class SoundBuffer;
 class SoundDevice;
 class StageCommonPlayerParams;
 class Texture;
-class TextureCache;
+class TextureStore;
 class TimePoint;
 class VirtualKeyInputSource;
 class EngineDevelopOptions;
@@ -149,10 +149,10 @@ public:
     std::wstring GetMainScriptPath() const;
 
     /* texture */
-    std::shared_ptr<Texture> LoadTexture(const std::wstring& path, bool reserve, const std::shared_ptr<SourcePos>& srcPos);
-    void LoadTextureInThread(const std::wstring& path, bool reserve, const std::shared_ptr<SourcePos>& srcPos) noexcept(true);
-    void RemoveTextureReservedFlag(const std::wstring& path);
-    void ReleaseUnusedTexture();
+    const std::shared_ptr<Texture>& LoadTexture(const std::wstring & path);
+    void LoadTextureInThread(const std::wstring & path) noexcept(true);
+    void SetTextureReserveFlag(const std::wstring & path, bool reserve);
+    void RemoveUnusedTexture();
 
     /* font */
     std::shared_ptr<Font> CreateFont(const FontParams& param);
@@ -505,7 +505,7 @@ private:
     std::shared_ptr<ObjectLayerList> objLayerList_;
     std::shared_ptr<CollisionDetector> colDetector_;
     std::vector<std::shared_ptr<Intersection>> tempEnemyShotIsects_;
-    std::shared_ptr<TextureCache> textureCache_;
+    std::shared_ptr<TextureStore> textureStore_;
     std::shared_ptr<MeshCache> meshCache_;
     std::shared_ptr<Camera2D> camera2D_;
     std::shared_ptr<Camera3D> camera3D_;

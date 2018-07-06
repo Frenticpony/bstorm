@@ -84,15 +84,15 @@ Package::Package(HWND hWnd,
     objTable_(std::make_shared<ObjectTable>()),
     objLayerList_(std::make_shared<ObjectLayerList>()),
     colDetector_(std::make_shared<CollisionDetector>(screenWidth, screenHeight, std::make_shared<CollisionMatrix>(DEFAULT_COLLISION_MATRIX_DIMENSION, DEFAULT_COLLISION_MATRIX))),
-    textureCache_(std::make_shared<TextureCache>(graphicDevice_->GetDevice())),
-    meshCache_(std::make_shared<MeshCache>(textureCache_, fileLoader_)),
+    textureStore_(std::make_shared<TextureStore>(graphicDevice_)),
+    meshCache_(std::make_shared<MeshCache>(textureStore_, fileLoader_)),
     camera2D_(std::make_shared<Camera2D>()),
     camera3D_(std::make_shared<Camera3D>()),
     commonDataDB_(std::make_shared<CommonDataDB>()),
     scriptManager_(std::make_shared<ScriptManager>()),
-    playerShotDataTable_(std::make_shared<ShotDataTable>(ShotDataTable::Type::PLAYER, textureCache_, fileLoader_)),
-    enemyShotDataTable_(std::make_shared<ShotDataTable>(ShotDataTable::Type::ENEMY, textureCache_, fileLoader_)),
-    itemDataTable_(std::make_shared<ItemDataTable>(textureCache_, fileLoader_)),
+    playerShotDataTable_(std::make_shared<ShotDataTable>(ShotDataTable::Type::PLAYER, textureStore_, fileLoader_)),
+    enemyShotDataTable_(std::make_shared<ShotDataTable>(ShotDataTable::Type::ENEMY, textureStore_, fileLoader_)),
+    itemDataTable_(std::make_shared<ItemDataTable>(textureStore_, fileLoader_)),
     shotCounter_(std::make_shared<ShotCounter>()),
     randGenerator_(std::make_shared<RandGenerator>((uint32_t)this)), // FUTURE : from rand
     autoItemCollectionManager_(std::make_shared<AutoItemCollectionManager>()),
@@ -233,13 +233,11 @@ void Package::TickFrame()
     }
 
     // 使われなくなったリソース開放
+    RemoveUnusedTexture();
     switch (GetElapsedFrame() % 1920)
     {
         case 0:
             lostableGraphicResourceManager_->ReleaseUnusedResource();
-            break;
-        case 480:
-            ReleaseUnusedTexture();
             break;
         case 960:
             ReleaseUnusedFont();
@@ -425,24 +423,24 @@ std::wstring Package::GetMainScriptPath() const
     return GetMainPackageScriptPath() == DEFAULT_PACKAGE_PATH ? GetMainStgScriptPath() : GetMainPackageScriptPath();
 }
 
-std::shared_ptr<Texture> Package::LoadTexture(const std::wstring & path, bool reserve, const std::shared_ptr<SourcePos>& srcPos)
+const std::shared_ptr<Texture>& Package::LoadTexture(const std::wstring & path)
 {
-    return textureCache_->Load(path, reserve, srcPos);
+    return textureStore_->Load(path);
 }
 
-void Package::LoadTextureInThread(const std::wstring & path, bool reserve, const std::shared_ptr<SourcePos>& srcPos) noexcept(true)
+void Package::LoadTextureInThread(const std::wstring & path) noexcept(true)
 {
-    textureCache_->LoadInThread(path, reserve, srcPos);
+    textureStore_->LoadInThread(path);
 }
 
-void Package::RemoveTextureReservedFlag(const std::wstring & path)
+void Package::SetTextureReserveFlag(const std::wstring & path, bool reserve)
 {
-    textureCache_->RemoveReservedFlag(path);
+    textureStore_->SetReserveFlag(path, reserve);
 }
 
-void Package::ReleaseUnusedTexture()
+void Package::RemoveUnusedTexture()
 {
-    textureCache_->ReleaseUnusedTexture();
+    textureStore_->RemoveUnusedTexture();
 }
 
 std::shared_ptr<Font> Package::CreateFont(const FontParams& param)
@@ -1334,7 +1332,7 @@ void Package::GenerateBonusItem(float x, float y)
 
 void Package::GenerateItemScoreText(float x, float y, PlayerScore score)
 {
-    std::shared_ptr<Texture> texture = textureCache_->Load(SYSTEM_STG_DIGIT_IMG_PATH, false, nullptr);
+    std::shared_ptr<Texture> texture = textureStore_->Load(SYSTEM_STG_DIGIT_IMG_PATH);
     auto scoreText = objTable_->Create<ObjItemScoreText>(score, texture, shared_from_this());
     objLayerList_->SetRenderPriority(scoreText, objLayerList_->GetItemRenderPriority());
     scoreText->SetMovePosition(x, y);
@@ -2226,9 +2224,9 @@ void Package::StartStageScene(const std::shared_ptr<SourcePos>& srcPos)
     Reset2DCamera();
     ResetCamera();
     SetDefaultBonusItemEnable(true);
-    playerShotDataTable_ = std::make_shared<ShotDataTable>(ShotDataTable::Type::PLAYER, textureCache_, fileLoader_);
-    enemyShotDataTable_ = std::make_shared<ShotDataTable>(ShotDataTable::Type::ENEMY, textureCache_, fileLoader_);
-    itemDataTable_ = std::make_shared<ItemDataTable>(textureCache_, fileLoader_);
+    playerShotDataTable_ = std::make_shared<ShotDataTable>(ShotDataTable::Type::PLAYER, textureStore_, fileLoader_);
+    enemyShotDataTable_ = std::make_shared<ShotDataTable>(ShotDataTable::Type::ENEMY, textureStore_, fileLoader_);
+    itemDataTable_ = std::make_shared<ItemDataTable>(textureStore_, fileLoader_);
     stageMainScript_.reset();
     stagePlayerScript_.reset();
     ReloadItemData(DEFAULT_ITEM_DATA_PATH, nullptr);

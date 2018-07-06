@@ -2,17 +2,42 @@
 
 #include <bstorm/util.hpp>
 #include <bstorm/logger.hpp>
+#include <bstorm/graphic_device.hpp>
 
 #include <d3dx9.h>
 
 namespace bstorm
 {
-Texture::Texture(const std::wstring& path, IDirect3DTexture9* d3DTexture) :
-    d3DTexture_(d3DTexture),
-    path_(path),
-    reservedFlag_(false)
+static IDirect3DTexture9 * LoadTextureFromFile(const std::wstring & path, GraphicDevice& graphicDevice) noexcept(true)
 {
-    GetD3DTextureSize(d3DTexture, &width_, &height_);
+    IDirect3DTexture9* d3DTexture = NULL;
+    if (FAILED(D3DXCreateTextureFromFileEx(
+        graphicDevice.GetDevice(),
+        path.c_str(),
+        D3DX_DEFAULT_NONPOW2, // 画像の横幅
+        D3DX_DEFAULT_NONPOW2, // 画像の縦幅
+        0, // MipsLevel
+        0, // Usage
+        D3DFMT_UNKNOWN, // Format
+        D3DPOOL_MANAGED, // Pool
+        D3DX_FILTER_NONE, // Filter
+        D3DX_FILTER_NONE, // MipMapFilter
+        0, //  透明色
+        NULL, // ImageInfo
+        NULL, // Pallete
+        &d3DTexture)))
+    {
+        return NULL;
+    }
+    return d3DTexture;
+}
+
+Texture::Texture(const std::wstring & path, const std::shared_ptr<GraphicDevice> & graphicDevice) :
+    path_(path),
+    d3DTexture_(nullptr),
+    graphicDevice_(graphicDevice)
+{
+    Reload();
 }
 
 Texture::~Texture()
@@ -39,170 +64,22 @@ int Texture::GetHeight() const
     return height_;
 }
 
-void Texture::SetReservedFlag(bool flag)
-{
-    reservedFlag_ = flag;
-}
-
-bool Texture::IsReserved() const
-{
-    return reservedFlag_;
-}
-
 IDirect3DTexture9* Texture::GetTexture() const
 {
     return d3DTexture_;
 }
 
-void Texture::Reset(IDirect3DTexture9 * d3DTex)
+void Texture::Reload()
 {
-    if (d3DTex)
+    auto texture = LoadTextureFromFile(path_, *graphicDevice_);
+    if (texture == nullptr)
     {
-        safe_release(d3DTexture_);
-        d3DTexture_ = d3DTex;
-        GetD3DTextureSize(d3DTexture_, &width_, &height_);
-    }
-}
-
-IDirect3DTexture9 * LoadTextureFromFile(const std::wstring & path, IDirect3DDevice9* d3DDevice_) noexcept(true)
-{
-    IDirect3DTexture9* d3DTexture = NULL;
-    if (FAILED(D3DXCreateTextureFromFileEx(
-        d3DDevice_,
-        path.c_str(),
-        D3DX_DEFAULT_NONPOW2, // 画像の横幅
-        D3DX_DEFAULT_NONPOW2, // 画像の縦幅
-        0, // MipsLevel
-        0, // Usage
-        D3DFMT_UNKNOWN, // Format
-        D3DPOOL_MANAGED, // Pool
-        D3DX_FILTER_NONE, // Filter
-        D3DX_FILTER_NONE, // MipMapFilter
-        0, //  透明色
-        NULL, // ImageInfo
-        NULL, // Pallete
-        &d3DTexture)))
-    {
-        return NULL;
-    }
-    return d3DTexture;
-}
-
-std::shared_ptr<Texture> TextureCache::Load(const std::wstring& path, bool reserve, const std::shared_ptr<SourcePos>& srcPos)
-{
-    return LoadInThread(path, reserve, srcPos).get();
-}
-
-std::shared_future<std::shared_ptr<Texture>> TextureCache::LoadInThread(const std::wstring & p, bool reserve, const std::shared_ptr<SourcePos>& srcPos)
-{
-    auto uniqPath = GetCanonicalPath(p);
-    {
-        auto it = textureMap_.find(uniqPath);
-        if (it != textureMap_.end())
-        {
-            // ロード中 or ロード済
-            return it->second;
-        }
-    }
-    return textureMap_[uniqPath] = std::async(std::launch::async, [this, uniqPath, reserve, srcPos]()
-    {
-        // load
-        if (auto d3DTexture = LoadTextureFromFile(uniqPath, d3DDevice_))
-        {
-            auto texture = std::make_shared<Texture>(uniqPath, d3DTexture);
-            texture->SetReservedFlag(reserve);
-            Logger::WriteLog(std::move(
-                Log(Log::Level::LV_INFO).SetMessage(std::string("load texture") + (reserve ? " (reserved)." : "."))
-                .SetParam(Log::Param(Log::Param::Tag::TEXTURE, uniqPath))
-                .AddSourcePos(srcPos)));
-            return texture;
-        }
         throw Log(Log::Level::LV_ERROR)
             .SetMessage("failed to load texture.")
-            .SetParam(Log::Param(Log::Param::Tag::TEXTURE, uniqPath));
-    }).share();
-}
-
-void TextureCache::Reload(const std::wstring& p, bool reserve, const std::shared_ptr<SourcePos>& srcPos)
-{
-    const std::wstring& uniqPath = GetCanonicalPath(p);
-    auto it = textureMap_.find(uniqPath);
-    if (it != textureMap_.end())
-    {
-        // cache hit
-        try
-        {
-            // ロードが完了していない場合は完了させる
-            auto& texture = it->second.get();
-
-            if (reserve) texture->SetReservedFlag(true);
-            if (auto d3DTexture = LoadTextureFromFile(uniqPath, d3DDevice_))
-            {
-                // リロード
-                texture->Reset(d3DTexture);
-                Logger::WriteLog(std::move(
-                    Log(Log::Level::LV_INFO).SetMessage(std::string("reload texture") + (reserve ? " (reserved)." : "."))
-                    .SetParam(Log::Param(Log::Param::Tag::TEXTURE, uniqPath))
-                    .AddSourcePos(srcPos)));
-            } else
-            {
-                Logger::WriteLog(std::move(
-                    Log(Log::Level::LV_WARN).SetMessage(std::string("failed to reload texture."))
-                    .SetParam(Log::Param(Log::Param::Tag::TEXTURE, uniqPath))
-                    .AddSourcePos(srcPos)));
-            }
-            return;
-        } catch (...)
-        {
-            // ロード失敗
-        }
+            .SetParam(Log::Param(Log::Param::Tag::TEXTURE, path_));
     }
-    // 未ロードかロードに失敗していた場合は新しくロード
-    LoadInThread(uniqPath, reserve, srcPos);
-}
-
-void TextureCache::RemoveReservedFlag(const std::wstring & p)
-{
-    auto uniqPath = GetCanonicalPath(p);
-    auto it = textureMap_.find(uniqPath);
-    if (it != textureMap_.end())
-    {
-        try
-        {
-            auto texture = it->second.get();
-            texture->SetReservedFlag(false);
-        } catch (...)
-        {
-        }
-    }
-}
-
-void TextureCache::ReleaseUnusedTexture()
-{
-    auto it = textureMap_.begin();
-    while (it != textureMap_.end())
-    {
-        try
-        {
-            auto& texture = it->second.get();
-            if (!texture->IsReserved() && texture.use_count() <= 1)
-            {
-                textureMap_.erase(it++);
-            } else ++it;
-        } catch (...)
-        {
-            ++it;
-        }
-    }
-}
-
-TextureCache::TextureCache(IDirect3DDevice9* d3DDevice_) :
-    d3DDevice_(d3DDevice_)
-{
-}
-
-TextureCache::~TextureCache()
-{
+    d3DTexture_ = texture;
+    GetD3DTextureSize(d3DTexture_, &width_, &height_);
 }
 
 void GetD3DTextureSize(IDirect3DTexture9 * texture, int * width, int * height)
@@ -230,5 +107,59 @@ int GetD3DTextureHeight(IDirect3DTexture9 * texture)
     int w, h;
     GetD3DTextureSize(texture, &w, &h);
     return h;
+}
+
+TextureStore::TextureStore(const std::shared_ptr<GraphicDevice>& graphicDevice) :
+    graphicDevice_(graphicDevice)
+{
+}
+
+TextureStore::~TextureStore()
+{
+}
+
+const std::shared_ptr<Texture>& TextureStore::Load(const std::wstring & path)
+{
+    auto uniqPath = GetCanonicalPath(path);
+    if (cacheStore_.Contains(uniqPath))
+    {
+        return cacheStore_.Get(uniqPath);
+    }
+    auto& texture = cacheStore_.Load(uniqPath, uniqPath, graphicDevice_);
+    Logger::WriteLog(std::move(
+        Log(Log::Level::LV_INFO).SetMessage(std::string("load texture."))
+        .SetParam(Log::Param(Log::Param::Tag::TEXTURE, uniqPath))));
+    return texture;
+}
+
+void TextureStore::LoadInThread(const std::wstring & path)
+{
+    auto uniqPath = GetCanonicalPath(path);
+    if (cacheStore_.Contains(uniqPath)) return;
+    cacheStore_.LoadAsync(uniqPath, uniqPath, graphicDevice_);
+    Logger::WriteLog(std::move(
+        Log(Log::Level::LV_INFO).SetMessage(std::string("load texture (async)."))
+        .SetParam(Log::Param(Log::Param::Tag::TEXTURE, uniqPath))));
+}
+
+void TextureStore::SetReserveFlag(const std::wstring & path, bool reserve)
+{
+    auto uniqPath = GetCanonicalPath(path);
+    cacheStore_.SetReserveFlag(uniqPath, reserve);
+}
+
+bool TextureStore::IsReserved(const std::wstring & path) const
+{
+    return cacheStore_.IsReserved(path);
+}
+
+void TextureStore::RemoveUnusedTexture()
+{
+    cacheStore_.RemoveUnused();
+}
+bool TextureStore::IsLoadCompleted(const std::wstring& path) const
+{
+    auto uniqPath = GetCanonicalPath(path);
+    return cacheStore_.IsLoadCompleted(uniqPath);
 }
 }

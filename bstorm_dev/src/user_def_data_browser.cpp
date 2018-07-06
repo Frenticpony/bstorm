@@ -140,7 +140,7 @@ void drawShotDataInfo(const std::shared_ptr<ShotData>& shotData)
             }
         }
         rects.push_back(shotData->delayRect);
-        drawTextureInfo(shotData->texture, rects);
+        DrawTextureInfo(shotData->texture, rects, nullptr);
         ImGui::TreePop();
     }
 }
@@ -219,7 +219,7 @@ void drawItemDataInfo(const std::shared_ptr<ItemData>& itemData)
             }
         }
         rects.push_back(itemData->out);
-        drawTextureInfo(itemData->texture, rects);
+        DrawTextureInfo(itemData->texture, rects, nullptr);
         ImGui::TreePop();
     }
 }

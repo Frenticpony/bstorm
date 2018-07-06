@@ -29,14 +29,14 @@ static D3DXVECTOR3 CalcFaceNormal(const D3DXVECTOR3& a, const D3DXVECTOR3& b, co
     return n;
 }
 
-std::shared_ptr<Mesh> MqoToMesh(const Mqo & mqo, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos)
+std::shared_ptr<Mesh> MqoToMesh(const Mqo & mqo, const std::shared_ptr<TextureStore>& textureStore, const std::shared_ptr<SourcePos>& srcPos)
 {
     auto mesh = std::make_shared<Mesh>(mqo.path);
 
     // ÞŽ¿î•ñ‚ðƒRƒs[
     for (const auto& mqoMat : mqo.materials)
     {
-        auto texture = textureCache->Load(ConcatPath(GetParentPath(mqo.path), mqoMat.tex), false, srcPos);
+        auto texture = textureStore->Load(ConcatPath(GetParentPath(mqo.path), mqoMat.tex));
         mesh->materials.emplace_back(mqoMat.col.r, mqoMat.col.g, mqoMat.col.b, mqoMat.col.a, mqoMat.dif, mqoMat.amb, mqoMat.emi, texture);
     }
 
@@ -114,8 +114,8 @@ Mesh::~Mesh()
 }
 
 
-MeshCache::MeshCache(const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<FileLoader>& fileLoader) :
-    textureCache_(textureCache),
+MeshCache::MeshCache(const std::shared_ptr<TextureStore>& textureStore, const std::shared_ptr<FileLoader>& fileLoader) :
+    textureStore_(textureStore),
     fileLoader_(fileLoader)
 {
 }
@@ -140,7 +140,7 @@ std::shared_ptr<Mesh> MeshCache::Load(const std::wstring & path, const std::shar
     {
         if (auto mqo = ParseMqo(uniqPath, fileLoader_))
         {
-            auto mesh = MqoToMesh(*mqo, textureCache_, srcPos);
+            auto mesh = MqoToMesh(*mqo, textureStore_, srcPos);
             Logger::WriteLog(std::move(
                 Log(Log::Level::LV_INFO).SetMessage("load mesh.")
                 .SetParam(Log::Param(Log::Param::Tag::MESH, uniqPath))

@@ -279,7 +279,7 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                 {
                     if (ImGui::TreeNode("Texture Info##primTexture"))
                     {
-                        drawTextureInfo(texture, {});
+                        DrawTextureInfo(texture, {}, nullptr);
                         ImGui::TreePop();
                     }
                 }
@@ -287,7 +287,7 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                 {
                     if (ImGui::TreeNode("RenderTarget Info##primRenderTarget"))
                     {
-                        drawRenderTargetInfo(renderTarget, {});
+                        DrawRenderTargetInfo(renderTarget, {});
                         ImGui::TreePop();
                     }
                 }
@@ -538,7 +538,7 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                                 ImGui::PushID(fontId++);
                                 if (ImGui::TreeNode(ToUTF8(std::wstring{ font->GetParams().c }).c_str()))
                                 {
-                                    drawFontInfo(font);
+                                    DrawFontInfo(font);
                                     ImGui::TreePop();
                                 }
                                 ImGui::PopID();
@@ -557,7 +557,7 @@ void drawObjEditArea(const std::shared_ptr<Obj>& obj, std::shared_ptr<ObjectLaye
                                     ImGui::PushID(fontId++);
                                     if (ImGui::TreeNode(ToUTF8(std::wstring{ font->GetParams().c }).c_str()))
                                     {
-                                        drawFontInfo(font);
+                                        DrawFontInfo(font);
                                         ImGui::TreePop();
                                     }
                                     ImGui::PopID();

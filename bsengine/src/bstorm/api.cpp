@@ -591,7 +591,8 @@ static int LoadTextureInLoadThread(lua_State* L)
 {
     Package* package = GetPackage(L);
     auto path = DnhValue::ToString(L, 1);
-    package->LoadTextureInThread(path, true, GetSourcePos(L));
+    package->LoadTextureInThread(path);
+    package->SetTextureReserveFlag(path, true);
     return 0;
 }
 
@@ -604,7 +605,7 @@ static int RemoveTexture(lua_State* L)
 {
     Package* package = GetPackage(L);
     auto path = DnhValue::ToString(L, 1);
-    package->RemoveTextureReservedFlag(path);
+    package->SetTextureReserveFlag(path, false);
     return 0;
 }
 
@@ -619,7 +620,7 @@ static int GetTextureWidth(lua_State* L)
     {
         try
         {
-            lua_pushnumber(L, package->LoadTexture(name, false, GetSourcePos(L))->GetWidth());
+            lua_pushnumber(L, package->LoadTexture(name)->GetWidth());
         } catch (Log& log)
         {
             log.SetLevel(Log::Level::LV_WARN)
@@ -642,7 +643,7 @@ static int GetTextureHeight(lua_State* L)
     {
         try
         {
-            lua_pushnumber(L, package->LoadTexture(name, false, GetSourcePos(L))->GetHeight());
+            lua_pushnumber(L, package->LoadTexture(name)->GetHeight());
         } catch (Log& log)
         {
             log.SetLevel(Log::Level::LV_WARN)
@@ -2834,7 +2835,7 @@ static int ObjPrim_SetTexture(lua_State* L)
             obj->SetRenderTarget(renderTarget);
         } else
         {
-            obj->SetTexture(package->LoadTexture(name, false, GetSourcePos(L)));
+            obj->SetTexture(package->LoadTexture(name));
         }
     }
     return 0;
@@ -3599,7 +3600,7 @@ static int ObjShader_SetTexture(lua_State* L)
             obj->SetShaderTexture(name, renderTarget);
         } else
         {
-            obj->SetShaderTexture(name, package->LoadTexture(path, false, GetSourcePos(L)));
+            obj->SetShaderTexture(name, package->LoadTexture(path));
         }
     }
     return 0;

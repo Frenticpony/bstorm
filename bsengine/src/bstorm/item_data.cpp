@@ -19,8 +19,8 @@ ItemData::ItemData() :
 {
 }
 
-ItemDataTable::ItemDataTable(const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<FileLoader>& fileLoader) :
-    textureCache_(textureCache),
+ItemDataTable::ItemDataTable(const std::shared_ptr<TextureStore>& textureStore, const std::shared_ptr<FileLoader>& fileLoader) :
+    textureStore_(textureStore),
     fileLoader_(fileLoader)
 {
 }
@@ -56,7 +56,7 @@ void ItemDataTable::Reload(const std::wstring & path, const std::shared_ptr<Sour
 {
     std::wstring uniqPath = GetCanonicalPath(path);
     auto userItemData = ParseUserItemData(uniqPath, fileLoader_);
-    auto texture = textureCache_->Load(userItemData->imagePath, false, srcPos);
+    auto texture = textureStore_->Load(userItemData->imagePath);
     for (auto& entry : userItemData->dataMap)
     {
         auto& data = entry.second;

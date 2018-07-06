@@ -5,7 +5,7 @@
 #include <bstorm/texture.hpp>
 #include <bstorm/font.hpp>
 #include <bstorm/render_target.hpp>
-#include <bstorm/package.hpp>
+#include <bstorm/logger.hpp>
 #include <bstorm/package.hpp>
 
 #include <algorithm>
@@ -14,12 +14,12 @@
 
 namespace bstorm
 {
-static void drawRect(float offsetX, float offsetY, const Rect<int>& rect, ImU32 color)
+static void DrawRect(float offsetX, float offsetY, const Rect<int>& rect, ImU32 color)
 {
     ImGui::GetWindowDrawList()->AddRect(ImVec2(offsetX + rect.left, offsetY + rect.top), ImVec2(offsetX + rect.right, offsetY + rect.bottom), color, 0.0f, -1, 2.0f);
 }
 
-void drawTextureInfo(const std::shared_ptr<Texture>& texture, const std::vector<Rect<int>>& rects)
+void DrawTextureInfo(const std::shared_ptr<Texture>& texture, const std::vector<Rect<int>>& rects, bool* reserved)
 {
     if (!texture) return;
     int width = texture->GetWidth();
@@ -29,7 +29,11 @@ void drawTextureInfo(const std::shared_ptr<Texture>& texture, const std::vector<
     ImGui::BulletText("path      : %s", path.c_str());
     ImGui::BulletText("width     : %d", width);
     ImGui::BulletText("height    : %d", height);
-    ImGui::BulletText("reserved  : %s", texture->IsReserved() ? "true" : "false");
+    if (reserved != nullptr)
+    {
+        ImGui::Checkbox(("reserved##" + path).c_str(), reserved);
+    }
+    //    ImGui::BulletText("reserved  : %s", texture->IsReserved() ? "true" : "false");
     ImGui::BulletText("use-count : %d", useCount);
     if (ImGui::TreeNode("image##texture"))
     {
@@ -38,13 +42,13 @@ void drawTextureInfo(const std::shared_ptr<Texture>& texture, const std::vector<
         ImGui::Image(texture->GetTexture(), ImVec2(width, height));
         for (const auto& rect : rects)
         {
-            drawRect(areaLeft, areaTop, rect, IM_COL32(0x00, 0xff, 0x00, 0xff));
+            DrawRect(areaLeft, areaTop, rect, IM_COL32(0x00, 0xff, 0x00, 0xff));
         }
         ImGui::TreePop();
     }
 }
 
-void drawFontInfo(const std::shared_ptr<Font>& font)
+void DrawFontInfo(const std::shared_ptr<Font>& font)
 {
     if (!font) return;
     {
@@ -98,7 +102,7 @@ void drawFontInfo(const std::shared_ptr<Font>& font)
     }
 }
 
-void drawRenderTargetInfo(const std::shared_ptr<RenderTarget>& renderTarget, const std::vector<Rect<int>>& rects)
+void DrawRenderTargetInfo(const std::shared_ptr<RenderTarget>& renderTarget, const std::vector<Rect<int>>& rects)
 {
     int width = renderTarget->GetWidth();
     int height = renderTarget->GetHeight();
@@ -114,61 +118,63 @@ void drawRenderTargetInfo(const std::shared_ptr<RenderTarget>& renderTarget, con
         ImGui::Image(renderTarget->GetTexture(), ImVec2(width, height));
         for (const auto& rect : rects)
         {
-            drawRect(areaLeft, areaTop, rect, IM_COL32(0x00, 0xff, 0x00, 0xff));
+            DrawRect(areaLeft, areaTop, rect, IM_COL32(0x00, 0xff, 0x00, 0xff));
         }
         ImGui::TreePop();
     }
 }
 
-template<>
-void TextureCache::BackDoor<ResourceMonitor>()
+void DrawTextureInfoTab(const std::shared_ptr<TextureStore>& textureStore)
 {
     static std::wstring selectedTexturePath;
     const float sideBarWidth = ImGui::GetContentRegionAvailWidth() * 0.2;
     ImGui::BeginChild("ResourceTextureTabSideBar", ImVec2(sideBarWidth, -1), true, ImGuiWindowFlags_HorizontalScrollbar);
     {
-        for (const auto& entry : textureMap_)
+        textureStore->ForEach([&](const auto& path, bool& isReserved, auto& texture)
         {
-            std::wstring path = entry.first;
             auto pathU8 = ToUTF8(path);
-            try
+            ImGui::PushID(pathU8.c_str());
+            ImGui::BeginGroup();
+            if (ImGui::Button(ICON_FA_REFRESH))
             {
-                ImGui::PushID(pathU8.c_str());
-                auto& texture = entry.second.get();
-                ImGui::BeginGroup();
-                if (ImGui::Button(ICON_FA_REFRESH))
+                try
                 {
-                    Reload(path, texture->IsReserved(), nullptr);
-                }
-                ImGui::SameLine();
-                float iconWidth = std::min(sideBarWidth * 0.4f, 1.0f * texture->GetWidth());
-                float iconHeight = std::max(iconWidth / texture->GetWidth() * texture->GetHeight(), ImGui::GetTextLineHeight());
-                if (ImGui::ImageButton(texture->GetTexture(), ImVec2(iconWidth, iconHeight), ImVec2(0, 0), ImVec2(1, 1), 0, ImVec4(0, 0, 0, 1)))
+                    texture->Reload();
+                    Logger::WriteLog(std::move(
+                        Log(Log::Level::LV_INFO).SetMessage(std::string("reload texture."))
+                        .SetParam(Log::Param(Log::Param::Tag::TEXTURE, path))));
+                } catch (Log& log)
                 {
-                    selectedTexturePath = path;
+                    Logger::WriteLog(log);
                 }
-                ImGui::SameLine();
-                if (ImGui::Selectable(pathU8.c_str(), selectedTexturePath == path))
-                {
-                    selectedTexturePath = path;
-                }
-                ImGui::EndGroup();
-                ImGui::PopID();
-            } catch (...)
-            {
             }
-        }
+            ImGui::SameLine();
+            float iconWidth = std::min(sideBarWidth * 0.4f, 1.0f * texture->GetWidth());
+            float iconHeight = std::max(iconWidth / texture->GetWidth() * texture->GetHeight(), ImGui::GetTextLineHeight());
+            if (ImGui::ImageButton(texture->GetTexture(), ImVec2(iconWidth, iconHeight), ImVec2(0, 0), ImVec2(1, 1), 0, ImVec4(0, 0, 0, 1)))
+            {
+                selectedTexturePath = path;
+            }
+            ImGui::SameLine();
+            if (ImGui::Selectable(pathU8.c_str(), selectedTexturePath == path))
+            {
+                selectedTexturePath = path;
+            }
+            ImGui::EndGroup();
+            ImGui::PopID();
+        });
         ImGui::EndChild();
         ImGui::SameLine();
         ImGui::BeginChild("ResourceTextureTabInfoArea", ImVec2(-1, -1), false, ImGuiWindowFlags_HorizontalScrollbar);
         ImGui::Text("Texture Info");
-        auto it = textureMap_.find(selectedTexturePath);
-        if (it != textureMap_.end())
+        if (textureStore->IsLoadCompleted(selectedTexturePath))
         {
             try
             {
-                auto& texture = it->second.get();
-                drawTextureInfo(texture, std::vector<Rect<int>>());
+                auto& texture = textureStore->Load(selectedTexturePath);
+                bool isReserved = textureStore->IsReserved(selectedTexturePath);
+                DrawTextureInfo(texture, std::vector<Rect<int>>(), &isReserved);
+                textureStore->SetReserveFlag(selectedTexturePath, isReserved);
             } catch (...) {}
         }
     }
@@ -210,7 +216,7 @@ void DrawFontInfoTab(const std::unordered_map<FontParams, std::shared_ptr<Font>>
     ImGui::Text("Font Info");
     if (it != fontMap.end())
     {
-        drawFontInfo(it->second);
+        DrawFontInfo(it->second);
     }
     ImGui::EndChild();
 }
@@ -237,7 +243,7 @@ void Package::backDoor<RenderTargetMonitor>()
     ImGui::Text("RenderTarget Info");
     if (it != renderTargets_.end())
     {
-        drawRenderTargetInfo(it->second, std::vector<Rect<int>>());
+        DrawRenderTargetInfo(it->second, std::vector<Rect<int>>());
     }
     ImGui::EndChild();
 }
@@ -273,7 +279,7 @@ void Package::backDoor<ResourceMonitor>()
     ImGui::Separator();
     if (selectedTab == Tab::TEXTURE)
     {
-        textureCache_->BackDoor<ResourceMonitor>();
+        DrawTextureInfoTab(textureStore_);
     } else if (selectedTab == Tab::FONT)
     {
         DrawFontInfoTab(GetFontMap());

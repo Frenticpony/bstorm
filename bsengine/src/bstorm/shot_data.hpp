@@ -61,7 +61,7 @@ public:
 };
 
 struct SourcePos;
-class TextureCache;
+class TextureStore;
 class ShotDataTable
 {
 public:
@@ -71,7 +71,7 @@ public:
         ENEMY
     };
     static const char* GetTypeName(Type type);
-    ShotDataTable(Type type, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<FileLoader>& fileLoader);
+    ShotDataTable(Type type, const std::shared_ptr<TextureStore>& textureStore, const std::shared_ptr<FileLoader>& fileLoader);
     ~ShotDataTable();
     void Add(const std::shared_ptr<ShotData>& data);
     void Load(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
@@ -84,7 +84,7 @@ public:
     void BackDoor() const {}
 private:
     const Type type_;
-    const std::shared_ptr<TextureCache> textureCache_;
+    const std::shared_ptr<TextureStore> textureStore_;
     const std::shared_ptr<FileLoader> fileLoader_;
     std::unordered_set<std::wstring> alreadyLoadedPaths_;
     std::map<int, std::shared_ptr<ShotData>> table_;

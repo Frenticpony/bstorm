@@ -50,20 +50,20 @@ private:
 };
 
 struct SourcePos;
-class TextureCache;
+class TextureStore;
 struct Mqo;
-std::shared_ptr<Mesh> MqoToMesh(const Mqo& mqo, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<SourcePos>& srcPos);
+std::shared_ptr<Mesh> MqoToMesh(const Mqo& mqo, const std::shared_ptr<TextureStore>& textureStore, const std::shared_ptr<SourcePos>& srcPos);
 
 class FileLoader;
-class TextureCache;
+class TextureStore;
 class MeshCache
 {
 public:
-    MeshCache(const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<FileLoader>& fileLoader);
+    MeshCache(const std::shared_ptr<TextureStore>& textureStore, const std::shared_ptr<FileLoader>& fileLoader);
     std::shared_ptr<Mesh> Load(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
     void ReleaseUnusedMesh();
 private:
-    std::shared_ptr<TextureCache> textureCache_;
+    std::shared_ptr<TextureStore> textureStore_;
     std::shared_ptr<FileLoader> fileLoader_;
     std::unordered_map<std::wstring, std::shared_ptr<Mesh>> meshMap_;
 };

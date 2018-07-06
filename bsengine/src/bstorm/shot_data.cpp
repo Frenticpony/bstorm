@@ -28,9 +28,9 @@ ShotData::ShotData() :
 {
 }
 
-ShotDataTable::ShotDataTable(Type type, const std::shared_ptr<TextureCache>& textureCache, const std::shared_ptr<FileLoader>& fileLoader) :
+ShotDataTable::ShotDataTable(Type type, const std::shared_ptr<TextureStore>& textureStore, const std::shared_ptr<FileLoader>& fileLoader) :
     type_(type),
-    textureCache_(textureCache),
+    textureStore_(textureStore),
     fileLoader_(fileLoader)
 {
 }
@@ -80,7 +80,7 @@ void ShotDataTable::Reload(const std::wstring & path, const std::shared_ptr<Sour
 {
     std::wstring uniqPath = GetCanonicalPath(path);
     auto userShotData = ParseUserShotData(uniqPath, fileLoader_);
-    auto texture = textureCache_->Load(userShotData->imagePath, false, srcPos);
+    auto texture = textureStore_->Load(userShotData->imagePath);
     for (auto& entry : userShotData->dataMap)
     {
         auto& data = entry.second;
