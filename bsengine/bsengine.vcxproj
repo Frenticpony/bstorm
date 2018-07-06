@@ -28,6 +28,7 @@
     <ClInclude Include="src\bstorm\common_data_db.hpp" />
     <ClInclude Include="src\bstorm\engine.hpp" />
     <ClInclude Include="src\bstorm\engine_develop_options.hpp" />
+    <ClInclude Include="src\bstorm\cache_store.hpp" />
     <ClInclude Include="src\bstorm\font_params.hpp" />
     <ClInclude Include="src\bstorm\key_types.hpp" />
     <ClInclude Include="src\bstorm\nullable_shared_ptr.hpp" />
