@@ -9,7 +9,8 @@
 namespace bstorm
 {
 struct SourcePos;
-void AddStandardAPI(const std::wstring& type, const std::wstring& version, NameTable& table);
+void RegisterStandardAPI(const std::wstring& type, const std::wstring& version, NameTable& table);
+void RegisterRuntimeHelper(lua_State* L);
 
 // helper
 int GetCurrentLine(lua_State* L);
@@ -20,20 +21,8 @@ int UnsafeFunction(lua_State* L)
 {
     return __UnsafeFunctionCommon(L, func);
 }
-void* GetPointer(lua_State* L, const char* key);
-void SetPointer(lua_State* L, const char* key, void* p);
-
-class Package;
-Package* GetPackage(lua_State* L);
-void SetPackage(lua_State* L, Package*);
 
 class Script;
 Script* GetScript(lua_State* L);
 void SetScript(lua_State* L, Script*);
-
-// runtime helper function
-int c_chartonum(lua_State* L);
-int c_succchar(lua_State* L);
-int c_predchar(lua_State* L);
-int c_raiseerror(lua_State* L);
 }

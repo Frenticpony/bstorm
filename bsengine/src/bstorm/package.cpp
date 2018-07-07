@@ -2448,4 +2448,6 @@ const std::map<int, std::shared_ptr<Obj>>& Package::GetObjAll() const
 {
     return objTable_->GetAll();
 }
+
+Package* Package::Current = nullptr;
 }

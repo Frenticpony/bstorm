@@ -94,6 +94,7 @@ class EngineDevelopOptions;
 struct SourcePos;
 
 namespace conf { struct KeyConfig; }
+
 class Package : public std::enable_shared_from_this<Package>
 {
 public:
@@ -477,6 +478,9 @@ public:
     /* backdoor */
     template <typename T>
     void backDoor() {}
+
+    /* API用, API以外から取得しないこと */
+    static Package* Current;
 private:
     void RenderToTexture(const std::wstring& renderTargetName, int begin, int end, int objId, bool doClear, bool renderToBackBuffer, bool checkInvalidRenderPriority, bool checkVisibleFlag);
     NullableSharedPtr<Obj> GetObj(int id) const;

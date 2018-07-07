@@ -43,7 +43,7 @@ Script::Script(const std::wstring& p, const std::wstring& type, const std::wstri
 
         // 弾幕風標準API登録
         auto globalEnv = std::make_shared<Env>();
-        AddStandardAPI(type_, version_, globalEnv->table);
+        RegisterStandardAPI(type_, version_, globalEnv->table);
 
         for (const auto& entry : globalEnv->table)
         {
@@ -56,14 +56,10 @@ Script::Script(const std::wstring& p, const std::wstring& type, const std::wstri
             }
         }
 
-        // ランタイム用関数登録
-        lua_register(L_, "c_chartonum", c_chartonum);
-        lua_register(L_, "c_succchar", c_succchar);
-        lua_register(L_, "c_predchar", c_predchar);
-        lua_register(L_, "c_raiseerror", c_raiseerror);
+        // ランタイム用ヘルパー関数登録
+        RegisterRuntimeHelper(L_);
 
         // ポインタ設定
-        SetPackage(L_, package.get());
         SetScript(L_, this);
 
         // パース
@@ -231,6 +227,16 @@ void Script::RunBuiltInSub(const std::string &name)
 
 void Script::CallLuaChunk()
 {
+    // API用の静的変数をセット
+    if (auto package = package_.lock())
+    {
+        Package::Current = package.get();
+    } else
+    {
+        lua_pop(L_, 1);
+        return;
+    }
+
     bool tmp = luaStateBusy_;
     luaStateBusy_ = true;
     if (lua_pcall(L_, 0, 0, 0) != 0)

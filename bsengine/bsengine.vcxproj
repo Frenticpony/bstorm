@@ -32,6 +32,7 @@
     <ClInclude Include="src\bstorm\cache_store.hpp" />
     <ClInclude Include="src\bstorm\font_params.hpp" />
     <ClInclude Include="src\bstorm\key_types.hpp" />
+    <ClInclude Include="src\bstorm\lua_util.hpp" />
     <ClInclude Include="src\bstorm\nullable_shared_ptr.hpp" />
     <ClInclude Include="src\bstorm\point2D.hpp" />
     <ClInclude Include="src\bstorm\rect.hpp" />
@@ -122,6 +123,7 @@
     <ClCompile Include="src\bstorm\fps_counter.cpp" />
     <ClCompile Include="src\bstorm\input_device.cpp" />
     <ClCompile Include="src\bstorm\logger.cpp" />
+    <ClCompile Include="src\bstorm\lua_util.cpp" />
     <ClCompile Include="src\bstorm\mesh.cpp" />
     <ClCompile Include="src\bstorm\obj_col.cpp" />
     <ClCompile Include="src\bstorm\obj_enemy_boss_scene.cpp" />
