@@ -15,7 +15,7 @@ class Package;
 class Obj : private NonCopyable
 {
 public:
-    using Type = int;
+    using Type = uint8_t;
     Obj(const std::shared_ptr<Package>& state);
     virtual ~Obj();
     virtual void Update() {}

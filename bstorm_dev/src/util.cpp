@@ -39,7 +39,7 @@ const char* GetBlendTypeName(int blendType)
     }
 }
 
-const char * GetObjTypeName(int objType)
+const char * GetObjTypeName(uint8_t objType)
 {
     switch (objType)
     {

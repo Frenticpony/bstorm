@@ -12,7 +12,7 @@ class Texture;
 class Intersection;
 class MoveMode;
 const char* GetBlendTypeName(int blendType);
-const char* GetObjTypeName(int objType);
+const char* GetObjTypeName(uint8_t objType);
 const char* GetPrimitiveTypeName(int primType);
 const char* GetItemTypeName(int itemType);
 const char* GetCollisionGroupName(CollisionGroup colGroup);

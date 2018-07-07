@@ -7,7 +7,7 @@ namespace bstorm
 {
 Obj::Obj(const std::shared_ptr<Package>& state) :
     id_(ID_INVALID),
-    type_(-1),
+    type_(0),
     isDead_(false),
     isStgSceneObj_(true),
     package_(state)

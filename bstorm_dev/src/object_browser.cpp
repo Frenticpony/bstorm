@@ -1072,7 +1072,6 @@ void Package::backDoor<ObjectBrowser>()
         auto id = entry.first;
         ImGui::PushID(id);
         const auto& obj = entry.second;
-        auto type = obj->GetType();
         const auto& nameProp = obj->GetValue(L"name");
         std::string name;
         if (nameProp->GetType() != DnhValue::Type::NIL)

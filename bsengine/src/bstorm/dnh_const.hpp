@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <cstdint>
+
 #undef VK_LEFT
 #undef VK_RIGHT
 #undef VK_UP
@@ -10,29 +12,29 @@
 namespace bstorm
 {
 // obj type
-constexpr int OBJ_PRIMITIVE_2D = 1;
-constexpr int OBJ_SPRITE_2D = 2;
-constexpr int OBJ_SPRITE_LIST_2D = 3;
-constexpr int OBJ_PRIMITIVE_3D = 4;
-constexpr int OBJ_SPRITE_3D = 5;
-constexpr int OBJ_TRAJECTORY_3D = 6;
-constexpr int OBJ_SHADER = 7;
-constexpr int OBJ_MESH = 8;
-constexpr int OBJ_TEXT = 9;
-constexpr int OBJ_SOUND = 10;
-constexpr int OBJ_FILE_TEXT = 11;
-constexpr int OBJ_FILE_BINARY = 12;
-constexpr int OBJ_PLAYER = 100;
-constexpr int OBJ_SPELL_MANAGE = 101;
-constexpr int OBJ_SPELL = 102;
-constexpr int OBJ_ENEMY = 103;
-constexpr int OBJ_ENEMY_BOSS = 104;
-constexpr int OBJ_ENEMY_BOSS_SCENE = 105;
-constexpr int OBJ_SHOT = 106;
-constexpr int OBJ_LOOSE_LASER = 107;
-constexpr int OBJ_STRAIGHT_LASER = 108;
-constexpr int OBJ_CURVE_LASER = 109;
-constexpr int OBJ_ITEM = 110;
+constexpr uint8_t OBJ_PRIMITIVE_2D = 1;
+constexpr uint8_t OBJ_SPRITE_2D = 2;
+constexpr uint8_t OBJ_SPRITE_LIST_2D = 3;
+constexpr uint8_t OBJ_PRIMITIVE_3D = 4;
+constexpr uint8_t OBJ_SPRITE_3D = 5;
+constexpr uint8_t OBJ_TRAJECTORY_3D = 6;
+constexpr uint8_t OBJ_SHADER = 7;
+constexpr uint8_t OBJ_MESH = 8;
+constexpr uint8_t OBJ_TEXT = 9;
+constexpr uint8_t OBJ_SOUND = 10;
+constexpr uint8_t OBJ_FILE_TEXT = 11;
+constexpr uint8_t OBJ_FILE_BINARY = 12;
+constexpr uint8_t OBJ_PLAYER = 100;
+constexpr uint8_t OBJ_SPELL_MANAGE = 101;
+constexpr uint8_t OBJ_SPELL = 102;
+constexpr uint8_t OBJ_ENEMY = 103;
+constexpr uint8_t OBJ_ENEMY_BOSS = 104;
+constexpr uint8_t OBJ_ENEMY_BOSS_SCENE = 105;
+constexpr uint8_t OBJ_SHOT = 106;
+constexpr uint8_t OBJ_LOOSE_LASER = 107;
+constexpr uint8_t OBJ_STRAIGHT_LASER = 108;
+constexpr uint8_t OBJ_CURVE_LASER = 109;
+constexpr uint8_t OBJ_ITEM = 110;
 
 // item type
 constexpr int ITEM_1UP = -65536;
