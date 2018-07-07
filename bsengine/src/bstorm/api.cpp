@@ -5690,17 +5690,17 @@ int c_raiseerror(lua_State* L)
 
 __declspec(noinline) static void addConst(NameTable& table, const char* name, const wchar_t* value)
 {
-    table[name] = std::make_shared<NodeConst>(name, value);
+    table.emplace(name, std::make_shared<NodeConst>(name, value));
 }
 
 __declspec(noinline) static void addConstI(NameTable& table, const char* name, int value)
 {
-    table[name] = std::make_shared<NodeConst>(name, std::to_wstring(value));
+    table.emplace(name, std::make_shared<NodeConst>(name, std::to_wstring(value)));
 }
 
 __declspec(noinline) static void addFunc(NameTable& table, const char* name, int paramc, lua_CFunction func)
 {
-    table[name] = std::make_shared<NodeBuiltInFunc>(name, paramc, (void*)func);
+    table.emplace(name, std::make_shared<NodeBuiltInFunc>(name, paramc, (void*)func));
 }
 
 #define constI(name) (addConstI(table, #name, name))
@@ -5715,7 +5715,7 @@ __declspec(noinline) static void addFunc(NameTable& table, const char* name, int
 
 typedef uint8_t ScriptType;
 
-void addStandardAPI(const std::wstring& typeName, const std::wstring& version, NameTable& table)
+void AddStandardAPI(const std::wstring& typeName, const std::wstring& version, NameTable& table)
 {
     constexpr ScriptType t_player = 1;
     constexpr ScriptType t_stage = 2;

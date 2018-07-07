@@ -43,7 +43,7 @@ Script::Script(const std::wstring& p, const std::wstring& type, const std::wstri
 
         // 弾幕風標準API登録
         auto globalEnv = std::make_shared<Env>();
-        addStandardAPI(type_, version_, globalEnv->table);
+        AddStandardAPI(type_, version_, globalEnv->table);
 
         for (const auto& entry : globalEnv->table)
         {

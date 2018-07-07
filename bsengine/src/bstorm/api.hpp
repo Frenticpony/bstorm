@@ -9,7 +9,7 @@
 namespace bstorm
 {
 struct SourcePos;
-void addStandardAPI(const std::wstring& type, const std::wstring& version, NameTable& table);
+void AddStandardAPI(const std::wstring& type, const std::wstring& version, NameTable& table);
 
 // helper
 int GetCurrentLine(lua_State* L);
