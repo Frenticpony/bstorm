@@ -177,6 +177,9 @@ void Package::TickFrame()
             isStageForceTerminated_ = false;
             isStagePaused_ = true;
             pseudoPlayerFps_ = pseudoEnemyFps_ = 60;
+            playerShotDataTable_ = std::make_shared<ShotDataTable>(ShotDataTable::Type::PLAYER, textureStore_, fileLoader_);
+            enemyShotDataTable_ = std::make_shared<ShotDataTable>(ShotDataTable::Type::ENEMY, textureStore_, fileLoader_);
+            itemDataTable_ = std::make_shared<ItemDataTable>(textureStore_, fileLoader_);
         }
     }
 
