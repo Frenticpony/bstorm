@@ -3,10 +3,11 @@
 #include <memory>
 #include <future>
 #include <unordered_map>
+#include <mutex>
 
 namespace bstorm
 {
-// SharedCache: flyweight pattern, 非同期ロード機能付き
+// SharedCache: flyweight pattern, 非同期ロード機能付き, thread-safe
 // NOTE: メインスレッド終了前に破棄しなければならない
 
 // K: require operator==, should be copyable
@@ -27,10 +28,12 @@ private:
         std::shared_future<std::shared_ptr<V>> future;
     };
     std::unordered_map<K, CacheEntry<V>> cacheMap_;
+    mutable std::mutex mutex;
 public:
     // blocking
     const std::shared_ptr<V>& Get(const K& key) const noexcept(false)
     {
+        std::lock_guard<std::mutex> lock(mutex);
         auto it = cacheMap_.find(key);
         if (it != cacheMap_.end())
         {
@@ -41,11 +44,13 @@ public:
 
     bool Contains(const K& key) const
     {
+        std::lock_guard<std::mutex> lock(mutex);
         return cacheMap_.count(key) != 0;
     }
 
     bool IsLoadCompleted(const K& key) const
     {
+        std::lock_guard<std::mutex> lock(mutex);
         auto it = cacheMap_.find(key);
         if (it != cacheMap_.end())
         {
@@ -63,6 +68,7 @@ public:
     template <class... Args>
     const std::shared_future<std::shared_ptr<V>>& LoadAsync(const K& key, Args&&... args) noexcept(true)
     {
+        std::lock_guard<std::mutex> lock(mutex);
         auto it = cacheMap_.find(key);
         if (it != cacheMap_.end())
         {
@@ -78,11 +84,13 @@ public:
 
     void Remove(const K& key)
     {
+        std::lock_guard<std::mutex> lock(mutex);
         cacheMap_.erase(key);
     }
 
     void RemoveAll()
     {
+        std::lock_guard<std::mutex> lock(mutex);
         // 中身を空にしてメモリを解放
         std::unordered_map<K, CacheEntry<V>>().swap(cacheMap_);
     }
@@ -90,6 +98,7 @@ public:
     // non blocking
     void RemoveUnused()
     {
+        std::lock_guard<std::mutex> lock(mutex);
         auto it = cacheMap_.begin();
         while (it != cacheMap_.end())
         {
@@ -115,6 +124,7 @@ public:
 
     void SetReserveFlag(const K& key, bool reserve)
     {
+        std::lock_guard<std::mutex> lock(mutex);
         auto it = cacheMap_.find(key);
         if (it != cacheMap_.end())
         {
@@ -125,6 +135,7 @@ public:
 
     bool IsReserved(const K& key) const
     {
+        std::lock_guard<std::mutex> lock(mutex);
         auto it = cacheMap_.find(key);
         if (it != cacheMap_.end())
         {
@@ -138,6 +149,7 @@ public:
     template <class Fn>
     void ForEach(Fn func)
     {
+        std::lock_guard<std::mutex> lock(mutex);
         for (auto& pair : cacheMap_)
         {
             const K& key = pair.first;
