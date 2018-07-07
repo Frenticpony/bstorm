@@ -62,7 +62,17 @@ public:
     template <class... Args>
     const std::shared_ptr<V>& Load(const K& key, Args&&... args) noexcept(false)
     {
-        return LoadAsync(key, std::forward<Args>(args)...).get();
+        std::lock_guard<std::mutex> lock(mutex);
+        auto it = cacheMap_.find(key);
+        if (it != cacheMap_.end())
+        {
+            return it->second.future.get();
+        }
+
+        std::promise<std::shared_ptr<V>> promise;
+        promise.set_value(std::make_shared<V>(std::forward<Args>(args)...));
+        cacheMap_.emplace(std::piecewise_construct, std::forward_as_tuple(key), std::forward_as_tuple(false, promise.get_future().share()));
+        return cacheMap_.at(key).future.get();
     }
 
     template <class... Args>
