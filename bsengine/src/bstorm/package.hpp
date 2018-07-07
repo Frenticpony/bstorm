@@ -423,8 +423,8 @@ public:
     bool IsDeleteShotImmediateEventOnShotScriptEnabled() const;
     bool IsDeleteShotFadeEventOnShotScriptEnabled() const;
     bool IsDeleteShotToItemEventOnShotScriptEnabled() const;
-    void DeleteShotAll(int tarGet, int behavior) const;
-    void DeleteShotInCircle(int tarGet, int behavior, float x, float y, float r) const;
+    void DeleteShotAll(int tarGet, int behavior);
+    void DeleteShotInCircle(int tarGet, int behavior, float x, float y, float r);
     std::vector<std::shared_ptr<ObjShot>> GetShotInCircle(float x, float y, float r, int tarGet) const;
     void SetShotIntersectoinCicle(float x, float y, float r);
     void SetShotIntersectoinLine(float x1, float y1, float x2, float y2, float width);

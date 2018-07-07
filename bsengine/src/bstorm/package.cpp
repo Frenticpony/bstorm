@@ -1834,7 +1834,7 @@ bool Package::IsDeleteShotToItemEventOnShotScriptEnabled() const
     return deleteShotToItemEventOnShotScriptEnable_;
 }
 
-void Package::DeleteShotAll(int target, int behavior) const
+void Package::DeleteShotAll(int target, int behavior)
 {
     auto shots = GetObjectAll<ObjShot>();
     if (target == TYPE_SHOT)
@@ -1863,7 +1863,7 @@ void Package::DeleteShotAll(int target, int behavior) const
     }
 }
 
-void Package::DeleteShotInCircle(int target, int behavior, float x, float y, float r) const
+void Package::DeleteShotInCircle(int target, int behavior, float x, float y, float r)
 {
     auto isects = colDetector_->GetIntersectionsCollideWithShape(Shape(x, y, r), COL_GRP_ENEMY_SHOT);
     for (auto& isect : isects)
