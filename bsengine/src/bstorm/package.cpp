@@ -239,7 +239,10 @@ void Package::TickFrame()
     RemoveUnusedTexture();
     RemoveUnusedMesh();
     RemoveUnusedFont();
-    lostableGraphicResourceManager_->ReleaseUnusedResource();
+    if (elapsedFrame_ % 900 == 0)
+    {
+        lostableGraphicResourceManager_->RemoveUnusedResource();
+    }
 
     elapsedFrame_++;
 }

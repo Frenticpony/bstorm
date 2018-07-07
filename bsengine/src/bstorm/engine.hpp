@@ -32,7 +32,7 @@ public:
     void ResetGraphicDevice();
     void ReleaseLostableGraphicResource();
     void RestoreLostableGraphicDevice();
-    void ReleaseUnusedLostableGraphicResource();
+    void RemoveUnusedLostableGraphicResource();
     void SwitchRenderTargetToBackBuffer();
 
     /* input control */

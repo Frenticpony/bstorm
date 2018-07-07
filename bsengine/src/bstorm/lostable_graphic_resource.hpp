@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include <unordered_map>
+#include <list>
 #include <memory>
 
 namespace bstorm
@@ -19,8 +19,8 @@ public:
     void AddResource(const std::shared_ptr<LostableGraphicResource>& resource);
     void OnLostDeviceAll();
     void OnResetDeviceAll();
-    void ReleaseUnusedResource();
+    void RemoveUnusedResource();
 private:
-    std::unordered_map<LostableGraphicResource*, std::weak_ptr<LostableGraphicResource>> resourceMap_;
+    std::list<std::weak_ptr<LostableGraphicResource>> resources_;
 };
 }

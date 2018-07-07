@@ -48,9 +48,9 @@ void Engine::RestoreLostableGraphicDevice()
     lostableGraphicResourceManager_->OnResetDeviceAll();
 }
 
-void Engine::ReleaseUnusedLostableGraphicResource()
+void Engine::RemoveUnusedLostableGraphicResource()
 {
-    lostableGraphicResourceManager_->ReleaseUnusedResource();
+    lostableGraphicResourceManager_->RemoveUnusedResource();
 }
 
 void Engine::SwitchRenderTargetToBackBuffer()
