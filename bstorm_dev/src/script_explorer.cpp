@@ -340,7 +340,7 @@ void ScriptExplorer::reload()
         std::vector<std::wstring> scriptPaths;
         GetFilePathsRecursively(L"script", scriptPaths, ignoreScriptExts);
 
-        auto loader = std::make_shared<FileLoaderFromTextFile>();
+        auto loader = std::make_shared<FileLoader>();
 
         for (auto& path : scriptPaths)
         {

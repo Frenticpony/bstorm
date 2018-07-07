@@ -17,6 +17,7 @@
 namespace bstorm
 {
 class Package;
+class FileLoader;
 class DnhValue;
 class DnhArray;
 extern const std::unordered_set<std::wstring> ignoreScriptExts;
@@ -24,7 +25,7 @@ extern const std::unordered_set<std::wstring> ignoreScriptExts;
 class Script : private NonCopyable
 {
 public:
-    Script(const std::wstring& path, const std::wstring& type, const std::wstring& version, int id, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& compileSrcPos);
+    Script(const std::wstring& path, const std::wstring& type, const std::wstring& version, int id, const std::shared_ptr<FileLoader>& fileLoader, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& compileSrcPos);
     ~Script();
     void Close();
     bool IsClosed() const;
@@ -81,7 +82,7 @@ private:
 class ScriptManager
 {
 public:
-    ScriptManager();
+    ScriptManager(const std::shared_ptr<FileLoader>& fileLoader);
     ~ScriptManager();
     std::shared_ptr<Script> Compile(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& srcPos);
     std::shared_ptr<Script> CompileInThread(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& srcPos);
@@ -100,5 +101,6 @@ private:
     int idGen_;
     std::map<int, std::shared_ptr<Script>> scriptMap_; // IDが若い順に走査される
     std::unordered_map<int, std::unique_ptr<DnhValue>> scriptResults_;
+    const std::shared_ptr<FileLoader> fileLoader_;
 };
 }

@@ -11,7 +11,6 @@
 #include <bstorm/semantics_checker.hpp>
 #include <bstorm/code_generator.hpp>
 #include <bstorm/api.hpp>
-#include <bstorm/file_loader.hpp>
 #include <bstorm/logger.hpp>
 #include <bstorm/package.hpp>
 #include <bstorm/time_point.hpp>
@@ -24,7 +23,7 @@ namespace bstorm
 {
 const std::unordered_set<std::wstring> ignoreScriptExts{ L".png", L".jpg", L".jpeg", L".bmp", L".gif", L".dds", L".hdr", L".dib", L".pfm", L".tif", L".tiff", L".ttf", L".otf", L".mqo", L".mp3", L".mp4", L".avi", L".ogg", L".wav", L".wave", L".def", L".dat", L".fx", L".exe" };
 
-Script::Script(const std::wstring& p, const std::wstring& type, const std::wstring& version, int id, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& srcPos) :
+Script::Script(const std::wstring& p, const std::wstring& type, const std::wstring& version, int id, const std::shared_ptr<FileLoader>& fileLoader, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& srcPos) :
     L_(NULL),
     path_(GetCanonicalPath(p)),
     type_(type),
@@ -76,7 +75,7 @@ Script::Script(const std::wstring& p, const std::wstring& type, const std::wstri
                 .SetParam(Log::Param(Log::Param::Tag::SCRIPT, path_))
                 .AddSourcePos(compileSrcPos_)));
             TimePoint tp;
-            program = ParseDnhScript(path_, globalEnv, true, std::make_shared<FileLoaderFromTextFile>());
+            program = ParseDnhScript(path_, globalEnv, true, fileLoader);
             Logger::WriteLog(std::move(
                 Log(Log::Level::LV_DETAIL)
                 .SetMessage("...parse complete " + std::to_string(tp.GetElapsedMilliSec()) + " [ms].")
@@ -399,8 +398,9 @@ void Script::RethrowError() const
     std::rethrow_exception(err_);
 }
 
-ScriptManager::ScriptManager() :
-    idGen_(0)
+ScriptManager::ScriptManager(const std::shared_ptr<FileLoader>& fileLoader) :
+    idGen_(0),
+    fileLoader_(fileLoader)
 {
 }
 
@@ -408,7 +408,7 @@ ScriptManager::~ScriptManager() {}
 
 std::shared_ptr<Script> ScriptManager::Compile(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& srcPos)
 {
-    auto script = std::make_shared<Script>(path, type, version, idGen_++, package, srcPos);
+    auto script = std::make_shared<Script>(path, type, version, idGen_++, fileLoader_, package, srcPos);
     scriptMap_.emplace_hint(scriptMap_.end(), script->GetID(), script);
     return script;
 }

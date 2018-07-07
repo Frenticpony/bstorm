@@ -5,19 +5,11 @@
 
 namespace bstorm
 {
+// should be thread safe.
 class FileLoader
 {
 public:
-    FileLoader() {}
-    virtual ~FileLoader() {}
-    virtual FILE* OpenFile(const std::wstring& path) = 0;
-    virtual void CloseFile(const std::wstring& path, FILE* fp) = 0;
-};
-
-class FileLoaderFromTextFile : public FileLoader
-{
-public:
-    FILE * OpenFile(const std::wstring& path) override;
-    void CloseFile(const std::wstring& path, FILE* fp) override;
+    FILE * OpenFile(const std::wstring& path);
+    void CloseFile(const std::wstring& path, FILE* fp);
 };
 }
