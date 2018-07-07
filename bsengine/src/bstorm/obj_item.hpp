@@ -50,7 +50,7 @@ private:
     int autoDeleteClipRight_;
     int autoDeleteClipBottom_;
     float autoCollectSpeed_;
-    int isObtained_;
+    bool isObtained_;
     PlayerScore score_;
     int animationFrameCnt_;
     int animationIdx_;
