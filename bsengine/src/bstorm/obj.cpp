@@ -56,8 +56,11 @@ const std::unordered_map<std::wstring, std::unique_ptr<DnhValue>>& Obj::GetPrope
 
 ObjectTable::ObjectTable() :
     idGen_(0),
-    isUpdating_(false)
+    isUpdating_(false),
+    objCache_(std::make_shared<Obj>(nullptr)) // ダミーで初期化
 {
+    // 取得されないようにDead状態にする
+    objCache_->Die();
 }
 
 ObjectTable::~ObjectTable()

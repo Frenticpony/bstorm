@@ -18,7 +18,7 @@ public:
     using Type = int;
     Obj(const std::shared_ptr<Package>& state);
     virtual ~Obj();
-    virtual void Update() = 0;
+    virtual void Update() {}
     const std::unique_ptr<DnhValue>& GetValue(const std::wstring& key) const;
     const std::unique_ptr<DnhValue>& GetValueD(const std::wstring& key, const std::unique_ptr<DnhValue>& defaultValue) const;
     void SetValue(const std::wstring& key, std::unique_ptr<DnhValue>&& value);
@@ -58,20 +58,31 @@ public:
     template <class T>
     NullableSharedPtr<T> Get(int id)
     {
+        if (objCache_->GetID() == id && !objCache_->IsDead())
+        {
+            return std::dynamic_pointer_cast<T>(objCache_);
+        }
+
         auto it = table_.find(id);
         if (it != table_.end() && !it->second->IsDead())
         {
-            return std::dynamic_pointer_cast<T>(it->second);
+            objCache_ = it->second;
+            return std::dynamic_pointer_cast<T>(objCache_);
         }
         return nullptr;
     }
     template <>
     NullableSharedPtr<Obj> Get(int id)
     {
+        if (objCache_->GetID() == id && !objCache_->IsDead())
+        {
+            return objCache_;
+        }
+
         auto it = table_.find(id);
         if (it != table_.end() && !it->second->IsDead())
         {
-            return it->second;
+            return objCache_ = it->second;
         }
         return nullptr;
     }
@@ -91,6 +102,7 @@ public:
 private:
     int idGen_;
     std::map<int, std::shared_ptr<Obj>> table_;
+    std::shared_ptr<Obj> objCache_;
     bool isUpdating_;
 };
 }
