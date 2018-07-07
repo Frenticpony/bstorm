@@ -88,6 +88,7 @@
     <ClInclude Include="src\bstorm\source_map.hpp" />
     <ClInclude Include="src\bstorm\stage_types.hpp" />
     <ClInclude Include="src\bstorm\texture.hpp" />
+    <ClInclude Include="src\bstorm\thread_util.hpp" />
     <ClInclude Include="src\bstorm\th_dnh_def.hpp" />
     <ClInclude Include="src\bstorm\time_point.hpp" />
     <ClInclude Include="src\bstorm\util.hpp" />

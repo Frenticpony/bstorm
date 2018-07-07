@@ -2,6 +2,7 @@
 
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/util.hpp>
+#include <bstorm/thread_util.hpp>
 
 namespace bstorm
 {
@@ -47,14 +48,14 @@ Font::Font(const FontParams& params, HWND hWnd, IDirect3DDevice9* d3DDevice_, in
         texture_->LockRect(0, &texRect, NULL, D3DLOCK_DISCARD);
         D3DCOLOR* texMem = (D3DCOLOR*)texRect.pBits;
 
-        int bmpWidth = (fontWidth + 3) & ~3; // DWORD-align
-        for (int y = 0; y < fontHeight; y++)
+        const int bmpWidth = (fontWidth + 3) & ~3; // DWORD-align
+        ParallelTimes(fontHeight, [&](int y)
         {
             for (int x = 0; x < fontWidth; x++)
             {
-                int bmpPos = y * bmpWidth + x;
-                int texPos = y * texWidth + x;
-                BYTE alpha = (BYTE)(fontBmp[bmpPos] * 255.0 / (grad - 1));
+                const int bmpPos = y * bmpWidth + x;
+                const int texPos = y * texWidth + x;
+                const BYTE alpha = (BYTE)(fontBmp[bmpPos] * 255.0 / (grad - 1));
                 if (alpha != 0)
                 {
                     texMem[texPos] = LerpColor(y, fontHeight, params_.topColor, params_.bottomColor).ToD3DCOLOR(alpha);
@@ -65,7 +66,7 @@ Font::Font(const FontParams& params, HWND hWnd, IDirect3DDevice9* d3DDevice_, in
                     texMem[texPos] = 0;
                 }
             }
-        }
+        });
 
         texture_->UnlockRect(0);
         delete[] fontBmp;
@@ -168,7 +169,7 @@ Font::Font(const FontParams& params, HWND hWnd, IDirect3DDevice9* d3DDevice_, in
         /* フォントビットマップからテクスチャに書き込み */
         const int bmpWidth = (fontRect.right * 3 + 3) & ~3;
         const int q2 = quality * quality;
-        for (int y = 0; y < fontHeight; y++)
+        ParallelTimes(fontHeight, [&](int y)
         {
             for (int x = 0; x < fontWidth; x++)
             {
@@ -192,7 +193,7 @@ Font::Font(const FontParams& params, HWND hWnd, IDirect3DDevice9* d3DDevice_, in
                 border /= q2;
                 bg /= q2;
 
-                BYTE alpha = 0xff - bg;
+                const BYTE alpha = 0xff - bg;
 
                 if (alpha == 0)
                 {
@@ -203,15 +204,15 @@ Font::Font(const FontParams& params, HWND hWnd, IDirect3DDevice9* d3DDevice_, in
                 } else
                 {
                     /* フォントの色を線形補間で生成 */
-                    ColorRGB fontColor = LerpColor(y, fontHeight, params_.topColor, params_.bottomColor);
+                    const ColorRGB fontColor = LerpColor(y, fontHeight, params_.topColor, params_.bottomColor);
                     /* 混ぜる */
-                    int r = ((fontColor.GetR() * ch) >> 8) + ((params_.borderColor.GetR() * border) >> 8);
-                    int g = ((fontColor.GetG() * ch) >> 8) + ((params_.borderColor.GetG() * border) >> 8);
-                    int b = ((fontColor.GetB() * ch) >> 8) + ((params_.borderColor.GetB() * border) >> 8);
+                    const int r = ((fontColor.GetR() * ch) >> 8) + ((params_.borderColor.GetR() * border) >> 8);
+                    const int g = ((fontColor.GetG() * ch) >> 8) + ((params_.borderColor.GetG() * border) >> 8);
+                    const int b = ((fontColor.GetB() * ch) >> 8) + ((params_.borderColor.GetB() * border) >> 8);
                     texMem[texPos] = D3DCOLOR_ARGB(alpha, (BYTE)r, (BYTE)g, (BYTE)b);
                 }
             }
-        }
+        });
         texture_->UnlockRect(0);
         SelectObject(memDC, hOldBmp); DeleteObject(hBmp);
         DeleteDC(memDC);
