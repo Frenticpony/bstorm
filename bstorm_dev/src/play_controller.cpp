@@ -22,7 +22,7 @@ PlayController::PlayController(const std::shared_ptr<Engine>& engine) :
 
 void PlayController::Tick()
 {
-    if (HasPackage()) return;
+    if (NotExistPackage()) return;
     if (package_->IsClosed())
     {
         package_->Finalize();
@@ -50,11 +50,11 @@ void PlayController::Tick()
 
 void PlayController::Pause(bool doPause)
 {
-    if (isPaused_ == true && doPause == false && HasPackage())
+    if (isPaused_ == true && doPause == false && NotExistPackage())
     {
         // パッケージ再生開始
         Reload();
-        if (!HasPackage())
+        if (!NotExistPackage())
         {
             isPaused_ = false;
         }
@@ -135,7 +135,7 @@ void PlayController::SetScript(const ScriptInfo & mainScript, const ScriptInfo &
 
 int PlayController::GetElapsedFrame() const
 {
-    if (HasPackage()) return 0;
+    if (NotExistPackage()) return 0;
     return package_->GetElapsedFrame();
 }
 
@@ -145,7 +145,7 @@ void PlayController::SetScreenSize(int width, int height)
     screenHeight_ = height;
 }
 
-bool PlayController::HasPackage() const
+bool PlayController::NotExistPackage() const
 {
     return !package_;
 }
