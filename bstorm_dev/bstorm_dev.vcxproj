@@ -197,6 +197,7 @@
     <ClCompile Include="..\imgui\imgui_draw.cpp" />
     <ClCompile Include="src\camera_browser.cpp" />
     <ClCompile Include="src\common_data_browser.cpp" />
+    <ClCompile Include="src\develop_only.cpp" />
     <ClCompile Include="src\game_view.cpp" />
     <ClCompile Include="src\game_view_mouse_position_provider.cpp" />
     <ClCompile Include="src\object_browser.cpp" />

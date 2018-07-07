@@ -38,6 +38,7 @@ public:
     const BoundingBox& GetBoundingBox() const;
     void Trans(float dx, float dy);
     void SetWidth(float width);
+    // develop only
     void Render(const std::shared_ptr<Renderer>& renderer, bool permitCamera) const;
     Type GetType() const;
     void GetCircle(float& x, float &y, float& r) const;

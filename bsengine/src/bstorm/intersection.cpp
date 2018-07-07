@@ -268,65 +268,6 @@ void Shape::SetWidth(float width)
     UpdateBoundingBox();
 }
 
-void Shape::Render(const std::shared_ptr<Renderer>& renderer, bool permitCamera) const
-{
-    const D3DCOLOR color = D3DCOLOR_ARGB(128, 255, 0, 0);
-    if (type_ == Type::CIRCLE)
-    {
-        static constexpr int vertexNum = 66;
-        static constexpr int way = vertexNum - 2;
-        static bool isInitialized = false;
-        static std::array<Vertex, vertexNum> vertices;
-        if (!isInitialized)
-        {
-            float x = 0;
-            float y = 1;
-            float c = cos(2 * D3DX_PI / way);
-            float s = sin(2 * D3DX_PI / way);
-            for (int i = 0; i < vertexNum; i++)
-            {
-                Vertex& v = vertices[i];
-                if (i == 0)
-                {
-                    v.x = 0;
-                    v.y = 0;
-                } else
-                {
-                    v.x = x;
-                    v.y = y;
-                    float nx = c * x - s * y;
-                    float ny = s * x + c * y;
-                    x = nx;
-                    y = ny;
-                }
-                v.color = color;
-            }
-            isInitialized = true;
-        }
-        D3DXMATRIX world = CreateScaleRotTransMatrix(params_.Circle.x, params_.Circle.y, 0.0f, 0.0f, 0.0f, 0.0f, params_.Circle.r, params_.Circle.r, 1.0f);
-        renderer->RenderPrim2D(D3DPT_TRIANGLEFAN, vertices.size(), vertices.data(), nullptr, BLEND_ALPHA, world, std::shared_ptr<Shader>(), permitCamera, false);
-    } else if (type_ == Type::RECT)
-    {
-        static std::array<Vertex, 4> vertices;
-        for (auto& v : vertices)
-        {
-            v.color = color;
-        }
-        const auto rect = LineToRect(params_.Rect.x1, params_.Rect.y1, params_.Rect.x2, params_.Rect.y2, params_.Rect.width);
-        vertices[0].x = rect[0].x;
-        vertices[0].y = rect[0].y;
-        vertices[1].x = rect[1].x;
-        vertices[1].y = rect[1].y;
-        vertices[2].x = rect[3].x;
-        vertices[2].y = rect[3].y;
-        vertices[3].x = rect[2].x;
-        vertices[3].y = rect[2].y;
-        D3DXMATRIX world;
-        D3DXMatrixIdentity(&world);
-        renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, vertices.size(), vertices.data(), nullptr, BLEND_ALPHA, world, std::shared_ptr<Shader>(), permitCamera, false);
-    }
-}
-
 Shape::Type Shape::GetType() const
 {
     return type_;

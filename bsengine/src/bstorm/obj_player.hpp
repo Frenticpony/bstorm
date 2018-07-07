@@ -71,6 +71,8 @@ public:
 protected:
     void OnTrans(float dx, float dy) override;
 private:
+    // develop only
+    bool IsForceInvincible() const;
     bool IsInvincible() const;
     void ShootDown();
     void Rebirth();

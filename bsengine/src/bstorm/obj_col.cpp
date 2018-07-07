@@ -47,24 +47,6 @@ void ObjCol::SetWidthIntersection(float width)
     }
 }
 
-void ObjCol::RenderIntersection(const std::shared_ptr<Renderer>& renderer, bool isPermitCamera) const
-{
-    auto package = package_.lock();
-    bool renderIntersectionEnable = package == nullptr || package->GetEngineDevelopOptions()->renderIntersectionEnable;
-
-    if (renderIntersectionEnable)
-    {
-        for (auto& isect : GetIntersections())
-        {
-            isect->Render(renderer, isPermitCamera);
-        }
-        for (auto& isect : GetTempIntersections())
-        {
-            isect->Render(renderer, isPermitCamera);
-        }
-    }
-}
-
 void ObjCol::ClearIntersection()
 {
     isects_.clear();

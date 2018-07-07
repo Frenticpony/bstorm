@@ -337,7 +337,7 @@ void ObjPlayer::Hit(int collisionObjId)
 {
     if (auto package = GetPackage().lock())
     {
-        if (package->GetEngineDevelopOptions()->forcePlayerInvincibleEnable) return;
+        if (IsForceInvincible()) return;
         if (state_ == STATE_NORMAL && !IsInvincible())
         {
             state_ = STATE_HIT;
