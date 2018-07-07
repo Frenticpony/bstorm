@@ -8,7 +8,7 @@
 namespace bstorm
 {
 class Font;
-class FontCache;
+class FontStore;
 class ObjText : public ObjRender
 {
 public:

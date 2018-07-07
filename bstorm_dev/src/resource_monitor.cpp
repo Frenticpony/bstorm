@@ -54,30 +54,30 @@ void DrawFontInfo(const std::shared_ptr<Font>& font)
     {
         // font-params
         ImGui::BeginGroup();
-        const FontParams& params_ = font->GetParams();
-        bool hasBorder = params_.borderType != BORDER_NONE;
-        ImGui::BulletText("char         : %s", ToUTF8(std::wstring{ params_.c }).c_str());
-        ImGui::BulletText("font-name    : %s", ToUTF8(params_.fontName).c_str());
-        ImGui::BulletText("size         : %d", params_.size);
-        ImGui::BulletText("weight       : %d", params_.weight);
+        const FontParams& params = font->GetParams();
+        bool hasBorder = params.borderType != BORDER_NONE;
+        ImGui::BulletText("char         : %s", ToUTF8(std::wstring{ params.c }).c_str());
+        ImGui::BulletText("font-name    : %s", ToUTF8(params.fontName).c_str());
+        ImGui::BulletText("size         : %d", params.size);
+        ImGui::BulletText("weight       : %d", params.weight);
         ImGui::BulletText("border       : %s", hasBorder ? "enable" : "disable");
         if (hasBorder)
         {
-            ImGui::BulletText("border-width : %d", params_.borderWidth);
+            ImGui::BulletText("border-width : %d", params.borderWidth);
         }
         {
             // top color
-            float topColor[3] = { params_.topColor.GetR() / 255.0f, params_.topColor.GetG() / 255.0f, params_.topColor.GetB() / 255.0f };
+            float topColor[3] = { params.topColor.GetR() / 255.0f, params.topColor.GetG() / 255.0f, params.topColor.GetB() / 255.0f };
             ImGui::ColorEdit3("top-color", topColor, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_NoInputs);
         }
         {
             // bottom color
-            float bottomColor[3] = { params_.bottomColor.GetR() / 255.0f, params_.bottomColor.GetG() / 255.0f, params_.bottomColor.GetB() / 255.0f };
+            float bottomColor[3] = { params.bottomColor.GetR() / 255.0f, params.bottomColor.GetG() / 255.0f, params.bottomColor.GetB() / 255.0f };
             ImGui::ColorEdit3("bottom-color", bottomColor, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_NoInputs);
         }
         if (hasBorder)
         { // border color
-            float borderColor[3] = { params_.borderColor.GetR() / 255.0f, params_.borderColor.GetG() / 255.0f, params_.borderColor.GetB() / 255.0f };
+            float borderColor[3] = { params.borderColor.GetR() / 255.0f, params.borderColor.GetG() / 255.0f, params.borderColor.GetB() / 255.0f };
             ImGui::ColorEdit3("border-color", borderColor, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_NoInputs);
         }
         ImGui::EndGroup();
@@ -181,44 +181,43 @@ void DrawTextureInfoTab(const std::shared_ptr<TextureStore>& textureStore)
     ImGui::EndChild();
 }
 
-void DrawFontInfoTab(const std::unordered_map<FontParams, std::shared_ptr<Font>>& fontMap)
+void DrawFontInfoTab(const std::shared_ptr<FontStore>& fontStore)
 {
     static FontParams selectedFontParams;
     float sideBarWidth = ImGui::GetContentRegionAvailWidth() * 0.2;
     ImGui::BeginChild("ResourceFontTabSideBar", ImVec2(sideBarWidth, -1), true, ImGuiWindowFlags_HorizontalScrollbar);
     {
         int fontId = 0;
-        for (const auto& entry : fontMap)
+        fontStore->ForEach([&](const auto& params, auto& isReserved, auto& font)
         {
             ImGui::PushID(fontId++);
-            const auto& params_ = entry.first;
-            const auto& font = entry.second;
             ImGui::BeginGroup();
             float iconWidth = ImGui::GetTextLineHeight();
             if (ImGui::ImageButton(font->GetTexture(), ImVec2(iconWidth, iconWidth), ImVec2(0, 0), ImVec2(1.0f*font->GetWidth() / font->GetTextureWidth(), 1.0f*font->GetHeight() / font->GetTextureHeight()), 0, ImVec4(0, 0, 0, 1)))
             {
-                selectedFontParams = params_;
+                selectedFontParams = params;
             }
             ImGui::SameLine();
-            std::string label = ToUTF8(std::wstring{ params_.c }) + "(" + ToUTF8(params_.fontName) + ")";
-            if (ImGui::Selectable(label.c_str(), selectedFontParams == params_))
+            std::string label = ToUTF8(std::wstring{ params.c }) + "(" + ToUTF8(params.fontName) + ")";
+            if (ImGui::Selectable(label.c_str(), selectedFontParams == params))
             {
-                selectedFontParams = params_;
+                selectedFontParams = params;
             }
             ImGui::EndGroup();
             ImGui::PopID();
-        }
+        });
     }
     ImGui::EndChild();
     ImGui::SameLine();
-    ImGui::BeginChild("ResourceFontTabInfoArea", ImVec2(-1, -1), false, ImGuiWindowFlags_HorizontalScrollbar);
-    auto it = fontMap.find(selectedFontParams);
-    ImGui::Text("Font Info");
-    if (it != fontMap.end())
     {
-        DrawFontInfo(it->second);
+        ImGui::BeginChild("ResourceFontTabInfoArea", ImVec2(-1, -1), false, ImGuiWindowFlags_HorizontalScrollbar);
+        ImGui::Text("Font Info");
+        if (fontStore->Contains(selectedFontParams))
+        {
+            DrawFontInfo(fontStore->Create(selectedFontParams));
+        }
+        ImGui::EndChild();
     }
-    ImGui::EndChild();
 }
 
 struct RenderTargetMonitor;
@@ -282,7 +281,7 @@ void Package::backDoor<ResourceMonitor>()
         DrawTextureInfoTab(textureStore_);
     } else if (selectedTab == Tab::FONT)
     {
-        DrawFontInfoTab(GetFontMap());
+        DrawFontInfoTab(fontStore_);
     } else if (selectedTab == Tab::RENDER_TARGET)
     {
         backDoor<RenderTargetMonitor>();

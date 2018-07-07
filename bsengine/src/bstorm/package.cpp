@@ -116,7 +116,7 @@ Package::Package(HWND hWnd,
     defaultBonusItemEnable_(true),
     stgFrame_(32.0f, 16.0f, 416.0f, 464.0f),
     shotAutoDeleteClip_(64.0f, 64.0f, 64.0f, 64.0f),
-    fontCache_(std::make_shared<FontCache>(hWnd, graphicDevice_->GetDevice())),
+    fontStore_(std::make_shared<FontStore>(hWnd, graphicDevice_)),
     packageStartTime_(std::make_shared<TimePoint>())
 {
     Reset2DCamera();
@@ -238,15 +238,9 @@ void Package::TickFrame()
     // 使われなくなったリソース開放
     RemoveUnusedTexture();
     RemoveUnusedMesh();
-    switch (GetElapsedFrame() % 1920)
-    {
-        case 0:
-            lostableGraphicResourceManager_->ReleaseUnusedResource();
-            break;
-        case 960:
-            ReleaseUnusedFont();
-            break;
-    }
+    RemoveUnusedFont();
+    lostableGraphicResourceManager_->ReleaseUnusedResource();
+
     elapsedFrame_++;
 }
 
@@ -444,19 +438,14 @@ void Package::RemoveUnusedTexture()
     textureStore_->RemoveUnusedTexture();
 }
 
-std::shared_ptr<Font> Package::CreateFont(const FontParams& param)
+const std::shared_ptr<Font>& Package::CreateFont(const FontParams& param)
 {
-    return fontCache_->Create(param);
+    return fontStore_->Create(param);
 }
 
-void Package::ReleaseUnusedFont()
+void Package::RemoveUnusedFont()
 {
-    fontCache_->ReleaseUnusedFont();
-}
-
-const std::unordered_map<FontParams, std::shared_ptr<Font>>& Package::GetFontMap() const
-{
-    return fontCache_->GetFontMap();
+    fontStore_->RemoveUnusedFont();
 }
 
 bool Package::InstallFont(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)

@@ -3,6 +3,7 @@
 #include <bstorm/font_params.hpp>
 #include <bstorm/non_copyable.hpp>
 #include <bstorm/color_rgb.hpp>
+#include <bstorm/cache_store.hpp>
 
 #include <windows.h>
 #include <string>
@@ -12,10 +13,11 @@
 
 namespace bstorm
 {
+class GraphicDevice;
 class Font : private NonCopyable
 {
 public:
-    Font(const FontParams& params, HWND hWnd, IDirect3DDevice9* d3DDevice_, int borderedFontQuality);
+    Font(const FontParams& params, HWND hWnd, const std::shared_ptr<GraphicDevice>& graphicDevice);
     ~Font();
     int GetWidth() const { return width_; }
     int GetHeight() const { return height_; }
@@ -41,19 +43,19 @@ private:
     int textureHeight_; // テクスチャの高さ(2のn乗)
 };
 
-class FontCache
+class FontStore
 {
 public:
-    FontCache(HWND hWnd, IDirect3DDevice9* d3DDevice_);
-    std::shared_ptr<Font> Create(const FontParams& params);
-    void SetBorderedFontQuality(int q); // 1 ~ 4
-    void ReleaseUnusedFont();
-    const std::unordered_map<FontParams, std::shared_ptr<Font>>& GetFontMap() const { return fontMap_; }
+    FontStore(HWND hWnd, const std::shared_ptr<GraphicDevice>& graphicDevice);
+    const std::shared_ptr<Font>& Create(const FontParams& params);
+    bool Contains(const FontParams& params) const;
+    void RemoveUnusedFont();
+    template <class Fn>
+    void ForEach(Fn func) { cacheStore_.ForEach(func); }
 private:
     HWND hWnd_;
-    IDirect3DDevice9* d3DDevice_;
-    std::unordered_map<FontParams, std::shared_ptr<Font>> fontMap_;
-    int borderedFontQuality_;
+    const std::shared_ptr<GraphicDevice> graphicDevice_;
+    CacheStore<FontParams, Font> cacheStore_;
 };
 
 bool InstallFont(const std::wstring& path);

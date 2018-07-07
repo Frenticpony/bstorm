@@ -34,7 +34,7 @@ class DnhArray;
 class DnhValue;
 class FileLoader;
 class Font;
-class FontCache;
+class FontStore;
 class FpsCounter;
 class GraphicDevice;
 class InputDevice;
@@ -155,9 +155,8 @@ public:
     void RemoveUnusedTexture();
 
     /* font */
-    std::shared_ptr<Font> CreateFont(const FontParams& param);
-    void ReleaseUnusedFont();
-    const std::unordered_map<FontParams, std::shared_ptr<Font>>& GetFontMap() const;
+    const std::shared_ptr<Font>& CreateFont(const FontParams& param);
+    void RemoveUnusedFont();
     bool InstallFont(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
 
     /* render target */
@@ -562,7 +561,7 @@ private:
 
     Rect<float> stgFrame_;
     Rect<float> shotAutoDeleteClip_;
-    const std::shared_ptr<FontCache> fontCache_;
+    const std::shared_ptr<FontStore> fontStore_;
     StageCommonPlayerParams stageCommonPlayerParams_;
 
     std::shared_ptr<TimePoint> packageStartTime_;

@@ -41,10 +41,7 @@ public:
     void RemoveUnusedTexture();
     bool IsLoadCompleted(const std::wstring & path) const;
     template <class Fn>
-    void ForEach(Fn func)
-    {
-        cacheStore_.ForEach(func);
-    }
+    void ForEach(Fn func) { cacheStore_.ForEach(func); }
 private:
     CacheStore<std::wstring, Texture> cacheStore_;
     const std::shared_ptr<GraphicDevice> graphicDevice_;

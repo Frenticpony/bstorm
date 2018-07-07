@@ -3,6 +3,7 @@
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/util.hpp>
 #include <bstorm/thread_util.hpp>
+#include <bstorm/graphic_device.hpp>
 
 namespace bstorm
 {
@@ -16,7 +17,8 @@ static ColorRGB LerpColor(float y, float height, const ColorRGB& topColor, const
 }
 
 // FUTURE : error check
-Font::Font(const FontParams& params, HWND hWnd, IDirect3DDevice9* d3DDevice_, int quality) :
+// NOTE: Windows GDIを使っているので非同期に作成してはいけない
+Font::Font(const FontParams& params, HWND hWnd, const std::shared_ptr<GraphicDevice>& graphicDevice) :
     texture_(NULL),
     params_(params)
 {
@@ -43,7 +45,7 @@ Font::Font(const FontParams& params, HWND hWnd, IDirect3DDevice9* d3DDevice_, in
         const int fontHeight = gm.gmBlackBoxY;
         const int texWidth = NextPow2(fontWidth);
         const int texHeight = NextPow2(fontHeight);
-        d3DDevice_->CreateTexture(texWidth, texHeight, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture_, NULL);
+        graphicDevice->GetDevice()->CreateTexture(texWidth, texHeight, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture_, NULL);
         D3DLOCKED_RECT texRect;
         texture_->LockRect(0, &texRect, NULL, D3DLOCK_DISCARD);
         D3DCOLOR* texMem = (D3DCOLOR*)texRect.pBits;
@@ -84,12 +86,14 @@ Font::Font(const FontParams& params, HWND hWnd, IDirect3DDevice9* d3DDevice_, in
         // BORDER_SHADOWは廃止
 
         /* GDIで大きく描いてから、SSAAしてテクスチャに書き込む */
+        constexpr int ssaaQuality = 4;
+        constexpr int ssaaQualitySq = ssaaQuality * ssaaQuality;
         HDC hDC = GetDC(hWnd);
         HDC memDC = CreateCompatibleDC(hDC);
 
         /* フォントの作成 */
-        /** quality倍の大きさで取得 */
-        HFONT hFont = CreateFont(params_.size * quality, 0, 0, 0, params_.weight, 0, 0, 0, DEFAULT_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY, DEFAULT_PITCH, params_.fontName.c_str());
+        /** ssaaQuality倍の大きさで取得 */
+        HFONT hFont = CreateFont(params_.size * ssaaQuality, 0, 0, 0, params_.weight, 0, 0, 0, DEFAULT_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY, DEFAULT_PITCH, params_.fontName.c_str());
         HFONT hOldFont = (HFONT)SelectObject(memDC, hFont);
 
         /* フォントのパラメータ取得 */
@@ -99,11 +103,11 @@ Font::Font(const FontParams& params, HWND hWnd, IDirect3DDevice9* d3DDevice_, in
         GetTextMetrics(memDC, &tm);
         GetGlyphOutline(memDC, (UINT)params_.c, GGO_METRICS, &gm, 0, NULL, &mat);
 
-        const int penSize = 2 * params_.borderWidth * quality;
+        const int penSize = 2 * params_.borderWidth * ssaaQuality;
 
         /* フォント矩形 */
-        /** 幅と高さがqualityの倍数になるように調整 */
-        RECT fontRect = { 0, 0, ((LONG)gm.gmBlackBoxX + penSize + quality - 1) / quality * quality, ((LONG)gm.gmBlackBoxY + penSize + quality - 1) / quality * quality };
+        /** 幅と高さがssaaQualityの倍数になるように調整 */
+        RECT fontRect = { 0, 0, ((LONG)gm.gmBlackBoxX + penSize + ssaaQuality - 1) / ssaaQuality * ssaaQuality, ((LONG)gm.gmBlackBoxY + penSize + ssaaQuality - 1) / ssaaQuality * ssaaQuality };
 
         /* フォントビットマップ取得 */
         BITMAPINFO bmpInfo = {};
@@ -156,19 +160,18 @@ Font::Font(const FontParams& params, HWND hWnd, IDirect3DDevice9* d3DDevice_, in
         SelectObject(memDC, hOldBrush); DeleteObject(hBrush);
 
         /* テクスチャ取得 */
-        const int fontWidth = fontRect.right / quality;
-        const int fontHeight = fontRect.bottom / quality;
+        const int fontWidth = fontRect.right / ssaaQuality;
+        const int fontHeight = fontRect.bottom / ssaaQuality;
         const int texWidth = NextPow2(fontWidth);
         const int texHeight = NextPow2(fontHeight);
 
-        d3DDevice_->CreateTexture(texWidth, texHeight, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture_, NULL);
+        graphicDevice->GetDevice()->CreateTexture(texWidth, texHeight, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture_, NULL);
         D3DLOCKED_RECT texRect;
         texture_->LockRect(0, &texRect, NULL, D3DLOCK_DISCARD);
         D3DCOLOR* texMem = (D3DCOLOR*)texRect.pBits;
 
         /* フォントビットマップからテクスチャに書き込み */
         const int bmpWidth = (fontRect.right * 3 + 3) & ~3;
-        const int q2 = quality * quality;
         ParallelTimes(fontHeight, [&](int y)
         {
             for (int x = 0; x < fontWidth; x++)
@@ -177,21 +180,21 @@ Font::Font(const FontParams& params, HWND hWnd, IDirect3DDevice9* d3DDevice_, in
                 int ch = 0; // 文字
                 int border = 0; // 縁取り
                 int bg = 0; // 背景
-                for (int dy = 0; dy < quality; dy++)
+                for (int dy = 0; dy < ssaaQuality; dy++)
                 {
-                    for (int dx = 0; dx < quality; dx++)
+                    for (int dx = 0; dx < ssaaQuality; dx++)
                     {
-                        const int bmpX = x * quality + dx;
-                        const int bmpY = y * quality + dy;
+                        const int bmpX = x * ssaaQuality + dx;
+                        const int bmpY = y * ssaaQuality + dy;
                         const int bmpPos = bmpY * bmpWidth + 3 * bmpX;
                         ch += fontBmp[bmpPos + 2]; // R
                         border += fontBmp[bmpPos + 1]; // G
                         bg += fontBmp[bmpPos]; // B
                     }
                 }
-                ch /= q2;
-                border /= q2;
-                bg /= q2;
+                ch /= ssaaQualitySq;
+                border /= ssaaQualitySq;
+                bg /= ssaaQualitySq;
 
                 const BYTE alpha = 0xff - bg;
 
@@ -240,41 +243,25 @@ Font::~Font()
     safe_release(texture_);
 }
 
-FontCache::FontCache(HWND hWnd, IDirect3DDevice9 * d3DDevice_) :
+FontStore::FontStore(HWND hWnd, const std::shared_ptr<GraphicDevice>& graphicDevice) :
     hWnd_(hWnd),
-    d3DDevice_(d3DDevice_),
-    borderedFontQuality_(4)
+    graphicDevice_(graphicDevice)
 {
 }
 
-std::shared_ptr<Font> FontCache::Create(const FontParams& params)
+const std::shared_ptr<Font>& FontStore::Create(const FontParams& params)
 {
-    auto it = fontMap_.find(params);
-    if (it != fontMap_.end())
-    {
-        return it->second;
-    } else
-    {
-        return fontMap_[params] = std::make_shared<Font>(params, hWnd_, d3DDevice_, borderedFontQuality_);
-    }
+    return cacheStore_.Load(params, params, hWnd_, graphicDevice_);
 }
 
-void FontCache::SetBorderedFontQuality(int q)
+bool FontStore::Contains(const FontParams & params) const
 {
-    borderedFontQuality_ = q;
+    return cacheStore_.Contains(params);
 }
 
-void FontCache::ReleaseUnusedFont()
+void FontStore::RemoveUnusedFont()
 {
-    auto it = fontMap_.begin();
-    while (it != fontMap_.end())
-    {
-        auto& font = it->second;
-        if (font.use_count() <= 1)
-        {
-            fontMap_.erase(it++);
-        } else ++it;
-    }
+    cacheStore_.RemoveUnused();
 }
 
 bool InstallFont(const std::wstring& path)
