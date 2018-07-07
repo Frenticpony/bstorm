@@ -24,7 +24,7 @@ namespace bstorm
 ObjPlayer::ObjPlayer(const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package) :
     ObjSprite2D(package),
     ObjMove(this),
-    ObjCol(colDetector, package),
+    ObjCol(colDetector),
     permitPlayerShot_(true),
     permitPlayerSpell_(true),
     state_(STATE_NORMAL),
@@ -117,7 +117,7 @@ void ObjPlayer::Update()
 void ObjPlayer::Render(const std::shared_ptr<Renderer>& renderer)
 {
     ObjSprite2D::Render(renderer);
-    ObjCol::RenderIntersection(renderer, IsPermitCamera());
+    ObjCol::RenderIntersection(renderer, IsPermitCamera(), GetPackage());
 }
 
 void ObjPlayer::AddIntersectionCircleA1(float dx, float dy, float r, float dr)
@@ -337,7 +337,7 @@ void ObjPlayer::Hit(int collisionObjId)
 {
     if (auto package = GetPackage().lock())
     {
-        if (IsForceInvincible()) return;
+        if (IsForceInvincible(package)) return;
         if (state_ == STATE_NORMAL && !IsInvincible())
         {
             state_ = STATE_HIT;

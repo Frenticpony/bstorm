@@ -23,7 +23,7 @@ namespace bstorm
 ObjShot::ObjShot(bool isPlayerShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package) :
     ObjRender(package),
     ObjMove(this),
-    ObjCol(colDetector, package),
+    ObjCol(colDetector),
     isPlayerShot_(isPlayerShot),
     isRegistered_(false),
     intersectionEnable_(true),
@@ -532,7 +532,7 @@ void ObjShot::OnTrans(float dx, float dy)
 
 void ObjShot::RenderIntersection(const std::shared_ptr<Renderer>& renderer)
 {
-    ObjCol::RenderIntersection(renderer, IsPermitCamera());
+    ObjCol::RenderIntersection(renderer, IsPermitCamera(), GetPackage());
 }
 
 void ObjShot::CheckAutoDelete(float x, float y)

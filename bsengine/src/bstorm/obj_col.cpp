@@ -8,9 +8,8 @@
 
 namespace bstorm
 {
-ObjCol::ObjCol(const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package) :
-    colDetector_(colDetector),
-    package_(package)
+ObjCol::ObjCol(const std::shared_ptr<CollisionDetector>& colDetector) :
+    colDetector_(colDetector)
 {
 }
 ObjCol::~ObjCol() {}

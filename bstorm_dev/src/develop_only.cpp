@@ -11,9 +11,9 @@
 
 namespace bstorm
 {
-void ObjCol::RenderIntersection(const std::shared_ptr<Renderer>& renderer, bool isPermitCamera) const
+void ObjCol::RenderIntersection(const std::shared_ptr<Renderer>& renderer, bool isPermitCamera, const std::weak_ptr<Package>& packagePtr) const
 {
-    auto package = package_.lock();
+    auto package = packagePtr.lock();
     bool renderIntersectionEnable = package && package->GetEngineDevelopOptions()->renderIntersectionEnable;
 
     if (renderIntersectionEnable)
@@ -29,13 +29,9 @@ void ObjCol::RenderIntersection(const std::shared_ptr<Renderer>& renderer, bool 
     }
 }
 
-bool ObjPlayer::IsForceInvincible() const
+bool ObjPlayer::IsForceInvincible(const std::shared_ptr<Package>& package) const
 {
-    if (auto package = GetPackage().lock())
-    {
-        return package->GetEngineDevelopOptions()->forcePlayerInvincibleEnable;
-    }
-    return false;
+    return package->GetEngineDevelopOptions()->forcePlayerInvincibleEnable;
 }
 
 static std::array<Point2D, 4> LineToRect(float x1, float y1, float x2, float y2, float width)

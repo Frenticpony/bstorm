@@ -8,7 +8,7 @@ namespace bstorm
 {
 ObjSpell::ObjSpell(const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package) :
     ObjPrim2D(package),
-    ObjCol(colDetector, package),
+    ObjCol(colDetector),
     damage_(0),
     isRegistered_(false),
     eraseShotEnable_(true)
@@ -28,7 +28,7 @@ void ObjSpell::Render(const std::shared_ptr<Renderer>& renderer)
     if (IsRegistered())
     {
         ObjPrim2D::Render(renderer);
-        ObjCol::RenderIntersection(renderer, IsPermitCamera());
+        ObjCol::RenderIntersection(renderer, IsPermitCamera(), GetPackage());
     }
 }
 

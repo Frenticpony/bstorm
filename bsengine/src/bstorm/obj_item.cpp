@@ -17,7 +17,7 @@ namespace bstorm
 ObjItem::ObjItem(int itemType, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package) :
     ObjRender(package),
     ObjMove(this),
-    ObjCol(colDetector, package),
+    ObjCol(colDetector),
     itemType_(itemType),
     score_(0),
     autoCollectEnable_(true),
@@ -224,7 +224,7 @@ void ObjItem::Render(const std::shared_ptr<Renderer>& renderer)
         renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), itemData_->texture->GetTexture(), itemBlend, world, GetAppliedShader(), IsPermitCamera(), true);
     }
 
-    ObjCol::RenderIntersection(renderer, IsPermitCamera());
+    ObjCol::RenderIntersection(renderer, IsPermitCamera(), GetPackage());
 }
 
 int ObjItem::GetItemType() const { return itemType_; }

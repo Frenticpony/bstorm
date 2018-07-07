@@ -4,7 +4,7 @@
 
 namespace bstorm
 {
-void ObjCol::RenderIntersection(const std::shared_ptr<Renderer>& renderer, bool isPermitCamera) const {}
-bool ObjPlayer::IsForceInvincible() const { return false; }
+void ObjCol::RenderIntersection(const std::shared_ptr<Renderer>& renderer, bool isPermitCamera, const std::weak_ptr<Package>& package) const {}
+bool ObjPlayer::IsForceInvincible(const std::shared_ptr<Package>& package) const { return false; }
 void Shape::Render(const std::shared_ptr<Renderer>& renderer, bool permitCamera) const {}
 }

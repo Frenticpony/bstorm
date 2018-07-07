@@ -12,7 +12,7 @@ namespace bstorm
 ObjEnemy::ObjEnemy(bool isBoss, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package) :
     ObjSprite2D(package),
     ObjMove(this),
-    ObjCol(colDetector, package),
+    ObjCol(colDetector),
     isRegistered_(false),
     life_(0),
     damageRateShot_(1.0),
@@ -49,7 +49,7 @@ void ObjEnemy::Render(const std::shared_ptr<Renderer>& renderer)
     if (IsRegistered())
     {
         ObjSprite2D::Render(renderer);
-        ObjCol::RenderIntersection(renderer, IsPermitCamera());
+        ObjCol::RenderIntersection(renderer, IsPermitCamera(), GetPackage());
     }
 }
 
