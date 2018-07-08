@@ -113,7 +113,10 @@ void CodeGenerator::Traverse(NodeNoParenCallExp& call)
         NodeStr(GetParentPath(*call.srcPos->filename) + L"/").Traverse(*this);
     } else if (auto c = std::dynamic_pointer_cast<NodeConst>(def))
     {
-        AddCode(ToUTF8(c->value) + " --[[ " + call.name + " ]]");
+        AddCode(ToUTF8(c->value));
+#ifdef _DEBUG
+        AddCode(" --[[ " + call.name + " ]]");
+#endif
     } else
     {
         AddCode(varname(call.name) + "()");
@@ -128,7 +131,10 @@ void CodeGenerator::Traverse(NodeCallExp& call)
         NodeStr(GetParentPath(*call.srcPos->filename) + L"/").Traverse(*this);
     } else if (auto c = std::dynamic_pointer_cast<NodeConst>(def))
     {
-        AddCode(ToUTF8(c->value) + " --[[ " + call.name + " ]]");
+        AddCode(ToUTF8(c->value));
+#ifdef _DEBUG
+        AddCode(" --[[ " + call.name + " ]]");
+#endif
     } else
     {
         AddCode(varname(call.name) + "(");
@@ -162,7 +168,7 @@ void CodeGenerator::AddCode(const std::string& s)
     {
         for (int i = 0; i < indentLevel_; i++) { code_ += tab; }
         isLineHead_ = false;
-    }
+}
 #endif
     code_ += s;
 }
