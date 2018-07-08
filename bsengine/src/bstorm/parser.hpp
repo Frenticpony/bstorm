@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <bstorm/script_info.hpp>
+
 #include <memory>
 #include <string>
 
@@ -8,7 +10,6 @@ namespace bstorm
 class FileLoader;
 class UserShotData;
 class UserItemData;
-class ScriptInfo;
 struct Env;
 struct NodeBlock;
 struct Mqo;

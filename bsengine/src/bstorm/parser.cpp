@@ -7,7 +7,6 @@
 
 #include <bstorm/util.hpp>
 #include <bstorm/file_loader.hpp>
-#include <bstorm/script_info.hpp>
 #include <bstorm/env.hpp>
 #include <bstorm/node.hpp>
 #include <bstorm/shot_data.hpp>
