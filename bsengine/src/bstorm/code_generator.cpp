@@ -35,7 +35,6 @@ CodeGenerator::CodeGenerator() :
 void CodeGenerator::Generate(Node & n)
 {
     code_.clear();
-    code_.reserve(4096);
     n.Traverse(*this);
 }
 
