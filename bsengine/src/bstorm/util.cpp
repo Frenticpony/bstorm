@@ -244,7 +244,7 @@ separator:
     }
 
     // concat
-    std::wstring ret; ret.reserve(pathSize);
+    std::wstring ret; ret.reserve(pathSize + 1);
     for (const auto& s : trail)
     {
         ret += s;
