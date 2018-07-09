@@ -251,6 +251,16 @@ std::wstring ConcatPath(const std::wstring& a, const std::wstring& b)
     return a + L"/" + b;
 }
 
+std::wstring ConcatPath(std::wstring && a, const std::wstring & b)
+{
+    if (a.empty() || (a.back() != L'/' && a.back() != L'\\'))
+    {
+        a.push_back(L'/');
+    }
+    a += b;
+    return std::move(a);
+}
+
 std::wstring GetParentPath(const std::wstring& path)
 {
     auto found = path.find_last_of(L"/\\");

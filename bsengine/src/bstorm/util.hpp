@@ -123,6 +123,7 @@ inline int NextPow2(int x)
 
 std::wstring GetCanonicalPath(const std::wstring& path);
 std::wstring ConcatPath(const std::wstring& a, const std::wstring& b);
+std::wstring ConcatPath(std::wstring&& a, const std::wstring& b);
 std::wstring GetParentPath(const std::wstring& path);
 std::wstring ExpandIncludePath(const std::wstring& includerPath, const std::wstring& includeePath);
 }
