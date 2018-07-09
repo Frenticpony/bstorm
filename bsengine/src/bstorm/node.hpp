@@ -524,9 +524,9 @@ struct NodeBuiltInFunc : public NodeDef
 
 struct NodeConst : public NodeDef
 {
-    NodeConst(const std::string& name, const std::wstring& c) : NodeDef(name), value(c) {}
+    NodeConst(const std::string& name, const std::string& c) : NodeDef(name), value(c) {}
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
-    std::wstring value;
+    std::string value; // UTF-8
 };
 
 struct NodeLocal : public NodeStmt

@@ -5649,14 +5649,14 @@ void SetScript(lua_State* L, Script* p)
     SetPointerToLuaRegistry(L, "Script", p);
 }
 
-__declspec(noinline) static void addConst(NameTable& table, const char* name, const wchar_t* value)
+__declspec(noinline) static void addConst(NameTable& table, const char* name, const char* value)
 {
     table.emplace(name, std::make_shared<NodeConst>(name, value));
 }
 
 __declspec(noinline) static void addConstI(NameTable& table, const char* name, int value)
 {
-    table.emplace(name, std::make_shared<NodeConst>(name, std::to_wstring(value)));
+    table.emplace(name, std::make_shared<NodeConst>(name, std::to_string(value)));
 }
 
 __declspec(noinline) static void addFunc(NameTable& table, const char* name, int paramc, lua_State* L, lua_CFunction func)
@@ -6079,9 +6079,9 @@ void RegisterStandardAPI(lua_State* L, const std::wstring& typeName, const std::
     constI(CULL_CW);
     constI(CULL_CCW);
 
-    addConst(table, "pi", L"3.141592653589793");
-    addConst(table, "true", L"true");
-    addConst(table, "false", L"false");
+    addConst(table, "pi", "3.141592653589793");
+    addConst(table, "true", "true");
+    addConst(table, "false", "false");
 
     runtime(concatenate, 2);
     runtime(add, 2);

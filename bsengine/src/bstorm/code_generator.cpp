@@ -112,7 +112,7 @@ void CodeGenerator::Traverse(NodeNoParenCallExp& call)
         NodeStr(GetParentPath(*call.srcPos->filename) + L"/").Traverse(*this);
     } else if (auto c = std::dynamic_pointer_cast<NodeConst>(def))
     {
-        AddCode(ToUTF8(c->value));
+        AddCode(c->value);
 #ifdef _DEBUG
         AddCode(" --[[ " + call.name + " ]]");
 #endif
@@ -130,7 +130,7 @@ void CodeGenerator::Traverse(NodeCallExp& call)
         NodeStr(GetParentPath(*call.srcPos->filename) + L"/").Traverse(*this);
     } else if (auto c = std::dynamic_pointer_cast<NodeConst>(def))
     {
-        AddCode(ToUTF8(c->value));
+        AddCode(c->value);
 #ifdef _DEBUG
         AddCode(" --[[ " + call.name + " ]]");
 #endif
