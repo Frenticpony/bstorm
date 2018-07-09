@@ -172,7 +172,19 @@ bool IsMatchString(const std::string& searchText, const std::string& searchTarge
 
 bool IsSpace(wchar_t c)
 {
-    return c == L' ' || c == L'\t' || c == L'\n' || c == L'\r' || c == L'\f' || c == L'\v' || c == L'\b';
+    switch (c)
+    {
+        case L' ':
+        case L'\t':
+        case L'\n':
+        case L'\r':
+        case L'\f':
+        case L'\v':
+        case L'\b':
+            return true;
+        default:
+            return false;
+    }
 }
 
 void TrimSpace(std::wstring * s)
