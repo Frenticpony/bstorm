@@ -45,10 +45,7 @@ Script::Script(const std::wstring& p, const std::wstring& type, const std::wstri
         auto globalEnv = std::make_shared<Env>();
         RegisterStandardAPI(L_, type_, version_, globalEnv->table);
 
-        // ランタイム用ヘルパー関数登録
-        RegisterRuntimeHelper(L_);
-
-        // ポインタ設定
+        // スクリプトをバインド
         SetScript(L_, this);
 
         // パース

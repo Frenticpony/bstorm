@@ -5569,17 +5569,13 @@ static int c_predchar(lua_State* L)
     return 1;
 }
 
-static int __c_raiseerror(lua_State* L)
+static int c_raiseerror(lua_State* L)
 {
     std::string msg = lua_tostring(L, 1);
     throw Log(Log::Level::LV_ERROR).SetMessage(msg);
     return 0;
 }
 
-static int c_raiseerror(lua_State* L)
-{
-    return UnsafeFunction<__c_raiseerror>(L);
-}
 
 // helper
 
@@ -5610,12 +5606,7 @@ std::shared_ptr<SourcePos> GetSourcePos(lua_State * L)
     return script->GetSourcePos(line);
 }
 
-// MEMO :
-// UnsafeFunctionCommonで例外を拾い
-// __UnsafeFunctionCommonでlua_errorでlongjmpする
-// UnsafeFunctionCommonから直接longjmpするとローカルに確保されたオブジェクトのデストラクタが呼ばれないため二段構成となっている
-
-static int UnsafeFunctionCommon(lua_State* L, lua_CFunction func)
+static int WrapException(lua_State* L, lua_CFunction func)
 {
     try
     {
@@ -5645,15 +5636,7 @@ static int UnsafeFunctionCommon(lua_State* L, lua_CFunction func)
         }
         lua_pushstring(L, "unexpected_script_runtime_error");
     }
-    return -1;
-}
-
-// NOTE : don't create object in this function
-int __UnsafeFunctionCommon(lua_State* L, lua_CFunction func)
-{
-    int r = UnsafeFunctionCommon(L, func);
-    if (r < 0) lua_error(L); // longjmp
-    return r;
+    return lua_error(L);
 }
 
 Script* GetScript(lua_State* L)
@@ -5688,12 +5671,7 @@ __declspec(noinline) static void addRuntimeFunc(NameTable& table, const char* na
 }
 
 #define constI(name) (addConstI(table, #name, name))
-#define unsafe(name, paramc) (addFunc(table, #name, (paramc), L, UnsafeFunction<name>))
-#ifdef _DEBUG
-#define safe(name, paramc) (unsafe(name, paramc))
-#else
-#define safe(name, paramc) (addFunc(table, #name, (paramc), L, name))
-#endif
+#define builtin(name, paramc) (addFunc(table, #name, (paramc), L, name))
 #define runtime(name, paramc) (addRuntimeFunc(table, #name, (paramc)))
 #define TypeIs(typeSet) ((typeSet) & type)
 
@@ -5701,6 +5679,9 @@ typedef uint8_t ScriptType;
 
 void RegisterStandardAPI(lua_State* L, const std::wstring& typeName, const std::wstring& version, NameTable& table)
 {
+    lua_pushlightuserdata(L, (void *)WrapException);
+    luaJIT_setmode(L, -1, LUAJIT_MODE_WRAPCFUNC | LUAJIT_MODE_ON);
+
     constexpr ScriptType t_player = 1;
     constexpr ScriptType t_stage = 2;
     constexpr ScriptType t_package = 4;
@@ -6140,623 +6121,621 @@ void RegisterStandardAPI(lua_State* L, const std::wstring& typeName, const std::
     runtime(absolute, 1);
     runtime(modc, 2);
 
-    safe(InstallFont, 1);
-    safe(ToString, 1);
+    builtin(InstallFont, 1);
+    builtin(ToString, 1);
     runtime(IntToString, 1);
     runtime(itoa, 1);
     runtime(rtoa, 1);
-    safe(atoi, 1);
-    safe(ator, 1);
-    safe(TrimString, 1);
-    safe(rtos, 2);
-    safe(vtos, 2);
-    safe(SplitString, 2);
+    builtin(atoi, 1);
+    builtin(ator, 1);
+    builtin(TrimString, 1);
+    builtin(rtos, 2);
+    builtin(vtos, 2);
+    builtin(SplitString, 2);
 
-    safe(GetFileDirectory, 1);
-    safe(GetFilePathList, 1);
-    safe(GetDirectoryList, 1);
-    unsafe(GetModuleDirectory, 0);
+    builtin(GetFileDirectory, 1);
+    builtin(GetFilePathList, 1);
+    builtin(GetDirectoryList, 1);
+    builtin(GetModuleDirectory, 0);
 
     if (TypeIs(~t_package))
     {
-        safe(GetMainStgScriptPath, 0);
+        builtin(GetMainStgScriptPath, 0);
     }
 
-    safe(GetMainPackageScriptPath, 0);
+    builtin(GetMainPackageScriptPath, 0);
 
     if (TypeIs(~t_package))
     {
-        safe(GetMainStgScriptDirectory, 0);
+        builtin(GetMainStgScriptDirectory, 0);
     }
 
     runtime(GetCurrentScriptDirectory, 0);
-    safe(GetScriptPathList, 2);
+    builtin(GetScriptPathList, 2);
 
-    safe(GetCurrentDateTimeS, 0);
-    safe(GetStageTime, 0);
-    safe(GetPackageTime, 0);
-    safe(GetCurrentFps, 0);
-
-    if (TypeIs(~t_package))
-    {
-        unsafe(GetReplayFps, 0);
-    }
-
-    unsafe(WriteLog, 1);
-    unsafe(RaiseError, 1);
-    unsafe(assert, 2);
-
-    safe(SetCommonData, 2);
-    safe(GetCommonData, 2);
-    safe(ClearCommonData, 0);
-    safe(DeleteCommonData, 1);
-    safe(SetAreaCommonData, 3);
-    safe(GetAreaCommonData, 3);
-    safe(ClearAreaCommonData, 1);
-    safe(DeleteAreaCommonData, 2);
-    safe(CreateCommonDataArea, 1);
-    safe(IsCommonDataAreaExists, 1);
-    safe(CopyCommonDataArea, 2);
-    safe(GetCommonDataAreaKeyList, 0);
-    safe(GetCommonDataValueKeyList, 1);
-    safe(SaveCommonDataAreaA1, 1);
-    safe(LoadCommonDataAreaA1, 1);
-    safe(SaveCommonDataAreaA2, 2);
-    safe(LoadCommonDataAreaA2, 2);
+    builtin(GetCurrentDateTimeS, 0);
+    builtin(GetStageTime, 0);
+    builtin(GetPackageTime, 0);
+    builtin(GetCurrentFps, 0);
 
     if (TypeIs(~t_package))
     {
-        unsafe(SaveCommonDataAreaToReplayFile, 1);
-        unsafe(LoadCommonDataAreaFromReplayFile, 1);
+        builtin(GetReplayFps, 0);
     }
 
-    unsafe(LoadSound, 1);
-    safe(RemoveSound, 1);
-    safe(PlayBGM, 3);
-    safe(PlaySE, 1);
-    safe(StopSound, 1);
+    builtin(WriteLog, 1);
+    builtin(RaiseError, 1);
+    builtin(assert, 2);
 
-    safe(GetVirtualKeyState, 1);
-    safe(SetVirtualKeyState, 2);
-    safe(AddVirtualKey, 3);
-    unsafe(AddReplayTargetVirtualKey, 1);
-    safe(GetKeyState, 1);
-    safe(GetMouseState, 1);
-    safe(GetMouseX, 0);
-    safe(GetMouseY, 0);
-    safe(GetMouseMoveZ, 0);
-    safe(SetSkipModeKey, 1);
-    safe(LoadTexture, 1);
-    safe(LoadTextureInLoadThread, 1);
-    safe(RemoveTexture, 1);
-    safe(GetTextureWidth, 1);
-    safe(GetTextureHeight, 1);
-    safe(SetFogEnable, 1);
-    safe(SetFogParam, 5);
-    safe(ClearInvalidRenderPriority, 0);
-    safe(SetInvalidRenderPriorityA1, 2);
-    safe(GetReservedRenderTargetName, 1);
-    unsafe(CreateRenderTarget, 1);
-    unsafe(RenderToTextureA1, 4);
-    unsafe(RenderToTextureB1, 3);
-    safe(SaveRenderedTextureA1, 2);
-    safe(SaveRenderedTextureA2, 6);
-    unsafe(SaveSnapShotA1, 1);
-    unsafe(SaveSnapShotA2, 5);
-    safe(IsPixelShaderSupported, 2);
-    safe(SetShader, 3);
-    safe(SetShaderI, 3);
-    safe(ResetShader, 2);
-    safe(ResetShaderI, 2);
-
-    safe(SetCameraFocusX, 1);
-    safe(SetCameraFocusY, 1);
-    safe(SetCameraFocusZ, 1);
-    safe(SetCameraFocusXYZ, 3);
-    safe(SetCameraRadius, 1);
-    safe(SetCameraAzimuthAngle, 1);
-    safe(SetCameraElevationAngle, 1);
-    safe(SetCameraYaw, 1);
-    safe(SetCameraPitch, 1);
-    safe(SetCameraRoll, 1);
-
-    safe(GetCameraX, 0);
-    safe(GetCameraY, 0);
-    safe(GetCameraZ, 0);
-    safe(GetCameraFocusX, 0);
-    safe(GetCameraFocusY, 0);
-    safe(GetCameraFocusZ, 0);
-    safe(GetCameraRadius, 0);
-    safe(GetCameraAzimuthAngle, 0);
-    safe(GetCameraElevationAngle, 0);
-    safe(GetCameraYaw, 0);
-    safe(GetCameraPitch, 0);
-    safe(GetCameraRoll, 0);
-    safe(SetCameraPerspectiveClip, 2);
-
-    safe(Set2DCameraFocusX, 1);
-    safe(Set2DCameraFocusY, 1);
-    safe(Set2DCameraAngleZ, 1);
-    safe(Set2DCameraRatio, 1);
-    safe(Set2DCameraRatioX, 1);
-    safe(Set2DCameraRatioY, 1);
-    safe(Reset2DCamera, 0);
-    safe(Get2DCameraX, 0);
-    safe(Get2DCameraY, 0);
-    safe(Get2DCameraAngleZ, 0);
-    safe(Get2DCameraRatio, 0);
-    safe(Get2DCameraRatioX, 0);
-    safe(Get2DCameraRatioY, 0);
-
-    unsafe(LoadScript, 1);
-    unsafe(LoadScriptInThread, 1);
-    unsafe(StartScript, 1);
-    safe(CloseScript, 1);
-    safe(IsCloseScript, 1);
-    safe(SetScriptArgument, 3);
-    safe(GetScriptArgument, 1);
-    safe(GetScriptArgumentCount, 0);
+    builtin(SetCommonData, 2);
+    builtin(GetCommonData, 2);
+    builtin(ClearCommonData, 0);
+    builtin(DeleteCommonData, 1);
+    builtin(SetAreaCommonData, 3);
+    builtin(GetAreaCommonData, 3);
+    builtin(ClearAreaCommonData, 1);
+    builtin(DeleteAreaCommonData, 2);
+    builtin(CreateCommonDataArea, 1);
+    builtin(IsCommonDataAreaExists, 1);
+    builtin(CopyCommonDataArea, 2);
+    builtin(GetCommonDataAreaKeyList, 0);
+    builtin(GetCommonDataValueKeyList, 1);
+    builtin(SaveCommonDataAreaA1, 1);
+    builtin(LoadCommonDataAreaA1, 1);
+    builtin(SaveCommonDataAreaA2, 2);
+    builtin(LoadCommonDataAreaA2, 2);
 
     if (TypeIs(~t_package))
     {
-        unsafe(CloseStgScene, 0);
+        builtin(SaveCommonDataAreaToReplayFile, 1);
+        builtin(LoadCommonDataAreaFromReplayFile, 1);
     }
 
-    safe(GetOwnScriptID, 0);
+    builtin(LoadSound, 1);
+    builtin(RemoveSound, 1);
+    builtin(PlayBGM, 3);
+    builtin(PlaySE, 1);
+    builtin(StopSound, 1);
+
+    builtin(GetVirtualKeyState, 1);
+    builtin(SetVirtualKeyState, 2);
+    builtin(AddVirtualKey, 3);
+    builtin(AddReplayTargetVirtualKey, 1);
+    builtin(GetKeyState, 1);
+    builtin(GetMouseState, 1);
+    builtin(GetMouseX, 0);
+    builtin(GetMouseY, 0);
+    builtin(GetMouseMoveZ, 0);
+    builtin(SetSkipModeKey, 1);
+    builtin(LoadTexture, 1);
+    builtin(LoadTextureInLoadThread, 1);
+    builtin(RemoveTexture, 1);
+    builtin(GetTextureWidth, 1);
+    builtin(GetTextureHeight, 1);
+    builtin(SetFogEnable, 1);
+    builtin(SetFogParam, 5);
+    builtin(ClearInvalidRenderPriority, 0);
+    builtin(SetInvalidRenderPriorityA1, 2);
+    builtin(GetReservedRenderTargetName, 1);
+    builtin(CreateRenderTarget, 1);
+    builtin(RenderToTextureA1, 4);
+    builtin(RenderToTextureB1, 3);
+    builtin(SaveRenderedTextureA1, 2);
+    builtin(SaveRenderedTextureA2, 6);
+    builtin(SaveSnapShotA1, 1);
+    builtin(SaveSnapShotA2, 5);
+    builtin(IsPixelShaderSupported, 2);
+    builtin(SetShader, 3);
+    builtin(SetShaderI, 3);
+    builtin(ResetShader, 2);
+    builtin(ResetShaderI, 2);
+
+    builtin(SetCameraFocusX, 1);
+    builtin(SetCameraFocusY, 1);
+    builtin(SetCameraFocusZ, 1);
+    builtin(SetCameraFocusXYZ, 3);
+    builtin(SetCameraRadius, 1);
+    builtin(SetCameraAzimuthAngle, 1);
+    builtin(SetCameraElevationAngle, 1);
+    builtin(SetCameraYaw, 1);
+    builtin(SetCameraPitch, 1);
+    builtin(SetCameraRoll, 1);
+
+    builtin(GetCameraX, 0);
+    builtin(GetCameraY, 0);
+    builtin(GetCameraZ, 0);
+    builtin(GetCameraFocusX, 0);
+    builtin(GetCameraFocusY, 0);
+    builtin(GetCameraFocusZ, 0);
+    builtin(GetCameraRadius, 0);
+    builtin(GetCameraAzimuthAngle, 0);
+    builtin(GetCameraElevationAngle, 0);
+    builtin(GetCameraYaw, 0);
+    builtin(GetCameraPitch, 0);
+    builtin(GetCameraRoll, 0);
+    builtin(SetCameraPerspectiveClip, 2);
+
+    builtin(Set2DCameraFocusX, 1);
+    builtin(Set2DCameraFocusY, 1);
+    builtin(Set2DCameraAngleZ, 1);
+    builtin(Set2DCameraRatio, 1);
+    builtin(Set2DCameraRatioX, 1);
+    builtin(Set2DCameraRatioY, 1);
+    builtin(Reset2DCamera, 0);
+    builtin(Get2DCameraX, 0);
+    builtin(Get2DCameraY, 0);
+    builtin(Get2DCameraAngleZ, 0);
+    builtin(Get2DCameraRatio, 0);
+    builtin(Get2DCameraRatioX, 0);
+    builtin(Get2DCameraRatioY, 0);
+
+    builtin(LoadScript, 1);
+    builtin(LoadScriptInThread, 1);
+    builtin(StartScript, 1);
+    builtin(CloseScript, 1);
+    builtin(IsCloseScript, 1);
+    builtin(SetScriptArgument, 3);
+    builtin(GetScriptArgument, 1);
+    builtin(GetScriptArgumentCount, 0);
+
+    if (TypeIs(~t_package))
+    {
+        builtin(CloseStgScene, 0);
+    }
+
+    builtin(GetOwnScriptID, 0);
     runtime(GetEventType, 0);
     runtime(GetEventArgument, 1);
-    safe(SetScriptResult, 1);
-    safe(GetScriptResult, 1);
-    safe(SetAutoDeleteObject, 1);
-    unsafe(NotifyEvent, 3);
-    unsafe(NotifyEventAll, 2);
-    safe(GetScriptInfoA1, 2);
+    builtin(SetScriptResult, 1);
+    builtin(GetScriptResult, 1);
+    builtin(SetAutoDeleteObject, 1);
+    builtin(NotifyEvent, 3);
+    builtin(NotifyEventAll, 2);
+    builtin(GetScriptInfoA1, 2);
 
     if (TypeIs(~t_package))
     {
-        safe(SetStgFrame, 6);
+        builtin(SetStgFrame, 6);
     }
-    safe(GetScore, 0);
-    safe(AddScore, 1);
-    safe(GetGraze, 0);
-    safe(AddGraze, 1);
-    safe(GetPoint, 0);
-    safe(AddPoint, 1);
+    builtin(GetScore, 0);
+    builtin(AddScore, 1);
+    builtin(GetGraze, 0);
+    builtin(AddGraze, 1);
+    builtin(GetPoint, 0);
+    builtin(AddPoint, 1);
     if (TypeIs(~t_package))
     {
-        safe(SetItemRenderPriorityI, 1);
-        safe(SetShotRenderPriorityI, 1);
-        safe(GetStgFrameRenderPriorityMinI, 0);
-        safe(GetStgFrameRenderPriorityMaxI, 0);
-        safe(GetItemRenderPriorityI, 0);
-        safe(GetShotRenderPriorityI, 0);
-        safe(GetPlayerRenderPriorityI, 0);
-        safe(GetCameraFocusPermitPriorityI, 0);
+        builtin(SetItemRenderPriorityI, 1);
+        builtin(SetShotRenderPriorityI, 1);
+        builtin(GetStgFrameRenderPriorityMinI, 0);
+        builtin(GetStgFrameRenderPriorityMaxI, 0);
+        builtin(GetItemRenderPriorityI, 0);
+        builtin(GetShotRenderPriorityI, 0);
+        builtin(GetPlayerRenderPriorityI, 0);
+        builtin(GetCameraFocusPermitPriorityI, 0);
     }
-    safe(GetStgFrameLeft, 0);
-    safe(GetStgFrameTop, 0);
-    safe(GetStgFrameWidth, 0);
-    safe(GetStgFrameHeight, 0);
-    safe(GetScreenWidth, 0);
-    safe(GetScreenHeight, 0);
-    unsafe(IsReplay, 0);
-    unsafe(AddArchiveFile, 1);
+    builtin(GetStgFrameLeft, 0);
+    builtin(GetStgFrameTop, 0);
+    builtin(GetStgFrameWidth, 0);
+    builtin(GetStgFrameHeight, 0);
+    builtin(GetScreenWidth, 0);
+    builtin(GetScreenHeight, 0);
+    builtin(IsReplay, 0);
+    builtin(AddArchiveFile, 1);
 
     if (TypeIs(~t_package))
     {
-        safe(SCREEN_WIDTH, 0);
-        safe(SCREEN_HEIGHT, 0);
-        safe(GetPlayerObjectID, 0);
-        safe(GetPlayerScriptID, 0);
-        safe(SetPlayerSpeed, 2);
-        safe(SetPlayerClip, 4);
-        safe(SetPlayerLife, 1);
-        safe(SetPlayerSpell, 1);
-        safe(SetPlayerPower, 1);
-        safe(SetPlayerInvincibilityFrame, 1);
-        safe(SetPlayerDownStateFrame, 1);
-        safe(SetPlayerRebirthFrame, 1);
-        safe(SetPlayerRebirthLossFrame, 1);
-        safe(SetPlayerAutoItemCollectLine, 1);
-        safe(SetForbidPlayerShot, 1);
-        safe(SetForbidPlayerSpell, 1);
-        safe(GetPlayerX, 0);
-        safe(GetPlayerY, 0);
-        safe(GetPlayerState, 0);
-        safe(GetPlayerSpeed, 0);
-        safe(GetPlayerClip, 0);
-        safe(GetPlayerLife, 0);
-        safe(GetPlayerSpell, 0);
-        safe(GetPlayerPower, 0);
-        safe(GetPlayerInvincibilityFrame, 0);
-        safe(GetPlayerDownStateFrame, 0);
-        safe(GetPlayerRebirthFrame, 0);
-        safe(IsPermitPlayerShot, 0);
-        safe(IsPermitPlayerSpell, 0);
-        safe(IsPlayerLastSpellWait, 0);
-        safe(IsPlayerSpellActive, 0);
-        safe(GetAngleToPlayer, 1);
-    }
-
-    safe(GetPlayerID, 0);
-    safe(GetPlayerReplayName, 0);
-
-    if (TypeIs(~t_package))
-    {
-        safe(GetEnemyIntersectionPosition, 3);
-        unsafe(GetEnemyBossSceneObjectID, 0);
-        unsafe(GetEnemyBossObjectID, 0);
-        safe(GetAllEnemyID, 0);
-        safe(GetIntersectionRegistedEnemyID, 0);
-        safe(GetAllEnemyIntersectionPosition, 0);
-        safe(GetEnemyIntersectionPositionByIdA1, 1);
-        safe(GetEnemyIntersectionPositionByIdA2, 3);
-        unsafe(LoadEnemyShotData, 1);
-        unsafe(ReloadEnemyShotData, 1);
-
-        unsafe(DeleteShotAll, 2); // NotifyEvent
-        unsafe(DeleteShotInCircle, 5); // NotifyEvent
-        safe(CreateShotA1, 6);
-        safe(CreateShotA2, 8);
-        safe(CreateShotOA1, 5);
-        safe(CreateShotB1, 6);
-        safe(CreateShotB2, 10);
-        safe(CreateShotOB1, 5);
-        safe(CreateLooseLaserA1, 8);
-        safe(CreateStraightLaserA1, 8);
-        safe(CreateCurveLaserA1, 8);
-        safe(SetShotIntersectionCircle, 3);
-        safe(SetShotIntersectionLine, 5);
-        safe(GetShotIdInCircleA1, 3);
-        safe(GetShotIdInCircleA2, 4);
-        safe(GetShotCount, 1);
-        safe(SetShotAutoDeleteClip, 4);
-        safe(GetShotDataInfoA1, 3);
-        unsafe(StartShotScript, 1);
-
-        safe(CreateItemA1, 4);
-        safe(CreateItemA2, 6);
-        safe(CreateItemU1, 4);
-        safe(CreateItemU2, 6);
-        safe(CollectAllItems, 0);
-        safe(CollectItemsByType, 1);
-        safe(CollectItemsInCircle, 3);
-        safe(CancelCollectItems, 0);
-        unsafe(StartItemScript, 1);
-        safe(SetDefaultBonusItemEnable, 1);
-        unsafe(LoadItemData, 1);
-        unsafe(ReloadItemData, 1);
-        safe(StartSlow, 2);
-        safe(StopSlow, 1);
-        safe(IsIntersected_Line_Circle, 8);
-        safe(IsIntersected_Obj_Obj, 2);
+        builtin(SCREEN_WIDTH, 0);
+        builtin(SCREEN_HEIGHT, 0);
+        builtin(GetPlayerObjectID, 0);
+        builtin(GetPlayerScriptID, 0);
+        builtin(SetPlayerSpeed, 2);
+        builtin(SetPlayerClip, 4);
+        builtin(SetPlayerLife, 1);
+        builtin(SetPlayerSpell, 1);
+        builtin(SetPlayerPower, 1);
+        builtin(SetPlayerInvincibilityFrame, 1);
+        builtin(SetPlayerDownStateFrame, 1);
+        builtin(SetPlayerRebirthFrame, 1);
+        builtin(SetPlayerRebirthLossFrame, 1);
+        builtin(SetPlayerAutoItemCollectLine, 1);
+        builtin(SetForbidPlayerShot, 1);
+        builtin(SetForbidPlayerSpell, 1);
+        builtin(GetPlayerX, 0);
+        builtin(GetPlayerY, 0);
+        builtin(GetPlayerState, 0);
+        builtin(GetPlayerSpeed, 0);
+        builtin(GetPlayerClip, 0);
+        builtin(GetPlayerLife, 0);
+        builtin(GetPlayerSpell, 0);
+        builtin(GetPlayerPower, 0);
+        builtin(GetPlayerInvincibilityFrame, 0);
+        builtin(GetPlayerDownStateFrame, 0);
+        builtin(GetPlayerRebirthFrame, 0);
+        builtin(IsPermitPlayerShot, 0);
+        builtin(IsPermitPlayerSpell, 0);
+        builtin(IsPlayerLastSpellWait, 0);
+        builtin(IsPlayerSpellActive, 0);
+        builtin(GetAngleToPlayer, 1);
     }
 
-    safe(GetObjectDistance, 2);
-    safe(GetObject2dPosition, 1);
-    safe(Get2dPosition, 3);
-
-    safe(Obj_Delete, 1);
-    safe(Obj_IsDeleted, 1);
-    safe(Obj_SetVisible, 2);
-    safe(Obj_IsVisible, 1);
-    safe(Obj_SetRenderPriority, 2);
-    safe(Obj_SetRenderPriorityI, 2);
-    safe(Obj_GetRenderPriority, 1);
-    safe(Obj_GetRenderPriorityI, 1);
-    safe(Obj_GetValue, 2);
-    safe(Obj_GetValueD, 3);
-    safe(Obj_SetValue, 3);
-    safe(Obj_DeleteValue, 2);
-    safe(Obj_IsValueExists, 2);
-    safe(Obj_GetType, 1);
-
-    safe(ObjRender_SetX, 2);
-    safe(ObjRender_SetY, 2);
-    safe(ObjRender_SetZ, 2);
-    safe(ObjRender_SetPosition, 4);
-    safe(ObjRender_SetAngleX, 2);
-    safe(ObjRender_SetAngleY, 2);
-    safe(ObjRender_SetAngleZ, 2);
-    safe(ObjRender_SetAngleXYZ, 4);
-    safe(ObjRender_SetScaleX, 2);
-    safe(ObjRender_SetScaleY, 2);
-    safe(ObjRender_SetScaleZ, 2);
-    safe(ObjRender_SetScaleXYZ, 4);
-    safe(ObjRender_SetColor, 4);
-    safe(ObjRender_SetColorHSV, 4);
-    safe(ObjRender_SetAlpha, 2);
-    safe(ObjRender_SetBlendType, 2);
-
-    safe(ObjRender_GetX, 1);
-    safe(ObjRender_GetY, 1);
-    safe(ObjRender_GetZ, 1);
-    safe(ObjRender_GetAngleX, 1);
-    safe(ObjRender_GetAngleY, 1);
-    safe(ObjRender_GetAngleZ, 1);
-    safe(ObjRender_GetScaleX, 1);
-    safe(ObjRender_GetScaleY, 1);
-    safe(ObjRender_GetScaleZ, 1);
-    safe(ObjRender_GetBlendType, 1);
-
-    safe(ObjRender_SetZWrite, 2);
-    safe(ObjRender_SetZTest, 2);
-    safe(ObjRender_SetFogEnable, 2);
-    safe(ObjRender_SetPermitCamera, 2);
-    safe(ObjRender_SetCullingMode, 2);
-
-    safe(ObjPrim_Create, 1);
-    safe(ObjPrim_SetPrimitiveType, 2);
-    safe(ObjPrim_SetVertexCount, 2);
-    safe(ObjPrim_GetVertexCount, 1);
-    unsafe(ObjPrim_SetTexture, 2);
-    safe(ObjPrim_SetVertexPosition, 5);
-    safe(ObjPrim_GetVertexPosition, 2);
-    safe(ObjPrim_SetVertexUV, 4);
-    safe(ObjPrim_SetVertexUVT, 4);
-    safe(ObjPrim_SetVertexColor, 5);
-    safe(ObjPrim_SetVertexAlpha, 3);
-
-    safe(ObjSprite2D_SetSourceRect, 5);
-    safe(ObjSprite2D_SetDestRect, 5);
-    safe(ObjSprite2D_SetDestCenter, 1);
-
-    safe(ObjSpriteList2D_SetSourceRect, 5);
-    safe(ObjSpriteList2D_SetDestRect, 5);
-    safe(ObjSpriteList2D_SetDestCenter, 1);
-    safe(ObjSpriteList2D_AddVertex, 1);
-    safe(ObjSpriteList2D_CloseVertex, 1);
-    safe(ObjSpriteList2D_ClearVertexCount, 1);
-
-    safe(ObjSprite3D_SetSourceRect, 5);
-    safe(ObjSprite3D_SetDestRect, 5);
-    safe(ObjSprite3D_SetSourceDestRect, 5);
-    safe(ObjSprite3D_SetBillboard, 2);
-
-    safe(ObjTrajectory3D_SetComplementCount, 2);
-    safe(ObjTrajectory3D_SetAlphaVariation, 2);
-    safe(ObjTrajectory3D_SetInitialPoint, 7);
-
-    safe(ObjMesh_Create, 0);
-    unsafe(ObjMesh_Load, 2);
-    safe(ObjMesh_SetColor, 4);
-    safe(ObjMesh_SetAlpha, 2);
-    safe(ObjMesh_SetAnimation, 3);
-    unsafe(ObjMesh_SetCoordinate2D, 2);
-    safe(ObjMesh_GetPath, 1);
-
-    safe(ObjText_Create, 0);
-    safe(ObjText_SetText, 2);
-    safe(ObjText_SetFontType, 2);
-    safe(ObjText_SetFontSize, 2);
-    safe(ObjText_SetFontBold, 2);
-    safe(ObjText_SetFontColorTop, 4);
-    safe(ObjText_SetFontColorBottom, 4);
-    safe(ObjText_SetFontBorderWidth, 2);
-    safe(ObjText_SetFontBorderType, 2);
-    safe(ObjText_SetFontBorderColor, 4);
-
-    safe(ObjText_SetMaxWidth, 2);
-    safe(ObjText_SetMaxHeight, 2);
-    safe(ObjText_SetLinePitch, 2);
-    safe(ObjText_SetSidePitch, 2);
-    safe(ObjText_SetTransCenter, 3);
-    safe(ObjText_SetAutoTransCenter, 2);
-    safe(ObjText_SetHorizontalAlignment, 2);
-    safe(ObjText_SetSyntacticAnalysis, 2);
-    safe(ObjText_GetTextLength, 1);
-    safe(ObjText_GetTextLengthCU, 1);
-    safe(ObjText_GetTextLengthCUL, 1);
-    unsafe(ObjText_GetTotalWidth, 1);
-    unsafe(ObjText_GetTotalHeight, 1);
-
-    safe(ObjShader_Create, 0);
-    unsafe(ObjShader_SetShaderF, 2);
-    safe(ObjShader_SetShaderO, 2);
-    safe(ObjShader_ResetShader, 1);
-    safe(ObjShader_SetTechnique, 2);
-    safe(ObjShader_SetVector, 6);
-    safe(ObjShader_SetFloat, 3);
-    safe(ObjShader_SetFloatArray, 3);
-    safe(ObjShader_SetTexture, 3);
-
-    safe(ObjSound_Create, 0);
-    unsafe(ObjSound_Load, 2);
-    safe(ObjSound_Play, 1);
-    safe(ObjSound_Stop, 1);
-    safe(ObjSound_SetVolumeRate, 2);
-    safe(ObjSound_SetPanRate, 2);
-    safe(ObjSound_SetFade, 2);
-    safe(ObjSound_SetLoopEnable, 2);
-    safe(ObjSound_SetLoopTime, 3);
-    safe(ObjSound_SetLoopSampleCount, 3);
-    safe(ObjSound_SetRestartEnable, 2);
-    safe(ObjSound_SetSoundDivision, 2);
-    safe(ObjSound_IsPlaying, 1);
-    safe(ObjSound_GetVolumeRate, 1);
-
-    safe(ObjFile_Create, 1);
-    unsafe(ObjFile_Open, 2);
-    unsafe(ObjFile_OpenNW, 2);
-    unsafe(ObjFile_Store, 1);
-    safe(ObjFile_GetSize, 1);
-
-    safe(ObjFileT_GetLineCount, 1);
-    safe(ObjFileT_GetLineText, 2);
-    safe(ObjFileT_SplitLineText, 3);
-    safe(ObjFileT_AddLine, 2);
-    safe(ObjFileT_ClearLine, 1);
-
-    safe(ObjFileB_SetByteOrder, 2);
-    safe(ObjFileB_SetCharacterCode, 2);
-    safe(ObjFileB_GetPointer, 1);
-    safe(ObjFileB_Seek, 2);
-    safe(ObjFileB_ReadBoolean, 1);
-    safe(ObjFileB_ReadByte, 1);
-    safe(ObjFileB_ReadShort, 1);
-    safe(ObjFileB_ReadInteger, 1);
-    safe(ObjFileB_ReadLong, 1);
-    safe(ObjFileB_ReadFloat, 1);
-    safe(ObjFileB_ReadDouble, 1);
-    safe(ObjFileB_ReadString, 2);
+    builtin(GetPlayerID, 0);
+    builtin(GetPlayerReplayName, 0);
 
     if (TypeIs(~t_package))
     {
-        safe(ObjMove_SetX, 2);
-        safe(ObjMove_SetY, 2);
-        safe(ObjMove_SetPosition, 3);
-        safe(ObjMove_SetSpeed, 2);
-        safe(ObjMove_SetAngle, 2);
-        safe(ObjMove_SetAcceleration, 2);
-        safe(ObjMove_SetMaxSpeed, 2);
-        safe(ObjMove_SetAngularVelocity, 2);
+        builtin(GetEnemyIntersectionPosition, 3);
+        builtin(GetEnemyBossSceneObjectID, 0);
+        builtin(GetEnemyBossObjectID, 0);
+        builtin(GetAllEnemyID, 0);
+        builtin(GetIntersectionRegistedEnemyID, 0);
+        builtin(GetAllEnemyIntersectionPosition, 0);
+        builtin(GetEnemyIntersectionPositionByIdA1, 1);
+        builtin(GetEnemyIntersectionPositionByIdA2, 3);
+        builtin(LoadEnemyShotData, 1);
+        builtin(ReloadEnemyShotData, 1);
 
-        safe(ObjMove_SetDestAtSpeed, 4);
-        safe(ObjMove_SetDestAtFrame, 4);
-        safe(ObjMove_SetDestAtWeight, 5);
+        builtin(DeleteShotAll, 2);
+        builtin(DeleteShotInCircle, 5);
+        builtin(CreateShotA1, 6);
+        builtin(CreateShotA2, 8);
+        builtin(CreateShotOA1, 5);
+        builtin(CreateShotB1, 6);
+        builtin(CreateShotB2, 10);
+        builtin(CreateShotOB1, 5);
+        builtin(CreateLooseLaserA1, 8);
+        builtin(CreateStraightLaserA1, 8);
+        builtin(CreateCurveLaserA1, 8);
+        builtin(SetShotIntersectionCircle, 3);
+        builtin(SetShotIntersectionLine, 5);
+        builtin(GetShotIdInCircleA1, 3);
+        builtin(GetShotIdInCircleA2, 4);
+        builtin(GetShotCount, 1);
+        builtin(SetShotAutoDeleteClip, 4);
+        builtin(GetShotDataInfoA1, 3);
+        builtin(StartShotScript, 1);
 
-        safe(ObjMove_AddPatternA1, 4);
-        safe(ObjMove_AddPatternA2, 7);
-        safe(ObjMove_AddPatternA3, 8);
-        safe(ObjMove_AddPatternA4, 9);
-        safe(ObjMove_AddPatternB1, 4);
-        safe(ObjMove_AddPatternB2, 8);
-        safe(ObjMove_AddPatternB3, 9);
+        builtin(CreateItemA1, 4);
+        builtin(CreateItemA2, 6);
+        builtin(CreateItemU1, 4);
+        builtin(CreateItemU2, 6);
+        builtin(CollectAllItems, 0);
+        builtin(CollectItemsByType, 1);
+        builtin(CollectItemsInCircle, 3);
+        builtin(CancelCollectItems, 0);
+        builtin(StartItemScript, 1);
+        builtin(SetDefaultBonusItemEnable, 1);
+        builtin(LoadItemData, 1);
+        builtin(ReloadItemData, 1);
+        builtin(StartSlow, 2);
+        builtin(StopSlow, 1);
+        builtin(IsIntersected_Line_Circle, 8);
+        builtin(IsIntersected_Obj_Obj, 2);
+    }
 
-        safe(ObjMove_GetX, 1);
-        safe(ObjMove_GetY, 1);
-        safe(ObjMove_GetSpeed, 1);
-        safe(ObjMove_GetAngle, 1);
+    builtin(GetObjectDistance, 2);
+    builtin(GetObject2dPosition, 1);
+    builtin(Get2dPosition, 3);
 
-        safe(ObjEnemy_Create, 1);
-        safe(ObjEnemy_Regist, 1);
-        safe(ObjEnemy_GetInfo, 2);
-        safe(ObjEnemy_SetLife, 2);
-        safe(ObjEnemy_AddLife, 2);
-        safe(ObjEnemy_SetDamageRate, 3);
-        safe(ObjEnemy_SetIntersectionCircleToShot, 4);
-        safe(ObjEnemy_SetIntersectionCircleToPlayer, 4);
+    builtin(Obj_Delete, 1);
+    builtin(Obj_IsDeleted, 1);
+    builtin(Obj_SetVisible, 2);
+    builtin(Obj_IsVisible, 1);
+    builtin(Obj_SetRenderPriority, 2);
+    builtin(Obj_SetRenderPriorityI, 2);
+    builtin(Obj_GetRenderPriority, 1);
+    builtin(Obj_GetRenderPriorityI, 1);
+    builtin(Obj_GetValue, 2);
+    builtin(Obj_GetValueD, 3);
+    builtin(Obj_SetValue, 3);
+    builtin(Obj_DeleteValue, 2);
+    builtin(Obj_IsValueExists, 2);
+    builtin(Obj_GetType, 1);
 
-        safe(ObjEnemyBossScene_Create, 0);
-        unsafe(ObjEnemyBossScene_Regist, 1);
-        safe(ObjEnemyBossScene_Add, 3);
-        unsafe(ObjEnemyBossScene_LoadInThread, 1);
-        safe(ObjEnemyBossScene_GetInfo, 2);
-        safe(ObjEnemyBossScene_SetSpellTimer, 2);
-        unsafe(ObjEnemyBossScene_StartSpell, 1); // NotifyEvent
+    builtin(ObjRender_SetX, 2);
+    builtin(ObjRender_SetY, 2);
+    builtin(ObjRender_SetZ, 2);
+    builtin(ObjRender_SetPosition, 4);
+    builtin(ObjRender_SetAngleX, 2);
+    builtin(ObjRender_SetAngleY, 2);
+    builtin(ObjRender_SetAngleZ, 2);
+    builtin(ObjRender_SetAngleXYZ, 4);
+    builtin(ObjRender_SetScaleX, 2);
+    builtin(ObjRender_SetScaleY, 2);
+    builtin(ObjRender_SetScaleZ, 2);
+    builtin(ObjRender_SetScaleXYZ, 4);
+    builtin(ObjRender_SetColor, 4);
+    builtin(ObjRender_SetColorHSV, 4);
+    builtin(ObjRender_SetAlpha, 2);
+    builtin(ObjRender_SetBlendType, 2);
 
-        safe(ObjShot_Create, 1);
-        safe(ObjShot_Regist, 1);
-        safe(ObjShot_SetAutoDelete, 2);
-        safe(ObjShot_FadeDelete, 1);
-        safe(ObjShot_SetDeleteFrame, 2);
-        safe(ObjShot_SetDamage, 2);
-        safe(ObjShot_SetDelay, 2);
-        safe(ObjShot_SetSpellResist, 2);
-        safe(ObjShot_SetGraphic, 2);
-        safe(ObjShot_SetSourceBlendType, 2);
-        safe(ObjShot_SetPenetration, 2);
-        safe(ObjShot_SetEraseShot, 2);
-        safe(ObjShot_SetSpellFactor, 2);
-        unsafe(ObjShot_ToItem, 1); // NotifyEvent
-        safe(ObjShot_AddShotA1, 3);
-        safe(ObjShot_AddShotA2, 5);
-        safe(ObjShot_SetIntersectionEnable, 2);
-        safe(ObjShot_SetIntersectionCircleA1, 2);
-        safe(ObjShot_SetIntersectionCircleA2, 4);
-        safe(ObjShot_SetIntersectionLine, 6);
-        safe(ObjShot_SetItemChange, 2);
-        safe(ObjShot_GetDamage, 1);
-        safe(ObjShot_GetPenetration, 1);
-        safe(ObjShot_GetDelay, 1);
-        safe(ObjShot_IsSpellResist, 1);
-        safe(ObjShot_GetImageID, 1);
+    builtin(ObjRender_GetX, 1);
+    builtin(ObjRender_GetY, 1);
+    builtin(ObjRender_GetZ, 1);
+    builtin(ObjRender_GetAngleX, 1);
+    builtin(ObjRender_GetAngleY, 1);
+    builtin(ObjRender_GetAngleZ, 1);
+    builtin(ObjRender_GetScaleX, 1);
+    builtin(ObjRender_GetScaleY, 1);
+    builtin(ObjRender_GetScaleZ, 1);
+    builtin(ObjRender_GetBlendType, 1);
 
-        safe(ObjLaser_SetLength, 2);
-        safe(ObjLaser_SetRenderWidth, 2);
-        safe(ObjLaser_SetIntersectionWidth, 2);
-        safe(ObjLaser_SetGrazeInvalidFrame, 2);
-        safe(ObjLaser_SetInvalidLength, 3);
-        safe(ObjLaser_SetItemDistance, 2);
-        safe(ObjLaser_GetLength, 1);
+    builtin(ObjRender_SetZWrite, 2);
+    builtin(ObjRender_SetZTest, 2);
+    builtin(ObjRender_SetFogEnable, 2);
+    builtin(ObjRender_SetPermitCamera, 2);
+    builtin(ObjRender_SetCullingMode, 2);
 
-        safe(ObjStLaser_SetAngle, 2);
-        safe(ObjStLaser_GetAngle, 1);
-        safe(ObjStLaser_SetSource, 2);
+    builtin(ObjPrim_Create, 1);
+    builtin(ObjPrim_SetPrimitiveType, 2);
+    builtin(ObjPrim_SetVertexCount, 2);
+    builtin(ObjPrim_GetVertexCount, 1);
+    builtin(ObjPrim_SetTexture, 2);
+    builtin(ObjPrim_SetVertexPosition, 5);
+    builtin(ObjPrim_GetVertexPosition, 2);
+    builtin(ObjPrim_SetVertexUV, 4);
+    builtin(ObjPrim_SetVertexUVT, 4);
+    builtin(ObjPrim_SetVertexColor, 5);
+    builtin(ObjPrim_SetVertexAlpha, 3);
 
-        safe(ObjCrLaser_SetTipDecrement, 2);
+    builtin(ObjSprite2D_SetSourceRect, 5);
+    builtin(ObjSprite2D_SetDestRect, 5);
+    builtin(ObjSprite2D_SetDestCenter, 1);
 
-        safe(ObjItem_SetItemID, 2);
-        safe(ObjItem_SetRenderScoreEnable, 2);
-        safe(ObjItem_SetAutoCollectEnable, 2);
-        safe(ObjItem_SetDefinedMovePatternA1, 2);
-        safe(ObjItem_GetInfo, 2);
+    builtin(ObjSpriteList2D_SetSourceRect, 5);
+    builtin(ObjSpriteList2D_SetDestRect, 5);
+    builtin(ObjSpriteList2D_SetDestCenter, 1);
+    builtin(ObjSpriteList2D_AddVertex, 1);
+    builtin(ObjSpriteList2D_CloseVertex, 1);
+    builtin(ObjSpriteList2D_ClearVertexCount, 1);
 
-        safe(ObjPlayer_AddIntersectionCircleA1, 5);
-        safe(ObjPlayer_AddIntersectionCircleA2, 4);
-        safe(ObjPlayer_ClearIntersection, 1);
+    builtin(ObjSprite3D_SetSourceRect, 5);
+    builtin(ObjSprite3D_SetDestRect, 5);
+    builtin(ObjSprite3D_SetSourceDestRect, 5);
+    builtin(ObjSprite3D_SetBillboard, 2);
 
-        safe(ObjCol_IsIntersected, 1);
-        safe(ObjCol_GetListOfIntersectedEnemyID, 1);
-        safe(ObjCol_GetIntersectedCount, 1);
+    builtin(ObjTrajectory3D_SetComplementCount, 2);
+    builtin(ObjTrajectory3D_SetAlphaVariation, 2);
+    builtin(ObjTrajectory3D_SetInitialPoint, 7);
+
+    builtin(ObjMesh_Create, 0);
+    builtin(ObjMesh_Load, 2);
+    builtin(ObjMesh_SetColor, 4);
+    builtin(ObjMesh_SetAlpha, 2);
+    builtin(ObjMesh_SetAnimation, 3);
+    builtin(ObjMesh_SetCoordinate2D, 2);
+    builtin(ObjMesh_GetPath, 1);
+
+    builtin(ObjText_Create, 0);
+    builtin(ObjText_SetText, 2);
+    builtin(ObjText_SetFontType, 2);
+    builtin(ObjText_SetFontSize, 2);
+    builtin(ObjText_SetFontBold, 2);
+    builtin(ObjText_SetFontColorTop, 4);
+    builtin(ObjText_SetFontColorBottom, 4);
+    builtin(ObjText_SetFontBorderWidth, 2);
+    builtin(ObjText_SetFontBorderType, 2);
+    builtin(ObjText_SetFontBorderColor, 4);
+
+    builtin(ObjText_SetMaxWidth, 2);
+    builtin(ObjText_SetMaxHeight, 2);
+    builtin(ObjText_SetLinePitch, 2);
+    builtin(ObjText_SetSidePitch, 2);
+    builtin(ObjText_SetTransCenter, 3);
+    builtin(ObjText_SetAutoTransCenter, 2);
+    builtin(ObjText_SetHorizontalAlignment, 2);
+    builtin(ObjText_SetSyntacticAnalysis, 2);
+    builtin(ObjText_GetTextLength, 1);
+    builtin(ObjText_GetTextLengthCU, 1);
+    builtin(ObjText_GetTextLengthCUL, 1);
+    builtin(ObjText_GetTotalWidth, 1);
+    builtin(ObjText_GetTotalHeight, 1);
+
+    builtin(ObjShader_Create, 0);
+    builtin(ObjShader_SetShaderF, 2);
+    builtin(ObjShader_SetShaderO, 2);
+    builtin(ObjShader_ResetShader, 1);
+    builtin(ObjShader_SetTechnique, 2);
+    builtin(ObjShader_SetVector, 6);
+    builtin(ObjShader_SetFloat, 3);
+    builtin(ObjShader_SetFloatArray, 3);
+    builtin(ObjShader_SetTexture, 3);
+
+    builtin(ObjSound_Create, 0);
+    builtin(ObjSound_Load, 2);
+    builtin(ObjSound_Play, 1);
+    builtin(ObjSound_Stop, 1);
+    builtin(ObjSound_SetVolumeRate, 2);
+    builtin(ObjSound_SetPanRate, 2);
+    builtin(ObjSound_SetFade, 2);
+    builtin(ObjSound_SetLoopEnable, 2);
+    builtin(ObjSound_SetLoopTime, 3);
+    builtin(ObjSound_SetLoopSampleCount, 3);
+    builtin(ObjSound_SetRestartEnable, 2);
+    builtin(ObjSound_SetSoundDivision, 2);
+    builtin(ObjSound_IsPlaying, 1);
+    builtin(ObjSound_GetVolumeRate, 1);
+
+    builtin(ObjFile_Create, 1);
+    builtin(ObjFile_Open, 2);
+    builtin(ObjFile_OpenNW, 2);
+    builtin(ObjFile_Store, 1);
+    builtin(ObjFile_GetSize, 1);
+
+    builtin(ObjFileT_GetLineCount, 1);
+    builtin(ObjFileT_GetLineText, 2);
+    builtin(ObjFileT_SplitLineText, 3);
+    builtin(ObjFileT_AddLine, 2);
+    builtin(ObjFileT_ClearLine, 1);
+
+    builtin(ObjFileB_SetByteOrder, 2);
+    builtin(ObjFileB_SetCharacterCode, 2);
+    builtin(ObjFileB_GetPointer, 1);
+    builtin(ObjFileB_Seek, 2);
+    builtin(ObjFileB_ReadBoolean, 1);
+    builtin(ObjFileB_ReadByte, 1);
+    builtin(ObjFileB_ReadShort, 1);
+    builtin(ObjFileB_ReadInteger, 1);
+    builtin(ObjFileB_ReadLong, 1);
+    builtin(ObjFileB_ReadFloat, 1);
+    builtin(ObjFileB_ReadDouble, 1);
+    builtin(ObjFileB_ReadString, 2);
+
+    if (TypeIs(~t_package))
+    {
+        builtin(ObjMove_SetX, 2);
+        builtin(ObjMove_SetY, 2);
+        builtin(ObjMove_SetPosition, 3);
+        builtin(ObjMove_SetSpeed, 2);
+        builtin(ObjMove_SetAngle, 2);
+        builtin(ObjMove_SetAcceleration, 2);
+        builtin(ObjMove_SetMaxSpeed, 2);
+        builtin(ObjMove_SetAngularVelocity, 2);
+
+        builtin(ObjMove_SetDestAtSpeed, 4);
+        builtin(ObjMove_SetDestAtFrame, 4);
+        builtin(ObjMove_SetDestAtWeight, 5);
+
+        builtin(ObjMove_AddPatternA1, 4);
+        builtin(ObjMove_AddPatternA2, 7);
+        builtin(ObjMove_AddPatternA3, 8);
+        builtin(ObjMove_AddPatternA4, 9);
+        builtin(ObjMove_AddPatternB1, 4);
+        builtin(ObjMove_AddPatternB2, 8);
+        builtin(ObjMove_AddPatternB3, 9);
+
+        builtin(ObjMove_GetX, 1);
+        builtin(ObjMove_GetY, 1);
+        builtin(ObjMove_GetSpeed, 1);
+        builtin(ObjMove_GetAngle, 1);
+
+        builtin(ObjEnemy_Create, 1);
+        builtin(ObjEnemy_Regist, 1);
+        builtin(ObjEnemy_GetInfo, 2);
+        builtin(ObjEnemy_SetLife, 2);
+        builtin(ObjEnemy_AddLife, 2);
+        builtin(ObjEnemy_SetDamageRate, 3);
+        builtin(ObjEnemy_SetIntersectionCircleToShot, 4);
+        builtin(ObjEnemy_SetIntersectionCircleToPlayer, 4);
+
+        builtin(ObjEnemyBossScene_Create, 0);
+        builtin(ObjEnemyBossScene_Regist, 1);
+        builtin(ObjEnemyBossScene_Add, 3);
+        builtin(ObjEnemyBossScene_LoadInThread, 1);
+        builtin(ObjEnemyBossScene_GetInfo, 2);
+        builtin(ObjEnemyBossScene_SetSpellTimer, 2);
+        builtin(ObjEnemyBossScene_StartSpell, 1);
+
+        builtin(ObjShot_Create, 1);
+        builtin(ObjShot_Regist, 1);
+        builtin(ObjShot_SetAutoDelete, 2);
+        builtin(ObjShot_FadeDelete, 1);
+        builtin(ObjShot_SetDeleteFrame, 2);
+        builtin(ObjShot_SetDamage, 2);
+        builtin(ObjShot_SetDelay, 2);
+        builtin(ObjShot_SetSpellResist, 2);
+        builtin(ObjShot_SetGraphic, 2);
+        builtin(ObjShot_SetSourceBlendType, 2);
+        builtin(ObjShot_SetPenetration, 2);
+        builtin(ObjShot_SetEraseShot, 2);
+        builtin(ObjShot_SetSpellFactor, 2);
+        builtin(ObjShot_ToItem, 1);
+        builtin(ObjShot_AddShotA1, 3);
+        builtin(ObjShot_AddShotA2, 5);
+        builtin(ObjShot_SetIntersectionEnable, 2);
+        builtin(ObjShot_SetIntersectionCircleA1, 2);
+        builtin(ObjShot_SetIntersectionCircleA2, 4);
+        builtin(ObjShot_SetIntersectionLine, 6);
+        builtin(ObjShot_SetItemChange, 2);
+        builtin(ObjShot_GetDamage, 1);
+        builtin(ObjShot_GetPenetration, 1);
+        builtin(ObjShot_GetDelay, 1);
+        builtin(ObjShot_IsSpellResist, 1);
+        builtin(ObjShot_GetImageID, 1);
+
+        builtin(ObjLaser_SetLength, 2);
+        builtin(ObjLaser_SetRenderWidth, 2);
+        builtin(ObjLaser_SetIntersectionWidth, 2);
+        builtin(ObjLaser_SetGrazeInvalidFrame, 2);
+        builtin(ObjLaser_SetInvalidLength, 3);
+        builtin(ObjLaser_SetItemDistance, 2);
+        builtin(ObjLaser_GetLength, 1);
+
+        builtin(ObjStLaser_SetAngle, 2);
+        builtin(ObjStLaser_GetAngle, 1);
+        builtin(ObjStLaser_SetSource, 2);
+
+        builtin(ObjCrLaser_SetTipDecrement, 2);
+
+        builtin(ObjItem_SetItemID, 2);
+        builtin(ObjItem_SetRenderScoreEnable, 2);
+        builtin(ObjItem_SetAutoCollectEnable, 2);
+        builtin(ObjItem_SetDefinedMovePatternA1, 2);
+        builtin(ObjItem_GetInfo, 2);
+
+        builtin(ObjPlayer_AddIntersectionCircleA1, 5);
+        builtin(ObjPlayer_AddIntersectionCircleA2, 4);
+        builtin(ObjPlayer_ClearIntersection, 1);
+
+        builtin(ObjCol_IsIntersected, 1);
+        builtin(ObjCol_GetListOfIntersectedEnemyID, 1);
+        builtin(ObjCol_GetIntersectedCount, 1);
     }
 
     if (TypeIs(t_player))
     {
-        safe(CreatePlayerShotA1, 7);
-        unsafe(CallSpell, 0); // NotifyEvent
-        unsafe(LoadPlayerShotData, 1);
-        unsafe(ReloadPlayerShotData, 1);
-        safe(GetSpellManageObject, 0);
+        builtin(CreatePlayerShotA1, 7);
+        builtin(CallSpell, 0);
+        builtin(LoadPlayerShotData, 1);
+        builtin(ReloadPlayerShotData, 1);
+        builtin(GetSpellManageObject, 0);
 
-        safe(ObjSpell_Create, 0);
-        safe(ObjSpell_Regist, 1);
-        safe(ObjSpell_SetDamage, 2);
-        safe(ObjSpell_SetEraseShot, 2);
-        safe(ObjSpell_SetIntersectionCircle, 4);
-        safe(ObjSpell_SetIntersectionLine, 6);
+        builtin(ObjSpell_Create, 0);
+        builtin(ObjSpell_Regist, 1);
+        builtin(ObjSpell_SetDamage, 2);
+        builtin(ObjSpell_SetEraseShot, 2);
+        builtin(ObjSpell_SetIntersectionCircle, 4);
+        builtin(ObjSpell_SetIntersectionLine, 6);
     }
 
-    safe(SetPauseScriptPath, 1);
-    safe(SetEndSceneScriptPath, 1);
-    safe(SetReplaySaveSceneScriptPath, 1);
-    safe(GetTransitionRenderTargetName, 0);
+    builtin(SetPauseScriptPath, 1);
+    builtin(SetEndSceneScriptPath, 1);
+    builtin(SetReplaySaveSceneScriptPath, 1);
+    builtin(GetTransitionRenderTargetName, 0);
 
     if (TypeIs(t_shot_custom))
     {
-        safe(SetShotDeleteEventEnable, 2);
+        builtin(SetShotDeleteEventEnable, 2);
     }
 
     if (TypeIs(t_package))
     {
-        safe(ClosePackage, 0);
-        unsafe(InitializeStageScene, 0);
-        unsafe(FinalizeStageScene, 0);
-        unsafe(StartStageScene, 0);
-        safe(SetStageIndex, 1);
-        safe(SetStageMainScript, 1);
-        safe(SetStagePlayerScript, 1);
-        unsafe(SetStageReplayFile, 1);
-        safe(GetStageSceneState, 0);
-        safe(GetStageSceneResult, 0);
-        unsafe(PauseStageScene, 1); // NotifyEvent
-        safe(TerminateStageScene, 0);
+        builtin(ClosePackage, 0);
+        builtin(InitializeStageScene, 0);
+        builtin(FinalizeStageScene, 0);
+        builtin(StartStageScene, 0);
+        builtin(SetStageIndex, 1);
+        builtin(SetStageMainScript, 1);
+        builtin(SetStagePlayerScript, 1);
+        builtin(SetStageReplayFile, 1);
+        builtin(GetStageSceneState, 0);
+        builtin(GetStageSceneResult, 0);
+        builtin(PauseStageScene, 1);
+        builtin(TerminateStageScene, 0);
 
-        safe(GetLoadFreePlayerScriptList, 0);
-        safe(GetFreePlayerScriptCount, 0);
-        safe(GetFreePlayerScriptInfo, 2);
+        builtin(GetLoadFreePlayerScriptList, 0);
+        builtin(GetFreePlayerScriptCount, 0);
+        builtin(GetFreePlayerScriptInfo, 2);
 
-        unsafe(LoadReplayList, 0);
-        unsafe(GetValidReplayIndices, 0);
-        unsafe(IsValidReplayIndex, 1);
-        unsafe(GetReplayInfo, 2);
-        unsafe(SetReplayInfo, 2);
-        unsafe(SaveReplay, 2);
+        builtin(LoadReplayList, 0);
+        builtin(GetValidReplayIndices, 0);
+        builtin(IsValidReplayIndex, 1);
+        builtin(GetReplayInfo, 2);
+        builtin(SetReplayInfo, 2);
+        builtin(SaveReplay, 2);
     }
-}
 
-void RegisterRuntimeHelper(lua_State* L)
-{
+    // runtime helper
     lua_register(L, "c_chartonum", c_chartonum);
     lua_register(L, "c_succchar", c_succchar);
     lua_register(L, "c_predchar", c_predchar);
