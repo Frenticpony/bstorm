@@ -43,18 +43,7 @@ Script::Script(const std::wstring& p, const std::wstring& type, const std::wstri
 
         // 弾幕風標準API登録
         auto globalEnv = std::make_shared<Env>();
-        RegisterStandardAPI(type_, version_, globalEnv->table);
-
-        for (const auto& entry : globalEnv->table)
-        {
-            if (auto builtInFunc = std::dynamic_pointer_cast<NodeBuiltInFunc>(entry.second))
-            {
-                if (builtInFunc->funcPointer)
-                {
-                    lua_register(L_, (DNH_VAR_PREFIX + entry.first).c_str(), (lua_CFunction)builtInFunc->funcPointer);
-                }
-            }
-        }
+        RegisterStandardAPI(L_, type_, version_, globalEnv->table);
 
         // ランタイム用ヘルパー関数登録
         RegisterRuntimeHelper(L_);

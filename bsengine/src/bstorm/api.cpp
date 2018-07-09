@@ -5676,24 +5676,30 @@ __declspec(noinline) static void addConstI(NameTable& table, const char* name, i
     table.emplace(name, std::make_shared<NodeConst>(name, std::to_wstring(value)));
 }
 
-__declspec(noinline) static void addFunc(NameTable& table, const char* name, int paramc, lua_CFunction func)
+__declspec(noinline) static void addFunc(NameTable& table, const char* name, int paramc, lua_State* L, lua_CFunction func)
 {
-    table.emplace(name, std::make_shared<NodeBuiltInFunc>(name, paramc, (void*)func));
+    table.emplace(name, std::make_shared<NodeBuiltInFunc>(name, paramc));
+    lua_register(L, (std::string(DNH_VAR_PREFIX) + name).c_str(), func);
+}
+
+__declspec(noinline) static void addRuntimeFunc(NameTable& table, const char* name, int paramc)
+{
+    table.emplace(name, std::make_shared<NodeBuiltInFunc>(name, paramc));
 }
 
 #define constI(name) (addConstI(table, #name, name))
-#define unsafe(name, paramc) (addFunc(table, #name, (paramc), UnsafeFunction<name>))
+#define unsafe(name, paramc) (addFunc(table, #name, (paramc), L, UnsafeFunction<name>))
 #ifdef _DEBUG
 #define safe(name, paramc) (unsafe(name, paramc))
 #else
-#define safe(name, paramc) (addFunc(table, #name, (paramc), name))
+#define safe(name, paramc) (addFunc(table, #name, (paramc), L, name))
 #endif
-#define runtime(name, paramc) (addFunc(table, #name, (paramc), 0))
+#define runtime(name, paramc) (addRuntimeFunc(table, #name, (paramc)))
 #define TypeIs(typeSet) ((typeSet) & type)
 
 typedef uint8_t ScriptType;
 
-void RegisterStandardAPI(const std::wstring& typeName, const std::wstring& version, NameTable& table)
+void RegisterStandardAPI(lua_State* L, const std::wstring& typeName, const std::wstring& version, NameTable& table)
 {
     constexpr ScriptType t_player = 1;
     constexpr ScriptType t_stage = 2;

@@ -517,10 +517,9 @@ struct NodeTaskDef : public NodeDef
 
 struct NodeBuiltInFunc : public NodeDef
 {
-    NodeBuiltInFunc(const std::string& name, int paramc, void* func) : NodeDef(name), paramCnt(paramc), funcPointer(func) {}
+    NodeBuiltInFunc(const std::string& name, int paramc) : NodeDef(name), paramCnt(paramc) {}
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     int paramCnt;
-    void* funcPointer;
 };
 
 struct NodeConst : public NodeDef

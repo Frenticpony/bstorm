@@ -9,7 +9,7 @@
 namespace bstorm
 {
 struct SourcePos;
-void RegisterStandardAPI(const std::wstring& type, const std::wstring& version, NameTable& table);
+void RegisterStandardAPI(lua_State* L, const std::wstring& type, const std::wstring& version, NameTable& table);
 void RegisterRuntimeHelper(lua_State* L);
 
 // helper
