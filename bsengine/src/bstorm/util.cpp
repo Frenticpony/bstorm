@@ -186,36 +186,61 @@ void TrimSpace(std::wstring * s)
 
 std::wstring GetCanonicalPath(const std::wstring& path)
 {
-    // unify path separator
-    auto unified = std::regex_replace(path, std::wregex(L"((\\\\)|/)+"), L"/");
-    // remove relative path
-    std::wistringstream ss(unified);
-    std::vector<std::wstring> trail; trail.reserve(32);
-    std::wstring tmp;
-    while (std::getline(ss, tmp, L'/'))
+    // expand relative path
+    const size_t pathSize = path.size();
+    std::vector<std::wstring> trail; trail.reserve(16);
     {
-        if (tmp == L".")
+        std::wstring tmp;
+        size_t i = 0;
+        for (; i < pathSize; ++i)
         {
-            // ignore
-        } else if (tmp == L"..")
-        {
-            if (trail.empty())
+            const char& c = path[i];
+            switch (c)
             {
-                trail.push_back(L"..");
-            } else
-            {
-                trail.pop_back();
+                case '/':
+                case '\\':
+separator:
+                    if (tmp.empty())
+                    {
+                    } else if (tmp == L".")
+                    {
+                        // ignore
+                        tmp.pop_back();
+                    } else if (tmp == L"..")
+                    {
+                        if (trail.empty())
+                        {
+                            trail.emplace_back(L"..");
+                        } else
+                        {
+                            trail.pop_back();
+                        }
+                        tmp.clear();
+                    } else
+                    {
+                        trail.push_back(std::move(tmp));
+                    }
+                    break;
+                default:
+                    tmp.push_back(c);
+                    break;
+
             }
-        } else
-        {
-            trail.push_back(tmp);
         }
+
+        if (i == pathSize) goto separator; // end of string
     }
-    std::wstring ret; ret.reserve(128);
-    for (int i = 0; i < trail.size(); i++)
+
+    // concat
+    std::wstring ret; ret.reserve(pathSize);
+    for (const auto& s : trail)
     {
-        if (i != 0) ret += L"/";
-        ret += trail[i];
+        ret += s;
+        ret.push_back(L'/');
+    }
+    if (!ret.empty())
+    {
+        ret.pop_back();
     }
     return ret;
 }
