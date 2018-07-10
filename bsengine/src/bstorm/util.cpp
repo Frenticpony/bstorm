@@ -206,11 +206,11 @@ std::wstring GetCanonicalPath(const std::wstring& path)
         size_t i = 0;
         for (; i < pathSize; ++i)
         {
-            const char& c = path[i];
+            const wchar_t& c = path[i];
             switch (c)
             {
-                case '/':
-                case '\\':
+                case L'/':
+                case L'\\':
 separator:
                     if (tmp.empty())
                     {
