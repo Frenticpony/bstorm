@@ -494,13 +494,12 @@ function Task:create()
       coroutine.yield();
     end
   end);
-  setmetatable(t, Task);
-  return t;
+  return setmetatable(t, Task);
 end
 
 function Task:resume()
   if self.state == Task.SUSPENDED then return; end
-  self.step();
+  return self.step();
 end
 
 function Task:set_func(f, args)
@@ -519,8 +518,7 @@ function TaskManager:create(n)
   for i = 1, n do
     tm.pooled[i] = Task:create();
   end
-  setmetatable(tm, TaskManager);
-  return tm;
+  return setmetatable(tm, TaskManager);
 end
 
 function TaskManager:register(f, args)
@@ -564,7 +562,7 @@ local function r_run(f)
   end
 end
 
-function r_fork(func, args) task_manager:register(func, args) end
+function r_fork(func, args) return task_manager:register(func, args); end
 
 -- entry point --
 
@@ -574,8 +572,8 @@ function d_Initialize() end
 function d_MainLoop() end
 function d_Finalize() end
 
-function r_run_Loading() r_run(d_Loading); end
-function r_run_Event() r_run(d_Event); end
-function r_run_Initialize() r_run(d_Initialize); end
-function r_run_MainLoop() r_run(d_MainLoop); end
-function r_run_Finalize() r_run(d_Finalize); end
+function r_run_Loading() return r_run(d_Loading); end
+function r_run_Event() return r_run(d_Event); end
+function r_run_Initialize() return r_run(d_Initialize); end
+function r_run_MainLoop() return r_run(d_MainLoop); end
+function r_run_Finalize() return r_run(d_Finalize); end
