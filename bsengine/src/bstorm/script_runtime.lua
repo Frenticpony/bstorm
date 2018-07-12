@@ -15,7 +15,7 @@ local function r_strtodnhstr(s)
   return t;
 end
 
-function r_type_eq(x, y)
+local function r_type_eq(x, y)
   local tx = type(x);
   local ty = type(y);
   if tx == 'table' and ty == 'table' then
