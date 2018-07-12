@@ -38,7 +38,7 @@ function r_checknil(v, name)
   end
 end
 
-local r_ator = dnh_ator;
+local r_ator = d_ator;
 
 function r_tonum(x)
   local t = type(x);
@@ -161,6 +161,13 @@ function r_compare(x, y)
 
   return 0;
 end
+
+function r_eq(x, y) return r_compare(x, y) == 0; end
+function r_ne(x, y) return not r_eq(x, y); end
+function r_lt(x, y) return r_compare(x, y) < 0; end
+function r_le(x, y) return r_compare(x, y) <= 0; end
+function r_gt(x, y) return not r_le(x, y); end
+function r_ge(x, y) return not r_lt(x, y); end
 
 function r_and(x, f)
   if r_tobool(x) then return f() end
@@ -316,29 +323,29 @@ function r_absolute(x)
   return math.abs(r_tonum(x));
 end
 
-dnh_add = r_add;
-dnh_subtract = r_subtract;
-dnh_multiply = r_multiply;
-dnh_divide = r_divide;
-dnh_remainder = r_remainder;
-dnh_power = r_power
-dnh_not = r_not;
-dnh_negative = r_negative;
-dnh_compare = r_compare;
-dnh_concatenate = r_concatenate;
-dnh_index_ = r_read;
-dnh_slice = r_slice;
-dnh_successor = r_successor;
-dnh_predecessor = r_predecessor;
-dnh_absolute = r_absolute;
+d_add = r_add;
+d_subtract = r_subtract;
+d_multiply = r_multiply;
+d_divide = r_divide;
+d_remainder = r_remainder;
+d_power = r_power
+d_not = r_not;
+d_negative = r_negative;
+d_compare = r_compare;
+d_concatenate = r_concatenate;
+d_index_ = r_read;
+d_slice = r_slice;
+d_successor = r_successor;
+d_predecessor = r_predecessor;
+d_absolute = r_absolute;
 
 -- throws
-function dnh_append(a,x)
+function d_append(a,x)
   return r_concatenate(a, {x});
 end
 
 -- throws
-function dnh_erase(a, i)
+function d_erase(a, i)
   if(type(a) ~= "table") then
       c_raiseerror("attempt to erase a non-array value.");
   end
@@ -358,7 +365,7 @@ function dnh_erase(a, i)
   return r;
 end
 
-function dnh_length(a)
+function d_length(a)
   if type(a) ~= "table" then
     return 0;
   else
@@ -368,85 +375,85 @@ end
 
 --- math function ---
 
-function dnh_min(x,y)
+function d_min(x,y)
   return math.min(r_tonum(x), r_tonum(y));
 end
 
-function dnh_max(x,y)
+function d_max(x,y)
   return math.max(r_tonum(x), r_tonum(y));
 end
 
-function dnh_log(x)
+function d_log(x)
   return math.log(r_tonum(x));
 end
 
-function dnh_log10(x)
+function d_log10(x)
   return math.log10(r_tonum(x));
 end
 
-function dnh_cos(x)
+function d_cos(x)
   return math.cos(math.rad(r_tonum(x)));
 end
 
-function dnh_sin(x)
+function d_sin(x)
   return math.sin(math.rad(r_tonum(x)));
 end
 
-function dnh_tan(x)
+function d_tan(x)
   return math.tan(math.rad(r_tonum(x)));
 end
 
-function dnh_acos(x)
+function d_acos(x)
   return math.deg(math.acos(r_tonum(x)));
 end
 
-function dnh_asin(x)
+function d_asin(x)
   return math.deg(math.asin(r_tonum(x)));
 end
 
-function dnh_atan(x)
+function d_atan(x)
   return math.deg(math.atan(r_tonum(x)));
 end
 
-function dnh_atan2(y,x)
+function d_atan2(y,x)
   return math.deg(math.atan2(r_tonum(y), r_tonum(x)));
 end
 
 math.randomseed(os.time()); -- FUTURE : Systemから与えられたシードで初期化
 
-function dnh_rand(min, max)
+function d_rand(min, max)
   min = r_tonum(min); max = r_tonum(max);
   return math.random() * (max - min) + min;
 end
 
-function dnh_round(x)
+function d_round(x)
   return math.floor(r_tonum(x) + 0.5);
 end
 
-dnh_truncate = r_toint;
+d_truncate = r_toint;
 
-dnh_trunc = r_toint;
+d_trunc = r_toint;
 
-function dnh_floor(x)
+function d_floor(x)
   return math.floor(r_tonum(x));
 end
 
-function dnh_ceil(x)
+function d_ceil(x)
   return math.ceil(r_tonum(x));
 end
 
-function dnh_modc(x, y)
+function d_modc(x, y)
   return math.fmod(r_tonum(x), r_tonum(y));
 end
 
-function dnh_IntToString(n)
+function d_IntToString(n)
   n = r_toint(n);
   return r_strtodnhstr(string.format("%d", n));
 end
 
-dnh_itoa = dnh_IntToString
+d_itoa = d_IntToString
 
-function dnh_rtoa(n)
+function d_rtoa(n)
   n = r_tonum(n);
   return r_strtodnhstr(string.format("%f", n));
 end
@@ -454,11 +461,11 @@ end
 script_event_type = -1;
 script_event_args = {};
 
-function dnh_GetEventType()
+function d_GetEventType()
   return script_event_type;
 end
 
-function dnh_GetEventArgument(idx)
+function d_GetEventArgument(idx)
   -- 小数は切り捨てる
   idx = r_toint(idx) + 1;
   if idx < 1 or idx > #script_event_args then
@@ -559,14 +566,14 @@ function r_fork(func, args) task_manager:register(func, args) end
 
 -- entry point --
 
-function dnh_Loading() end
-function dnh_Event() end
-function dnh_Initialize() end
-function dnh_MainLoop() end
-function dnh_Finalize() end
+function d_Loading() end
+function d_Event() end
+function d_Initialize() end
+function d_MainLoop() end
+function d_Finalize() end
 
-function r_run_Loading() r_run(dnh_Loading); end
-function r_run_Event() r_run(dnh_Event); end
-function r_run_Initialize() r_run(dnh_Initialize); end
-function r_run_MainLoop() r_run(dnh_MainLoop); end
-function r_run_Finalize() r_run(dnh_Finalize); end
+function r_run_Loading() r_run(d_Loading); end
+function r_run_Event() r_run(d_Event); end
+function r_run_Initialize() r_run(d_Initialize); end
+function r_run_MainLoop() r_run(d_MainLoop); end
+function r_run_Finalize() r_run(d_Finalize); end

@@ -69,9 +69,9 @@ void CodeGenerator::Traverse(NodeArray& exp)
     }
     AddCode("}");
 }
-void CodeGenerator::Traverse(NodeNeg& exp) { genMonoOp("negative", exp); }
-void CodeGenerator::Traverse(NodeNot& exp) { genMonoOp("not", exp); }
-void CodeGenerator::Traverse(NodeAbs& exp) { genMonoOp("absolute", exp); }
+void CodeGenerator::Traverse(NodeNeg& exp) { GenMonoOp("negative", exp); }
+void CodeGenerator::Traverse(NodeNot& exp) { GenMonoOp("not", exp); }
+void CodeGenerator::Traverse(NodeAbs& exp) { GenMonoOp("absolute", exp); }
 
 void CodeGenerator::Traverse(NodeAdd& exp) { GenBinOp("add", exp); }
 void CodeGenerator::Traverse(NodeSub& exp) { GenBinOp("subtract", exp); }
@@ -80,12 +80,12 @@ void CodeGenerator::Traverse(NodeDiv& exp) { GenBinOp("divide", exp); }
 void CodeGenerator::Traverse(NodeRem& exp) { GenBinOp("remainder", exp); }
 void CodeGenerator::Traverse(NodePow& exp) { GenBinOp("power", exp); }
 
-void CodeGenerator::Traverse(NodeLt& exp) { GenCmpBinOp("<", exp); }
-void CodeGenerator::Traverse(NodeGt& exp) { GenCmpBinOp(">", exp); }
-void CodeGenerator::Traverse(NodeLe& exp) { GenCmpBinOp("<=", exp); }
-void CodeGenerator::Traverse(NodeGe& exp) { GenCmpBinOp(">=", exp); }
-void CodeGenerator::Traverse(NodeEq& exp) { GenCmpBinOp("==", exp); }
-void CodeGenerator::Traverse(NodeNe& exp) { GenCmpBinOp("~=", exp); }
+void CodeGenerator::Traverse(NodeLt& exp) { GenBinOp("lt", exp); }
+void CodeGenerator::Traverse(NodeGt& exp) { GenBinOp("gt", exp); }
+void CodeGenerator::Traverse(NodeLe& exp) { GenBinOp("le", exp); }
+void CodeGenerator::Traverse(NodeGe& exp) { GenBinOp("ge", exp); }
+void CodeGenerator::Traverse(NodeEq& exp) { GenBinOp("eq", exp); }
+void CodeGenerator::Traverse(NodeNe& exp) { GenBinOp("ne", exp); }
 
 void CodeGenerator::Traverse(NodeAnd& exp) { GenLogBinOp("and", exp); }
 void CodeGenerator::Traverse(NodeOr& exp) { GenLogBinOp("or", exp); }
@@ -190,7 +190,7 @@ void CodeGenerator::Unindent()
 {
     indentLevel_--;
 }
-void CodeGenerator::genMonoOp(const std::string& fname, NodeMonoOp& exp)
+void CodeGenerator::GenMonoOp(const std::string& fname, NodeMonoOp& exp)
 {
     AddCode(runtime(fname) + "(");
     exp.rhs->Traverse(*this);
@@ -203,16 +203,6 @@ void CodeGenerator::GenBinOp(const std::string& fname, NodeBinOp& exp)
     AddCode(",");
     exp.rhs->Traverse(*this);
     AddCode(")");
-}
-void CodeGenerator::GenCmpBinOp(const std::string & op, NodeBinOp & exp)
-{
-    AddCode("(" + runtime("compare") + "(");
-    exp.lhs->Traverse(*this);
-    AddCode(",");
-    exp.rhs->Traverse(*this);
-    AddCode(") ");
-    AddCode(op);
-    AddCode(" 0)");
 }
 void CodeGenerator::GenLogBinOp(const std::string & fname, NodeBinOp & exp)
 {
@@ -590,7 +580,7 @@ void CodeGenerator::Traverse(NodeAscent& stmt)
     AddCode("do"); NewLine();
     AddCode("local i = ");  stmt.range->start->Traverse(*this); AddCode(";"); NewLine(stmt.range->start->srcPos);
     AddCode("local e = ");  stmt.range->end->Traverse(*this); AddCode(";"); NewLine(stmt.range->end->srcPos);
-    AddCode("while " + runtime("compare") + "(e, i) > 0 do"); NewLine(stmt.srcPos);
+    AddCode("while " + runtime("lt") + "(i, e) do"); NewLine(stmt.srcPos);
     stmt.block->Traverse(*this);
     Indent(); AddCode("i = " + runtime("successor") + "(i);"); NewLine(stmt.srcPos); Unindent();
     AddCode("end"); NewLine();
@@ -601,7 +591,7 @@ void CodeGenerator::Traverse(NodeDescent& stmt)
     AddCode("do"); NewLine();
     AddCode("local s = ");  stmt.range->start->Traverse(*this); AddCode(";"); NewLine(stmt.range->start->srcPos);
     AddCode("local i = ");  stmt.range->end->Traverse(*this); AddCode(";"); NewLine(stmt.range->end->srcPos);
-    AddCode("while " + runtime("compare") + "(s, i) < 0 do"); NewLine(stmt.srcPos);
+    AddCode("while " + runtime("gt") + "(i, s) do"); NewLine(stmt.srcPos);
     Indent(); AddCode("i = " + runtime("predecessor") + "(i);"); NewLine(stmt.srcPos); Unindent();
     stmt.block->Traverse(*this);
     AddCode("end"); NewLine();
@@ -639,7 +629,7 @@ void CodeGenerator::Traverse(NodeAlternative& stmt)
         for (auto& exp : stmt.cases[i]->exps)
         {
             AddCode(" or (");
-            AddCode("(" + runtime("compare") + "(c,"); exp->Traverse(*this); AddCode(") == 0)");
+            AddCode("(" + runtime("eq") + "(c,"); exp->Traverse(*this); AddCode("))");
         }
         for (auto& exp : stmt.cases[i]->exps)
         {

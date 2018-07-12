@@ -90,9 +90,8 @@ private:
     void NewLine(const std::shared_ptr<SourcePos>& srcPos);
     void Indent();
     void Unindent();
-    void genMonoOp(const std::string& fname, NodeMonoOp& exp);
+    void GenMonoOp(const std::string& fname, NodeMonoOp& exp);
     void GenBinOp(const std::string& fname, NodeBinOp& exp);
-    void GenCmpBinOp(const std::string& op, NodeBinOp& exp);
     void GenLogBinOp(const std::string& fname, NodeBinOp& exp);
     void GenCheckNil(const std::string& name);
     void GenProc(std::shared_ptr<NodeDef> def, const std::vector<std::string>& params_, NodeBlock& blk);

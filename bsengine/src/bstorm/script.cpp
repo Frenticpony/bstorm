@@ -98,6 +98,7 @@ Script::Script(const std::wstring& p, const std::wstring& type, const std::wstri
                 .AddSourcePos(compileSrcPos_)));
             srcMap_ = codeGen.GetSourceMap();
         }
+        OutputDebugStringA(codeGen.GetCode().c_str());
 
         // ランタイム読み込み
         luaL_loadbuffer(L_, (const char *)luaJIT_BC_script_runtime, luaJIT_BC_script_runtime_SIZE, DNH_RUNTIME_NAME);
