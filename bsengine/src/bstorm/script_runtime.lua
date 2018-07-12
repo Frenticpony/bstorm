@@ -474,7 +474,7 @@ function d_GetEventArgument(idx)
   return r_cp(script_event_args[idx]);
 end
 
---- task package ---
+--- task ---
 
 -- task state
 local TASK_RUNNING = 0;
@@ -511,45 +511,39 @@ function Task:set_func(f, args)
   self.state = TASK_RUNNING;
 end
 
-local TaskManager = {}; TaskManager.__index = TaskManager;
-function TaskManager:create(n)
-  local tm = {running = {}, added = {}, pooled = {}};
-  for i = 1, n do
-    tm.pooled[i] = Task:create();
-  end
-  return setmetatable(tm, TaskManager);
-end
+-- task manager
+local running_sub_tasks, added_sub_tasks, pooled_sub_tasks = {}, {}, {};
 
-function TaskManager:register(f, args)
-  local t = table.remove(self.pooled);
+local function add_sub_task(f, args)
+  local t = table.remove(pooled_sub_tasks);
   if t == nil then
     t = Task:create();
   end
   t:set_func(f, args);
   t:resume();
   if t.state == TASK_SUSPENDED then
-    self.pooled[#self.pooled+1] = t;
+    pooled_sub_tasks[#pooled_sub_tasks+1] = t;
   else
-    self.added[#self.added+1] = t;
+    added_sub_tasks[#added_sub_tasks+1] = t;
   end
 end
 
-function TaskManager:resumeAll()
-  self.running, self.added = self.added, self.running;
-  for i,t in ipairs(self.running) do
+local function resume_all_sub_task()
+  running_sub_tasks, added_sub_tasks = added_sub_tasks, running_sub_tasks;
+  for i,t in ipairs(running_sub_tasks) do
     t:resume();
     if t.state == TASK_SUSPENDED then
-      self.pooled[#self.pooled+1] = t;
+      pooled_sub_tasks[#pooled_sub_tasks+1] = t;
     else
-      self.added[#self.added+1] = t;
+      added_sub_tasks[#added_sub_tasks+1] = t;
     end
-    self.running[i] = nil;
+    running_sub_tasks[i] = nil;
   end
 end
 
-local task_manager = TaskManager:create(1);
 local main_task = Task:create();
 
+-- run builtin routine
 function r_run(f)
   main_task:set_func(f, nil);
   while true do
@@ -557,8 +551,9 @@ function r_run(f)
     if main_task.state == TASK_SUSPENDED then
       break;
     end
-    task_manager:resumeAll();
+    resume_all_sub_task();
   end
 end
 
-function r_fork(func, args) return task_manager:register(func, args); end
+-- fork sub task
+function r_fork(func, args) return add_sub_task(func, args); end
