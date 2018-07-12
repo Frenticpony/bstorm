@@ -478,10 +478,14 @@ end
 
 --- task package ---
 
-local Task = {RUNNING = 0, SUSPENDED = 1}; Task.__index = Task;
+-- task state
+local TASK_RUNNING = 0;
+local TASK_SUSPENDED = 1;
+
+local Task = {}; Task.__index = Task;
 
 function Task:create()
-  local t = {func = nil, args = nil, state = Task.SUSPENDED};
+  local t = {func = nil, args = nil, state = TASK_SUSPENDED};
   t.step = coroutine.wrap(function()
     while true do
       if t.args == nil then
@@ -490,7 +494,7 @@ function Task:create()
         t.func(unpack(t.args));
       end
       t.func = nil; t.args = nil;
-      t.state = Task.SUSPENDED;
+      t.state = TASK_SUSPENDED;
       coroutine.yield();
     end
   end);
@@ -498,18 +502,18 @@ function Task:create()
 end
 
 function Task:resume()
-  if self.state == Task.SUSPENDED then return; end
+  if self.state == TASK_SUSPENDED then return; end
   return self.step();
 end
 
 function Task:set_func(f, args)
-  if self.state ~= Task.SUSPENDED then
+  if self.state ~= TASK_SUSPENDED then
     -- error!
   end
 
   self.func = f;
   self.args = args;
-  self.state = Task.RUNNING;
+  self.state = TASK_RUNNING;
 end
 
 local TaskManager = {}; TaskManager.__index = TaskManager;
@@ -528,7 +532,7 @@ function TaskManager:register(f, args)
   end
   t:set_func(f, args);
   t:resume();
-  if t.state == Task.SUSPENDED then
+  if t.state == TASK_SUSPENDED then
     self.pooled[#self.pooled+1] = t;
   else
     self.added[#self.added+1] = t;
@@ -539,7 +543,7 @@ function TaskManager:resumeAll()
   self.running, self.added = self.added, self.running;
   for i,t in ipairs(self.running) do
     t:resume();
-    if t.state == Task.SUSPENDED then
+    if t.state == TASK_SUSPENDED then
       self.pooled[#self.pooled+1] = t;
     else
       self.added[#self.added+1] = t;
@@ -555,7 +559,7 @@ local function r_run(f)
   main_task:set_func(f, nil);
   while true do
     main_task:resume();
-    if main_task.state == Task.SUSPENDED then
+    if main_task.state == TASK_SUSPENDED then
       break;
     end
     task_manager:resumeAll();
