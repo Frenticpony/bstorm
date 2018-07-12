@@ -548,7 +548,7 @@ function TaskManager:resumeAll()
   end
 end
 
-local task_manager = TaskManager:create(128);
+local task_manager = TaskManager:create(1);
 local main_task = Task:create();
 
 local function r_run(f)
