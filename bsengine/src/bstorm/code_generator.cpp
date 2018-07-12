@@ -69,16 +69,16 @@ void CodeGenerator::Traverse(NodeArray& exp)
     }
     AddCode("}");
 }
-void CodeGenerator::Traverse(NodeNeg& exp) { GenMonoOp("negative", exp); }
+void CodeGenerator::Traverse(NodeNeg& exp) { GenMonoOp("neg", exp); }
 void CodeGenerator::Traverse(NodeNot& exp) { GenMonoOp("not", exp); }
-void CodeGenerator::Traverse(NodeAbs& exp) { GenMonoOp("absolute", exp); }
+void CodeGenerator::Traverse(NodeAbs& exp) { GenMonoOp("abs", exp); }
 
 void CodeGenerator::Traverse(NodeAdd& exp) { GenBinOp("add", exp); }
-void CodeGenerator::Traverse(NodeSub& exp) { GenBinOp("subtract", exp); }
-void CodeGenerator::Traverse(NodeMul& exp) { GenBinOp("multiply", exp); }
-void CodeGenerator::Traverse(NodeDiv& exp) { GenBinOp("divide", exp); }
-void CodeGenerator::Traverse(NodeRem& exp) { GenBinOp("remainder", exp); }
-void CodeGenerator::Traverse(NodePow& exp) { GenBinOp("power", exp); }
+void CodeGenerator::Traverse(NodeSub& exp) { GenBinOp("sub", exp); }
+void CodeGenerator::Traverse(NodeMul& exp) { GenBinOp("mul", exp); }
+void CodeGenerator::Traverse(NodeDiv& exp) { GenBinOp("div", exp); }
+void CodeGenerator::Traverse(NodeRem& exp) { GenBinOp("rem", exp); }
+void CodeGenerator::Traverse(NodePow& exp) { GenBinOp("pow", exp); }
 
 void CodeGenerator::Traverse(NodeLt& exp) { GenBinOp("lt", exp); }
 void CodeGenerator::Traverse(NodeGt& exp) { GenBinOp("gt", exp); }
@@ -93,10 +93,10 @@ void CodeGenerator::Traverse(NodeCat& exp)
 {
     if (IsCopyNeeded(exp.lhs))
     {
-        GenBinOp("concatenate", exp);
+        GenBinOp("cat", exp);
     } else
     {
-        GenBinOp("mconcatenate", exp);
+        GenBinOp("mcat", exp);
     }
 }
 void CodeGenerator::Traverse(NodeNoParenCallExp& call)
@@ -430,12 +430,12 @@ void CodeGenerator::Traverse(NodeAssign& stmt)
     NewLine(stmt.srcPos);
 }
 void CodeGenerator::Traverse(NodeAddAssign& stmt) { GenOpAssign("add", stmt.lhs, stmt.rhs); }
-void CodeGenerator::Traverse(NodeSubAssign& stmt) { GenOpAssign("subtract", stmt.lhs, stmt.rhs); }
-void CodeGenerator::Traverse(NodeMulAssign& stmt) { GenOpAssign("multiply", stmt.lhs, stmt.rhs); }
-void CodeGenerator::Traverse(NodeDivAssign& stmt) { GenOpAssign("divide", stmt.lhs, stmt.rhs); }
-void CodeGenerator::Traverse(NodeRemAssign& stmt) { GenOpAssign("remainder", stmt.lhs, stmt.rhs); }
-void CodeGenerator::Traverse(NodePowAssign& stmt) { GenOpAssign("power", stmt.lhs, stmt.rhs); }
-void CodeGenerator::Traverse(NodeCatAssign& stmt) { GenOpAssign("mconcatenate", stmt.lhs, stmt.rhs); }
+void CodeGenerator::Traverse(NodeSubAssign& stmt) { GenOpAssign("sub", stmt.lhs, stmt.rhs); }
+void CodeGenerator::Traverse(NodeMulAssign& stmt) { GenOpAssign("mul", stmt.lhs, stmt.rhs); }
+void CodeGenerator::Traverse(NodeDivAssign& stmt) { GenOpAssign("div", stmt.lhs, stmt.rhs); }
+void CodeGenerator::Traverse(NodeRemAssign& stmt) { GenOpAssign("rem", stmt.lhs, stmt.rhs); }
+void CodeGenerator::Traverse(NodePowAssign& stmt) { GenOpAssign("pow", stmt.lhs, stmt.rhs); }
+void CodeGenerator::Traverse(NodeCatAssign& stmt) { GenOpAssign("mcat", stmt.lhs, stmt.rhs); }
 
 void CodeGenerator::Traverse(NodeCallStmt& call)
 {
@@ -526,8 +526,8 @@ void CodeGenerator::Traverse(NodeBreak& stmt)
     NewLine(stmt.srcPos);
 }
 
-void CodeGenerator::Traverse(NodeSucc& stmt) { GenOpAssign("successor", stmt.lhs, std::shared_ptr<NodeExp>()); }
-void CodeGenerator::Traverse(NodePred& stmt) { GenOpAssign("predecessor", stmt.lhs, std::shared_ptr<NodeExp>()); }
+void CodeGenerator::Traverse(NodeSucc& stmt) { GenOpAssign("succ", stmt.lhs, std::shared_ptr<NodeExp>()); }
+void CodeGenerator::Traverse(NodePred& stmt) { GenOpAssign("pred", stmt.lhs, std::shared_ptr<NodeExp>()); }
 
 void CodeGenerator::Traverse(NodeVarDecl &) {}
 void CodeGenerator::Traverse(NodeVarInit& stmt)
@@ -559,7 +559,7 @@ void CodeGenerator::Traverse(NodeTimes& stmt)
 {
     AddCode("do"); NewLine();
     AddCode("local i = 0;"); NewLine(stmt.srcPos);
-    AddCode("local e = math.ceil(r_tonum(");  stmt.cnt->Traverse(*this); AddCode("));");
+    AddCode("local e = " + runtime("ceil") + "(");  stmt.cnt->Traverse(*this); AddCode(");");
     NewLine(stmt.cnt->srcPos);
     AddCode("while i < e do"); NewLine();
     stmt.block->Traverse(*this);
@@ -582,7 +582,7 @@ void CodeGenerator::Traverse(NodeAscent& stmt)
     AddCode("local e = ");  stmt.range->end->Traverse(*this); AddCode(";"); NewLine(stmt.range->end->srcPos);
     AddCode("while " + runtime("lt") + "(i, e) do"); NewLine(stmt.srcPos);
     stmt.block->Traverse(*this);
-    Indent(); AddCode("i = " + runtime("successor") + "(i);"); NewLine(stmt.srcPos); Unindent();
+    Indent(); AddCode("i = " + runtime("succ") + "(i);"); NewLine(stmt.srcPos); Unindent();
     AddCode("end"); NewLine();
     AddCode("end"); NewLine();
 }
@@ -592,7 +592,7 @@ void CodeGenerator::Traverse(NodeDescent& stmt)
     AddCode("local s = ");  stmt.range->start->Traverse(*this); AddCode(";"); NewLine(stmt.range->start->srcPos);
     AddCode("local i = ");  stmt.range->end->Traverse(*this); AddCode(";"); NewLine(stmt.range->end->srcPos);
     AddCode("while " + runtime("gt") + "(i, s) do"); NewLine(stmt.srcPos);
-    Indent(); AddCode("i = " + runtime("predecessor") + "(i);"); NewLine(stmt.srcPos); Unindent();
+    Indent(); AddCode("i = " + runtime("pred") + "(i);"); NewLine(stmt.srcPos); Unindent();
     stmt.block->Traverse(*this);
     AddCode("end"); NewLine();
     AddCode("end"); NewLine();

@@ -40,7 +40,7 @@ end
 
 local r_ator = d_ator;
 
-function r_tonum(x)
+local function r_tonum(x)
   local t = type(x);
   if t == 'number' then return x end
   if t == 'boolean' then return (x and 1 or 0) end
@@ -85,7 +85,7 @@ function r_add(x, y)
 end
 
 -- throws
-function r_subtract(x, y)
+function r_sub(x, y)
   if type(x) == "table" then
     if type(y) ~= "table" then
       c_raiseerror("can't compare diffrent type values.");
@@ -95,7 +95,7 @@ function r_subtract(x, y)
     end
     local z = {};
     for i = 1, #x do
-      z[i] = r_subtract(x[i], y[i]);
+      z[i] = r_sub(x[i], y[i]);
     end
     return z;
   else
@@ -103,19 +103,19 @@ function r_subtract(x, y)
   end
 end
 
-function r_multiply(x,y)
+function r_mul(x,y)
   return r_tonum(x) * r_tonum(y);
 end
 
-function r_divide(x,y)
+function r_div(x,y)
   return r_tonum(x) / r_tonum(y);
 end
 
-function r_remainder(x,y)
+function r_rem(x,y)
   return r_tonum(x) % r_tonum(y);
 end
 
-function r_power(x,y)
+function r_pow(x,y)
   return r_tonum(x) ^ r_tonum(y);
 end
 
@@ -123,12 +123,12 @@ function r_not(x)
   return not r_tobool(x);
 end
 
-function r_negative(x)
+function r_neg(x)
   return -r_tonum(x);
 end
 
 -- throws
-function r_compare(x, y)
+local function r_cmp(x, y)
   if type(x) ~= type(y) then
     c_raiseerror("can't compare diffrent type values.");
   end
@@ -144,28 +144,28 @@ function r_compare(x, y)
   end
 
   if type(x) == "string" then
-    return r_compare(c_chartonum(x), c_chartonum(y));
+    return r_cmp(c_chartonum(x), c_chartonum(y));
   end
 
   if type(x) == "boolean" then
-    return r_compare(r_tonum(x), r_tonum(y));
+    return r_cmp(r_tonum(x), r_tonum(y));
   end
 
   if type(x) == "table" then
     for i = 1, math.min(#x, #y) do
-      local r = r_compare(x[i], y[i]);
+      local r = r_cmp(x[i], y[i]);
       if r ~= 0 then return r end
     end
-    return r_compare(#x, #y);
+    return r_cmp(#x, #y);
   end
 
   return 0;
 end
 
-function r_eq(x, y) return r_compare(x, y) == 0; end
+function r_eq(x, y) return r_cmp(x, y) == 0; end
 function r_ne(x, y) return not r_eq(x, y); end
-function r_lt(x, y) return r_compare(x, y) < 0; end
-function r_le(x, y) return r_compare(x, y) <= 0; end
+function r_lt(x, y) return r_cmp(x, y) < 0; end
+function r_le(x, y) return r_cmp(x, y) <= 0; end
 function r_gt(x, y) return not r_le(x, y); end
 function r_ge(x, y) return not r_lt(x, y); end
 
@@ -186,7 +186,7 @@ function r_cp(x)
   return x;
 end
 
-function r_mconcatenate(a, b)
+function r_mcat(a, b)
   if type(a) ~= "table" or type(b) ~= "table" then
     c_raiseerror("can't concat non-array values.");
   end
@@ -201,8 +201,8 @@ function r_mconcatenate(a, b)
 end
 
 -- throws
-function r_concatenate(a, b)
-  return r_mconcatenate(r_cp(a), b);
+function r_cat(a, b)
+  return r_mcat(r_cp(a), b);
 end
 
 -- throws
@@ -293,7 +293,7 @@ function r_write(a, indices, v)
   end
 end
 
-function r_successor(x)
+function r_succ(x)
   if type(x) == "number" then
     return x + 1;
   elseif type(x) == "string" then
@@ -306,7 +306,7 @@ function r_successor(x)
   return x;
 end
 
-function r_predecessor(x)
+function r_pred(x)
   if type(x) == "number" then
     return x - 1;
   elseif type(x) == "string" then
@@ -319,29 +319,29 @@ function r_predecessor(x)
   return x;
 end
 
-function r_absolute(x)
+function r_abs(x)
   return math.abs(r_tonum(x));
 end
 
 d_add = r_add;
-d_subtract = r_subtract;
-d_multiply = r_multiply;
-d_divide = r_divide;
-d_remainder = r_remainder;
-d_power = r_power
+d_subtract = r_sub;
+d_multiply = r_mul;
+d_divide = r_div;
+d_remainder = r_rem;
+d_power = r_pow
 d_not = r_not;
-d_negative = r_negative;
-d_compare = r_compare;
-d_concatenate = r_concatenate;
+d_negative = r_neg;
+d_compare = r_cmp;
+d_cat = r_cat;
 d_index_ = r_read;
 d_slice = r_slice;
-d_successor = r_successor;
-d_predecessor = r_predecessor;
-d_absolute = r_absolute;
+d_successor = r_succ;
+d_predecessor = r_pred;
+d_absolute = r_abs;
 
 -- throws
 function d_append(a,x)
-  return r_concatenate(a, {x});
+  return r_cat(a, {x});
 end
 
 -- throws
@@ -438,9 +438,11 @@ function d_floor(x)
   return math.floor(r_tonum(x));
 end
 
-function d_ceil(x)
+function r_ceil(x)
   return math.ceil(r_tonum(x));
 end
+
+d_ceil = r_ceil;
 
 function d_modc(x, y)
   return math.fmod(r_tonum(x), r_tonum(y));
