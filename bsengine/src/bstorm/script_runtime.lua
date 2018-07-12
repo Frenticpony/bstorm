@@ -29,15 +29,6 @@ local function r_type_eq(x, y)
   end
 end
 
--- throws
-function r_checknil(v, name)
-  if v == nil then
-    c_raiseerror("attempt to use empty variable `" .. name .. "'.");
-  else
-    return v;
-  end
-end
-
 local r_ator = d_ator;
 
 local function r_tonum(x)
@@ -53,6 +44,15 @@ end
 local function r_toint(x)
   local a = math.modf(r_tonum(x));
   return a;
+end
+
+-- throws
+function r_checknil(v, name)
+  if v == nil then
+    c_raiseerror("attempt to use empty variable `" .. name .. "'.");
+  else
+    return v;
+  end
 end
 
 function r_tobool(x)
