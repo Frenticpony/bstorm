@@ -53,7 +53,7 @@ public:
     const std::unique_ptr<DnhValue>& GetScriptArgument(int idx);
 private:
     void RunBuiltInSub(const std::string &name);
-    void CallLuaChunk();
+    void CallLuaChunk(int argCnt);
     lua_State* L_;
     const std::wstring path_;
     const std::wstring type_;

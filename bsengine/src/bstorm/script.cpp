@@ -98,11 +98,10 @@ Script::Script(const std::wstring& p, const std::wstring& type, const std::wstri
                 .AddSourcePos(compileSrcPos_)));
             srcMap_ = codeGen.GetSourceMap();
         }
-        OutputDebugStringA(codeGen.GetCode().c_str());
 
         // ランタイム読み込み
         luaL_loadbuffer(L_, (const char *)luaJIT_BC_script_runtime, luaJIT_BC_script_runtime_SIZE, DNH_RUNTIME_NAME);
-        CallLuaChunk();
+        CallLuaChunk(0);
 
         // コンパイル
         {
@@ -205,14 +204,28 @@ void Script::RunBuiltInSub(const std::string &name)
     if (luaStateBusy_)
     {
         lua_getglobal(L_, (DNH_VAR_PREFIX + name).c_str());
+        if (lua_isfunction(L_, -1))
+        {
+            CallLuaChunk(0);
+        } else
+        {
+            lua_pop(L_, 1);
+        }
     } else
     {
-        lua_getglobal(L_, (std::string(DNH_RUNTIME_PREFIX) + "run_" + name).c_str());
+        lua_getglobal(L_, (std::string(DNH_RUNTIME_PREFIX) + "run").c_str());
+        lua_getglobal(L_, (DNH_VAR_PREFIX + name).c_str());
+        if (lua_isfunction(L_, -1))
+        {
+            CallLuaChunk(1);
+        } else
+        {
+            lua_pop(L_, 2);
+        }
     }
-    CallLuaChunk();
 }
 
-void Script::CallLuaChunk()
+void Script::CallLuaChunk(int argCnt)
 {
     // API用の静的変数をセット
     if (auto package = package_.lock())
@@ -226,7 +239,7 @@ void Script::CallLuaChunk()
 
     bool tmp = luaStateBusy_;
     luaStateBusy_ = true;
-    if (lua_pcall(L_, 0, 0, 0) != 0)
+    if (lua_pcall(L_, argCnt, 0, 0) != 0)
     {
         luaStateBusy_ = false;
         std::string msg = lua_tostring(L_, -1);
@@ -254,7 +267,7 @@ void Script::Load()
 {
     if (state_.isLoaded || IsClosed()) { return; }
 
-    CallLuaChunk(); // exec Main Chunk
+    CallLuaChunk(0); // exec toplevel chunk
     RunBuiltInSub("Loading");
     Logger::WriteLog(std::move(
         Log(Log::Level::LV_INFO)

@@ -505,10 +505,7 @@ function Task:resume()
 end
 
 function Task:set_func(f, args)
-  if self.state ~= TASK_SUSPENDED then
-    -- error!
-  end
-
+  -- assert(self.state == TASK_SUSPENDED);
   self.func = f;
   self.args = args;
   self.state = TASK_RUNNING;
@@ -553,7 +550,7 @@ end
 local task_manager = TaskManager:create(1);
 local main_task = Task:create();
 
-local function r_run(f)
+function r_run(f)
   main_task:set_func(f, nil);
   while true do
     main_task:resume();
@@ -565,17 +562,3 @@ local function r_run(f)
 end
 
 function r_fork(func, args) return task_manager:register(func, args); end
-
--- entry point --
-
-function d_Loading() end
-function d_Event() end
-function d_Initialize() end
-function d_MainLoop() end
-function d_Finalize() end
-
-function r_run_Loading() return r_run(d_Loading); end
-function r_run_Event() return r_run(d_Event); end
-function r_run_Initialize() return r_run(d_Initialize); end
-function r_run_MainLoop() return r_run(d_MainLoop); end
-function r_run_Finalize() return r_run(d_Finalize); end
