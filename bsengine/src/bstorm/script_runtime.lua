@@ -422,8 +422,8 @@ end
 math.randomseed(os.time()); -- FUTURE : Systemから与えられたシードで初期化
 
 function d_rand(min, max)
-  min = r_tonum(min); max = r_tonum(max);
-  return math.random() * (max - min) + min;
+  min = r_tonum(min);
+  return math.random() * (r_tonum(max) - min) + min;
 end
 
 function d_round(x)
@@ -449,15 +449,13 @@ function d_modc(x, y)
 end
 
 function d_IntToString(n)
-  n = r_toint(n);
-  return r_strtodnhstr(string.format("%d", n));
+  return r_strtodnhstr(string.format("%d", r_toint(n)));
 end
 
 d_itoa = d_IntToString
 
 function d_rtoa(n)
-  n = r_tonum(n);
-  return r_strtodnhstr(string.format("%f", n));
+  return r_strtodnhstr(string.format("%f", r_tonum(n)));
 end
 
 script_event_type = -1;
