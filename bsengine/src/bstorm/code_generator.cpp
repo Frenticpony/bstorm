@@ -32,9 +32,10 @@ CodeGenerator::CodeGenerator() :
 {
 }
 
-void CodeGenerator::Generate(Node & n)
+void CodeGenerator::Generate(bool embedLocalVarName, Node & n)
 {
     code_.clear();
+    embedLocalVarName_ = embedLocalVarName;
     n.Traverse(*this);
 }
 
@@ -215,7 +216,13 @@ void CodeGenerator::GenLogBinOp(const std::string & fname, NodeBinOp & exp)
 }
 void CodeGenerator::GenCheckNil(const std::string & name)
 {
-    AddCode("r_checknil(" + varname(name) + ", \"" + name + "\")");
+    if (embedLocalVarName_)
+    {
+        AddCode(runtime("checknil") + "(" + varname(name) + ", \"" + name + "\")");
+    } else
+    {
+        AddCode(runtime("checknil") + "(" + varname(name) + ")");
+    }
 }
 void CodeGenerator::GenProc(std::shared_ptr<NodeDef> def, const std::vector<std::string>& params_, NodeBlock & blk)
 {

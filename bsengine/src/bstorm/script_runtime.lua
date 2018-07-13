@@ -49,7 +49,11 @@ end
 -- throws
 function r_checknil(v, name)
   if v == nil then
-    c_raiseerror("attempt to use empty variable `" .. name .. "'.");
+    if name == nil then
+      c_raiseerror("attempt to use empty variable.");
+    else
+      c_raiseerror("attempt to use empty variable `" .. name .. "'.");
+    end
   else
     return v;
   end

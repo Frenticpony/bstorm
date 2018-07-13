@@ -14,7 +14,7 @@ class CodeGenerator : public NodeTraverser
 {
 public:
     CodeGenerator();
-    void Generate(Node& n);
+    void Generate(bool embedLocalVarName, Node& n);
     SourceMap GetSourceMap() const { return srcMap_; }
     const std::string& GetCode() const { return code_; }
     void Traverse(NodeNum&);
@@ -105,5 +105,6 @@ private:
     int indentLevel_;
     int outputLine_;
     bool isLineHead_;
+    bool embedLocalVarName_;
 };
 }

@@ -90,7 +90,7 @@ Script::Script(const std::wstring& p, const std::wstring& type, const std::wstri
                 .SetParam(Log::Param(Log::Param::Tag::SCRIPT, path_))
                 .AddSourcePos(compileSrcPos_)));
             TimePoint tp;
-            codeGen.Generate(*program);
+            codeGen.Generate(true, *program);
             Logger::WriteLog(std::move(
                 Log(Log::Level::LV_DETAIL)
                 .SetMessage("...codegen complete " + std::to_string(tp.GetElapsedMilliSec()) + " [ms].")
