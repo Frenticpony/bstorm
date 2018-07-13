@@ -272,7 +272,7 @@ void CodeGenerator::GenOpAssign(const std::string & fname, const std::shared_ptr
             AddCode("do"); NewLine();
             GenCheckNil(left->name); NewLine(left->srcPos);
             AddCode("local i = "); left->indices[0]->Traverse(*this); AddCode(";"); NewLine(left->srcPos);
-            AddCode("r_write1(" + varname(left->name) + ", i, ");
+            AddCode(runtime("write1") + "(" + varname(left->name) + ", i, ");
             AddCode(runtime(fname) + "(");
             AddCode(runtime("read") + "(" + varname(left->name) + ", i)");
             if (right)
@@ -297,7 +297,7 @@ void CodeGenerator::GenOpAssign(const std::string & fname, const std::shared_ptr
                 left->indices[i]->Traverse(*this);
             }
             AddCode("};"); NewLine(left->srcPos);
-            AddCode("r_write(" + varname(left->name) + ", is");
+            AddCode(runtime("write") + "(" + varname(left->name) + ", is");
             AddCode("," + runtime(fname) + "(");
             for (int i = 0; i < left->indices.size(); i++)
             {
@@ -323,7 +323,7 @@ void CodeGenerator::GenCopy(std::shared_ptr<NodeExp> exp)
 {
     if (IsCopyNeeded(exp))
     {
-        AddCode("r_cp("); exp->Traverse(*this); AddCode(")");
+        AddCode(runtime("cp") + "("); exp->Traverse(*this); AddCode(")");
     } else
     {
         exp->Traverse(*this);
@@ -410,7 +410,7 @@ void CodeGenerator::Traverse(NodeAssign& stmt)
         case 1:
             // a[i] = e;
             // out : r_write1(r_checknil(a), i, e);
-            AddCode("r_write1(");
+            AddCode(runtime("write1") + "(");
             GenCheckNil(def->name);
             AddCode(",");
             stmt.lhs->indices[0]->Traverse(*this);
@@ -421,7 +421,7 @@ void CodeGenerator::Traverse(NodeAssign& stmt)
         default:
             // a[i1][i2] .. [in] = e;
             // out : r_write(r_checknil(a), {i1, i2, .. in}, e);
-            AddCode("r_write(");
+            AddCode(runtime("write") + "(");
             GenCheckNil(def->name);
             AddCode(", {");
             for (int i = 0; i < stmt.lhs->indices.size(); i++)
@@ -453,7 +453,7 @@ void CodeGenerator::Traverse(NodeCallStmt& call)
     bool isTask = (bool)std::dynamic_pointer_cast<NodeTaskDef>(def);
     if (isTask)
     {
-        AddCode("r_fork(" + varname(call.name));
+        AddCode(runtime("fork") + "(" + varname(call.name));
         if (call.args.size() != 0)
         {
             AddCode(", {");
@@ -545,7 +545,7 @@ void CodeGenerator::Traverse(NodeVarInit& stmt)
 void CodeGenerator::Traverse(NodeProcParam &) {}
 void CodeGenerator::Traverse(NodeLoopParam& param)
 {
-    AddCode("local " + varname(param.name) + " = r_cp(i);");
+    AddCode("local " + varname(param.name) + " = " + runtime("cp") + "(i);");
     NewLine(param.srcPos);
 }
 void CodeGenerator::Traverse(NodeBuiltInFunc &) {}
@@ -578,7 +578,7 @@ void CodeGenerator::Traverse(NodeTimes& stmt)
 }
 void CodeGenerator::Traverse(NodeWhile& stmt)
 {
-    AddCode("while r_tobool("); stmt.cond->Traverse(*this); AddCode(") do"); NewLine(stmt.cond->srcPos);
+    AddCode("while " + runtime("tobool") + "("); stmt.cond->Traverse(*this); AddCode(") do"); NewLine(stmt.cond->srcPos);
     stmt.block->Traverse(*this);
     AddCode("end"); NewLine();
 }
@@ -606,12 +606,12 @@ void CodeGenerator::Traverse(NodeDescent& stmt)
 }
 void CodeGenerator::Traverse(NodeElseIf& elsif)
 {
-    AddCode("elseif r_tobool("); elsif.cond->Traverse(*this); AddCode(") then"); NewLine(elsif.cond->srcPos);
+    AddCode("elseif " + runtime("tobool") + "("); elsif.cond->Traverse(*this); AddCode(") then"); NewLine(elsif.cond->srcPos);
     elsif.block->Traverse(*this);
 }
 void CodeGenerator::Traverse(NodeIf& stmt)
 {
-    AddCode("if r_tobool("); stmt.cond->Traverse(*this); AddCode(") then"); NewLine(stmt.cond->srcPos);
+    AddCode("if " + runtime("tobool") + "("); stmt.cond->Traverse(*this); AddCode(") then"); NewLine(stmt.cond->srcPos);
     stmt.thenBlock->Traverse(*this);
     for (auto elsif : stmt.elsifs) { elsif->Traverse(*this); }
     if (stmt.elseBlock)
