@@ -2,7 +2,11 @@
 
 #include <bstorm/util.hpp>
 
-#include "../../json/single_include/nlohmann/json.hpp"
+#include <yas/mem_streams.hpp>
+#include <yas/binary_iarchive.hpp>
+#include <yas/binary_oarchive.hpp>
+#include <yas/std_types.hpp>
+#include <yas/buffers.hpp>
 
 #include <deque>
 
@@ -12,17 +16,20 @@ std::string SourcePos::ToString() const
 {
     return ToUTF8(*filename) + ":" + std::to_string(line) + ((column >= 0) ? (":" + std::to_string(column)) : "");
 }
-using nlohmann::json;
 
 // シリアライズ用の中間表現
 // <srcPath, <outputLine, srcLine>>
 using CompactSourceMap = std::map<std::string, std::deque<std::pair<int32_t, int32_t>>>;
+constexpr auto yas_option = yas::binary | yas::no_header | yas::compacted;
 
 SourceMap::SourceMap() {}
 
-SourceMap::SourceMap(const std::vector<uint8_t>& data)
+SourceMap::SourceMap(const std::string& data)
 {
-    CompactSourceMap compact = json::from_msgpack(data);
+    CompactSourceMap compact;
+    yas::mem_istream is(data.data(), data.size());
+    yas::binary_iarchive<yas::mem_istream, yas_option> ia(is);
+    ia & compact;
     for (const auto & entry : compact)
     {
         auto srcPath = std::make_shared<std::wstring>(ToUnicode(entry.first));
@@ -50,7 +57,7 @@ std::shared_ptr<SourcePos> SourceMap::GetSourcePos(int outputLine) const
     return nullptr;
 }
 
-void SourceMap::Serialize(std::vector<uint8_t>& dst) const
+void SourceMap::Serialize(std::string& data) const
 {
     CompactSourceMap compact;
     for (auto& entry : srcMap_)
@@ -65,6 +72,10 @@ void SourceMap::Serialize(std::vector<uint8_t>& dst) const
         }
         compact.at(srcPath).emplace_back(outputLine, srcLine);
     }
-    dst = json::to_msgpack(compact);
+    yas::mem_ostream os;
+    yas::binary_oarchive<yas::mem_ostream, yas_option> oa(os);
+    oa & compact;
+    auto buf = os.get_intrusive_buffer();
+    data.assign(buf.data, buf.size);
 }
 }

@@ -29,10 +29,10 @@ class SourceMap
 {
 public:
     SourceMap();
-    SourceMap(const std::vector<uint8_t>& data); // from serialized data.
+    SourceMap(const std::string& data); // from serialized data.
     void LogSourcePos(int outputLine, const std::shared_ptr<std::wstring>& path, int srcLine);
     std::shared_ptr<SourcePos> GetSourcePos(int outputLine) const;
-    void Serialize(std::vector<uint8_t>& dst) const;
+    void Serialize(std::string& data) const;
 private:
     std::map<int, SourcePos> srcMap_;
 };
