@@ -19,7 +19,7 @@ std::string SourcePos::ToString() const
 
 // シリアライズ用の中間表現
 // <srcPath, <outputLine, srcLine>>
-using CompactSourceMap = std::map<std::string, std::deque<std::pair<int32_t, int32_t>>>;
+using CompactSourceMap = std::map<std::wstring, std::deque<std::pair<int32_t, int32_t>>>;
 constexpr auto yas_option = yas::binary | yas::no_header | yas::compacted;
 
 SourceMap::SourceMap() {}
@@ -32,7 +32,7 @@ SourceMap::SourceMap(const std::string& data)
     ia & compact;
     for (const auto & entry : compact)
     {
-        auto srcPath = std::make_shared<std::wstring>(ToUnicode(entry.first));
+        auto srcPath = std::make_shared<std::wstring>(entry.first);
         for (const auto & pair : entry.second)
         {
             int outputLine = pair.first;
@@ -64,7 +64,7 @@ void SourceMap::Serialize(std::string& data) const
     {
         int outputLine = entry.first;
         int srcLine = entry.second.line;
-        const std::string& srcPath = ToUTF8(*entry.second.filename);
+        const std::wstring& srcPath = *entry.second.filename;
 
         if (compact.count(srcPath) == 0)
         {
