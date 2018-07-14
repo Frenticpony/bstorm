@@ -10,6 +10,7 @@
 *.swp
 *.tlog
 *.user
+*.code-workspace
 
 ## distribution
 imgui.ini
