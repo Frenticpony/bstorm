@@ -32,15 +32,6 @@ void read_value(const char* name, T& dst, const json& j, bool rethrowException =
     }
 }
 
-inline json get_untyped(const json& j, const char *property)
-{
-    if (j.find(property) != j.end())
-    {
-        return j.at(property).get<json>();
-    }
-    return json();
-}
-
 inline void from_json(const json& _j, struct KeyMap& _x)
 {
     read_value<std::string>("action_name", _x.actionName, _j, true);
