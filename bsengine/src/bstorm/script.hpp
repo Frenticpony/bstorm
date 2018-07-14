@@ -61,7 +61,7 @@ private:
     const int id_;
     const bool isStgSceneScript_;
     const std::shared_ptr<SourcePos> compileSrcPos_; // コンパイルを開始した場所
-    SourceMap srcMap_;
+    std::vector<uint8_t> srcMap_;
     bool luaStateBusy_;
     std::exception_ptr err_;
     std::deque<int> autoDeleteTargetObjIds_;

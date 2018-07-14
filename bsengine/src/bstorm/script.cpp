@@ -91,12 +91,12 @@ Script::Script(const std::wstring& p, const std::wstring& type, const std::wstri
                 .AddSourcePos(compileSrcPos_)));
             TimePoint tp;
             codeGen.Generate(true, *program);
+            codeGen.GetSourceMap().Serialize(srcMap_);
             Logger::WriteLog(std::move(
                 Log(Log::Level::LV_DETAIL)
                 .SetMessage("...codegen complete " + std::to_string(tp.GetElapsedMilliSec()) + " [ms].")
                 .SetParam(Log::Param(Log::Param::Tag::SCRIPT, path_))
                 .AddSourcePos(compileSrcPos_)));
-            srcMap_ = codeGen.GetSourceMap();
         }
 
         // ランタイム読み込み
@@ -123,7 +123,7 @@ Script::Script(const std::wstring& p, const std::wstring& type, const std::wstri
                     if (ss.size() >= 2)
                     {
                         int line = _wtoi(ss[1].c_str());
-                        err.AddSourcePos(srcMap_.GetSourcePos(line));
+                        err.AddSourcePos(codeGen.GetSourceMap().GetSourcePos(line));
                     } else
                     {
                         err.SetParam(Log::Param(Log::Param::Tag::SCRIPT, path_));
@@ -391,7 +391,7 @@ const std::unique_ptr<DnhValue>& Script::GetScriptArgument(int idx)
 
 std::shared_ptr<SourcePos> Script::GetSourcePos(int line)
 {
-    return srcMap_.GetSourcePos(line);
+    return SourceMap(srcMap_).GetSourcePos(line);
 }
 
 void Script::SaveError(const std::exception_ptr& e)

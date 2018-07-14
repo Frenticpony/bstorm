@@ -3,6 +3,8 @@
 #include <string>
 #include <memory>
 #include <map>
+#include <cstdint>
+#include <vector>
 
 namespace bstorm
 {
@@ -26,8 +28,11 @@ struct SourceLoc
 class SourceMap
 {
 public:
+    SourceMap();
+    SourceMap(const std::vector<uint8_t>& data); // from serialized data.
     void LogSourcePos(int outputLine, const std::shared_ptr<std::wstring>& path, int srcLine);
     std::shared_ptr<SourcePos> GetSourcePos(int outputLine) const;
+    void Serialize(std::vector<uint8_t>& dst) const;
 private:
     std::map<int, SourcePos> srcMap_;
 };

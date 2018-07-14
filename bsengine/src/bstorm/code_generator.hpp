@@ -15,7 +15,7 @@ class CodeGenerator : public NodeTraverser
 public:
     CodeGenerator();
     void Generate(bool embedLocalVarName, Node& n);
-    SourceMap GetSourceMap() const { return srcMap_; }
+    const SourceMap& GetSourceMap() const { return srcMap_; }
     const std::string& GetCode() const { return code_; }
     void Traverse(NodeNum&);
     void Traverse(NodeChar&);
