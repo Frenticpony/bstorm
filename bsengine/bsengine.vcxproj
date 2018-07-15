@@ -36,6 +36,7 @@
     <ClInclude Include="src\bstorm\nullable_shared_ptr.hpp" />
     <ClInclude Include="src\bstorm\point2D.hpp" />
     <ClInclude Include="src\bstorm\rect.hpp" />
+    <ClInclude Include="src\bstorm\serialized_script.hpp" />
     <ClInclude Include="src\bstorm\shot_counter.hpp" />
     <ClInclude Include="src\bstorm\stage_common_player_params.hpp" />
     <ClInclude Include="src\bstorm\config.hpp" />
@@ -132,6 +133,7 @@
     <ClCompile Include="src\bstorm\obj_sound.cpp" />
     <ClCompile Include="src\bstorm\parser.cpp" />
     <ClCompile Include="src\bstorm\replay_data.cpp" />
+    <ClCompile Include="src\bstorm\serialized_script.cpp" />
     <ClCompile Include="src\bstorm\time_point.cpp" />
     <ClCompile Include="src\bstorm\vertex.cpp" />
     <ClCompile Include="src\reflex\dnh_lexer.cpp" />

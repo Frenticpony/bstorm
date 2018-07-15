@@ -17,12 +17,13 @@
 
 namespace bstorm
 {
+extern const std::unordered_set<std::wstring> ignoreScriptExts;
+
 class Package;
 class FileLoader;
 class DnhValue;
 class DnhArray;
-extern const std::unordered_set<std::wstring> ignoreScriptExts;
-
+class SerializedScript;
 class Script : private NonCopyable
 {
 public:
@@ -34,7 +35,7 @@ public:
     const std::wstring& GetPath() const;
     ScriptType GetType() const;
     const std::wstring& GetVersion() const;
-    std::shared_ptr<SourcePos> GetSourcePos(int line);
+    std::shared_ptr<SourcePos> GetSourcePos(int line) const;
     void SaveError(const std::exception_ptr& e);
     void RethrowError() const;
     void Load();
@@ -61,7 +62,7 @@ private:
     const std::wstring version_;
     const int id_;
     const std::shared_ptr<SourcePos> compileSrcPos_; // コンパイルを開始した場所
-    std::string srcMap_;
+    std::shared_ptr<SerializedScript> serializedScript_;
     bool luaStateBusy_;
     std::exception_ptr err_;
     std::deque<int> autoDeleteTargetObjIds_;

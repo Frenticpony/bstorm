@@ -421,10 +421,16 @@ loop-body          : TK_LOOP block { $$ = $2; }
 
 header             : TK_HEADER TK_LBRACKET header-params TK_RBRACKET
                        {
-                           auto header = new NodeHeader(*$1, *$3);
-                           FixPos(header, @1);
-                           ctx->headers.push_back(*header);
-                           $$ = header;
+                           if (ctx->lexer->GetIncludeStackSize() == 1)
+                           {
+                               auto header = new NodeHeader(*$1, *$3);
+                               FixPos(header, @1);
+                               ctx->headers.push_back(*header);
+                               $$ = header;
+                           } else
+                           {
+                               $$ = NULL;
+                           }
                            delete $1; delete $3;
                        }
                    | TK_HEADER TK_STR
@@ -437,10 +443,16 @@ header             : TK_HEADER TK_LBRACKET header-params TK_RBRACKET
                                ctx->lexer->PushInclude(param);
                            } else
                            {
-                               auto header = new NodeHeader(name, {param});
-                               FixPos(header, @1);
-                               ctx->headers.push_back(*header);
-                               $$ = header;
+                               if (ctx->lexer->GetIncludeStackSize() == 1)
+                               {
+                                   auto header = new NodeHeader(name, {param});
+                                   FixPos(header, @1);
+                                   ctx->headers.push_back(*header);
+                                   $$ = header;
+                               } else
+                               {
+                                   $$ = NULL;
+                               }
                            }
                            delete $1; delete $2;
                        }

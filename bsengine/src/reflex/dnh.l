@@ -87,6 +87,10 @@ public :
             includeStack_.pop_back();
         }
     }
+    size_t GetIncludeStackSize() const 
+    {
+        return includeStack_.size();
+    }
     ~DnhLexer()
     {
       while (!includeStack_.empty())

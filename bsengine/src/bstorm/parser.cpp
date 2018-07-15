@@ -18,32 +18,13 @@
 
 namespace bstorm
 {
-std::shared_ptr<NodeBlock> ParseDnhScript(const std::wstring& filePath, const std::shared_ptr<Env>& globalEnv, bool expandInclude, const std::shared_ptr<FileLoader>& loader)
+static ScriptInfo CreateScriptInfo(const std::wstring& filePath, const std::vector<NodeHeader>& headers)
 {
-    DnhLexer lexer;
-    lexer.SetLoader(loader);
-    lexer.PushInclude(filePath);
-    DnhParseContext ctx(globalEnv, &lexer, expandInclude);
-    DnhParser parser(&ctx);
-    parser.parse();
-    lexer.PopInclude();
-    return ctx.result;
-}
-ScriptInfo ScanDnhScriptInfo(const std::wstring & filePath, const std::shared_ptr<FileLoader>& loader)
-{
-    DnhLexer lexer;
-    lexer.SetLoader(loader);
-    lexer.PushInclude(filePath);
-    DnhParseContext ctx(&lexer, false);
-    DnhParser parser(&ctx);
-    parser.parse();
-    lexer.PopInclude();
     ScriptInfo info;
     info.path = GetCanonicalPath(filePath);
     info.id = info.path;
-    info.type = ScriptType::Value::UNKNOWN;
     info.version = SCRIPT_VERSION_PH3;
-    for (const auto& header : ctx.headers)
+    for (const auto& header : headers)
     {
         if (header.params_.empty()) continue;
         if (header.name == L"TouhouDanmakufu")
@@ -90,6 +71,29 @@ ScriptInfo ScanDnhScriptInfo(const std::wstring & filePath, const std::shared_pt
         playerPath = ExpandIncludePath(info.path, playerPath);
     }
     return info;
+}
+std::shared_ptr<NodeBlock> ParseDnhScript(const std::wstring& filePath, const std::shared_ptr<Env>& globalEnv, bool expandInclude, ScriptInfo* scriptInfo, const std::shared_ptr<FileLoader>& loader)
+{
+    DnhLexer lexer;
+    lexer.SetLoader(loader);
+    lexer.PushInclude(filePath);
+    DnhParseContext ctx(globalEnv, &lexer, expandInclude);
+    DnhParser parser(&ctx);
+    parser.parse();
+    lexer.PopInclude();
+    *scriptInfo = CreateScriptInfo(filePath, ctx.headers);
+    return ctx.result;
+}
+ScriptInfo ScanDnhScriptInfo(const std::wstring & filePath, const std::shared_ptr<FileLoader>& loader)
+{
+    DnhLexer lexer;
+    lexer.SetLoader(loader);
+    lexer.PushInclude(filePath);
+    DnhParseContext ctx(&lexer, false);
+    DnhParser parser(&ctx);
+    parser.parse();
+    lexer.PopInclude();
+    return CreateScriptInfo(filePath, ctx.headers);
 }
 std::shared_ptr<UserShotData> ParseUserShotData(const std::wstring& filePath, const std::shared_ptr<FileLoader>& loader)
 {

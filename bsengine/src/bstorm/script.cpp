@@ -14,6 +14,7 @@
 #include <bstorm/logger.hpp>
 #include <bstorm/package.hpp>
 #include <bstorm/time_point.hpp>
+#include <bstorm/serialized_script.hpp>
 #include <bstorm/script_runtime.h>
 
 #include <exception>
@@ -47,6 +48,8 @@ Script::Script(const std::wstring& p, ScriptType type, const std::wstring& versi
         // スクリプトをバインド
         SetScript(L_, this);
 
+        ScriptInfo scriptInfo;
+
         // パース
         std::shared_ptr<NodeBlock> program;
         {
@@ -56,7 +59,7 @@ Script::Script(const std::wstring& p, ScriptType type, const std::wstring& versi
                 .SetParam(Log::Param(Log::Param::Tag::SCRIPT, path_))
                 .AddSourcePos(compileSrcPos_)));
             TimePoint tp;
-            program = ParseDnhScript(path_, globalEnv, true, fileLoader);
+            program = ParseDnhScript(path_, globalEnv, true, &scriptInfo, fileLoader);
             Logger::WriteLog(std::move(
                 Log(Log::Level::LV_DETAIL)
                 .SetMessage("...parse complete " + std::to_string(tp.GetElapsedMilliSec()) + " [ms].")
@@ -90,7 +93,6 @@ Script::Script(const std::wstring& p, ScriptType type, const std::wstring& versi
                 .AddSourcePos(compileSrcPos_)));
             TimePoint tp;
             codeGen.Generate(true, *program);
-            codeGen.GetSourceMap().Serialize(srcMap_);
             Logger::WriteLog(std::move(
                 Log(Log::Level::LV_DETAIL)
                 .SetMessage("...codegen complete " + std::to_string(tp.GetElapsedMilliSec()) + " [ms].")
@@ -141,6 +143,7 @@ Script::Script(const std::wstring& p, ScriptType type, const std::wstring& versi
                 .SetParam(Log::Param(Log::Param::Tag::SCRIPT, path_))
                 .AddSourcePos(compileSrcPos_)));
         }
+        serializedScript_ = std::make_shared<SerializedScript>(scriptInfo, codeGen.GetSourceMap(), L_);
     } catch (...)
     {
         if (L_)
@@ -388,9 +391,9 @@ const std::unique_ptr<DnhValue>& Script::GetScriptArgument(int idx)
     return scriptArgs_[idx];
 }
 
-std::shared_ptr<SourcePos> Script::GetSourcePos(int line)
+std::shared_ptr<SourcePos> Script::GetSourcePos(int line) const
 {
-    return SourceMap(srcMap_).GetSourcePos(line);
+    return SourceMap(serializedScript_->GetSourceMap()).GetSourcePos(line);
 }
 
 void Script::SaveError(const std::exception_ptr& e)

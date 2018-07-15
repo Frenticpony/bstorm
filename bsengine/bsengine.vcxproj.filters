@@ -264,6 +264,9 @@
     <ClInclude Include="src\bstorm\lua_util.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="src\bstorm\serialized_script.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\bison\dnh.tab.cpp">
@@ -477,6 +480,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\bstorm\lua_util.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bstorm\serialized_script.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
