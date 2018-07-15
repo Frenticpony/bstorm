@@ -49,7 +49,7 @@ ScriptInfo ScanDnhScriptInfo(const std::wstring & filePath, const std::shared_pt
         if (header.name == L"TouhouDanmakufu")
         {
             info.type = header.params_[0];
-        } else if (header.name == L"std::wstring")
+        } else if (header.name == L"ScriptVersion")
         {
             info.version = header.params_[0];
         } else if (header.name == L"ID")
