@@ -18,7 +18,7 @@ public:
         PACKAGE = 5,
         SHOT_CUSTOM = 6,
         ITEM_CUSTOM = 7,
-        UNKNOWN = 0xff
+        UNKNOWN = 0x3f
     } value;
     ScriptType() : value(Value::UNKNOWN) {};
     ScriptType(Value v) : value(v) {};
@@ -36,6 +36,9 @@ constexpr wchar_t* SCRIPT_VERSION_PH3 = L"3";
 class ScriptInfo
 {
 public:
+    ScriptInfo() {};
+    ScriptInfo(const std::string& data); // from serialized data;
+    void Serialize(std::string& data) const;
     std::wstring path;
     ScriptType type;
     std::wstring version;
@@ -46,7 +49,7 @@ public:
     std::wstring systemPath;
     std::wstring backgroundPath;
     std::wstring bgmPath;
-    std::vector<std::wstring> playerScripts;
+    std::vector<std::wstring> playerScriptPaths;
     std::wstring replayName;
 };
 }

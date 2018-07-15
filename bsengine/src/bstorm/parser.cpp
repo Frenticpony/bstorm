@@ -75,7 +75,7 @@ ScriptInfo ScanDnhScriptInfo(const std::wstring & filePath, const std::shared_pt
             info.bgmPath = header.params_[0];
         } else if (header.name == L"Player")
         {
-            info.playerScripts = header.params_;
+            info.playerScriptPaths = header.params_;
         } else if (header.name == L"ReplayName")
         {
             info.replayName = header.params_[0];
@@ -85,7 +85,7 @@ ScriptInfo ScanDnhScriptInfo(const std::wstring & filePath, const std::shared_pt
     info.systemPath = ExpandIncludePath(info.path, info.systemPath);
     info.backgroundPath = ExpandIncludePath(info.path, info.backgroundPath);
     info.bgmPath = ExpandIncludePath(info.path, info.bgmPath);
-    for (auto& playerPath : info.playerScripts)
+    for (auto& playerPath : info.playerScriptPaths)
     {
         playerPath = ExpandIncludePath(info.path, playerPath);
     }

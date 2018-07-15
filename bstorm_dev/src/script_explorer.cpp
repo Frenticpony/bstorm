@@ -235,7 +235,7 @@ void ScriptExplorer::draw()
                 if (mainScripts.count(selectedMainScriptPath) != 0)
                 {
                     const ScriptInfo& mainScript = mainScripts.at(selectedMainScriptPath);
-                    const std::vector<std::wstring>& paths = (mainScript.playerScripts.empty() || mainScript.playerScripts[0] == L"DEFAULT") ? freePlayerScriptPaths : mainScript.playerScripts;
+                    const std::vector<std::wstring>& paths = (mainScript.playerScriptPaths.empty() || mainScript.playerScriptPaths[0] == L"DEFAULT") ? freePlayerScriptPaths : mainScript.playerScriptPaths;
                     int uiId = 0;
                     for (auto& path : paths)
                     {
