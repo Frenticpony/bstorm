@@ -19,7 +19,7 @@ std::string SourcePos::ToString() const
 
 // シリアライズ用の中間表現
 // <srcPath, <outputLine, srcLine>>
-using CompactSourceMap = std::map<std::wstring, std::deque<std::pair<int32_t, int32_t>>>;
+using CompactSourceMap = std::map<std::wstring, std::deque<std::pair<uint16_t, uint16_t>>>;
 constexpr auto yas_option = yas::binary | yas::no_header | yas::compacted;
 
 SourceMap::SourceMap() {}
