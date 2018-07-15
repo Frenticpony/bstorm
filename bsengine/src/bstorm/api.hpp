@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <bstorm/env.hpp>
+#include <bstorm/script_info.hpp>
 
 #include <string>
 #include <unordered_map>
@@ -9,7 +10,7 @@
 namespace bstorm
 {
 struct SourcePos;
-void RegisterStandardAPI(lua_State* L, const std::wstring& type, const std::wstring& version, NameTable& table);
+void RegisterStandardAPI(lua_State* L, ScriptType type, const std::wstring& version, NameTable& table);
 
 // helper
 int GetCurrentLine(lua_State* L);

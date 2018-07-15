@@ -1413,14 +1413,14 @@ NullableSharedPtr<Script> Package::GetScript(int scriptId) const
     return scriptManager_->Get(scriptId);
 }
 
-std::shared_ptr<Script> Package::LoadScript(const std::wstring & path, const std::wstring & type, const std::wstring & version, const std::shared_ptr<SourcePos>& srcPos)
+std::shared_ptr<Script> Package::LoadScript(const std::wstring & path, ScriptType type, const std::wstring & version, const std::shared_ptr<SourcePos>& srcPos)
 {
     auto script = scriptManager_->Compile(path, type, version, shared_from_this(), srcPos);
     script->Load();
     return script;
 }
 
-std::shared_ptr<Script> Package::LoadScriptInThread(const std::wstring & path, const std::wstring & type, const std::wstring & version, const std::shared_ptr<SourcePos>& srcPos)
+std::shared_ptr<Script> Package::LoadScriptInThread(const std::wstring & path, ScriptType type, const std::wstring & version, const std::shared_ptr<SourcePos>& srcPos)
 {
     auto script = scriptManager_->CompileInThread(path, type, version, shared_from_this(), srcPos);
     return script;
@@ -1564,19 +1564,18 @@ void Package::SetScriptResult(int scriptId, std::unique_ptr<DnhValue>&& value)
     scriptManager_->SetScriptResult(scriptId, std::move(value));
 }
 
-std::vector<ScriptInfo> Package::GetScriptList(const std::wstring & dirPath, int scriptType, bool doRecursive)
+std::vector<ScriptInfo> Package::GetScriptList(const std::wstring & dirPath, ScriptType scriptType, bool doRecursive, bool getAll)
 {
     std::vector<std::wstring> pathList;
     GetFilePaths(dirPath, pathList, ignoreScriptExts, doRecursive);
     std::vector<ScriptInfo> infos;
     infos.reserve(pathList.size());
-    const std::wstring scriptTypeName = GetScriptTypeNameFromConst(scriptType);
     for (const auto& path : pathList)
     {
         try
         {
             auto info = ScanDnhScriptInfo(path, fileLoader_);
-            if (scriptType == TYPE_SCRIPT_ALL || scriptTypeName == info.type)
+            if (getAll || scriptType == info.type)
             {
                 infos.push_back(info);
             }
@@ -1589,7 +1588,7 @@ std::vector<ScriptInfo> Package::GetScriptList(const std::wstring & dirPath, int
 
 void Package::GetLoadFreePlayerScriptList()
 {
-    freePlayerScriptInfoList_ = GetScriptList(FREE_PLAYER_DIR, TYPE_SCRIPT_PLAYER, true);
+    freePlayerScriptInfoList_ = GetScriptList(FREE_PLAYER_DIR, ScriptType::Value::PLAYER, true, false);
 }
 
 int Package::GetFreePlayerScriptCount() const
@@ -1786,7 +1785,7 @@ void Package::StartShotScript(const std::wstring & path, const std::shared_ptr<S
             .AddSourcePos(srcPos)));
         return;
     }
-    auto shotScript = LoadScript(path, SCRIPT_TYPE_SHOT_CUSTOM, stageMainScriptInfo_.version, srcPos);
+    auto shotScript = LoadScript(path, ScriptType::Value::SHOT_CUSTOM, stageMainScriptInfo_.version, srcPos);
     shotScript = shotScript;
     shotScript->RunInitialize();
 }
@@ -1978,7 +1977,7 @@ void Package::StartItemScript(const std::wstring & path, const std::shared_ptr<S
             .AddSourcePos(srcPos)));
         return;
     }
-    auto itemScript = LoadScript(path, SCRIPT_TYPE_ITEM_CUSTOM, stageMainScriptInfo_.version, srcPos);
+    auto itemScript = LoadScript(path, ScriptType::Value::ITEM_CUSTOM, stageMainScriptInfo_.version, srcPos);
     itemScript = itemScript;
     itemScript->RunInitialize();
 }
@@ -2053,7 +2052,7 @@ void Package::Start()
         Log(Log::Level::LV_INFO)
         .SetMessage("start package.")
         .SetParam(Log::Param(Log::Param::Tag::SCRIPT, GetMainScriptPath()))));
-    auto script = scriptManager_->Compile(packageMainScriptInfo_.path, SCRIPT_TYPE_PACKAGE, packageMainScriptInfo_.version, shared_from_this(), nullptr);
+    auto script = scriptManager_->Compile(packageMainScriptInfo_.path, ScriptType::Value::PACKAGE, packageMainScriptInfo_.version, shared_from_this(), nullptr);
     packageMainScript_ = script;
     script->RunInitialize();
 }
@@ -2244,7 +2243,7 @@ void Package::StartStageScene(const std::shared_ptr<SourcePos>& srcPos)
     }
 
     // #System
-    auto systemScript = scriptManager_->Compile(stageMainScriptInfo_.systemPath, SCRIPT_TYPE_STAGE, stageMainScriptInfo_.version, shared_from_this(), srcPos);
+    auto systemScript = scriptManager_->Compile(stageMainScriptInfo_.systemPath, ScriptType::Value::STAGE, stageMainScriptInfo_.version, shared_from_this(), srcPos);
     systemScript->RunInitialize();
 
     // Create Player
@@ -2257,20 +2256,20 @@ void Package::StartStageScene(const std::shared_ptr<SourcePos>& srcPos)
         .SetMessage("create player object.")
         .AddSourcePos(srcPos)));
 
-    auto playerScript = scriptManager_->Compile(stagePlayerScriptInfo_.path, SCRIPT_TYPE_PLAYER, stagePlayerScriptInfo_.version, shared_from_this(), srcPos);
+    auto playerScript = scriptManager_->Compile(stagePlayerScriptInfo_.path, ScriptType::Value::PLAYER, stagePlayerScriptInfo_.version, shared_from_this(), srcPos);
     stagePlayerScript_ = playerScript;
     playerScript->RunInitialize();
 
     // Main
     auto stageMainScriptPath = stageMainScriptInfo_.path;
-    if (stageMainScriptInfo_.type == SCRIPT_TYPE_SINGLE)
+    if (stageMainScriptInfo_.type == ScriptType::Value::SINGLE)
     {
         stageMainScriptPath = SYSTEM_SINGLE_STAGE_PATH;
-    } else if (stageMainScriptInfo_.type == SCRIPT_TYPE_PLURAL)
+    } else if (stageMainScriptInfo_.type == ScriptType::Value::PLURAL)
     {
         stageMainScriptPath = SYSTEM_PLURAL_STAGE_PATH;
     }
-    auto stageMainScript = scriptManager_->Compile(stageMainScriptPath, SCRIPT_TYPE_STAGE, stageMainScriptInfo_.version, shared_from_this(), srcPos);
+    auto stageMainScript = scriptManager_->Compile(stageMainScriptPath, ScriptType::Value::STAGE, stageMainScriptInfo_.version, shared_from_this(), srcPos);
     stageMainScript_ = stageMainScript;
     stageMainScript->RunInitialize();
     stageStartTime_ = std::make_shared<TimePoint>();
@@ -2278,7 +2277,7 @@ void Package::StartStageScene(const std::shared_ptr<SourcePos>& srcPos)
     // #Background
     if (!stageMainScriptInfo_.backgroundPath.empty() && stageMainScriptInfo_.backgroundPath != L"DEFAULT")
     {
-        auto backgroundScript = scriptManager_->Compile(stageMainScriptInfo_.backgroundPath, SCRIPT_TYPE_STAGE, stageMainScriptInfo_.version, shared_from_this(), srcPos);
+        auto backgroundScript = scriptManager_->Compile(stageMainScriptInfo_.backgroundPath, ScriptType::Value::STAGE, stageMainScriptInfo_.version, shared_from_this(), srcPos);
         backgroundScript->RunInitialize();
     }
 

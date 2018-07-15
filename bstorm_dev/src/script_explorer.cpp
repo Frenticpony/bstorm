@@ -38,21 +38,23 @@ static void drawFlatView(const std::map<std::wstring, ScriptInfo>& scripts, std:
             if (!(IsMatchString(searchText, titleU8) || IsMatchString(searchText, pathU8))) continue;
         }
         std::string icon;
-        if (script.type == SCRIPT_TYPE_PLURAL)
+        switch (script.type.value)
         {
-            icon = ICON_FA_CUBES;
-        } else if (script.type == SCRIPT_TYPE_STAGE)
-        {
-            icon = ICON_FA_FIGHTER_JET;
-        } else if (script.type == SCRIPT_TYPE_PACKAGE)
-        {
-            icon = ICON_FA_BRIEFCASE;
-        } else if (script.type == SCRIPT_TYPE_PLAYER)
-        {
-            icon = ICON_FA_USER;
-        } else
-        {
-            icon = ICON_FA_CUBE;
+            case ScriptType::Value::PLURAL:
+                icon = ICON_FA_CUBES;
+                break;
+            case ScriptType::Value::STAGE:
+                icon = ICON_FA_FIGHTER_JET;
+                break;
+            case ScriptType::Value::PACKAGE:
+                icon = ICON_FA_BRIEFCASE;
+                break;
+            case ScriptType::Value::PLAYER:
+                icon = ICON_FA_USER;
+                break;
+            default:
+                icon = ICON_FA_CUBE;
+                break;
         }
         ImGui::PushID(uiId++);
         bool isSelected = selectedPath == script.path;
@@ -264,7 +266,7 @@ void ScriptExplorer::draw()
             if (mainScripts.count(selectedMainScriptPath) != 0)
             {
                 const ScriptInfo& script = mainScripts.at(selectedMainScriptPath);
-                std::string type = ToUTF8(script.type);
+                std::string type = script.type.GetName();
                 std::string title = ToUTF8(script.title);
                 std::string location = ToUTF8(script.path);
                 std::string version = ToUTF8(script.version);
@@ -355,7 +357,7 @@ void ScriptExplorer::reload()
 
                 {
                     std::lock_guard<std::mutex> lock(memberAccessSection);
-                    if (script.type == SCRIPT_TYPE_PLAYER)
+                    if (script.type == ScriptType::Value::PLAYER)
                     {
                         playerScripts[script.path] = script;
                         if (script.path.find_first_of(FREE_PLAYER_DIR) == 0)

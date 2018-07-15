@@ -3,6 +3,7 @@
 #include <bstorm/non_copyable.hpp>
 #include <bstorm/nullable_shared_ptr.hpp>
 #include <bstorm/source_map.hpp>
+#include <bstorm/script_info.hpp>
 
 #include <string>
 #include <memory>
@@ -25,13 +26,13 @@ extern const std::unordered_set<std::wstring> ignoreScriptExts;
 class Script : private NonCopyable
 {
 public:
-    Script(const std::wstring& path, const std::wstring& type, const std::wstring& version, int id, const std::shared_ptr<FileLoader>& fileLoader, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& compileSrcPos);
+    Script(const std::wstring& path, ScriptType type, const std::wstring& version, int id, const std::shared_ptr<FileLoader>& fileLoader, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& compileSrcPos);
     ~Script();
     void Close();
     bool IsClosed() const;
     int GetID() const;
     const std::wstring& GetPath() const;
-    const std::wstring& GetType() const;
+    ScriptType GetType() const;
     const std::wstring& GetVersion() const;
     std::shared_ptr<SourcePos> GetSourcePos(int line);
     void SaveError(const std::exception_ptr& e);
@@ -56,10 +57,9 @@ private:
     void CallLuaChunk(int argCnt);
     lua_State* L_;
     const std::wstring path_;
-    const std::wstring type_;
+    ScriptType type_;
     const std::wstring version_;
     const int id_;
-    const bool isStgSceneScript_;
     const std::shared_ptr<SourcePos> compileSrcPos_; // コンパイルを開始した場所
     std::string srcMap_;
     bool luaStateBusy_;
@@ -84,8 +84,8 @@ class ScriptManager
 public:
     ScriptManager(const std::shared_ptr<FileLoader>& fileLoader);
     ~ScriptManager();
-    std::shared_ptr<Script> Compile(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& srcPos);
-    std::shared_ptr<Script> CompileInThread(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& srcPos);
+    std::shared_ptr<Script> Compile(const std::wstring& path, ScriptType type, const std::wstring& version, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& srcPos);
+    std::shared_ptr<Script> CompileInThread(const std::wstring& path, ScriptType type, const std::wstring& version, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& srcPos);
     void RunMainLoopAllNonStgScript();
     void RunMainLoopAllStgScript();
     NullableSharedPtr<Script> Get(int id) const;

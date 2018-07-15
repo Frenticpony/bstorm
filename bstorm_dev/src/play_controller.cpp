@@ -78,7 +78,7 @@ void PlayController::Reload()
 {
     try
     {
-        if (mainScript_.type == SCRIPT_TYPE_PACKAGE)
+        if (mainScript_.type == ScriptType::Value::PACKAGE)
         {
             package_ = engine_->CreatePackage(screenWidth_, screenHeight_, mainScript_.path);
             package_->Start();
@@ -94,9 +94,9 @@ void PlayController::Reload()
             }
             if (!mainScript_.path.empty() && !playerScript_.path.empty())
             {
-                if (mainScript_.type == SCRIPT_TYPE_UNKNOWN)
+                if (mainScript_.type == ScriptType::Value::UNKNOWN)
                 {
-                    mainScript_.type = SCRIPT_TYPE_SINGLE;
+                    mainScript_.type = ScriptType::Value::SINGLE;
                 }
 
                 package_ = engine_->CreatePackage(screenWidth_, screenHeight_, DEFAULT_PACKAGE_PATH);

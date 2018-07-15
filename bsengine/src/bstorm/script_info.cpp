@@ -4,31 +4,63 @@
 
 namespace bstorm
 {
-int GetScriptTypeConstFromName(const std::wstring& name)
+const char * ScriptType::GetName() const
 {
-    if (name == SCRIPT_TYPE_PLAYER) return TYPE_SCRIPT_PLAYER;
-    if (name == SCRIPT_TYPE_SINGLE) return TYPE_SCRIPT_SINGLE;
-    if (name == SCRIPT_TYPE_PLURAL) return TYPE_SCRIPT_PLURAL;
-    if (name == SCRIPT_TYPE_STAGE) return TYPE_SCRIPT_STAGE;
-    if (name == SCRIPT_TYPE_PACKAGE) return TYPE_SCRIPT_PACKAGE;
-    return -1;
+    switch (value)
+    {
+        case ScriptType::Value::PLAYER: return "Player";
+        case ScriptType::Value::SINGLE: return "Single";
+        case ScriptType::Value::PLURAL: return "Plural";
+        case ScriptType::Value::STAGE: return "Stage";
+        case ScriptType::Value::PACKAGE: return "Package";
+        case ScriptType::Value::SHOT_CUSTOM: return "ShotCustom";
+        case ScriptType::Value::ITEM_CUSTOM: return "ItemCustom";
+    }
+    return "Unknown";
 }
-
-bool IsStgSceneScript(const std::wstring & name)
+int ScriptType::GetScriptConst() const
 {
-    return name != SCRIPT_TYPE_PACKAGE;
+    switch (value)
+    {
+        case ScriptType::Value::PLAYER:
+        case ScriptType::Value::SINGLE:
+        case ScriptType::Value::PLURAL:
+        case ScriptType::Value::STAGE:
+        case ScriptType::Value::PACKAGE:
+            return static_cast<int>(value);
+    }
+    return 0;
 }
-
-std::wstring GetScriptTypeNameFromConst(int c)
+bool ScriptType::IsStgSceneScript() const
+{
+    return value != ScriptType::Value::PACKAGE;
+}
+ScriptType ScriptType::FromScriptConst(int c)
 {
     switch (c)
     {
-        case TYPE_SCRIPT_PLAYER: return SCRIPT_TYPE_PLAYER;
-        case TYPE_SCRIPT_SINGLE: return SCRIPT_TYPE_SINGLE;
-        case TYPE_SCRIPT_PLURAL: return SCRIPT_TYPE_PLURAL;
-        case TYPE_SCRIPT_STAGE: return SCRIPT_TYPE_STAGE;
-        case TYPE_SCRIPT_PACKAGE: return SCRIPT_TYPE_PACKAGE;
+        case TYPE_SCRIPT_PLAYER:
+            return ScriptType::Value::PLAYER;
+        case TYPE_SCRIPT_SINGLE:
+            return ScriptType::Value::SINGLE;
+        case TYPE_SCRIPT_PLURAL:
+            return ScriptType::Value::PLURAL;
+        case TYPE_SCRIPT_STAGE:
+            return ScriptType::Value::STAGE;
+        case TYPE_SCRIPT_PACKAGE:
+            return ScriptType::Value::PACKAGE;
     }
-    return SCRIPT_TYPE_UNKNOWN;
+    return ScriptType::Value::UNKNOWN;
+}
+ScriptType ScriptType::FromName(const std::string & name)
+{
+    if (name == "Player") return ScriptType::Value::PLAYER;
+    if (name == "Single") return ScriptType::Value::SINGLE;
+    if (name == "Plural") return ScriptType::Value::PLURAL;
+    if (name == "Stage") return ScriptType::Value::STAGE;
+    if (name == "Package") return ScriptType::Value::PACKAGE;
+    if (name == "ShotCustom") return ScriptType::Value::SHOT_CUSTOM;
+    if (name == "ItemCustom") return ScriptType::Value::ITEM_CUSTOM;
+    return ScriptType::Value::UNKNOWN;
 }
 }

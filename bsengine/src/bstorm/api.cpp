@@ -74,7 +74,7 @@ static int GetScriptPathList(lua_State* L)
     Package* package = Package::Current;
     auto dirPath = DnhValue::ToString(L, 1);
     int scriptType = DnhValue::ToInt(L, 2);
-    auto scriptList = package->GetScriptList(dirPath, scriptType, false);
+    auto scriptList = package->GetScriptList(dirPath, ScriptType::FromScriptConst(scriptType), false, scriptType == TYPE_SCRIPT_ALL);
     DnhArray pathList(scriptList.size());
     for (const auto& info : scriptList)
     {
@@ -1733,7 +1733,7 @@ static int CreateShotA1(lua_State* L)
     double angle = DnhValue::ToNum(L, 4);
     int graphic = DnhValue::ToInt(L, 5);
     int delay = DnhValue::ToInt(L, 6);
-    if (auto shot = package->CreateShotA1(x, y, speed, angle, graphic, delay, script->GetType() == SCRIPT_TYPE_PLAYER))
+    if (auto shot = package->CreateShotA1(x, y, speed, angle, graphic, delay, script->GetType() == ScriptType::Value::PLAYER))
     {
         script->AddAutoDeleteTargetObjectId(shot->GetID());
         lua_pushnumber(L, shot->GetID());
@@ -1756,7 +1756,7 @@ static int CreateShotA2(lua_State* L)
     double maxSpeed = DnhValue::ToNum(L, 6);
     int graphic = DnhValue::ToInt(L, 7);
     int delay = DnhValue::ToInt(L, 8);
-    if (auto shot = package->CreateShotA2(x, y, speed, angle, accel, maxSpeed, graphic, delay, script->GetType() == SCRIPT_TYPE_PLAYER))
+    if (auto shot = package->CreateShotA2(x, y, speed, angle, accel, maxSpeed, graphic, delay, script->GetType() == ScriptType::Value::PLAYER))
     {
         script->AddAutoDeleteTargetObjectId(shot->GetID());
         lua_pushnumber(L, shot->GetID());
@@ -1776,7 +1776,7 @@ static int CreateShotOA1(lua_State* L)
     double angle = DnhValue::ToNum(L, 3);
     int graphic = DnhValue::ToInt(L, 4);
     int delay = DnhValue::ToInt(L, 5);
-    if (auto shot = package->CreateShotOA1(objId, speed, angle, graphic, delay, script->GetType() == SCRIPT_TYPE_PLAYER))
+    if (auto shot = package->CreateShotOA1(objId, speed, angle, graphic, delay, script->GetType() == ScriptType::Value::PLAYER))
     {
         script->AddAutoDeleteTargetObjectId(shot->GetID());
         lua_pushnumber(L, shot->GetID());
@@ -1797,7 +1797,7 @@ static int CreateShotB1(lua_State* L)
     double speedY = DnhValue::ToNum(L, 4);
     int graphic = DnhValue::ToInt(L, 5);
     int delay = DnhValue::ToInt(L, 6);
-    if (auto shot = package->CreateShotB1(x, y, speedX, speedY, graphic, delay, script->GetType() == SCRIPT_TYPE_PLAYER))
+    if (auto shot = package->CreateShotB1(x, y, speedX, speedY, graphic, delay, script->GetType() == ScriptType::Value::PLAYER))
     {
         script->AddAutoDeleteTargetObjectId(shot->GetID());
         lua_pushnumber(L, shot->GetID());
@@ -1822,7 +1822,7 @@ static int CreateShotB2(lua_State* L)
     double maxSpeedY = DnhValue::ToNum(L, 8);
     int graphic = DnhValue::ToInt(L, 9);
     int delay = DnhValue::ToInt(L, 10);
-    if (auto shot = package->CreateShotB2(x, y, speedX, speedY, accelX, accelY, maxSpeedX, maxSpeedY, graphic, delay, script->GetType() == SCRIPT_TYPE_PLAYER))
+    if (auto shot = package->CreateShotB2(x, y, speedX, speedY, accelX, accelY, maxSpeedX, maxSpeedY, graphic, delay, script->GetType() == ScriptType::Value::PLAYER))
     {
         script->AddAutoDeleteTargetObjectId(shot->GetID());
         lua_pushnumber(L, shot->GetID());
@@ -1842,7 +1842,7 @@ static int CreateShotOB1(lua_State* L)
     double speedY = DnhValue::ToNum(L, 3);
     int graphic = DnhValue::ToInt(L, 4);
     int delay = DnhValue::ToInt(L, 5);
-    if (auto shot = package->CreateShotOB1(objId, speedX, speedY, graphic, delay, script->GetType() == SCRIPT_TYPE_PLAYER))
+    if (auto shot = package->CreateShotOB1(objId, speedX, speedY, graphic, delay, script->GetType() == ScriptType::Value::PLAYER))
     {
         script->AddAutoDeleteTargetObjectId(shot->GetID());
         lua_pushnumber(L, shot->GetID());
@@ -1865,7 +1865,7 @@ static int CreateLooseLaserA1(lua_State* L)
     double laserWidth = DnhValue::ToNum(L, 6);
     int graphic = DnhValue::ToInt(L, 7);
     int delay = DnhValue::ToInt(L, 8);
-    if (auto laser = package->CreateLooseLaserA1(x, y, speed, angle, laserLength, laserWidth, graphic, delay, script->GetType() == SCRIPT_TYPE_PLAYER))
+    if (auto laser = package->CreateLooseLaserA1(x, y, speed, angle, laserLength, laserWidth, graphic, delay, script->GetType() == ScriptType::Value::PLAYER))
     {
         script->AddAutoDeleteTargetObjectId(laser->GetID());
         lua_pushnumber(L, laser->GetID());
@@ -1888,7 +1888,7 @@ static int CreateStraightLaserA1(lua_State* L)
     int deleteFrame = DnhValue::ToInt(L, 6);
     int graphic = DnhValue::ToInt(L, 7);
     int delay = DnhValue::ToInt(L, 8);
-    if (auto laser = package->CreateStraightLaserA1(x, y, angle, laserLength, laserWidth, deleteFrame, graphic, delay, script->GetType() == SCRIPT_TYPE_PLAYER))
+    if (auto laser = package->CreateStraightLaserA1(x, y, angle, laserLength, laserWidth, deleteFrame, graphic, delay, script->GetType() == ScriptType::Value::PLAYER))
     {
         script->AddAutoDeleteTargetObjectId(laser->GetID());
         lua_pushnumber(L, laser->GetID());
@@ -1911,7 +1911,7 @@ static int CreateCurveLaserA1(lua_State* L)
     double laserWidth = DnhValue::ToNum(L, 6);
     int graphic = DnhValue::ToInt(L, 7);
     int delay = DnhValue::ToInt(L, 8);
-    if (auto laser = package->CreateCurveLaserA1(x, y, speed, angle, laserLength, laserWidth, graphic, delay, script->GetType() == SCRIPT_TYPE_PLAYER))
+    if (auto laser = package->CreateCurveLaserA1(x, y, speed, angle, laserLength, laserWidth, graphic, delay, script->GetType() == ScriptType::Value::PLAYER))
     {
         script->AddAutoDeleteTargetObjectId(laser->GetID());
         lua_pushnumber(L, laser->GetID());
@@ -1952,7 +1952,7 @@ static int GetShotIdInCircleA1(lua_State* L)
     double y = DnhValue::ToNum(L, 2);
     double r = DnhValue::ToNum(L, 3);
     DnhArray ids;
-    for (auto& shot : package->GetShotInCircle(x, y, r, script->GetType() == SCRIPT_TYPE_PLAYER ? TARGET_ENEMY : TARGET_PLAYER))
+    for (auto& shot : package->GetShotInCircle(x, y, r, script->GetType() == ScriptType::Value::PLAYER ? TARGET_ENEMY : TARGET_PLAYER))
     {
         if (shot)
         {
@@ -2218,7 +2218,7 @@ static int StartSlow(lua_State* L)
     Package* package = Package::Current;
     Script* script = GetScript(L);
     int fps = DnhValue::ToInt(L, 2);
-    package->StartSlow(fps, script->GetType() == SCRIPT_TYPE_PLAYER);
+    package->StartSlow(fps, script->GetType() == ScriptType::Value::PLAYER);
     return 0;
 }
 
@@ -2226,7 +2226,7 @@ static int StopSlow(lua_State* L)
 {
     Package* package = Package::Current;
     Script* script = GetScript(L);
-    package->StopSlow(script->GetType() == SCRIPT_TYPE_PLAYER);
+    package->StopSlow(script->GetType() == ScriptType::Value::PLAYER);
     return 0;
 }
 
@@ -2366,7 +2366,7 @@ static int GetScriptInfoA1(lua_State* L)
     switch (infoType)
     {
         case INFO_SCRIPT_TYPE:
-            lua_pushnumber(L, GetScriptTypeConstFromName(info.type));
+            lua_pushnumber(L, info.type.GetScriptConst());
             break;
         case INFO_SCRIPT_PATH:
             DnhArray(info.path).Push(L);
@@ -4598,7 +4598,7 @@ static int ObjShot_Create(lua_State* L)
     Script* script = GetScript(L);
     int shotType = DnhValue::ToInt(L, 1);
     int objId = ID_INVALID;
-    bool isPlayerShot = script->GetType() == SCRIPT_TYPE_PLAYER;
+    bool isPlayerShot = script->GetType() == ScriptType::Value::PLAYER;
     switch (shotType)
     {
         case OBJ_SHOT:
@@ -5675,37 +5675,41 @@ __declspec(noinline) static void addRuntimeFunc(NameTable& table, const char* na
 #define runtime(name, paramc) (addRuntimeFunc(table, #name, (paramc)))
 #define TypeIs(typeSet) ((typeSet) & type)
 
-typedef uint8_t ScriptType;
+using ScriptTypeSet = uint8_t;
 
-void RegisterStandardAPI(lua_State* L, const std::wstring& typeName, const std::wstring& version, NameTable& table)
+constexpr ScriptTypeSet t_player = 1;
+constexpr ScriptTypeSet t_stage = 2;
+constexpr ScriptTypeSet t_package = 4;
+constexpr ScriptTypeSet t_shot_custom = 8;
+constexpr ScriptTypeSet t_item_custom = 16;
+constexpr ScriptTypeSet t_all = 0xff;
+
+void RegisterStandardAPI(lua_State* L, ScriptType scriptType, const std::wstring& version, NameTable& table)
 {
     lua_pushlightuserdata(L, (void *)WrapException);
     luaJIT_setmode(L, -1, LUAJIT_MODE_WRAPCFUNC | LUAJIT_MODE_ON);
 
-    constexpr ScriptType t_player = 1;
-    constexpr ScriptType t_stage = 2;
-    constexpr ScriptType t_package = 4;
-    constexpr ScriptType t_shot_custom = 8;
-    constexpr ScriptType t_item_custom = 16;
-    constexpr ScriptType t_all = 0xff;
-
-    ScriptType type = 0;
-    if (typeName == SCRIPT_TYPE_PLAYER)
+    ScriptTypeSet type = 0;
+    switch (scriptType.value)
     {
-        type = t_player;
-    } else if (typeName == SCRIPT_TYPE_PACKAGE)
-    {
-        type = t_package;
-    } else if (typeName == SCRIPT_TYPE_SHOT_CUSTOM)
-    {
-        type = t_shot_custom;
-    } else if (typeName == SCRIPT_TYPE_ITEM_CUSTOM)
-    {
-        type = t_item_custom;
-    } else
-    {
-        type = t_stage;
+        case ScriptType::Value::PLAYER:
+            type = t_player;
+            break;
+        case ScriptType::Value::PACKAGE:
+            type = t_package;
+            break;
+        case ScriptType::Value::SHOT_CUSTOM:
+            type = t_shot_custom;
+            break;
+        case ScriptType::Value::ITEM_CUSTOM:
+            type = t_item_custom;
+            break;
+        case ScriptType::Value::STAGE:
+        default:
+            type = t_stage;
+            break;
     }
+
     constI(OBJ_PRIMITIVE_2D);
     constI(OBJ_SPRITE_2D);
     constI(OBJ_SPRITE_LIST_2D);

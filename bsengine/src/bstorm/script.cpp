@@ -23,7 +23,7 @@ namespace bstorm
 {
 const std::unordered_set<std::wstring> ignoreScriptExts{ L".png", L".jpg", L".jpeg", L".bmp", L".gif", L".dds", L".hdr", L".dib", L".pfm", L".tif", L".tiff", L".ttf", L".otf", L".mqo", L".mp3", L".mp4", L".avi", L".ogg", L".wav", L".wave", L".def", L".dat", L".fx", L".exe" };
 
-Script::Script(const std::wstring& p, const std::wstring& type, const std::wstring& version, int id, const std::shared_ptr<FileLoader>& fileLoader, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& srcPos) :
+Script::Script(const std::wstring& p, ScriptType type, const std::wstring& version, int id, const std::shared_ptr<FileLoader>& fileLoader, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& srcPos) :
     L_(NULL),
     path_(GetCanonicalPath(p)),
     type_(type),
@@ -31,7 +31,6 @@ Script::Script(const std::wstring& p, const std::wstring& type, const std::wstri
     id_(id),
     compileSrcPos_(srcPos),
     luaStateBusy_(false),
-    isStgSceneScript_(bstorm::IsStgSceneScript(type)),
     autoDeleteObjectEnable_(false),
     package_(package)
 {
@@ -178,7 +177,7 @@ const std::wstring & Script::GetPath() const
     return path_;
 }
 
-const std::wstring& Script::GetType() const
+ScriptType Script::GetType() const
 {
     return type_;
 }
@@ -337,7 +336,7 @@ void Script::NotifyEvent(int eventType, const std::unique_ptr<DnhArray>& args)
 
 bool Script::IsStgSceneScript() const
 {
-    return isStgSceneScript_;
+    return type_.IsStgSceneScript();
 }
 
 void Script::SetAutoDeleteObjectEnable(bool enable)
@@ -412,14 +411,14 @@ ScriptManager::ScriptManager(const std::shared_ptr<FileLoader>& fileLoader) :
 
 ScriptManager::~ScriptManager() {}
 
-std::shared_ptr<Script> ScriptManager::Compile(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& srcPos)
+std::shared_ptr<Script> ScriptManager::Compile(const std::wstring& path, ScriptType type, const std::wstring& version, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& srcPos)
 {
     auto script = std::make_shared<Script>(path, type, version, idGen_++, fileLoader_, package, srcPos);
     scriptMap_.emplace_hint(scriptMap_.end(), script->GetID(), script);
     return script;
 }
 
-std::shared_ptr<Script> ScriptManager::CompileInThread(const std::wstring & path, const std::wstring & type, const std::wstring & version, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& srcPos)
+std::shared_ptr<Script> ScriptManager::CompileInThread(const std::wstring & path, ScriptType type, const std::wstring & version, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& srcPos)
 {
     return Compile(path, type, version, package, srcPos);
 }

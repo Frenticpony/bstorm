@@ -358,14 +358,14 @@ public:
 
     /* script */
     NullableSharedPtr<Script> GetScript(int scriptId) const;
-    std::shared_ptr<Script> LoadScript(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<SourcePos>& srcPos);
-    std::shared_ptr<Script> LoadScriptInThread(const std::wstring& path, const std::wstring& type, const std::wstring& version, const std::shared_ptr<SourcePos>& srcPos);
+    std::shared_ptr<Script> LoadScript(const std::wstring& path, ScriptType type, const std::wstring& version, const std::shared_ptr<SourcePos>& srcPos);
+    std::shared_ptr<Script> LoadScriptInThread(const std::wstring& path, ScriptType type, const std::wstring& version, const std::shared_ptr<SourcePos>& srcPos);
     void CloseStgScene();
     void NotifyEventAll(int eventType);
     void NotifyEventAll(int eventType, const std::unique_ptr<DnhArray>& args);
     const std::unique_ptr<DnhValue>& GetScriptResult(int scriptId) const;
     void SetScriptResult(int scriptId, std::unique_ptr<DnhValue>&& value);
-    std::vector<ScriptInfo> GetScriptList(const std::wstring& dirPath, int scriptType, bool doRecursive);
+    std::vector<ScriptInfo> GetScriptList(const std::wstring& dirPath, ScriptType scriptType, bool doRecursive, bool getAll);
     void GetLoadFreePlayerScriptList();
     int GetFreePlayerScriptCount() const;
     ScriptInfo GetFreePlayerScriptInfo(int idx) const;

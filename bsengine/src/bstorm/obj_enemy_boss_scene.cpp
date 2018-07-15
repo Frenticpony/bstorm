@@ -106,7 +106,7 @@ void ObjEnemyBossScene::LoadInThread(const std::shared_ptr<SourcePos>& srcPos)
         {
             if (phase.scriptId < 0)
             {
-                phase.scriptId = package->LoadScriptInThread(phase.path, SCRIPT_TYPE_SINGLE, SCRIPT_VERSION_PH3, srcPos)->GetID();
+                phase.scriptId = package->LoadScriptInThread(phase.path, ScriptType::Value::SINGLE, SCRIPT_VERSION_PH3, srcPos)->GetID();
             }
         }
     }

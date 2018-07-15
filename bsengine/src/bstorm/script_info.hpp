@@ -2,24 +2,42 @@
 
 #include <string>
 #include <vector>
+#include <cstdint>
 
 namespace bstorm
 {
-constexpr wchar_t* SCRIPT_TYPE_PLAYER = L"Player";
-constexpr wchar_t* SCRIPT_TYPE_SINGLE = L"Single";
-constexpr wchar_t* SCRIPT_TYPE_PLURAL = L"Plural";
-constexpr wchar_t* SCRIPT_TYPE_STAGE = L"Stage";
-constexpr wchar_t* SCRIPT_TYPE_PACKAGE = L"Package";
-constexpr wchar_t* SCRIPT_TYPE_UNKNOWN = L"Unknown";
-constexpr wchar_t* SCRIPT_TYPE_SHOT_CUSTOM = L"ShotCustom";
-constexpr wchar_t* SCRIPT_TYPE_ITEM_CUSTOM = L"ItemCustom";
+class ScriptType
+{
+public:
+    enum class Value : uint8_t
+    {
+        PLAYER = 1,
+        SINGLE = 2,
+        PLURAL = 3,
+        STAGE = 4,
+        PACKAGE = 5,
+        SHOT_CUSTOM = 6,
+        ITEM_CUSTOM = 7,
+        UNKNOWN = 0xff
+    } value;
+    ScriptType() : value(Value::UNKNOWN) {};
+    ScriptType(Value v) : value(v) {};
+    bool operator==(const ScriptType& type) { return value == type.value; }
+    bool operator!=(const ScriptType& type) { return !(*this == type); }
+    const char* GetName() const;
+    int GetScriptConst() const;
+    bool IsStgSceneScript() const;
+    static ScriptType FromScriptConst(int c);
+    static ScriptType FromName(const std::string& name);
+};
+
 constexpr wchar_t* SCRIPT_VERSION_PH3 = L"3";
 
 class ScriptInfo
 {
 public:
     std::wstring path;
-    std::wstring type;
+    ScriptType type;
     std::wstring version;
     std::wstring id;
     std::wstring title;
@@ -31,8 +49,4 @@ public:
     std::vector<std::wstring> playerScripts;
     std::wstring replayName;
 };
-
-int GetScriptTypeConstFromName(const std::wstring& name);
-bool IsStgSceneScript(const std::wstring& name);
-std::wstring GetScriptTypeNameFromConst(int c);
 }

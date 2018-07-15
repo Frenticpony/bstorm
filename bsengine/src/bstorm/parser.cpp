@@ -41,14 +41,14 @@ ScriptInfo ScanDnhScriptInfo(const std::wstring & filePath, const std::shared_pt
     ScriptInfo info;
     info.path = GetCanonicalPath(filePath);
     info.id = info.path;
-    info.type = SCRIPT_TYPE_UNKNOWN;
+    info.type = ScriptType::Value::UNKNOWN;
     info.version = SCRIPT_VERSION_PH3;
     for (const auto& header : ctx.headers)
     {
         if (header.params_.empty()) continue;
         if (header.name == L"TouhouDanmakufu")
         {
-            info.type = header.params_[0];
+            info.type = ScriptType::FromName(ToUTF8(header.params_[0]));
         } else if (header.name == L"ScriptVersion")
         {
             info.version = header.params_[0];
