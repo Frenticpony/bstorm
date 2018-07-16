@@ -5,8 +5,6 @@
 #include <memory>
 #include <cstdint>
 
-#include <bstorm/env.hpp>
-
 namespace bstorm
 {
 struct NodeNum;
@@ -479,11 +477,12 @@ struct NodeLoopParam : public NodeDef
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 
+class Env;
 struct NodeBlock : public Node
 {
-    NodeBlock(const NameTable& t, std::vector <std::shared_ptr<NodeStmt>>&& ss) : Node(), table(t), stmts(std::move(ss)) {}
+    NodeBlock(const std::shared_ptr<Env>& env, std::vector <std::shared_ptr<NodeStmt>>&& ss) : Node(), env(env), stmts(std::move(ss)) {}
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
-    NameTable table;
+    std::shared_ptr<Env> env;
     std::vector <std::shared_ptr<NodeStmt>> stmts;
 };
 

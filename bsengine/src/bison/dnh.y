@@ -14,6 +14,7 @@
 { // top dnh.tab.hpp
 #include <bstorm/source_map.hpp>
 #include <bstorm/node.hpp>
+#include <bstorm/env.hpp>
 
 namespace bstorm
 {
@@ -258,7 +259,7 @@ static void AddDef(DnhParseContext* ctx, NodeDef* def)
 %%
 program            : stmts TK_EOF
                       {
-                          ctx->result = std::make_shared<NodeBlock>(ctx->env->table, std::move(*$1));
+                          ctx->result = std::make_shared<NodeBlock>(ctx->env, std::move(*$1));
                           ctx->result->srcPos = std::make_shared<SourcePos>(SourcePos({1, 1, ctx->lexer->GetCurrentFilePath()}));
                           delete($1);
                       }
@@ -320,7 +321,7 @@ new-scope           : { auto newEnv = std::make_shared<Env>(); newEnv->parent = 
 
 block              : TK_LBRACE stmts TK_RBRACE
                        {
-                           $$ = new NodeBlock(ctx->env->table, std::move(*$2));
+                           $$ = new NodeBlock(ctx->env, std::move(*$2));
                            FixPos($$, @1);
                            delete($2);
                            ctx->env = ctx->env->parent;

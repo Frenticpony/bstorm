@@ -8,6 +8,7 @@
 
 namespace bstorm
 {
+class Env;
 class SemanticsChecker : public NodeTraverser
 {
 public:

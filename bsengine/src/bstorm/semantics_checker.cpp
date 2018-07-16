@@ -1,6 +1,7 @@
 ﻿#include <bstorm/semantics_checker.hpp>
 
 #include <bstorm/util.hpp>
+#include <bstorm/env.hpp>
 
 namespace bstorm
 {
@@ -247,11 +248,8 @@ void SemanticsChecker::Traverse(NodeProcParam &) {}
 void SemanticsChecker::Traverse(NodeLoopParam &) {}
 void SemanticsChecker::Traverse(NodeBlock& blk)
 {
-    auto newEnv = std::make_shared<Env>();
-    newEnv->parent = env_;
-    newEnv->table = blk.table;
-    env_ = newEnv;
-    for (auto& bind : blk.table)
+    env_ = blk.env;
+    for (auto& bind : blk.env->table)
     {
         bind.second->Traverse(*this);
     }

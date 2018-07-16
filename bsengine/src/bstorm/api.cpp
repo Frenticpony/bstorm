@@ -5,6 +5,7 @@
 #include <bstorm/util.hpp>
 #include <bstorm/lua_util.hpp>
 #include <bstorm/node.hpp>
+#include <bstorm/env.hpp>
 #include <bstorm/texture.hpp>
 #include <bstorm/font.hpp>
 #include <bstorm/render_target.hpp>
