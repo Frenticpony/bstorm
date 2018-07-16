@@ -5668,20 +5668,24 @@ __declspec(noinline) static void addFunc(const std::shared_ptr<Env>& env, const 
     }
 }
 
-__declspec(noinline) static void addRuntimeFunc(const std::shared_ptr<Env>& env, const char* name, uint8_t paramc, lua_State* L)
+__declspec(noinline) static void addRuntimeBuiltInFunc(const std::shared_ptr<Env>& env, const char* name, uint8_t paramc, lua_State* L)
 {
     auto& def = env->AddDef(name, std::make_shared<NodeBuiltInFunc>(name, paramc));
     if (L)
     {
         // get from runtime lib.
-        lua_getglobal(L, (std::string(DNH_RUNTIME_BUILTIN_PREFIX) + name).c_str());
+        std::string runtimeBuiltInPrefixedName = std::string(DNH_RUNTIME_BUILTIN_PREFIX) + name;
+        lua_getglobal(L, runtimeBuiltInPrefixedName.c_str());
         lua_setglobal(L, (std::string(DNH_BUILTIN_FUNC_PREFIX) + def->convertedName).c_str());
+        // remove used global.
+        lua_pushnil(L);
+        lua_setglobal(L, runtimeBuiltInPrefixedName.c_str());
     }
 }
 
 #define constI(name) (addConstI(env, #name, name))
 #define builtin(name, paramc) (addFunc(env, #name, (paramc), L, name))
-#define runtime(name, paramc) (addRuntimeFunc(env, #name, (paramc), L))
+#define runtime(name, paramc) (addRuntimeBuiltInFunc(env, #name, (paramc), L))
 #define TypeIs(typeSet) ((typeSet) & type)
 
 using ScriptTypeSet = uint8_t;
