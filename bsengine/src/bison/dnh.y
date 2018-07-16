@@ -307,8 +307,8 @@ single-stmt        : none             { $$ = NULL; }
                    | return
                    | yield
                    | break
-                   | left-value TK_SUCC { $$ = new NodeSucc(std::shared_ptr<NodeLeftVal>($1)); FixPos($$, @2); }
-                   | left-value TK_PRED { $$ = new NodePred(std::shared_ptr<NodeLeftVal>($1)); FixPos($$, @2); }
+                   | left-value TK_SUCC { $$ = new NodeSucc(leftval($1)); FixPos($$, @2); }
+                   | left-value TK_PRED { $$ = new NodePred(leftval($1)); FixPos($$, @2); }
 
 call-stmt          : TK_IDENT { $$ = new NodeCallStmt(*$1, {}); FixPos($$, @1); delete($1); }
                    | TK_IDENT TK_LPAREN exps TK_RPAREN { $$ = new NodeCallStmt(*$1, std::move(*$3)); FixPos($$, @1); delete($1); delete($3); }
