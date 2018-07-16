@@ -19,8 +19,8 @@ public:
     bool IsRoot() const;
 
     using NameTable = std::unordered_map<std::string, std::shared_ptr<NodeDef>>;
-    const NameTable& GetCurrentBlockNameTable() const { return table_; }
-    const std::shared_ptr<Env> GetParent() const { return parent_; }
+    NameTable& GetCurrentBlockNameTable() { return table_; }
+    const std::shared_ptr<Env>& GetParent() const { return parent_; }
 private:
     std::shared_ptr<Env> parent_;
     NameTable table_;
