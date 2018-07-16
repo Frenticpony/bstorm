@@ -5651,20 +5651,20 @@ void SetScript(lua_State* L, Script* p)
 __declspec(noinline) static void addConst(const std::shared_ptr<Env>& env, const char* name, const char* value)
 {
     if (env)
-        env->table.emplace(name, std::make_shared<NodeConst>(name, value));
+        env->AddDef(name, std::make_shared<NodeConst>(name, value));
 }
 
 __declspec(noinline) static void addConstI(const std::shared_ptr<Env>& env, const char* name, int value)
 {
     if (env)
-        env->table.emplace(name, std::make_shared<NodeConst>(name, std::to_string(value)));
+        env->AddDef(name, std::make_shared<NodeConst>(name, std::to_string(value)));
 }
 
 __declspec(noinline) static void addFunc(const std::shared_ptr<Env>& env, const char* name, uint8_t paramc, lua_State* L, lua_CFunction func)
 {
     if (env)
     {
-        env->table.emplace(name, std::make_shared<NodeBuiltInFunc>(name, paramc));
+        env->AddDef(name, std::make_shared<NodeBuiltInFunc>(name, paramc));
     } else
     {
         lua_register(L, (std::string(DNH_BUILTIN_FUNC_PREFIX) + name).c_str(), func);
@@ -5674,7 +5674,7 @@ __declspec(noinline) static void addFunc(const std::shared_ptr<Env>& env, const 
 __declspec(noinline) static void addRuntimeFunc(const std::shared_ptr<Env>& env, const char* name, uint8_t paramc)
 {
     if (env)
-        env->table.emplace(name, std::make_shared<NodeBuiltInFunc>(name, paramc));
+        env->AddDef(name, std::make_shared<NodeBuiltInFunc>(name, paramc));
 }
 
 #define constI(name) (addConstI(env, #name, name))

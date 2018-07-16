@@ -8,14 +8,21 @@
 namespace bstorm
 {
 struct NodeDef;
-using NameTable = std::unordered_map<std::string, std::shared_ptr<NodeDef>>;
-
 class Env
 {
 public:
+    Env();
+    Env(const std::shared_ptr<Env>& parent);
+    void AddDef(const std::string& name, const std::shared_ptr<NodeDef>& def);
+    void AddDef(std::string&& name, std::shared_ptr<NodeDef>&& def);
     NullableSharedPtr<NodeDef> FindDef(const std::string& name) const;
     bool IsRoot() const;
-    NameTable table;
-    std::shared_ptr<Env> parent;
+
+    using NameTable = std::unordered_map<std::string, std::shared_ptr<NodeDef>>;
+    const NameTable& GetCurrentBlockNameTable() const { return table_; }
+    const std::shared_ptr<Env> GetParent() const { return parent_; }
+private:
+    std::shared_ptr<Env> parent_;
+    NameTable table_;
 };
 }

@@ -90,9 +90,9 @@ static void FixPos(Node *node, const DnhParser::location_type& yylloc)
 
 static void CheckDupDef(DnhParseContext* ctx, const DnhParser::location_type& yylloc, const std::string& name)
 {
-    if (ctx->env->table.count(name) != 0)
+    if (ctx->env->GetCurrentBlockNameTable().count(name) != 0)
     {
-        auto prevDef = ctx->env->table[name];
+        auto prevDef = ctx->env->GetCurrentBlockNameTable().at(name);
         auto prevDefLine = std::to_string(prevDef->srcPos->line);
         auto prevDefPath = ToUTF8(*prevDef->srcPos->filename);
         auto msg = "found a duplicate definition of '" + prevDef->name + "' (previous definition was at line " + prevDefLine + " in " + prevDefPath + ").";
@@ -102,9 +102,10 @@ static void CheckDupDef(DnhParseContext* ctx, const DnhParser::location_type& yy
     }
 }
 
-static void AddDef(DnhParseContext* ctx, NodeDef* def)
+static void AddDef(DnhParseContext* ctx, NodeDef* ptr)
 {
-    ctx->env->table[def->name] = std::shared_ptr<NodeDef>(def);
+    auto def = std::shared_ptr<NodeDef>(ptr);
+    ctx->env->AddDef(def->name, def);
 }
 }
 
@@ -317,14 +318,14 @@ call-stmt          : TK_IDENT { $$ = new NodeCallStmt(*$1, {}); FixPos($$, @1); 
 yield              : TK_YIELD { $$ = new NodeYield(); FixPos($$, @1); }
 break              : TK_BREAK { $$ = new NodeBreak(); FixPos($$, @1); }
 
-new-scope           : { auto newEnv = std::make_shared<Env>(); newEnv->parent = ctx->env; ctx->env = newEnv; }
+new-scope           : { ctx->env = std::make_shared<Env>(ctx->env); }
 
 block              : TK_LBRACE stmts TK_RBRACE
                        {
                            $$ = new NodeBlock(ctx->env, std::move(*$2));
                            FixPos($$, @1);
                            delete($2);
-                           ctx->env = ctx->env->parent;
+                           ctx->env = ctx->env->GetParent();
                        }
 
 
@@ -351,7 +352,7 @@ sub-def            : TK_SUB TK_IDENT { CheckDupDef(ctx, @2, *$2); } new-scope op
 
 func-def           : TK_FUNCTION TK_IDENT { CheckDupDef(ctx, @2, *$2); } new-scope opt-params
                        {
-                         if (ctx->env->table.count("result") == 0)
+                         if (ctx->env->GetCurrentBlockNameTable().count("result") == 0)
                          {
                              auto result = new NodeVarDecl("result");
                              FixPos(result, @1);

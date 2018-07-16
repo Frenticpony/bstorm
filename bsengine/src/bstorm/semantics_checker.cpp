@@ -248,13 +248,14 @@ void SemanticsChecker::Traverse(NodeProcParam &) {}
 void SemanticsChecker::Traverse(NodeLoopParam &) {}
 void SemanticsChecker::Traverse(NodeBlock& blk)
 {
+    auto prevEnv = env_;
     env_ = blk.env;
-    for (auto& bind : blk.env->table)
+    for (auto& bind : blk.env->GetCurrentBlockNameTable())
     {
         bind.second->Traverse(*this);
     }
     for (auto& stmt : blk.stmts) stmt->Traverse(*this);
-    env_ = env_->parent;
+    env_ = prevEnv;
 }
 void SemanticsChecker::Traverse(NodeSubDef& def)
 {
