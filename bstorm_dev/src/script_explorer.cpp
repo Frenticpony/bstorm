@@ -5,7 +5,7 @@
 #include <bstorm/parser.hpp>
 #include <bstorm/util.hpp>
 #include <bstorm/logger.hpp>
-#include <bstorm/const.hpp>
+#include <bstorm/path_const.hpp>
 #include <bstorm/script.hpp>
 
 #include <memory>

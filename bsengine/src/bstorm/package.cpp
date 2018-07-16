@@ -1,7 +1,7 @@
 ﻿#include <bstorm/package.hpp>
 
 #include <bstorm/util.hpp>
-#include <bstorm/const.hpp>
+#include <bstorm/path_const.hpp>
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/parser.hpp>
 #include <bstorm/graphic_device.hpp>
@@ -502,6 +502,10 @@ NullableSharedPtr<RenderTarget> Package::GetRenderTarget(const std::wstring & na
     }
     return nullptr;
 }
+
+constexpr wchar_t* TRANSITION_RENDER_TARGET_NAME = L"__RENDERTARGET_TRANSITION__";
+constexpr wchar_t* RESERVED_RENDER_TARGET_PREFIX = L"__RESERVED_RENDER_TARGET__";
+constexpr wchar_t* SNAP_SHOT_RENDER_TARGET_NAME = L"__SNAP_SHOT__";
 
 std::wstring Package::GetReservedRenderTargetName(int idx) const
 {

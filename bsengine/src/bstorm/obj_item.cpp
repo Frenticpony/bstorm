@@ -1,7 +1,6 @@
 ﻿#include <bstorm/obj_item.hpp>
 
 #include <bstorm/dnh_const.hpp>
-#include <bstorm/const.hpp>
 #include <bstorm/dx_util.hpp>
 #include <bstorm/vertex.hpp>
 #include <bstorm/intersection.hpp>

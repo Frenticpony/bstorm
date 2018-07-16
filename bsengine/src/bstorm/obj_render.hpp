@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include <bstorm/color_rgb.hpp>
-#include <bstorm/const.hpp>
 #include <bstorm/obj.hpp>
 
 #include <array>
@@ -126,6 +125,15 @@ public:
     void Update() override {}
     void Render(const std::shared_ptr<Renderer>& renderer) override {};
 };
+
+constexpr int MAX_RENDER_PRIORITY = 100;
+constexpr int DEFAULT_STG_FRAME_RENDER_PRIORITY_MIN = 20;
+constexpr int DEFAULT_STG_FRAME_RENDER_PRIORITY_MAX = 80;
+constexpr int DEFAULT_PLAYER_RENDER_PRIORITY = 30;
+constexpr int DEFAULT_ENEMY_RENDER_PRIORITY = 40;
+constexpr int DEFAULT_SHOT_RENDER_PRIORITY = 50;
+constexpr int DEFAULT_ITEM_RENDER_PRIORITY = 60;
+constexpr int DEFAULT_CAMERA_FOCUS_PERMIT_RENDER_PRIORITY = 69;
 
 class ObjectLayerList
 {

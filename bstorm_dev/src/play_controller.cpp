@@ -1,6 +1,6 @@
 #include "play_controller.hpp"
 
-#include <bstorm/const.hpp>
+#include <bstorm/path_const.hpp>
 #include <bstorm/logger.hpp>
 #include <bstorm/package.hpp>
 #include <bstorm/engine.hpp>

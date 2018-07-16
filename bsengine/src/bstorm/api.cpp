@@ -1,7 +1,7 @@
 ﻿#include <bstorm/api.hpp>
 
 #include <bstorm/dnh_const.hpp>
-#include <bstorm/const.hpp>
+#include <bstorm/script_name_prefix.hpp>
 #include <bstorm/util.hpp>
 #include <bstorm/lua_util.hpp>
 #include <bstorm/node.hpp>
@@ -45,6 +45,8 @@
 
 namespace bstorm
 {
+
+constexpr char* DNH_RUNTIME_NAME = "runtime.lua";
 static int GetCurrentLine(lua_State* L)
 {
     // コールスタックから現在の行番号を取得する

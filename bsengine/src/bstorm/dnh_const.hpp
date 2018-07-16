@@ -46,6 +46,7 @@ constexpr int ITEM_POWER_S = -65531;
 constexpr int ITEM_POINT = -65530;
 constexpr int ITEM_POINT_S = -65529;
 constexpr int ITEM_USER = 0;
+constexpr int ITEM_DEFAULT_BONUS = -65528; // not script const
 
 // item move type
 constexpr int ITEM_MOVE_DOWN = 2;

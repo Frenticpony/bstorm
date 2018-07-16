@@ -6,7 +6,6 @@
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/render_target.hpp>
 #include <bstorm/config.hpp>
-#include <bstorm/const.hpp>
 #include <bstorm/th_dnh_def.hpp>
 #include <bstorm/version.hpp>
 

@@ -1,7 +1,6 @@
 ﻿#include <bstorm/obj_enemy_boss_scene.hpp>
 
 #include <bstorm/dnh_const.hpp>
-#include <bstorm/const.hpp>
 #include <bstorm/util.hpp>
 #include <bstorm/logger.hpp>
 #include <bstorm/script.hpp>

@@ -2,7 +2,6 @@
 #include <bstorm/key_name_map.hpp>
 #include <bstorm/logger.hpp>
 #include <bstorm/config.hpp>
-#include <bstorm/const.hpp>
 #include <bstorm/util.hpp>
 #include <bstorm/version.hpp>
 
