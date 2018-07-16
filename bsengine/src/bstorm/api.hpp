@@ -9,8 +9,8 @@
 namespace bstorm
 {
 class Env;
-// 環境を与えた場合は環境の作成だけを行い、Luaスレッドへの関数の登録はしない
-void RegisterStandardAPI(lua_State* L, ScriptType type, const std::wstring& version, const NullableSharedPtr<Env>& env);
+// Lがnullptrじゃなければ関数の登録を行う
+std::shared_ptr<Env> CreateInitRootEnv(ScriptType type, const std::wstring& version, lua_State* L);
 
 class Script;
 Script* GetScript(lua_State* L);

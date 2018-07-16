@@ -10,16 +10,21 @@ static std::string runtime(const std::string& name)
     return bstorm::DNH_RUNTIME_PREFIX + name;
 }
 
-static std::string builtin(const std::string& name)
+static std::string builtin(const std::shared_ptr<NodeDef>& def)
 {
-    return bstorm::DNH_BUILTIN_FUNC_PREFIX + name;
+    return bstorm::DNH_BUILTIN_FUNC_PREFIX + def->convertedName;
 }
 
-static std::string varname(const std::string& name)
+static std::string varname(const std::shared_ptr<NodeDef>& def)
 {
-    return bstorm::DNH_VAR_PREFIX + name;
+    return bstorm::DNH_VAR_PREFIX + def->convertedName;
 }
 
+static std::string varname(const std::string& name, const std::shared_ptr<Env>& env)
+{
+    auto def = env->FindDef(name);
+    return bstorm::DNH_VAR_PREFIX + def->convertedName;
+}
 
 static bool isDeclarationNeeded(const std::shared_ptr<NodeDef>& def)
 {
@@ -121,7 +126,7 @@ void CodeGenerator::Traverse(NodeNoParenCallExp& call)
             NodeStr(GetParentPath(*call.srcPos->filename) + L"/").Traverse(*this);
         } else
         {
-            AddCode(builtin(call.name) + "()");
+            AddCode(builtin(def) + "()");
         }
     } else if (auto c = std::dynamic_pointer_cast<NodeConst>(def))
     {
@@ -129,9 +134,9 @@ void CodeGenerator::Traverse(NodeNoParenCallExp& call)
 #ifdef _DEBUG
         AddCode(" --[[ " + call.name + " ]]");
 #endif
-    } else
+} else
     {
-        AddCode(varname(call.name) + "()");
+        AddCode(varname(def) + "()");
     }
 }
 
@@ -147,15 +152,15 @@ void CodeGenerator::Traverse(NodeCallExp& call)
 #ifdef _DEBUG
         AddCode(" --[[ " + call.name + " ]]");
 #endif
-    } else
+} else
     {
         bool isUserFunc = !std::dynamic_pointer_cast<NodeBuiltInFunc>(def);
         if (isUserFunc)
         {
-            AddCode(varname(call.name) + "(");
+            AddCode(varname(def) + "(");
         } else
         {
-            AddCode(builtin(call.name) + "(");
+            AddCode(builtin(def) + "(");
         }
         for (int i = 0; i < call.args.size(); i++)
         {
@@ -236,19 +241,19 @@ void CodeGenerator::GenCheckNil(const std::string & name)
 {
     if (embedLocalVarName_)
     {
-        AddCode(runtime("checknil") + "(" + varname(name) + ", \"" + name + "\")");
+        AddCode(runtime("checknil") + "(" + varname(name, env_) + ", \"" + name + "\")");
     } else
     {
-        AddCode(runtime("checknil") + "(" + varname(name) + ")");
+        AddCode(runtime("checknil") + "(" + varname(name, env_) + ")");
     }
 }
 void CodeGenerator::GenProc(std::shared_ptr<NodeDef> def, const std::vector<std::string>& params_, NodeBlock & blk)
 {
-    AddCode(varname(def->name) + " = function(");
+    AddCode(varname(def) + " = function(");
     for (int i = 0; i < params_.size(); i++)
     {
         if (i != 0) AddCode(",");
-        AddCode(varname(params_[i]));
+        AddCode(varname(params_[i], blk.env));
     }
     AddCode(")"); NewLine();
     blk.Traverse(*this);
@@ -258,7 +263,7 @@ void CodeGenerator::GenProc(std::shared_ptr<NodeDef> def, const std::vector<std:
         if (!std::dynamic_pointer_cast<NodeProcParam>(result))
         {
             Indent();
-            AddCode("do return " + varname("result") + " end");
+            AddCode("do return " + varname(result) + " end");
             NewLine(result->srcPos);
             Unindent();
         }
@@ -272,7 +277,7 @@ void CodeGenerator::GenOpAssign(const std::string & fname, const std::shared_ptr
         case 0:
             // a += e;
             // out : a = add(r_checknil(a), e);
-            AddCode(varname(left->name) + " = ");
+            AddCode(varname(left->name, env_) + " = ");
             AddCode(runtime(fname) + "(");
             GenCheckNil(left->name);
             if (right)
@@ -290,9 +295,9 @@ void CodeGenerator::GenOpAssign(const std::string & fname, const std::shared_ptr
             AddCode("do"); NewLine();
             GenCheckNil(left->name); NewLine(left->srcPos);
             AddCode("local i = "); left->indices[0]->Traverse(*this); AddCode(";"); NewLine(left->srcPos);
-            AddCode(runtime("write1") + "(" + varname(left->name) + ", i, ");
+            AddCode(runtime("write1") + "(" + varname(left->name, env_) + ", i, ");
             AddCode(runtime(fname) + "(");
-            AddCode(runtime("read") + "(" + varname(left->name) + ", i)");
+            AddCode(runtime("read") + "(" + varname(left->name, env_) + ", i)");
             if (right)
             {
                 AddCode(",");
@@ -315,13 +320,13 @@ void CodeGenerator::GenOpAssign(const std::string & fname, const std::shared_ptr
                 left->indices[i]->Traverse(*this);
             }
             AddCode("};"); NewLine(left->srcPos);
-            AddCode(runtime("write") + "(" + varname(left->name) + ", is");
+            AddCode(runtime("write") + "(" + varname(left->name, env_) + ", is");
             AddCode("," + runtime(fname) + "(");
             for (int i = 0; i < left->indices.size(); i++)
             {
                 AddCode(runtime("read") + "(");
             }
-            AddCode(varname(left->name) + ",");
+            AddCode(varname(left->name, env_) + ",");
             for (int i = 0; i < left->indices.size(); i++)
             {
                 if (i != 0) AddCode(",");
@@ -423,7 +428,7 @@ void CodeGenerator::Traverse(NodeAssign& stmt)
         case 0:
             // a = e;
             // out : a = r_cp(e);
-            AddCode(varname(def->name) + " = "); GenCopy(stmt.rhs); AddCode(";");
+            AddCode(varname(def) + " = "); GenCopy(stmt.rhs); AddCode(";");
             break;
         case 1:
             // a[i] = e;
@@ -472,7 +477,7 @@ void CodeGenerator::Traverse(NodeCallStmt& call)
     bool isUserFunc = !std::dynamic_pointer_cast<NodeBuiltInFunc>(def);
     if (isTask)
     {
-        AddCode(runtime("fork") + "(" + varname(call.name));
+        AddCode(runtime("fork") + "(" + varname(def));
         if (call.args.size() != 0)
         {
             AddCode(", {");
@@ -481,10 +486,10 @@ void CodeGenerator::Traverse(NodeCallStmt& call)
     {
         if (isUserFunc)
         {
-            AddCode(varname(call.name) + "(");
+            AddCode(varname(def) + "(");
         } else
         {
-            AddCode(builtin(call.name) + "(");
+            AddCode(builtin(def) + "(");
         }
     }
     for (int i = 0; i < call.args.size(); i++)
@@ -526,8 +531,8 @@ void CodeGenerator::Traverse(NodeReturnVoid& stmt)
                 AddCode("do return end");
             } else
             {
-                // return implicit result
-                AddCode("do return " + varname("result") + " end");
+                // return result
+                AddCode("do return " + varname(result) + " end");
             }
         } else
         {
@@ -563,13 +568,13 @@ void CodeGenerator::Traverse(NodePred& stmt) { GenOpAssign("pred", stmt.lhs, std
 void CodeGenerator::Traverse(NodeVarDecl &) {}
 void CodeGenerator::Traverse(NodeVarInit& stmt)
 {
-    AddCode(varname(stmt.name) + " = "); GenCopy(stmt.rhs); AddCode(";");
+    AddCode(varname(stmt.name, env_) + " = "); GenCopy(stmt.rhs); AddCode(";");
     NewLine(stmt.rhs->srcPos);
 }
 void CodeGenerator::Traverse(NodeProcParam &) {}
 void CodeGenerator::Traverse(NodeLoopParam& param)
 {
-    AddCode("local " + varname(param.name) + " = " + runtime("cp") + "(i);");
+    AddCode("local " + varname(param.name, env_) + " = " + runtime("cp") + "(i);");
     NewLine(param.srcPos);
 }
 void CodeGenerator::Traverse(NodeBuiltInFunc &) {}
@@ -698,7 +703,7 @@ void CodeGenerator::Traverse(NodeBlock& blk)
             auto def = bind.second;
             if (isDeclarationNeeded(def))
             {
-                AddCode("local "); AddCode(varname(def->name)); AddCode(";"); NewLine(def->srcPos);
+                AddCode("local "); AddCode(varname(def)); AddCode(";"); NewLine(def->srcPos);
             }
         }
     }

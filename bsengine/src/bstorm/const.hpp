@@ -13,9 +13,15 @@ constexpr int DEFAULT_SHOT_RENDER_PRIORITY = 50;
 constexpr int DEFAULT_ITEM_RENDER_PRIORITY = 60;
 constexpr int DEFAULT_CAMERA_FOCUS_PERMIT_RENDER_PRIORITY = 69;
 
-constexpr char* DNH_RUNTIME_PREFIX = "r_";
-constexpr char* DNH_BUILTIN_FUNC_PREFIX = "b_";
-constexpr char* DNH_VAR_PREFIX = "d_";
+// prefix
+constexpr char* DNH_RUNTIME_PREFIX = "r_"; // ランタイム関数
+constexpr char* DNH_RUNTIME_BUILTIN_PREFIX = "rb_"; // ランタイムライブラリに書かれてる組み込み関数
+#ifdef _DEBUG
+constexpr char* DNH_BUILTIN_FUNC_PREFIX = "b_"; // 組み込み関数
+#else
+constexpr char* DNH_BUILTIN_FUNC_PREFIX = "d_"; // 組み込み関数
+#endif
+constexpr char* DNH_VAR_PREFIX = "d_"; // 変数
 
 constexpr wchar_t* FREE_PLAYER_DIR = L"script/player";
 

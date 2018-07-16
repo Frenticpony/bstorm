@@ -20,8 +20,7 @@ SerializedScript::SerializedScript(const std::wstring & path, ScriptType type, c
 {
     std::unique_ptr<lua_State, decltype(&lua_close)> L(luaL_newstate(), lua_close);
     // ŠÂ‹«ì¬
-    auto globalEnv = std::make_shared<Env>();
-    RegisterStandardAPI(L.get(), type_, version_, globalEnv);
+    auto globalEnv = CreateInitRootEnv(type_, version_, nullptr);
 
     // ƒp[ƒX
     ScriptInfo scriptInfo;
@@ -78,5 +77,19 @@ SerializedScript::SerializedScript(const std::wstring & path, ScriptType type, c
     scriptInfo.Serialize(scriptInfo_);
     codeGen.GetSourceMap().Serialize(srcMap_);
     SerializeChunk(L.get(), byteCode_);
+    for (auto&& name : { "Loading", "Initialize", "MainLoop", "Finalize", "Event" })
+    {
+        if (auto def = globalEnv->FindDef(name))
+        {
+            builtInSubNameConversionMap_[name] = def->convertedName;
+        } else
+        {
+            builtInSubNameConversionMap_[name] = name;
+        }
+    }
+}
+const std::string& SerializedScript::GetConvertedBuiltInSubName(const std::string & name) const
+{
+    return builtInSubNameConversionMap_.at(name);
 }
 }

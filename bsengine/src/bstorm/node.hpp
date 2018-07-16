@@ -447,8 +447,9 @@ struct NodePred : public NodeSucc
 
 struct NodeDef : public Node
 {
-    NodeDef(const std::string& name) : Node(), name(name) {}
+    NodeDef(const std::string& name) : Node(), name(name), convertedName(name) {}
     std::string name;
+    std::string convertedName; // 名前変換用
 };
 
 struct NodeVarDecl : public NodeDef

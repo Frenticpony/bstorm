@@ -30,6 +30,7 @@
 #include <bstorm/logger.hpp>
 #include <bstorm/dnh_value.hpp>
 #include <bstorm/package.hpp>
+#include <bstorm/script_runtime.h>
 
 #include <exception>
 
@@ -5650,36 +5651,37 @@ void SetScript(lua_State* L, Script* p)
 
 __declspec(noinline) static void addConst(const std::shared_ptr<Env>& env, const char* name, const char* value)
 {
-    if (env)
-        env->AddDef(name, std::make_shared<NodeConst>(name, value));
+    env->AddDef(name, std::make_shared<NodeConst>(name, value));
 }
 
 __declspec(noinline) static void addConstI(const std::shared_ptr<Env>& env, const char* name, int value)
 {
-    if (env)
-        env->AddDef(name, std::make_shared<NodeConst>(name, std::to_string(value)));
+    env->AddDef(name, std::make_shared<NodeConst>(name, std::to_string(value)));
 }
 
 __declspec(noinline) static void addFunc(const std::shared_ptr<Env>& env, const char* name, uint8_t paramc, lua_State* L, lua_CFunction func)
 {
-    if (env)
+    auto& def = env->AddDef(name, std::make_shared<NodeBuiltInFunc>(name, paramc));
+    if (L)
     {
-        env->AddDef(name, std::make_shared<NodeBuiltInFunc>(name, paramc));
-    } else
-    {
-        lua_register(L, (std::string(DNH_BUILTIN_FUNC_PREFIX) + name).c_str(), func);
+        lua_register(L, (std::string(DNH_BUILTIN_FUNC_PREFIX) + def->convertedName).c_str(), func);
     }
 }
 
-__declspec(noinline) static void addRuntimeFunc(const std::shared_ptr<Env>& env, const char* name, uint8_t paramc)
+__declspec(noinline) static void addRuntimeFunc(const std::shared_ptr<Env>& env, const char* name, uint8_t paramc, lua_State* L)
 {
-    if (env)
-        env->AddDef(name, std::make_shared<NodeBuiltInFunc>(name, paramc));
+    auto& def = env->AddDef(name, std::make_shared<NodeBuiltInFunc>(name, paramc));
+    if (L)
+    {
+        // get from runtime lib.
+        lua_getglobal(L, (std::string(DNH_RUNTIME_BUILTIN_PREFIX) + name).c_str());
+        lua_setglobal(L, (std::string(DNH_BUILTIN_FUNC_PREFIX) + def->convertedName).c_str());
+    }
 }
 
 #define constI(name) (addConstI(env, #name, name))
 #define builtin(name, paramc) (addFunc(env, #name, (paramc), L, name))
-#define runtime(name, paramc) (addRuntimeFunc(env, #name, (paramc)))
+#define runtime(name, paramc) (addRuntimeFunc(env, #name, (paramc), L))
 #define TypeIs(typeSet) ((typeSet) & type)
 
 using ScriptTypeSet = uint8_t;
@@ -5691,10 +5693,30 @@ constexpr ScriptTypeSet t_shot_custom = 8;
 constexpr ScriptTypeSet t_item_custom = 16;
 constexpr ScriptTypeSet t_all = 0xff;
 
-void RegisterStandardAPI(lua_State* L, ScriptType scriptType, const std::wstring& version, const NullableSharedPtr<Env>& env)
+std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring& version, lua_State* L)
 {
-    lua_pushlightuserdata(L, (void *)WrapException);
-    luaJIT_setmode(L, -1, LUAJIT_MODE_WRAPCFUNC | LUAJIT_MODE_ON);
+    if (L)
+    {
+        // Lua標準API登録
+        luaL_openlibs(L);
+
+        // ランタイム読み込み
+        luaL_loadbuffer(L, (const char *)luaJIT_BC_script_runtime, luaJIT_BC_script_runtime_SIZE, DNH_RUNTIME_NAME);
+        if (lua_pcall(L, 0, 0, 0) != 0)
+        {
+            std::string msg = lua_tostring(L, -1);
+            lua_pop(L, 1);
+            throw Log(Log::Level::LV_ERROR)
+                .SetMessage("runtime library error.")
+                .SetParam(Log::Param(Log::Param::Tag::TEXT, msg));
+        }
+
+        // 例外ラッパー
+        lua_pushlightuserdata(L, (void *)WrapException);
+        luaJIT_setmode(L, -1, LUAJIT_MODE_WRAPCFUNC | LUAJIT_MODE_ON);
+    }
+
+    auto env = std::make_shared<Env>();
 
     ScriptTypeSet type = 0;
     switch (scriptType.value)
@@ -6746,10 +6768,15 @@ void RegisterStandardAPI(lua_State* L, ScriptType scriptType, const std::wstring
         builtin(SaveReplay, 2);
     }
 
-    // runtime helper
-    lua_register(L, "c_chartonum", c_chartonum);
-    lua_register(L, "c_succchar", c_succchar);
-    lua_register(L, "c_predchar", c_predchar);
-    lua_register(L, "c_raiseerror", c_raiseerror);
+    if (L)
+    {
+        // runtime helper
+        lua_register(L, "c_chartonum", c_chartonum);
+        lua_register(L, "c_succchar", c_succchar);
+        lua_register(L, "c_predchar", c_predchar);
+        lua_register(L, "c_raiseerror", c_raiseerror);
+        lua_register(L, "c_ator", ator);
+    }
+    return env;
 }
 }

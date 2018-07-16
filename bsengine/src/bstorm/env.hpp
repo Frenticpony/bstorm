@@ -13,8 +13,8 @@ class Env
 public:
     Env();
     Env(const std::shared_ptr<Env>& parent);
-    void AddDef(const std::string& name, const std::shared_ptr<NodeDef>& def);
-    void AddDef(std::string&& name, std::shared_ptr<NodeDef>&& def);
+    const std::shared_ptr<NodeDef>& AddDef(const std::string& name, const std::shared_ptr<NodeDef>& def);
+    const std::shared_ptr<NodeDef>& AddDef(std::string&& name, std::shared_ptr<NodeDef>&& def);
     NullableSharedPtr<NodeDef> FindDef(const std::string& name) const;
     bool IsRoot() const;
 
@@ -24,5 +24,6 @@ public:
 private:
     std::shared_ptr<Env> parent_;
     NameTable table_;
+    const int depth_;
 };
 }

@@ -10,7 +10,6 @@
 #include <bstorm/source_map.hpp>
 #include <bstorm/serialized_script.hpp>
 #include <bstorm/package.hpp>
-#include <bstorm/script_runtime.h>
 
 #include <exception>
 #include <cassert>
@@ -82,7 +81,7 @@ void Script::RunBuiltInSub(const std::string &name)
     if (state_.isFailed) { return; }
     if (luaStateBusy_)
     {
-        lua_getglobal(L_.get(), (DNH_VAR_PREFIX + name).c_str());
+        lua_getglobal(L_.get(), (DNH_VAR_PREFIX + serializedScript_->GetConvertedBuiltInSubName(name)).c_str());
         if (lua_isfunction(L_.get(), -1))
         {
             CallLuaChunk(0);
@@ -93,7 +92,7 @@ void Script::RunBuiltInSub(const std::string &name)
     } else
     {
         lua_getglobal(L_.get(), (std::string(DNH_RUNTIME_PREFIX) + "run").c_str());
-        lua_getglobal(L_.get(), (DNH_VAR_PREFIX + name).c_str());
+        lua_getglobal(L_.get(), (DNH_VAR_PREFIX + serializedScript_->GetConvertedBuiltInSubName(name)).c_str());
         if (lua_isfunction(L_.get(), -1))
         {
             CallLuaChunk(1);
@@ -146,15 +145,8 @@ void Script::Load()
 {
     if (state_.isLoaded || IsClosed()) { return; }
 
-    // Lua標準API登録
-    luaL_openlibs(L_.get());
-
-    // 弾幕風標準API登録
-    RegisterStandardAPI(L_.get(), type_, version_, nullptr);
-
-    // ランタイム読み込み
-    luaL_loadbuffer(L_.get(), (const char *)luaJIT_BC_script_runtime, luaJIT_BC_script_runtime_SIZE, DNH_RUNTIME_NAME);
-    CallLuaChunk(0);
+    // 実行環境作成
+    CreateInitRootEnv(type_, version_, L_.get());
 
     // スクリプトをバインド
     SetScript(L_.get(), this);
