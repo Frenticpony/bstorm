@@ -168,7 +168,7 @@ struct NodeExp : public Node
 
 struct NodeNum : public NodeExp
 {
-    NodeNum(const std::string& n) : NodeExp(), number(n) {};
+    NodeNum(std::string&& n) : NodeExp(), number(std::move(n)) {};
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::string number;
 };
@@ -182,14 +182,14 @@ struct NodeChar : public NodeExp
 
 struct NodeStr : public NodeExp
 {
-    NodeStr(const std::wstring& s) : NodeExp(), str(s) {};
+    NodeStr(std::wstring&& s) : NodeExp(), str(std::move(s)) {};
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::wstring str;
 };
 
 struct NodeArray : public NodeExp
 {
-    NodeArray(const std::vector<std::shared_ptr<NodeExp>>& es) : NodeExp(), elems(es) {}
+    NodeArray(std::vector<std::shared_ptr<NodeExp>>&& es) : NodeExp(), elems(std::move(es)) {}
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::vector <std::shared_ptr<NodeExp>> elems;
 };
@@ -313,7 +313,7 @@ struct NodeNoParenCallExp : public NodeExp
 
 struct NodeCallExp : public NodeExp
 {
-    NodeCallExp(const std::string& name, const std::vector<std::shared_ptr<NodeExp>>& as) :NodeExp(), name(name), args(as) {}
+    NodeCallExp(const std::string& name, std::vector<std::shared_ptr<NodeExp>>&& as) :NodeExp(), name(name), args(std::move(as)) {}
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::string name;
     std::vector<std::shared_ptr<NodeExp>> args;
@@ -351,7 +351,7 @@ struct NodeNop : public NodeStmt
 
 struct NodeLeftVal : public Node
 {
-    NodeLeftVal(const std::string& name, const std::vector<std::shared_ptr<NodeExp>>& is) : Node(), name(name), indices(is) {}
+    NodeLeftVal(const std::string& name, std::vector<std::shared_ptr<NodeExp>>&& is) : Node(), name(name), indices(std::move(is)) {}
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::string name;
     std::vector<std::shared_ptr<NodeExp>> indices;
@@ -403,7 +403,7 @@ struct NodeCatAssign : public NodeAssign
 
 struct NodeCallStmt : public NodeStmt
 {
-    NodeCallStmt(const std::string& name, const std::vector<std::shared_ptr<NodeExp>>& as) : NodeStmt(), name(name), args(as) {}
+    NodeCallStmt(const std::string& name, std::vector<std::shared_ptr<NodeExp>>&& as) : NodeStmt(), name(name), args(std::move(as)) {}
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::string name;
     std::vector<std::shared_ptr<NodeExp>> args;
@@ -481,7 +481,7 @@ struct NodeLoopParam : public NodeDef
 
 struct NodeBlock : public Node
 {
-    NodeBlock(const NameTable& t, const std::vector <std::shared_ptr<NodeStmt>>& ss) : Node(), table(t), stmts(ss) {}
+    NodeBlock(const NameTable& t, std::vector <std::shared_ptr<NodeStmt>>&& ss) : Node(), table(t), stmts(std::move(ss)) {}
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     NameTable table;
     std::vector <std::shared_ptr<NodeStmt>> stmts;
@@ -502,7 +502,7 @@ struct NodeBuiltInSubDef : public NodeSubDef
 
 struct NodeFuncDef : public NodeDef
 {
-    NodeFuncDef(const std::string& name, const std::vector<std::string>& ps, const std::shared_ptr<NodeBlock>& blk) : NodeDef(name), params_(ps), block(blk) {}
+    NodeFuncDef(const std::string& name, std::vector<std::string>&& ps, const std::shared_ptr<NodeBlock>& blk) : NodeDef(name), params_(std::move(ps)), block(blk) {}
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::vector<std::string> params_;
     std::shared_ptr<NodeBlock> block;
@@ -510,7 +510,7 @@ struct NodeFuncDef : public NodeDef
 
 struct NodeTaskDef : public NodeDef
 {
-    NodeTaskDef(const std::string& name, const std::vector<std::string>& ps, std::shared_ptr<NodeBlock>& blk) : NodeDef(name), params_(ps), block(blk) {}
+    NodeTaskDef(const std::string& name, std::vector<std::string>&& ps, std::shared_ptr<NodeBlock>& blk) : NodeDef(name), params_(std::move(ps)), block(blk) {}
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::vector<std::string> params_;
     std::shared_ptr<NodeBlock> block;
@@ -589,7 +589,7 @@ struct NodeElseIf : public NodeStmt
 struct NodeIf : public NodeStmt
 {
 public:
-    NodeIf(const std::shared_ptr<NodeExp>& c, const std::shared_ptr<NodeBlock>& t, const std::vector<std::shared_ptr<NodeElseIf>>& elsifs, const std::shared_ptr<NodeBlock>& e) : NodeStmt(), cond(c), thenBlock(t), elsifs(elsifs), elseBlock(e) {}
+    NodeIf(const std::shared_ptr<NodeExp>& c, const std::shared_ptr<NodeBlock>& t, std::vector<std::shared_ptr<NodeElseIf>>&& elsifs, const std::shared_ptr<NodeBlock>& e) : NodeStmt(), cond(c), thenBlock(t), elsifs(std::move(elsifs)), elseBlock(e) {}
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::shared_ptr<NodeExp> cond;
     std::shared_ptr<NodeBlock> thenBlock;
@@ -599,7 +599,7 @@ public:
 
 struct NodeCase : public Node
 {
-    NodeCase(const std::vector<std::shared_ptr<NodeExp>>& es, const std::shared_ptr<NodeBlock>& blk) : Node(), exps(es), block(blk) {}
+    NodeCase(std::vector<std::shared_ptr<NodeExp>>&& es, const std::shared_ptr<NodeBlock>& blk) : Node(), exps(std::move(es)), block(blk) {}
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::vector<std::shared_ptr<NodeExp>> exps;
     std::shared_ptr<NodeBlock> block;
@@ -607,7 +607,7 @@ struct NodeCase : public Node
 
 struct NodeAlternative : public NodeStmt
 {
-    NodeAlternative(const std::shared_ptr<NodeExp>& c, const std::vector<std::shared_ptr<NodeCase>>& cs, const std::shared_ptr<NodeBlock>& os) : NodeStmt(), cond(c), cases(cs), others(os) {}
+    NodeAlternative(const std::shared_ptr<NodeExp>& c, std::vector<std::shared_ptr<NodeCase>>&& cs, const std::shared_ptr<NodeBlock>& os) : NodeStmt(), cond(c), cases(std::move(cs)), others(os) {}
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::shared_ptr<NodeExp> cond;
     std::vector<std::shared_ptr<NodeCase>> cases;
@@ -616,7 +616,7 @@ struct NodeAlternative : public NodeStmt
 
 struct NodeHeader : public NodeStmt
 {
-    NodeHeader(const std::wstring& name, const std::vector<std::wstring>& params_) : NodeStmt(), name(name), params_(params_) {}
+    NodeHeader(const std::wstring& name, std::vector<std::wstring>&& params) : NodeStmt(), name(name), params_(std::move(params)) {}
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::wstring name;
     std::vector<std::wstring> params_;

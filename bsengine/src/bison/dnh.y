@@ -258,7 +258,7 @@ static void AddDef(DnhParseContext* ctx, NodeDef* def)
 %%
 program            : stmts TK_EOF
                       {
-                          ctx->result = std::make_shared<NodeBlock>(ctx->env->table, *$1);
+                          ctx->result = std::make_shared<NodeBlock>(ctx->env->table, std::move(*$1));
                           ctx->result->srcPos = std::make_shared<SourcePos>(SourcePos({1, 1, ctx->lexer->GetCurrentFilePath()}));
                           delete($1);
                       }
@@ -311,7 +311,7 @@ single-stmt        : none             { $$ = NULL; }
                    | left-value TK_PRED { $$ = new NodePred(std::shared_ptr<NodeLeftVal>($1)); FixPos($$, @2); }
 
 call-stmt          : TK_IDENT { $$ = new NodeCallStmt(*$1, {}); FixPos($$, @1); delete($1); }
-                   | TK_IDENT TK_LPAREN exps TK_RPAREN { $$ = new NodeCallStmt(*$1, *$3); FixPos($$, @1); delete($1); delete($3); }
+                   | TK_IDENT TK_LPAREN exps TK_RPAREN { $$ = new NodeCallStmt(*$1, std::move(*$3)); FixPos($$, @1); delete($1); delete($3); }
 
 yield              : TK_YIELD { $$ = new NodeYield(); FixPos($$, @1); }
 break              : TK_BREAK { $$ = new NodeBreak(); FixPos($$, @1); }
@@ -320,7 +320,7 @@ new-scope           : { auto newEnv = std::make_shared<Env>(); newEnv->parent = 
 
 block              : TK_LBRACE stmts TK_RBRACE
                        {
-                           $$ = new NodeBlock(ctx->env->table, *$2);
+                           $$ = new NodeBlock(ctx->env->table, std::move(*$2));
                            FixPos($$, @1);
                            delete($2);
                            ctx->env = ctx->env->parent;
@@ -359,13 +359,13 @@ func-def           : TK_FUNCTION TK_IDENT { CheckDupDef(ctx, @2, *$2); } new-sco
                        }
                        block
                        {
-                           auto def = new NodeFuncDef(*$2, *$5, block($7));
+                           auto def = new NodeFuncDef(*$2, std::move(*$5), block($7));
                            FixPos(def, @1);
                            AddDef(ctx, def);
                            delete($2); delete($5);
                        }
 
-task-def           : TK_TASK TK_IDENT { CheckDupDef(ctx, @2, *$2); } new-scope opt-params block { auto def = new NodeTaskDef(*$2, *$5, block($6)); FixPos(def, @1); AddDef(ctx, def); delete($2); delete($5); }
+task-def           : TK_TASK TK_IDENT { CheckDupDef(ctx, @2, *$2); } new-scope opt-params block { auto def = new NodeTaskDef(*$2, std::move(*$5), block($6)); FixPos(def, @1); AddDef(ctx, def); delete($2); delete($5); }
 
 params             : params1 opt-comma { $$ = $1; }
                    | none { $$ = new std::vector<std::string>(); }
@@ -386,7 +386,7 @@ opt-nullparams     : TK_LPAREN TK_RPAREN
 
 local              : TK_LOCAL new-scope block { $$ = new NodeLocal(block($3)); FixPos($$, @1); }
 
-if                 : TK_IF cond new-scope block elsifs opt-else { $$ = new NodeIf(exp($2), block($4), *$5, block($6)); FixPos($$, @1); delete($5); }
+if                 : TK_IF cond new-scope block elsifs opt-else { $$ = new NodeIf(exp($2), block($4), std::move(*$5), block($6)); FixPos($$, @1); delete($5); }
 
 elsifs             : none         { $$ = new std::vector<std::shared_ptr<NodeElseIf>>(); }
                    | elsifs elsif { $$ = $1; $$->push_back(std::shared_ptr<NodeElseIf>($2)); }
@@ -396,12 +396,12 @@ elsif              : TK_ELSE TK_IF cond new-scope block { $$ = new NodeElseIf(ex
 opt-else           : TK_ELSE new-scope block { $$ = $3; }
                    | none                    { $$ = NULL; }
 
-alternative        : TK_ALTERNATIVE TK_LPAREN exp TK_RPAREN cases opt-others { $$ = new NodeAlternative(exp($3), *$5, block($6)); FixPos($$, @1); delete($5); }
+alternative        : TK_ALTERNATIVE TK_LPAREN exp TK_RPAREN cases opt-others { $$ = new NodeAlternative(exp($3), std::move(*$5), block($6)); FixPos($$, @1); delete($5); }
 
 cases              : none       { $$ = new std::vector<std::shared_ptr<NodeCase>>(); }
                    | cases case { $$ = $1; $$->push_back(std::shared_ptr<NodeCase>($2)); }
 
-case               : TK_CASE TK_LPAREN exps1 TK_RPAREN new-scope block { $$ = new NodeCase(*$3, block($6)); FixPos($$, @1); delete $3; }
+case               : TK_CASE TK_LPAREN exps1 TK_RPAREN new-scope block { $$ = new NodeCase(std::move(*$3), block($6)); FixPos($$, @1); delete $3; }
 
 opt-others         : TK_OTHERS new-scope block  { $$ = $3; FixPos($3, @1); }
                    | none                       { $$ = NULL; }
@@ -423,7 +423,7 @@ header             : TK_HEADER TK_LBRACKET header-params TK_RBRACKET
                        {
                            if (ctx->lexer->GetIncludeStackSize() == 1)
                            {
-                               auto header = new NodeHeader(*$1, *$3);
+                               auto header = new NodeHeader(*$1, std::move(*$3));
                                FixPos(header, @1);
                                ctx->headers.push_back(*header);
                                $$ = header;
@@ -481,7 +481,7 @@ exps1              : exps1 TK_COMMA exp { $$ = $1; $1->push_back(exp($3)); }
 return             : TK_RETURN exp { $$ = new NodeReturn(exp($2)); FixPos($$, @1); }
                    | TK_RETURN     { $$ = new NodeReturnVoid(); FixPos($$, @1); }
 
-left-value         : TK_IDENT indices { $$ = new NodeLeftVal(*$1, *$2); FixPos($$, @1); delete($1); delete($2); }
+left-value         : TK_IDENT indices { $$ = new NodeLeftVal(*$1, std::move(*$2)); FixPos($$, @1); delete($1); delete($2); }
 
 indices            : indices1
                    | none  { $$ = new std::vector<std::shared_ptr<NodeExp>>(); }
@@ -533,9 +533,9 @@ binop              : exp TK_PLUS exp  { $$ = new NodeAdd(exp($1),exp($3)); FixPo
                    | exp TK_OR exp    { $$ = new NodeOr(exp($1),exp($3));  FixPos($$, @2); }
 
 call-exp           : TK_IDENT                          { $$ = new NodeNoParenCallExp(*$1); FixPos($$, @1); delete($1); }
-                   | TK_IDENT TK_LPAREN exps TK_RPAREN { $$ = new NodeCallExp(*$1, *$3); FixPos($$, @1); delete($1); delete($3); }
+                   | TK_IDENT TK_LPAREN exps TK_RPAREN { $$ = new NodeCallExp(*$1, std::move(*$3)); FixPos($$, @1); delete($1); delete($3); }
 
-lit                : TK_NUM   { $$ = new NodeNum(*$1);  FixPos($$, @1); delete $1; }
+lit                : TK_NUM   { $$ = new NodeNum(std::move(*$1));  FixPos($$, @1); delete $1; }
                    | TK_CHAR  { $$ = new NodeChar($1); FixPos($$, @1); }
                    | TK_STR
                        {
@@ -545,7 +545,7 @@ lit                : TK_NUM   { $$ = new NodeNum(*$1);  FixPos($$, @1); delete $
                        }
                    | array
 
-array              : TK_LBRACKET exps TK_RBRACKET { $$ = new NodeArray(*$2); FixPos($$, @1); delete($2); }
+array              : TK_LBRACKET exps TK_RBRACKET { $$ = new NodeArray(std::move(*$2)); FixPos($$, @1); delete($2); }
 
 array-access       : primary TK_LBRACKET exp TK_RBRACKET   { $$ = new NodeArrayRef(exp($1), exp($3)); FixPos($$, @2); }
                    | primary TK_LBRACKET range TK_RBRACKET { $$ = new NodeArraySlice(exp($1), std::shared_ptr<NodeRange>($3)); FixPos($$, @2); }
