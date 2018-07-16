@@ -11,12 +11,11 @@
 
 #include <bstorm/logger.hpp>
 #include <bstorm/package.hpp>
-#include <bstorm/util.hpp>
+#include <bstorm/string_util.hpp>
 #include <bstorm/input_device.hpp>
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/render_target.hpp>
 #include <bstorm/config.hpp>
-#include <bstorm/const.hpp>
 #include <bstorm/th_dnh_def.hpp>
 #include <bstorm/version.hpp>
 #include <bstorm/engine.hpp>

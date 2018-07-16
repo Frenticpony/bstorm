@@ -3,7 +3,7 @@
 #include <bstorm/obj_render.hpp>
 
 #include <bstorm/dnh_const.hpp>
-#include <bstorm/util.hpp>
+#include <bstorm/math_util.hpp>
 #include <bstorm/shader.hpp>
 #include <bstorm/texture.hpp>
 #include <bstorm/render_target.hpp>

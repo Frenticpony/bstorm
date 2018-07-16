@@ -1,7 +1,6 @@
 ﻿#include "util.hpp"
 
 #include <bstorm/dnh_const.hpp>
-#include <bstorm/const.hpp>
 #include <bstorm/texture.hpp>
 #include <bstorm/intersection.hpp>
 #include <bstorm/obj_move.hpp>

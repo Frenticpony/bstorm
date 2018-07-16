@@ -1,6 +1,5 @@
 ﻿#include <bstorm/semantics_checker.hpp>
 
-#include <bstorm/util.hpp>
 #include <bstorm/env.hpp>
 
 namespace bstorm

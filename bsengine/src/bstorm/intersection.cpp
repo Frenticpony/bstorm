@@ -3,7 +3,8 @@
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/point2D.hpp>
 #include <bstorm/vertex.hpp>
-#include <bstorm/util.hpp>
+#include <bstorm/math_util.hpp>
+#include <bstorm/ptr_util.hpp>
 #include <bstorm/dx_util.hpp>
 #include <bstorm/renderer.hpp>
 #include <bstorm/obj_enemy.hpp>

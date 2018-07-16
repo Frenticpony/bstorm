@@ -1,7 +1,7 @@
 ﻿#include <bstorm/obj_text.hpp>
 
 #include <bstorm/dnh_const.hpp>
-#include <bstorm/util.hpp>
+#include <bstorm/string_util.hpp>
 #include <bstorm/dx_util.hpp>
 #include <bstorm/vertex.hpp>
 #include <bstorm/font.hpp>

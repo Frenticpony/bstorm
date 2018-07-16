@@ -1,6 +1,5 @@
 #include <bstorm/config.hpp>
 
-#include <bstorm/util.hpp>
 #include <bstorm/logger.hpp>
 #include <bstorm/version.hpp>
 

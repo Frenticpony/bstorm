@@ -1,6 +1,6 @@
 #include <bstorm/mesh.hpp>
 
-#include <bstorm/util.hpp>
+#include <bstorm/file_util.hpp>
 #include <bstorm/logger.hpp>
 #include <bstorm/texture.hpp>
 #include <bstorm/mqo.hpp>

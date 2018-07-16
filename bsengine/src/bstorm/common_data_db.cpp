@@ -1,6 +1,7 @@
 ﻿#include <bstorm/common_data_db.hpp>
 
-#include <bstorm/util.hpp>
+#include <bstorm/file_util.hpp>
+#include <bstorm/string_util.hpp>
 #include <bstorm/dnh_value.hpp>
 #include <bstorm/log_error.hpp>
 

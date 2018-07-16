@@ -33,9 +33,11 @@
     <ClInclude Include="src\bstorm\font_params.hpp" />
     <ClInclude Include="src\bstorm\key_types.hpp" />
     <ClInclude Include="src\bstorm\lua_util.hpp" />
+    <ClInclude Include="src\bstorm\math_util.hpp" />
     <ClInclude Include="src\bstorm\nullable_shared_ptr.hpp" />
     <ClInclude Include="src\bstorm\path_const.hpp" />
     <ClInclude Include="src\bstorm\point2D.hpp" />
+    <ClInclude Include="src\bstorm\ptr_util.hpp" />
     <ClInclude Include="src\bstorm\rect.hpp" />
     <ClInclude Include="src\bstorm\script_name_prefix.hpp" />
     <ClInclude Include="src\bstorm\serialized_script.hpp" />
@@ -90,11 +92,12 @@
     <ClInclude Include="src\bstorm\sound_device.hpp" />
     <ClInclude Include="src\bstorm\source_map.hpp" />
     <ClInclude Include="src\bstorm\stage_types.hpp" />
+    <ClInclude Include="src\bstorm\string_util.hpp" />
     <ClInclude Include="src\bstorm\texture.hpp" />
     <ClInclude Include="src\bstorm\thread_util.hpp" />
     <ClInclude Include="src\bstorm\th_dnh_def.hpp" />
     <ClInclude Include="src\bstorm\time_point.hpp" />
-    <ClInclude Include="src\bstorm\util.hpp" />
+    <ClInclude Include="src\bstorm\file_util.hpp" />
     <ClInclude Include="src\bstorm\version.hpp" />
     <ClInclude Include="src\bstorm\vertex.hpp" />
     <ClInclude Include="src\bison\dnh.tab.hpp" />
@@ -135,6 +138,7 @@
     <ClCompile Include="src\bstorm\parser.cpp" />
     <ClCompile Include="src\bstorm\replay_data.cpp" />
     <ClCompile Include="src\bstorm\serialized_script.cpp" />
+    <ClCompile Include="src\bstorm\string_util.cpp" />
     <ClCompile Include="src\bstorm\time_point.cpp" />
     <ClCompile Include="src\bstorm\vertex.cpp" />
     <ClCompile Include="src\reflex\dnh_lexer.cpp" />
@@ -168,7 +172,7 @@
     <ClCompile Include="src\bstorm\source_map.cpp" />
     <ClCompile Include="src\bstorm\texture.cpp" />
     <ClCompile Include="src\bstorm\th_dnh_def.cpp" />
-    <ClCompile Include="src\bstorm\util.cpp" />
+    <ClCompile Include="src\bstorm\file_util.cpp" />
     <ClCompile Include="tool\reflex\lib\convert.cpp" />
     <ClCompile Include="tool\reflex\lib\debug.cpp" />
     <ClCompile Include="tool\reflex\lib\error.cpp" />

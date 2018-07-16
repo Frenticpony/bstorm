@@ -3,7 +3,7 @@
 #include <bstorm/vertex.hpp>
 #include <bstorm/color_rgb.hpp>
 #include <bstorm/dnh_const.hpp>
-#include <bstorm/util.hpp>
+#include <bstorm/ptr_util.hpp>
 #include <bstorm/camera2D.hpp>
 #include <bstorm/shader.hpp>
 #include <bstorm/texture.hpp>

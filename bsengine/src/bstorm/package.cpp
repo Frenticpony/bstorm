@@ -1,6 +1,8 @@
 ﻿#include <bstorm/package.hpp>
 
-#include <bstorm/util.hpp>
+#include <bstorm/file_util.hpp>
+#include <bstorm/math_util.hpp>
+#include <bstorm/string_util.hpp>
 #include <bstorm/path_const.hpp>
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/parser.hpp>

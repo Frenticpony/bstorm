@@ -1,7 +1,7 @@
 ﻿#include <bstorm/item_data.hpp>
 
 #include <bstorm/dnh_const.hpp>
-#include <bstorm/util.hpp>
+#include <bstorm/file_util.hpp>
 #include <bstorm/parser.hpp>
 #include <bstorm/texture.hpp>
 #include <bstorm/logger.hpp>

@@ -43,7 +43,7 @@ struct DnhParseContext
 #include "../reflex/dnh_lexer.hpp"
 
 #include <bstorm/logger.hpp>
-#include <bstorm/util.hpp>
+#include <bstorm/string_util.hpp>
 
 #include <regex>
 

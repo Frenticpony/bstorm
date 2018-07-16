@@ -2,7 +2,7 @@
 
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/script_name_prefix.hpp>
-#include <bstorm/util.hpp>
+#include <bstorm/file_util.hpp>
 #include <bstorm/logger.hpp>
 #include <bstorm/dnh_value.hpp>
 #include <bstorm/obj.hpp>

@@ -1,6 +1,6 @@
 #include <bstorm/serialized_script.hpp>
 
-#include <bstorm/util.hpp>
+#include <bstorm/string_util.hpp>
 #include <bstorm/lua_util.hpp>
 #include <bstorm/logger.hpp>
 #include <bstorm/api.hpp>

@@ -6,7 +6,8 @@
 #include "user_def_data_browser.hpp"
 
 #include <bstorm/dnh_const.hpp>
-#include <bstorm/util.hpp>
+#include <bstorm/string_util.hpp>
+#include <bstorm/math_util.hpp>
 #include <bstorm/render_target.hpp>
 #include <bstorm/texture.hpp>
 #include <bstorm/font.hpp>

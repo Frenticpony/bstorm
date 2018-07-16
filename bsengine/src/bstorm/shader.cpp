@@ -1,8 +1,6 @@
-﻿#include <exception>
+﻿#include <bstorm/shader.hpp>
 
-#include <bstorm/shader.hpp>
-
-#include <bstorm/util.hpp>
+#include <bstorm/ptr_util.hpp>
 #include <bstorm/logger.hpp>
 
 namespace bstorm

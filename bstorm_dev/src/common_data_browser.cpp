@@ -3,7 +3,7 @@
 #include <imgui.h>
 
 #include <bstorm/dnh_const.hpp>
-#include <bstorm/util.hpp>
+#include <bstorm/string_util.hpp>
 #include <bstorm/package.hpp>
 #include <bstorm/dnh_value.hpp>
 #include <bstorm/common_data_db.hpp>

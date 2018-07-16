@@ -1,7 +1,8 @@
 ﻿#include <bstorm/code_generator.hpp>
 
 #include <bstorm/script_name_prefix.hpp>
-#include <bstorm/util.hpp>
+#include <bstorm/string_util.hpp>
+#include <bstorm/file_util.hpp>
 
 namespace bstorm
 {

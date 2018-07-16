@@ -1,7 +1,7 @@
 ﻿#include <bstorm/input_device.hpp>
 
 #include <bstorm/dnh_const.hpp>
-#include <bstorm/util.hpp>
+#include <bstorm/ptr_util.hpp>
 #include <bstorm/logger.hpp>
 
 namespace bstorm

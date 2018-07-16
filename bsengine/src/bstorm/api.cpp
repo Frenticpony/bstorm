@@ -2,7 +2,8 @@
 
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/script_name_prefix.hpp>
-#include <bstorm/util.hpp>
+#include <bstorm/file_util.hpp>
+#include <bstorm/string_util.hpp>
 #include <bstorm/lua_util.hpp>
 #include <bstorm/node.hpp>
 #include <bstorm/env.hpp>

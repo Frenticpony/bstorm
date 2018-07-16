@@ -1,7 +1,7 @@
 ﻿#include <bstorm/logger.hpp>
 #include <bstorm/engine.hpp>
 #include <bstorm/package.hpp>
-#include <bstorm/util.hpp>
+#include <bstorm/string_util.hpp>
 #include <bstorm/input_device.hpp>
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/render_target.hpp>

@@ -1,6 +1,6 @@
 #include <bstorm/logger.hpp>
 
-#include <bstorm/util.hpp>
+#include <bstorm/string_util.hpp>
 
 namespace bstorm
 {

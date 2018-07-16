@@ -1,6 +1,6 @@
 #include <bstorm/th_dnh_def.hpp>
 
-#include <bstorm/util.hpp>
+#include <bstorm/string_util.hpp>
 
 #include <fstream>
 #include <locale>

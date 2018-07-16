@@ -186,9 +186,6 @@
     <ClInclude Include="src\bstorm\th_dnh_def.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\bstorm\util.hpp">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="src\bstorm\script_runtime.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -268,6 +265,18 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\bstorm\path_const.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\bstorm\string_util.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\bstorm\ptr_util.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\bstorm\math_util.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\bstorm\file_util.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -449,9 +458,6 @@
     <ClCompile Include="src\bstorm\th_dnh_def.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\bstorm\util.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="src\bstorm\semantics_checker.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -486,6 +492,12 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\bstorm\serialized_script.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bstorm\string_util.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bstorm\file_util.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

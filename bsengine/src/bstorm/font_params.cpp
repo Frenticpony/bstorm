@@ -1,7 +1,6 @@
 #include <bstorm/font_params.hpp>
 
 #include <bstorm/dnh_const.hpp>
-#include <bstorm/util.hpp>
 
 namespace bstorm
 {
@@ -49,6 +48,13 @@ bool FontParams::operator==(const FontParams& params) const
 bool FontParams::operator!=(const FontParams& params) const
 {
     return !(*this == params);
+}
+
+template <class T>
+void hash_combine(std::size_t& seed, const T& v)
+{
+    std::hash<T> hasher;
+    seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 }
 
 size_t FontParams::hashValue() const

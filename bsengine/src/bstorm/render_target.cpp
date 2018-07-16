@@ -1,6 +1,6 @@
 ﻿#include <bstorm/render_target.hpp>
 
-#include <bstorm/util.hpp>
+#include <bstorm/ptr_util.hpp>
 #include <bstorm/logger.hpp>
 
 #include <exception>

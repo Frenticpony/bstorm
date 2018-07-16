@@ -1,6 +1,6 @@
 ﻿#include <bstorm/dnh_value.hpp>
 
-#include <bstorm/util.hpp>
+#include <bstorm/string_util.hpp>
 
 namespace bstorm
 {

@@ -1,7 +1,8 @@
 ﻿#include <bstorm/obj_file.hpp>
 
 #include <bstorm/dnh_const.hpp>
-#include <bstorm/util.hpp>
+#include <bstorm/string_util.hpp>
+#include <bstorm/file_util.hpp>
 
 namespace bstorm
 {

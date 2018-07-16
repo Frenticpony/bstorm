@@ -4,7 +4,7 @@
 
 #include <bstorm/render_target.hpp>
 #include <bstorm/package.hpp>
-#include <bstorm/util.hpp>
+#include <bstorm/string_util.hpp>
 
 #include "play_controller.hpp"
 #include "game_view.hpp"

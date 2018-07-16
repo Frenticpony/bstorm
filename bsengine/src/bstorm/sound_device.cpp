@@ -1,6 +1,8 @@
 ﻿#include <bstorm/sound_device.hpp>
 
-#include <bstorm/util.hpp>
+#include <bstorm/file_util.hpp>
+#include <bstorm/math_util.hpp>
+#include <bstorm/ptr_util.hpp>
 #include <bstorm/logger.hpp>
 
 #include <mmsystem.h>

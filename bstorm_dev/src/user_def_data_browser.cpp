@@ -4,7 +4,6 @@
 
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/texture.hpp>
-#include <bstorm/util.hpp>
 #include <bstorm/shot_data.hpp>
 #include <bstorm/item_data.hpp>
 #include <bstorm/package.hpp>

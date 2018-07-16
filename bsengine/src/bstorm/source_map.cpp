@@ -1,6 +1,6 @@
 #include <bstorm/source_map.hpp>
 
-#include <bstorm/util.hpp>
+#include <bstorm/string_util.hpp>
 
 #include <yas/mem_streams.hpp>
 #include <yas/binary_iarchive.hpp>

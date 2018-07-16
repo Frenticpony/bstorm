@@ -2,7 +2,8 @@
 #include <imgui_internal.h>
 #include <IconsFontAwesome_c.h>
 
-#include <bstorm/util.hpp>
+#include <bstorm/file_util.hpp>
+#include <bstorm/string_util.hpp>
 #include <bstorm/source_map.hpp>
 
 #include "log_window.hpp"

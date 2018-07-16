@@ -39,7 +39,6 @@ struct MqoParseContext
 %code
 { // mqo.tab.cpp after #include mqo.tab.hpp
 #include <bstorm/logger.hpp>
-#include <bstorm/util.hpp>
 
 #include "../reflex/mqo_lexer.hpp"
 

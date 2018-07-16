@@ -3,7 +3,8 @@
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/dnh_value.hpp>
 #include <bstorm/time_point.hpp>
-#include <bstorm/util.hpp>
+#include <bstorm/file_util.hpp>
+#include <bstorm/string_util.hpp>
 #include <bstorm/logger.hpp>
 #include <bstorm/log_error.hpp>
 

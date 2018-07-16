@@ -56,7 +56,6 @@ struct Int5 {
 #include "../reflex/user_def_data_lexer.hpp"
 
 #include <bstorm/dnh_const.hpp>
-#include <bstorm/util.hpp>
 #include <bstorm/logger.hpp>
 
 #include <algorithm>

@@ -5,7 +5,7 @@
 #include "reflex/mqo_lexer.hpp"
 #include "bison/mqo.tab.hpp"
 
-#include <bstorm/util.hpp>
+#include <bstorm/string_util.hpp>
 #include <bstorm/file_loader.hpp>
 #include <bstorm/env.hpp>
 #include <bstorm/node.hpp>

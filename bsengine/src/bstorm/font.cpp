@@ -1,7 +1,8 @@
 ﻿#include <bstorm/font.hpp>
 
 #include <bstorm/dnh_const.hpp>
-#include <bstorm/util.hpp>
+#include <bstorm/math_util.hpp>
+#include <bstorm/ptr_util.hpp>
 #include <bstorm/thread_util.hpp>
 #include <bstorm/graphic_device.hpp>
 

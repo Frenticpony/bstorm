@@ -1,7 +1,7 @@
 ﻿#include <bstorm/obj_shot.hpp>
 
 #include <bstorm/dnh_const.hpp>
-#include <bstorm/util.hpp>
+#include <bstorm/math_util.hpp>
 #include <bstorm/dx_util.hpp>
 #include <bstorm/renderer.hpp>
 #include <bstorm/texture.hpp>

@@ -3,7 +3,8 @@
 #include <bstorm/file_loader.hpp>
 #include <bstorm/script_info.hpp>
 #include <bstorm/parser.hpp>
-#include <bstorm/util.hpp>
+#include <bstorm/file_util.hpp>
+#include <bstorm/string_util.hpp>
 #include <bstorm/logger.hpp>
 #include <bstorm/path_const.hpp>
 #include <bstorm/script.hpp>

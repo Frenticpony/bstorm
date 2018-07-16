@@ -1,5 +1,5 @@
 #include <bstorm/color_rgb.hpp>
-#include <bstorm/util.hpp>
+#include <bstorm/math_util.hpp>
 
 #include <algorithm>
 
