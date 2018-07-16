@@ -3,18 +3,13 @@
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/const.hpp>
 #include <bstorm/util.hpp>
-#include <bstorm/script_info.hpp>
-#include <bstorm/parser.hpp>
-#include <bstorm/obj.hpp>
-#include <bstorm/dnh_value.hpp>
-#include <bstorm/package.hpp>
-#include <bstorm/semantics_checker.hpp>
-#include <bstorm/code_generator.hpp>
-#include <bstorm/api.hpp>
 #include <bstorm/logger.hpp>
-#include <bstorm/package.hpp>
-#include <bstorm/time_point.hpp>
+#include <bstorm/dnh_value.hpp>
+#include <bstorm/obj.hpp>
+#include <bstorm/api.hpp>
+#include <bstorm/source_map.hpp>
 #include <bstorm/serialized_script.hpp>
+#include <bstorm/package.hpp>
 #include <bstorm/script_runtime.h>
 
 #include <exception>
@@ -24,135 +19,18 @@ namespace bstorm
 {
 const std::unordered_set<std::wstring> ignoreScriptExts{ L".png", L".jpg", L".jpeg", L".bmp", L".gif", L".dds", L".hdr", L".dib", L".pfm", L".tif", L".tiff", L".ttf", L".otf", L".mqo", L".mp3", L".mp4", L".avi", L".ogg", L".wav", L".wave", L".def", L".dat", L".fx", L".exe" };
 
-Script::Script(const std::wstring& p, ScriptType type, const std::wstring& version, int id, const std::shared_ptr<FileLoader>& fileLoader, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& srcPos) :
-    L_(NULL),
-    path_(GetCanonicalPath(p)),
+Script::Script(const std::wstring& path, ScriptType type, const std::wstring& version, int id, const std::shared_ptr<FileLoader>& fileLoader, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& srcPos) :
+    L_(luaL_newstate(), lua_close),
+    path_(GetCanonicalPath(path)),
     type_(type),
     version_(version),
     id_(id),
     compileSrcPos_(srcPos),
     luaStateBusy_(false),
     autoDeleteObjectEnable_(false),
-    package_(package)
+    package_(package),
+    serializedScript_(std::make_shared<SerializedScript>(path_, type_, version_, fileLoader))
 {
-    try
-    {
-        L_ = lua_open();
-        // Lua標準API登録
-        luaL_openlibs(L_);
-
-        // 弾幕風標準API登録
-        auto globalEnv = std::make_shared<Env>();
-        RegisterStandardAPI(L_, type_, version_, globalEnv->table);
-
-        // スクリプトをバインド
-        SetScript(L_, this);
-
-        ScriptInfo scriptInfo;
-
-        // パース
-        std::shared_ptr<NodeBlock> program;
-        {
-            Logger::WriteLog(std::move(
-                Log(Log::Level::LV_DETAIL)
-                .SetMessage("parse start...")
-                .SetParam(Log::Param(Log::Param::Tag::SCRIPT, path_))
-                .AddSourcePos(compileSrcPos_)));
-            TimePoint tp;
-            program = ParseDnhScript(path_, globalEnv, true, &scriptInfo, fileLoader);
-            Logger::WriteLog(std::move(
-                Log(Log::Level::LV_DETAIL)
-                .SetMessage("...parse complete " + std::to_string(tp.GetElapsedMilliSec()) + " [ms].")
-                .SetParam(Log::Param(Log::Param::Tag::SCRIPT, path_))
-                .AddSourcePos(compileSrcPos_)));
-        }
-
-        // 静的エラー検査
-        {
-            SemanticsChecker checker;
-            auto errors_ = checker.Check(*program);
-            for (auto& err : errors_)
-            {
-                Logger::WriteLog(err);
-            }
-            if (!errors_.empty())
-            {
-                throw Log(Log::Level::LV_ERROR)
-                    .SetMessage("found " + std::to_string(errors_.size()) + " script error" + (errors_.size() > 1 ? "s." : "."))
-                    .SetParam(Log::Param(Log::Param::Tag::SCRIPT, path_));
-            }
-        }
-
-        // 変換
-        CodeGenerator codeGen;
-        {
-            Logger::WriteLog(std::move(
-                Log(Log::Level::LV_DETAIL)
-                .SetMessage("codegen start...")
-                .SetParam(Log::Param(Log::Param::Tag::SCRIPT, path_))
-                .AddSourcePos(compileSrcPos_)));
-            TimePoint tp;
-            codeGen.Generate(true, *program);
-            Logger::WriteLog(std::move(
-                Log(Log::Level::LV_DETAIL)
-                .SetMessage("...codegen complete " + std::to_string(tp.GetElapsedMilliSec()) + " [ms].")
-                .SetParam(Log::Param(Log::Param::Tag::SCRIPT, path_))
-                .AddSourcePos(compileSrcPos_)));
-        }
-
-        // ランタイム読み込み
-        luaL_loadbuffer(L_, (const char *)luaJIT_BC_script_runtime, luaJIT_BC_script_runtime_SIZE, DNH_RUNTIME_NAME);
-        CallLuaChunk(0);
-
-        // コンパイル
-        {
-            Logger::WriteLog(std::move(
-                Log(Log::Level::LV_DETAIL)
-                .SetMessage("compile start...")
-                .SetParam(Log::Param(Log::Param::Tag::SCRIPT, path_))
-                .AddSourcePos(compileSrcPos_)));
-            TimePoint tp;
-            int hasCompileError = luaL_loadstring(L_, codeGen.GetCode().c_str());
-            if (hasCompileError)
-            {
-                std::string msg = lua_tostring(L_, -1); lua_pop(L_, 1);
-                if (msg.find("has more than 200 local variables") != std::string::npos)
-                {
-                    auto ss = Split(ToUnicode(msg), L':');
-                    Log err = Log(Log::Level::LV_ERROR)
-                        .SetMessage("too many variable used in one function.");
-                    if (ss.size() >= 2)
-                    {
-                        int line = _wtoi(ss[1].c_str());
-                        err.AddSourcePos(codeGen.GetSourceMap().GetSourcePos(line));
-                    } else
-                    {
-                        err.SetParam(Log::Param(Log::Param::Tag::SCRIPT, path_));
-                    }
-                    throw err;
-                } else
-                {
-                    throw Log(Log::Level::LV_ERROR)
-                        .SetMessage("unexpected compile error occured, please send a bug report. (" + msg + ")")
-                        .SetParam(Log::Param(Log::Param::Tag::SCRIPT, path_));
-                }
-            }
-            Logger::WriteLog(std::move(
-                Log(Log::Level::LV_DETAIL)
-                .SetMessage("...compile complete " + std::to_string(tp.GetElapsedMilliSec()) + " [ms].")
-                .SetParam(Log::Param(Log::Param::Tag::SCRIPT, path_))
-                .AddSourcePos(compileSrcPos_)));
-        }
-        serializedScript_ = std::make_shared<SerializedScript>(scriptInfo, codeGen.GetSourceMap(), L_);
-    } catch (...)
-    {
-        if (L_)
-        {
-            lua_close(L_);
-            L_ = NULL;
-        }
-        throw;
-    }
 }
 
 Script::~Script()
@@ -167,7 +45,6 @@ Script::~Script()
             }
         }
     }
-    lua_close(L_);
 }
 
 int Script::GetID() const
@@ -205,24 +82,24 @@ void Script::RunBuiltInSub(const std::string &name)
     if (state_.isFailed) { return; }
     if (luaStateBusy_)
     {
-        lua_getglobal(L_, (DNH_VAR_PREFIX + name).c_str());
-        if (lua_isfunction(L_, -1))
+        lua_getglobal(L_.get(), (DNH_VAR_PREFIX + name).c_str());
+        if (lua_isfunction(L_.get(), -1))
         {
             CallLuaChunk(0);
         } else
         {
-            lua_pop(L_, 1);
+            lua_pop(L_.get(), 1);
         }
     } else
     {
-        lua_getglobal(L_, (std::string(DNH_RUNTIME_PREFIX) + "run").c_str());
-        lua_getglobal(L_, (DNH_VAR_PREFIX + name).c_str());
-        if (lua_isfunction(L_, -1))
+        lua_getglobal(L_.get(), (std::string(DNH_RUNTIME_PREFIX) + "run").c_str());
+        lua_getglobal(L_.get(), (DNH_VAR_PREFIX + name).c_str());
+        if (lua_isfunction(L_.get(), -1))
         {
             CallLuaChunk(1);
         } else
         {
-            lua_pop(L_, 2);
+            lua_pop(L_.get(), 2);
         }
     }
 }
@@ -235,17 +112,17 @@ void Script::CallLuaChunk(int argCnt)
         Package::Current = package.get();
     } else
     {
-        lua_pop(L_, 1);
+        lua_pop(L_.get(), 1);
         return;
     }
 
     bool tmp = luaStateBusy_;
     luaStateBusy_ = true;
-    if (lua_pcall(L_, argCnt, 0, 0) != 0)
+    if (lua_pcall(L_.get(), argCnt, 0, 0) != 0)
     {
         luaStateBusy_ = false;
-        std::string msg = lua_tostring(L_, -1);
-        lua_pop(L_, 1);
+        std::string msg = lua_tostring(L_.get(), -1);
+        lua_pop(L_.get(), 1);
         if (!err_)
         {
             try
@@ -269,12 +146,29 @@ void Script::Load()
 {
     if (state_.isLoaded || IsClosed()) { return; }
 
-    CallLuaChunk(0); // exec toplevel chunk
+    // Lua標準API登録
+    luaL_openlibs(L_.get());
+
+    // 弾幕風標準API登録
+    RegisterStandardAPI(L_.get(), type_, version_, nullptr);
+
+    // ランタイム読み込み
+    luaL_loadbuffer(L_.get(), (const char *)luaJIT_BC_script_runtime, luaJIT_BC_script_runtime_SIZE, DNH_RUNTIME_NAME);
+    CallLuaChunk(0);
+
+    // スクリプトをバインド
+    SetScript(L_.get(), this);
+
+    // toplevel
+    luaL_loadbuffer(L_.get(), serializedScript_->GetByteCode(), serializedScript_->GetByteCodeSize(), "main");
+    CallLuaChunk(0);
+
+    // call @Loading
     RunBuiltInSub("Loading");
     Logger::WriteLog(std::move(
         Log(Log::Level::LV_INFO)
         .SetMessage("load script.")
-        .SetParam(Log::Param(Log::Param(Log::Param::Tag::SCRIPT, GetCanonicalPath(path_))))
+        .SetParam(Log::Param(Log::Param(Log::Param::Tag::SCRIPT, path_)))
         .AddSourcePos(compileSrcPos_)));
     state_.isLoaded = true;
 }
@@ -328,10 +222,10 @@ void Script::NotifyEvent(int eventType, const std::unique_ptr<DnhArray>& args)
 
     if (state_.isStarted)
     {
-        DnhReal((double)eventType).Push(L_);
-        lua_setglobal(L_, "script_event_type");
-        args->Push(L_);
-        lua_setglobal(L_, "script_event_args");
+        DnhReal((double)eventType).Push(L_.get());
+        lua_setglobal(L_.get(), "script_event_type");
+        args->Push(L_.get());
+        lua_setglobal(L_.get(), "script_event_args");
         SetScriptResult(std::make_unique<DnhNil>());
         RunBuiltInSub("Event");
     }

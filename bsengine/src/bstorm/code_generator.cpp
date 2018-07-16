@@ -5,15 +5,21 @@
 
 namespace bstorm
 {
+static std::string runtime(const std::string& name)
+{
+    return bstorm::DNH_RUNTIME_PREFIX + name;
+}
+
+static std::string builtin(const std::string& name)
+{
+    return bstorm::DNH_BUILTIN_FUNC_PREFIX + name;
+}
+
 static std::string varname(const std::string& name)
 {
     return bstorm::DNH_VAR_PREFIX + name;
 }
 
-static std::string runtime(const std::string& name)
-{
-    return bstorm::DNH_RUNTIME_PREFIX + name;
-}
 
 static bool isDeclarationNeeded(const std::shared_ptr<NodeDef>& def)
 {
@@ -108,9 +114,15 @@ void CodeGenerator::Traverse(NodeNoParenCallExp& call)
         std::dynamic_pointer_cast<NodeLoopParam>(def))
     {
         GenCheckNil(call.name);
-    } else if (call.name == "GetCurrentScriptDirectory" && std::dynamic_pointer_cast<NodeBuiltInFunc>(def))
+    } else if (std::dynamic_pointer_cast<NodeBuiltInFunc>(def))
     {
-        NodeStr(GetParentPath(*call.srcPos->filename) + L"/").Traverse(*this);
+        if (call.name == "GetCurrentScriptDirectory")
+        {
+            NodeStr(GetParentPath(*call.srcPos->filename) + L"/").Traverse(*this);
+        } else
+        {
+            AddCode(builtin(call.name) + "()");
+        }
     } else if (auto c = std::dynamic_pointer_cast<NodeConst>(def))
     {
         AddCode(c->value);
@@ -137,8 +149,14 @@ void CodeGenerator::Traverse(NodeCallExp& call)
 #endif
     } else
     {
-        AddCode(varname(call.name) + "(");
         bool isUserFunc = !std::dynamic_pointer_cast<NodeBuiltInFunc>(def);
+        if (isUserFunc)
+        {
+            AddCode(varname(call.name) + "(");
+        } else
+        {
+            AddCode(builtin(call.name) + "(");
+        }
         for (int i = 0; i < call.args.size(); i++)
         {
             if (i != 0) AddCode(",");
@@ -168,7 +186,7 @@ void CodeGenerator::AddCode(const std::string& s)
     {
         for (int i = 0; i < indentLevel_; i++) { code_ += tab; }
         isLineHead_ = false;
-}
+    }
 #endif
     code_ += s;
 }
@@ -451,6 +469,7 @@ void CodeGenerator::Traverse(NodeCallStmt& call)
     if (std::dynamic_pointer_cast<NodeConst>(def)) return;
 
     bool isTask = (bool)std::dynamic_pointer_cast<NodeTaskDef>(def);
+    bool isUserFunc = !std::dynamic_pointer_cast<NodeBuiltInFunc>(def);
     if (isTask)
     {
         AddCode(runtime("fork") + "(" + varname(call.name));
@@ -460,9 +479,14 @@ void CodeGenerator::Traverse(NodeCallStmt& call)
         }
     } else
     {
-        AddCode(varname(call.name) + "(");
+        if (isUserFunc)
+        {
+            AddCode(varname(call.name) + "(");
+        } else
+        {
+            AddCode(builtin(call.name) + "(");
+        }
     }
-    bool isUserFunc = !std::dynamic_pointer_cast<NodeBuiltInFunc>(def);
     for (int i = 0; i < call.args.size(); i++)
     {
         if (i != 0) AddCode(",");

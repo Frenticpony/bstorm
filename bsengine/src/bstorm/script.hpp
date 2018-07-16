@@ -2,7 +2,6 @@
 
 #include <bstorm/non_copyable.hpp>
 #include <bstorm/nullable_shared_ptr.hpp>
-#include <bstorm/source_map.hpp>
 #include <bstorm/script_info.hpp>
 
 #include <string>
@@ -23,6 +22,7 @@ class Package;
 class FileLoader;
 class DnhValue;
 class DnhArray;
+struct SourcePos;
 class SerializedScript;
 class Script : private NonCopyable
 {
@@ -56,13 +56,12 @@ public:
 private:
     void RunBuiltInSub(const std::string &name);
     void CallLuaChunk(int argCnt);
-    lua_State* L_;
+    std::unique_ptr<lua_State, decltype(&lua_close)> L_;
     const std::wstring path_;
     ScriptType type_;
     const std::wstring version_;
     const int id_;
     const std::shared_ptr<SourcePos> compileSrcPos_; // コンパイルを開始した場所
-    std::shared_ptr<SerializedScript> serializedScript_;
     bool luaStateBusy_;
     std::exception_ptr err_;
     std::deque<int> autoDeleteTargetObjIds_;
@@ -78,6 +77,7 @@ private:
         bool isFailed = false; // error
     } state_;
     std::weak_ptr<Package> package_;
+    std::shared_ptr<SerializedScript> serializedScript_;
 };
 
 class ScriptManager

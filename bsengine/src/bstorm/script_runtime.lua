@@ -29,7 +29,7 @@ local function r_type_eq(x, y)
   end
 end
 
-local r_ator = d_ator;
+local r_ator = b_ator;
 
 local function r_tonum(x)
   local t = type(x);
@@ -327,29 +327,29 @@ function r_abs(x)
   return math.abs(r_tonum(x));
 end
 
-d_add = r_add;
-d_subtract = r_sub;
-d_multiply = r_mul;
-d_divide = r_div;
-d_remainder = r_rem;
-d_power = r_pow
-d_not = r_not;
-d_negative = r_neg;
-d_compare = r_cmp;
-d_cat = r_cat;
-d_index_ = r_read;
-d_slice = r_slice;
-d_successor = r_succ;
-d_predecessor = r_pred;
-d_absolute = r_abs;
+b_add = r_add;
+b_subtract = r_sub;
+b_multiply = r_mul;
+b_divide = r_div;
+b_remainder = r_rem;
+b_power = r_pow
+b_not = r_not;
+b_negative = r_neg;
+b_compare = r_cmp;
+b_cat = r_cat;
+b_index_ = r_read;
+b_slice = r_slice;
+b_successor = r_succ;
+b_predecessor = r_pred;
+b_absolute = r_abs;
 
 -- throws
-function d_append(a,x)
+function b_append(a,x)
   return r_cat(a, {x});
 end
 
 -- throws
-function d_erase(a, i)
+function b_erase(a, i)
   if(type(a) ~= "table") then
       c_raiseerror("attempt to erase a non-array value.");
   end
@@ -369,7 +369,7 @@ function d_erase(a, i)
   return r;
 end
 
-function d_length(a)
+function b_length(a)
   if type(a) ~= "table" then
     return 0;
   else
@@ -379,66 +379,66 @@ end
 
 --- math function ---
 
-function d_min(x,y)
+function b_min(x,y)
   return math.min(r_tonum(x), r_tonum(y));
 end
 
-function d_max(x,y)
+function b_max(x,y)
   return math.max(r_tonum(x), r_tonum(y));
 end
 
-function d_log(x)
+function b_log(x)
   return math.log(r_tonum(x));
 end
 
-function d_log10(x)
+function b_log10(x)
   return math.log10(r_tonum(x));
 end
 
-function d_cos(x)
+function b_cos(x)
   return math.cos(math.rad(r_tonum(x)));
 end
 
-function d_sin(x)
+function b_sin(x)
   return math.sin(math.rad(r_tonum(x)));
 end
 
-function d_tan(x)
+function b_tan(x)
   return math.tan(math.rad(r_tonum(x)));
 end
 
-function d_acos(x)
+function b_acos(x)
   return math.deg(math.acos(r_tonum(x)));
 end
 
-function d_asin(x)
+function b_asin(x)
   return math.deg(math.asin(r_tonum(x)));
 end
 
-function d_atan(x)
+function b_atan(x)
   return math.deg(math.atan(r_tonum(x)));
 end
 
-function d_atan2(y,x)
+function b_atan2(y,x)
   return math.deg(math.atan2(r_tonum(y), r_tonum(x)));
 end
 
 math.randomseed(os.time()); -- FUTURE : Systemから与えられたシードで初期化
 
-function d_rand(min, max)
+function b_rand(min, max)
   min = r_tonum(min);
   return math.random() * (r_tonum(max) - min) + min;
 end
 
-function d_round(x)
+function b_round(x)
   return math.floor(r_tonum(x) + 0.5);
 end
 
-d_truncate = r_toint;
+b_truncate = r_toint;
 
-d_trunc = r_toint;
+b_trunc = r_toint;
 
-function d_floor(x)
+function b_floor(x)
   return math.floor(r_tonum(x));
 end
 
@@ -446,30 +446,30 @@ function r_ceil(x)
   return math.ceil(r_tonum(x));
 end
 
-d_ceil = r_ceil;
+b_ceil = r_ceil;
 
-function d_modc(x, y)
+function b_modc(x, y)
   return math.fmod(r_tonum(x), r_tonum(y));
 end
 
-function d_IntToString(n)
+function b_IntToString(n)
   return r_strtodnhstr(string.format("%d", r_toint(n)));
 end
 
-d_itoa = d_IntToString
+b_itoa = b_IntToString
 
-function d_rtoa(n)
+function b_rtoa(n)
   return r_strtodnhstr(string.format("%f", r_tonum(n)));
 end
 
 script_event_type = -1;
 script_event_args = {};
 
-function d_GetEventType()
+function b_GetEventType()
   return script_event_type;
 end
 
-function d_GetEventArgument(idx)
+function b_GetEventArgument(idx)
   -- 小数は切り捨てる
   idx = r_toint(idx) + 1;
   if idx < 1 or idx > #script_event_args then

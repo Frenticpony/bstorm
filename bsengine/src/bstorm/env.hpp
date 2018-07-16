@@ -10,8 +10,9 @@ namespace bstorm
 struct NodeDef;
 using NameTable = std::unordered_map<std::string, std::shared_ptr<NodeDef>>;
 
-struct Env
+class Env
 {
+public:
     NullableSharedPtr<NodeDef> FindDef(const std::string& name) const;
     bool IsRoot() const;
     NameTable table;

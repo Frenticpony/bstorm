@@ -14,6 +14,7 @@ constexpr int DEFAULT_ITEM_RENDER_PRIORITY = 60;
 constexpr int DEFAULT_CAMERA_FOCUS_PERMIT_RENDER_PRIORITY = 69;
 
 constexpr char* DNH_RUNTIME_PREFIX = "r_";
+constexpr char* DNH_BUILTIN_FUNC_PREFIX = "b_";
 constexpr char* DNH_VAR_PREFIX = "d_";
 
 constexpr wchar_t* FREE_PLAYER_DIR = L"script/player";

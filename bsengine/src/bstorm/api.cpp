@@ -23,6 +23,7 @@
 #include <bstorm/intersection.hpp>
 #include <bstorm/shot_data.hpp>
 #include <bstorm/item_data.hpp>
+#include <bstorm/source_map.hpp>
 #include <bstorm/script_info.hpp>
 #include <bstorm/script.hpp>
 #include <bstorm/logger.hpp>
@@ -42,6 +43,33 @@
 
 namespace bstorm
 {
+static int GetCurrentLine(lua_State* L)
+{
+    // コールスタックから現在の行番号を取得する
+    lua_Debug deb;
+    int level = 1;
+    int line = -1;
+    while (lua_getstack(L, level++, &deb))
+    {
+        deb.source = NULL;
+        lua_getinfo(L, "Sl", &deb);
+        // ランタイムの行ではなく、変換されたソースから行番号を取得
+        if (std::string(deb.source) != DNH_RUNTIME_NAME)
+        {
+            line = deb.currentline;
+            break;
+        }
+    }
+    return line;
+}
+
+static std::shared_ptr<SourcePos> GetSourcePos(lua_State * L)
+{
+    int line = GetCurrentLine(L);
+    Script* script = GetScript(L);
+    return script->GetSourcePos(line);
+}
+
 static int GetModuleDirectory(lua_State* L)
 {
     DnhArray(L"./").Push(L);
@@ -5576,36 +5604,6 @@ static int c_raiseerror(lua_State* L)
     return 0;
 }
 
-
-// helper
-
-int GetCurrentLine(lua_State* L)
-{
-    // コールスタックから現在の行番号を取得する
-    lua_Debug deb;
-    int level = 1;
-    int line = -1;
-    while (lua_getstack(L, level++, &deb))
-    {
-        deb.source = NULL;
-        lua_getinfo(L, "Sl", &deb);
-        // ランタイムの行ではなく、変換されたソースから行番号を取得
-        if (std::string(deb.source) != DNH_RUNTIME_NAME)
-        {
-            line = deb.currentline;
-            break;
-        }
-    }
-    return line;
-}
-
-std::shared_ptr<SourcePos> GetSourcePos(lua_State * L)
-{
-    int line = GetCurrentLine(L);
-    Script* script = GetScript(L);
-    return script->GetSourcePos(line);
-}
-
 static int WrapException(lua_State* L, lua_CFunction func)
 {
     try
@@ -5649,30 +5647,38 @@ void SetScript(lua_State* L, Script* p)
     SetPointerToLuaRegistry(L, "Script", p);
 }
 
-__declspec(noinline) static void addConst(NameTable& table, const char* name, const char* value)
+__declspec(noinline) static void addConst(const std::shared_ptr<Env>& env, const char* name, const char* value)
 {
-    table.emplace(name, std::make_shared<NodeConst>(name, value));
+    if (env)
+        env->table.emplace(name, std::make_shared<NodeConst>(name, value));
 }
 
-__declspec(noinline) static void addConstI(NameTable& table, const char* name, int value)
+__declspec(noinline) static void addConstI(const std::shared_ptr<Env>& env, const char* name, int value)
 {
-    table.emplace(name, std::make_shared<NodeConst>(name, std::to_string(value)));
+    if (env)
+        env->table.emplace(name, std::make_shared<NodeConst>(name, std::to_string(value)));
 }
 
-__declspec(noinline) static void addFunc(NameTable& table, const char* name, int paramc, lua_State* L, lua_CFunction func)
+__declspec(noinline) static void addFunc(const std::shared_ptr<Env>& env, const char* name, uint8_t paramc, lua_State* L, lua_CFunction func)
 {
-    table.emplace(name, std::make_shared<NodeBuiltInFunc>(name, paramc));
-    lua_register(L, (std::string(DNH_VAR_PREFIX) + name).c_str(), func);
+    if (env)
+    {
+        env->table.emplace(name, std::make_shared<NodeBuiltInFunc>(name, paramc));
+    } else
+    {
+        lua_register(L, (std::string(DNH_BUILTIN_FUNC_PREFIX) + name).c_str(), func);
+    }
 }
 
-__declspec(noinline) static void addRuntimeFunc(NameTable& table, const char* name, int paramc)
+__declspec(noinline) static void addRuntimeFunc(const std::shared_ptr<Env>& env, const char* name, uint8_t paramc)
 {
-    table.emplace(name, std::make_shared<NodeBuiltInFunc>(name, paramc));
+    if (env)
+        env->table.emplace(name, std::make_shared<NodeBuiltInFunc>(name, paramc));
 }
 
-#define constI(name) (addConstI(table, #name, name))
-#define builtin(name, paramc) (addFunc(table, #name, (paramc), L, name))
-#define runtime(name, paramc) (addRuntimeFunc(table, #name, (paramc)))
+#define constI(name) (addConstI(env, #name, name))
+#define builtin(name, paramc) (addFunc(env, #name, (paramc), L, name))
+#define runtime(name, paramc) (addRuntimeFunc(env, #name, (paramc)))
 #define TypeIs(typeSet) ((typeSet) & type)
 
 using ScriptTypeSet = uint8_t;
@@ -5684,7 +5690,7 @@ constexpr ScriptTypeSet t_shot_custom = 8;
 constexpr ScriptTypeSet t_item_custom = 16;
 constexpr ScriptTypeSet t_all = 0xff;
 
-void RegisterStandardAPI(lua_State* L, ScriptType scriptType, const std::wstring& version, NameTable& table)
+void RegisterStandardAPI(lua_State* L, ScriptType scriptType, const std::wstring& version, const NullableSharedPtr<Env>& env)
 {
     lua_pushlightuserdata(L, (void *)WrapException);
     luaJIT_setmode(L, -1, LUAJIT_MODE_WRAPCFUNC | LUAJIT_MODE_ON);
@@ -6083,9 +6089,9 @@ void RegisterStandardAPI(lua_State* L, ScriptType scriptType, const std::wstring
     constI(CULL_CW);
     constI(CULL_CCW);
 
-    addConst(table, "pi", "3.141592653589793");
-    addConst(table, "true", "true");
-    addConst(table, "false", "false");
+    addConst(env, "pi", "3.141592653589793");
+    addConst(env, "true", "true");
+    addConst(env, "false", "false");
 
     runtime(concatenate, 2);
     runtime(add, 2);

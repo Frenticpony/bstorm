@@ -71,7 +71,7 @@ static bool IsVariable(const std::shared_ptr<NodeDef>& def)
 
 static int GetParamCnt(const std::shared_ptr<NodeDef>& def)
 {
-    if (auto b = std::dynamic_pointer_cast<NodeBuiltInFunc>(def)) return b->paramCnt;
+    if (auto b = std::dynamic_pointer_cast<NodeBuiltInFunc>(def)) return (int)b->paramCnt;
     if (auto f = std::dynamic_pointer_cast<NodeFuncDef>(def)) return (int)f->params_.size();
     if (auto t = std::dynamic_pointer_cast<NodeTaskDef>(def)) return (int)t->params_.size();
     return 0;

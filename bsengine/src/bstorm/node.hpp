@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <cstdint>
 
 #include <bstorm/env.hpp>
 
@@ -517,9 +518,9 @@ struct NodeTaskDef : public NodeDef
 
 struct NodeBuiltInFunc : public NodeDef
 {
-    NodeBuiltInFunc(const std::string& name, int paramc) : NodeDef(name), paramCnt(paramc) {}
+    NodeBuiltInFunc(const std::string& name, uint8_t paramc) : NodeDef(name), paramCnt(paramc) {}
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
-    int paramCnt;
+    uint8_t paramCnt;
 };
 
 struct NodeConst : public NodeDef

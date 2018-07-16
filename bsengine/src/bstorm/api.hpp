@@ -1,20 +1,16 @@
 ﻿#pragma once
 
-#include <bstorm/env.hpp>
+#include <bstorm/nullable_shared_ptr.hpp>
 #include <bstorm/script_info.hpp>
 
 #include <string>
-#include <unordered_map>
 #include <luajit/lua.hpp>
 
 namespace bstorm
 {
-struct SourcePos;
-void RegisterStandardAPI(lua_State* L, ScriptType type, const std::wstring& version, NameTable& table);
-
-// helper
-int GetCurrentLine(lua_State* L);
-std::shared_ptr<SourcePos> GetSourcePos(lua_State* L);
+class Env;
+// 環境を与えた場合は環境の作成だけを行い、Luaスレッドへの関数の登録はしない
+void RegisterStandardAPI(lua_State* L, ScriptType type, const std::wstring& version, const NullableSharedPtr<Env>& env);
 
 class Script;
 Script* GetScript(lua_State* L);

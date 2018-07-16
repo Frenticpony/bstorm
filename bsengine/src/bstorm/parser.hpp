@@ -11,7 +11,7 @@ class ScriptInfo;
 class FileLoader;
 class UserShotData;
 class UserItemData;
-struct Env;
+class Env;
 struct NodeBlock;
 struct Mqo;
 std::shared_ptr<NodeBlock> ParseDnhScript(const std::wstring& filePath, const std::shared_ptr<Env>& globalEnv, bool expandInclude, ScriptInfo* scriptInfo, const std::shared_ptr<FileLoader>& loader);
