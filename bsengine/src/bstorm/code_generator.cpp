@@ -260,7 +260,7 @@ void CodeGenerator::GenProc(std::shared_ptr<NodeDef> def, const std::vector<std:
     blk.Traverse(*this);
     if (std::dynamic_pointer_cast<NodeFuncDef>(def))
     {
-        auto result = blk.env->GetCurrentBlockNameTable().at("result");
+        auto result = blk.env->GetCurrentBlockNameTable()->at("result");
         if (!std::dynamic_pointer_cast<NodeProcParam>(result))
         {
             Indent();
@@ -525,7 +525,7 @@ void CodeGenerator::Traverse(NodeReturnVoid& stmt)
     {
         if (auto func = std::dynamic_pointer_cast<NodeFuncDef>(procStack_.top()))
         {
-            auto result = func->block->env->GetCurrentBlockNameTable().at("result");
+            auto result = func->block->env->GetCurrentBlockNameTable()->at("result");
             if (auto funcParam = std::dynamic_pointer_cast<NodeProcParam>(result))
             {
                 // function has "result" param
@@ -699,7 +699,7 @@ void CodeGenerator::Traverse(NodeBlock& blk)
     {
         Indent();
         // local declare
-        for (const auto& bind : blk.env->GetCurrentBlockNameTable())
+        for (const auto& bind : *(blk.env->GetCurrentBlockNameTable()))
         {
             auto def = bind.second;
             if (isDeclarationNeeded(def))
@@ -709,7 +709,7 @@ void CodeGenerator::Traverse(NodeBlock& blk)
         }
     }
 
-    for (const auto& bind : blk.env->GetCurrentBlockNameTable())
+    for (const auto& bind : *(blk.env->GetCurrentBlockNameTable()))
     {
         bind.second->Traverse(*this);
     }

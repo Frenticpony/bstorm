@@ -249,7 +249,7 @@ void SemanticsChecker::Traverse(NodeBlock& blk)
 {
     auto prevEnv = env_;
     env_ = blk.env;
-    for (auto& bind : blk.env->GetCurrentBlockNameTable())
+    for (auto& bind : *(blk.env->GetCurrentBlockNameTable()))
     {
         bind.second->Traverse(*this);
     }

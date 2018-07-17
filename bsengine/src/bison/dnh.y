@@ -90,9 +90,9 @@ static void FixPos(Node *node, const DnhParser::location_type& yylloc)
 
 static void CheckDupDef(DnhParseContext* ctx, const DnhParser::location_type& yylloc, const std::string& name)
 {
-    if (ctx->env->GetCurrentBlockNameTable().count(name) != 0)
+    if (ctx->env->GetCurrentBlockNameTable()->count(name) != 0)
     {
-        auto prevDef = ctx->env->GetCurrentBlockNameTable().at(name);
+        auto prevDef = ctx->env->GetCurrentBlockNameTable()->at(name);
         auto prevDefLine = std::to_string(prevDef->srcPos->line);
         auto prevDefPath = ToUTF8(*prevDef->srcPos->filename);
         auto msg = "found a duplicate definition of '" + prevDef->name + "' (previous definition was at line " + prevDefLine + " in " + prevDefPath + ").";
@@ -352,7 +352,7 @@ sub-def            : TK_SUB TK_IDENT { CheckDupDef(ctx, @2, *$2); } new-scope op
 
 func-def           : TK_FUNCTION TK_IDENT { CheckDupDef(ctx, @2, *$2); } new-scope opt-params
                        {
-                         if (ctx->env->GetCurrentBlockNameTable().count("result") == 0)
+                         if (ctx->env->GetCurrentBlockNameTable()->count("result") == 0)
                          {
                              auto result = new NodeVarDecl("result");
                              FixPos(result, @1);

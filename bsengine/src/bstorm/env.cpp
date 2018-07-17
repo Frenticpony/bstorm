@@ -6,9 +6,26 @@
 
 namespace bstorm
 {
-Env::Env() : parent_(nullptr), depth_(0) {}
+Env::Env() :
+    parent_(nullptr),
+    depth_(0),
+    table_(std::make_shared<DefNameTable>())
+{
+}
 
-Env::Env(const std::shared_ptr<Env>& parent) : parent_(parent), depth_(parent->depth_ + 1) {}
+Env::Env(const std::shared_ptr<Env>& parent) :
+    parent_(parent),
+    depth_(parent->depth_ + 1),
+    table_(std::make_shared<DefNameTable>())
+{
+}
+
+Env::Env(const std::shared_ptr<DefNameTable>& table, const std::shared_ptr<Env>& parent) :
+    parent_(parent),
+    depth_(parent->depth_ + 1),
+    table_(table)
+{
+}
 
 const std::shared_ptr<NodeDef>& Env::AddDef(const std::string & name, const std::shared_ptr<NodeDef>& def)
 {
@@ -38,17 +55,17 @@ static std::string getShortName(size_t i, int depth)
 
 const std::shared_ptr<NodeDef>& Env::AddDef(std::string && name, std::shared_ptr<NodeDef>&& def)
 {
-    if (table_.count(name) != 0) { return table_[name]; }
+    if (table_->count(name) != 0) { return (*table_)[name]; }
 #ifndef _DEBUG
     def->convertedName = std::move(getShortName(table_.size(), depth_));
 #endif
-    return table_[std::move(name)] = std::move(def);
+    return (*table_)[std::move(name)] = std::move(def);
 }
 
 NullableSharedPtr<NodeDef> Env::FindDef(const std::string & name) const
 {
-    auto it = table_.find(name);
-    if (it != table_.end())
+    auto it = table_->find(name);
+    if (it != table_->end())
     {
         return it->second;
     } else
