@@ -15,14 +15,14 @@ Env::Env() :
 
 Env::Env(const std::shared_ptr<Env>& parent) :
     parent_(parent),
-    depth_(parent->depth_ + 1),
+    depth_(parent ? (parent->depth_ + 1) : 0),
     table_(std::make_shared<DefNameTable>())
 {
 }
 
 Env::Env(const std::shared_ptr<DefNameTable>& table, const std::shared_ptr<Env>& parent) :
     parent_(parent),
-    depth_(parent->depth_ + 1),
+    depth_(parent ? (parent->depth_ + 1) : 0),
     table_(table)
 {
 }

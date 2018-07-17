@@ -46,6 +46,7 @@ CodeGenerator::CodeGenerator() :
 
 void CodeGenerator::Generate(bool embedLocalVarName, Node & n)
 {
+    env_ = nullptr;
     code_.clear();
     embedLocalVarName_ = embedLocalVarName;
     n.Traverse(*this);
@@ -254,13 +255,13 @@ void CodeGenerator::GenProc(std::shared_ptr<NodeDef> def, const std::vector<std:
     for (int i = 0; i < params_.size(); i++)
     {
         if (i != 0) AddCode(",");
-        AddCode(varname(params_[i], blk.env));
+        AddCode(varname(params_[i], std::make_shared<Env>(blk.nameTable, env_)));
     }
     AddCode(")"); NewLine();
     blk.Traverse(*this);
     if (std::dynamic_pointer_cast<NodeFuncDef>(def))
     {
-        auto result = blk.env->GetCurrentBlockNameTable()->at("result");
+        auto result = blk.nameTable->at("result");
         if (!std::dynamic_pointer_cast<NodeProcParam>(result))
         {
             Indent();
@@ -525,7 +526,7 @@ void CodeGenerator::Traverse(NodeReturnVoid& stmt)
     {
         if (auto func = std::dynamic_pointer_cast<NodeFuncDef>(procStack_.top()))
         {
-            auto result = func->block->env->GetCurrentBlockNameTable()->at("result");
+            auto result = func->block->nameTable->at("result");
             if (auto funcParam = std::dynamic_pointer_cast<NodeProcParam>(result))
             {
                 // function has "result" param
@@ -692,14 +693,13 @@ void CodeGenerator::Traverse(NodeAlternative& stmt)
 }
 void CodeGenerator::Traverse(NodeBlock& blk)
 {
-    auto prevEnv = env_;
-    env_ = blk.env;
+    env_ = std::make_shared<Env>(blk.nameTable, env_);
 
     if (!env_->IsRoot())
     {
         Indent();
         // local declare
-        for (const auto& bind : *(blk.env->GetCurrentBlockNameTable()))
+        for (const auto& bind : *(blk.nameTable))
         {
             auto def = bind.second;
             if (isDeclarationNeeded(def))
@@ -709,7 +709,7 @@ void CodeGenerator::Traverse(NodeBlock& blk)
         }
     }
 
-    for (const auto& bind : *(blk.env->GetCurrentBlockNameTable()))
+    for (const auto& bind : *(blk.nameTable))
     {
         bind.second->Traverse(*this);
     }
@@ -723,7 +723,7 @@ void CodeGenerator::Traverse(NodeBlock& blk)
     {
         Unindent();
     }
-    env_ = prevEnv;
+    env_ = env_->GetParent();
 }
 void CodeGenerator::Traverse(NodeSubDef& sub)
 {

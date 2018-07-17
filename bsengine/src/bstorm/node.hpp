@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <unordered_map>
 #include <cstdint>
 
 namespace bstorm
@@ -478,13 +479,13 @@ struct NodeLoopParam : public NodeDef
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 
-class Env;
+using DefNameTable = std::unordered_map<std::string, std::shared_ptr<NodeDef>>;
 struct NodeBlock : public Node
 {
-    NodeBlock(const std::shared_ptr<Env>& env, std::vector <std::shared_ptr<NodeStmt>>&& ss) : Node(), env(env), stmts(std::move(ss)) {}
+    NodeBlock(const std::shared_ptr<DefNameTable>& nameTable, std::vector <std::shared_ptr<NodeStmt>>&& ss) : Node(), nameTable(nameTable), stmts(std::move(ss)) {}
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
-    std::shared_ptr<Env> env;
-    std::vector <std::shared_ptr<NodeStmt>> stmts;
+    std::shared_ptr<DefNameTable> nameTable; // NOTE: shared_ptrが循環参照してしまうのでEnvは直接持たない
+    std::vector<std::shared_ptr<NodeStmt>> stmts;
 };
 
 struct NodeSubDef : public NodeDef

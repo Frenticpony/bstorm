@@ -79,7 +79,7 @@ static int GetParamCnt(const std::shared_ptr<NodeDef>& def)
 
 std::vector<Log> SemanticsChecker::Check(Node & n)
 {
-    env_ = std::shared_ptr<Env>();
+    env_ = nullptr;
     errors_.clear();
     n.Traverse(*this);
     return errors_;
@@ -247,14 +247,13 @@ void SemanticsChecker::Traverse(NodeProcParam &) {}
 void SemanticsChecker::Traverse(NodeLoopParam &) {}
 void SemanticsChecker::Traverse(NodeBlock& blk)
 {
-    auto prevEnv = env_;
-    env_ = blk.env;
-    for (auto& bind : *(blk.env->GetCurrentBlockNameTable()))
+    env_ = std::make_shared<Env>(blk.nameTable, env_);
+    for (auto& bind : *(blk.nameTable))
     {
         bind.second->Traverse(*this);
     }
     for (auto& stmt : blk.stmts) stmt->Traverse(*this);
-    env_ = prevEnv;
+    env_ = env_->GetParent();
 }
 void SemanticsChecker::Traverse(NodeSubDef& def)
 {

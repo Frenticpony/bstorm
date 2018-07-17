@@ -260,7 +260,7 @@ static void AddDef(DnhParseContext* ctx, NodeDef* ptr)
 %%
 program            : stmts TK_EOF
                       {
-                          ctx->result = std::make_shared<NodeBlock>(ctx->env, std::move(*$1));
+                          ctx->result = std::make_shared<NodeBlock>(ctx->env->GetCurrentBlockNameTable(), std::move(*$1));
                           ctx->result->srcPos = std::make_shared<SourcePos>(SourcePos({1, 1, ctx->lexer->GetCurrentFilePath()}));
                           delete($1);
                       }
@@ -322,7 +322,7 @@ new-scope           : { ctx->env = std::make_shared<Env>(ctx->env); }
 
 block              : TK_LBRACE stmts TK_RBRACE
                        {
-                           $$ = new NodeBlock(ctx->env, std::move(*$2));
+                           $$ = new NodeBlock(ctx->env->GetCurrentBlockNameTable(), std::move(*$2));
                            FixPos($$, @1);
                            delete($2);
                            ctx->env = ctx->env->GetParent();
