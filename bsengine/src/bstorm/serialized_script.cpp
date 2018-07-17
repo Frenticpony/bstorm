@@ -88,8 +88,13 @@ SerializedScript::SerializedScript(const std::wstring & path, ScriptType type, c
         }
     }
 }
-const std::string& SerializedScript::GetConvertedBuiltInSubName(const std::string & name) const
+std::string SerializedScript::GetConvertedBuiltInSubName(const std::string & name) const
 {
-    return builtInSubNameConversionMap_.at(name);
+    auto it = builtInSubNameConversionMap_.find(name);
+    if (it != builtInSubNameConversionMap_.end())
+    {
+        return it->second;
+    }
+    return "";
 }
 }
