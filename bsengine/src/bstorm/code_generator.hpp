@@ -96,7 +96,8 @@ private:
     void GenCheckNil(const std::string& name);
     void GenProc(std::shared_ptr<NodeDef> def, const std::vector<std::string>& params_, NodeBlock& blk);
     void GenOpAssign(const std::string& fname, const std::shared_ptr<NodeLeftVal>& left, std::shared_ptr<NodeExp> right);
-    void GenCopy(std::shared_ptr<NodeExp> exp);
+    void GenCopy(std::shared_ptr<NodeExp>& exp);
+    void GenCondition(std::shared_ptr<NodeExp>& exp);
     bool IsCopyNeeded(const std::shared_ptr<NodeExp>& exp);
     std::shared_ptr<Env> env_;
     std::stack<std::shared_ptr<NodeDef>> procStack_;

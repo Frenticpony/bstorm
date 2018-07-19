@@ -136,7 +136,7 @@ void CodeGenerator::Traverse(NodeNoParenCallExp& call)
 #ifdef _DEBUG
         AddCode(" --[[ " + call.name + " ]]");
 #endif
-} else
+    } else
     {
         AddCode(varname(def) + "()");
     }
@@ -154,7 +154,7 @@ void CodeGenerator::Traverse(NodeCallExp& call)
 #ifdef _DEBUG
         AddCode(" --[[ " + call.name + " ]]");
 #endif
-} else
+    } else
     {
         bool isUserFunc = !std::dynamic_pointer_cast<NodeBuiltInFunc>(def);
         if (isUserFunc)
@@ -344,7 +344,7 @@ void CodeGenerator::GenOpAssign(const std::string & fname, const std::shared_ptr
             break;
     }
 }
-void CodeGenerator::GenCopy(std::shared_ptr<NodeExp> exp)
+void CodeGenerator::GenCopy(std::shared_ptr<NodeExp>& exp)
 {
     if (IsCopyNeeded(exp))
     {
@@ -354,6 +354,18 @@ void CodeGenerator::GenCopy(std::shared_ptr<NodeExp> exp)
         exp->Traverse(*this);
     }
 }
+
+void CodeGenerator::GenCondition(std::shared_ptr<NodeExp>& exp)
+{
+    if (exp->expType == NodeExp::ExpType::BOOL)
+    {
+        exp->Traverse(*this);
+    } else
+    {
+        AddCode(runtime("tobool") + "("); exp->Traverse(*this); AddCode(")");
+    }
+}
+
 bool CodeGenerator::IsCopyNeeded(const std::shared_ptr<NodeExp>& exp)
 {
     if (std::dynamic_pointer_cast<NodeNum>(exp) ||
@@ -609,7 +621,7 @@ void CodeGenerator::Traverse(NodeTimes& stmt)
 }
 void CodeGenerator::Traverse(NodeWhile& stmt)
 {
-    AddCode("while " + runtime("tobool") + "("); stmt.cond->Traverse(*this); AddCode(") do"); NewLine(stmt.cond->srcPos);
+    AddCode("while "); GenCondition(stmt.cond); AddCode(" do"); NewLine(stmt.cond->srcPos);
     stmt.block->Traverse(*this);
     AddCode("end"); NewLine();
 }
@@ -637,12 +649,12 @@ void CodeGenerator::Traverse(NodeDescent& stmt)
 }
 void CodeGenerator::Traverse(NodeElseIf& elsif)
 {
-    AddCode("elseif " + runtime("tobool") + "("); elsif.cond->Traverse(*this); AddCode(") then"); NewLine(elsif.cond->srcPos);
+    AddCode("elseif "); GenCondition(elsif.cond); AddCode(" then"); NewLine(elsif.cond->srcPos);
     elsif.block->Traverse(*this);
 }
 void CodeGenerator::Traverse(NodeIf& stmt)
 {
-    AddCode("if " + runtime("tobool") + "("); stmt.cond->Traverse(*this); AddCode(") then"); NewLine(stmt.cond->srcPos);
+    AddCode("if "); GenCondition(stmt.cond); AddCode(" then"); NewLine(stmt.cond->srcPos);
     stmt.thenBlock->Traverse(*this);
     for (auto elsif : stmt.elsifs) { elsif->Traverse(*this); }
     if (stmt.elseBlock)
