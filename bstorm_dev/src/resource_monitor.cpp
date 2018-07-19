@@ -255,6 +255,11 @@ void DrawScriptCacheInfoTab(const std::shared_ptr<SerializedScriptStore>& serial
                 ImGui::BulletText("info-size  : %d [byte]", serializedScript->GetScriptInfo().size());
                 ImGui::BulletText("source-map : %d [byte]", serializedScript->GetSourceMap().size());
                 ImGui::BulletText("use-count  : %d", serializedScript.use_count() - 2);
+#ifdef _DEBUG
+                ImGui::BeginChild("Source Code", ImVec2(-1, -1), false, ImGuiWindowFlags_HorizontalScrollbar);
+                ImGui::TextUnformatted(serializedScript->GetSourceCode().c_str());
+                ImGui::EndChild();
+#endif
             }
         }
     }

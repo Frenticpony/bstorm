@@ -106,6 +106,9 @@ SerializedScript::SerializedScript(const SerializedScriptSignature& signature, c
     scriptInfo.Serialize(scriptInfo_);
     codeGen.GetSourceMap().Serialize(srcMap_);
     SerializeChunk(L.get(), byteCode_);
+#ifdef _DEBUG
+    srcCode_ = codeGen.GetCode();
+#endif
     for (auto&& name : { "Loading", "Initialize", "MainLoop", "Finalize", "Event" })
     {
         if (auto def = globalEnv->FindDef(name))

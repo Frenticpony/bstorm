@@ -49,6 +49,7 @@ public:
     const std::string& GetSourceMap() const { return srcMap_; }
     const char* GetByteCode() { return byteCode_.data(); }
     const size_t GetByteCodeSize() { return byteCode_.size(); }
+    const std::string& GetSourceCode() const { return srcCode_; }
     std::string GetConvertedBuiltInSubName(const std::string& name) const;
     const SerializedScriptSignature& GetSignature() const { return signature_; }
 private:
@@ -56,6 +57,7 @@ private:
     std::string scriptInfo_;
     std::string srcMap_;
     std::string byteCode_;
+    std::string srcCode_;
     std::unordered_map<std::string, std::string> builtInSubNameConversionMap_;
 };
 
