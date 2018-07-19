@@ -138,13 +138,30 @@ const std::shared_ptr<SerializedScript>& SerializedScriptStore::Load(const std::
     return cacheStore_.Load(signature, signature, fileLoader_);
 }
 
-const std::shared_future<std::shared_ptr<SerializedScript>>& SerializedScriptStore::LoadAsync(const std::wstring & path, ScriptType type, const std::wstring & version)
+SerializedScriptSignature SerializedScriptStore::LoadAsync(const std::wstring & path, ScriptType type, const std::wstring & version)
 {
     SerializedScriptSignature signature(path, type, version, GetFileLastUpdateTime(path));
-    return cacheStore_.LoadAsync(signature, signature, fileLoader_);
+    cacheStore_.LoadAsync(signature, signature, fileLoader_);
+    return signature;
 }
+
+NullableSharedPtr<SerializedScript> SerializedScriptStore::Get(const SerializedScriptSignature & signature) const
+{
+    try
+    {
+        return cacheStore_.Get(signature);
+    } catch (...)
+    {
+        return nullptr;
+    }
+}
+
 void SerializedScriptStore::RemoveCache(const SerializedScriptSignature& signature)
 {
     cacheStore_.Remove(signature);
+}
+bool SerializedScriptStore::IsLoadCompleted(const SerializedScriptSignature & signature) const
+{
+    return cacheStore_.IsLoadCompleted(signature);
 }
 }

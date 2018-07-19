@@ -3,6 +3,7 @@
 #include <bstorm/cache_store.hpp>
 #include <bstorm/script_info.hpp>
 #include <bstorm/time_stamp.hpp>
+#include <bstorm/nullable_shared_ptr.hpp>
 
 #include <string>
 #include <memory>
@@ -63,8 +64,12 @@ class SerializedScriptStore
 public:
     SerializedScriptStore(const std::shared_ptr<FileLoader>& fileLoader);
     const std::shared_ptr<SerializedScript>& Load(const std::wstring& path, ScriptType type, const std::wstring& version);
-    const std::shared_future<std::shared_ptr<SerializedScript>>& LoadAsync(const std::wstring& path, ScriptType type, const std::wstring& version);
+    SerializedScriptSignature LoadAsync(const std::wstring& path, ScriptType type, const std::wstring& version);
+    NullableSharedPtr<SerializedScript> Get(const SerializedScriptSignature& signature) const;
     void RemoveCache(const SerializedScriptSignature& signature);
+    bool IsLoadCompleted(const SerializedScriptSignature& signature) const;
+    template <class Fn>
+    void ForEach(Fn func) { cacheStore_.ForEach(func); }
 private:
     std::shared_ptr<FileLoader> fileLoader_;
     CacheStore<SerializedScriptSignature, SerializedScript> cacheStore_;

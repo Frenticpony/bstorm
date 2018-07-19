@@ -5,6 +5,7 @@
 #include <bstorm/texture.hpp>
 #include <bstorm/font.hpp>
 #include <bstorm/render_target.hpp>
+#include <bstorm/serialized_script.hpp>
 #include <bstorm/logger.hpp>
 #include <bstorm/package.hpp>
 
@@ -163,9 +164,11 @@ void DrawTextureInfoTab(const std::shared_ptr<TextureStore>& textureStore)
             ImGui::EndGroup();
             ImGui::PopID();
         });
-        ImGui::EndChild();
-        ImGui::SameLine();
-        ImGui::BeginChild("ResourceTextureTabInfoArea", ImVec2(-1, -1), false, ImGuiWindowFlags_HorizontalScrollbar);
+    }
+    ImGui::EndChild();
+    ImGui::SameLine();
+    ImGui::BeginChild("ResourceTextureTabInfoArea", ImVec2(-1, -1), false, ImGuiWindowFlags_HorizontalScrollbar);
+    {
         ImGui::Text("Texture Info");
         if (textureStore->IsLoadCompleted(selectedTexturePath))
         {
@@ -220,6 +223,44 @@ void DrawFontInfoTab(const std::shared_ptr<FontStore>& fontStore)
     }
 }
 
+void DrawScriptCacheInfoTab(const std::shared_ptr<SerializedScriptStore>& serializedScriptStore)
+{
+    static SerializedScriptSignature selectedSignature(L"", ScriptType::Value::UNKNOWN, L"", TIME_STAMP_NONE);
+    float sideBarWidth = ImGui::GetContentRegionAvailWidth() * 0.2;
+    ImGui::BeginChild("ResourceScriptCacheSideBar", ImVec2(sideBarWidth, -1), true, ImGuiWindowFlags_HorizontalScrollbar);
+    {
+        serializedScriptStore->ForEach([&](const auto& signature, bool& isReserved, auto& texture)
+        {
+            auto id = std::to_string(signature.lastUpdateTime);
+            ImGui::PushID(id.c_str());
+            if (ImGui::Selectable(ToUTF8(signature.path).c_str(), selectedSignature == signature))
+            {
+                selectedSignature = signature;
+            }
+            ImGui::PopID();
+        });
+        ImGui::EndChild();
+    }
+    ImGui::SameLine();
+    ImGui::BeginChild("ResourceScriptCacheInfoArea", ImVec2(-1, -1), false, ImGuiWindowFlags_HorizontalScrollbar);
+    {
+        ImGui::Text("Script Cache Info");
+        if (serializedScriptStore->IsLoadCompleted(selectedSignature))
+        {
+            if (auto serializedScript = serializedScriptStore->Get(selectedSignature))
+            {
+                ImGui::BulletText("path       : %s", ToUTF8(selectedSignature.path).c_str());
+                ImGui::BulletText("type       : %s", selectedSignature.type.GetName());
+                ImGui::BulletText("code-size  : %d [byte]", serializedScript->GetByteCodeSize());
+                ImGui::BulletText("info-size  : %d [byte]", serializedScript->GetScriptInfo().size());
+                ImGui::BulletText("source-map : %d [byte]", serializedScript->GetSourceMap().size());
+                ImGui::BulletText("use-count  : %d", serializedScript.use_count() - 2);
+            }
+        }
+    }
+    ImGui::EndChild();
+}
+
 struct RenderTargetMonitor;
 template <>
 void Package::backDoor<RenderTargetMonitor>()
@@ -251,13 +292,14 @@ enum class Tab
 {
     TEXTURE,
     FONT,
-    RENDER_TARGET
+    RENDER_TARGET,
+    SCRIPT_CACHE
 };
 
 template <>
 void Package::backDoor<ResourceMonitor>()
 {
-    ImGui::Columns(3, "resource tab");
+    ImGui::Columns(4, "resource tab");
     ImGui::Separator();
     static Tab selectedTab = Tab::TEXTURE;
     if (ImGui::Selectable("Texture##ResourceTextureTab", selectedTab == Tab::TEXTURE))
@@ -274,17 +316,28 @@ void Package::backDoor<ResourceMonitor>()
     {
         selectedTab = Tab::RENDER_TARGET;
     }
+    ImGui::NextColumn();
+    if (ImGui::Selectable("ScriptCache##ScriptCacheTab", selectedTab == Tab::SCRIPT_CACHE))
+    {
+        selectedTab = Tab::SCRIPT_CACHE;
+    }
     ImGui::Columns(1);
     ImGui::Separator();
-    if (selectedTab == Tab::TEXTURE)
+    switch (selectedTab)
     {
-        DrawTextureInfoTab(textureStore_);
-    } else if (selectedTab == Tab::FONT)
-    {
-        DrawFontInfoTab(fontStore_);
-    } else if (selectedTab == Tab::RENDER_TARGET)
-    {
-        backDoor<RenderTargetMonitor>();
+        case Tab::TEXTURE:
+            DrawTextureInfoTab(textureStore_);
+            break;
+        case Tab::FONT:
+            DrawFontInfoTab(fontStore_);
+            break;
+        case Tab::RENDER_TARGET:
+            backDoor<RenderTargetMonitor>();
+            break;
+        case Tab::SCRIPT_CACHE:
+            DrawScriptCacheInfoTab(serializedScriptStore_);
+            break;
+
     }
 }
 
