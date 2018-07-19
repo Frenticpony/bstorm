@@ -138,7 +138,7 @@ void CodeGenerator::Traverse(NodeNoParenCallExp& call)
         std::dynamic_pointer_cast<NodeProcParam>(def) ||
         std::dynamic_pointer_cast<NodeLoopParam>(def))
     {
-        GenCheckNil(call.name);
+        GenNilCheck(call.name);
     } else if (std::dynamic_pointer_cast<NodeBuiltInFunc>(def))
     {
         if (call.name == "GetCurrentScriptDirectory")
@@ -273,14 +273,14 @@ void CodeGenerator::GenLogBinOp(const std::string & fname, NodeBinOp & exp)
     AddCode(" end");
     AddCode(")");
 }
-void CodeGenerator::GenCheckNil(const std::string & name)
+void CodeGenerator::GenNilCheck(const std::string & name)
 {
     if (embedLocalVarName_)
     {
-        AddCode(runtime("checknil") + "(" + varname(name, env_) + ", \"" + name + "\")");
+        AddCode(runtime("nc") + "(" + varname(name, env_) + ", \"" + name + "\")");
     } else
     {
-        AddCode(runtime("checknil") + "(" + varname(name, env_) + ")");
+        AddCode(runtime("nc") + "(" + varname(name, env_) + ")");
     }
 }
 void CodeGenerator::GenProc(std::shared_ptr<NodeDef> def, const std::vector<std::string>& params_, NodeBlock & blk)
@@ -312,10 +312,10 @@ void CodeGenerator::GenOpAssign(const std::string & fname, const std::shared_ptr
     {
         case 0:
             // a += e;
-            // out : a = add(r_checknil(a), e);
+            // out : a = add(r_nc(a), e);
             AddCode(varname(left->name, env_) + " = ");
             AddCode(runtime(fname) + "(");
-            GenCheckNil(left->name);
+            GenNilCheck(left->name);
             if (right)
             {
                 AddCode(",");
@@ -325,11 +325,11 @@ void CodeGenerator::GenOpAssign(const std::string & fname, const std::shared_ptr
             break;
         case 1:
             // a[_i] += e;
-            // out :  r_checknil(a);
+            // out :  r_nc(a);
             //        local i = _i;
             //        r_write1(a, i, r_add(r_read(a, i), e));
             AddCode("do"); NewLine();
-            GenCheckNil(left->name); NewLine(left->srcPos);
+            GenNilCheck(left->name); NewLine(left->srcPos);
             AddCode("local i = "); left->indices[0]->Traverse(*this); AddCode(";"); NewLine(left->srcPos);
             AddCode(runtime("write1") + "(" + varname(left->name, env_) + ", i, ");
             AddCode(runtime(fname) + "(");
@@ -344,11 +344,11 @@ void CodeGenerator::GenOpAssign(const std::string & fname, const std::shared_ptr
             break;
         default:
             // a[i][j]..[z] += e;
-            // out : check_nil(a);
+            // out : r_nc(a);
             //       local is = {i, j, .. , z};
-            //       r_write(check_nil(a), is, r_add(r_read(..r_read(a, is[1]), is[2]), .. is[n]), e);
+            //       r_write(a, is, r_add(r_read(..r_read(a, is[1]), is[2]), .. is[n]), e);
             AddCode("do"); NewLine();
-            GenCheckNil(left->name); NewLine(left->srcPos);
+            GenNilCheck(left->name); NewLine(left->srcPos);
             AddCode("local is = {");
             for (int i = 0; i < left->indices.size(); i++)
             {
@@ -482,10 +482,10 @@ void CodeGenerator::Traverse(NodeAssign& stmt)
             break;
         case 1:
             // a[i] = e;
-            // out : r_write1(r_checknil(a), i, e);
+            // out : r_write1(r_nc(a), i, e);
             AddCode(runtime("write1"));
             AddCode("(");
-            GenCheckNil(def->name);
+            GenNilCheck(def->name);
             AddCode(",");
             stmt.lhs->indices[0]->Traverse(*this);
             AddCode(",");
@@ -494,10 +494,10 @@ void CodeGenerator::Traverse(NodeAssign& stmt)
             break;
         default:
             // a[i1][i2] .. [in] = e;
-            // out : r_write(r_checknil(a), {i1, i2, .. in}, e);
+            // out : r_write(r_nc(a), {i1, i2, .. in}, e);
             AddCode(runtime("write"));
             AddCode("(");
-            GenCheckNil(def->name);
+            GenNilCheck(def->name);
             AddCode(", {");
             for (int i = 0; i < stmt.lhs->indices.size(); i++)
             {

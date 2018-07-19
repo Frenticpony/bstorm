@@ -49,7 +49,7 @@ local function rl_toint(x)
 end
 
 -- throws
-function r_checknil(v, name)
+function r_nc(v, name) -- nilcheck
   if v == nil then
     if name == nil then
       c_raiseerror("attempt to use empty variable.");
