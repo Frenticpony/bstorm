@@ -601,8 +601,8 @@ void CodeGenerator::Traverse(NodeBreak& stmt)
     NewLine(stmt.srcPos);
 }
 
-void CodeGenerator::Traverse(NodeSucc& stmt) { GenOpAssign("succ", stmt.lhs, std::shared_ptr<NodeExp>()); }
-void CodeGenerator::Traverse(NodePred& stmt) { GenOpAssign("pred", stmt.lhs, std::shared_ptr<NodeExp>()); }
+void CodeGenerator::Traverse(NodeSucc& stmt) { GenOpAssign("succ", stmt.lhs, nullptr); }
+void CodeGenerator::Traverse(NodePred& stmt) { GenOpAssign("pred", stmt.lhs, nullptr); }
 
 void CodeGenerator::Traverse(NodeVarDecl &) {}
 void CodeGenerator::Traverse(NodeVarInit& stmt)
