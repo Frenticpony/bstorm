@@ -57,7 +57,7 @@ const std::shared_ptr<NodeDef>& Env::AddDef(std::string && name, std::shared_ptr
 {
     if (table_->count(name) != 0) { return (*table_)[name]; }
 #ifndef _DEBUG
-    def->convertedName = std::move(getShortName(table_.size(), depth_));
+    def->convertedName = std::move(getShortName(table_->size(), depth_));
 #endif
     return (*table_)[std::move(name)] = std::move(def);
 }
