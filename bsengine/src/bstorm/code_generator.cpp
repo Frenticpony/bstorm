@@ -93,7 +93,16 @@ void CodeGenerator::Traverse(NodeNeg& exp)
         GenMonoOp("neg", exp);
     }
 }
-void CodeGenerator::Traverse(NodeNot& exp) { GenMonoOp("not", exp); }
+void CodeGenerator::Traverse(NodeNot& exp)
+{
+    if (exp.rhs->expType == NodeExp::ExpType::BOOL)
+    {
+        AddCode("(not("); exp.rhs->Traverse(*this); AddCode("))");
+    } else
+    {
+        GenMonoOp("not", exp);
+    }
+}
 void CodeGenerator::Traverse(NodeAbs& exp) { GenMonoOp("abs", exp); }
 
 void CodeGenerator::Traverse(NodeAdd& exp) { GenArithBinOp("add", "+", exp); }
