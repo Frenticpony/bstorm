@@ -5679,6 +5679,12 @@ __declspec(noinline) static void addRuntimeBuiltInFunc(const std::shared_ptr<Env
         // get from runtime lib.
         std::string runtimeBuiltInPrefixedName = std::string(DNH_RUNTIME_BUILTIN_PREFIX) + name;
         lua_getglobal(L, runtimeBuiltInPrefixedName.c_str());
+#ifdef _DEBUG
+        if (lua_isfunction(L, -1) == 0)
+        {
+            throw std::runtime_error("undefined runtime: " + runtimeBuiltInPrefixedName);
+        }
+#endif
         lua_setglobal(L, (std::string(DNH_BUILTIN_FUNC_PREFIX) + def->convertedName).c_str());
         // remove used global.
         lua_pushnil(L);
