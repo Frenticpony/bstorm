@@ -80,6 +80,11 @@ void PlayController::Reload()
     {
         if (mainScript_.type == ScriptType::Value::PACKAGE)
         {
+            if (package_)
+            {
+                package_->Finalize();
+                package_ = nullptr;
+            }
             package_ = engine_->CreatePackage(screenWidth_, screenHeight_, mainScript_.path);
             package_->Start();
         } else

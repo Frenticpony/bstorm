@@ -78,6 +78,7 @@ class Renderer;
 class ReplayData;
 class Script;
 class ScriptInfo;
+class SerializedScriptStore;
 class ScriptManager;
 class Shader;
 class ShotCounter;
@@ -300,7 +301,7 @@ public:
     template <class T>
     std::vector <std::shared_ptr<T>> GetObjectAll() const
     {
-        std::vector <std::shared_ptr<T>> objs;
+        std::vector<std::shared_ptr<T>> objs;
         for (const auto& entry : GetObjAll())
         {
             if (auto obj = std::dynamic_pointer_cast<T>(entry.second))
@@ -513,6 +514,7 @@ private:
     std::shared_ptr<Camera2D> camera2D_;
     std::shared_ptr<Camera3D> camera3D_;
     std::shared_ptr<CommonDataDB> commonDataDB_;
+    std::shared_ptr<SerializedScriptStore> serializedScriptStore_;
     std::shared_ptr<ScriptManager> scriptManager_;
 
     std::shared_ptr<ShotDataTable> playerShotDataTable_;

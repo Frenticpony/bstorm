@@ -9,7 +9,7 @@
 namespace bstorm
 {
 class Env;
-// Lがnullptrじゃなければ関数の登録を行う
+// Lがnullptrなら関数を登録せずに環境の作成のみを行う
 std::shared_ptr<Env> CreateInitRootEnv(ScriptType type, const std::wstring& version, lua_State* L);
 
 class Script;

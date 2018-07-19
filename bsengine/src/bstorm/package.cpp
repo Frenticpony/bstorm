@@ -43,6 +43,7 @@
 #include <bstorm/rand_generator.hpp>
 #include <bstorm/file_loader.hpp>
 #include <bstorm/script_info.hpp>
+#include <bstorm/serialized_script.hpp>
 #include <bstorm/script.hpp>
 #include <bstorm/replay_data.hpp>
 #include <bstorm/config.hpp>
@@ -91,7 +92,8 @@ Package::Package(HWND hWnd,
     camera2D_(std::make_shared<Camera2D>()),
     camera3D_(std::make_shared<Camera3D>()),
     commonDataDB_(std::make_shared<CommonDataDB>()),
-    scriptManager_(std::make_shared<ScriptManager>(fileLoader_)),
+    serializedScriptStore_(std::make_shared<SerializedScriptStore>(fileLoader_)),
+    scriptManager_(std::make_shared<ScriptManager>(fileLoader_, serializedScriptStore_)),
     playerShotDataTable_(std::make_shared<ShotDataTable>(ShotDataTable::Type::PLAYER, textureStore_, fileLoader_)),
     enemyShotDataTable_(std::make_shared<ShotDataTable>(ShotDataTable::Type::ENEMY, textureStore_, fileLoader_)),
     itemDataTable_(std::make_shared<ItemDataTable>(textureStore_, fileLoader_)),

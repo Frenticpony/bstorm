@@ -1,6 +1,8 @@
 #include <bstorm/serialized_script.hpp>
 
 #include <bstorm/string_util.hpp>
+#include <bstorm/file_util.hpp>
+#include <bstorm/math_util.hpp>
 #include <bstorm/lua_util.hpp>
 #include <bstorm/logger.hpp>
 #include <bstorm/api.hpp>
@@ -14,17 +16,41 @@
 
 namespace bstorm
 {
-SerializedScript::SerializedScript(const std::wstring & path, ScriptType type, const std::wstring & version, const std::shared_ptr<FileLoader>& fileLoader) :
-    type_(type),
-    version_(version)
+SerializedScriptSignature::SerializedScriptSignature(const std::wstring & path, ScriptType type, std::wstring version) :
+    path(GetCanonicalPath(path)),
+    type(type),
+    version(version)
+{
+}
+bool SerializedScriptSignature::operator==(const SerializedScriptSignature & params) const
+{
+    return path == params.path && type.value == params.type.value && version == params.version;
+}
+
+bool SerializedScriptSignature::operator!=(const SerializedScriptSignature & params) const
+{
+    return !(*this == params);
+}
+
+size_t SerializedScriptSignature::hashValue() const
+{
+    size_t h = 0;
+    hash_combine(h, path);
+    hash_combine(h, type.value);
+    hash_combine(h, version);
+    return h;
+}
+
+SerializedScript::SerializedScript(const SerializedScriptSignature& signature, const std::shared_ptr<FileLoader>& fileLoader) :
+    signature_(signature)
 {
     std::unique_ptr<lua_State, decltype(&lua_close)> L(luaL_newstate(), lua_close);
     // 環境作成
-    auto globalEnv = CreateInitRootEnv(type_, version_, nullptr);
+    auto globalEnv = CreateInitRootEnv(signature.type, signature.version, nullptr);
 
     // パース
     ScriptInfo scriptInfo;
-    std::shared_ptr<NodeBlock> program = ParseDnhScript(path, globalEnv, true, &scriptInfo, fileLoader);
+    std::shared_ptr<NodeBlock> program = ParseDnhScript(signature.path, globalEnv, true, &scriptInfo, fileLoader);
 
     // 静的エラー検査
     {
@@ -38,7 +64,7 @@ SerializedScript::SerializedScript(const std::wstring & path, ScriptType type, c
         {
             throw Log(Log::Level::LV_ERROR)
                 .SetMessage("found " + std::to_string(errors_.size()) + " script error" + (errors_.size() > 1 ? "s." : "."))
-                .SetParam(Log::Param(Log::Param::Tag::SCRIPT, path));
+                .SetParam(Log::Param(Log::Param::Tag::SCRIPT, signature.path));
         }
     }
 
@@ -63,14 +89,14 @@ SerializedScript::SerializedScript(const std::wstring & path, ScriptType type, c
                     err.AddSourcePos(codeGen.GetSourceMap().GetSourcePos(line));
                 } else
                 {
-                    err.SetParam(Log::Param(Log::Param::Tag::SCRIPT, path));
+                    err.SetParam(Log::Param(Log::Param::Tag::SCRIPT, signature.path));
                 }
                 throw err;
             } else
             {
                 throw Log(Log::Level::LV_ERROR)
                     .SetMessage("unexpected compile error occured, please send a bug report. (" + msg + ")")
-                    .SetParam(Log::Param(Log::Param::Tag::SCRIPT, path));
+                    .SetParam(Log::Param(Log::Param::Tag::SCRIPT, signature.path));
             }
         }
     }
@@ -96,5 +122,27 @@ std::string SerializedScript::GetConvertedBuiltInSubName(const std::string & nam
         return it->second;
     }
     return "";
+}
+
+SerializedScriptStore::SerializedScriptStore(const std::shared_ptr<FileLoader>& fileLoader) :
+    fileLoader_(fileLoader)
+{
+}
+
+const std::shared_ptr<SerializedScript>& SerializedScriptStore::Load(const std::wstring & path, ScriptType type, const std::wstring & version)
+{
+    SerializedScriptSignature signature(path, type, version);
+    return cacheStore_.Load(signature, signature, fileLoader_);
+}
+
+const std::shared_future<std::shared_ptr<SerializedScript>>& SerializedScriptStore::LoadAsync(const std::wstring & path, ScriptType type, const std::wstring & version)
+{
+    SerializedScriptSignature signature(path, type, version);
+    return cacheStore_.LoadAsync(signature, signature, fileLoader_);
+}
+void SerializedScriptStore::RemoveCache(const std::wstring & path, ScriptType type, const std::wstring & version)
+{
+    SerializedScriptSignature signature(path, type, version);
+    cacheStore_.Remove(signature);
 }
 }

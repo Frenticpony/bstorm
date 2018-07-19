@@ -24,10 +24,11 @@ class DnhValue;
 class DnhArray;
 struct SourcePos;
 class SerializedScript;
+class SerializedScriptStore;
 class Script : private NonCopyable
 {
 public:
-    Script(const std::wstring& path, ScriptType type, const std::wstring& version, int id, const std::shared_ptr<FileLoader>& fileLoader, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& compileSrcPos);
+    Script(const std::wstring& path, ScriptType type, const std::wstring& version, int id, const std::shared_ptr<SerializedScriptStore>& serializedScript, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& compileSrcPos);
     ~Script();
     void Close();
     bool IsClosed() const;
@@ -35,7 +36,7 @@ public:
     const std::wstring& GetPath() const;
     ScriptType GetType() const;
     const std::wstring& GetVersion() const;
-    std::shared_ptr<SourcePos> GetSourcePos(int line) const;
+    NullableSharedPtr<SourcePos> GetSourcePos(int line) const;
     void SaveError(const std::exception_ptr& e);
     void RethrowError() const;
     void Load();
@@ -77,13 +78,14 @@ private:
         bool isFailed = false; // error
     } state_;
     std::weak_ptr<Package> package_;
-    std::shared_ptr<SerializedScript> serializedScript_;
+    NullableSharedPtr<SerializedScript> serializedScript_;
+    std::shared_ptr<SerializedScriptStore> serializedScriptStore_;
 };
 
 class ScriptManager
 {
 public:
-    ScriptManager(const std::shared_ptr<FileLoader>& fileLoader);
+    ScriptManager(const std::shared_ptr<FileLoader>& fileLoader, const std::shared_ptr<SerializedScriptStore>& serializedScriptStore);
     ~ScriptManager();
     std::shared_ptr<Script> Compile(const std::wstring& path, ScriptType type, const std::wstring& version, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& srcPos);
     std::shared_ptr<Script> CompileInThread(const std::wstring& path, ScriptType type, const std::wstring& version, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& srcPos);
@@ -101,7 +103,9 @@ public:
 private:
     int idGen_;
     std::map<int, std::shared_ptr<Script>> scriptMap_; // IDが若い順に走査される
+    std::unordered_map<std::wstring, int> scriptCntMap_; // あるスクリプトのインスタンス数
     std::unordered_map<int, std::unique_ptr<DnhValue>> scriptResults_;
     const std::shared_ptr<FileLoader> fileLoader_;
+    const std::shared_ptr<SerializedScriptStore> serializedScriptStore_;
 };
 }

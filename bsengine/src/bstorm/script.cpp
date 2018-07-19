@@ -18,7 +18,7 @@ namespace bstorm
 {
 const std::unordered_set<std::wstring> ignoreScriptExts{ L".png", L".jpg", L".jpeg", L".bmp", L".gif", L".dds", L".hdr", L".dib", L".pfm", L".tif", L".tiff", L".ttf", L".otf", L".mqo", L".mp3", L".mp4", L".avi", L".ogg", L".wav", L".wave", L".def", L".dat", L".fx", L".exe" };
 
-Script::Script(const std::wstring& path, ScriptType type, const std::wstring& version, int id, const std::shared_ptr<FileLoader>& fileLoader, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& srcPos) :
+Script::Script(const std::wstring& path, ScriptType type, const std::wstring& version, int id, const std::shared_ptr<SerializedScriptStore>& serializedScriptStore, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& srcPos) :
     L_(luaL_newstate(), lua_close),
     path_(GetCanonicalPath(path)),
     type_(type),
@@ -28,7 +28,8 @@ Script::Script(const std::wstring& path, ScriptType type, const std::wstring& ve
     luaStateBusy_(false),
     autoDeleteObjectEnable_(false),
     package_(package),
-    serializedScript_(std::make_shared<SerializedScript>(path_, type_, version_, fileLoader))
+    serializedScript_(nullptr),
+    serializedScriptStore_(serializedScriptStore)
 {
 }
 
@@ -81,7 +82,7 @@ void Script::RunBuiltInSub(const std::string &name)
     if (state_.isFailed) { return; }
     if (luaStateBusy_)
     {
-        lua_getglobal(L_.get(), (DNH_VAR_PREFIX + serializedScript_->GetConvertedBuiltInSubName(name)).c_str());
+        lua_getglobal(L_.get(), (DNH_VAR_PREFIX + serializedScript_.get()->GetConvertedBuiltInSubName(name)).c_str());
         if (lua_isfunction(L_.get(), -1))
         {
             CallLuaChunk(0);
@@ -92,7 +93,7 @@ void Script::RunBuiltInSub(const std::string &name)
     } else
     {
         lua_getglobal(L_.get(), (std::string(DNH_RUNTIME_PREFIX) + "run").c_str());
-        lua_getglobal(L_.get(), (DNH_VAR_PREFIX + serializedScript_->GetConvertedBuiltInSubName(name)).c_str());
+        lua_getglobal(L_.get(), (DNH_VAR_PREFIX + serializedScript_.get()->GetConvertedBuiltInSubName(name)).c_str());
         if (lua_isfunction(L_.get(), -1))
         {
             CallLuaChunk(1);
@@ -144,6 +145,8 @@ void Script::CallLuaChunk(int argCnt)
 void Script::Load()
 {
     if (state_.isLoaded || IsClosed()) { return; }
+
+    serializedScript_ = serializedScriptStore_->Load(path_, type_, version_);
 
     // 実行環境作成
     CreateInitRootEnv(type_, version_, L_.get());
@@ -277,9 +280,13 @@ const std::unique_ptr<DnhValue>& Script::GetScriptArgument(int idx)
     return scriptArgs_[idx];
 }
 
-std::shared_ptr<SourcePos> Script::GetSourcePos(int line) const
+NullableSharedPtr<SourcePos> Script::GetSourcePos(int line) const
 {
-    return SourceMap(serializedScript_->GetSourceMap()).GetSourcePos(line);
+    if (serializedScript_)
+    {
+        return SourceMap(serializedScript_->GetSourceMap()).GetSourcePos(line);
+    }
+    return nullptr;
 }
 
 void Script::SaveError(const std::exception_ptr& e)
@@ -292,9 +299,10 @@ void Script::RethrowError() const
     std::rethrow_exception(err_);
 }
 
-ScriptManager::ScriptManager(const std::shared_ptr<FileLoader>& fileLoader) :
+ScriptManager::ScriptManager(const std::shared_ptr<FileLoader>& fileLoader, const std::shared_ptr<SerializedScriptStore>& serializedScriptStore) :
     idGen_(0),
-    fileLoader_(fileLoader)
+    fileLoader_(fileLoader),
+    serializedScriptStore_(serializedScriptStore)
 {
 }
 
@@ -302,8 +310,16 @@ ScriptManager::~ScriptManager() {}
 
 std::shared_ptr<Script> ScriptManager::Compile(const std::wstring& path, ScriptType type, const std::wstring& version, const std::shared_ptr<Package>& package, const std::shared_ptr<SourcePos>& srcPos)
 {
-    auto script = std::make_shared<Script>(path, type, version, idGen_++, fileLoader_, package, srcPos);
+    serializedScriptStore_->LoadAsync(path, type, version);
+    auto script = std::make_shared<Script>(path, type, version, idGen_++, serializedScriptStore_, package, srcPos);
     scriptMap_.emplace_hint(scriptMap_.end(), script->GetID(), script);
+    if (scriptCntMap_.count(script->GetPath()) == 0)
+    {
+        scriptCntMap_[script->GetPath()] = 1;
+    } else
+    {
+        scriptCntMap_[script->GetPath()]++;
+    }
     return script;
 }
 
@@ -383,6 +399,13 @@ void ScriptManager::RunFinalizeOnClosedScript()
         if (script->IsClosed())
         {
             script->RunFinalize();
+            scriptCntMap_[script->GetPath()]--;
+            // もう使っていないならキャッシュ削除
+            if (scriptCntMap_[script->GetPath()] == 0)
+            {
+                scriptCntMap_.erase(script->GetPath());
+                serializedScriptStore_->RemoveCache(script->GetPath(), script->GetType(), script->GetVersion());
+            }
             it = scriptMap_.erase(it);
         } else ++it;
     }
