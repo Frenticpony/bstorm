@@ -54,6 +54,7 @@ public:
     void SetScriptArgument(int idx, std::unique_ptr<DnhValue>&& value);
     int GetScriptArgumentCount() const;
     const std::unique_ptr<DnhValue>& GetScriptArgument(int idx);
+    const std::shared_ptr<SerializedScript>& GetSerializedScript() const;
 private:
     void RunBuiltInSub(const std::string &name);
     void CallLuaChunk(int argCnt);
@@ -103,7 +104,6 @@ public:
 private:
     int idGen_;
     std::map<int, std::shared_ptr<Script>> scriptMap_; // IDが若い順に走査される
-    std::unordered_map<std::wstring, int> scriptCntMap_; // あるスクリプトのインスタンス数
     std::unordered_map<int, std::unique_ptr<DnhValue>> scriptResults_;
     const std::shared_ptr<FileLoader> fileLoader_;
     const std::shared_ptr<SerializedScriptStore> serializedScriptStore_;

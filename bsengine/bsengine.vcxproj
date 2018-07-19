@@ -98,6 +98,7 @@
     <ClInclude Include="src\bstorm\th_dnh_def.hpp" />
     <ClInclude Include="src\bstorm\time_point.hpp" />
     <ClInclude Include="src\bstorm\file_util.hpp" />
+    <ClInclude Include="src\bstorm\time_stamp.hpp" />
     <ClInclude Include="src\bstorm\version.hpp" />
     <ClInclude Include="src\bstorm\vertex.hpp" />
     <ClInclude Include="src\bison\dnh.tab.hpp" />
@@ -140,6 +141,7 @@
     <ClCompile Include="src\bstorm\serialized_script.cpp" />
     <ClCompile Include="src\bstorm\string_util.cpp" />
     <ClCompile Include="src\bstorm\time_point.cpp" />
+    <ClCompile Include="src\bstorm\time_stamp.cpp" />
     <ClCompile Include="src\bstorm\vertex.cpp" />
     <ClCompile Include="src\reflex\dnh_lexer.cpp" />
     <ClCompile Include="src\reflex\mqo_lexer.cpp" />

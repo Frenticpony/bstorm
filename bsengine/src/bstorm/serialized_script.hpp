@@ -2,6 +2,7 @@
 
 #include <bstorm/cache_store.hpp>
 #include <bstorm/script_info.hpp>
+#include <bstorm/time_stamp.hpp>
 
 #include <string>
 #include <memory>
@@ -13,13 +14,14 @@ namespace bstorm
 class SerializedScriptSignature
 {
 public:
-    SerializedScriptSignature(const std::wstring& path, ScriptType type, std::wstring version);
+    SerializedScriptSignature(const std::wstring& path, ScriptType type, std::wstring version, TimeStamp lastUpdateTime);
     bool operator==(const SerializedScriptSignature& params) const;
     bool operator!=(const SerializedScriptSignature& params) const;
     size_t hashValue() const;
     std::wstring path;
     ScriptType type;
     std::wstring version;
+    TimeStamp lastUpdateTime;
 };
 }
 
@@ -47,6 +49,7 @@ public:
     const char* GetByteCode() { return byteCode_.data(); }
     const size_t GetByteCodeSize() { return byteCode_.size(); }
     std::string GetConvertedBuiltInSubName(const std::string& name) const;
+    const SerializedScriptSignature& GetSignature() const { return signature_; }
 private:
     const SerializedScriptSignature signature_;
     std::string scriptInfo_;
@@ -61,7 +64,7 @@ public:
     SerializedScriptStore(const std::shared_ptr<FileLoader>& fileLoader);
     const std::shared_ptr<SerializedScript>& Load(const std::wstring& path, ScriptType type, const std::wstring& version);
     const std::shared_future<std::shared_ptr<SerializedScript>>& LoadAsync(const std::wstring& path, ScriptType type, const std::wstring& version);
-    void RemoveCache(const std::wstring& path, ScriptType type, const std::wstring& version);
+    void RemoveCache(const SerializedScriptSignature& signature);
 private:
     std::shared_ptr<FileLoader> fileLoader_;
     CacheStore<SerializedScriptSignature, SerializedScript> cacheStore_;

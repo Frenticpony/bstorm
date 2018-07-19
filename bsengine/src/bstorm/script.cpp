@@ -280,6 +280,11 @@ const std::unique_ptr<DnhValue>& Script::GetScriptArgument(int idx)
     return scriptArgs_[idx];
 }
 
+const std::shared_ptr<SerializedScript>& Script::GetSerializedScript() const
+{
+    return serializedScript_;
+}
+
 NullableSharedPtr<SourcePos> Script::GetSourcePos(int line) const
 {
     if (serializedScript_)
@@ -313,13 +318,6 @@ std::shared_ptr<Script> ScriptManager::Compile(const std::wstring& path, ScriptT
     serializedScriptStore_->LoadAsync(path, type, version);
     auto script = std::make_shared<Script>(path, type, version, idGen_++, serializedScriptStore_, package, srcPos);
     scriptMap_.emplace_hint(scriptMap_.end(), script->GetID(), script);
-    if (scriptCntMap_.count(script->GetPath()) == 0)
-    {
-        scriptCntMap_[script->GetPath()] = 1;
-    } else
-    {
-        scriptCntMap_[script->GetPath()]++;
-    }
     return script;
 }
 
@@ -399,13 +397,6 @@ void ScriptManager::RunFinalizeOnClosedScript()
         if (script->IsClosed())
         {
             script->RunFinalize();
-            scriptCntMap_[script->GetPath()]--;
-            // もう使っていないならキャッシュ削除
-            if (scriptCntMap_[script->GetPath()] == 0)
-            {
-                scriptCntMap_.erase(script->GetPath());
-                serializedScriptStore_->RemoveCache(script->GetPath(), script->GetType(), script->GetVersion());
-            }
             it = scriptMap_.erase(it);
         } else ++it;
     }

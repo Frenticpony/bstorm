@@ -16,15 +16,17 @@
 
 namespace bstorm
 {
-SerializedScriptSignature::SerializedScriptSignature(const std::wstring & path, ScriptType type, std::wstring version) :
+SerializedScriptSignature::SerializedScriptSignature(const std::wstring & path, ScriptType type, std::wstring version, TimeStamp lastUpdateTime) :
     path(GetCanonicalPath(path)),
     type(type),
-    version(version)
+    version(version),
+    lastUpdateTime(lastUpdateTime)
 {
 }
+
 bool SerializedScriptSignature::operator==(const SerializedScriptSignature & params) const
 {
-    return path == params.path && type.value == params.type.value && version == params.version;
+    return path == params.path && type.value == params.type.value && version == params.version && lastUpdateTime == params.lastUpdateTime;
 }
 
 bool SerializedScriptSignature::operator!=(const SerializedScriptSignature & params) const
@@ -38,6 +40,7 @@ size_t SerializedScriptSignature::hashValue() const
     hash_combine(h, path);
     hash_combine(h, type.value);
     hash_combine(h, version);
+    hash_combine(h, lastUpdateTime);
     return h;
 }
 
@@ -131,18 +134,17 @@ SerializedScriptStore::SerializedScriptStore(const std::shared_ptr<FileLoader>& 
 
 const std::shared_ptr<SerializedScript>& SerializedScriptStore::Load(const std::wstring & path, ScriptType type, const std::wstring & version)
 {
-    SerializedScriptSignature signature(path, type, version);
+    SerializedScriptSignature signature(path, type, version, GetFileLastUpdateTime(path));
     return cacheStore_.Load(signature, signature, fileLoader_);
 }
 
 const std::shared_future<std::shared_ptr<SerializedScript>>& SerializedScriptStore::LoadAsync(const std::wstring & path, ScriptType type, const std::wstring & version)
 {
-    SerializedScriptSignature signature(path, type, version);
+    SerializedScriptSignature signature(path, type, version, GetFileLastUpdateTime(path));
     return cacheStore_.LoadAsync(signature, signature, fileLoader_);
 }
-void SerializedScriptStore::RemoveCache(const std::wstring & path, ScriptType type, const std::wstring & version)
+void SerializedScriptStore::RemoveCache(const SerializedScriptSignature& signature)
 {
-    SerializedScriptSignature signature(path, type, version);
     cacheStore_.Remove(signature);
 }
 }
