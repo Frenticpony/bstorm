@@ -5652,26 +5652,26 @@ void SetScript(lua_State* L, Script* p)
     SetPointerToLuaRegistry(L, "Script", p);
 }
 
-__declspec(noinline) static void addConst(const std::shared_ptr<Env>& env, const char* name, const char* value)
+__declspec(noinline) static void AddConst(const std::shared_ptr<Env>& env, const char* name, const char* value)
 {
     env->AddDef(name, std::make_shared<NodeConst>(name, value));
 }
 
-__declspec(noinline) static void addConstI(const std::shared_ptr<Env>& env, const char* name, int value)
+__declspec(noinline) static void AddConstI(const std::shared_ptr<Env>& env, const char* name, int value)
 {
     env->AddDef(name, std::make_shared<NodeConst>(name, std::to_string(value)));
 }
 
-__declspec(noinline) static void addFunc(const std::shared_ptr<Env>& env, const char* name, uint8_t paramc, lua_State* L, lua_CFunction func)
+__declspec(noinline) static void AddBuiltInFunc(const std::shared_ptr<Env>& env, const char* name, uint8_t paramc, lua_State* L, lua_CFunction func)
 {
     auto& def = env->AddDef(name, std::make_shared<NodeBuiltInFunc>(name, paramc));
-    if (L)
+    if (L && func)
     {
         lua_register(L, (std::string(DNH_BUILTIN_FUNC_PREFIX) + def->convertedName).c_str(), func);
     }
 }
 
-__declspec(noinline) static void addRuntimeBuiltInFunc(const std::shared_ptr<Env>& env, const char* name, uint8_t paramc, lua_State* L)
+__declspec(noinline) static void AddRuntimeBuiltInFunc(const std::shared_ptr<Env>& env, const char* name, uint8_t paramc, lua_State* L)
 {
     auto& def = env->AddDef(name, std::make_shared<NodeBuiltInFunc>(name, paramc));
     if (L)
@@ -5692,9 +5692,9 @@ __declspec(noinline) static void addRuntimeBuiltInFunc(const std::shared_ptr<Env
     }
 }
 
-#define constI(name) (addConstI(env, #name, name))
-#define builtin(name, paramc) (addFunc(env, #name, (paramc), L, name))
-#define runtime(name, paramc) (addRuntimeBuiltInFunc(env, #name, (paramc), L))
+#define constI(name) (AddConstI(env, #name, name))
+#define builtin(name, paramc) (AddBuiltInFunc(env, #name, (paramc), L, name))
+#define runtime(name, paramc) (AddRuntimeBuiltInFunc(env, #name, (paramc), L))
 #define TypeIs(typeSet) ((typeSet) & type)
 
 using ScriptTypeSet = uint8_t;
@@ -6125,9 +6125,9 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
     constI(CULL_CW);
     constI(CULL_CCW);
 
-    addConst(env, "pi", "3.141592653589793");
-    addConst(env, "true", "true");
-    addConst(env, "false", "false");
+    AddConst(env, "pi", "3.141592653589793");
+    AddConst(env, "true", "true");
+    AddConst(env, "false", "false");
 
     runtime(concatenate, 2);
     runtime(add, 2);
@@ -6196,7 +6196,7 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
         builtin(GetMainStgScriptDirectory, 0);
     }
 
-    runtime(GetCurrentScriptDirectory, 0);
+    AddBuiltInFunc(env, "GetCurrentScriptDirectory", 0, L, nullptr);
     builtin(GetScriptPathList, 2);
 
     builtin(GetCurrentDateTimeS, 0);
