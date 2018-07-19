@@ -112,12 +112,12 @@ void CodeGenerator::Traverse(NodeDiv& exp) { GenArithBinOp("div", "/", exp); }
 void CodeGenerator::Traverse(NodeRem& exp) { GenArithBinOp("rem", "%", exp); }
 void CodeGenerator::Traverse(NodePow& exp) { GenArithBinOp("pow", "^", exp); }
 
-void CodeGenerator::Traverse(NodeLt& exp) { GenBinOp("lt", exp); }
-void CodeGenerator::Traverse(NodeGt& exp) { GenBinOp("gt", exp); }
-void CodeGenerator::Traverse(NodeLe& exp) { GenBinOp("le", exp); }
-void CodeGenerator::Traverse(NodeGe& exp) { GenBinOp("ge", exp); }
-void CodeGenerator::Traverse(NodeEq& exp) { GenBinOp("eq", exp); }
-void CodeGenerator::Traverse(NodeNe& exp) { GenBinOp("ne", exp); }
+void CodeGenerator::Traverse(NodeLt& exp) { GenArithBinOp("lt", "<", exp); }
+void CodeGenerator::Traverse(NodeGt& exp) { GenArithBinOp("gt", ">", exp); }
+void CodeGenerator::Traverse(NodeLe& exp) { GenArithBinOp("le", "<=", exp); }
+void CodeGenerator::Traverse(NodeGe& exp) { GenArithBinOp("ge", ">=", exp); }
+void CodeGenerator::Traverse(NodeEq& exp) { GenArithBinOp("eq", "==", exp); }
+void CodeGenerator::Traverse(NodeNe& exp) { GenArithBinOp("ne", "~=", exp); }
 
 void CodeGenerator::Traverse(NodeAnd& exp) { GenLogBinOp("and", exp); }
 void CodeGenerator::Traverse(NodeOr& exp) { GenLogBinOp("or", exp); }
