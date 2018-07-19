@@ -83,16 +83,25 @@ void CodeGenerator::Traverse(NodeArray& exp)
     }
     AddCode("}");
 }
-void CodeGenerator::Traverse(NodeNeg& exp) { GenMonoOp("neg", exp); }
+void CodeGenerator::Traverse(NodeNeg& exp)
+{
+    if (exp.rhs->expType == NodeExp::ExpType::REAL)
+    {
+        AddCode("(-"); exp.rhs->Traverse(*this); AddCode(")");
+    } else
+    {
+        GenMonoOp("neg", exp);
+    }
+}
 void CodeGenerator::Traverse(NodeNot& exp) { GenMonoOp("not", exp); }
 void CodeGenerator::Traverse(NodeAbs& exp) { GenMonoOp("abs", exp); }
 
-void CodeGenerator::Traverse(NodeAdd& exp) { GenBinOp("add", exp); }
-void CodeGenerator::Traverse(NodeSub& exp) { GenBinOp("sub", exp); }
-void CodeGenerator::Traverse(NodeMul& exp) { GenBinOp("mul", exp); }
-void CodeGenerator::Traverse(NodeDiv& exp) { GenBinOp("div", exp); }
-void CodeGenerator::Traverse(NodeRem& exp) { GenBinOp("rem", exp); }
-void CodeGenerator::Traverse(NodePow& exp) { GenBinOp("pow", exp); }
+void CodeGenerator::Traverse(NodeAdd& exp) { GenArithBinOp("add", "+", exp); }
+void CodeGenerator::Traverse(NodeSub& exp) { GenArithBinOp("sub", "-", exp); }
+void CodeGenerator::Traverse(NodeMul& exp) { GenArithBinOp("mul", "*", exp); }
+void CodeGenerator::Traverse(NodeDiv& exp) { GenArithBinOp("div", "/", exp); }
+void CodeGenerator::Traverse(NodeRem& exp) { GenArithBinOp("rem", "%", exp); }
+void CodeGenerator::Traverse(NodePow& exp) { GenArithBinOp("pow", "^", exp); }
 
 void CodeGenerator::Traverse(NodeLt& exp) { GenBinOp("lt", exp); }
 void CodeGenerator::Traverse(NodeGt& exp) { GenBinOp("gt", exp); }
@@ -218,17 +227,33 @@ void CodeGenerator::Unindent()
 }
 void CodeGenerator::GenMonoOp(const std::string& fname, NodeMonoOp& exp)
 {
-    AddCode(runtime(fname) + "(");
+    AddCode(runtime(fname));
+    AddCode("(");
     exp.rhs->Traverse(*this);
     AddCode(")");
 }
 void CodeGenerator::GenBinOp(const std::string& fname, NodeBinOp& exp)
 {
-    AddCode(runtime(fname) + "(");
+    AddCode(runtime(fname));
+    AddCode("(");
     exp.lhs->Traverse(*this);
     AddCode(",");
     exp.rhs->Traverse(*this);
     AddCode(")");
+}
+void CodeGenerator::GenArithBinOp(const std::string & fname, const std::string& op, NodeBinOp & exp)
+{
+    if (exp.lhs->expType == NodeExp::ExpType::REAL && exp.rhs->expType == NodeExp::ExpType::REAL)
+    {
+        AddCode("(");
+        exp.lhs->Traverse(*this);
+        AddCode(op);
+        exp.rhs->Traverse(*this);
+        AddCode(")");
+    } else
+    {
+        GenBinOp(fname, exp);
+    }
 }
 void CodeGenerator::GenLogBinOp(const std::string & fname, NodeBinOp & exp)
 {

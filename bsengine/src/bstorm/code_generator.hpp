@@ -92,6 +92,7 @@ private:
     void Unindent();
     void GenMonoOp(const std::string& fname, NodeMonoOp& exp);
     void GenBinOp(const std::string& fname, NodeBinOp& exp);
+    void GenArithBinOp(const std::string& fname, const std::string& op, NodeBinOp& exp);
     void GenLogBinOp(const std::string& fname, NodeBinOp& exp);
     void GenCheckNil(const std::string& name);
     void GenProc(std::shared_ptr<NodeDef> def, const std::vector<std::string>& params_, NodeBlock& blk);
