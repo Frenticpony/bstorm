@@ -373,7 +373,7 @@ void CodeGenerator::GenCopy(std::shared_ptr<NodeExp>& exp)
 {
     if (IsCopyNeeded(exp))
     {
-        AddCode(runtime("cp") + "("); exp->Traverse(*this); AddCode(")");
+        AddCode(runtime("cp")); AddCode("("); exp->Traverse(*this); AddCode(")");
     } else
     {
         exp->Traverse(*this);
@@ -387,7 +387,7 @@ void CodeGenerator::GenCondition(std::shared_ptr<NodeExp>& exp)
         exp->Traverse(*this);
     } else
     {
-        AddCode(runtime("tobool") + "("); exp->Traverse(*this); AddCode(")");
+        AddCode(runtime("tobool")); AddCode("("); exp->Traverse(*this); AddCode(")");
     }
 }
 
@@ -440,7 +440,8 @@ bool CodeGenerator::IsCopyNeeded(const std::shared_ptr<NodeExp>& exp)
 }
 void CodeGenerator::Traverse(NodeArrayRef& exp)
 {
-    AddCode(runtime("read") + "(");
+    AddCode(runtime("read"));
+    AddCode("(");
     exp.array->Traverse(*this);
     AddCode(",");
     exp.idx->Traverse(*this);
@@ -449,7 +450,8 @@ void CodeGenerator::Traverse(NodeArrayRef& exp)
 void CodeGenerator::Traverse(NodeRange &) {}
 void CodeGenerator::Traverse(NodeArraySlice& exp)
 {
-    AddCode(runtime("slice") + "(");
+    AddCode(runtime("slice"));
+    AddCode("(");
     exp.array->Traverse(*this);
     AddCode(",");
     exp.range->start->Traverse(*this);
@@ -472,7 +474,8 @@ void CodeGenerator::Traverse(NodeAssign& stmt)
         case 1:
             // a[i] = e;
             // out : r_write1(r_checknil(a), i, e);
-            AddCode(runtime("write1") + "(");
+            AddCode(runtime("write1"));
+            AddCode("(");
             GenCheckNil(def->name);
             AddCode(",");
             stmt.lhs->indices[0]->Traverse(*this);
@@ -483,7 +486,8 @@ void CodeGenerator::Traverse(NodeAssign& stmt)
         default:
             // a[i1][i2] .. [in] = e;
             // out : r_write(r_checknil(a), {i1, i2, .. in}, e);
-            AddCode(runtime("write") + "(");
+            AddCode(runtime("write"));
+            AddCode("(");
             GenCheckNil(def->name);
             AddCode(", {");
             for (int i = 0; i < stmt.lhs->indices.size(); i++)
@@ -525,11 +529,12 @@ void CodeGenerator::Traverse(NodeCallStmt& call)
     {
         if (isUserFunc)
         {
-            AddCode(varname(def) + "(");
+            AddCode(varname(def));
         } else
         {
-            AddCode(builtin(def) + "(");
+            AddCode(builtin(def));
         }
+        AddCode("(");
     }
     for (int i = 0; i < call.args.size(); i++)
     {
