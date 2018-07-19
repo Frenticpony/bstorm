@@ -123,6 +123,17 @@ void CodeGenerator::Traverse(NodeAnd& exp) { GenLogBinOp("and", exp); }
 void CodeGenerator::Traverse(NodeOr& exp) { GenLogBinOp("or", exp); }
 void CodeGenerator::Traverse(NodeCat& exp)
 {
+    {
+        auto leftStr = std::dynamic_pointer_cast<NodeStr>(exp.lhs);
+        auto rightStr = std::dynamic_pointer_cast<NodeStr>(exp.rhs);
+        if (leftStr && rightStr)
+        {
+            NodeStr(leftStr->str + rightStr->str).Traverse(*this);
+            return;
+        }
+    }
+
+
     if (IsCopyNeeded(exp.lhs))
     {
         GenBinOp("cat", exp);
