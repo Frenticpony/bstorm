@@ -72,8 +72,8 @@ SerializedScript::SerializedScript(const SerializedScriptSignature& signature, c
     }
 
     // •ÏŠ·
-    CodeGenerator codeGen;
-    codeGen.Generate(true, *program);
+    CodeGenerator codeGen(CodeGenerator::Option{});
+    codeGen.Generate(*program);
 
     // ƒRƒ“ƒpƒCƒ‹
     {

@@ -3,6 +3,7 @@
 #include <bstorm/env.hpp>
 #include <bstorm/node.hpp>
 #include <bstorm/source_map.hpp>
+#include <bstorm/nullable_shared_ptr.hpp>
 
 #include <string>
 #include <stack>
@@ -13,8 +14,13 @@ namespace bstorm
 class CodeGenerator : public NodeTraverser
 {
 public:
-    CodeGenerator();
-    void Generate(bool embedLocalVarName, Node& n);
+    struct Option
+    {
+        bool embedLocalVarName = true;
+        bool deleteUnreachableDefinition = false;
+    };
+    CodeGenerator(const Option& option);
+    void Generate(Node& n);
     const SourceMap& GetSourceMap() const { return srcMap_; }
     const std::string& GetCode() const { return code_; }
     void Traverse(NodeNum&);
@@ -95,8 +101,8 @@ private:
     void GenArithBinOp(const std::string& fname, const std::string& op, NodeBinOp& exp);
     void GenLogBinOp(const std::string& fname, NodeBinOp& exp);
     void GenNilCheck(const std::string& name);
-    void GenProc(std::shared_ptr<NodeDef> def, const std::vector<std::string>& params_, NodeBlock& blk);
-    void GenOpAssign(const std::string& fname, const std::shared_ptr<NodeLeftVal>& left, std::shared_ptr<NodeExp> right);
+    void GenProc(const std::shared_ptr<NodeDef>& def, const std::vector<std::string>& params_, NodeBlock& blk);
+    void GenOpAssign(const std::string& fname, const std::shared_ptr<NodeLeftVal>& left, const NullableSharedPtr<NodeExp>& right);
     void GenCopy(std::shared_ptr<NodeExp>& exp);
     void GenCondition(std::shared_ptr<NodeExp>& exp);
     bool IsCopyNeeded(const std::shared_ptr<NodeExp>& exp);
@@ -107,6 +113,6 @@ private:
     int indentLevel_;
     int outputLine_;
     bool isLineHead_;
-    bool embedLocalVarName_;
+    const Option option_;
 };
 }

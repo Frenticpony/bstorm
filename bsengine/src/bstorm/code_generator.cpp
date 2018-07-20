@@ -37,18 +37,18 @@ static bool isDeclarationNeeded(const std::shared_ptr<NodeDef>& def)
     return false;
 }
 
-CodeGenerator::CodeGenerator() :
+CodeGenerator::CodeGenerator(const Option& option) :
     indentLevel_(0),
     outputLine_(1),
-    isLineHead_(true)
+    isLineHead_(true),
+    option_(option)
 {
 }
 
-void CodeGenerator::Generate(bool embedLocalVarName, Node & n)
+void CodeGenerator::Generate(Node & n)
 {
     env_ = nullptr;
     code_.clear();
-    embedLocalVarName_ = embedLocalVarName;
     n.Traverse(*this);
 }
 
@@ -286,7 +286,7 @@ void CodeGenerator::GenLogBinOp(const std::string & fname, NodeBinOp & exp)
 }
 void CodeGenerator::GenNilCheck(const std::string & name)
 {
-    if (embedLocalVarName_)
+    if (option_.embedLocalVarName)
     {
         AddCode(runtime("nc") + "(" + varname(name, env_) + ", \"" + name + "\")");
     } else
@@ -294,7 +294,7 @@ void CodeGenerator::GenNilCheck(const std::string & name)
         AddCode(runtime("nc") + "(" + varname(name, env_) + ")");
     }
 }
-void CodeGenerator::GenProc(std::shared_ptr<NodeDef> def, const std::vector<std::string>& params_, NodeBlock & blk)
+void CodeGenerator::GenProc(const std::shared_ptr<NodeDef>& def, const std::vector<std::string>& params_, NodeBlock & blk)
 {
     AddCode(varname(def) + " = function(");
     for (int i = 0; i < params_.size(); i++)
@@ -317,7 +317,7 @@ void CodeGenerator::GenProc(std::shared_ptr<NodeDef> def, const std::vector<std:
     }
     AddCode("end"); NewLine();
 }
-void CodeGenerator::GenOpAssign(const std::string & fname, const std::shared_ptr<NodeLeftVal>& left, std::shared_ptr<NodeExp> right)
+void CodeGenerator::GenOpAssign(const std::string & fname, const std::shared_ptr<NodeLeftVal>& left, const NullableSharedPtr<NodeExp>& right)
 {
     switch (left->indices.size())
     {
@@ -757,13 +757,15 @@ void CodeGenerator::Traverse(NodeBlock& blk)
 {
     env_ = std::make_shared<Env>(blk.nameTable, env_);
 
+    // トップレベルはグローバル変数に入れるので宣言不要
     if (!env_->IsRoot())
     {
         Indent();
         // local declare
         for (const auto& bind : *(blk.nameTable))
         {
-            auto def = bind.second;
+            auto& def = bind.second;
+            if (def->unreachable && option_.deleteUnreachableDefinition) continue;
             if (isDeclarationNeeded(def))
             {
                 AddCode("local "); AddCode(varname(def)); AddCode(";"); NewLine(def->srcPos);

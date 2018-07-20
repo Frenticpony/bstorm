@@ -468,9 +468,10 @@ struct NodePred : public NodeSucc
 
 struct NodeDef : public Node
 {
-    NodeDef(const std::string& name) : Node(), name(name), convertedName(name) {}
+    NodeDef(const std::string& name) : Node(), name(name), convertedName(name), unreachable(true) {}
     std::string name;
     std::string convertedName; // 名前変換用
+    bool unreachable; // 到達不可能
 };
 
 struct NodeVarDecl : public NodeDef
