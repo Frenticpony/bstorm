@@ -282,6 +282,12 @@
     <ClInclude Include="src\bstorm\time_stamp.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="src\bstorm\code_analyzer.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\bstorm\script_entry_routine_names.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\bison\dnh.tab.cpp">
@@ -504,6 +510,12 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\bstorm\time_stamp.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bstorm\code_analyzer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bstorm\script_entry_routine_names.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

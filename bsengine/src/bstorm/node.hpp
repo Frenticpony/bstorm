@@ -79,72 +79,72 @@ class NodeTraverser
 {
 public:
     virtual ~NodeTraverser() {}
-    virtual void Traverse(NodeNum&) {};
-    virtual void Traverse(NodeChar&) {};
-    virtual void Traverse(NodeStr&) {};
-    virtual void Traverse(NodeArray&) {};
-    virtual void Traverse(NodeNeg&) {};
-    virtual void Traverse(NodeNot&) {};
-    virtual void Traverse(NodeAbs&) {};
-    virtual void Traverse(NodeAdd&) {};
-    virtual void Traverse(NodeSub&) {};
-    virtual void Traverse(NodeMul&) {};
-    virtual void Traverse(NodeDiv&) {};
-    virtual void Traverse(NodeRem&) {};
-    virtual void Traverse(NodePow&) {};
-    virtual void Traverse(NodeLt&) {};
-    virtual void Traverse(NodeGt&) {};
-    virtual void Traverse(NodeLe&) {};
-    virtual void Traverse(NodeGe&) {};
-    virtual void Traverse(NodeEq&) {};
-    virtual void Traverse(NodeNe&) {};
-    virtual void Traverse(NodeAnd&) {};
-    virtual void Traverse(NodeOr&) {};
-    virtual void Traverse(NodeCat&) {};
-    virtual void Traverse(NodeNoParenCallExp&) {};
-    virtual void Traverse(NodeCallExp&) {};
-    virtual void Traverse(NodeArrayRef&) {};
-    virtual void Traverse(NodeRange&) {};
-    virtual void Traverse(NodeArraySlice&) {};
-    virtual void Traverse(NodeNop&) {};
-    virtual void Traverse(NodeLeftVal&) {};
-    virtual void Traverse(NodeAssign&) {};
-    virtual void Traverse(NodeAddAssign&) {};
-    virtual void Traverse(NodeSubAssign&) {};
-    virtual void Traverse(NodeMulAssign&) {};
-    virtual void Traverse(NodeDivAssign&) {};
-    virtual void Traverse(NodeRemAssign&) {};
-    virtual void Traverse(NodePowAssign&) {};
-    virtual void Traverse(NodeCatAssign&) {};
-    virtual void Traverse(NodeCallStmt&) {};
-    virtual void Traverse(NodeReturn&) {};
-    virtual void Traverse(NodeReturnVoid&) {};
-    virtual void Traverse(NodeYield&) {};
-    virtual void Traverse(NodeBreak&) {};
-    virtual void Traverse(NodeSucc&) {};
-    virtual void Traverse(NodePred&) {};
-    virtual void Traverse(NodeVarDecl&) {};
-    virtual void Traverse(NodeVarInit&) {};
-    virtual void Traverse(NodeProcParam&) {};
-    virtual void Traverse(NodeLoopParam&) {};
-    virtual void Traverse(NodeBlock&) {};
-    virtual void Traverse(NodeSubDef&) {};
-    virtual void Traverse(NodeBuiltInSubDef&) {};
-    virtual void Traverse(NodeFuncDef&) {};
-    virtual void Traverse(NodeTaskDef&) {};
-    virtual void Traverse(NodeBuiltInFunc&) {};
-    virtual void Traverse(NodeConst&) {};
-    virtual void Traverse(NodeLocal&) {};
-    virtual void Traverse(NodeLoop&) {};
-    virtual void Traverse(NodeTimes&) {};
-    virtual void Traverse(NodeWhile&) {};
-    virtual void Traverse(NodeAscent&) {};
-    virtual void Traverse(NodeDescent&) {};
-    virtual void Traverse(NodeElseIf&) {};
-    virtual void Traverse(NodeIf&) {};
-    virtual void Traverse(NodeCase&) {};
-    virtual void Traverse(NodeAlternative&) {};
-    virtual void Traverse(NodeHeader&) {};
+    virtual void Traverse(NodeNum&) = 0;
+    virtual void Traverse(NodeChar&) = 0;
+    virtual void Traverse(NodeStr&) = 0;
+    virtual void Traverse(NodeArray&) = 0;
+    virtual void Traverse(NodeNeg&) = 0;
+    virtual void Traverse(NodeNot&) = 0;
+    virtual void Traverse(NodeAbs&) = 0;
+    virtual void Traverse(NodeAdd&) = 0;
+    virtual void Traverse(NodeSub&) = 0;
+    virtual void Traverse(NodeMul&) = 0;
+    virtual void Traverse(NodeDiv&) = 0;
+    virtual void Traverse(NodeRem&) = 0;
+    virtual void Traverse(NodePow&) = 0;
+    virtual void Traverse(NodeLt&) = 0;
+    virtual void Traverse(NodeGt&) = 0;
+    virtual void Traverse(NodeLe&) = 0;
+    virtual void Traverse(NodeGe&) = 0;
+    virtual void Traverse(NodeEq&) = 0;
+    virtual void Traverse(NodeNe&) = 0;
+    virtual void Traverse(NodeAnd&) = 0;
+    virtual void Traverse(NodeOr&) = 0;
+    virtual void Traverse(NodeCat&) = 0;
+    virtual void Traverse(NodeNoParenCallExp&) = 0;
+    virtual void Traverse(NodeCallExp&) = 0;
+    virtual void Traverse(NodeArrayRef&) = 0;
+    virtual void Traverse(NodeRange&) = 0;
+    virtual void Traverse(NodeArraySlice&) = 0;
+    virtual void Traverse(NodeNop&) = 0;
+    virtual void Traverse(NodeLeftVal&) = 0;
+    virtual void Traverse(NodeAssign&) = 0;
+    virtual void Traverse(NodeAddAssign&) = 0;
+    virtual void Traverse(NodeSubAssign&) = 0;
+    virtual void Traverse(NodeMulAssign&) = 0;
+    virtual void Traverse(NodeDivAssign&) = 0;
+    virtual void Traverse(NodeRemAssign&) = 0;
+    virtual void Traverse(NodePowAssign&) = 0;
+    virtual void Traverse(NodeCatAssign&) = 0;
+    virtual void Traverse(NodeCallStmt&) = 0;
+    virtual void Traverse(NodeReturn&) = 0;
+    virtual void Traverse(NodeReturnVoid&) = 0;
+    virtual void Traverse(NodeYield&) = 0;
+    virtual void Traverse(NodeBreak&) = 0;
+    virtual void Traverse(NodeSucc&) = 0;
+    virtual void Traverse(NodePred&) = 0;
+    virtual void Traverse(NodeVarDecl&) = 0;
+    virtual void Traverse(NodeVarInit&) = 0;
+    virtual void Traverse(NodeProcParam&) = 0;
+    virtual void Traverse(NodeLoopParam&) = 0;
+    virtual void Traverse(NodeBlock&) = 0;
+    virtual void Traverse(NodeSubDef&) = 0;
+    virtual void Traverse(NodeBuiltInSubDef&) = 0;
+    virtual void Traverse(NodeFuncDef&) = 0;
+    virtual void Traverse(NodeTaskDef&) = 0;
+    virtual void Traverse(NodeBuiltInFunc&) = 0;
+    virtual void Traverse(NodeConst&) = 0;
+    virtual void Traverse(NodeLocal&) = 0;
+    virtual void Traverse(NodeLoop&) = 0;
+    virtual void Traverse(NodeTimes&) = 0;
+    virtual void Traverse(NodeWhile&) = 0;
+    virtual void Traverse(NodeAscent&) = 0;
+    virtual void Traverse(NodeDescent&) = 0;
+    virtual void Traverse(NodeElseIf&) = 0;
+    virtual void Traverse(NodeIf&) = 0;
+    virtual void Traverse(NodeCase&) = 0;
+    virtual void Traverse(NodeAlternative&) = 0;
+    virtual void Traverse(NodeHeader&) = 0;
 };
 
 struct SourcePos;
@@ -490,7 +490,10 @@ struct NodeVarInit : public NodeStmt
 
 struct NodeProcParam : public NodeDef
 {
-    NodeProcParam(const std::string& name) : NodeDef(name) {}
+    NodeProcParam(const std::string& name) : NodeDef(name)
+    {
+        unreachable = false;
+    }
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 

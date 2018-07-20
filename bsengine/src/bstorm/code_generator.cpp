@@ -757,9 +757,10 @@ void CodeGenerator::Traverse(NodeBlock& blk)
 {
     env_ = std::make_shared<Env>(blk.nameTable, env_);
 
-    // トップレベルはグローバル変数に入れるので宣言不要
-    if (!env_->IsRoot())
+    // 宣言生成
+    if (!env_->IsRoot()) // トップレベルはグローバル変数に入れるので宣言不要
     {
+        
         Indent();
         // local declare
         for (const auto& bind : *(blk.nameTable))
@@ -773,11 +774,15 @@ void CodeGenerator::Traverse(NodeBlock& blk)
         }
     }
 
+    // 定義生成
     for (const auto& bind : *(blk.nameTable))
     {
-        bind.second->Traverse(*this);
+        auto& def = bind.second;
+        if (def->unreachable && option_.deleteUnreachableDefinition) continue;
+        def->Traverse(*this);
     }
 
+    // ブロック内の文生成
     for (auto& stmt : blk.stmts)
     {
         stmt->Traverse(*this);

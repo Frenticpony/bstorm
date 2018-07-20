@@ -10,7 +10,9 @@
 #include <bstorm/node.hpp>
 #include <bstorm/parser.hpp>
 #include <bstorm/semantics_checker.hpp>
+#include <bstorm/code_analyzer.hpp>
 #include <bstorm/code_generator.hpp>
+#include <bstorm/script_entry_routine_names.hpp>
 
 #include <luajit/lua.hpp>
 
@@ -71,8 +73,14 @@ SerializedScript::SerializedScript(const SerializedScriptSignature& signature, c
         }
     }
 
-    // 変換
-    CodeGenerator codeGen(CodeGenerator::Option{});
+    // 静的解析
+    CodeAnalyzer analyzer;
+    analyzer.Analyze(*program);
+
+    // コード生成
+    CodeGenerator::Option codeGenOption;
+    codeGenOption.deleteUnreachableDefinition = true;
+    CodeGenerator codeGen(codeGenOption);
     codeGen.Generate(*program);
 
     // コンパイル
@@ -109,7 +117,7 @@ SerializedScript::SerializedScript(const SerializedScriptSignature& signature, c
 #ifdef _DEBUG
     srcCode_ = codeGen.GetCode();
 #endif
-    for (auto&& name : { "Loading", "Initialize", "MainLoop", "Finalize", "Event" })
+    for (auto&& name : SCRIPT_ENTRY_ROUTINE_NAMES)
     {
         if (auto def = globalEnv->FindDef(name))
         {

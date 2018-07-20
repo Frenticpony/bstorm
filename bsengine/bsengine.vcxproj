@@ -23,6 +23,7 @@
     <ClInclude Include="src\bstorm\api.hpp" />
     <ClInclude Include="src\bstorm\camera2D.hpp" />
     <ClInclude Include="src\bstorm\camera3D.hpp" />
+    <ClInclude Include="src\bstorm\code_analyzer.hpp" />
     <ClInclude Include="src\bstorm\code_generator.hpp" />
     <ClInclude Include="src\bstorm\color_rgb.hpp" />
     <ClInclude Include="src\bstorm\common_data_db.hpp" />
@@ -39,6 +40,7 @@
     <ClInclude Include="src\bstorm\point2D.hpp" />
     <ClInclude Include="src\bstorm\ptr_util.hpp" />
     <ClInclude Include="src\bstorm\rect.hpp" />
+    <ClInclude Include="src\bstorm\script_entry_routine_names.hpp" />
     <ClInclude Include="src\bstorm\script_name_prefix.hpp" />
     <ClInclude Include="src\bstorm\serialized_script.hpp" />
     <ClInclude Include="src\bstorm\shot_counter.hpp" />
@@ -114,6 +116,7 @@
     <ClCompile Include="src\bison\dnh.tab.cpp" />
     <ClCompile Include="src\bison\mqo.tab.cpp" />
     <ClCompile Include="src\bison\user_def_data.tab.cpp" />
+    <ClCompile Include="src\bstorm\code_analyzer.cpp" />
     <ClCompile Include="src\bstorm\color_rgb.cpp" />
     <ClCompile Include="src\bstorm\dx_util.cpp" />
     <ClCompile Include="src\bstorm\engine.cpp" />
@@ -138,6 +141,7 @@
     <ClCompile Include="src\bstorm\obj_sound.cpp" />
     <ClCompile Include="src\bstorm\parser.cpp" />
     <ClCompile Include="src\bstorm\replay_data.cpp" />
+    <ClCompile Include="src\bstorm\script_entry_routine_names.cpp" />
     <ClCompile Include="src\bstorm\serialized_script.cpp" />
     <ClCompile Include="src\bstorm\string_util.cpp" />
     <ClCompile Include="src\bstorm\time_point.cpp" />
