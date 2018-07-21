@@ -152,10 +152,7 @@ void CodeGenerator::Traverse(NodeCat& exp)
 void CodeGenerator::Traverse(NodeNoParenCallExp& call)
 {
     auto def = env_->FindDef(call.name);
-    if (std::dynamic_pointer_cast<NodeVarDecl>(def) ||
-        std::dynamic_pointer_cast<NodeProcParam>(def) ||
-        std::dynamic_pointer_cast<NodeLoopParam>(def) ||
-        std::dynamic_pointer_cast<NodeResult>(def))
+    if (def->IsVariable())
     {
         GenNilCheckExp(call.name);
     } else if (std::dynamic_pointer_cast<NodeBuiltInFunc>(def))
@@ -892,14 +889,14 @@ void CodeGenerator::Traverse(NodeFuncDef& func)
 {
     std::shared_ptr<NodeFuncDef> def = std::make_shared<NodeFuncDef>(func);
     procStack_.push(def);
-    GenProc(def, func.params_, *func.block);
+    GenProc(def, func.params, *func.block);
     procStack_.pop();
 }
 void CodeGenerator::Traverse(NodeTaskDef& task)
 {
     std::shared_ptr<NodeTaskDef> def = std::make_shared<NodeTaskDef>(task);
     procStack_.push(def);
-    GenProc(def, task.params_, *task.block);
+    GenProc(def, task.params, *task.block);
     procStack_.pop();
 }
 }

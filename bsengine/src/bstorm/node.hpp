@@ -515,6 +515,7 @@ struct NodePred : public NodeSucc
 struct NodeDef : public Node
 {
     NodeDef(const std::string& name) : Node(), name(name), convertedName(name), unreachable(true) {}
+    virtual bool IsVariable() const = 0;
     std::string name;
     std::string convertedName; // 名前変換用
     bool unreachable; // 到達不可能フラグ
@@ -530,6 +531,8 @@ struct NodeVarDecl : public NodeDef
         noSubEffect = true;
     }
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
+    virtual bool IsVariable() const override { return true; }
+    std::string name;
     uint32_t assignCnt;
     uint32_t refCnt;
 };
@@ -550,6 +553,7 @@ struct NodeProcParam : public NodeDef
         noSubEffect = true;
     }
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
+    virtual bool IsVariable() const override { return true; }
 };
 
 struct NodeLoopParam : public NodeDef
@@ -559,6 +563,7 @@ struct NodeLoopParam : public NodeDef
         noSubEffect = true;
     }
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
+    virtual bool IsVariable() const override { return true; }
 };
 
 struct NodeResult : public NodeDef
@@ -568,6 +573,7 @@ struct NodeResult : public NodeDef
         noSubEffect = true;
     }
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
+    virtual bool IsVariable() const override { return true; }
 };
 
 using DefNameTable = std::unordered_map<std::string, std::shared_ptr<NodeDef>>;
@@ -583,6 +589,7 @@ struct NodeSubDef : public NodeDef
 {
     NodeSubDef(const std::string& name, const std::shared_ptr<NodeBlock>& blk) : NodeDef(name), block(blk) {}
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
+    virtual bool IsVariable() const override { return false; }
     std::shared_ptr<NodeBlock> block;
 };
 
@@ -594,17 +601,19 @@ struct NodeBuiltInSubDef : public NodeSubDef
 
 struct NodeFuncDef : public NodeDef
 {
-    NodeFuncDef(const std::string& name, std::vector<std::string>&& ps, const std::shared_ptr<NodeBlock>& blk) : NodeDef(name), params_(std::move(ps)), block(blk) {}
+    NodeFuncDef(const std::string& name, std::vector<std::string>&& ps, const std::shared_ptr<NodeBlock>& blk) : NodeDef(name), params(std::move(ps)), block(blk) {}
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
-    std::vector<std::string> params_;
+    virtual bool IsVariable() const override { return false; }
+    std::vector<std::string> params;
     std::shared_ptr<NodeBlock> block;
 };
 
 struct NodeTaskDef : public NodeDef
 {
-    NodeTaskDef(const std::string& name, std::vector<std::string>&& ps, std::shared_ptr<NodeBlock>& blk) : NodeDef(name), params_(std::move(ps)), block(blk) {}
+    NodeTaskDef(const std::string& name, std::vector<std::string>&& ps, std::shared_ptr<NodeBlock>& blk) : NodeDef(name), params(std::move(ps)), block(blk) {}
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
-    std::vector<std::string> params_;
+    virtual bool IsVariable() const override { return false; }
+    std::vector<std::string> params;
     std::shared_ptr<NodeBlock> block;
 };
 
@@ -612,6 +621,7 @@ struct NodeBuiltInFunc : public NodeDef
 {
     NodeBuiltInFunc(const std::string& name, uint8_t paramc) : NodeDef(name), paramCnt(paramc) {}
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
+    virtual bool IsVariable() const override { return false; }
     uint8_t paramCnt;
 };
 
@@ -619,6 +629,7 @@ struct NodeConst : public NodeDef
 {
     NodeConst(const std::string& name, const std::string& c) : NodeDef(name), value(c) {}
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
+    virtual bool IsVariable() const override { return false; }
     std::string value; // UTF-8
 };
 
@@ -708,9 +719,9 @@ struct NodeAlternative : public NodeStmt
 
 struct NodeHeader : public NodeStmt
 {
-    NodeHeader(const std::wstring& name, std::vector<std::wstring>&& params) : NodeStmt(), name(name), params_(std::move(params)) {}
+    NodeHeader(const std::wstring& name, std::vector<std::wstring>&& params) : NodeStmt(), name(name), params(std::move(params)) {}
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::wstring name;
-    std::vector<std::wstring> params_;
+    std::vector<std::wstring> params;
 };
 }

@@ -61,20 +61,11 @@ static Log invalid_break(const std::shared_ptr<SourcePos>& srcPos)
         .AddSourcePos(srcPos);
 }
 
-static bool IsVariable(const std::shared_ptr<NodeDef>& def)
-{
-    if (std::dynamic_pointer_cast<NodeVarDecl>(def)) { return true; }
-    if (std::dynamic_pointer_cast<NodeProcParam>(def)) { return true; }
-    if (std::dynamic_pointer_cast<NodeLoopParam>(def)) { return true; }
-    if (std::dynamic_pointer_cast<NodeResult>(def)) { return true; }
-    return false;
-}
-
 static int GetParamCnt(const std::shared_ptr<NodeDef>& def)
 {
     if (auto b = std::dynamic_pointer_cast<NodeBuiltInFunc>(def)) return (int)b->paramCnt;
-    if (auto f = std::dynamic_pointer_cast<NodeFuncDef>(def)) return (int)f->params_.size();
-    if (auto t = std::dynamic_pointer_cast<NodeTaskDef>(def)) return (int)t->params_.size();
+    if (auto f = std::dynamic_pointer_cast<NodeFuncDef>(def)) return (int)f->params.size();
+    if (auto t = std::dynamic_pointer_cast<NodeTaskDef>(def)) return (int)t->params.size();
     return 0;
 }
 
@@ -147,7 +138,7 @@ void SemanticsChecker::Traverse(NodeCallExp& call)
     {
         // マイクロスレッドの使用
         errors_.push_back(invalid_task_call(call.srcPos, call.name));
-    } else if (IsVariable(def))
+    } else if (def->IsVariable())
     {
         // 変数を呼び出している
         errors_.push_back(variable_call(call.srcPos, call.name));
@@ -181,7 +172,7 @@ void SemanticsChecker::Traverse(NodeLeftVal& left)
     {
         // 未定義名の使用
         errors_.push_back(undefined_name(left.srcPos, left.name));
-    } else if (!IsVariable(def))
+    } else if (!def->IsVariable())
     {
         // 変数以外へのの代入
         errors_.push_back(invalid_left_value(left.srcPos, left.name));
@@ -203,7 +194,7 @@ void SemanticsChecker::Traverse(NodeCallStmt& call)
     {
         // 未定義名の使用
         errors_.push_back(undefined_name(call.srcPos, call.name));
-    } else if (IsVariable(def))
+    } else if (def->IsVariable())
     {
         // 変数を呼び出している
         errors_.push_back(variable_call(call.srcPos, call.name));

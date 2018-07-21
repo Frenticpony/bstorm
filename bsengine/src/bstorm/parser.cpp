@@ -26,40 +26,40 @@ static ScriptInfo CreateScriptInfo(const std::wstring& filePath, const std::vect
     info.version = SCRIPT_VERSION_PH3;
     for (const auto& header : headers)
     {
-        if (header.params_.empty()) continue;
+        if (header.params.empty()) continue;
         if (header.name == L"TouhouDanmakufu")
         {
-            info.type = ScriptType::FromName(ToUTF8(header.params_[0]));
+            info.type = ScriptType::FromName(ToUTF8(header.params[0]));
         } else if (header.name == L"ScriptVersion")
         {
-            info.version = header.params_[0];
+            info.version = header.params[0];
         } else if (header.name == L"ID")
         {
-            info.id = header.params_[0];
+            info.id = header.params[0];
         } else if (header.name == L"Title")
         {
-            info.title = header.params_[0];
+            info.title = header.params[0];
         } else if (header.name == L"Text")
         {
-            info.text = header.params_[0];
+            info.text = header.params[0];
         } else if (header.name == L"Image")
         {
-            info.imagePath = header.params_[0];
+            info.imagePath = header.params[0];
         } else if (header.name == L"System")
         {
-            info.systemPath = header.params_[0];
+            info.systemPath = header.params[0];
         } else if (header.name == L"Background")
         {
-            info.backgroundPath = header.params_[0];
+            info.backgroundPath = header.params[0];
         } else if (header.name == L"BGM")
         {
-            info.bgmPath = header.params_[0];
+            info.bgmPath = header.params[0];
         } else if (header.name == L"Player")
         {
-            info.playerScriptPaths = header.params_;
+            info.playerScriptPaths = header.params;
         } else if (header.name == L"ReplayName")
         {
-            info.replayName = header.params_[0];
+            info.replayName = header.params[0];
         }
     }
     info.imagePath = ExpandIncludePath(info.path, info.imagePath);
