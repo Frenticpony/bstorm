@@ -27,7 +27,7 @@ void CodeAnalyzer::Traverse(NodeChar & lit)
 void CodeAnalyzer::Traverse(NodeStr & lit)
 {
     lit.noSubEffect = true;
-    lit.expType = lit.str.empty() ? NodeExp::T_ARRAY(NodeExp::T_EMPTY) : NodeExp::T_STRING;
+    lit.expType = lit.str.empty() ? NodeExp::T_ARRAY(NodeExp::T_ANY) : NodeExp::T_STRING;
 }
 void CodeAnalyzer::Traverse(NodeArray & array)
 {
@@ -40,18 +40,13 @@ void CodeAnalyzer::Traverse(NodeArray & array)
             array.noSubEffect = false;
         }
     }
-    if (array.elems.empty())
+    array.expType = NodeExp::T_ARRAY(NodeExp::T_ANY);
+    if (!array.elems.empty())
     {
-        array.expType = NodeExp::T_ARRAY(NodeExp::T_EMPTY);
-    } else
-    {
-        const auto firstElemExpType = array.elems[0]->expType;
+        auto firstElemExpType = array.elems[0]->expType;
         if (std::all_of(array.elems.begin(), array.elems.end(), [firstElemExpType](auto& e) { return e->expType == firstElemExpType; }))
         {
             array.expType = firstElemExpType;
-        } else
-        {
-            array.expType = NodeExp::T_ARRAY(NodeExp::T_ANY);
         }
     }
 }
@@ -75,19 +70,7 @@ void CodeAnalyzer::Traverse(NodeOr& exp) { AnalyzeBinOp(exp); }
 void CodeAnalyzer::Traverse(NodeCat& exp)
 {
     AnalyzeBinOp(exp);
-    if (exp.lhs->expType == NodeExp::T_ARRAY(NodeExp::T_EMPTY) && NodeExp::IsArrayType(exp.rhs->expType))
-    {
-        exp.expType = exp.rhs->expType;
-    } else if (exp.rhs->expType == NodeExp::T_ARRAY(NodeExp::T_EMPTY) && NodeExp::IsArrayType(exp.lhs->expType))
-    {
-        exp.expType = exp.lhs->expType;
-    } else if (exp.lhs->expType == exp.rhs->expType && NodeExp::IsArrayType(exp.lhs->expType))
-    {
-        exp.expType = exp.lhs->expType;
-    } else
-    {
-        exp.expType = NodeExp::T_ARRAY(NodeExp::T_ANY);
-    }
+    exp.expType = NodeExp::T_ARRAY(NodeExp::T_ANY);
 }
 void CodeAnalyzer::Traverse(NodeNoParenCallExp & call)
 {

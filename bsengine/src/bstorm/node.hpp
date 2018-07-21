@@ -172,7 +172,6 @@ struct NodeExp : public Node
     static constexpr ExpType T_CHAR = 5;
     static constexpr ExpType T_BOOL = 7;
     static constexpr ExpType T_NIL = 9;
-    static constexpr ExpType T_EMPTY = 11;
     static constexpr ExpType T_ARRAY(ExpType t)
     {
         return (t & 0x8000000000000000) ? T_ARRAY(T_ANY) : (t << 1);
@@ -230,7 +229,7 @@ struct NodeStr : public NodeExp
         NodeExp(),
         str(std::move(s))
     {
-        expType = str.empty() ? T_ARRAY(T_EMPTY) : T_STRING;
+        expType = str.empty() ? T_ARRAY(T_ANY) : T_STRING;
         noSubEffect = true;
     };
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
