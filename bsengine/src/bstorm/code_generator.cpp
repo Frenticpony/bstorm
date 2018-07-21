@@ -157,7 +157,7 @@ void CodeGenerator::Traverse(NodeNoParenCallExp& call)
         std::dynamic_pointer_cast<NodeLoopParam>(def) ||
         std::dynamic_pointer_cast<NodeResult>(def))
     {
-        GenNilCheck(call.name);
+        GenNilCheckExp(call.name);
     } else if (std::dynamic_pointer_cast<NodeBuiltInFunc>(def))
     {
         if (call.name == "GetCurrentScriptDirectory")
@@ -292,14 +292,21 @@ void CodeGenerator::GenLogBinOp(const std::string & fname, NodeBinOp & exp)
     AddCode(" end");
     AddCode(")");
 }
-void CodeGenerator::GenNilCheck(const std::string & name)
+void CodeGenerator::GenNilCheckExp(const std::string & name)
 {
-    if (option_.embedLocalVarName)
+    if (option_.enableNilCheck)
     {
         AddCode(runtime("nc") + "(" + varname(name, env_) + ", \"" + name + "\")");
     } else
     {
-        AddCode(runtime("nc") + "(" + varname(name, env_) + ")");
+        AddCode(varname(name, env_));
+    }
+}
+void CodeGenerator::GenNilCheckStmt(const std::string & name)
+{
+    if (option_.enableNilCheck)
+    {
+        AddCode(runtime("nc") + "(" + varname(name, env_) + ", \"" + name + "\")");
     }
 }
 void CodeGenerator::GenProc(const std::shared_ptr<NodeDef>& def, const std::vector<std::string>& params_, NodeBlock & blk)
@@ -450,7 +457,7 @@ void CodeGenerator::GenOpAssign(const std::string & fname, const std::shared_ptr
             // out : a = add(r_nc(a), e);
             AddCode(varname(left->name, env_) + " = ");
             AddCode(runtime(fname) + "(");
-            GenNilCheck(left->name);
+            GenNilCheckExp(left->name);
             if (right)
             {
                 AddCode(",");
@@ -464,7 +471,8 @@ void CodeGenerator::GenOpAssign(const std::string & fname, const std::shared_ptr
             //        local i = _i;
             //        r_write1(a, i, r_add(r_read(a, i), e));
             AddCode("do"); NewLine();
-            GenNilCheck(left->name); NewLine(left->srcPos);
+            GenNilCheckStmt(left->name);
+            NewLine(left->srcPos);
             AddCode("local i = "); left->indices[0]->Traverse(*this); AddCode(";"); NewLine(left->srcPos);
             AddCode(runtime("write1") + "(" + varname(left->name, env_) + ", i, ");
             AddCode(runtime(fname) + "(");
@@ -483,7 +491,7 @@ void CodeGenerator::GenOpAssign(const std::string & fname, const std::shared_ptr
             //       local is = {i, j, .. , z};
             //       r_write(a, is, r_add(r_read(..r_read(a, is[1]), is[2]), .. is[n]), e);
             AddCode("do"); NewLine();
-            GenNilCheck(left->name); NewLine(left->srcPos);
+            GenNilCheckStmt(left->name); NewLine(left->srcPos);
             AddCode("local is = {");
             for (int i = 0; i < left->indices.size(); i++)
             {
@@ -620,7 +628,7 @@ void CodeGenerator::Traverse(NodeAssign& stmt)
             // out : r_write1(r_nc(a), i, e);
             AddCode(runtime("write1"));
             AddCode("(");
-            GenNilCheck(def->name);
+            GenNilCheckExp(def->name);
             AddCode(",");
             stmt.lhs->indices[0]->Traverse(*this);
             AddCode(",");
@@ -632,7 +640,7 @@ void CodeGenerator::Traverse(NodeAssign& stmt)
             // out : r_write(r_nc(a), {i1, i2, .. in}, e);
             AddCode(runtime("write"));
             AddCode("(");
-            GenNilCheck(def->name);
+            GenNilCheckExp(def->name);
             AddCode(", {");
             for (int i = 0; i < stmt.lhs->indices.size(); i++)
             {

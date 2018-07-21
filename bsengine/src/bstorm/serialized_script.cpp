@@ -78,6 +78,7 @@ SerializedScript::SerializedScript(const SerializedScriptSignature& signature, c
 
     // ÉRÅ[Éhê∂ê¨
     CodeGenerator::Option codeGenOption;
+    codeGenOption.enableNilCheck = false;
     codeGenOption.deleteUnreachableDefinition = true;
     codeGenOption.deleteUnneededAssign = true;
     CodeGenerator codeGen(codeGenOption);

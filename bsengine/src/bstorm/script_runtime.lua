@@ -51,11 +51,7 @@ end
 -- throws
 function r_nc(v, name) -- nilcheck
   if v == nil then
-    if name == nil then
-      c_raiseerror("attempt to use empty variable.");
-    else
-      c_raiseerror("attempt to use empty variable `" .. name .. "'.");
-    end
+    c_raiseerror("attempt to use empty variable `" .. name .. "'.");
   else
     return v;
   end
@@ -238,7 +234,7 @@ end
 function r_arr(a)
   for i=2,#a do
     if not rl_type_eq(a[1], a[i]) then
-        c_raiseerror("can' create an array in which elements have different type.");
+        c_raiseerror("can' create an array in which elements  different type.");
     end
   end
   return a;

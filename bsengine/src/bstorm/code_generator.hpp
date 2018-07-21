@@ -16,7 +16,7 @@ class CodeGenerator : public NodeTraverser
 public:
     struct Option
     {
-        bool embedLocalVarName = true;
+        bool enableNilCheck = true;
         bool deleteUnreachableDefinition = false;
         bool deleteUnneededAssign = false;
     };
@@ -102,7 +102,8 @@ private:
     void GenBinOp(const std::string& fname, NodeBinOp& exp);
     void GenArithBinOp(const std::string& fname, const std::string& op, NodeBinOp& exp);
     void GenLogBinOp(const std::string& fname, NodeBinOp& exp);
-    void GenNilCheck(const std::string& name);
+    void GenNilCheckExp(const std::string& name);
+    void GenNilCheckStmt(const std::string& name);
     void GenProc(const std::shared_ptr<NodeDef>& def, const std::vector<std::string>& params_, NodeBlock& blk);
     void GenBlock(NodeBlock& blk, bool doTCO);
     void GenCallStmt(NodeCallStmt& call, bool doTCO);
