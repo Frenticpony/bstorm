@@ -191,10 +191,12 @@ struct NodeExp : public Node
     }
     NodeExp() :
         Node(),
-        expType(T_ANY)
+        expType(T_ANY),
+        copyRequired(true)
     {
     }
     ExpType expType;
+    bool copyRequired;
 };
 
 struct NodeNum : public NodeExp
@@ -205,6 +207,7 @@ struct NodeNum : public NodeExp
     {
         expType = T_REAL;
         noSubEffect = true;
+        copyRequired = false;
     };
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::string number;
@@ -218,6 +221,7 @@ struct NodeChar : public NodeExp
     {
         expType = T_CHAR;
         noSubEffect = true;
+        copyRequired = false;
     };
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     wchar_t c;
@@ -231,6 +235,7 @@ struct NodeStr : public NodeExp
     {
         expType = str.empty() ? T_ARRAY(T_ANY) : T_STRING;
         noSubEffect = true;
+        copyRequired = false;
     };
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::wstring str;
@@ -249,7 +254,10 @@ struct NodeArray : public NodeExp
 
 struct NodeMonoOp : public NodeExp
 {
-    NodeMonoOp(const std::shared_ptr<NodeExp>& r) : NodeExp(), rhs(r) {}
+    NodeMonoOp(const std::shared_ptr<NodeExp>& r) : NodeExp(), rhs(r)
+    {
+        copyRequired = false;
+    }
     std::shared_ptr<NodeExp> rhs;
 };
 
@@ -273,7 +281,10 @@ struct NodeAbs : public NodeMonoOp
 
 struct NodeBinOp : public NodeExp
 {
-    NodeBinOp(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeExp(), lhs(l), rhs(r) {}
+    NodeBinOp(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeExp(), lhs(l), rhs(r)
+    {
+        copyRequired = false;
+    }
     std::shared_ptr<NodeExp> lhs;
     std::shared_ptr<NodeExp> rhs;
 };
@@ -386,7 +397,10 @@ struct NodeCallExp : public NodeExp
 
 struct NodeArrayRef : public NodeExp
 {
-    NodeArrayRef(const std::shared_ptr<NodeExp>& a, const std::shared_ptr<NodeExp>& i) : NodeExp(), array(a), idx(i) {}
+    NodeArrayRef(const std::shared_ptr<NodeExp>& a, const std::shared_ptr<NodeExp>& i) : NodeExp(), array(a), idx(i)
+    {
+        copyRequired = false;
+    }
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::shared_ptr<NodeExp> array;
     std::shared_ptr<NodeExp> idx;
@@ -402,7 +416,10 @@ struct NodeRange : public Node
 
 struct NodeArraySlice : public NodeExp
 {
-    NodeArraySlice(const std::shared_ptr<NodeExp>& a, const std::shared_ptr<NodeRange>& r) : NodeExp(), array(a), range(r) {}
+    NodeArraySlice(const std::shared_ptr<NodeExp>& a, const std::shared_ptr<NodeRange>& r) : NodeExp(), array(a), range(r)
+    {
+        copyRequired = false;
+    }
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::shared_ptr<NodeExp> array;
     std::shared_ptr<NodeRange> range;
