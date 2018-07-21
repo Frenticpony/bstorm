@@ -93,7 +93,7 @@ SerializedScript::SerializedScript(const SerializedScriptSignature& signature, c
             {
                 auto ss = Split(ToUnicode(msg), L':');
                 Log err = Log(Log::Level::LV_ERROR)
-                    .SetMessage("too many variable used in one function.");
+                    .SetMessage("too many local variable declared in one function.");
                 if (ss.size() >= 2)
                 {
                     int line = _wtoi(ss[1].c_str());
