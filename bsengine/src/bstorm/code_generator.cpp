@@ -4,6 +4,8 @@
 #include <bstorm/string_util.hpp>
 #include <bstorm/file_util.hpp>
 
+#include <cassert>
+
 namespace bstorm
 {
 static std::string runtime(const std::string& name)
@@ -736,7 +738,24 @@ void CodeGenerator::Traverse(NodeIf& stmt)
     }
     AddCode("end"); NewLine();
 }
-void CodeGenerator::Traverse(NodeCase &) {}
+void CodeGenerator::Traverse(NodeCase & cs)
+{
+    assert(!cs.exps.empty());
+    AddCode("if ");
+    // orの右結合計算列を作る(右結合の方が早く短絡するので)
+    for (int i = 0; i < cs.exps.size(); i++)
+    {
+        auto& exp = cs.exps[i];
+        if (i != 0) AddCode(" or (");
+        AddCode(runtime("eq") + "(c,"); exp->Traverse(*this); AddCode(")");
+    }
+    for (int i = 0; i < cs.exps.size() - 1; i++)
+    {
+        AddCode(")");
+    }
+    AddCode(" then"); NewLine(cs.srcPos);
+    cs.block->Traverse(*this);
+}
 void CodeGenerator::Traverse(NodeAlternative& stmt)
 {
     AddCode("do"); NewLine();
@@ -746,19 +765,7 @@ void CodeGenerator::Traverse(NodeAlternative& stmt)
     {
         // case
         if (i != 0) AddCode("else"); // 1つ目以降のcaseはelse if
-        AddCode("if false");
-        // orの右結合計算列を作る(右結合の方が早く短絡するので)
-        for (auto& exp : stmt.cases[i]->exps)
-        {
-            AddCode(" or (");
-            AddCode("(" + runtime("eq") + "(c,"); exp->Traverse(*this); AddCode("))");
-        }
-        for (auto& exp : stmt.cases[i]->exps)
-        {
-            AddCode(")");
-        }
-        AddCode(" then"); NewLine(stmt.cases[i]->srcPos);
-        stmt.cases[i]->block->Traverse(*this);
+        stmt.cases[i]->Traverse(*this);
     }
     /* gen else*/
     if (stmt.others)
