@@ -307,9 +307,9 @@ void CodeGenerator::GenProc(const std::shared_ptr<NodeDef>& def, const std::vect
         AddCode(varname(params_[i], std::make_shared<Env>(blk.nameTable, env_)));
     }
     AddCode(")"); NewLine();
-    blk.Traverse(*this);
     if (std::dynamic_pointer_cast<NodeFuncDef>(def))
     {
+        blk.Traverse(*this);
         if (auto result = std::dynamic_pointer_cast<NodeResult>(blk.nameTable->at("result")))
         {
             if (!(result->unreachable && option_.deleteUnreachableDefinition))
@@ -320,8 +320,122 @@ void CodeGenerator::GenProc(const std::shared_ptr<NodeDef>& def, const std::vect
                 Unindent();
             }
         }
+    } else
+    {
+        GenBlock(blk, true);
     }
     AddCode("end"); NewLine();
+}
+void CodeGenerator::GenBlock(NodeBlock & blk, bool doTCO)
+{
+    env_ = std::make_shared<Env>(blk.nameTable, env_);
+
+    // 宣言生成
+    if (!env_->IsRoot()) // トップレベルはグローバル変数に入れるので宣言不要
+    {
+
+        Indent();
+        // local declare
+        for (const auto& bind : *(blk.nameTable))
+        {
+            auto& def = bind.second;
+            if (def->unreachable && option_.deleteUnreachableDefinition) continue;
+            if (isDeclarationNeeded(def))
+            {
+                AddCode("local "); AddCode(varname(def)); AddCode(";"); NewLine(def->srcPos);
+            }
+        }
+    }
+
+    // 定義生成
+    for (const auto& bind : *(blk.nameTable))
+    {
+        auto& def = bind.second;
+        if (def->unreachable && option_.deleteUnreachableDefinition) continue;
+        def->Traverse(*this);
+    }
+
+    // ブロック内の文生成
+    for (int i = 0; i < blk.stmts.size(); i++)
+    {
+        auto & stmt = blk.stmts[i];
+        if (i == blk.stmts.size() - 1)
+        {
+            if (auto call = std::dynamic_pointer_cast<NodeCallStmt>(stmt))
+            {
+                GenCallStmt(*call, doTCO);
+                break;
+            }
+        }
+        blk.stmts[i]->Traverse(*this);
+    }
+
+    if (!env_->IsRoot())
+    {
+        Unindent();
+    }
+    env_ = env_->GetParent();
+}
+void CodeGenerator::GenCallStmt(NodeCallStmt & call, bool doTCO)
+{
+    auto def = env_->FindDef(call.name);
+
+    if (std::dynamic_pointer_cast<NodeConst>(def)) return;
+
+    constexpr int maxArgsCntHasSpecifiedRuntime = 7;
+    bool isTask = (bool)std::dynamic_pointer_cast<NodeTaskDef>(def);
+    bool isUserFunc = !std::dynamic_pointer_cast<NodeBuiltInFunc>(def);
+    if (doTCO)
+    {
+        AddCode("return ");
+    }
+    if (isTask)
+    {
+        AddCode(runtime("fork"));
+        if (call.args.size() <= maxArgsCntHasSpecifiedRuntime)
+        {
+            AddCode(std::to_string(call.args.size())); // 0 ~ max
+        }
+        AddCode("(");
+        AddCode(varname(def)); // func
+        if (call.args.size() > 0) // fork0以外
+        {
+            AddCode(", ");
+        }
+        if (call.args.size() > maxArgsCntHasSpecifiedRuntime)
+        {
+            AddCode("{");
+        }
+    } else
+    {
+        if (isUserFunc)
+        {
+            AddCode(varname(def));
+        } else
+        {
+            AddCode(builtin(def));
+        }
+        AddCode("(");
+    }
+    for (int i = 0; i < call.args.size(); i++)
+    {
+        if (i != 0) AddCode(",");
+        if (isUserFunc)
+        {
+            GenCopy(call.args[i]);
+        } else
+        {
+            call.args[i]->Traverse(*this);
+        }
+    }
+    if (isTask)
+    {
+        if (call.args.size() > maxArgsCntHasSpecifiedRuntime)
+        {
+            AddCode("}");
+        }
+    }
+    AddCode(");"); NewLine(call.srcPos);
 }
 void CodeGenerator::GenOpAssign(const std::string & fname, const std::shared_ptr<NodeLeftVal>& left, const NullableSharedPtr<NodeExp>& right)
 {
@@ -538,60 +652,7 @@ void CodeGenerator::Traverse(NodeCatAssign& stmt) { GenOpAssign("mcat", stmt.lhs
 
 void CodeGenerator::Traverse(NodeCallStmt& call)
 {
-    auto def = env_->FindDef(call.name);
-
-    if (std::dynamic_pointer_cast<NodeConst>(def)) return;
-
-    constexpr int maxArgsCntHasSpecifiedRuntime = 7;
-    bool isTask = (bool)std::dynamic_pointer_cast<NodeTaskDef>(def);
-    bool isUserFunc = !std::dynamic_pointer_cast<NodeBuiltInFunc>(def);
-    if (isTask)
-    {
-        AddCode(runtime("fork"));
-        if (call.args.size() <= maxArgsCntHasSpecifiedRuntime)
-        {
-            AddCode(std::to_string(call.args.size())); // 0 ~ max
-        }
-        AddCode("(");
-        AddCode(varname(def)); // func
-        if (call.args.size() > 0) // fork0以外
-        {
-            AddCode(", ");
-        }
-        if (call.args.size() > maxArgsCntHasSpecifiedRuntime)
-        {
-            AddCode("{");
-        }
-    } else
-    {
-        if (isUserFunc)
-        {
-            AddCode(varname(def));
-        } else
-        {
-            AddCode(builtin(def));
-        }
-        AddCode("(");
-    }
-    for (int i = 0; i < call.args.size(); i++)
-    {
-        if (i != 0) AddCode(",");
-        if (isUserFunc)
-        {
-            GenCopy(call.args[i]);
-        } else
-        {
-            call.args[i]->Traverse(*this);
-        }
-    }
-    if (isTask)
-    {
-        if (call.args.size() > maxArgsCntHasSpecifiedRuntime)
-        {
-            AddCode("}");
-        }
-    }
-    AddCode(");"); NewLine(call.srcPos);
+    GenCallStmt(call, false);
 }
 void CodeGenerator::Traverse(NodeReturn& stmt)
 {
@@ -798,44 +859,7 @@ void CodeGenerator::Traverse(NodeAlternative& stmt)
 }
 void CodeGenerator::Traverse(NodeBlock& blk)
 {
-    env_ = std::make_shared<Env>(blk.nameTable, env_);
-
-    // 宣言生成
-    if (!env_->IsRoot()) // トップレベルはグローバル変数に入れるので宣言不要
-    {
-
-        Indent();
-        // local declare
-        for (const auto& bind : *(blk.nameTable))
-        {
-            auto& def = bind.second;
-            if (def->unreachable && option_.deleteUnreachableDefinition) continue;
-            if (isDeclarationNeeded(def))
-            {
-                AddCode("local "); AddCode(varname(def)); AddCode(";"); NewLine(def->srcPos);
-            }
-        }
-    }
-
-    // 定義生成
-    for (const auto& bind : *(blk.nameTable))
-    {
-        auto& def = bind.second;
-        if (def->unreachable && option_.deleteUnreachableDefinition) continue;
-        def->Traverse(*this);
-    }
-
-    // ブロック内の文生成
-    for (auto& stmt : blk.stmts)
-    {
-        stmt->Traverse(*this);
-    }
-
-    if (!env_->IsRoot())
-    {
-        Unindent();
-    }
-    env_ = env_->GetParent();
+    GenBlock(blk, false);
 }
 void CodeGenerator::Traverse(NodeSubDef& sub)
 {

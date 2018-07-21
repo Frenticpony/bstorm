@@ -7,7 +7,7 @@ namespace bstorm
 static Log invalid_return(const std::shared_ptr<SourcePos>& srcPos)
 {
     return Log(Log::Level::LV_ERROR)
-        .SetMessage("'return' with a value is available only in function.")
+        .SetMessage("'return' with a value is available only to function.")
         .AddSourcePos(srcPos);
 }
 

@@ -21,7 +21,7 @@ public:
         bool deleteUnneededAssign = false;
     };
     CodeGenerator(const Option& option);
-    void Generate(Node& n);
+    void Generate(Node& program);
     const SourceMap& GetSourceMap() const { return srcMap_; }
     const std::string& GetCode() const { return code_; }
     void Traverse(NodeNum&) override;
@@ -104,6 +104,8 @@ private:
     void GenLogBinOp(const std::string& fname, NodeBinOp& exp);
     void GenNilCheck(const std::string& name);
     void GenProc(const std::shared_ptr<NodeDef>& def, const std::vector<std::string>& params_, NodeBlock& blk);
+    void GenBlock(NodeBlock& blk, bool doTCO);
+    void GenCallStmt(NodeCallStmt& call, bool doTCO);
     void GenOpAssign(const std::string& fname, const std::shared_ptr<NodeLeftVal>& left, const NullableSharedPtr<NodeExp>& right);
     void GenCopy(std::shared_ptr<NodeExp>& exp);
     void GenCondition(std::shared_ptr<NodeExp>& exp);
