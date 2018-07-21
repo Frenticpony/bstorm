@@ -563,3 +563,11 @@ end
 
 -- fork sub task
 function r_fork(func, args) return add_sub_task(func, args); end
+function r_fork0(func) return add_sub_task(func); end
+function r_fork1(func, arg1) return add_sub_task(func, {arg1}); end
+function r_fork2(func, arg1, arg2) return add_sub_task(func, {arg1, arg2}); end
+function r_fork3(func, arg1, arg2, arg3) return add_sub_task(func, {arg1, arg2, arg3}); end
+function r_fork4(func, arg1, arg2, arg3, arg4) return add_sub_task(func, {arg1, arg2, arg3, arg4}); end
+function r_fork5(func, arg1, arg2, arg3, arg4, arg5) return add_sub_task(func, {arg1, arg2, arg3, arg4, arg5}); end
+function r_fork6(func, arg1, arg2, arg3, arg4, arg5, arg6) return add_sub_task(func, {arg1, arg2, arg3, arg4, arg5, arg6}); end
+function r_fork7(func, arg1, arg2, arg3, arg4, arg5, arg6, arg7) return add_sub_task(func, {arg1, arg2, arg3, arg4, arg5, arg6, arg7}); end

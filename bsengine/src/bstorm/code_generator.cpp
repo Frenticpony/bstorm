@@ -542,14 +542,25 @@ void CodeGenerator::Traverse(NodeCallStmt& call)
 
     if (std::dynamic_pointer_cast<NodeConst>(def)) return;
 
+    constexpr int maxArgsCntHasSpecifiedRuntime = 7;
     bool isTask = (bool)std::dynamic_pointer_cast<NodeTaskDef>(def);
     bool isUserFunc = !std::dynamic_pointer_cast<NodeBuiltInFunc>(def);
     if (isTask)
     {
-        AddCode(runtime("fork") + "(" + varname(def));
-        if (call.args.size() != 0)
+        AddCode(runtime("fork"));
+        if (call.args.size() <= maxArgsCntHasSpecifiedRuntime)
         {
-            AddCode(", {");
+            AddCode(std::to_string(call.args.size())); // 0 ~ max
+        }
+        AddCode("(");
+        AddCode(varname(def)); // func
+        if (call.args.size() > 0) // fork0以外
+        {
+            AddCode(", ");
+        }
+        if (call.args.size() > maxArgsCntHasSpecifiedRuntime)
+        {
+            AddCode("{");
         }
     } else
     {
@@ -573,9 +584,12 @@ void CodeGenerator::Traverse(NodeCallStmt& call)
             call.args[i]->Traverse(*this);
         }
     }
-    if (isTask && call.args.size() != 0)
+    if (isTask)
     {
-        AddCode("}");
+        if (call.args.size() > maxArgsCntHasSpecifiedRuntime)
+        {
+            AddCode("}");
+        }
     }
     AddCode(");"); NewLine(call.srcPos);
 }
