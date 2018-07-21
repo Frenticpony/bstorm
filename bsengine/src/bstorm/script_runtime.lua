@@ -329,6 +329,10 @@ function r_abs(x)
   return math.abs(rl_tonum(x));
 end
 
+function r_yield()
+  return coroutine.yield();
+end
+
 rb_add = r_add;
 rb_subtract = r_sub;
 rb_multiply = r_mul;

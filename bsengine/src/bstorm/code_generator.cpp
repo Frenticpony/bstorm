@@ -696,7 +696,8 @@ void CodeGenerator::Traverse(NodeYield& stmt)
 {
     if (!procStack_.empty())
     {
-        AddCode("coroutine.yield();");
+        AddCode(runtime("yield"));
+        AddCode("();");
         NewLine(stmt.srcPos);
     }
 }
