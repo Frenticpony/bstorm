@@ -641,6 +641,18 @@ void CodeGenerator::Traverse(NodePred& stmt) { GenOpAssign("pred", stmt.lhs, nul
 void CodeGenerator::Traverse(NodeVarDecl &) {}
 void CodeGenerator::Traverse(NodeVarInit& stmt)
 {
+
+    if (auto varDecl = std::dynamic_pointer_cast<NodeVarDecl>(env_->FindDef(stmt.name)))
+    {
+        if (option_.deleteUnneededAssign)
+        {
+            if (varDecl->refCnt == 0 && varDecl->assignCnt == 1 && stmt.rhs->noSubEffect)
+            {
+                return;
+            }
+        }
+    }
+
     AddCode(varname(stmt.name, env_) + " = "); GenCopy(stmt.rhs); AddCode(";");
     NewLine(stmt.rhs->srcPos);
 }

@@ -152,10 +152,11 @@ public:
 struct SourcePos;
 struct Node
 {
-    Node() {}
+    Node() : noSubEffect(false) {}
     virtual ~Node() {};
     virtual void Traverse(NodeTraverser& Traverser) = 0;
     std::shared_ptr<SourcePos> srcPos;
+    bool noSubEffect;
 };
 
 struct NodeStmt : public Node
@@ -171,34 +172,59 @@ struct NodeExp : public Node
         CHAR,
         BOOL,
     };
-    NodeExp() : Node(), expType(ExpType::ANY) {}
+    NodeExp() :
+        Node(),
+        expType(ExpType::ANY)
+    {
+    }
     ExpType expType;
 };
 
 struct NodeNum : public NodeExp
 {
-    NodeNum(std::string&& n) : NodeExp(), number(std::move(n)) { expType = ExpType::REAL; };
+    NodeNum(std::string&& n) :
+        NodeExp(),
+        number(std::move(n))
+    {
+        expType = ExpType::REAL;
+        noSubEffect = true;
+    };
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::string number;
 };
 
 struct NodeChar : public NodeExp
 {
-    NodeChar(wchar_t c) : NodeExp(), c(c) { expType = ExpType::CHAR; };
+    NodeChar(wchar_t c) :
+        NodeExp(),
+        c(c)
+    {
+        expType = ExpType::CHAR;
+        noSubEffect = true;
+    };
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     wchar_t c;
 };
 
 struct NodeStr : public NodeExp
 {
-    NodeStr(std::wstring&& s) : NodeExp(), str(std::move(s)) {};
+    NodeStr(std::wstring&& s) :
+        NodeExp(),
+        str(std::move(s))
+    {
+        noSubEffect = true;
+    };
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::wstring str;
 };
 
 struct NodeArray : public NodeExp
 {
-    NodeArray(std::vector<std::shared_ptr<NodeExp>>&& es) : NodeExp(), elems(std::move(es)) {}
+    NodeArray(std::vector<std::shared_ptr<NodeExp>>&& es) :
+        NodeExp(),
+        elems(std::move(es))
+    {
+    }
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     std::vector <std::shared_ptr<NodeExp>> elems;
 };
@@ -478,8 +504,16 @@ struct NodeDef : public Node
 
 struct NodeVarDecl : public NodeDef
 {
-    NodeVarDecl(const std::string& name) : NodeDef(name) {}
+    NodeVarDecl(const std::string& name) :
+        NodeDef(name),
+        assignCnt(0u),
+        refCnt(0u)
+    {
+        noSubEffect = true;
+    }
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
+    uint32_t assignCnt;
+    uint32_t refCnt;
 };
 
 struct NodeVarInit : public NodeStmt
@@ -495,19 +529,26 @@ struct NodeProcParam : public NodeDef
     NodeProcParam(const std::string& name) : NodeDef(name)
     {
         unreachable = false;
+        noSubEffect = true;
     }
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 
 struct NodeLoopParam : public NodeDef
 {
-    NodeLoopParam(const std::string& name) : NodeDef(name) {}
+    NodeLoopParam(const std::string& name) : NodeDef(name)
+    {
+        noSubEffect = true;
+    }
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 
 struct NodeResult : public NodeDef
 {
-    NodeResult() : NodeDef("result") {}
+    NodeResult() : NodeDef("result")
+    {
+        noSubEffect = true;
+    }
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 

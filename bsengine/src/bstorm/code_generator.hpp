@@ -18,6 +18,7 @@ public:
     {
         bool embedLocalVarName = true;
         bool deleteUnreachableDefinition = false;
+        bool deleteUnneededAssign = false;
     };
     CodeGenerator(const Option& option);
     void Generate(Node& n);

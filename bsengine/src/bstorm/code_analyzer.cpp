@@ -12,14 +12,28 @@ void CodeAnalyzer::Analyze(Node & n)
     env_ = nullptr;
     n.Traverse(*this);
 }
-void CodeAnalyzer::Traverse(NodeNum &) {}
-void CodeAnalyzer::Traverse(NodeChar &) {}
-void CodeAnalyzer::Traverse(NodeStr &) {}
+void CodeAnalyzer::Traverse(NodeNum & lit)
+{
+    lit.noSubEffect = true;
+}
+void CodeAnalyzer::Traverse(NodeChar & lit)
+{
+    lit.noSubEffect = true;
+}
+void CodeAnalyzer::Traverse(NodeStr & lit)
+{
+    lit.noSubEffect = true;
+}
 void CodeAnalyzer::Traverse(NodeArray & array)
 {
+    array.noSubEffect = true;
     for (auto& e : array.elems)
     {
         e->Traverse(*this);
+        if (!e->noSubEffect)
+        {
+            array.noSubEffect = false;
+        }
     }
 }
 void CodeAnalyzer::Traverse(NodeNeg& exp) { AnalyzeMonoOp(exp); }
@@ -43,29 +57,43 @@ void CodeAnalyzer::Traverse(NodeCat& exp) { AnalyzeBinOp(exp); }
 void CodeAnalyzer::Traverse(NodeNoParenCallExp & call)
 {
     AnalyzeDef(call.name);
+    auto def = env_->FindDef(call.name);
+    call.noSubEffect = def->noSubEffect;
+    if (auto varDecl = std::dynamic_pointer_cast<NodeVarDecl>(def))
+    {
+        varDecl->refCnt++;
+    }
 }
 void CodeAnalyzer::Traverse(NodeCallExp & call)
 {
     AnalyzeDef(call.name);
+    call.noSubEffect = env_->FindDef(call.name)->noSubEffect;
     for (auto& arg : call.args)
     {
         arg->Traverse(*this);
+        if (!arg->noSubEffect)
+        {
+            call.noSubEffect = false;
+        }
     }
 }
 void CodeAnalyzer::Traverse(NodeArrayRef& exp)
 {
     exp.array->Traverse(*this);
     exp.idx->Traverse(*this);
+    exp.noSubEffect = exp.array->noSubEffect && exp.idx->noSubEffect;
 }
 void CodeAnalyzer::Traverse(NodeRange& range)
 {
     range.start->Traverse(*this);
     range.end->Traverse(*this);
+    range.noSubEffect = range.start->noSubEffect && range.end->noSubEffect;
 }
 void CodeAnalyzer::Traverse(NodeArraySlice& exp)
 {
     exp.array->Traverse(*this);
     exp.range->Traverse(*this);
+    exp.noSubEffect = exp.array->noSubEffect && exp.range->noSubEffect;
 }
 void CodeAnalyzer::Traverse(NodeNop &) {}
 void CodeAnalyzer::Traverse(NodeLeftVal & left)
@@ -74,6 +102,10 @@ void CodeAnalyzer::Traverse(NodeLeftVal & left)
     for (auto& idx : left.indices)
     {
         idx->Traverse(*this);
+    }
+    if (auto varDecl = std::dynamic_pointer_cast<NodeVarDecl>(env_->FindDef(left.name)))
+    {
+        varDecl->assignCnt++;
     }
 }
 void CodeAnalyzer::Traverse(NodeAssign& stmt) { AnalyzeAssign(stmt); }
@@ -199,17 +231,34 @@ void CodeAnalyzer::Traverse(NodePred& stmt)
 {
     stmt.lhs->Traverse(*this);
 }
-void CodeAnalyzer::Traverse(NodeVarDecl&) {}
+void CodeAnalyzer::Traverse(NodeVarDecl& def)
+{
+    def.noSubEffect = true;
+}
 
 void CodeAnalyzer::Traverse(NodeVarInit& stmt)
 {
     AnalyzeDef(stmt.name);
     stmt.rhs->Traverse(*this);
+    stmt.noSubEffect = false;
+    if (auto varDecl = std::dynamic_pointer_cast<NodeVarDecl>(env_->FindDef(stmt.name)))
+    {
+        varDecl->assignCnt++;
+    }
 }
-void CodeAnalyzer::Traverse(NodeProcParam &) {}
-void CodeAnalyzer::Traverse(NodeLoopParam &) {}
+void CodeAnalyzer::Traverse(NodeProcParam & def)
+{
+    def.noSubEffect = true;
+}
+void CodeAnalyzer::Traverse(NodeLoopParam & def)
+{
+    def.noSubEffect = true;
+}
 
-void CodeAnalyzer::Traverse(NodeResult &) {}
+void CodeAnalyzer::Traverse(NodeResult & def)
+{
+    def.noSubEffect = true;
+}
 
 void CodeAnalyzer::Traverse(NodeHeader &) {}
 
@@ -238,15 +287,18 @@ void CodeAnalyzer::AnalyzeDef(const std::string& name)
 void CodeAnalyzer::AnalyzeMonoOp(NodeMonoOp & exp)
 {
     exp.rhs->Traverse(*this);
+    exp.noSubEffect = exp.rhs->noSubEffect;
 }
 void CodeAnalyzer::AnalyzeBinOp(NodeBinOp & exp)
 {
     exp.lhs->Traverse(*this);
     exp.rhs->Traverse(*this);
+    exp.noSubEffect = exp.lhs->noSubEffect && exp.rhs->noSubEffect;
 }
 void CodeAnalyzer::AnalyzeAssign(NodeAssign & stmt)
 {
     stmt.lhs->Traverse(*this);
     stmt.rhs->Traverse(*this);
+    stmt.noSubEffect = false;
 }
 }
