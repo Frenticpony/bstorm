@@ -80,6 +80,9 @@ private:
     void AnalyzeDef(const std::string& name);
     void AnalyzeMonoOp(NodeMonoOp& exp);
     void AnalyzeBinOp(NodeBinOp& exp);
+    void AnalyzeArithAndArrayBinOp(NodeBinOp& exp);
+    void AnalyzeArithBinOp(NodeBinOp& exp);
+    void AnalyzeCmpBinOp(NodeBinOp& exp);
     void AnalyzeAssign(NodeAssign& stmt);
 };
 }

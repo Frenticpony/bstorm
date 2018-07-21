@@ -3,6 +3,8 @@
 #include <bstorm/env.hpp>
 #include <bstorm/script_entry_routine_names.hpp>
 
+#include <algorithm>
+
 namespace bstorm
 {
 // NOTE: “ž’B‰Â”\‚È•”•ª‚¾‚¯‰ðÍ
@@ -15,14 +17,17 @@ void CodeAnalyzer::Analyze(Node & n)
 void CodeAnalyzer::Traverse(NodeNum & lit)
 {
     lit.noSubEffect = true;
+    lit.expType = NodeExp::T_REAL;
 }
 void CodeAnalyzer::Traverse(NodeChar & lit)
 {
     lit.noSubEffect = true;
+    lit.expType = NodeExp::T_CHAR;
 }
 void CodeAnalyzer::Traverse(NodeStr & lit)
 {
     lit.noSubEffect = true;
+    lit.expType = lit.str.empty() ? NodeExp::T_ARRAY(NodeExp::T_EMPTY) : NodeExp::T_STRING;
 }
 void CodeAnalyzer::Traverse(NodeArray & array)
 {
@@ -35,25 +40,55 @@ void CodeAnalyzer::Traverse(NodeArray & array)
             array.noSubEffect = false;
         }
     }
+    if (array.elems.empty())
+    {
+        array.expType = NodeExp::T_ARRAY(NodeExp::T_EMPTY);
+    } else
+    {
+        const auto firstElemExpType = array.elems[0]->expType;
+        if (std::all_of(array.elems.begin(), array.elems.end(), [firstElemExpType](auto& e) { return e->expType == firstElemExpType; }))
+        {
+            array.expType = firstElemExpType;
+        } else
+        {
+            array.expType = NodeExp::T_ARRAY(NodeExp::T_ANY);
+        }
+    }
 }
-void CodeAnalyzer::Traverse(NodeNeg& exp) { AnalyzeMonoOp(exp); }
-void CodeAnalyzer::Traverse(NodeNot& exp) { AnalyzeMonoOp(exp); }
-void CodeAnalyzer::Traverse(NodeAbs& exp) { AnalyzeMonoOp(exp); }
-void CodeAnalyzer::Traverse(NodeAdd& exp) { AnalyzeBinOp(exp); }
-void CodeAnalyzer::Traverse(NodeSub& exp) { AnalyzeBinOp(exp); }
-void CodeAnalyzer::Traverse(NodeMul& exp) { AnalyzeBinOp(exp); }
-void CodeAnalyzer::Traverse(NodeDiv& exp) { AnalyzeBinOp(exp); }
-void CodeAnalyzer::Traverse(NodeRem& exp) { AnalyzeBinOp(exp); }
-void CodeAnalyzer::Traverse(NodePow& exp) { AnalyzeBinOp(exp); }
-void CodeAnalyzer::Traverse(NodeLt& exp) { AnalyzeBinOp(exp); }
-void CodeAnalyzer::Traverse(NodeGt& exp) { AnalyzeBinOp(exp); }
-void CodeAnalyzer::Traverse(NodeLe& exp) { AnalyzeBinOp(exp); }
-void CodeAnalyzer::Traverse(NodeGe& exp) { AnalyzeBinOp(exp); }
-void CodeAnalyzer::Traverse(NodeEq& exp) { AnalyzeBinOp(exp); }
-void CodeAnalyzer::Traverse(NodeNe& exp) { AnalyzeBinOp(exp); }
+void CodeAnalyzer::Traverse(NodeNeg& exp) { AnalyzeMonoOp(exp); exp.expType = NodeExp::T_REAL; }
+void CodeAnalyzer::Traverse(NodeNot& exp) { AnalyzeMonoOp(exp); exp.expType = NodeExp::T_BOOL; }
+void CodeAnalyzer::Traverse(NodeAbs& exp) { AnalyzeMonoOp(exp); exp.expType = NodeExp::T_REAL; }
+void CodeAnalyzer::Traverse(NodeAdd& exp) { AnalyzeArithAndArrayBinOp(exp); }
+void CodeAnalyzer::Traverse(NodeSub& exp) { AnalyzeArithAndArrayBinOp(exp); }
+void CodeAnalyzer::Traverse(NodeMul& exp) { AnalyzeArithBinOp(exp); }
+void CodeAnalyzer::Traverse(NodeDiv& exp) { AnalyzeArithBinOp(exp); }
+void CodeAnalyzer::Traverse(NodeRem& exp) { AnalyzeArithBinOp(exp); }
+void CodeAnalyzer::Traverse(NodePow& exp) { AnalyzeArithBinOp(exp); }
+void CodeAnalyzer::Traverse(NodeLt& exp) { AnalyzeCmpBinOp(exp); }
+void CodeAnalyzer::Traverse(NodeGt& exp) { AnalyzeCmpBinOp(exp); }
+void CodeAnalyzer::Traverse(NodeLe& exp) { AnalyzeCmpBinOp(exp); }
+void CodeAnalyzer::Traverse(NodeGe& exp) { AnalyzeCmpBinOp(exp); }
+void CodeAnalyzer::Traverse(NodeEq& exp) { AnalyzeCmpBinOp(exp); }
+void CodeAnalyzer::Traverse(NodeNe& exp) { AnalyzeCmpBinOp(exp); }
 void CodeAnalyzer::Traverse(NodeAnd& exp) { AnalyzeBinOp(exp); }
 void CodeAnalyzer::Traverse(NodeOr& exp) { AnalyzeBinOp(exp); }
-void CodeAnalyzer::Traverse(NodeCat& exp) { AnalyzeBinOp(exp); }
+void CodeAnalyzer::Traverse(NodeCat& exp)
+{
+    AnalyzeBinOp(exp);
+    if (exp.lhs->expType == NodeExp::T_ARRAY(NodeExp::T_EMPTY) && NodeExp::IsArrayType(exp.rhs->expType))
+    {
+        exp.expType = exp.rhs->expType;
+    } else if (exp.rhs->expType == NodeExp::T_ARRAY(NodeExp::T_EMPTY) && NodeExp::IsArrayType(exp.lhs->expType))
+    {
+        exp.expType = exp.lhs->expType;
+    } else if (exp.lhs->expType == exp.rhs->expType && NodeExp::IsArrayType(exp.lhs->expType))
+    {
+        exp.expType = exp.lhs->expType;
+    } else
+    {
+        exp.expType = NodeExp::T_ARRAY(NodeExp::T_ANY);
+    }
+}
 void CodeAnalyzer::Traverse(NodeNoParenCallExp & call)
 {
     AnalyzeDef(call.name);
@@ -294,6 +329,24 @@ void CodeAnalyzer::AnalyzeBinOp(NodeBinOp & exp)
     exp.lhs->Traverse(*this);
     exp.rhs->Traverse(*this);
     exp.noSubEffect = exp.lhs->noSubEffect && exp.rhs->noSubEffect;
+}
+void CodeAnalyzer::AnalyzeArithAndArrayBinOp(NodeBinOp & exp)
+{
+    AnalyzeBinOp(exp);
+    if (exp.lhs->expType == NodeExp::T_REAL && exp.rhs->expType == NodeExp::T_REAL)
+    {
+        exp.expType = NodeExp::T_REAL;
+    }
+}
+void CodeAnalyzer::AnalyzeArithBinOp(NodeBinOp & exp)
+{
+    AnalyzeBinOp(exp);
+    exp.expType = NodeExp::T_REAL;
+}
+void CodeAnalyzer::AnalyzeCmpBinOp(NodeBinOp & exp)
+{
+    AnalyzeBinOp(exp);
+    exp.expType = NodeExp::T_BOOL;
 }
 void CodeAnalyzer::AnalyzeAssign(NodeAssign & stmt)
 {

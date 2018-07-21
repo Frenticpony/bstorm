@@ -78,17 +78,21 @@ void CodeGenerator::Traverse(NodeStr& exp)
 }
 void CodeGenerator::Traverse(NodeArray& exp)
 {
-    AddCode("{");
+    if (exp.elems.size() >= 2 && NodeExp::ContainsAnyType(exp.expType))
+    {
+        AddCode(runtime("arr"));
+    }
+    AddCode("({");
     for (int i = 0; i < exp.elems.size(); i++)
     {
         if (i != 0) AddCode(",");
         exp.elems[i]->Traverse(*this);
     }
-    AddCode("}");
+    AddCode("})");
 }
 void CodeGenerator::Traverse(NodeNeg& exp)
 {
-    if (exp.rhs->expType == NodeExp::ExpType::REAL)
+    if (exp.rhs->expType == NodeExp::T_REAL)
     {
         AddCode("(-"); exp.rhs->Traverse(*this); AddCode(")");
     } else
@@ -98,7 +102,7 @@ void CodeGenerator::Traverse(NodeNeg& exp)
 }
 void CodeGenerator::Traverse(NodeNot& exp)
 {
-    if (exp.rhs->expType == NodeExp::ExpType::BOOL)
+    if (exp.rhs->expType == NodeExp::T_BOOL)
     {
         AddCode("(not("); exp.rhs->Traverse(*this); AddCode("))");
     } else
@@ -267,7 +271,7 @@ void CodeGenerator::GenBinOp(const std::string& fname, NodeBinOp& exp)
 }
 void CodeGenerator::GenArithBinOp(const std::string & fname, const std::string& op, NodeBinOp & exp)
 {
-    if (exp.lhs->expType == NodeExp::ExpType::REAL && exp.rhs->expType == NodeExp::ExpType::REAL)
+    if (exp.lhs->expType == NodeExp::T_REAL && exp.rhs->expType == NodeExp::T_REAL)
     {
         AddCode("(");
         exp.lhs->Traverse(*this);
@@ -522,7 +526,7 @@ void CodeGenerator::GenCopy(std::shared_ptr<NodeExp>& exp)
 
 void CodeGenerator::GenCondition(std::shared_ptr<NodeExp>& exp)
 {
-    if (exp->expType == NodeExp::ExpType::BOOL)
+    if (exp->expType == NodeExp::T_BOOL)
     {
         exp->Traverse(*this);
     } else
@@ -663,7 +667,7 @@ void CodeGenerator::Traverse(NodeReturnVoid& stmt)
 {
     if (procStack_.empty())
     {
-        // top level return
+        // top level return・
         AddCode("do return end");
     } else
     {

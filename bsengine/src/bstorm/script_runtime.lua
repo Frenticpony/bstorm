@@ -235,6 +235,16 @@ function r_slice(a, s, e)
 end
 
 -- throws
+function r_arr(a)
+  for i=2,#a do
+    if not rl_type_eq(a[1], a[i]) then
+        c_raiseerror("can' create an array in which elements have different type.");
+    end
+  end
+  return a;
+end
+
+-- throws
 function r_read(a, idx)
   if type(a) ~= "table" then
     c_raiseerror("attempt to index a non-array value.");
