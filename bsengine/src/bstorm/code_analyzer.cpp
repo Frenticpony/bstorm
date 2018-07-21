@@ -209,6 +209,8 @@ void CodeAnalyzer::Traverse(NodeVarInit& stmt)
 void CodeAnalyzer::Traverse(NodeProcParam &) {}
 void CodeAnalyzer::Traverse(NodeLoopParam &) {}
 
+void CodeAnalyzer::Traverse(NodeResult &) {}
+
 void CodeAnalyzer::Traverse(NodeHeader &) {}
 
 void CodeAnalyzer::AnalyzeDef(const std::string& name)

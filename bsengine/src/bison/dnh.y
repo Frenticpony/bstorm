@@ -354,7 +354,7 @@ func-def           : TK_FUNCTION TK_IDENT { CheckDupDef(ctx, @2, *$2); } new-sco
                        {
                          if (ctx->env->GetCurrentBlockNameTable()->count("result") == 0)
                          {
-                             auto result = new NodeVarDecl("result");
+                             auto result = new NodeResult();
                              FixPos(result, @1);
                              AddDef(ctx, result);
                          }

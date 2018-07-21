@@ -7,7 +7,6 @@
 #include <bstorm/logger.hpp>
 #include <bstorm/api.hpp>
 #include <bstorm/source_map.hpp>
-#include <bstorm/node.hpp>
 #include <bstorm/parser.hpp>
 #include <bstorm/semantics_checker.hpp>
 #include <bstorm/code_analyzer.hpp>

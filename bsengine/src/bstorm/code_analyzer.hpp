@@ -56,6 +56,7 @@ public:
     void Traverse(NodeVarInit&) override;
     void Traverse(NodeProcParam&) override;
     void Traverse(NodeLoopParam&) override;
+    void Traverse(NodeResult&) override;
     void Traverse(NodeBlock&) override;
     void Traverse(NodeSubDef&) override;
     void Traverse(NodeBuiltInSubDef&) override;

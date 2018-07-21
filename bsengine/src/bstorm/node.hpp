@@ -56,6 +56,7 @@ struct NodeVarDecl;
 struct NodeVarInit;
 struct NodeProcParam;
 struct NodeLoopParam;
+struct NodeResult;
 struct NodeBlock;
 struct NodeSubDef;
 struct NodeBuiltInSubDef;
@@ -127,6 +128,7 @@ public:
     virtual void Traverse(NodeVarInit&) = 0;
     virtual void Traverse(NodeProcParam&) = 0;
     virtual void Traverse(NodeLoopParam&) = 0;
+    virtual void Traverse(NodeResult&) = 0;
     virtual void Traverse(NodeBlock&) = 0;
     virtual void Traverse(NodeSubDef&) = 0;
     virtual void Traverse(NodeBuiltInSubDef&) = 0;
@@ -471,7 +473,7 @@ struct NodeDef : public Node
     NodeDef(const std::string& name) : Node(), name(name), convertedName(name), unreachable(true) {}
     std::string name;
     std::string convertedName; // 名前変換用
-    bool unreachable; // 到達不可能
+    bool unreachable; // 到達不可能フラグ
 };
 
 struct NodeVarDecl : public NodeDef
@@ -500,6 +502,12 @@ struct NodeProcParam : public NodeDef
 struct NodeLoopParam : public NodeDef
 {
     NodeLoopParam(const std::string& name) : NodeDef(name) {}
+    void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
+};
+
+struct NodeResult : public NodeDef
+{
+    NodeResult() : NodeDef("result") {}
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 

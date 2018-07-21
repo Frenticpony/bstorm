@@ -30,6 +30,7 @@ static std::string varname(const std::string& name, const std::shared_ptr<Env>& 
 static bool isDeclarationNeeded(const std::shared_ptr<NodeDef>& def)
 {
     if (std::dynamic_pointer_cast<NodeVarDecl>(def)) return true;
+    if (std::dynamic_pointer_cast<NodeResult>(def)) return true;
     if (std::dynamic_pointer_cast<NodeFuncDef>(def)) return true;
     if (std::dynamic_pointer_cast<NodeSubDef>(def)) return true;
     if (std::dynamic_pointer_cast<NodeBuiltInSubDef>(def)) return true;
@@ -147,7 +148,8 @@ void CodeGenerator::Traverse(NodeNoParenCallExp& call)
     auto def = env_->FindDef(call.name);
     if (std::dynamic_pointer_cast<NodeVarDecl>(def) ||
         std::dynamic_pointer_cast<NodeProcParam>(def) ||
-        std::dynamic_pointer_cast<NodeLoopParam>(def))
+        std::dynamic_pointer_cast<NodeLoopParam>(def) ||
+        std::dynamic_pointer_cast<NodeResult>(def))
     {
         GenNilCheck(call.name);
     } else if (std::dynamic_pointer_cast<NodeBuiltInFunc>(def))
@@ -306,13 +308,15 @@ void CodeGenerator::GenProc(const std::shared_ptr<NodeDef>& def, const std::vect
     blk.Traverse(*this);
     if (std::dynamic_pointer_cast<NodeFuncDef>(def))
     {
-        auto result = blk.nameTable->at("result");
-        if (!std::dynamic_pointer_cast<NodeProcParam>(result))
+        if (auto result = std::dynamic_pointer_cast<NodeResult>(blk.nameTable->at("result")))
         {
-            Indent();
-            AddCode("do return " + varname(result) + " end");
-            NewLine(result->srcPos);
-            Unindent();
+            if (!(result->unreachable && option_.deleteUnreachableDefinition))
+            {
+                Indent();
+                AddCode("return " + varname(result) + ";");
+                NewLine(result->srcPos);
+                Unindent();
+            }
         }
     }
     AddCode("end"); NewLine();
@@ -588,15 +592,20 @@ void CodeGenerator::Traverse(NodeReturnVoid& stmt)
     {
         if (auto func = std::dynamic_pointer_cast<NodeFuncDef>(procStack_.top()))
         {
-            auto result = func->block->nameTable->at("result");
-            if (auto funcParam = std::dynamic_pointer_cast<NodeProcParam>(result))
+            if (auto result = std::dynamic_pointer_cast<NodeResult>(func->block->nameTable->at("result")))
+            {
+                if (!(result->unreachable && option_.deleteUnreachableDefinition))
+                {
+                    // return result
+                    AddCode("do return " + varname(result) + " end");
+                } else
+                {
+                    AddCode("do return end");
+                }
+            } else
             {
                 // function has "result" param
                 AddCode("do return end");
-            } else
-            {
-                // return result
-                AddCode("do return " + varname(result) + " end");
             }
         } else
         {
@@ -641,6 +650,7 @@ void CodeGenerator::Traverse(NodeLoopParam& param)
     AddCode("local " + varname(param.name, env_) + " = " + runtime("cp") + "(i);");
     NewLine(param.srcPos);
 }
+void CodeGenerator::Traverse(NodeResult &) {}
 void CodeGenerator::Traverse(NodeBuiltInFunc &) {}
 void CodeGenerator::Traverse(NodeConst &) {}
 void CodeGenerator::Traverse(NodeLocal& stmt)
@@ -760,7 +770,7 @@ void CodeGenerator::Traverse(NodeBlock& blk)
     // 宣言生成
     if (!env_->IsRoot()) // トップレベルはグローバル変数に入れるので宣言不要
     {
-        
+
         Indent();
         // local declare
         for (const auto& bind : *(blk.nameTable))

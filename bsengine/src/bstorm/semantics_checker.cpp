@@ -66,6 +66,7 @@ static bool IsVariable(const std::shared_ptr<NodeDef>& def)
     if (std::dynamic_pointer_cast<NodeVarDecl>(def)) { return true; }
     if (std::dynamic_pointer_cast<NodeProcParam>(def)) { return true; }
     if (std::dynamic_pointer_cast<NodeLoopParam>(def)) { return true; }
+    if (std::dynamic_pointer_cast<NodeResult>(def)) { return true; }
     return false;
 }
 
@@ -245,6 +246,7 @@ void SemanticsChecker::Traverse(NodeVarInit& stmt)
 }
 void SemanticsChecker::Traverse(NodeProcParam &) {}
 void SemanticsChecker::Traverse(NodeLoopParam &) {}
+void SemanticsChecker::Traverse(NodeResult &) {}
 void SemanticsChecker::Traverse(NodeBlock& blk)
 {
     env_ = std::make_shared<Env>(blk.nameTable, env_);
