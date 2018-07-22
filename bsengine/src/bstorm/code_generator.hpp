@@ -110,6 +110,7 @@ private:
     void GenOpAssign(const std::string& fname, const std::shared_ptr<NodeLeftVal>& left, const NullableSharedPtr<NodeExp>& right);
     void GenCopy(NodeExp& exp);
     void GenCondition(std::shared_ptr<NodeExp>& exp);
+    void GenCase(NodeCase& cs, ExpType condType);
     std::shared_ptr<Env> env_;
     std::stack<std::shared_ptr<NodeDef>> procStack_;
     std::string code_;

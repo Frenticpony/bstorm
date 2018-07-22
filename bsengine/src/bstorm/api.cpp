@@ -6353,7 +6353,7 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
     }
 
     builtin_real(GetOwnScriptID, 0);
-    runtime(GetEventType, 0);
+    runtime_real(GetEventType, 0);
     runtime(GetEventArgument, 1);
     builtin(SetScriptResult, 1);
     builtin(GetScriptResult, 1);

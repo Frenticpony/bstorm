@@ -541,6 +541,32 @@ void CodeGenerator::GenCondition(std::shared_ptr<NodeExp>& exp)
     }
 }
 
+void CodeGenerator::GenCase(NodeCase & cs, ExpType condType)
+{
+    assert(!cs.exps.empty());
+    AddCode("if ");
+    // orの右結合計算列を作る(右結合の方が早く短絡するので)
+    for (int i = 0; i < cs.exps.size(); i++)
+    {
+        auto& exp = cs.exps[i];
+        if (i != 0) AddCode(" or (");
+        if (condType == ExpType::REAL && exp->expType == ExpType::REAL)
+        {
+            AddCode("c == ");
+            exp->Traverse(*this);
+        } else
+        {
+            AddCode(runtime("eq") + "(c,"); exp->Traverse(*this); AddCode(")");
+        }
+    }
+    for (int i = 0; i < cs.exps.size() - 1; i++)
+    {
+        AddCode(")");
+    }
+    AddCode(" then"); NewLine(cs.srcPos);
+    cs.block->Traverse(*this);
+}
+
 void CodeGenerator::Traverse(NodeArrayRef& exp)
 {
     AddCode(runtime("read"));
@@ -850,21 +876,7 @@ void CodeGenerator::Traverse(NodeIf& stmt)
 }
 void CodeGenerator::Traverse(NodeCase & cs)
 {
-    assert(!cs.exps.empty());
-    AddCode("if ");
-    // orの右結合計算列を作る(右結合の方が早く短絡するので)
-    for (int i = 0; i < cs.exps.size(); i++)
-    {
-        auto& exp = cs.exps[i];
-        if (i != 0) AddCode(" or (");
-        AddCode(runtime("eq") + "(c,"); exp->Traverse(*this); AddCode(")");
-    }
-    for (int i = 0; i < cs.exps.size() - 1; i++)
-    {
-        AddCode(")");
-    }
-    AddCode(" then"); NewLine(cs.srcPos);
-    cs.block->Traverse(*this);
+    GenCase(cs, ExpType::ANY);
 }
 void CodeGenerator::Traverse(NodeAlternative& stmt)
 {
@@ -875,7 +887,7 @@ void CodeGenerator::Traverse(NodeAlternative& stmt)
     {
         // case
         if (i != 0) AddCode("else"); // 1つ目以降のcaseはelse if
-        stmt.cases[i]->Traverse(*this);
+        GenCase(*stmt.cases[i], stmt.cond->expType);
     }
     /* gen else*/
     if (stmt.others)
