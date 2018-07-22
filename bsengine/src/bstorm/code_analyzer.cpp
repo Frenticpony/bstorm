@@ -17,19 +17,19 @@ void CodeAnalyzer::Analyze(Node & n)
 void CodeAnalyzer::Traverse(NodeNum & lit)
 {
     lit.noSubEffect = true;
-    lit.expType = NodeExp::T_REAL;
+    lit.expType = ExpType::REAL;
     lit.copyRequired = false;
 }
 void CodeAnalyzer::Traverse(NodeChar & lit)
 {
     lit.noSubEffect = true;
-    lit.expType = NodeExp::T_CHAR;
+    lit.expType = ExpType::CHAR;
     lit.copyRequired = false;
 }
 void CodeAnalyzer::Traverse(NodeStr & lit)
 {
     lit.noSubEffect = true;
-    lit.expType = lit.str.empty() ? NodeExp::T_ARRAY(NodeExp::T_ANY) : NodeExp::T_STRING;
+    lit.expType = lit.str.empty() ? ExpType::ARRAY(ExpType::ANY) : ExpType::STRING;
     lit.copyRequired = false;
 }
 void CodeAnalyzer::Traverse(NodeArray & array)
@@ -48,19 +48,19 @@ void CodeAnalyzer::Traverse(NodeArray & array)
             array.copyRequired = true;
         }
     }
-    array.expType = NodeExp::T_ARRAY(NodeExp::T_ANY);
+    array.expType = ExpType::ARRAY(ExpType::ANY);
     if (!array.elems.empty())
     {
         auto firstElemExpType = array.elems[0]->expType;
         if (std::all_of(array.elems.begin(), array.elems.end(), [firstElemExpType](auto& e) { return e->expType == firstElemExpType; }))
         {
-            array.expType = NodeExp::T_ARRAY(firstElemExpType);
+            array.expType = ExpType::ARRAY(firstElemExpType);
         }
     }
 }
-void CodeAnalyzer::Traverse(NodeNeg& exp) { AnalyzeMonoOp(exp); exp.expType = NodeExp::T_REAL; }
-void CodeAnalyzer::Traverse(NodeNot& exp) { AnalyzeMonoOp(exp); exp.expType = NodeExp::T_BOOL; }
-void CodeAnalyzer::Traverse(NodeAbs& exp) { AnalyzeMonoOp(exp); exp.expType = NodeExp::T_REAL; }
+void CodeAnalyzer::Traverse(NodeNeg& exp) { AnalyzeMonoOp(exp); exp.expType = ExpType::REAL; }
+void CodeAnalyzer::Traverse(NodeNot& exp) { AnalyzeMonoOp(exp); exp.expType = ExpType::BOOL; }
+void CodeAnalyzer::Traverse(NodeAbs& exp) { AnalyzeMonoOp(exp); exp.expType = ExpType::REAL; }
 void CodeAnalyzer::Traverse(NodeAdd& exp) { AnalyzeArithAndArrayBinOp(exp); }
 void CodeAnalyzer::Traverse(NodeSub& exp) { AnalyzeArithAndArrayBinOp(exp); }
 void CodeAnalyzer::Traverse(NodeMul& exp) { AnalyzeArithBinOp(exp); }
@@ -79,12 +79,12 @@ void CodeAnalyzer::Traverse(NodeCat& exp)
 {
     exp.copyRequired = false;
     AnalyzeBinOp(exp);
-    if (exp.lhs->expType == exp.rhs->expType && NodeExp::IsArrayType(exp.lhs->expType))
+    if (exp.lhs->expType == exp.rhs->expType && exp.lhs->expType.IsArray())
     {
         exp.expType = exp.lhs->expType;
     } else
     {
-        exp.expType = NodeExp::T_ARRAY(NodeExp::T_ANY);
+        exp.expType = ExpType::ARRAY(ExpType::ANY);
     }
 }
 void CodeAnalyzer::Traverse(NodeNoParenCallExp & call)
@@ -346,21 +346,21 @@ void CodeAnalyzer::AnalyzeArithAndArrayBinOp(NodeBinOp & exp)
 {
     exp.copyRequired = false;
     AnalyzeBinOp(exp);
-    if (exp.lhs->expType == NodeExp::T_REAL && exp.rhs->expType == NodeExp::T_REAL)
+    if (exp.lhs->expType == ExpType::REAL && exp.rhs->expType == ExpType::REAL)
     {
-        exp.expType = NodeExp::T_REAL;
+        exp.expType = ExpType::REAL;
     }
 }
 void CodeAnalyzer::AnalyzeArithBinOp(NodeBinOp & exp)
 {
     exp.copyRequired = false;
-    exp.expType = NodeExp::T_REAL;
+    exp.expType = ExpType::REAL;
     AnalyzeBinOp(exp);
 }
 void CodeAnalyzer::AnalyzeCmpBinOp(NodeBinOp & exp)
 {
     exp.copyRequired = false;
-    exp.expType = NodeExp::T_BOOL;
+    exp.expType = ExpType::BOOL;
     AnalyzeBinOp(exp);
 }
 void CodeAnalyzer::AnalyzeLogBinOp(NodeBinOp & exp)

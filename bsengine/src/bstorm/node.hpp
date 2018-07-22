@@ -164,34 +164,44 @@ struct NodeStmt : public Node
     NodeStmt() : Node() {}
 };
 
-struct NodeExp : public Node
+class ExpType
 {
-    using ExpType = uint64_t;
-    static constexpr ExpType T_ANY = 1;
-    static constexpr ExpType T_REAL = 3;
-    static constexpr ExpType T_CHAR = 5;
-    static constexpr ExpType T_BOOL = 7;
-    static constexpr ExpType T_NIL = 9;
-    static constexpr ExpType T_ARRAY(ExpType t)
+public:
+    using T = uint64_t;
+    static constexpr T ANY = 1;
+    static constexpr T REAL = 3;
+    static constexpr T CHAR = 5;
+    static constexpr T BOOL = 7;
+    static constexpr T NIL = 9;
+    static T ARRAY(ExpType et)
     {
-        return (t & 0x8000000000000000) ? T_ARRAY(T_ANY) : (t << 1);
+        return (et.t & 0x8000000000000000) ? ARRAY(ANY) : (et.t << 1);
     }
-    static constexpr ExpType T_STRING = 10;
-    static constexpr bool IsArrayType(ExpType t)
+    static constexpr T STRING = 10;
+    static T ARRAY_ELEM(ExpType et)
+    {
+        return (!(et.t & 1)) ? (et.t >> 1) : ANY;
+    }
+    ExpType() : t(ANY) {}
+    ExpType(T t) : t(t) {}
+    bool operator==(const ExpType& et) { return t == et.t; }
+    bool operator!=(const ExpType& et) { return !(*this == et); }
+    bool IsArray() const
     {
         return !(t & 1);
     }
-    static constexpr ExpType T_ARRAY_ELEM(ExpType t)
-    {
-        return IsArrayType(t) ? (t >> 1) : T_ANY;
-    }
-    static constexpr bool ContainsAnyType(ExpType t)
+    bool ContainsAny() const
     {
         return !(t & (t - 1)); // 2の冪乗
     }
+    T t;
+};
+
+struct NodeExp : public Node
+{
     NodeExp() :
         Node(),
-        expType(T_ANY),
+        expType(ExpType::ANY),
         copyRequired(true)
     {
     }
@@ -205,7 +215,7 @@ struct NodeNum : public NodeExp
         NodeExp(),
         number(std::move(n))
     {
-        expType = T_REAL;
+        expType = ExpType::REAL;
         noSubEffect = true;
         copyRequired = false;
     };
@@ -219,7 +229,7 @@ struct NodeChar : public NodeExp
         NodeExp(),
         c(c)
     {
-        expType = T_CHAR;
+        expType = ExpType::CHAR;
         noSubEffect = true;
         copyRequired = false;
     };
@@ -233,7 +243,7 @@ struct NodeStr : public NodeExp
         NodeExp(),
         str(std::move(s))
     {
-        expType = str.empty() ? T_ARRAY(T_ANY) : T_STRING;
+        expType = str.empty() ? ExpType::ARRAY(ExpType::ANY) : ExpType::STRING;
         noSubEffect = true;
         copyRequired = false;
     };
@@ -263,19 +273,19 @@ struct NodeMonoOp : public NodeExp
 
 struct NodeNeg : public NodeMonoOp
 {
-    NodeNeg(const std::shared_ptr<NodeExp>& r) : NodeMonoOp(r) { expType = T_REAL; }
+    NodeNeg(const std::shared_ptr<NodeExp>& r) : NodeMonoOp(r) { expType = ExpType::REAL; }
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 
 struct NodeNot : public NodeMonoOp
 {
-    NodeNot(const std::shared_ptr<NodeExp>& r) : NodeMonoOp(r) { expType = T_BOOL; }
+    NodeNot(const std::shared_ptr<NodeExp>& r) : NodeMonoOp(r) { expType = ExpType::BOOL; }
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 
 struct NodeAbs : public NodeMonoOp
 {
-    NodeAbs(const std::shared_ptr<NodeExp>& r) : NodeMonoOp(r) { expType = T_REAL; }
+    NodeAbs(const std::shared_ptr<NodeExp>& r) : NodeMonoOp(r) { expType = ExpType::REAL; }
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 
@@ -292,9 +302,9 @@ struct NodeAdd : public NodeBinOp
 {
     NodeAdd(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r)
     {
-        if (l->expType == T_REAL && r->expType == T_REAL)
+        if (l->expType == ExpType::REAL && r->expType == ExpType::REAL)
         {
-            expType = T_REAL;
+            expType = ExpType::REAL;
         }
     }
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
@@ -303,62 +313,62 @@ struct NodeSub : public NodeBinOp
 {
     NodeSub(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r)
     {
-        if (l->expType == T_REAL && r->expType == T_REAL)
+        if (l->expType == ExpType::REAL && r->expType == ExpType::REAL)
         {
-            expType = T_REAL;
+            expType = ExpType::REAL;
         }
     }
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 struct NodeMul : public NodeBinOp
 {
-    NodeMul(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) { expType = T_REAL; }
+    NodeMul(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) { expType = ExpType::REAL; }
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 struct NodeDiv : public NodeBinOp
 {
-    NodeDiv(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) { expType = T_REAL; }
+    NodeDiv(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) { expType = ExpType::REAL; }
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 struct NodeRem : public NodeBinOp
 {
-    NodeRem(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) { expType = T_REAL; }
+    NodeRem(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) { expType = ExpType::REAL; }
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 struct NodePow : public NodeBinOp
 {
-    NodePow(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) { expType = T_REAL; }
+    NodePow(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) { expType = ExpType::REAL; }
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 
 struct NodeLt : public NodeBinOp
 {
-    NodeLt(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) { expType = T_BOOL; }
+    NodeLt(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) { expType = ExpType::BOOL; }
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 struct NodeGt : public NodeBinOp
 {
-    NodeGt(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) { expType = T_BOOL; }
+    NodeGt(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) { expType = ExpType::BOOL; }
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 struct NodeLe : public NodeBinOp
 {
-    NodeLe(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) { expType = T_BOOL; }
+    NodeLe(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) { expType = ExpType::BOOL; }
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 struct NodeGe : public NodeBinOp
 {
-    NodeGe(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) { expType = T_BOOL; }
+    NodeGe(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) { expType = ExpType::BOOL; }
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 struct NodeEq : public NodeBinOp
 {
-    NodeEq(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) { expType = T_BOOL; }
+    NodeEq(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) { expType = ExpType::BOOL; }
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 struct NodeNe : public NodeBinOp
 {
-    NodeNe(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) { expType = T_BOOL; }
+    NodeNe(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeBinOp(l, r) { expType = ExpType::BOOL; }
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
 };
 

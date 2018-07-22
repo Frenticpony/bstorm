@@ -79,7 +79,7 @@ void CodeGenerator::Traverse(NodeStr& exp)
 }
 void CodeGenerator::Traverse(NodeArray& exp)
 {
-    if (exp.elems.size() >= 2 && NodeExp::ContainsAnyType(exp.expType))
+    if (exp.elems.size() >= 2 && exp.expType.ContainsAny())
     {
         AddCode(runtime("arr"));
     }
@@ -93,7 +93,7 @@ void CodeGenerator::Traverse(NodeArray& exp)
 }
 void CodeGenerator::Traverse(NodeNeg& exp)
 {
-    if (exp.rhs->expType == NodeExp::T_REAL)
+    if (exp.rhs->expType == ExpType::REAL)
     {
         AddCode("(-"); exp.rhs->Traverse(*this); AddCode(")");
     } else
@@ -103,7 +103,7 @@ void CodeGenerator::Traverse(NodeNeg& exp)
 }
 void CodeGenerator::Traverse(NodeNot& exp)
 {
-    if (exp.rhs->expType == NodeExp::T_BOOL)
+    if (exp.rhs->expType == ExpType::BOOL)
     {
         AddCode("(not("); exp.rhs->Traverse(*this); AddCode("))");
     } else
@@ -269,7 +269,7 @@ void CodeGenerator::GenBinOp(const std::string& fname, NodeBinOp& exp)
 }
 void CodeGenerator::GenArithBinOp(const std::string & fname, const std::string& op, NodeBinOp & exp)
 {
-    if (exp.lhs->expType == NodeExp::T_REAL && exp.rhs->expType == NodeExp::T_REAL)
+    if (exp.lhs->expType == ExpType::REAL && exp.rhs->expType == ExpType::REAL)
     {
         AddCode("(");
         exp.lhs->Traverse(*this);
@@ -532,7 +532,7 @@ void CodeGenerator::GenCopy(NodeExp& exp)
 
 void CodeGenerator::GenCondition(std::shared_ptr<NodeExp>& exp)
 {
-    if (exp->expType == NodeExp::T_BOOL)
+    if (exp->expType == ExpType::BOOL)
     {
         exp->Traverse(*this);
     } else
