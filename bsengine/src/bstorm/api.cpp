@@ -6195,8 +6195,8 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
     runtime(IntToString, 1);
     runtime(itoa, 1);
     runtime(rtoa, 1);
-    builtin(atoi, 1);
-    builtin(ator, 1);
+    builtin_real(atoi, 1);
+    builtin_real(ator, 1);
     builtin(TrimString, 1);
     builtin(rtos, 2);
     builtin(vtos, 2);
@@ -6249,15 +6249,15 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
     builtin(CopyCommonDataArea, 2);
     builtin(GetCommonDataAreaKeyList, 0);
     builtin(GetCommonDataValueKeyList, 1);
-    builtin(SaveCommonDataAreaA1, 1);
-    builtin(LoadCommonDataAreaA1, 1);
-    builtin(SaveCommonDataAreaA2, 2);
-    builtin(LoadCommonDataAreaA2, 2);
+    builtin_bool(SaveCommonDataAreaA1, 1);
+    builtin_bool(LoadCommonDataAreaA1, 1);
+    builtin_bool(SaveCommonDataAreaA2, 2);
+    builtin_bool(LoadCommonDataAreaA2, 2);
 
     if (TypeIs(~t_package))
     {
-        builtin(SaveCommonDataAreaToReplayFile, 1);
-        builtin(LoadCommonDataAreaFromReplayFile, 1);
+        builtin_bool(SaveCommonDataAreaToReplayFile, 1);
+        builtin_bool(LoadCommonDataAreaFromReplayFile, 1);
     }
 
     builtin(LoadSound, 1);
@@ -6286,7 +6286,7 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
     builtin(ClearInvalidRenderPriority, 0);
     builtin(SetInvalidRenderPriorityA1, 2);
     builtin(GetReservedRenderTargetName, 1);
-    builtin(CreateRenderTarget, 1);
+    builtin_bool(CreateRenderTarget, 1);
     builtin(RenderToTextureA1, 4);
     builtin(RenderToTextureB1, 3);
     builtin(SaveRenderedTextureA1, 2);
@@ -6446,28 +6446,28 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
 
         builtin(DeleteShotAll, 2);
         builtin(DeleteShotInCircle, 5);
-        builtin(CreateShotA1, 6);
-        builtin(CreateShotA2, 8);
-        builtin(CreateShotOA1, 5);
-        builtin(CreateShotB1, 6);
-        builtin(CreateShotB2, 10);
-        builtin(CreateShotOB1, 5);
-        builtin(CreateLooseLaserA1, 8);
-        builtin(CreateStraightLaserA1, 8);
-        builtin(CreateCurveLaserA1, 8);
+        builtin_real(CreateShotA1, 6);
+        builtin_real(CreateShotA2, 8);
+        builtin_real(CreateShotOA1, 5);
+        builtin_real(CreateShotB1, 6);
+        builtin_real(CreateShotB2, 10);
+        builtin_real(CreateShotOB1, 5);
+        builtin_real(CreateLooseLaserA1, 8);
+        builtin_real(CreateStraightLaserA1, 8);
+        builtin_real(CreateCurveLaserA1, 8);
         builtin(SetShotIntersectionCircle, 3);
         builtin(SetShotIntersectionLine, 5);
         builtin(GetShotIdInCircleA1, 3);
         builtin(GetShotIdInCircleA2, 4);
-        builtin(GetShotCount, 1);
+        builtin_real(GetShotCount, 1);
         builtin(SetShotAutoDeleteClip, 4);
         builtin(GetShotDataInfoA1, 3);
         builtin(StartShotScript, 1);
 
-        builtin(CreateItemA1, 4);
-        builtin(CreateItemA2, 6);
-        builtin(CreateItemU1, 4);
-        builtin(CreateItemU2, 6);
+        builtin_real(CreateItemA1, 4);
+        builtin_real(CreateItemA2, 6);
+        builtin_real(CreateItemU1, 4);
+        builtin_real(CreateItemU2, 6);
         builtin(CollectAllItems, 0);
         builtin(CollectItemsByType, 1);
         builtin(CollectItemsInCircle, 3);
@@ -6535,7 +6535,7 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
     builtin(ObjRender_SetPermitCamera, 2);
     builtin(ObjRender_SetCullingMode, 2);
 
-    builtin(ObjPrim_Create, 1);
+    builtin_real(ObjPrim_Create, 1);
     builtin(ObjPrim_SetPrimitiveType, 2);
     builtin(ObjPrim_SetVertexCount, 2);
     builtin_real(ObjPrim_GetVertexCount, 1);
@@ -6567,7 +6567,7 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
     builtin(ObjTrajectory3D_SetAlphaVariation, 2);
     builtin(ObjTrajectory3D_SetInitialPoint, 7);
 
-    builtin(ObjMesh_Create, 0);
+    builtin_real(ObjMesh_Create, 0);
     builtin(ObjMesh_Load, 2);
     builtin(ObjMesh_SetColor, 4);
     builtin(ObjMesh_SetAlpha, 2);
@@ -6575,7 +6575,7 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
     builtin(ObjMesh_SetCoordinate2D, 2);
     builtin(ObjMesh_GetPath, 1);
 
-    builtin(ObjText_Create, 0);
+    builtin_real(ObjText_Create, 0);
     builtin(ObjText_SetText, 2);
     builtin(ObjText_SetFontType, 2);
     builtin(ObjText_SetFontSize, 2);
@@ -6600,7 +6600,7 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
     builtin_real(ObjText_GetTotalWidth, 1);
     builtin_real(ObjText_GetTotalHeight, 1);
 
-    builtin(ObjShader_Create, 0);
+    builtin_real(ObjShader_Create, 0);
     builtin(ObjShader_SetShaderF, 2);
     builtin(ObjShader_SetShaderO, 2);
     builtin(ObjShader_ResetShader, 1);
@@ -6610,7 +6610,7 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
     builtin(ObjShader_SetFloatArray, 3);
     builtin(ObjShader_SetTexture, 3);
 
-    builtin(ObjSound_Create, 0);
+    builtin_real(ObjSound_Create, 0);
     builtin(ObjSound_Load, 2);
     builtin(ObjSound_Play, 1);
     builtin(ObjSound_Stop, 1);
@@ -6625,13 +6625,13 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
     builtin_bool(ObjSound_IsPlaying, 1);
     builtin_real(ObjSound_GetVolumeRate, 1);
 
-    builtin(ObjFile_Create, 1);
+    builtin_real(ObjFile_Create, 1);
     builtin(ObjFile_Open, 2);
     builtin(ObjFile_OpenNW, 2);
     builtin(ObjFile_Store, 1);
     builtin_real(ObjFile_GetSize, 1);
 
-    builtin(ObjFileT_GetLineCount, 1);
+    builtin_real(ObjFileT_GetLineCount, 1);
     builtin(ObjFileT_GetLineText, 2);
     builtin(ObjFileT_SplitLineText, 3);
     builtin(ObjFileT_AddLine, 2);
@@ -6678,7 +6678,7 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
         builtin_real(ObjMove_GetSpeed, 1);
         builtin_real(ObjMove_GetAngle, 1);
 
-        builtin(ObjEnemy_Create, 1);
+        builtin_real(ObjEnemy_Create, 1);
         builtin(ObjEnemy_Regist, 1);
         builtin(ObjEnemy_GetInfo, 2);
         builtin(ObjEnemy_SetLife, 2);
@@ -6687,7 +6687,7 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
         builtin(ObjEnemy_SetIntersectionCircleToShot, 4);
         builtin(ObjEnemy_SetIntersectionCircleToPlayer, 4);
 
-        builtin(ObjEnemyBossScene_Create, 0);
+        builtin_real(ObjEnemyBossScene_Create, 0);
         builtin(ObjEnemyBossScene_Regist, 1);
         builtin(ObjEnemyBossScene_Add, 3);
         builtin(ObjEnemyBossScene_LoadInThread, 1);
@@ -6695,7 +6695,7 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
         builtin(ObjEnemyBossScene_SetSpellTimer, 2);
         builtin(ObjEnemyBossScene_StartSpell, 1);
 
-        builtin(ObjShot_Create, 1);
+        builtin_real(ObjShot_Create, 1);
         builtin(ObjShot_Regist, 1);
         builtin(ObjShot_SetAutoDelete, 2);
         builtin(ObjShot_FadeDelete, 1);
@@ -6753,13 +6753,13 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
 
     if (TypeIs(t_player))
     {
-        builtin(CreatePlayerShotA1, 7);
+        builtin_real(CreatePlayerShotA1, 7);
         builtin(CallSpell, 0);
         builtin(LoadPlayerShotData, 1);
         builtin(ReloadPlayerShotData, 1);
-        builtin(GetSpellManageObject, 0);
+        builtin_real(GetSpellManageObject, 0);
 
-        builtin(ObjSpell_Create, 0);
+        builtin_real(ObjSpell_Create, 0);
         builtin(ObjSpell_Regist, 1);
         builtin(ObjSpell_SetDamage, 2);
         builtin(ObjSpell_SetEraseShot, 2);
