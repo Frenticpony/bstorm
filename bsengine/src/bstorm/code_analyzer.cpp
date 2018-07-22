@@ -101,6 +101,7 @@ void CodeAnalyzer::Traverse(NodeNoParenCallExp & call)
     {
         varDecl->refCnt++;
     }
+    call.expType = def->retType;
 }
 void CodeAnalyzer::Traverse(NodeCallExp & call)
 {
@@ -120,6 +121,7 @@ void CodeAnalyzer::Traverse(NodeCallExp & call)
             call.noSubEffect = false;
         }
     }
+    call.expType = def->retType;
 }
 void CodeAnalyzer::Traverse(NodeArrayRef& exp)
 {

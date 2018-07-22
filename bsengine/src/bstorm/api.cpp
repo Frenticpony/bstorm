@@ -5652,14 +5652,14 @@ void SetScript(lua_State* L, Script* p)
     SetPointerToLuaRegistry(L, "Script", p);
 }
 
-__declspec(noinline) static void AddConst(const std::shared_ptr<Env>& env, const char* name, const char* value)
+__declspec(noinline) static void AddConst(const std::shared_ptr<Env>& env, const char* name, const char* value, ExpType expType)
 {
-    env->AddDef(name, std::make_shared<NodeConst>(name, value));
+    env->AddDef(name, std::make_shared<NodeConst>(name, value, expType));
 }
 
 __declspec(noinline) static void AddConstI(const std::shared_ptr<Env>& env, const char* name, int value)
 {
-    env->AddDef(name, std::make_shared<NodeConst>(name, std::to_string(value)));
+    env->AddDef(name, std::make_shared<NodeConst>(name, value));
 }
 
 __declspec(noinline) static void AddBuiltInFunc(const std::shared_ptr<Env>& env, const char* name, uint8_t paramc, lua_State* L, lua_CFunction func)
@@ -6125,9 +6125,9 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
     constI(CULL_CW);
     constI(CULL_CCW);
 
-    AddConst(env, "pi", "3.141592653589793");
-    AddConst(env, "true", "true");
-    AddConst(env, "false", "false");
+    AddConst(env, "pi", "3.141592653589793", ExpType::REAL);
+    AddConst(env, "true", "true", ExpType::BOOL);
+    AddConst(env, "false", "false", ExpType::BOOL);
 
     runtime(concatenate, 2);
     runtime(add, 2);

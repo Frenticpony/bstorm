@@ -545,6 +545,7 @@ struct NodeDef : public Node
     std::string name;
     std::string convertedName; // 名前変換用
     bool unreachable; // 到達不可能フラグ
+    ExpType retType;
 };
 
 struct NodeVarDecl : public NodeDef
@@ -653,7 +654,14 @@ struct NodeBuiltInFunc : public NodeDef
 
 struct NodeConst : public NodeDef
 {
-    NodeConst(const std::string& name, const std::string& c) : NodeDef(name), value(c) {}
+    NodeConst(const std::string& name, const std::string& c, ExpType expType) : NodeDef(name), value(c)
+    {
+        retType = expType;
+    }
+    NodeConst(const std::string& name, int c) : NodeDef(name), value(std::to_string(c))
+    {
+        retType = ExpType::REAL;
+    }
     void Traverse(NodeTraverser& Traverser) { Traverser.Traverse(*this); }
     virtual bool IsVariable() const override { return false; }
     std::string value; // UTF-8
