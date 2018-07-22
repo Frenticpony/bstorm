@@ -54,7 +54,7 @@ void CodeAnalyzer::Traverse(NodeArray & array)
         auto firstElemExpType = array.elems[0]->expType;
         if (std::all_of(array.elems.begin(), array.elems.end(), [firstElemExpType](auto& e) { return e->expType == firstElemExpType; }))
         {
-            array.expType = firstElemExpType;
+            array.expType = NodeExp::T_ARRAY(firstElemExpType);
         }
     }
 }
@@ -79,7 +79,13 @@ void CodeAnalyzer::Traverse(NodeCat& exp)
 {
     exp.copyRequired = false;
     AnalyzeBinOp(exp);
-    exp.expType = NodeExp::T_ARRAY(NodeExp::T_ANY);
+    if (exp.lhs->expType == exp.rhs->expType && NodeExp::IsArrayType(exp.lhs->expType))
+    {
+        exp.expType = exp.lhs->expType;
+    } else
+    {
+        exp.expType = NodeExp::T_ARRAY(NodeExp::T_ANY);
+    }
 }
 void CodeAnalyzer::Traverse(NodeNoParenCallExp & call)
 {
