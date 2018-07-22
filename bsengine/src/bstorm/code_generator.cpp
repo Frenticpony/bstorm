@@ -141,7 +141,7 @@ void CodeGenerator::Traverse(NodeCat& exp)
     }
 
 
-    if (IsCopyNeeded(exp.lhs))
+    if (exp.lhs->copyRequired)
     {
         GenBinOp("cat", exp);
     } else
@@ -203,7 +203,7 @@ void CodeGenerator::Traverse(NodeCallExp& call)
             if (i != 0) AddCode(",");
             if (isUserFunc)
             {
-                GenCopy(call.args[i]);
+                GenCopy(*call.args[i]);
             } else
             {
                 call.args[i]->Traverse(*this);
@@ -430,7 +430,7 @@ void CodeGenerator::GenCallStmt(NodeCallStmt & call, bool doTCO)
         if (i != 0) AddCode(",");
         if (isUserFunc)
         {
-            GenCopy(call.args[i]);
+            GenCopy(*call.args[i]);
         } else
         {
             call.args[i]->Traverse(*this);
@@ -518,14 +518,14 @@ void CodeGenerator::GenOpAssign(const std::string & fname, const std::shared_ptr
             break;
     }
 }
-void CodeGenerator::GenCopy(std::shared_ptr<NodeExp>& exp)
+void CodeGenerator::GenCopy(NodeExp& exp)
 {
-    if (IsCopyNeeded(exp))
+    if (exp.copyRequired)
     {
-        AddCode(runtime("cp")); AddCode("("); exp->Traverse(*this); AddCode(")");
+        AddCode(runtime("cp")); AddCode("("); exp.Traverse(*this); AddCode(")");
     } else
     {
-        exp->Traverse(*this);
+        exp.Traverse(*this);
     }
 }
 
@@ -540,53 +540,6 @@ void CodeGenerator::GenCondition(std::shared_ptr<NodeExp>& exp)
     }
 }
 
-bool CodeGenerator::IsCopyNeeded(const std::shared_ptr<NodeExp>& exp)
-{
-    if (std::dynamic_pointer_cast<NodeNum>(exp) ||
-        std::dynamic_pointer_cast<NodeChar>(exp) ||
-        std::dynamic_pointer_cast<NodeStr>(exp) ||
-        std::dynamic_pointer_cast<NodeMonoOp>(exp) ||
-        std::dynamic_pointer_cast<NodeArrayRef>(exp) ||
-        std::dynamic_pointer_cast<NodeArraySlice>(exp))
-    {
-        return false;
-    } else if (auto arr = std::dynamic_pointer_cast<NodeArray>(exp))
-    {
-        for (auto& elem : arr->elems)
-        {
-            if (IsCopyNeeded(elem)) return true;
-        }
-        return false;
-    } else if (auto op = std::dynamic_pointer_cast<NodeAnd>(exp))
-    {
-        return IsCopyNeeded(op->lhs) || IsCopyNeeded(op->rhs);
-    } else if (auto op = std::dynamic_pointer_cast<NodeOr>(exp))
-    {
-        return IsCopyNeeded(op->lhs) || IsCopyNeeded(op->rhs);
-    } else if (std::dynamic_pointer_cast<NodeBinOp>(exp))
-    {
-        return false;
-    } else if (auto call = std::dynamic_pointer_cast<NodeNoParenCallExp>(exp))
-    {
-        auto def = env_->FindDef(call->name);
-        if (std::dynamic_pointer_cast<NodeBuiltInFunc>(def) ||
-            std::dynamic_pointer_cast<NodeConst>(def))
-        {
-            return false;
-        }
-        return true;
-    } else if (auto call = std::dynamic_pointer_cast<NodeCallExp>(exp))
-    {
-        auto def = env_->FindDef(call->name);
-        if (std::dynamic_pointer_cast<NodeBuiltInFunc>(def) ||
-            std::dynamic_pointer_cast<NodeConst>(def))
-        {
-            return false;
-        }
-        return true;
-    }
-    return true;
-}
 void CodeGenerator::Traverse(NodeArrayRef& exp)
 {
     AddCode(runtime("read"));
@@ -618,7 +571,7 @@ void CodeGenerator::Traverse(NodeAssign& stmt)
         case 0:
             // a = e;
             // out : a = r_cp(e);
-            AddCode(varname(def) + " = "); GenCopy(stmt.rhs); AddCode(";");
+            AddCode(varname(def) + " = "); GenCopy(*stmt.rhs); AddCode(";");
             break;
         case 1:
             // a[i] = e;
@@ -740,7 +693,7 @@ void CodeGenerator::Traverse(NodeVarInit& stmt)
         }
     }
 
-    AddCode(varname(stmt.name, env_) + " = "); GenCopy(stmt.rhs); AddCode(";");
+    AddCode(varname(stmt.name, env_) + " = "); GenCopy(*stmt.rhs); AddCode(";");
     NewLine(stmt.rhs->srcPos);
 }
 void CodeGenerator::Traverse(NodeProcParam &) {}
@@ -844,7 +797,7 @@ void CodeGenerator::Traverse(NodeCase & cs)
 void CodeGenerator::Traverse(NodeAlternative& stmt)
 {
     AddCode("do"); NewLine();
-    AddCode("local c = "); GenCopy(stmt.cond); AddCode(";"); NewLine(stmt.cond->srcPos);
+    AddCode("local c = "); GenCopy(*stmt.cond); AddCode(";"); NewLine(stmt.cond->srcPos);
     /* gen if-seq */
     for (int i = 0; i < stmt.cases.size(); i++)
     {

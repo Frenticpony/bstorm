@@ -283,7 +283,6 @@ struct NodeBinOp : public NodeExp
 {
     NodeBinOp(const std::shared_ptr<NodeExp>& l, const std::shared_ptr<NodeExp>& r) : NodeExp(), lhs(l), rhs(r)
     {
-        copyRequired = false;
     }
     std::shared_ptr<NodeExp> lhs;
     std::shared_ptr<NodeExp> rhs;

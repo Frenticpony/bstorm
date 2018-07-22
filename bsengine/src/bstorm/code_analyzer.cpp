@@ -18,26 +18,34 @@ void CodeAnalyzer::Traverse(NodeNum & lit)
 {
     lit.noSubEffect = true;
     lit.expType = NodeExp::T_REAL;
+    lit.copyRequired = false;
 }
 void CodeAnalyzer::Traverse(NodeChar & lit)
 {
     lit.noSubEffect = true;
     lit.expType = NodeExp::T_CHAR;
+    lit.copyRequired = false;
 }
 void CodeAnalyzer::Traverse(NodeStr & lit)
 {
     lit.noSubEffect = true;
     lit.expType = lit.str.empty() ? NodeExp::T_ARRAY(NodeExp::T_ANY) : NodeExp::T_STRING;
+    lit.copyRequired = false;
 }
 void CodeAnalyzer::Traverse(NodeArray & array)
 {
     array.noSubEffect = true;
+    array.copyRequired = false;
     for (auto& e : array.elems)
     {
         e->Traverse(*this);
         if (!e->noSubEffect)
         {
             array.noSubEffect = false;
+        }
+        if (e->copyRequired)
+        {
+            array.copyRequired = true;
         }
     }
     array.expType = NodeExp::T_ARRAY(NodeExp::T_ANY);
@@ -65,17 +73,23 @@ void CodeAnalyzer::Traverse(NodeLe& exp) { AnalyzeCmpBinOp(exp); }
 void CodeAnalyzer::Traverse(NodeGe& exp) { AnalyzeCmpBinOp(exp); }
 void CodeAnalyzer::Traverse(NodeEq& exp) { AnalyzeCmpBinOp(exp); }
 void CodeAnalyzer::Traverse(NodeNe& exp) { AnalyzeCmpBinOp(exp); }
-void CodeAnalyzer::Traverse(NodeAnd& exp) { AnalyzeBinOp(exp); }
-void CodeAnalyzer::Traverse(NodeOr& exp) { AnalyzeBinOp(exp); }
+void CodeAnalyzer::Traverse(NodeAnd& exp) { AnalyzeLogBinOp(exp); }
+void CodeAnalyzer::Traverse(NodeOr& exp) { AnalyzeLogBinOp(exp); }
 void CodeAnalyzer::Traverse(NodeCat& exp)
 {
+    exp.copyRequired = false;
     AnalyzeBinOp(exp);
     exp.expType = NodeExp::T_ARRAY(NodeExp::T_ANY);
 }
 void CodeAnalyzer::Traverse(NodeNoParenCallExp & call)
 {
-    AnalyzeDef(call.name);
     auto def = env_->FindDef(call.name);
+    if (std::dynamic_pointer_cast<NodeBuiltInFunc>(def) ||
+        std::dynamic_pointer_cast<NodeConst>(def))
+    {
+        call.copyRequired = false;
+    }
+    AnalyzeDef(call.name);
     call.noSubEffect = def->noSubEffect;
     if (auto varDecl = std::dynamic_pointer_cast<NodeVarDecl>(def))
     {
@@ -84,8 +98,14 @@ void CodeAnalyzer::Traverse(NodeNoParenCallExp & call)
 }
 void CodeAnalyzer::Traverse(NodeCallExp & call)
 {
+    auto def = env_->FindDef(call.name);
+    if (std::dynamic_pointer_cast<NodeBuiltInFunc>(def) ||
+        std::dynamic_pointer_cast<NodeConst>(def))
+    {
+        call.copyRequired = false;
+    }
     AnalyzeDef(call.name);
-    call.noSubEffect = env_->FindDef(call.name)->noSubEffect;
+    call.noSubEffect = def->noSubEffect;
     for (auto& arg : call.args)
     {
         arg->Traverse(*this);
@@ -97,6 +117,7 @@ void CodeAnalyzer::Traverse(NodeCallExp & call)
 }
 void CodeAnalyzer::Traverse(NodeArrayRef& exp)
 {
+    exp.copyRequired = false;
     exp.array->Traverse(*this);
     exp.idx->Traverse(*this);
     exp.noSubEffect = exp.array->noSubEffect && exp.idx->noSubEffect;
@@ -109,6 +130,7 @@ void CodeAnalyzer::Traverse(NodeRange& range)
 }
 void CodeAnalyzer::Traverse(NodeArraySlice& exp)
 {
+    exp.copyRequired = false;
     exp.array->Traverse(*this);
     exp.range->Traverse(*this);
     exp.noSubEffect = exp.array->noSubEffect && exp.range->noSubEffect;
@@ -304,6 +326,7 @@ void CodeAnalyzer::AnalyzeDef(const std::string& name)
 }
 void CodeAnalyzer::AnalyzeMonoOp(NodeMonoOp & exp)
 {
+    exp.copyRequired = false;
     exp.rhs->Traverse(*this);
     exp.noSubEffect = exp.rhs->noSubEffect;
 }
@@ -315,6 +338,7 @@ void CodeAnalyzer::AnalyzeBinOp(NodeBinOp & exp)
 }
 void CodeAnalyzer::AnalyzeArithAndArrayBinOp(NodeBinOp & exp)
 {
+    exp.copyRequired = false;
     AnalyzeBinOp(exp);
     if (exp.lhs->expType == NodeExp::T_REAL && exp.rhs->expType == NodeExp::T_REAL)
     {
@@ -323,13 +347,24 @@ void CodeAnalyzer::AnalyzeArithAndArrayBinOp(NodeBinOp & exp)
 }
 void CodeAnalyzer::AnalyzeArithBinOp(NodeBinOp & exp)
 {
-    AnalyzeBinOp(exp);
+    exp.copyRequired = false;
     exp.expType = NodeExp::T_REAL;
+    AnalyzeBinOp(exp);
 }
 void CodeAnalyzer::AnalyzeCmpBinOp(NodeBinOp & exp)
 {
-    AnalyzeBinOp(exp);
+    exp.copyRequired = false;
     exp.expType = NodeExp::T_BOOL;
+    AnalyzeBinOp(exp);
+}
+void CodeAnalyzer::AnalyzeLogBinOp(NodeBinOp & exp)
+{
+    AnalyzeBinOp(exp);
+    if (exp.lhs->expType == exp.rhs->expType)
+    {
+        exp.expType = exp.lhs->expType;
+    }
+    exp.copyRequired = exp.lhs->copyRequired || exp.rhs->copyRequired;
 }
 void CodeAnalyzer::AnalyzeAssign(NodeAssign & stmt)
 {

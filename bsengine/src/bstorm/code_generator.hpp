@@ -108,9 +108,8 @@ private:
     void GenBlock(NodeBlock& blk, bool doTCO);
     void GenCallStmt(NodeCallStmt& call, bool doTCO);
     void GenOpAssign(const std::string& fname, const std::shared_ptr<NodeLeftVal>& left, const NullableSharedPtr<NodeExp>& right);
-    void GenCopy(std::shared_ptr<NodeExp>& exp);
+    void GenCopy(NodeExp& exp);
     void GenCondition(std::shared_ptr<NodeExp>& exp);
-    bool IsCopyNeeded(const std::shared_ptr<NodeExp>& exp);
     std::shared_ptr<Env> env_;
     std::stack<std::shared_ptr<NodeDef>> procStack_;
     std::string code_;

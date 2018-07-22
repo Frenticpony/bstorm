@@ -83,6 +83,7 @@ private:
     void AnalyzeArithAndArrayBinOp(NodeBinOp& exp);
     void AnalyzeArithBinOp(NodeBinOp& exp);
     void AnalyzeCmpBinOp(NodeBinOp& exp);
+    void AnalyzeLogBinOp(NodeBinOp& exp);
     void AnalyzeAssign(NodeAssign& stmt);
 };
 }
