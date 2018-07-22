@@ -776,9 +776,28 @@ void CodeGenerator::Traverse(NodeAscent& stmt)
     AddCode("do"); NewLine();
     AddCode("local i = ");  stmt.range->start->Traverse(*this); AddCode(";"); NewLine(stmt.range->start->srcPos);
     AddCode("local e = ");  stmt.range->end->Traverse(*this); AddCode(";"); NewLine(stmt.range->end->srcPos);
-    AddCode("while " + runtime("lt") + "(i, e) do"); NewLine(stmt.srcPos);
+    AddCode("while ");
+    if (stmt.range->start->expType == ExpType::REAL && stmt.range->end->expType == ExpType::REAL)
+    {
+        AddCode("i < e"); AddCode(" do"); NewLine();
+    } else
+    {
+        AddCode(runtime("lt") + "(i, e)"); AddCode(" do"); NewLine(stmt.srcPos);
+    }
     stmt.block->Traverse(*this);
-    Indent(); AddCode("i = " + runtime("succ") + "(i);"); NewLine(stmt.srcPos); Unindent();
+    {
+        Indent();
+        if (stmt.range->start->expType == ExpType::REAL)
+        {
+            AddCode("i = i + 1;");
+            NewLine();
+        } else
+        {
+            AddCode("i = " + runtime("succ") + "(i);");
+            NewLine(stmt.srcPos);
+        }
+        Unindent();
+    }
     AddCode("end"); NewLine();
     AddCode("end"); NewLine();
 }
@@ -787,8 +806,27 @@ void CodeGenerator::Traverse(NodeDescent& stmt)
     AddCode("do"); NewLine();
     AddCode("local s = ");  stmt.range->start->Traverse(*this); AddCode(";"); NewLine(stmt.range->start->srcPos);
     AddCode("local i = ");  stmt.range->end->Traverse(*this); AddCode(";"); NewLine(stmt.range->end->srcPos);
-    AddCode("while " + runtime("gt") + "(i, s) do"); NewLine(stmt.srcPos);
-    Indent(); AddCode("i = " + runtime("pred") + "(i);"); NewLine(stmt.srcPos); Unindent();
+    AddCode("while ");
+    if (stmt.range->start->expType == ExpType::REAL && stmt.range->end->expType == ExpType::REAL)
+    {
+        AddCode("i > s"); AddCode(" do"); NewLine();
+    } else
+    {
+        AddCode(runtime("gt") + "(i, s)"); AddCode(" do"); NewLine(stmt.srcPos);
+    }
+    {
+        Indent();
+        if (stmt.range->end->expType == ExpType::REAL)
+        {
+            AddCode("i = i - 1;");
+            NewLine();
+        } else
+        {
+            AddCode("i = " + runtime("pred") + "(i);");
+            NewLine(stmt.srcPos);
+        }
+        Unindent();
+    }
     stmt.block->Traverse(*this);
     AddCode("end"); NewLine();
     AddCode("end"); NewLine();

@@ -305,6 +305,7 @@ function r_write(a, indices, v)
   end
 end
 
+-- throws
 function r_succ(x)
   if type(x) == "number" then
     return x + 1;
@@ -318,6 +319,7 @@ function r_succ(x)
   return x;
 end
 
+-- throws
 function r_pred(x)
   if type(x) == "number" then
     return x - 1;
