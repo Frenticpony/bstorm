@@ -5,6 +5,7 @@
 #include <bstorm/file_util.hpp>
 
 #include <cassert>
+#include <regex>
 
 namespace bstorm
 {
@@ -735,11 +736,26 @@ void CodeGenerator::Traverse(NodeLoop& stmt)
     stmt.block->Traverse(*this);
     AddCode("end"); NewLine();
 }
+static bool IsIntLit(const std::shared_ptr<NodeExp>& exp)
+{
+    if (auto num = std::dynamic_pointer_cast<NodeNum>(exp))
+    {
+        std::regex isInt("((([0-9]+)(\\.0+)?)|(0x[0-9a-fA-F]+))");
+        std::smatch match;
+        if (std::regex_match(num->number, match, isInt))
+        {
+            return true;
+        }
+    }
+    return false;
+}
 void CodeGenerator::Traverse(NodeTimes& stmt)
 {
     AddCode("do"); NewLine();
     AddCode("local i = 0;"); NewLine(stmt.srcPos);
-    AddCode("local e = " + runtime("ceil") + "(");  stmt.cnt->Traverse(*this); AddCode(");");
+    AddCode("local e = ");
+    if (!IsIntLit(stmt.cnt)) { AddCode(runtime("ceil")); }
+    AddCode("("); stmt.cnt->Traverse(*this); AddCode(");");
     NewLine(stmt.cnt->srcPos);
     AddCode("while i < e do"); NewLine();
     stmt.block->Traverse(*this);
