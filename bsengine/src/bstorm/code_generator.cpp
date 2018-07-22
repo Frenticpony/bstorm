@@ -450,7 +450,7 @@ void CodeGenerator::GenOpAssign(const std::string & fname, const std::shared_ptr
     switch (left->indices.size())
     {
         case 0:
-            // a += e;
+            // in  : a += e;
             // out : a = add(r_nc(a), e);
             AddCode(varname(left->name, env_) + " = ");
             AddCode(runtime(fname) + "(");
@@ -463,7 +463,7 @@ void CodeGenerator::GenOpAssign(const std::string & fname, const std::shared_ptr
             AddCode(");"); NewLine(left->srcPos);
             break;
         case 1:
-            // a[_i] += e;
+            // in  : a[_i] += e;
             // out :  r_nc(a);
             //        local i = _i;
             //        r_write1(a, i, r_add(r_read(a, i), e));
@@ -483,7 +483,7 @@ void CodeGenerator::GenOpAssign(const std::string & fname, const std::shared_ptr
             AddCode("end"); NewLine();
             break;
         default:
-            // a[i][j]..[z] += e;
+            // in  : a[i][j]..[z] += e;
             // out : r_nc(a);
             //       local is = {i, j, .. , z};
             //       r_write(a, is, r_add(r_read(..r_read(a, is[1]), is[2]), .. is[n]), e);
@@ -569,12 +569,30 @@ void CodeGenerator::Traverse(NodeAssign& stmt)
     switch (stmt.lhs->indices.size())
     {
         case 0:
-            // a = e;
+            // in : a = a ~ e;
+            // out: r_mcat(a, e);
+            if (auto binOp = std::dynamic_pointer_cast<NodeCat>(stmt.rhs))
+            {
+                if (auto var = std::dynamic_pointer_cast<NodeNoParenCallExp>(binOp->lhs))
+                {
+                    if (stmt.lhs->name == var->name)
+                    {
+                        AddCode(runtime("mcat"));
+                        AddCode("(");
+                        AddCode(varname(def));
+                        AddCode(",");
+                        binOp->rhs->Traverse(*this);
+                        AddCode(");");
+                        break;
+                    }
+                }
+            }
+            // in  : a = e;
             // out : a = r_cp(e);
             AddCode(varname(def) + " = "); GenCopy(*stmt.rhs); AddCode(";");
             break;
         case 1:
-            // a[i] = e;
+            // in  : a[i] = e;
             // out : r_write1(r_nc(a), i, e);
             AddCode(runtime("write1"));
             AddCode("(");
@@ -586,7 +604,7 @@ void CodeGenerator::Traverse(NodeAssign& stmt)
             AddCode(");");
             break;
         default:
-            // a[i1][i2] .. [in] = e;
+            // in  : a[i1][i2] .. [in] = e;
             // out : r_write(r_nc(a), {i1, i2, .. in}, e);
             AddCode(runtime("write"));
             AddCode("(");
