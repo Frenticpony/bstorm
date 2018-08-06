@@ -98,8 +98,7 @@ void SoundBuffer::Stop()
 void SoundBuffer::SetVolume(float vol)
 {
     vol = constrain(vol, 0.0f, 1.0f);
-    // NOTE : 1000‚¾‚Æ’l‚É”ä‚×‚Ä‘å‚«‚­•·‚±‚¦‚é‚Ì‚Å3000‚É‚µ‚½B‰¹—Ê1/2‚Å-9dB‚®‚ç‚¢‚É‚È‚é’²®
-    vol = vol == 0.0f ? DSBVOLUME_MIN : (3000.0f * log10f(vol));
+    vol = vol == 0.0f ? DSBVOLUME_MIN : (1000.0f * log10f(vol));
     vol = constrain(vol, 1.0f*DSBVOLUME_MIN, 1.0f*DSBVOLUME_MAX);
     dSoundBuffer_->SetVolume(vol);
 }
