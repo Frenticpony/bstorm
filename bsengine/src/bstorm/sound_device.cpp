@@ -112,76 +112,6 @@ SoundBuffer::SoundBuffer(const std::wstring& path, IDirectSoundBuffer8* buf) :
     }
 }
 
-SoundBuffer::SoundBuffer(const std::shared_ptr<SoundBuffer>& src, IDirectSound8* dSound) :
-    path_(src->path_),
-    dSoundBuffer_(nullptr),
-    loopEnable_(false),
-    loopStartSampleCnt_(0),
-    loopEndSampleCnt_(DSBPN_OFFSETSTOP),
-    controlThread_(nullptr),
-    loopEndEvent_(nullptr)
-{
-    try
-    {
-        IDirectSoundBuffer* dSoundTempBuffer = nullptr;
-        if (DS_OK != dSound->DuplicateSoundBuffer(src->dSoundBuffer_, &dSoundTempBuffer))
-        {
-            throw Log(Log::Level::LV_ERROR)
-                .SetMessage("failed to duplicate sound buffer.")
-                .SetParam(Log::Param(Log::Param::Tag::TEXT, path_));
-        }
-        dSoundTempBuffer->QueryInterface(IID_IDirectSoundBuffer8, (void**)&dSoundBuffer_);
-        // バグがあるので、バッファ複製直後に元の音量からちょっとずらす必要があるらしい
-        LONG origVolume = 0; // 元の音量
-        src->dSoundBuffer_->GetVolume(&origVolume);
-        dSoundBuffer_->SetVolume(origVolume - 100);
-        // 最大音量に設定する
-        dSoundBuffer_->SetVolume(DSBVOLUME_MAX);
-        dSoundBuffer_->SetPan(DSBPAN_CENTER);
-        safe_release(dSoundTempBuffer);
-
-        WAVEFORMATEX waveFormat;
-        if (FAILED(dSoundBuffer_->GetFormat(&waveFormat, sizeof(waveFormat), nullptr)))
-        {
-            throw Log(Log::Level::LV_ERROR)
-                .SetMessage("failed to get sound buffer format.")
-                .SetParam(Log::Param(Log::Param::Tag::TEXT, path_));
-        }
-        samplePerSec_ = waveFormat.nSamplesPerSec;
-        bytesPerSample_ = waveFormat.wBitsPerSample / 8;
-        channelCnt_ = waveFormat.nChannels;
-
-        loopEndEvent_ = CreateEvent(nullptr, TRUE, FALSE, GetLoopEndEventName().c_str());
-        if (loopEndEvent_ == nullptr)
-        {
-            throw Log(Log::Level::LV_ERROR)
-                .SetMessage("failed to create loop end event.")
-                .SetParam(Log::Param(Log::Param::Tag::TEXT, path_));
-        }
-
-        controlThread_ = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)SoundControlThread, this, 0, nullptr);
-        if (controlThread_ == nullptr)
-        {
-            throw Log(Log::Level::LV_ERROR)
-                .SetMessage("failed to create sound control thread.")
-                .SetParam(Log::Param(Log::Param::Tag::TEXT, path_));
-        }
-    } catch (...)
-    {
-        if (loopEndEvent_)
-        {
-            CloseHandle(loopEndEvent_);
-        }
-        if (controlThread_)
-        {
-            TerminateThread(controlThread_, 1);
-            CloseHandle(controlThread_);
-        }
-        safe_release(dSoundBuffer_);
-        throw;
-    }
-}
-
 void SoundBuffer::Play()
 {
     dSoundBuffer_->Play(0, 0, loopEnable_ ? DSBPLAY_LOOPING : 0);
@@ -310,14 +240,9 @@ SoundDevice::~SoundDevice()
     safe_release(dSound_);
 }
 
-std::shared_ptr<SoundBuffer> SoundDevice::LoadSound(const std::wstring & path, bool doCache, const std::shared_ptr<SourcePos>& srcPos)
+std::shared_ptr<SoundBuffer> SoundDevice::LoadSound(const std::wstring & path)
 {
     auto uniqPath = GetCanonicalPath(path);
-    auto it = cache_.find(uniqPath);
-    if (it != cache_.end())
-    {
-        return std::make_shared<SoundBuffer>(it->second, dSound_);
-    }
     IDirectSoundBuffer8* buf = loader_->LoadSoundData(path, dSound_);
     if (buf == nullptr)
     {
@@ -326,31 +251,16 @@ std::shared_ptr<SoundBuffer> SoundDevice::LoadSound(const std::wstring & path, b
             .SetParam(Log::Param(Log::Param::Tag::TEXT, path));
     }
     auto sound = std::make_shared<SoundBuffer>(uniqPath, buf);
-    if (doCache)
-    {
-        cache_[uniqPath] = sound;
-    }
     Logger::WriteLog(std::move(
         Log(Log::Level::LV_INFO)
         .SetMessage("load sound.")
-        .SetParam(Log::Param(Log::Param::Tag::SOUND, uniqPath)))
-        .AddSourcePos(srcPos));
+        .SetParam(Log::Param(Log::Param::Tag::SOUND, uniqPath))));
     return sound;
 }
 
 void SoundDevice::SetLoader(const std::shared_ptr<SoundDataLoader>& ld)
 {
     loader_ = ld;
-}
-
-void SoundDevice::RemoveSoundCache(const std::wstring & path)
-{
-    cache_.erase(path);
-}
-
-void SoundDevice::ClearSoundCache()
-{
-    cache_.clear();
 }
 
 static IDirectSoundBuffer8* createSoundBuffer(DWORD dataSize, WAVEFORMATEX* waveFormat, IDirectSound8* dSound)

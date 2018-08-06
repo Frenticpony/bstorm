@@ -29,7 +29,6 @@ class SoundDevice;
 class SoundBuffer : private NonCopyable
 {
 public:
-    SoundBuffer(const std::shared_ptr<SoundBuffer>& src, IDirectSound8* dSound);
     SoundBuffer(const std::wstring& path, IDirectSoundBuffer8* buf);
     ~SoundBuffer();
     void Play();
@@ -66,14 +65,11 @@ class SoundDevice : private NonCopyable
 public:
     SoundDevice(HWND hWnd);
     ~SoundDevice();
-    std::shared_ptr<SoundBuffer> LoadSound(const std::wstring& path, bool doCache, const std::shared_ptr<SourcePos>& srcPos);
+    std::shared_ptr<SoundBuffer> LoadSound(const std::wstring& path);
     void SetLoader(const std::shared_ptr<SoundDataLoader>& ld);
-    void RemoveSoundCache(const std::wstring& path);
-    void ClearSoundCache();
 private:
     HWND hWnd_;
     IDirectSound8* dSound_;
     std::shared_ptr<SoundDataLoader> loader_;
-    std::unordered_map<std::wstring, std::shared_ptr<SoundBuffer>> cache_;
 };
 }

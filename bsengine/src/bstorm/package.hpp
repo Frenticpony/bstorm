@@ -181,15 +181,12 @@ public:
     void RemoveUnusedMesh();
 
     /* sound */
-    std::shared_ptr<SoundBuffer> LoadSound(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
-    void LoadOrphanSound(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
+    std::shared_ptr<SoundBuffer> LoadSound(const std::wstring& path);
+    void LoadOrphanSound(const std::wstring& path);
     void RemoveOrphanSound(const std::wstring& path);
     void PlayBGM(const std::wstring& path, double loopStartSec, double loopEndSec);
     void PlaySE(const std::wstring& path);
     void StopOrphanSound(const std::wstring& path);
-    void CacheSound(const std::wstring& path, const std::shared_ptr<SourcePos>& srcPos);
-    void RemoveSoundCache(const std::wstring& path);
-    void ClearSoundCache();
 
     /* layer */
     void SetObjectRenderPriority(const std::shared_ptr<ObjRender>& obj, int priority);

@@ -371,7 +371,7 @@ static int LoadSound(lua_State* L)
 {
     Package* package = Package::Current;
     auto path = DnhValue::ToString(L, 1);
-    package->LoadOrphanSound(path, GetSourcePos(L));
+    package->LoadOrphanSound(path);
     return 0;
 }
 
@@ -3664,7 +3664,7 @@ static int ObjSound_Load(lua_State* L)
     if (auto obj = package->GetObject<ObjSound>(objId))
     {
         obj->SetSound(nullptr);
-        obj->SetSound(package->LoadSound(path, GetSourcePos(L)));
+        obj->SetSound(package->LoadSound(path));
     }
     return 0;
 }

@@ -612,14 +612,14 @@ void Package::RemoveUnusedMesh()
     meshStore_->RemoveUnusedMesh();
 }
 
-std::shared_ptr<SoundBuffer> Package::LoadSound(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
+std::shared_ptr<SoundBuffer> Package::LoadSound(const std::wstring & path)
 {
-    return soundDevice->LoadSound(path, false, srcPos);
+    return soundDevice->LoadSound(path);
 }
 
-void Package::LoadOrphanSound(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
+void Package::LoadOrphanSound(const std::wstring & path)
 {
-    orphanSounds_[GetCanonicalPath(path)] = LoadSound(path, srcPos);
+    orphanSounds_[GetCanonicalPath(path)] = LoadSound(path);
 }
 
 void Package::RemoveOrphanSound(const std::wstring & path)
@@ -658,21 +658,6 @@ void Package::StopOrphanSound(const std::wstring & path)
     {
         it->second->Stop();
     }
-}
-
-void Package::CacheSound(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
-{
-    soundDevice->LoadSound(path, true, srcPos);
-}
-
-void Package::RemoveSoundCache(const std::wstring & path)
-{
-    soundDevice->RemoveSoundCache(path);
-}
-
-void Package::ClearSoundCache()
-{
-    soundDevice->ClearSoundCache();
 }
 
 void Package::SetObjectRenderPriority(const std::shared_ptr<ObjRender>& obj, int priority)
@@ -2294,7 +2279,7 @@ void Package::StartStageScene(const std::shared_ptr<SourcePos>& srcPos)
     {
         try
         {
-            LoadOrphanSound(stageMainScriptInfo_.bgmPath, nullptr); // TODO: #BGMヘッダのSourcePosを与える
+            LoadOrphanSound(stageMainScriptInfo_.bgmPath); // TODO: #BGMヘッダのSourcePosを与える
             auto& bgm = orphanSounds_[GetCanonicalPath(packageMainScriptInfo_.bgmPath)];
             bgm->SetLoopEnable(true);
             bgm->Play();
