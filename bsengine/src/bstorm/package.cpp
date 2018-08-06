@@ -12,6 +12,7 @@
 #include <bstorm/fps_counter.hpp>
 #include <bstorm/input_device.hpp>
 #include <bstorm/sound_device.hpp>
+#include <bstorm/sound_buffer.hpp>
 #include <bstorm/renderer.hpp>
 #include <bstorm/lostable_graphic_resource.hpp>
 #include <bstorm/render_target.hpp>

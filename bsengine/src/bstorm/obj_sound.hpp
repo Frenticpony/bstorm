@@ -6,7 +6,6 @@
 
 namespace bstorm
 {
-class SoundDevice;
 class SoundBuffer;
 class ObjSound : public Obj
 {

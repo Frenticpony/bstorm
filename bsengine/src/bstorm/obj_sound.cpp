@@ -1,8 +1,7 @@
 ﻿#include <bstorm/obj_sound.hpp>
 
 #include <bstorm/dnh_const.hpp>
-#include <bstorm/sound_device.hpp>
-#include <bstorm/package.hpp>
+#include <bstorm/sound_buffer.hpp>
 
 namespace bstorm
 {
