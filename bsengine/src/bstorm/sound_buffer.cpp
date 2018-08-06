@@ -12,20 +12,17 @@ static DWORD WINAPI SoundControlThread(LPVOID arg)
     SoundBuffer* soundBuffer = (SoundBuffer*)arg;
     while (true)
     {
-        HANDLE loopEndEvent = OpenEvent(EVENT_ALL_ACCESS, FALSE, soundBuffer->GetLoopEndEventName().c_str());
+        HANDLE loopEndEvent = soundBuffer->GetLoopEndEvent();
         auto ret = WaitForSingleObject(loopEndEvent, INFINITE);
-        ResetEvent(loopEndEvent);
-        CloseHandle(loopEndEvent);
         if (ret == WAIT_OBJECT_0)
         {
-            OutputDebugStringW(L"catch sound control event.\n");
             if (soundBuffer->IsLoopEnabled())
             {
                 soundBuffer->Seek(soundBuffer->GetLoopStartSampleCount());
             }
         } else
         {
-            OutputDebugStringW(L"unexpected sound control error occured.\n");
+            // unexpected sound control error occured.
             return 1;
         }
     }
@@ -57,7 +54,7 @@ SoundBuffer::SoundBuffer(const std::wstring& path, IDirectSoundBuffer8* buf) :
         bytesPerSample_ = waveFormat.wBitsPerSample / 8;
         channelCnt_ = waveFormat.nChannels;
 
-        loopEndEvent_ = CreateEvent(nullptr, TRUE, FALSE, GetLoopEndEventName().c_str());
+        loopEndEvent_ = CreateEvent(nullptr, TRUE, FALSE, L"LOOP_END");
         if (loopEndEvent_ == nullptr)
         {
             throw Log(Log::Level::LV_ERROR)
@@ -170,10 +167,9 @@ bool SoundBuffer::IsLoopEnabled() const
     return loopEnable_;
 }
 
-std::wstring SoundBuffer::GetLoopEndEventName() const
+HANDLE SoundBuffer::GetLoopEndEvent() const
 {
-    size_t id = (size_t)this;
-    return L"LOOP_END_" + std::to_wstring(id);
+    return loopEndEvent_;
 }
 
 DWORD SoundBuffer::GetLoopStartSampleCount() const

@@ -26,7 +26,7 @@ public:
     float GetVolume();
     const std::wstring& GetPath() const;
     bool IsLoopEnabled() const;
-    std::wstring GetLoopEndEventName() const;
+    HANDLE GetLoopEndEvent() const;
     DWORD GetLoopStartSampleCount() const;
     DWORD GetLoopEndSampleCount() const;
 private:
