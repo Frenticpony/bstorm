@@ -26,19 +26,25 @@ public:
     float GetVolume();
     const std::wstring& GetPath() const;
     bool IsLoopEnabled() const;
-    HANDLE GetLoopEndEvent() const;
     DWORD GetLoopStartSampleCount() const;
     DWORD GetLoopEndSampleCount() const;
+    struct SoundThreadParam
+    {
+        SoundBuffer* soundBuffer;
+        HANDLE soundEvents[2];
+    };
 private:
+    SoundThreadParam soundThreadParam_;
+    HANDLE threadEndEvent_;
     HANDLE loopEndEvent_;
+    HANDLE thread_;
+    const std::wstring path_;
+    IDirectSoundBuffer8* dSoundBuffer_;
+    bool loopEnable_;
     DWORD loopStartSampleCnt_;
     DWORD loopEndSampleCnt_;
     DWORD samplePerSec_;
     DWORD bytesPerSample_;
     DWORD channelCnt_;
-    const std::wstring path_;
-    IDirectSoundBuffer8* dSoundBuffer_;
-    bool loopEnable_;
-    HANDLE controlThread_;
 };
 }

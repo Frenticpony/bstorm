@@ -7,18 +7,23 @@
 
 namespace bstorm
 {
-static DWORD WINAPI SoundControlThread(LPVOID arg)
+constexpr DWORD THREAD_END_EVENT = 0;
+constexpr DWORD LOOP_END_EVENT = 1;
+// sound thread
+static DWORD WINAPI SoundMain(LPVOID p)
 {
-    SoundBuffer* soundBuffer = (SoundBuffer*)arg;
+    SoundBuffer::SoundThreadParam* param = (SoundBuffer::SoundThreadParam*)p;
     while (true)
     {
-        HANDLE loopEndEvent = soundBuffer->GetLoopEndEvent();
-        auto ret = WaitForSingleObject(loopEndEvent, INFINITE);
-        if (ret == WAIT_OBJECT_0)
+        auto ret = WaitForMultipleObjects(2, param->soundEvents, FALSE, INFINITE);
+        if (ret == WAIT_OBJECT_0 + THREAD_END_EVENT)
         {
-            if (soundBuffer->IsLoopEnabled())
+            break;
+        } else if (ret == WAIT_OBJECT_0 + LOOP_END_EVENT)
+        {
+            if (param->soundBuffer->IsLoopEnabled())
             {
-                soundBuffer->Seek(soundBuffer->GetLoopStartSampleCount());
+                param->soundBuffer->Seek(param->soundBuffer->GetLoopStartSampleCount());
             }
         } else
         {
@@ -29,14 +34,22 @@ static DWORD WINAPI SoundControlThread(LPVOID arg)
     return 0;
 }
 
+static void CloseThread(HANDLE thread, HANDLE threadEndEvent)
+{
+    SetEvent(threadEndEvent);
+    WaitForSingleObject(thread, INFINITE);
+    CloseHandle(thread);
+}
+
 SoundBuffer::SoundBuffer(const std::wstring& path, IDirectSoundBuffer8* buf) :
+    threadEndEvent_(nullptr),
+    loopEndEvent_(nullptr),
+    thread_(nullptr),
     path_(path),
     dSoundBuffer_(buf),
     loopEnable_(false),
     loopStartSampleCnt_(0),
-    loopEndSampleCnt_(DSBPN_OFFSETSTOP),
-    controlThread_(nullptr),
-    loopEndEvent_(nullptr)
+    loopEndSampleCnt_(DSBPN_OFFSETSTOP)
 {
     try
     {
@@ -44,7 +57,7 @@ SoundBuffer::SoundBuffer(const std::wstring& path, IDirectSoundBuffer8* buf) :
         dSoundBuffer_->SetPan(DSBPAN_CENTER);
 
         WAVEFORMATEX waveFormat;
-        if (FAILED(dSoundBuffer_->GetFormat(&waveFormat, sizeof(waveFormat), nullptr)))
+        if (FAILED(dSoundBuffer_->GetFormat(&waveFormat, sizeof(waveFormat), NULL)))
         {
             throw Log(Log::Level::LV_ERROR)
                 .SetMessage("failed to get sound buffer format.")
@@ -54,31 +67,46 @@ SoundBuffer::SoundBuffer(const std::wstring& path, IDirectSoundBuffer8* buf) :
         bytesPerSample_ = waveFormat.wBitsPerSample / 8;
         channelCnt_ = waveFormat.nChannels;
 
-        loopEndEvent_ = CreateEvent(nullptr, TRUE, FALSE, L"LOOP_END");
-        if (loopEndEvent_ == nullptr)
+        threadEndEvent_ = CreateEvent(nullptr, TRUE, FALSE, NULL);
+        if (threadEndEvent_ == nullptr)
         {
             throw Log(Log::Level::LV_ERROR)
-                .SetMessage("failed to create loop end event.")
+                .SetMessage("failed to create sound event.")
                 .SetParam(Log::Param(Log::Param::Tag::TEXT, path));
         }
 
-        controlThread_ = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)SoundControlThread, this, 0, nullptr);
-        if (controlThread_ == nullptr)
+        loopEndEvent_ = CreateEvent(nullptr, TRUE, FALSE, NULL);
+        if (loopEndEvent_ == nullptr)
         {
             throw Log(Log::Level::LV_ERROR)
-                .SetMessage("failed to create sound control thread.")
+                .SetMessage("failed to create sound event.")
+                .SetParam(Log::Param(Log::Param::Tag::TEXT, path));
+        }
+
+        soundThreadParam_.soundBuffer = this;
+        soundThreadParam_.soundEvents[THREAD_END_EVENT] = threadEndEvent_;
+        soundThreadParam_.soundEvents[LOOP_END_EVENT] = loopEndEvent_;
+
+        thread_ = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)SoundMain, &soundThreadParam_, 0, NULL);
+        if (thread_ == nullptr)
+        {
+            throw Log(Log::Level::LV_ERROR)
+                .SetMessage("failed to create sound thread.")
                 .SetParam(Log::Param(Log::Param::Tag::TEXT, path));
         }
     } catch (...)
     {
+        if (thread_)
+        {
+            CloseThread(thread_, threadEndEvent_);
+        }
         if (loopEndEvent_)
         {
             CloseHandle(loopEndEvent_);
         }
-        if (controlThread_)
+        if (threadEndEvent_)
         {
-            TerminateThread(controlThread_, 1);
-            CloseHandle(controlThread_);
+            CloseHandle(threadEndEvent_);
         }
         safe_release(dSoundBuffer_);
         throw;
@@ -166,11 +194,6 @@ bool SoundBuffer::IsLoopEnabled() const
     return loopEnable_;
 }
 
-HANDLE SoundBuffer::GetLoopEndEvent() const
-{
-    return loopEndEvent_;
-}
-
 DWORD SoundBuffer::GetLoopStartSampleCount() const
 {
     return loopStartSampleCnt_;
@@ -183,14 +206,13 @@ DWORD SoundBuffer::GetLoopEndSampleCount() const
 
 SoundBuffer::~SoundBuffer()
 {
-    TerminateThread(controlThread_, 0);
-    CloseHandle(controlThread_);
+    CloseThread(thread_, threadEndEvent_);
     CloseHandle(loopEndEvent_);
+    CloseHandle(threadEndEvent_);
     safe_release(dSoundBuffer_);
     Logger::WriteLog(std::move(
         Log(Log::Level::LV_INFO)
         .SetMessage("release sound.")
         .SetParam(Log::Param(Log::Param::Tag::SOUND, path_))));
 }
-
 }
