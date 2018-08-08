@@ -13,6 +13,3 @@
 [submodule "yas"]
 	path = yas
 	url = https://github.com/niXman/yas
-[submodule "bsengine/lib/dr_libs"]
-	path = bsengine/lib/dr_libs
-	url = https://github.com/mackron/dr_libs
