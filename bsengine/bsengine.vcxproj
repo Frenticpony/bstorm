@@ -27,6 +27,7 @@
     <ClInclude Include="src\bstorm\code_generator.hpp" />
     <ClInclude Include="src\bstorm\color_rgb.hpp" />
     <ClInclude Include="src\bstorm\common_data_db.hpp" />
+    <ClInclude Include="src\bstorm\com_deleter.hpp" />
     <ClInclude Include="src\bstorm\dx_util.hpp" />
     <ClInclude Include="src\bstorm\engine.hpp" />
     <ClInclude Include="src\bstorm\engine_develop_options.hpp" />
@@ -45,6 +46,7 @@
     <ClInclude Include="src\bstorm\serialized_script.hpp" />
     <ClInclude Include="src\bstorm\shot_counter.hpp" />
     <ClInclude Include="src\bstorm\sound_buffer.hpp" />
+    <ClInclude Include="src\bstorm\wave_sample_stream.hpp" />
     <ClInclude Include="src\bstorm\stage_common_player_params.hpp" />
     <ClInclude Include="src\bstorm\config.hpp" />
     <ClInclude Include="src\bstorm\dnh_const.hpp" />
@@ -108,6 +110,7 @@
     <ClInclude Include="src\bison\mqo.tab.hpp" />
     <ClInclude Include="src\bison\stack.hh" />
     <ClInclude Include="src\bison\user_def_data.tab.hpp" />
+    <ClInclude Include="src\bstorm\wav_stream.hpp" />
     <ClInclude Include="src\reflex\dnh_lexer.hpp" />
     <ClInclude Include="src\reflex\mqo_lexer.hpp" />
     <ClInclude Include="src\reflex\user_def_data_lexer.hpp" />
@@ -149,6 +152,7 @@
     <ClCompile Include="src\bstorm\time_point.cpp" />
     <ClCompile Include="src\bstorm\time_stamp.cpp" />
     <ClCompile Include="src\bstorm\vertex.cpp" />
+    <ClCompile Include="src\bstorm\wav_stream.cpp" />
     <ClCompile Include="src\reflex\dnh_lexer.cpp" />
     <ClCompile Include="src\reflex\mqo_lexer.cpp" />
     <ClCompile Include="src\reflex\user_def_data_lexer.cpp" />

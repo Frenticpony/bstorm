@@ -291,6 +291,15 @@
     <ClInclude Include="src\bstorm\sound_buffer.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="src\bstorm\wave_sample_stream.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\bstorm\wav_stream.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\bstorm\com_deleter.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\bison\dnh.tab.cpp">
@@ -522,6 +531,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\bstorm\sound_buffer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bstorm\wav_stream.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

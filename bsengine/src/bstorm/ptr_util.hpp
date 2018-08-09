@@ -25,13 +25,4 @@ void safe_release(T*& p)
         p = nullptr;
     }
 };
-
-template <class T>
-struct com_deleter
-{
-    void operator()(T* p)
-    {
-        safe_release(p);
-    }
-};
 }

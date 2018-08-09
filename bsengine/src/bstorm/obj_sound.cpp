@@ -42,7 +42,7 @@ void ObjSound::Play()
     {
         if (IsPlaying() || !restartEnable_)
         {
-            soundBuffer_->Seek(0);
+            soundBuffer_->Rewind();
         }
         soundBuffer_->Play();
     }

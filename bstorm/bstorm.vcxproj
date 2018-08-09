@@ -105,7 +105,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;d3dx9.lib;d3d9.lib;bsengine.lib;lua51.lib;dinput8.lib;dxguid.lib;dsound.lib;winmm.lib;libogg_static.lib;libvorbis_static.lib;libvorbisfile.lib;</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;d3dx9.lib;d3d9.lib;bsengine.lib;lua51.lib;dinput8.lib;dxguid.lib;dsound.lib;libogg_static.lib;libvorbis_static.lib;libvorbisfile.lib;</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration);$(SolutionDir)bsengine\lib\luajit\$(Platform)\$(Configuration);$(SolutionDir)bsengine\lib\ogg\$(Platform)\$(Configuration);$(SolutionDir)bsengine\lib\vorbis\$(Platform)\$(Configuration);$(SolutionDir)DxSDK\Lib\$(Platform);</AdditionalLibraryDirectories>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
@@ -128,7 +128,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;d3dx9.lib;d3d9.lib;bsengine.lib;lua51.lib;dinput8.lib;dxguid.lib;dsound.lib;winmm.lib;libogg_static.lib;libvorbis_static.lib;libvorbisfile.lib;</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;d3dx9.lib;d3d9.lib;bsengine.lib;lua51.lib;dinput8.lib;dxguid.lib;dsound.lib;libogg_static.lib;libvorbis_static.lib;libvorbisfile.lib;</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration);$(SolutionDir)bsengine\lib\luajit\$(Platform)\$(Configuration);$(SolutionDir)bsengine\lib\ogg\$(Platform)\$(Configuration);$(SolutionDir)bsengine\lib\vorbis\$(Platform)\$(Configuration);$(SolutionDir)DxSDK\Lib\$(Platform);</AdditionalLibraryDirectories>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
@@ -159,7 +159,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;d3dx9.lib;d3d9.lib;bsengine.lib;lua51.lib;dinput8.lib;dxguid.lib;dsound.lib;winmm.lib;libogg_static.lib;libvorbis_static.lib;libvorbisfile.lib;</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;d3dx9.lib;d3d9.lib;bsengine.lib;lua51.lib;dinput8.lib;dxguid.lib;dsound.lib;libogg_static.lib;libvorbis_static.lib;libvorbisfile.lib;</AdditionalDependencies>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration);$(SolutionDir)bsengine\lib\luajit\$(Platform)\$(Configuration);$(SolutionDir)bsengine\lib\ogg\$(Platform)\$(Configuration);$(SolutionDir)bsengine\lib\vorbis\$(Platform)\$(Configuration);$(SolutionDir)DxSDK\Lib\$(Platform);</AdditionalLibraryDirectories>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
@@ -190,7 +190,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;d3dx9.lib;d3d9.lib;bsengine.lib;lua51.lib;dinput8.lib;dxguid.lib;dsound.lib;winmm.lib;libogg_static.lib;libvorbis_static.lib;libvorbisfile.lib;</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;d3dx9.lib;d3d9.lib;bsengine.lib;lua51.lib;dinput8.lib;dxguid.lib;dsound.lib;libogg_static.lib;libvorbis_static.lib;libvorbisfile.lib;</AdditionalDependencies>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration);$(SolutionDir)bsengine\lib\luajit\$(Platform)\$(Configuration);$(SolutionDir)bsengine\lib\ogg\$(Platform)\$(Configuration);$(SolutionDir)bsengine\lib\vorbis\$(Platform)\$(Configuration);$(SolutionDir)DxSDK\Lib\$(Platform);</AdditionalLibraryDirectories>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>

@@ -634,7 +634,7 @@ void Package::PlayBGM(const std::wstring & path, double loopStartSec, double loo
     if (it != orphanSounds_.end())
     {
         auto& sound = it->second;
-        if (sound->IsPlaying()) sound->Seek(0);
+        if (sound->IsPlaying()) sound->Rewind();
         sound->SetLoopEnable(true);
         sound->SetLoopTime(loopStartSec, loopEndSec);
         sound->Play();
@@ -647,7 +647,7 @@ void Package::PlaySE(const std::wstring & path)
     if (it != orphanSounds_.end())
     {
         auto& sound = it->second;
-        if (sound->IsPlaying()) sound->Seek(0);
+        if (sound->IsPlaying()) sound->Rewind();
         sound->Play();
     }
 }
