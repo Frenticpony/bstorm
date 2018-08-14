@@ -112,6 +112,7 @@ void SoundBuffer::Stop()
 
 void SoundBuffer::Rewind()
 {
+    // TODO: 短い間隔で行うと音がパラついて聞こえるので調査
     CRITICAL_SECTION;
     dsBuffer_->Stop(); // 再生停止
     dsBuffer_->SetCurrentPosition(0); // 再生カーソルを先頭に戻す
@@ -230,8 +231,8 @@ void SoundBuffer::SoundMain()
                 }
             }
         }
-
-        Sleep(100);
+        // NOTE: スリープが長いとゼロ埋め部分のせい?でノイズが出ることがある
+        Sleep(1);
     }
 }
 
