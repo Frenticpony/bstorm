@@ -256,6 +256,25 @@ void SoundBuffer::FillBufferSector(BufferSector sector)
     size_t writedSize = 0;
     while (writedSize < sectorSize)
     {
+        const size_t restWrite = sectorSize - writedSize;
+        const size_t streamReadPos = istream_->Tell();
+
+        if (isLoopEnabled_ &&
+            streamReadPos < waveFormat_.totalBytes && // not stream end
+            loopRange.begin < waveFormat_.totalBytes && loopRange.end <= waveFormat_.totalBytes && // valid loop range
+            streamReadPos < loopRange.end && loopRange.end <= streamReadPos + restWrite // over loop end
+            )
+        {
+            // loop
+            auto justRead = istream_->ReadBytes(loopRange.end - streamReadPos, writePtr + writedSize);
+            writedSize += justRead;
+            istream_->SeekBytes(loopRange.begin);
+        } else
+        {
+            auto justRead = istream_->ReadBytes(restWrite, writePtr + writedSize);
+            writedSize += justRead;
+        }
+
         if (istream_->IsEnd() || istream_->IsClosed())
         {
             // セクタの残りを無音で埋める
@@ -269,21 +288,6 @@ void SoundBuffer::FillBufferSector(BufferSector sector)
                 playCursorOnStop_ = GetCurrentPlayCursor();
             }
             break;
-        }
-
-        const size_t restWrite = sectorSize - writedSize;
-        const size_t streamReadPos = istream_->Tell();
-
-        if (isLoopEnabled_ && streamReadPos < loopRange.end && streamReadPos + restWrite >= loopRange.end)
-        {
-            // loop
-            auto justRead = istream_->ReadBytes(loopRange.end - streamReadPos, writePtr + writedSize);
-            writedSize += justRead;
-            istream_->SeekBytes(loopRange.begin);
-        } else
-        {
-            auto justRead = istream_->ReadBytes(restWrite, writePtr + writedSize);
-            writedSize += justRead;
         }
     }
 
