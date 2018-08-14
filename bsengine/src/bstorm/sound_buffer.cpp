@@ -196,37 +196,36 @@ void SoundBuffer::SoundMain()
         {
             CRITICAL_SECTION;
             if (istream_->IsClosed()) break;
-        }
 
-        // fill buffer.
-        {
-            size_t playCursor = GetCurrentPlayCursor();
-            if (writeSector_ == BufferSector::FirstHalf && playCursor >= GetHalfBufferSize() ||
-                writeSector_ == BufferSector::LatterHalf && playCursor < GetHalfBufferSize())
-            {
-                FillBufferSector(writeSector_);
-                writeSector_ = writeSector_ == BufferSector::FirstHalf ? BufferSector::LatterHalf : BufferSector::FirstHalf;
-            }
-        }
-
-        // stop if reach end of stream.
-        if (isSetStopCursor_)
-        {
-            CRITICAL_SECTION;
-            if (IsPlaying())
+            // fill buffer.
             {
                 size_t playCursor = GetCurrentPlayCursor();
-                if (stopCursor_ < GetHalfBufferSize())
+                if (writeSector_ == BufferSector::FirstHalf && playCursor >= GetHalfBufferSize() ||
+                    writeSector_ == BufferSector::LatterHalf && playCursor < GetHalfBufferSize())
                 {
-                    if (stopCursor_ <= playCursor && playCursor < playCursorOnStop_)
-                    {
-                        Stop();
-                    }
-                } else
+                    FillBufferSector(writeSector_);
+                    writeSector_ = writeSector_ == BufferSector::FirstHalf ? BufferSector::LatterHalf : BufferSector::FirstHalf;
+                }
+            }
+
+            // stop if reach end of stream.
+            if (isSetStopCursor_)
+            {
+                if (IsPlaying())
                 {
-                    if (playCursor < playCursorOnStop_ || stopCursor_ <= playCursor)
+                    size_t playCursor = GetCurrentPlayCursor();
+                    if (stopCursor_ < GetHalfBufferSize())
                     {
-                        Stop();
+                        if (stopCursor_ <= playCursor && playCursor < playCursorOnStop_)
+                        {
+                            Stop();
+                        }
+                    } else
+                    {
+                        if (playCursor < playCursorOnStop_ || stopCursor_ <= playCursor)
+                        {
+                            Stop();
+                        }
                     }
                 }
             }
