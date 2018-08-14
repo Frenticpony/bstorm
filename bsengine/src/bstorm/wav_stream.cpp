@@ -55,43 +55,19 @@ WavStream::WavStream(const std::wstring & path) :
         fileStream_.seekg(dataChunk_.chunkSize, std::ios_base::cur);
         headerSize_ += dataChunk_.chunkSize;
     }
+
+    waveFormat_.totalBytes = dataChunk_.chunkSize;
+    waveFormat_.sampleRate = formatChunk_.samplePerSec;
+    waveFormat_.bitsPerSample = formatChunk_.bitsPerSample;
+    waveFormat_.channelCount = formatChunk_.channelCnt;
+    waveFormat_.formatTag = formatChunk_.formatTag;
+    waveFormat_.byteRate = formatChunk_.bytePerSec;
+    waveFormat_.blockAlign = formatChunk_.blockAlign;
 }
 
 WavStream::~WavStream()
 {
     fileStream_.close();
-}
-
-size_t WavStream::GetTotalBytes() const
-{
-    return dataChunk_.chunkSize;
-}
-size_t WavStream::GetSampleRate() const
-{
-    return formatChunk_.samplePerSec;
-}
-size_t WavStream::GetBitsPerSample() const
-{
-    return formatChunk_.bitsPerSample;
-}
-size_t WavStream::GetChannelCount() const
-{
-    return formatChunk_.channelCnt;
-}
-
-size_t WavStream::GetFormatTag() const
-{
-    return formatChunk_.formatTag;
-}
-
-size_t WavStream::GetByteRate() const
-{
-    return formatChunk_.bytePerSec;
-}
-
-size_t WavStream::GetBlockAlign() const
-{
-    return formatChunk_.blockAlign;
 }
 
 const std::wstring & WavStream::GetPath() const

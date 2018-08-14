@@ -68,7 +68,7 @@ void ObjSound::SetPanRate(float pan)
 {
     if (soundBuffer_)
     {
-        soundBuffer_->SetPanRate(pan / 100.0f);
+        soundBuffer_->SetPan(pan / 100.0f);
     }
 }
 

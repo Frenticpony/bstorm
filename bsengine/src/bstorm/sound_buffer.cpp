@@ -1,264 +1,29 @@
 #include <bstorm/sound_buffer.hpp>
 
-#include <bstorm/logger.hpp>
 #include <bstorm/ptr_util.hpp>
 #include <bstorm/math_util.hpp>
-#include <bstorm/sound_device.hpp>
+#include <bstorm/logger.hpp>
 #include <bstorm/wave_sample_stream.hpp>
+#include <bstorm/sound_device.hpp>
 
+#include <dsound.h>
 #include <cassert>
 
 namespace bstorm
 {
-static size_t CalcBufferSize(double bufSec, const WAVEFORMATEX& waveFormat)
-{
-    size_t bufSamples = (size_t)(bufSec * waveFormat.nSamplesPerSec);
-    size_t bytesPerSample = waveFormat.wBitsPerSample / 8;
-    return  bufSamples * bytesPerSample * waveFormat.nChannels;
-}
-
-static IDirectSoundBuffer8* CreateSoundBuffer(double bufSize, WAVEFORMATEX* waveFormat, const std::shared_ptr<SoundDevice>& soundDevice)
-{
-    DSBUFFERDESC dSBufferDesc;
-
-    dSBufferDesc.dwSize = sizeof(DSBUFFERDESC);
-    dSBufferDesc.dwBufferBytes = bufSize;
-    dSBufferDesc.dwReserved = 0;
-    dSBufferDesc.dwFlags = DSBCAPS_LOCDEFER
-        | DSBCAPS_GLOBALFOCUS
-        | DSBCAPS_GETCURRENTPOSITION2
-        | DSBCAPS_CTRLVOLUME
-        | DSBCAPS_CTRLFREQUENCY
-        | DSBCAPS_CTRLPAN; // 3D機能は使えなくなる
-    dSBufferDesc.lpwfxFormat = waveFormat;
-    dSBufferDesc.guid3DAlgorithm = GUID_NULL;
-
-    IDirectSoundBuffer* dSoundTempBuffer = nullptr;
-    if (soundDevice->GetDevice()->CreateSoundBuffer(&dSBufferDesc, &dSoundTempBuffer, nullptr) != DS_OK)
-    {
-        return nullptr;
-    }
-
-    IDirectSoundBuffer8* dsBuffer;
-    dSoundTempBuffer->QueryInterface(IID_IDirectSoundBuffer8, (void**)&(dsBuffer));
-    safe_release(dSoundTempBuffer);
-    return dsBuffer;
-}
-
 static inline float TodB(float r)
 {
     return 20.0f * log10f(r);
 }
 
-enum class BufferSector
+static inline float FromdB(float db)
 {
-    FirstHalf,
-    LatterHalf
-};
-
-// データストリームからバッファへと書き込みを行う
-static void FillBufferSector(BufferSector writeSector,
-                             const std::unique_ptr<IDirectSoundBuffer8, com_deleter>& dsBuffer,
-                             const std::unique_ptr<WaveSampleStream>& stream,
-                             size_t bufSize,
-                             size_t& stopPos,
-                             DWORD& playPosOnStop,
-                             SoundBuffer* soundBuffer)
-
-{
-    //  NOTE: 読み込み, 書き込みは全てバイト単位で行う。size, posなどの変数は全てbyte長
-    size_t halfBufSize = bufSize / 2;
-    size_t sectorWritePos = 0;
-    size_t sectorSize = 0;
-    switch (writeSector)
-    {
-        case BufferSector::FirstHalf:
-            sectorWritePos = 0;
-            sectorSize = halfBufSize;
-            break;
-        case BufferSector::LatterHalf:
-            sectorWritePos = halfBufSize;
-            sectorSize = bufSize - halfBufSize;
-            break;
-    }
-
-    char *writePtr, *unusedWritePtr;
-    DWORD writableBytes, unusedWritableBytes;
-    dsBuffer->Lock(sectorWritePos, sectorSize, (LPVOID*)&writePtr, &writableBytes, (LPVOID*)(&unusedWritePtr), &unusedWritableBytes, NULL);
-
-    // never cyclic allocation
-    assert(unusedWritePtr == NULL && unusedWritableBytes == 0);
-    assert(sectorSize == writableBytes);
-
-    size_t loopStartPos = soundBuffer->GetLoopStartSampleCount() * stream->GetBytesPerSample() * stream->GetChannelCount();
-    size_t loopEndPos = soundBuffer->GetLoopEndSampleCount() * stream->GetBytesPerSample() * stream->GetChannelCount();
-
-    size_t streamSize = stream->GetTotalBytes();
-
-    size_t writedSize = 0;
-    while (!stream->IsEnd() && writedSize < sectorSize && !stream->IsClosed())
-    {
-        const size_t restWrite = sectorSize - writedSize;
-        const size_t streamOffset = stream->Tell();
-
-        if (soundBuffer->IsLoopEnabled() && streamOffset < loopEndPos && streamOffset + restWrite >= loopEndPos)
-        {
-            // loop
-            auto justRead = stream->ReadBytes(loopEndPos - streamOffset, writePtr + writedSize);
-            writedSize += justRead;
-            stream->SeekBytes(loopStartPos);
-        } else
-        {
-            auto justRead = stream->ReadBytes(restWrite, writePtr + writedSize);
-            writedSize += justRead;
-        }
-    }
-
-    if (writedSize < sectorSize)
-    {
-        // 途中で終わったら無音で埋める
-        FillMemory(writePtr + writedSize, sectorSize - writedSize, stream->GetBitsPerSample() == 8 ? 0x80 : 0);
-
-        // 最初にストリーム終端に到達したときだけ, 終了位置を記録
-        if (writedSize != 0)
-        {
-            stopPos = sectorWritePos + writedSize;
-            dsBuffer->GetCurrentPosition(&playPosOnStop, nullptr);
-        }
-    }
-
-    dsBuffer->Unlock(writePtr, writableBytes, unusedWritePtr, unusedWritableBytes);
+    return powf(10.0f, db / 20.0f);
 }
 
-// sound thread
-static void SoundMain(std::unique_ptr<IDirectSoundBuffer8, com_deleter>&& dsBuffer,
-                      std::unique_ptr<WaveSampleStream>&& stream,
-                      concurrency::concurrent_queue<SoundRequest>* requestQueue,
-                      size_t bufSize,
-                      SoundBuffer* soundBuffer)
-{
-    const size_t halfBufSize = bufSize / 2;
-    size_t stopPos = ~0;
-    DWORD playPosOnStop = ~0;
-    stream->SeekBytes(0);
-    FillBufferSector(BufferSector::FirstHalf, dsBuffer, stream, bufSize, stopPos, playPosOnStop, soundBuffer);
-    BufferSector writeSector = BufferSector::LatterHalf;
-    while (true)
-    {
-        if (stream->IsClosed()) break;
-
-        // request handling
-        SoundRequest request;
-        while (requestQueue->try_pop(request))
-        {
-            switch (request)
-            {
-                case SoundRequest::PLAY:
-                    dsBuffer->Play(0, 0, DSBPLAY_LOOPING);
-                    break;
-                case SoundRequest::STOP:
-                    dsBuffer->Stop();
-                    break;
-                case SoundRequest::REWIND:
-                    dsBuffer->Stop();
-                    dsBuffer->SetCurrentPosition(0);
-                    stream->SeekBytes(0);
-                    stopPos = ~0;
-                    FillBufferSector(BufferSector::FirstHalf, dsBuffer, stream, bufSize, stopPos, playPosOnStop, soundBuffer);
-                    writeSector = BufferSector::LatterHalf;
-                    break;
-                case SoundRequest::SET_VOLUME:
-                {
-                    // 1/100dBに換算
-                    float volume = soundBuffer->GetVolume();
-                    volume = volume == 0.0f ? DSBVOLUME_MIN : (100 * TodB(volume));
-                    volume = constrain(volume, (float)DSBVOLUME_MIN, (float)DSBVOLUME_MAX);
-                    dsBuffer->SetVolume(volume);
-                }
-                break;
-                case SoundRequest::SET_PAN:
-                {
-                    float pan = soundBuffer->GetPan();
-                    const bool rightPan = pan > 0;
-                    pan = 1 - abs(pan); // 0 .. 1
-                    pan = pan == 0.0f ? DSBPAN_LEFT : (100 * TodB(pan)); // -inf .. 0
-                    if (rightPan) pan *= -1; // -inf .. 0 .. inf
-                    pan = constrain(pan, 1.0f*DSBPAN_LEFT, 1.0f*DSBPAN_RIGHT); // -10000 .. 0 .. 10000
-                    dsBuffer->SetPan(pan);
-                }
-                break;
-                case SoundRequest::EXIT:
-                default:
-                    return;
-            }
-        }
-
-        DWORD playPos;
-        dsBuffer->GetCurrentPosition(&playPos, nullptr);
-        // filling sound buffer
-        if (writeSector == BufferSector::FirstHalf && playPos >= halfBufSize ||
-            writeSector == BufferSector::LatterHalf && playPos < halfBufSize)
-        {
-            FillBufferSector(writeSector, dsBuffer, stream, bufSize, stopPos, playPosOnStop, soundBuffer);
-
-            // swap write sector
-            if (writeSector == BufferSector::FirstHalf)
-            {
-                writeSector = BufferSector::LatterHalf;
-            } else if (writeSector == BufferSector::LatterHalf)
-            {
-                writeSector = BufferSector::FirstHalf;
-            }
-        }
-
-        if (stopPos <= bufSize)
-        {
-            DWORD status;
-            dsBuffer->GetStatus(&status);
-            bool isPlaying = (status & DSBSTATUS_PLAYING) != 0;
-            if (isPlaying)
-            {
-                bool doStop = false;
-                dsBuffer->GetCurrentPosition(&playPos, nullptr);
-                if (stopPos < halfBufSize)
-                {
-                    // stopPosが前半にあるとき
-                    if (stopPos <= playPos && playPos < playPosOnStop)
-                    {
-                        doStop = true;
-                    }
-                } else
-                {
-                    // stopPosが後半にあるとき
-                    if (stopPos <= playPos || playPos < playPosOnStop)
-                    {
-                        doStop = true;
-                    }
-                }
-
-                if (doStop)
-                {
-                    dsBuffer->Stop();
-                    soundBuffer->Stop();
-                }
-            }
-        }
-        Sleep(1);
-    }
-}
-
-SoundBuffer::SoundBuffer(std::unique_ptr<WaveSampleStream>&& stream, const std::shared_ptr<SoundDevice>& soundDevice) :
-    path_(stream->GetPath()),
-    volume_(1.0f),
-    pan_(0.0f),
-    sampleRate_(stream->GetSampleRate()),
-    isPlaying_(false),
-    loopEnable_(false),
-    loopStartSampleCnt_(0),
-    loopEndSampleCnt_(stream->GetTotalSampleCount())
+static IDirectSoundBuffer8* CreateSoundBuffer(size_t bufSize, const std::unique_ptr<WaveSampleStream>& stream, const std::shared_ptr<SoundDevice>& soundDevice)
 {
     WAVEFORMATEX waveFormat;
-
     waveFormat.wFormatTag = stream->GetFormatTag();
     waveFormat.nChannels = stream->GetChannelCount();
     waveFormat.nSamplesPerSec = stream->GetSampleRate();
@@ -267,108 +32,261 @@ SoundBuffer::SoundBuffer(std::unique_ptr<WaveSampleStream>&& stream, const std::
     waveFormat.wBitsPerSample = stream->GetBitsPerSample();
     waveFormat.cbSize = sizeof(WAVEFORMAT);
 
-    constexpr double bufSec = 1.0;
-    auto bufSize = std::min(CalcBufferSize(bufSec, waveFormat), stream->GetTotalBytes());
-    auto buf = CreateSoundBuffer(bufSize, &waveFormat, soundDevice);
-    if (buf == nullptr)
+    DSBUFFERDESC dsBufferDesc;
+
+    dsBufferDesc.dwSize = sizeof(DSBUFFERDESC);
+    dsBufferDesc.dwBufferBytes = bufSize;
+    dsBufferDesc.dwReserved = 0;
+    dsBufferDesc.dwFlags = DSBCAPS_LOCDEFER
+        | DSBCAPS_GLOBALFOCUS
+        | DSBCAPS_GETCURRENTPOSITION2
+        | DSBCAPS_CTRLVOLUME
+        | DSBCAPS_CTRLFREQUENCY
+        | DSBCAPS_CTRLPAN; // 3D機能は使えなくなる
+    dsBufferDesc.lpwfxFormat = &waveFormat;
+    dsBufferDesc.guid3DAlgorithm = GUID_NULL;
+
+    IDirectSoundBuffer* dsTempBuffer = nullptr;
+    IDirectSoundBuffer8* dsBuffer = nullptr;
+
+    if (soundDevice->GetDevice()->CreateSoundBuffer(&dsBufferDesc, &dsTempBuffer, nullptr) != DS_OK)
     {
-        throw Log(Log::Level::LV_ERROR)
-            .SetMessage("failed to create sound buffer.")
-            .SetParam(Log::Param(Log::Param::Tag::TEXT, GetPath()));
+        goto failed_to_create;
     }
-    auto dsBuffer = std::unique_ptr<IDirectSoundBuffer8, com_deleter>(buf, com_deleter());
-    dsBuffer->SetVolume(DSBVOLUME_MAX);
-    dsBuffer->SetPan(DSBPAN_CENTER);
-    soundMain_ = std::thread(SoundMain, std::move(dsBuffer), std::move(stream), &soundRequestQueue_, bufSize, this);
+
+    if (dsTempBuffer->QueryInterface(IID_IDirectSoundBuffer8, (void**)&(dsBuffer)) != DS_OK)
+    {
+        goto failed_to_create;
+    }
+
+    return dsBuffer;
+failed_to_create:
+    safe_release(dsTempBuffer);
+    safe_release(dsBuffer);
+    throw Log(Log::Level::LV_ERROR)
+        .SetMessage("failed to create sound buffer.")
+        .SetParam(Log::Param(Log::Param::Tag::TEXT, stream->GetPath()));
+
+}
+
+static size_t CalcBufferSize(const std::unique_ptr<WaveSampleStream>& stream)
+{
+    constexpr float bufSec = 1.0f;
+    size_t bufSamples = (size_t)(bufSec * stream->GetSampleRate());
+    size_t bytesPerSample = stream->GetBytesPerSample();
+    return std::min(bufSamples * bytesPerSample * stream->GetChannelCount(), stream->GetTotalBytes());
+}
+
+SoundBuffer::SoundBuffer(std::unique_ptr<WaveSampleStream>&& stream, const std::shared_ptr<SoundDevice>& soundDevice) :
+    istream_(std::move(stream)),
+    waveFormat_(istream_->GetWaveFormat()),
+    bufSize_(CalcBufferSize(istream_)),
+    dsBuffer_(CreateSoundBuffer(bufSize_, istream_, soundDevice), com_deleter()),
+    isThreadTerminated_(false),
+    isLoopEnabled_(false),
+    loopRange_(LoopRange(0, istream_->GetTotalBytes())),
+    soundMain_(&SoundBuffer::SoundMain, this)
+{
 }
 
 SoundBuffer::~SoundBuffer()
 {
-    soundRequestQueue_.push(SoundRequest::EXIT);
+    isThreadTerminated_ = true;
     soundMain_.join();
-    Logger::WriteLog(std::move(
-        Log(Log::Level::LV_INFO)
-        .SetMessage("release sound.")
-        .SetParam(Log::Param(Log::Param::Tag::SOUND, path_))));
+    Stop(); // NOTE: セカンダリバッファ解放前に止めないとプライマリバッファに音が残ることがある
 }
+
+#define CRITICAL_SECTION std::lock_guard<std::recursive_mutex> lock(criticalSection_)
 
 void SoundBuffer::Play()
 {
-    isPlaying_ = true;
-    soundRequestQueue_.push(SoundRequest::PLAY);
+    CRITICAL_SECTION;
+    dsBuffer_->Play(0, 0, DSBPLAY_LOOPING);
 }
 
 void SoundBuffer::Stop()
 {
-    isPlaying_ = false;
-    soundRequestQueue_.push(SoundRequest::STOP);
+    CRITICAL_SECTION;
+    dsBuffer_->Stop();
 }
 
 void SoundBuffer::Rewind()
 {
-    soundRequestQueue_.push(SoundRequest::REWIND);
+    CRITICAL_SECTION;
+    dsBuffer_->Stop(); // 再生停止
+    dsBuffer_->SetCurrentPosition(0); // 再生カーソルを先頭に戻す
+    istream_->SeekBytes(0); // 入力を先頭に戻す
+    isSetStopCursor_ = false; // ストップカーソルを消す
+    FillBufferSector(BufferSector::FirstHalf); // バッファの前半を埋める
+    writeSector_ = BufferSector::LatterHalf; // バッファの後半を書き込み対象に
 }
 
-void SoundBuffer::SetVolume(float vol)
+void SoundBuffer::SetVolume(float volume)
 {
-    volume_ = constrain(vol, 0.0f, 1.0f);
-    soundRequestQueue_.push(SoundRequest::SET_VOLUME);
+    CRITICAL_SECTION;
+    // 1/100dBに換算
+    volume = constrain(volume, 0.0f, 1.0f);
+    volume = volume == 0.0f ? DSBVOLUME_MIN : (100 * TodB(volume));
+    volume = constrain(volume, (float)DSBVOLUME_MIN, (float)DSBVOLUME_MAX);
+    dsBuffer_->SetVolume(volume);
 }
 
-void SoundBuffer::SetPanRate(float pan)
+void SoundBuffer::SetPan(float pan)
 {
-    pan_ = constrain(pan, -1.0f, 1.0f);
-    soundRequestQueue_.push(SoundRequest::SET_PAN);
-}
-
-void SoundBuffer::SetLoopEnable(bool enable)
-{
-    loopEnable_ = enable;
-}
-
-void SoundBuffer::SetLoopSampleCount(size_t start, size_t end)
-{
-    loopStartSampleCnt_ = start;
-    loopEndSampleCnt_ = end;
-}
-
-void SoundBuffer::SetLoopTime(double startSec, double endSec)
-{
-    SetLoopSampleCount((size_t)(sampleRate_ * startSec), (size_t)(sampleRate_ * endSec));
-}
-
-const std::wstring& SoundBuffer::GetPath() const
-{
-    return path_;
+    CRITICAL_SECTION;
+    pan = constrain(pan, -1.0f, 1.0f);
+    const bool rightPan = pan > 0;
+    pan = 1 - abs(pan); // 0 .. 1
+    pan = pan == 0.0f ? DSBPAN_LEFT : (100 * TodB(pan)); // -inf .. 0
+    if (rightPan) pan *= -1; // -inf .. 0 .. inf
+    pan = constrain(pan, 1.0f*DSBPAN_LEFT, 1.0f*DSBPAN_RIGHT); // -10000 .. 0 .. 10000
+    dsBuffer_->SetPan(pan);
 }
 
 bool SoundBuffer::IsPlaying() const
 {
-    return isPlaying_;
+    CRITICAL_SECTION;
+    DWORD status;
+    dsBuffer_->GetStatus(&status);
+    return (status & DSBSTATUS_PLAYING) != 0;
 }
 
 float SoundBuffer::GetVolume() const
 {
-    return volume_;
+    CRITICAL_SECTION;
+    LONG vol;
+    dsBuffer_->GetVolume(&vol);
+    return vol == DSBVOLUME_MIN ? 0.0f : FromdB(vol / 100.0f);
 }
 
-float SoundBuffer::GetPan() const
+size_t SoundBuffer::GetCurrentPlayCursor() const
 {
-    return pan_;
+    CRITICAL_SECTION;
+    DWORD playCursor;
+    dsBuffer_->GetCurrentPosition(&playCursor, nullptr);
+    return playCursor;
 }
 
-bool SoundBuffer::IsLoopEnabled() const
+void SoundBuffer::SetLoopEnable(bool enable)
 {
-    return loopEnable_;
+    isLoopEnabled_ = enable;
 }
 
-size_t SoundBuffer::GetLoopStartSampleCount() const
+void SoundBuffer::SetLoopTime(size_t beginSec, size_t endSec)
 {
-    return loopStartSampleCnt_;
+    SetLoopSampleCount(beginSec * waveFormat_.sampleRate, endSec * waveFormat_.sampleRate);
 }
 
-size_t SoundBuffer::GetLoopEndSampleCount() const
+void SoundBuffer::SetLoopSampleCount(size_t begin, size_t end)
 {
-    return loopEndSampleCnt_;
+    size_t conv = waveFormat_.bitsPerSample / 8 * waveFormat_.channelCount;
+    SetLoopRange(begin * conv, end * conv);
+}
+
+void SoundBuffer::SetLoopRange(size_t begin, size_t end)
+{
+    loopRange_ = LoopRange(begin, end);
+}
+
+void SoundBuffer::SoundMain()
+{
+    Rewind();
+    while (!isThreadTerminated_)
+    {
+        {
+            CRITICAL_SECTION;
+            if (istream_->IsClosed()) break;
+        }
+
+        // fill buffer.
+        {
+            size_t playCursor = GetCurrentPlayCursor();
+            if (writeSector_ == BufferSector::FirstHalf && playCursor >= GetHalfBufferSize() ||
+                writeSector_ == BufferSector::LatterHalf && playCursor < GetHalfBufferSize())
+            {
+                FillBufferSector(writeSector_);
+                writeSector_ = writeSector_ == BufferSector::FirstHalf ? BufferSector::LatterHalf : BufferSector::FirstHalf;
+            }
+        }
+
+        // stop if reach end of stream.
+        if (isSetStopCursor_)
+        {
+            CRITICAL_SECTION;
+            if (IsPlaying())
+            {
+                size_t playCursor = GetCurrentPlayCursor();
+                if (stopCursor_ < GetHalfBufferSize())
+                {
+                    if (stopCursor_ <= playCursor && playCursor < playCursorOnStop_)
+                    {
+                        Stop();
+                    }
+                } else
+                {
+                    if (playCursor < playCursorOnStop_ || stopCursor_ <= playCursor)
+                    {
+                        Stop();
+                    }
+                }
+            }
+        }
+
+        Sleep(100);
+    }
+}
+
+void SoundBuffer::FillBufferSector(BufferSector sector)
+{
+    CRITICAL_SECTION;
+
+    const size_t sectorOffset = sector == BufferSector::FirstHalf ? 0 : GetHalfBufferSize();
+    const size_t sectorSize = sector == BufferSector::FirstHalf ? GetHalfBufferSize() : (bufSize_ - GetHalfBufferSize());
+
+    char *writePtr, *unusedWritePtr;
+    DWORD writableBytes, unusedWritableBytes;
+    dsBuffer_->Lock(sectorOffset, sectorSize, (LPVOID*)&writePtr, &writableBytes, (LPVOID*)(&unusedWritePtr), &unusedWritableBytes, NULL);
+
+    // never cyclic allocation
+    assert(unusedWritePtr == NULL && unusedWritableBytes == 0);
+    assert(sectorSize == writableBytes);
+
+    const auto loopRange = loopRange_.load();
+
+    size_t writedSize = 0;
+    while (writedSize < sectorSize)
+    {
+        if (istream_->IsEnd() || istream_->IsClosed())
+        {
+            // セクタの残りを無音で埋める
+            FillMemory(writePtr + writedSize, sectorSize - writedSize, waveFormat_.bitsPerSample == 8 ? 0x80 : 0);
+
+            // 最初にストリーム終端に到達したときだけ, 終了位置を記録
+            if (!isSetStopCursor_)
+            {
+                isSetStopCursor_ = true;
+                stopCursor_ = sectorOffset + writedSize;
+                playCursorOnStop_ = GetCurrentPlayCursor();
+            }
+            break;
+        }
+
+        const size_t restWrite = sectorSize - writedSize;
+        const size_t streamReadPos = istream_->Tell();
+
+        if (isLoopEnabled_ && streamReadPos < loopRange.end && streamReadPos + restWrite >= loopRange.end)
+        {
+            // loop
+            auto justRead = istream_->ReadBytes(loopRange.end - streamReadPos, writePtr + writedSize);
+            writedSize += justRead;
+            istream_->SeekBytes(loopRange.begin);
+        } else
+        {
+            auto justRead = istream_->ReadBytes(restWrite, writePtr + writedSize);
+            writedSize += justRead;
+        }
+    }
+
+    dsBuffer_->Unlock(writePtr, writableBytes, unusedWritePtr, unusedWritableBytes);
 }
 }

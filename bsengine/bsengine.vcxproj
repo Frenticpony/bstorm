@@ -46,6 +46,7 @@
     <ClInclude Include="src\bstorm\serialized_script.hpp" />
     <ClInclude Include="src\bstorm\shot_counter.hpp" />
     <ClInclude Include="src\bstorm\sound_buffer.hpp" />
+    <ClInclude Include="src\bstorm\wave_format.hpp" />
     <ClInclude Include="src\bstorm\wave_sample_stream.hpp" />
     <ClInclude Include="src\bstorm\stage_common_player_params.hpp" />
     <ClInclude Include="src\bstorm\config.hpp" />

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <bstorm/wave_format.hpp>
+
 #include <vector>
 #include <string>
 
@@ -10,13 +12,15 @@ class WaveSampleStream
 public:
     virtual ~WaveSampleStream() {};
 
-    virtual size_t GetTotalBytes() const = 0;
-    virtual size_t GetSampleRate() const = 0;
-    virtual size_t GetBitsPerSample() const = 0;
-    virtual size_t GetChannelCount() const = 0;
-    virtual size_t GetFormatTag() const = 0;
-    virtual size_t GetByteRate() const = 0;
-    virtual size_t GetBlockAlign() const = 0;
+    size_t GetTotalBytes() const { return waveFormat_.totalBytes; }
+    size_t GetSampleRate() const { return waveFormat_.sampleRate; }
+    size_t GetBitsPerSample() const { return waveFormat_.bitsPerSample; }
+    size_t GetChannelCount() const { return waveFormat_.channelCount; }
+    size_t GetFormatTag() const { return waveFormat_.formatTag; }
+    size_t GetByteRate() const { return waveFormat_.byteRate; }
+    size_t GetBlockAlign() const { return waveFormat_.blockAlign; }
+    const WaveFormat& GetWaveFormat() const { return waveFormat_; }
+
     size_t GetBytesPerSample() const
     {
         return GetBitsPerSample() / 8;
@@ -40,5 +44,7 @@ public:
     virtual size_t Tell() = 0;
     virtual bool IsEnd() = 0;
     virtual bool IsClosed() const = 0;
+protected:
+    WaveFormat waveFormat_;
 };
 }

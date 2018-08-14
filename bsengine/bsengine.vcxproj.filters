@@ -300,6 +300,9 @@
     <ClInclude Include="src\bstorm\com_deleter.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="src\bstorm\wave_format.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\bison\dnh.tab.cpp">

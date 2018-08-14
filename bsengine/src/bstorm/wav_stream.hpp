@@ -14,13 +14,6 @@ public:
     WavStream(const std::wstring& path);
     ~WavStream();
 
-    size_t GetTotalBytes() const override;
-    size_t GetSampleRate() const override;
-    size_t GetBitsPerSample() const override;
-    size_t GetChannelCount() const override;
-    size_t GetFormatTag() const override;
-    size_t GetByteRate() const override;
-    size_t GetBlockAlign() const override;
     const std::wstring& GetPath() const override;
 
     void SeekBytes(size_t pos) override;
