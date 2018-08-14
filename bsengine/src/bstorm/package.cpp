@@ -188,7 +188,7 @@ void Package::TickFrame()
         }
     }
 
-    scriptManager_->RunFinalizeOnClosedScript();
+    scriptManager_->FinalizeAllClosedScript();
 
     {
         // 入力更新

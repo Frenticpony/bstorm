@@ -95,7 +95,7 @@ public:
     NullableSharedPtr<Script> Get(int id) const;
     void NotifyEventAll(int eventType);
     void NotifyEventAll(int eventType, const std::unique_ptr<DnhArray>& args);
-    void RunFinalizeOnClosedScript();
+    void FinalizeAllClosedScript();
     void RunFinalizeAll();
     void CloseStgSceneScript();
     const std::unique_ptr<DnhValue>& GetScriptResult(int scriptId) const;

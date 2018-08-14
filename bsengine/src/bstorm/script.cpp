@@ -80,9 +80,10 @@ bool Script::IsClosed() const
 void Script::RunBuiltInSub(const std::string &name)
 {
     if (state_.isFailed) { return; }
+    if (serializedScript_ == nullptr) return;
     if (luaStateBusy_)
     {
-        lua_getglobal(L_.get(), (DNH_VAR_PREFIX + serializedScript_.get()->GetConvertedBuiltInSubName(name)).c_str());
+        lua_getglobal(L_.get(), (DNH_VAR_PREFIX + serializedScript_->GetConvertedBuiltInSubName(name)).c_str());
         if (lua_isfunction(L_.get(), -1))
         {
             CallLuaChunk(0);
@@ -93,7 +94,7 @@ void Script::RunBuiltInSub(const std::string &name)
     } else
     {
         lua_getglobal(L_.get(), (std::string(DNH_RUNTIME_PREFIX) + "run").c_str());
-        lua_getglobal(L_.get(), (DNH_VAR_PREFIX + serializedScript_.get()->GetConvertedBuiltInSubName(name)).c_str());
+        lua_getglobal(L_.get(), (DNH_VAR_PREFIX + serializedScript_->GetConvertedBuiltInSubName(name)).c_str());
         if (lua_isfunction(L_.get(), -1))
         {
             CallLuaChunk(1);
@@ -197,7 +198,7 @@ void Script::RunFinalize()
 {
     if (state_.isFinalized || state_.isFailed) { return; }
 
-    RunBuiltInSub("Finalize");
+    if (state_.isInitialized) RunBuiltInSub("Finalize");
 
     state_.isClosed = true;
     state_.isFinalized = true;
@@ -388,7 +389,7 @@ void ScriptManager::NotifyEventAll(int eventType, const std::unique_ptr<DnhArray
     }
 }
 
-void ScriptManager::RunFinalizeOnClosedScript()
+void ScriptManager::FinalizeAllClosedScript()
 {
     auto it = scriptMap_.begin();
     while (it != scriptMap_.end())
