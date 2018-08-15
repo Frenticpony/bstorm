@@ -42,7 +42,10 @@ public:
         return ReadBytes(sampleCnt * GetBytesPerSample() * GetChannelCount(), dst) / GetBytesPerSample() / GetChannelCount();
     }
     virtual size_t Tell() = 0;
-    virtual bool IsEnd() = 0;
+    bool IsEnd()
+    {
+        return Tell() >= GetTotalBytes();
+    }
     virtual bool IsClosed() const = 0;
 protected:
     WaveFormat waveFormat_;

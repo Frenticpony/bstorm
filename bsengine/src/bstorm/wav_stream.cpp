@@ -88,17 +88,14 @@ size_t WavStream::ReadBytes(size_t byte, char * dst)
         return 0;
     }
     fileStream_.read(dst, readSize);
-    return readSize;
+    return fileStream_.gcount();
 }
 
 size_t WavStream::Tell()
 {
     return (size_t)fileStream_.tellg() - headerSize_;
 }
-bool WavStream::IsEnd()
-{
-    return Tell() >= GetTotalBytes();
-}
+
 bool WavStream::IsClosed() const
 {
     return fileStream_.fail();

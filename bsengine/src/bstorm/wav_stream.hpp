@@ -19,7 +19,6 @@ public:
     void SeekBytes(size_t pos) override;
     size_t ReadBytes(size_t byte, char* dst) override;
     size_t Tell() override;
-    bool IsEnd() override;
     bool IsClosed() const override;
 private:
     struct WavRiffHeader
@@ -48,7 +47,7 @@ private:
     } dataChunk_;
 
     size_t headerSize_;
-    std::wstring path_;
+    const std::wstring path_;
     std::ifstream fileStream_;
 };
 }
