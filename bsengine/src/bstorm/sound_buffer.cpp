@@ -253,38 +253,35 @@ void SoundBuffer::FillBufferSector(BufferSector sector)
 
     const auto loopRange = loopRange_.load();
 
-    size_t writedSize = 0;
-    while (writedSize < sectorSize)
+    size_t writtenSize = 0;
+    while (writtenSize < sectorSize)
     {
-        const size_t restWrite = sectorSize - writedSize;
         const size_t streamReadPos = istream_->Tell();
 
         if (isLoopEnabled_ &&
             streamReadPos < waveFormat_.totalBytes && // not stream end
             loopRange.begin < waveFormat_.totalBytes && loopRange.end <= waveFormat_.totalBytes && // valid loop range
-            streamReadPos < loopRange.end && loopRange.end <= streamReadPos + restWrite // over loop end
+            streamReadPos < loopRange.end && loopRange.end <= streamReadPos + (sectorSize - writtenSize) // over loop end
             )
         {
             // loop
-            auto justRead = istream_->ReadBytes(loopRange.end - streamReadPos, writePtr + writedSize);
-            writedSize += justRead;
+            writtenSize += istream_->ReadBytes(loopRange.end - streamReadPos, writePtr + writtenSize);
             istream_->SeekBytes(loopRange.begin);
         } else
         {
-            auto justRead = istream_->ReadBytes(restWrite, writePtr + writedSize);
-            writedSize += justRead;
+            writtenSize += istream_->ReadBytes(sectorSize - writtenSize, writePtr + writtenSize);
         }
 
         if (istream_->IsEnd() || istream_->IsClosed())
         {
             // セクタの残りを無音で埋める
-            FillMemory(writePtr + writedSize, sectorSize - writedSize, waveFormat_.bitsPerSample == 8 ? 0x80 : 0);
+            FillMemory(writePtr + writtenSize, sectorSize - writtenSize, waveFormat_.bitsPerSample == 8 ? 0x80 : 0);
 
             // 最初にストリーム終端に到達したときだけ, 終了位置を記録
             if (!isSetStopCursor_)
             {
                 isSetStopCursor_ = true;
-                stopCursor_ = sectorOffset + writedSize;
+                stopCursor_ = sectorOffset + writtenSize;
                 playCursorOnStop_ = GetCurrentPlayCursor();
             }
             break;
