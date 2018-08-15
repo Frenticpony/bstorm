@@ -37,6 +37,7 @@
     <ClInclude Include="src\bstorm\lua_util.hpp" />
     <ClInclude Include="src\bstorm\math_util.hpp" />
     <ClInclude Include="src\bstorm\nullable_shared_ptr.hpp" />
+    <ClInclude Include="src\bstorm\ogg_vorbis_stream.hpp" />
     <ClInclude Include="src\bstorm\path_const.hpp" />
     <ClInclude Include="src\bstorm\point2D.hpp" />
     <ClInclude Include="src\bstorm\ptr_util.hpp" />
@@ -144,6 +145,7 @@
     <ClCompile Include="src\bstorm\obj_mesh.cpp" />
     <ClCompile Include="src\bstorm\obj_player.cpp" />
     <ClCompile Include="src\bstorm\obj_sound.cpp" />
+    <ClCompile Include="src\bstorm\ogg_vorbis_stream.cpp" />
     <ClCompile Include="src\bstorm\parser.cpp" />
     <ClCompile Include="src\bstorm\replay_data.cpp" />
     <ClCompile Include="src\bstorm\script_entry_routine_names.cpp" />
