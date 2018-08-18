@@ -18,7 +18,6 @@ public:
         LV_WARN,
         LV_ERROR,
         LV_SUCCESS,
-        LV_DETAIL,
         LV_DEBUG,
         LV_USER
     };

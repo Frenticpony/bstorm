@@ -30,7 +30,6 @@ private:
     bool showWarnLevel;
     bool showErrorLevel;
     bool showUserLevel;
-    bool showDetailLevel;
     static constexpr int MaxLogCnt = 1 << 11; // power of 2
     int headIdx;
     std::array<Log, MaxLogCnt> logs;

@@ -104,7 +104,6 @@ const char * Log::GetLevelName(Level level)
         case Log::Level::LV_WARN: return "warn";
         case Log::Level::LV_ERROR: return "error";
         case Log::Level::LV_SUCCESS: return "success";
-        case Log::Level::LV_DETAIL: return "detail";
         case Log::Level::LV_DEBUG: return "debug";
         case Log::Level::LV_USER: return "user";
     }

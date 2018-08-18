@@ -20,7 +20,6 @@ LogWindow::LogWindow() :
     showWarnLevel(true),
     showErrorLevel(true),
     showUserLevel(true),
-    showDetailLevel(false),
     headIdx(0),
     logCnt(0)
 {
@@ -63,7 +62,6 @@ static const char* getLogLevelIcon(Log::Level level)
         case Log::Level::LV_WARN: return ICON_FA_EXCLAMATION_TRIANGLE;
         case Log::Level::LV_ERROR: return ICON_FA_TIMES_CIRCLE;
         case Log::Level::LV_SUCCESS: return ICON_FA_CHECK_CIRCLE;
-        case Log::Level::LV_DETAIL: return ICON_FA_SEARCH_PLUS;
         case Log::Level::LV_DEBUG: return ICON_FA_COG;
         case Log::Level::LV_USER: return ICON_FA_COMMENT;
     }
@@ -120,11 +118,11 @@ void LogWindow::draw()
                     if (ImGui::MenuItem(ICON_FA_ASTERISK" All", NULL))
                     {
                         bool show = true;
-                        if (showInfoLevel && showWarnLevel && showErrorLevel && showUserLevel && showDetailLevel)
+                        if (showInfoLevel && showWarnLevel && showErrorLevel && showUserLevel)
                         {
                             show = false;
                         }
-                        showInfoLevel = showWarnLevel = showErrorLevel = showUserLevel = showDetailLevel = show;
+                        showInfoLevel = showWarnLevel = showErrorLevel = showUserLevel = show;
                     }
                     ImGui::PopItemFlag();
                 }
@@ -132,7 +130,6 @@ void LogWindow::draw()
                 showLevelMenu(Log::Level::LV_WARN, &showWarnLevel);
                 showLevelMenu(Log::Level::LV_ERROR, &showErrorLevel);
                 showLevelMenu(Log::Level::LV_USER, &showUserLevel);
-                showLevelMenu(Log::Level::LV_DETAIL, &showDetailLevel);
                 ImGui::EndMenu();
             }
             ImGui::EndMenuBar();
@@ -170,7 +167,6 @@ void LogWindow::draw()
                     case Log::Level::LV_WARN: if (!showWarnLevel) continue; break;
                     case Log::Level::LV_ERROR: if (!showErrorLevel) continue; break;
                     case Log::Level::LV_SUCCESS: if (!showInfoLevel) continue; break;
-                    case Log::Level::LV_DETAIL:  if (!showDetailLevel) continue; break;
                     case Log::Level::LV_DEBUG: if (!showInfoLevel) continue; break;
                     case Log::Level::LV_USER: if (!showUserLevel) continue; break;
                 }
