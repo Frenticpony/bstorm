@@ -2,7 +2,8 @@
 
 #include <bstorm/logger.hpp>
 
-#include <Mmreg.h>
+#include <windows.h>
+#include <mmreg.h>
 #include <algorithm>
 
 namespace bstorm

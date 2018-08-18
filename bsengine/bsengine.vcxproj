@@ -28,10 +28,12 @@
     <ClInclude Include="src\bstorm\color_rgb.hpp" />
     <ClInclude Include="src\bstorm\common_data_db.hpp" />
     <ClInclude Include="src\bstorm\com_deleter.hpp" />
+    <ClInclude Include="src\bstorm\dummy_logger.hpp" />
     <ClInclude Include="src\bstorm\dx_util.hpp" />
     <ClInclude Include="src\bstorm\engine.hpp" />
     <ClInclude Include="src\bstorm\engine_develop_options.hpp" />
     <ClInclude Include="src\bstorm\cache_store.hpp" />
+    <ClInclude Include="src\bstorm\file_logger.hpp" />
     <ClInclude Include="src\bstorm\font_params.hpp" />
     <ClInclude Include="src\bstorm\key_types.hpp" />
     <ClInclude Include="src\bstorm\lua_util.hpp" />
@@ -126,6 +128,7 @@
     <ClCompile Include="src\bstorm\color_rgb.cpp" />
     <ClCompile Include="src\bstorm\dx_util.cpp" />
     <ClCompile Include="src\bstorm\engine.cpp" />
+    <ClCompile Include="src\bstorm\file_logger.cpp" />
     <ClCompile Include="src\bstorm\font_params.cpp" />
     <ClCompile Include="src\bstorm\log_error.cpp" />
     <ClCompile Include="src\bstorm\camera2D.cpp" />

@@ -5,9 +5,7 @@
 #include <string>
 #include <memory>
 #include <vector>
-#include <fstream>
 #include <mutex>
-#include <windows.h>
 
 namespace bstorm
 {
@@ -92,33 +90,5 @@ private:
     static std::shared_ptr<Logger> logger;
     static std::mutex mutex;
     static bool logEnabled;
-};
-
-class DummyLogger : public Logger
-{
-public:
-    DummyLogger() {}
-private:
-    void log(Log& lg) noexcept(false) override
-    {
-        log(std::move(Log(lg)));
-    };
-    void log(Log&& lg) noexcept(false) override
-    {
-        OutputDebugStringA(lg.ToString().c_str());
-        OutputDebugStringA("\n");
-    };
-};
-
-class FileLogger : public Logger
-{
-public:
-    FileLogger(const std::wstring& filePath, const std::shared_ptr<Logger>& cc);
-    ~FileLogger() override;
-    void log(Log& lg) noexcept(false) override;
-    void log(Log&& lg) noexcept(false) override;
-private:
-    std::ofstream file_;
-    std::shared_ptr<Logger> cc_;
 };
 }

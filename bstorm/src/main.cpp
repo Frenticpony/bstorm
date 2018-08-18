@@ -1,4 +1,5 @@
-﻿#include <bstorm/logger.hpp>
+﻿#include <bstorm/dummy_logger.hpp>
+#include <bstorm/file_logger.hpp>
 #include <bstorm/engine.hpp>
 #include <bstorm/package.hpp>
 #include <bstorm/string_util.hpp>

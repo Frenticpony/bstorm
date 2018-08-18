@@ -1,6 +1,6 @@
 #include <bstorm/input_device.hpp>
 #include <bstorm/key_name_map.hpp>
-#include <bstorm/logger.hpp>
+#include <bstorm/dummy_logger.hpp>
 #include <bstorm/config.hpp>
 #include <bstorm/string_util.hpp>
 #include <bstorm/version.hpp>

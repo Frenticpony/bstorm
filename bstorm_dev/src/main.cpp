@@ -9,7 +9,7 @@
 #include "game_view_mouse_position_provider.hpp"
 #include "play_controller.hpp"
 
-#include <bstorm/logger.hpp>
+#include <bstorm/file_logger.hpp>
 #include <bstorm/package.hpp>
 #include <bstorm/string_util.hpp>
 #include <bstorm/input_device.hpp>
