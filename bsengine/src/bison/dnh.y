@@ -73,8 +73,8 @@ static int yylex(DnhParser::semantic_type *yylval, DnhParser::location_type* yyl
 
 void DnhParser::error(const DnhParser::location_type& yylloc, const std::string& msg)
 {
-    throw Log(Log::Level::LV_ERROR)
-      .SetMessage(msg)
+    throw Log(LogLevel::LV_ERROR)
+      .Msg(msg)
       .AddSourcePos(std::make_shared<SourcePos>(yylloc.begin));
 }
 
@@ -96,8 +96,8 @@ static void CheckDupDef(DnhParseContext* ctx, const DnhParser::location_type& yy
         auto prevDefLine = std::to_string(prevDef->srcPos->line);
         auto prevDefPath = ToUTF8(*prevDef->srcPos->filename);
         auto msg = "found a duplicate definition of '" + prevDef->name + "' (previous definition was at line " + prevDefLine + " in " + prevDefPath + ").";
-        throw Log(Log::Level::LV_ERROR)
-          .SetMessage(msg)
+        throw Log(LogLevel::LV_ERROR)
+          .Msg(msg)
           .AddSourcePos(std::make_shared<SourcePos>(yylloc.begin));
     }
 }

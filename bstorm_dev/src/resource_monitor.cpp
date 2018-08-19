@@ -141,12 +141,12 @@ void DrawTextureInfoTab(const std::shared_ptr<TextureStore>& textureStore)
                 try
                 {
                     texture->Reload();
-                    Logger::WriteLog(std::move(
-                        Log(Log::Level::LV_INFO).SetMessage(std::string("reload texture."))
-                        .SetParam(Log::Param(Log::Param::Tag::TEXTURE, path))));
+                    Logger::Write(std::move(
+                        Log(LogLevel::LV_INFO).Msg(std::string("reload texture."))
+                        .Param(LogParam(LogParam::Tag::TEXTURE, path))));
                 } catch (Log& log)
                 {
-                    Logger::WriteLog(log);
+                    Logger::Write(log);
                 }
             }
             ImGui::SameLine();

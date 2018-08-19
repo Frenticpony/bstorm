@@ -54,21 +54,21 @@ const char * ShotDataTable::GetTypeName(Type type)
     return "unknown";
 }
 
-static Log::Param::Tag getElemTag(ShotDataTable::Type type)
+static LogParam::Tag getElemTag(ShotDataTable::Type type)
 {
-    if (type == ShotDataTable::Type::PLAYER) return Log::Param::Tag::PLAYER_SHOT_DATA;
-    if (type == ShotDataTable::Type::ENEMY) return Log::Param::Tag::ENEMY_SHOT_DATA;
-    return Log::Param::Tag::TEXT;
+    if (type == ShotDataTable::Type::PLAYER) return LogParam::Tag::PLAYER_SHOT_DATA;
+    if (type == ShotDataTable::Type::ENEMY) return LogParam::Tag::ENEMY_SHOT_DATA;
+    return LogParam::Tag::TEXT;
 }
 
 void ShotDataTable::Load(const std::wstring & path, const std::shared_ptr<SourcePos>& srcPos)
 {
     if (IsLoaded(path))
     {
-        Logger::WriteLog(std::move(
-            Log(Log::Level::LV_WARN)
-            .SetMessage(std::string(GetTypeName(type_)) + " shot data already loaded.")
-            .SetParam(Log::Param(getElemTag(type_), path))
+        Logger::Write(std::move(
+            Log(LogLevel::LV_WARN)
+            .Msg(std::string(GetTypeName(type_)) + " shot data already loaded.")
+            .Param(LogParam(getElemTag(type_), path))
             .AddSourcePos(srcPos)));
     } else
     {
@@ -104,10 +104,10 @@ void ShotDataTable::Reload(const std::wstring & path, const std::shared_ptr<Sour
         table_.emplace(data.id, std::make_shared<ShotData>(data));
     }
     alreadyLoadedPaths_.insert(uniqPath);
-    Logger::WriteLog(std::move(
-        Log(Log::Level::LV_INFO)
-        .SetMessage("load " + std::string(GetTypeName(type_)) + " shot data.")
-        .SetParam(Log::Param(getElemTag(type_), path))
+    Logger::Write(std::move(
+        Log(LogLevel::LV_INFO)
+        .Msg("load " + std::string(GetTypeName(type_)) + " shot data.")
+        .Param(LogParam(getElemTag(type_), path))
         .AddSourcePos(srcPos)));
 }
 

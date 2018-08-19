@@ -62,13 +62,13 @@ SerializedScript::SerializedScript(const SerializedScriptSignature& signature, c
         auto errors_ = checker.Check(*program);
         for (auto& err : errors_)
         {
-            Logger::WriteLog(err);
+            Logger::Write(err);
         }
         if (!errors_.empty())
         {
-            throw Log(Log::Level::LV_ERROR)
-                .SetMessage("found " + std::to_string(errors_.size()) + " script error" + (errors_.size() > 1 ? "s." : "."))
-                .SetParam(Log::Param(Log::Param::Tag::SCRIPT, signature.path));
+            throw Log(LogLevel::LV_ERROR)
+                .Msg("found " + std::to_string(errors_.size()) + " script error" + (errors_.size() > 1 ? "s." : "."))
+                .Param(LogParam(LogParam::Tag::SCRIPT, signature.path));
         }
     }
 
@@ -93,22 +93,22 @@ SerializedScript::SerializedScript(const SerializedScriptSignature& signature, c
             if (msg.find("has more than 200 local variables") != std::string::npos)
             {
                 auto ss = Split(ToUnicode(msg), L':');
-                Log err = Log(Log::Level::LV_ERROR)
-                    .SetMessage("too many local variable declared in one function.");
+                Log err = Log(LogLevel::LV_ERROR)
+                    .Msg("too many local variable declared in one function.");
                 if (ss.size() >= 2)
                 {
                     int line = _wtoi(ss[1].c_str());
                     err.AddSourcePos(codeGen.GetSourceMap().GetSourcePos(line));
                 } else
                 {
-                    err.SetParam(Log::Param(Log::Param::Tag::SCRIPT, signature.path));
+                    err.Param(LogParam(LogParam::Tag::SCRIPT, signature.path));
                 }
                 throw err;
             } else
             {
-                throw Log(Log::Level::LV_ERROR)
-                    .SetMessage("unexpected compile error occured, please send a bug report. (" + msg + ")")
-                    .SetParam(Log::Param(Log::Param::Tag::SCRIPT, signature.path));
+                throw Log(LogLevel::LV_ERROR)
+                    .Msg("unexpected compile error occured, please send a bug report. (" + msg + ")")
+                    .Param(LogParam(LogParam::Tag::SCRIPT, signature.path));
             }
         }
     }

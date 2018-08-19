@@ -44,7 +44,7 @@ void PlayController::Tick()
     } catch (Log& log)
     {
         package_ = nullptr;
-        Logger::WriteLog(log);
+        Logger::Write(log);
     }
 }
 
@@ -91,11 +91,11 @@ void PlayController::Reload()
         {
             if (mainScript_.path.empty())
             {
-                Logger::WriteLog(Log::Level::LV_ERROR, "main script is not selected.");
+                Logger::Write(LogLevel::LV_ERROR, "main script is not selected.");
             }
             if (playerScript_.path.empty())
             {
-                Logger::WriteLog(Log::Level::LV_ERROR, "player script is not selected.");
+                Logger::Write(LogLevel::LV_ERROR, "player script is not selected.");
             }
             if (!mainScript_.path.empty() && !playerScript_.path.empty())
             {
@@ -113,7 +113,7 @@ void PlayController::Reload()
     } catch (Log& log)
     {
         package_ = nullptr;
-        Logger::WriteLog(log);
+        Logger::Write(log);
     }
 }
 

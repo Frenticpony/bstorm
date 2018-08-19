@@ -41,8 +41,8 @@ GraphicDevice::GraphicDevice(HWND hWnd) :
             if (FAILED(d3D_->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_REF, hWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_FPU_PRESERVE | D3DCREATE_MULTITHREADED, &presentParams_, &d3DDevice_)))
             {
                 d3D_->Release();
-                throw Log(Log::Level::LV_ERROR)
-                    .SetMessage("failed to init graphic device.");
+                throw Log(LogLevel::LV_ERROR)
+                    .Msg("failed to init graphic device.");
             }
         }
     }
@@ -65,7 +65,7 @@ void GraphicDevice::Reset()
     safe_release(backBufferDepthStencilSurface_);
     if (FAILED(d3DDevice_->Reset(&presentParams_)))
     {
-        throw Log(Log::Level::LV_ERROR).SetMessage("failed to reset graphic device.");
+        throw Log(LogLevel::LV_ERROR).Msg("failed to reset graphic device.");
     }
     d3DDevice_->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &backBufferSurface_);
     d3DDevice_->GetDepthStencilSurface(&backBufferDepthStencilSurface_);

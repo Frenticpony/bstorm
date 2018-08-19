@@ -304,7 +304,7 @@ const ObjEnemyBossScene::Phase& ObjEnemyBossScene::GetCurrentPhase() const
 {
     if (!ExistPhase())
     {
-        throw Log(Log::Level::LV_ERROR).SetMessage("phase not exists, please send bug report.");
+        throw Log(LogLevel::LV_ERROR).Msg("phase not exists, please send bug report.");
     }
     const auto& phases = steps_.at(currentStep_);
     return phases.at(currentPhase_);
@@ -338,7 +338,7 @@ bool ObjEnemyBossScene::LoadNext()
                 script->NotifyEvent(EV_REQUEST_LIFE);
                 if (script->GetScriptResult()->GetType() == DnhValue::Type::NIL)
                 {
-                    Logger::WriteLog(Log::Level::LV_WARN, "enemy life hasn't been setted in @Event, set a default value 2000.");
+                    Logger::Write(LogLevel::LV_WARN, "enemy life hasn't been setted in @Event, set a default value 2000.");
                     phase.maxLife = phase.life = 2000.0f;
                 } else
                 {

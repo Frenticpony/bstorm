@@ -179,9 +179,9 @@ static int WriteLog(lua_State* L)
 static int RaiseError(lua_State* L)
 {
     std::string msg = DnhValue::ToStringU8(L, 1);
-    throw Log(Log::Level::LV_ERROR)
-        .SetMessage("RaiseError.")
-        .SetParam(Log::Param(Log::Param::Tag::TEXT, std::move(msg)));
+    throw Log(LogLevel::LV_ERROR)
+        .Msg("RaiseError.")
+        .Param(LogParam(LogParam::Tag::TEXT, std::move(msg)));
     return 0;
 }
 
@@ -191,9 +191,9 @@ static int assert(lua_State* L)
     std::string msg = DnhValue::ToStringU8(L, 2);
     if (!cond)
     {
-        throw Log(Log::Level::LV_ERROR)
-            .SetMessage("assertion failed.")
-            .SetParam(Log::Param(Log::Param::Tag::TEXT, std::move(msg)));
+        throw Log(LogLevel::LV_ERROR)
+            .Msg("assertion failed.")
+            .Param(LogParam(LogParam::Tag::TEXT, std::move(msg)));
     }
     return 0;
 }
@@ -497,9 +497,9 @@ static int CreateRenderTarget(lua_State* L)
         lua_pushboolean(L, true);
     } catch (Log& log)
     {
-        log.SetLevel(Log::Level::LV_WARN)
+        log.Level(LogLevel::LV_WARN)
             .AddSourcePos(GetSourcePos(L));
-        Logger::WriteLog(log);
+        Logger::Write(log);
         lua_pushboolean(L, false);
     }
     return 1;
@@ -657,9 +657,9 @@ static int GetTextureWidth(lua_State* L)
             lua_pushnumber(L, package->LoadTexture(name)->GetWidth());
         } catch (Log& log)
         {
-            log.SetLevel(Log::Level::LV_WARN)
+            log.Level(LogLevel::LV_WARN)
                 .AddSourcePos(GetSourcePos(L));
-            Logger::WriteLog(log);
+            Logger::Write(log);
             lua_pushnumber(L, 0);
         }
     }
@@ -680,9 +680,9 @@ static int GetTextureHeight(lua_State* L)
             lua_pushnumber(L, package->LoadTexture(name)->GetHeight());
         } catch (Log& log)
         {
-            log.SetLevel(Log::Level::LV_WARN)
+            log.Level(LogLevel::LV_WARN)
                 .AddSourcePos(GetSourcePos(L));
-            Logger::WriteLog(log);
+            Logger::Write(log);
             lua_pushnumber(L, 0);
         }
     }
@@ -5605,7 +5605,7 @@ static int c_predchar(lua_State* L)
 static int c_raiseerror(lua_State* L)
 {
     std::string msg = lua_tostring(L, 1);
-    throw Log(Log::Level::LV_ERROR).SetMessage(msg);
+    throw Log(LogLevel::LV_ERROR).Msg(msg);
     return 0;
 }
 
@@ -5629,9 +5629,9 @@ static int WrapException(lua_State* L, lua_CFunction func)
         auto srcPos = GetSourcePos(L);
         try
         {
-            throw Log(Log::Level::LV_ERROR)
-                .SetMessage("unexpected script runtime error occured.")
-                .SetParam(Log::Param(Log::Param::Tag::TEXT, e.what()))
+            throw Log(LogLevel::LV_ERROR)
+                .Msg("unexpected script runtime error occured.")
+                .Param(LogParam(LogParam::Tag::TEXT, e.what()))
                 .AddSourcePos(srcPos);
         } catch (...)
         {
@@ -5742,9 +5742,9 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
         {
             std::string msg = lua_tostring(L, -1);
             lua_pop(L, 1);
-            throw Log(Log::Level::LV_ERROR)
-                .SetMessage("runtime library error.")
-                .SetParam(Log::Param(Log::Param::Tag::TEXT, msg));
+            throw Log(LogLevel::LV_ERROR)
+                .Msg("runtime library error.")
+                .Param(LogParam(LogParam::Tag::TEXT, msg));
         }
 
         // 例外ラッパー

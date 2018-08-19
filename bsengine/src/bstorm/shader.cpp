@@ -12,9 +12,9 @@ Shader::Shader(const std::wstring& path, bool precompiled, IDirect3DDevice9* d3D
     if (FAILED(D3DXCreateEffectFromFile(d3DDevice_, path.c_str(), nullptr, nullptr, precompiled ? D3DXSHADER_SKIPVALIDATION : 0, nullptr, &(this->effect_), &buf)))
     {
         buf->Release();
-        throw Log(Log::Level::LV_ERROR)
-            .SetMessage(((char*)(buf->GetBufferPointer())))
-            .SetParam(Log::Param(Log::Param::Tag::SHADER, path));
+        throw Log(LogLevel::LV_ERROR)
+            .Msg(((char*)(buf->GetBufferPointer())))
+            .Param(LogParam(LogParam::Tag::SHADER, path));
     }
     safe_release(buf);
 }
@@ -28,7 +28,7 @@ void Shader::OnLostDevice()
 {
     if (FAILED(effect_->OnLostDevice()))
     {
-        throw Log(Log::Level::LV_ERROR).SetMessage("failed to release shader.");
+        throw Log(LogLevel::LV_ERROR).Msg("failed to release shader.");
     }
 }
 
@@ -36,7 +36,7 @@ void Shader::OnResetDevice()
 {
     if (FAILED(effect_->OnResetDevice()))
     {
-        throw Log(Log::Level::LV_ERROR).SetMessage("failed to reset shader.");
+        throw Log(LogLevel::LV_ERROR).Msg("failed to reset shader.");
     }
 }
 

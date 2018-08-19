@@ -5,31 +5,31 @@
 
 namespace bstorm
 {
-void Logger::WriteLog(Log& lg)
+void Logger::Write(Log& lg)
 {
     std::lock_guard<std::mutex> lock(mutex);
     if (logEnabled) logger->log(lg);
 }
 
-void Logger::WriteLog(Log&& lg)
+void Logger::Write(Log&& lg)
 {
     std::lock_guard<std::mutex> lock(mutex);
     if (logEnabled) logger->log(std::move(lg));
 }
 
-void Logger::WriteLog(Log::Level level, const std::string & text)
+void Logger::Write(LogLevel level, const std::string & text)
 {
     std::lock_guard<std::mutex> lock(mutex);
     if (logEnabled) logger->log(level, text);
 }
 
-void Logger::WriteLog(Log::Level level, const std::wstring & text)
+void Logger::Write(LogLevel level, const std::wstring & text)
 {
     std::lock_guard<std::mutex> lock(mutex);
     if (logEnabled) logger->log(level, ToUTF8(text));
 }
 
-void Logger::WriteLog(Log::Level level, std::string && text)
+void Logger::Write(LogLevel level, std::string && text)
 {
     std::lock_guard<std::mutex> lock(mutex);
     if (logEnabled) logger->log(level, std::move(text));
@@ -59,92 +59,92 @@ void Logger::SetEnable(bool enable)
     logEnabled = enable;
 }
 
-void Logger::log(Log::Level level, const std::string & text)
+void Logger::log(LogLevel level, const std::string & text)
 {
-    log(std::move(Log(level).SetMessage(text)));
+    log(std::move(Log(level).Msg(text)));
 }
 
-void Logger::log(Log::Level level, const std::wstring & text)
+void Logger::log(LogLevel level, const std::wstring & text)
 {
     log(level, ToUTF8(text));
 }
 
-void Logger::log(Log::Level level, std::string && text)
+void Logger::log(LogLevel level, std::string && text)
 {
-    log(std::move(Log(level).SetMessage(std::move(text))));
+    log(std::move(Log(level).Msg(std::move(text))));
 }
 
 std::shared_ptr<Logger> Logger::logger = std::make_shared<DummyLogger>();
 std::mutex Logger::mutex;
 bool Logger::logEnabled = true;
 
-Log::Param::Param(Tag tag, const std::string & text) :
+LogParam::LogParam(Tag tag, const std::string & text) :
     tag_(tag),
     text_(text)
 {
 }
 
-Log::Param::Param(Tag tag, const std::wstring & text) :
+LogParam::LogParam(Tag tag, const std::wstring & text) :
     tag_(tag),
     text_(ToUTF8(text))
 {
 }
 
-Log::Param::Param(Tag tag, std::string && text) :
+LogParam::LogParam(Tag tag, std::string && text) :
     tag_(tag),
     text_(std::move(text))
 {
 }
 
-const char * Log::GetLevelName(Level level)
+const char * Log::GetLevelName(LogLevel level)
 {
     switch (level)
     {
-        case Log::Level::LV_INFO: return "info";
-        case Log::Level::LV_WARN: return "warn";
-        case Log::Level::LV_ERROR: return "error";
-        case Log::Level::LV_SUCCESS: return "success";
-        case Log::Level::LV_DEBUG: return "debug";
-        case Log::Level::LV_USER: return "user";
+        case LogLevel::LV_INFO: return "info";
+        case LogLevel::LV_WARN: return "warn";
+        case LogLevel::LV_ERROR: return "error";
+        case LogLevel::LV_SUCCESS: return "success";
+        case LogLevel::LV_DEBUG: return "debug";
+        case LogLevel::LV_USER: return "user";
     }
     return "???";
 }
 
 Log::Log() :
-    level_(Level::LV_INFO)
+    level_(LogLevel::LV_INFO)
 {
 }
 
-Log::Log(Level level) : level_(level)
+Log::Log(LogLevel level) : level_(level)
 {
 }
 
-Log & Log::SetMessage(const std::string & text)
+Log & Log::Msg(const std::string & text)
 {
     msg_ = text;
     return *this;
 }
 
-Log & Log::SetMessage(const std::wstring & text)
+Log & Log::Msg(const std::wstring & text)
 {
-    return SetMessage(ToUTF8(text));
+    return Msg(ToUTF8(text));
 }
 
-Log & Log::SetMessage(std::string && text)
+Log & Log::Msg(std::string && text)
 {
     msg_ = std::move(text);
     return *this;
 }
 
-Log & Log::SetParam(const Param & param)
+Log & Log::Param(const LogParam & param)
 {
-    this->param_ = std::make_shared<Param>(param);
+    this->param_ = std::make_shared<LogParam>(param);
     return *this;
 }
 
-Log & Log::SetParam(Param && param)
+Log & Log::Param(LogParam && param)
 {
-    this->param_ = std::make_shared<Param>(std::move(param));
+    this->param_ = std::make_shared<LogParam>(std::move(param));
     return *this;
 }
 
@@ -154,7 +154,7 @@ Log & Log::AddSourcePos(const std::shared_ptr<SourcePos>& srcPos)
     return *this;
 }
 
-Log & Log::SetLevel(Level level)
+Log & Log::Level(LogLevel level)
 {
     this->level_ = level;
     return *this;
@@ -173,5 +173,69 @@ std::string Log::ToString() const
         s += " @ " + srcPosStack_[0].ToString();
     }
     return s;
+}
+
+Log LogInfo(const std::wstring& msg)
+{
+    return Log(LogLevel::LV_INFO)
+        .Msg(msg);
+}
+Log LogInfo(const std::string& msg)
+{
+    return Log(LogLevel::LV_INFO)
+        .Msg(msg);
+}
+Log LogInfo(std::string&& msg)
+{
+    return Log(LogLevel::LV_INFO)
+        .Msg(std::move(msg));
+}
+
+Log LogWarn(const std::wstring& msg)
+{
+    return Log(LogLevel::LV_WARN)
+        .Msg(msg);
+}
+Log LogWarn(const std::string& msg)
+{
+    return Log(LogLevel::LV_WARN)
+        .Msg(msg);
+}
+Log LogWarn(std::string&& msg)
+{
+    return Log(LogLevel::LV_WARN)
+        .Msg(std::move(msg));
+}
+
+Log LogError(const std::wstring& msg)
+{
+    return Log(LogLevel::LV_ERROR)
+        .Msg(msg);
+}
+Log LogError(const std::string& msg)
+{
+    return Log(LogLevel::LV_ERROR)
+        .Msg(msg);
+}
+Log LogError(std::string&& msg)
+{
+    return Log(LogLevel::LV_ERROR)
+        .Msg(std::move(msg));
+}
+
+Log LogDebug(const std::wstring& msg)
+{
+    return Log(LogLevel::LV_DEBUG)
+        .Msg(msg);
+}
+Log LogDebug(const std::string& msg)
+{
+    return Log(LogLevel::LV_DEBUG)
+        .Msg(msg);
+}
+Log LogDebug(std::string&& msg)
+{
+    return Log(LogLevel::LV_DEBUG)
+        .Msg(std::move(msg));
 }
 }

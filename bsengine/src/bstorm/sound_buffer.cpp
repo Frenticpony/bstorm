@@ -63,9 +63,9 @@ static IDirectSoundBuffer8* CreateSoundBuffer(size_t bufSize, const std::unique_
 failed_to_create:
     safe_release(dsTempBuffer);
     safe_release(dsBuffer);
-    throw Log(Log::Level::LV_ERROR)
-        .SetMessage("failed to create sound buffer.")
-        .SetParam(Log::Param(Log::Param::Tag::TEXT, stream->GetPath()));
+    throw Log(LogLevel::LV_ERROR)
+        .Msg("failed to create sound buffer.")
+        .Param(LogParam(LogParam::Tag::TEXT, stream->GetPath()));
 
 }
 

@@ -107,9 +107,9 @@ Renderer::Renderer(IDirect3DDevice9* dev) :
         // create vertex shader 2D
         if (FAILED(D3DXCompileShader(prim2DVertexShaderSrc, sizeof(prim2DVertexShaderSrc) - 1, nullptr, nullptr, "main", "vs_1_1", D3DXSHADER_PACKMATRIX_ROWMAJOR, &code, &error, nullptr)))
         {
-            throw Log(Log::Level::LV_ERROR)
-                .SetMessage("internal shader compile error.")
-                .SetParam(Log::Param(Log::Param::Tag::TEXT, (const char*)error->GetBufferPointer()));
+            throw Log(LogLevel::LV_ERROR)
+                .Msg("internal shader compile error.")
+                .Param(LogParam(LogParam::Tag::TEXT, (const char*)error->GetBufferPointer()));
         }
         d3DDevice_->CreateVertexShader((const DWORD*)code->GetBufferPointer(), &prim2DVertexShader_);
         safe_release(code);
@@ -118,9 +118,9 @@ Renderer::Renderer(IDirect3DDevice9* dev) :
         // create vertex shader 3D
         if (FAILED(D3DXCompileShader(prim3DVertexShaderSrc, sizeof(prim3DVertexShaderSrc) - 1, nullptr, nullptr, "main", "vs_1_1", D3DXSHADER_PACKMATRIX_ROWMAJOR, &code, &error, nullptr)))
         {
-            throw Log(Log::Level::LV_ERROR)
-                .SetMessage("internal shader compile error.")
-                .SetParam(Log::Param(Log::Param::Tag::TEXT, (const char*)error->GetBufferPointer()));
+            throw Log(LogLevel::LV_ERROR)
+                .Msg("internal shader compile error.")
+                .Param(LogParam(LogParam::Tag::TEXT, (const char*)error->GetBufferPointer()));
         }
         d3DDevice_->CreateVertexShader((const DWORD*)code->GetBufferPointer(), &prim3DVertexShader_);
         safe_release(code);
@@ -129,9 +129,9 @@ Renderer::Renderer(IDirect3DDevice9* dev) :
         // create vertex shader mesh
         if (FAILED(D3DXCompileShader(meshVertexShaderSrc, sizeof(meshVertexShaderSrc) - 1, nullptr, nullptr, "main", "vs_1_1", D3DXSHADER_PACKMATRIX_ROWMAJOR, &code, &error, nullptr)))
         {
-            throw Log(Log::Level::LV_ERROR)
-                .SetMessage("internal shader compile error.")
-                .SetParam(Log::Param(Log::Param::Tag::TEXT, (const char*)error->GetBufferPointer()));
+            throw Log(LogLevel::LV_ERROR)
+                .Msg("internal shader compile error.")
+                .Param(LogParam(LogParam::Tag::TEXT, (const char*)error->GetBufferPointer()));
         }
         d3DDevice_->CreateVertexShader((const DWORD*)code->GetBufferPointer(), &meshVertexShader_);
         safe_release(code);

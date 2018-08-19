@@ -65,8 +65,8 @@ static int yylex(MqoParser::semantic_type *yylval, MqoParser::location_type* yyl
 
 void MqoParser::error(const MqoParser::location_type& yylloc, const std::string& msg)
 {
-    throw Log(Log::Level::LV_ERROR)
-      .SetMessage(msg)
+    throw Log(LogLevel::LV_ERROR)
+      .Msg(msg)
       .AddSourcePos(std::make_shared<SourcePos>(yylloc.begin));
 }
 

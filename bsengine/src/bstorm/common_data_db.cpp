@@ -216,14 +216,14 @@ void CommonDataDB::SaveCommonDataArea(const DataAreaName& areaName, const std::w
     if (!fstream.good())
     {
         throw failed_to_save_common_data_area()
-            .SetParam(Log::Param(Log::Param::Tag::TEXT, path));
+            .Param(LogParam(LogParam::Tag::TEXT, path));
     }
     try
     {
         SaveCommonDataArea(areaName, fstream);
     } catch (Log& log)
     {
-        log.SetParam(Log::Param(Log::Param::Tag::TEXT, path));
+        log.Param(LogParam(LogParam::Tag::TEXT, path));
         throw log;
     }
 }
@@ -296,7 +296,7 @@ void CommonDataDB::LoadCommonDataArea(const DataAreaName& areaName, const std::w
         LoadCommonDataArea(areaName, stream);
     } catch (Log& log)
     {
-        log.SetParam(Log::Param(Log::Param::Tag::TEXT, path));
+        log.Param(LogParam(LogParam::Tag::TEXT, path));
         throw log;
     }
 }

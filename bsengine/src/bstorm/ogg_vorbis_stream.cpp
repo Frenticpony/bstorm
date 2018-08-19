@@ -45,17 +45,17 @@ OggVorbisStream::OggVorbisStream(const std::wstring & path) :
     fileStream_.open(path, std::ios::binary | std::ios::in);
     if (!fileStream_.good())
     {
-        throw Log(Log::Level::LV_ERROR)
-            .SetMessage("can't open file")
-            .SetParam(Log::Param(Log::Param::Tag::TEXT, path));
+        throw Log(LogLevel::LV_ERROR)
+            .Msg("can't open file")
+            .Param(LogParam(LogParam::Tag::TEXT, path));
     }
 
     ov_callbacks cbs{ is_read, is_seek, nullptr, is_tell };
     if (ov_open_callbacks(&fileStream_, &ovFile_, 0, 0, cbs) != 0)
     {
-        throw Log(Log::Level::LV_ERROR)
-            .SetMessage("illegal ogg vorbis format file.")
-            .SetParam(Log::Param(Log::Param::Tag::TEXT, path));
+        throw Log(LogLevel::LV_ERROR)
+            .Msg("illegal ogg vorbis format file.")
+            .Param(LogParam(LogParam::Tag::TEXT, path));
     }
 
     info_ = ov_info(&ovFile_, -1);

@@ -44,10 +44,10 @@ Texture::Texture(const std::wstring & path, const std::shared_ptr<GraphicDevice>
 Texture::~Texture()
 {
     safe_release(d3DTexture_);
-    Logger::WriteLog(std::move(
-        Log(Log::Level::LV_INFO)
-        .SetMessage("release texture.")
-        .SetParam(Log::Param(Log::Param::Tag::TEXTURE, path_))));
+    Logger::Write(std::move(
+        Log(LogLevel::LV_INFO)
+        .Msg("release texture.")
+        .Param(LogParam(LogParam::Tag::TEXTURE, path_))));
 }
 
 const std::wstring& Texture::GetPath() const
@@ -75,9 +75,9 @@ void Texture::Reload()
     auto texture = LoadTextureFromFile(path_, *graphicDevice_);
     if (texture == nullptr)
     {
-        throw Log(Log::Level::LV_ERROR)
-            .SetMessage("failed to load texture.")
-            .SetParam(Log::Param(Log::Param::Tag::TEXTURE, path_));
+        throw Log(LogLevel::LV_ERROR)
+            .Msg("failed to load texture.")
+            .Param(LogParam(LogParam::Tag::TEXTURE, path_));
     }
     d3DTexture_ = texture;
     GetD3DTextureSize(d3DTexture_, &width_, &height_);
@@ -127,9 +127,9 @@ const std::shared_ptr<Texture>& TextureStore::Load(const std::wstring & path)
         return cacheStore_.Get(uniqPath);
     }
     auto& texture = cacheStore_.Load(uniqPath, uniqPath, graphicDevice_);
-    Logger::WriteLog(std::move(
-        Log(Log::Level::LV_INFO).SetMessage(std::string("load texture."))
-        .SetParam(Log::Param(Log::Param::Tag::TEXTURE, uniqPath))));
+    Logger::Write(std::move(
+        Log(LogLevel::LV_INFO).Msg(std::string("load texture."))
+        .Param(LogParam(LogParam::Tag::TEXTURE, uniqPath))));
     return texture;
 }
 
@@ -138,9 +138,9 @@ void TextureStore::LoadInThread(const std::wstring & path)
     auto uniqPath = GetCanonicalPath(path);
     if (cacheStore_.Contains(uniqPath)) return;
     cacheStore_.LoadAsync(uniqPath, uniqPath, graphicDevice_);
-    Logger::WriteLog(std::move(
-        Log(Log::Level::LV_INFO).SetMessage(std::string("load texture (async)."))
-        .SetParam(Log::Param(Log::Param::Tag::TEXTURE, uniqPath))));
+    Logger::Write(std::move(
+        Log(LogLevel::LV_INFO).Msg(std::string("load texture (async)."))
+        .Param(LogParam(LogParam::Tag::TEXTURE, uniqPath))));
 }
 
 void TextureStore::SetReserveFlag(const std::wstring & path, bool reserve)

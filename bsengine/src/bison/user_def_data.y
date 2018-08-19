@@ -86,8 +86,8 @@ static int yylex(UserDefDataParser::semantic_type* yylval,  UserDefDataParser::l
 }
 
 void UserDefDataParser::error(const UserDefDataParser::location_type& yylloc, const std::string &msg) {
-    throw Log(Log::Level::LV_ERROR)
-      .SetMessage(msg)
+    throw Log(LogLevel::LV_ERROR)
+      .Msg(msg)
       .AddSourcePos(std::make_shared<SourcePos>(yylloc.begin));
 }
 }

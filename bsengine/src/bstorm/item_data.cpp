@@ -41,10 +41,10 @@ void ItemDataTable::Load(const std::wstring & path, const std::shared_ptr<Source
 {
     if (IsLoaded(path))
     {
-        Logger::WriteLog(std::move(
-            Log(Log::Level::LV_WARN)
-            .SetMessage("item data already loaded.")
-            .SetParam(Log::Param(Log::Param::Tag::ITEM_DATA, path))
+        Logger::Write(std::move(
+            Log(LogLevel::LV_WARN)
+            .Msg("item data already loaded.")
+            .Param(LogParam(LogParam::Tag::ITEM_DATA, path))
             .AddSourcePos(srcPos)));
     } else
     {
@@ -64,10 +64,10 @@ void ItemDataTable::Reload(const std::wstring & path, const std::shared_ptr<Sour
         table_.emplace(data.id, std::make_shared<ItemData>(data));
     }
     loadedPaths_.insert(uniqPath);
-    Logger::WriteLog(std::move(
-        Log(Log::Level::LV_INFO)
-        .SetMessage("load item data.")
-        .SetParam(Log::Param(Log::Param::Tag::ITEM_DATA, path))
+    Logger::Write(std::move(
+        Log(LogLevel::LV_INFO)
+        .Msg("load item data.")
+        .Param(LogParam(LogParam::Tag::ITEM_DATA, path))
         .AddSourcePos(srcPos)));
 }
 

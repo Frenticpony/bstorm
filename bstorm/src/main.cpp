@@ -112,7 +112,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
 
         if (packageMainScriptPath.empty())
         {
-            throw Log(Log::Level::LV_ERROR).SetMessage("package main script not specified.");
+            throw Log(LogLevel::LV_ERROR).Msg("package main script not specified.");
         }
 
         Engine engine(hWnd, &config.keyConfig);
@@ -164,7 +164,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
                         }
                         break;
                     case D3DERR_DRIVERINTERNALERROR:
-                        throw Log(Log::Level::LV_ERROR).SetMessage("graphic device internal error occured.");
+                        throw Log(LogLevel::LV_ERROR).Msg("graphic device internal error occured.");
                         break;
                 }
             }
@@ -172,11 +172,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
         package->Finalize();
     } catch (Log& log)
     {
-        Logger::WriteLog(log);
+        Logger::Write(log);
         MessageBoxW(hWnd, ToUnicode(log.ToString()).c_str(), L"Engine Error", MB_OK);
     } catch (const std::exception& e)
     {
-        Logger::WriteLog(Log::Level::LV_ERROR, e.what());
+        Logger::Write(LogLevel::LV_ERROR, e.what());
         MessageBoxW(hWnd, ToUnicode(e.what()).c_str(), L"Unexpected Error", MB_OK);
     }
     Logger::Shutdown();

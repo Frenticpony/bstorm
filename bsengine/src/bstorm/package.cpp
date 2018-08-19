@@ -141,10 +141,10 @@ Package::Package(HWND hWnd,
 
 Package::~Package()
 {
-    Logger::WriteLog(std::move(
-        Log(Log::Level::LV_INFO)
-        .SetMessage("close package.")
-        .SetParam(Log::Param(Log::Param::Tag::SCRIPT, GetMainScriptPath()))));
+    Logger::Write(std::move(
+        Log(LogLevel::LV_INFO)
+        .Msg("close package.")
+        .Param(LogParam(LogParam::Tag::SCRIPT, GetMainScriptPath()))));
 }
 
 void Package::TickFrame()
@@ -344,10 +344,10 @@ int Package::GetMouseMoveZ()
 
 void Package::WriteLog(const std::string && msg, const std::shared_ptr<SourcePos>& srcPos)
 {
-    Logger::WriteLog(std::move(
-        Log(Log::Level::LV_USER)
-        .SetMessage(std::move(msg))
-        .AddSourcePos(srcPos)));
+    Logger::Write(Log(LogLevel::LV_USER)
+                  .Msg(std::move(msg))
+                  .AddSourcePos(srcPos)
+                  .move());
 }
 
 std::wstring Package::GetCurrentDateTimeS()
@@ -461,10 +461,10 @@ bool Package::InstallFont(const std::wstring & path, const std::shared_ptr<Sourc
     bool result = bstorm::InstallFont(path);
     if (!result)
     {
-        Logger::WriteLog(std::move(
-            Log(Log::Level::LV_WARN)
-            .SetMessage("failed to install font.")
-            .SetParam(Log::Param(Log::Param::Tag::TEXT, path))
+        Logger::Write(std::move(
+            Log(LogLevel::LV_WARN)
+            .Msg("failed to install font.")
+            .Param(LogParam(LogParam::Tag::TEXT, path))
             .AddSourcePos(srcPos)));
     }
     return result;
@@ -476,10 +476,10 @@ std::shared_ptr<RenderTarget> Package::CreateRenderTarget(const std::wstring & n
     renderTarget->SetViewport(0, 0, GetScreenWidth(), GetScreenHeight());
     renderTargets_[name] = renderTarget;
     lostableGraphicResourceManager_->AddResource(renderTarget);
-    Logger::WriteLog(std::move(
-        Log(Log::Level::LV_INFO)
-        .SetMessage("create render target.")
-        .SetParam(Log::Param(Log::Param::Tag::RENDER_TARGET, name))
+    Logger::Write(std::move(
+        Log(LogLevel::LV_INFO)
+        .Msg("create render target.")
+        .Param(LogParam(LogParam::Tag::RENDER_TARGET, name))
         .AddSourcePos(srcPos)));
     return renderTarget;
 }
@@ -490,10 +490,10 @@ void Package::RemoveRenderTarget(const std::wstring & name, const std::shared_pt
     if (it != renderTargets_.end())
     {
         renderTargets_.erase(it);
-        Logger::WriteLog(std::move(
-            Log(Log::Level::LV_INFO)
-            .SetMessage("remove render target.")
-            .SetParam(Log::Param(Log::Param::Tag::RENDER_TARGET, name))
+        Logger::Write(std::move(
+            Log(LogLevel::LV_INFO)
+            .Msg("remove render target.")
+            .Param(LogParam(LogParam::Tag::RENDER_TARGET, name))
             .AddSourcePos(srcPos)));
     }
 }
@@ -556,10 +556,10 @@ void Package::SaveRenderedTextureA2(const std::wstring & name, const std::wstrin
             return;
         }
     }
-    Logger::WriteLog(std::move(
-        Log(Log::Level::LV_WARN)
-        .SetMessage("failed to save render target.")
-        .SetParam(Log::Param(Log::Param::Tag::RENDER_TARGET, name))
+    Logger::Write(std::move(
+        Log(LogLevel::LV_WARN)
+        .Msg("failed to save render target.")
+        .Param(LogParam(LogParam::Tag::RENDER_TARGET, name))
         .AddSourcePos(srcPos)));
 }
 
@@ -578,12 +578,12 @@ void Package::SaveSnapShotA2(const std::wstring & path, int left, int top, int r
         SaveRenderedTextureA2(SNAP_SHOT_RENDER_TARGET_NAME, path, left, top, right, bottom, srcPos);
     } catch (Log& log)
     {
-        log.SetLevel(Log::Level::LV_WARN).AddSourcePos(srcPos);
-        Logger::WriteLog(log);
-        Logger::WriteLog(std::move(
-            Log(Log::Level::LV_WARN)
-            .SetMessage("failed to create snap shot.")
-            .SetParam(Log::Param(Log::Param::Tag::TEXT, path))
+        log.Level(LogLevel::LV_WARN).AddSourcePos(srcPos);
+        Logger::Write(log);
+        Logger::Write(std::move(
+            Log(LogLevel::LV_WARN)
+            .Msg("failed to create snap shot.")
+            .Param(LogParam(LogParam::Tag::TEXT, path))
             .AddSourcePos(srcPos)));
     }
     RemoveRenderTarget(SNAP_SHOT_RENDER_TARGET_NAME, srcPos);
@@ -1019,7 +1019,7 @@ bool Package::SaveCommonDataAreaA1(const std::wstring & areaName) const
         commonDataDB_->SaveCommonDataArea(areaName, GetDefaultCommonDataSavePath(areaName));
     } catch (Log& log)
     {
-        Logger::WriteLog(std::move(log.SetLevel(Log::Level::LV_WARN)));
+        Logger::Write(std::move(log.Level(LogLevel::LV_WARN)));
         return false;
     }
     return true;
@@ -1032,7 +1032,7 @@ bool Package::LoadCommonDataAreaA1(const std::wstring & areaName)
         commonDataDB_->LoadCommonDataArea(areaName, GetDefaultCommonDataSavePath(areaName));
     } catch (Log& log)
     {
-        Logger::WriteLog(std::move(log.SetLevel(Log::Level::LV_WARN)));
+        Logger::Write(std::move(log.Level(LogLevel::LV_WARN)));
         return false;
     }
     return true;
@@ -1045,7 +1045,7 @@ bool Package::SaveCommonDataAreaA2(const std::wstring & areaName, const std::wst
         commonDataDB_->SaveCommonDataArea(areaName, path);
     } catch (Log& log)
     {
-        Logger::WriteLog(std::move(log.SetLevel(Log::Level::LV_WARN)));
+        Logger::Write(std::move(log.Level(LogLevel::LV_WARN)));
         return false;
     }
     return true;
@@ -1058,7 +1058,7 @@ bool Package::LoadCommonDataAreaA2(const std::wstring & areaName, const std::wst
         commonDataDB_->LoadCommonDataArea(areaName, path);
     } catch (Log& log)
     {
-        Logger::WriteLog(std::move(log.SetLevel(Log::Level::LV_WARN)));
+        Logger::Write(std::move(log.Level(LogLevel::LV_WARN)));
         return false;
     }
     return true;
@@ -1383,9 +1383,9 @@ std::shared_ptr<ObjEnemyBossScene> Package::CreateObjEnemyBossScene(const std::s
     {
         if (!bossScene->IsDead())
         {
-            Logger::WriteLog(std::move(
-                Log(Log::Level::LV_WARN)
-                .SetMessage("boss scene object already exists.")
+            Logger::Write(std::move(
+                Log(LogLevel::LV_WARN)
+                .Msg("boss scene object already exists.")
                 .AddSourcePos(srcPos)));
             return bossScene;
         }
@@ -1602,12 +1602,12 @@ ScriptInfo Package::GetScriptInfo(const std::wstring & path, const std::shared_p
         return ScanDnhScriptInfo(path, fileLoader_);
     } catch (Log& log)
     {
-        log.SetLevel(Log::Level::LV_WARN).AddSourcePos(srcPos);
-        Logger::WriteLog(log);
-        Logger::WriteLog(std::move(
-            Log(Log::Level::LV_WARN)
-            .SetMessage("failed to load script info.")
-            .SetParam(Log::Param(Log::Param::Tag::SCRIPT, path))
+        log.Level(LogLevel::LV_WARN).AddSourcePos(srcPos);
+        Logger::Write(log);
+        Logger::Write(std::move(
+            Log(LogLevel::LV_WARN)
+            .Msg("failed to load script info.")
+            .Param(LogParam(LogParam::Tag::SCRIPT, path))
             .AddSourcePos(srcPos)));
         return ScriptInfo();
     }
@@ -1772,10 +1772,10 @@ void Package::StartShotScript(const std::wstring & path, const std::shared_ptr<S
 {
     if (IsStageFinished())
     {
-        Logger::WriteLog(std::move(
-            Log(Log::Level::LV_WARN)
-            .SetMessage("shot script is only available in stage.")
-            .SetParam(Log::Param(Log::Param::Tag::SCRIPT, GetCanonicalPath(path)))
+        Logger::Write(std::move(
+            Log(LogLevel::LV_WARN)
+            .Msg("shot script is only available in stage.")
+            .Param(LogParam(LogParam::Tag::SCRIPT, GetCanonicalPath(path)))
             .AddSourcePos(srcPos)));
         return;
     }
@@ -1964,10 +1964,10 @@ void Package::StartItemScript(const std::wstring & path, const std::shared_ptr<S
 {
     if (IsStageFinished())
     {
-        Logger::WriteLog(std::move(
-            Log(Log::Level::LV_WARN)
-            .SetMessage("item script is only available in stage.")
-            .SetParam(Log::Param(Log::Param::Tag::SCRIPT, GetCanonicalPath(path)))
+        Logger::Write(std::move(
+            Log(LogLevel::LV_WARN)
+            .Msg("item script is only available in stage.")
+            .Param(LogParam(LogParam::Tag::SCRIPT, GetCanonicalPath(path)))
             .AddSourcePos(srcPos)));
         return;
     }
@@ -2042,10 +2042,10 @@ void Package::FinalizeStageScene()
 void Package::Start()
 {
     packageStartTime_ = std::make_shared<TimePoint>();
-    Logger::WriteLog(std::move(
-        Log(Log::Level::LV_INFO)
-        .SetMessage("start package.")
-        .SetParam(Log::Param(Log::Param::Tag::SCRIPT, GetMainScriptPath()))));
+    Logger::Write(std::move(
+        Log(LogLevel::LV_INFO)
+        .Msg("start package.")
+        .Param(LogParam(LogParam::Tag::SCRIPT, GetMainScriptPath()))));
     auto script = scriptManager_->Compile(packageMainScriptInfo_.path, ScriptType::Value::PACKAGE, packageMainScriptInfo_.version, shared_from_this(), nullptr);
     packageMainScript_ = script;
     script->RunInitialize();
@@ -2125,8 +2125,8 @@ void Package::SetStageMainScript(const std::wstring & path, const std::shared_pt
         stageMainScriptInfo_ = ScanDnhScriptInfo(path, fileLoader_);
     } catch (Log& log)
     {
-        log.SetLevel(Log::Level::LV_WARN).AddSourcePos(srcPos);
-        Logger::WriteLog(log);
+        log.Level(LogLevel::LV_WARN).AddSourcePos(srcPos);
+        Logger::Write(log);
         stageMainScriptInfo_ = ScriptInfo();
         stageMainScriptInfo_.path = path;
     }
@@ -2139,8 +2139,8 @@ void Package::SetStagePlayerScript(const std::wstring & path, const std::shared_
         stagePlayerScriptInfo_ = ScanDnhScriptInfo(path, fileLoader_);
     } catch (Log& log)
     {
-        log.SetLevel(Log::Level::LV_WARN).AddSourcePos(srcPos);
-        Logger::WriteLog(log);
+        log.Level(LogLevel::LV_WARN).AddSourcePos(srcPos);
+        Logger::Write(log);
         stageMainScriptInfo_ = ScriptInfo();
         stageMainScriptInfo_.path = path;
     }
@@ -2245,9 +2245,9 @@ void Package::StartStageScene(const std::shared_ptr<SourcePos>& srcPos)
     objLayerList_->SetRenderPriority(player, DEFAULT_PLAYER_RENDER_PRIORITY);
     player->AddIntersectionToItem();
     playerObj_ = player;
-    Logger::WriteLog(std::move(
-        Log(Log::Level::LV_INFO)
-        .SetMessage("create player object.")
+    Logger::Write(std::move(
+        Log(LogLevel::LV_INFO)
+        .Msg("create player object.")
         .AddSourcePos(srcPos)));
 
     auto playerScript = scriptManager_->Compile(stagePlayerScriptInfo_.path, ScriptType::Value::PLAYER, stagePlayerScriptInfo_.version, shared_from_this(), srcPos);
@@ -2286,9 +2286,9 @@ void Package::StartStageScene(const std::shared_ptr<SourcePos>& srcPos)
             bgm->Play();
         } catch (Log& log)
         {
-            log.SetLevel(Log::Level::LV_WARN);
+            log.Level(LogLevel::LV_WARN);
             log.AddSourcePos(srcPos);
-            Logger::WriteLog(log);
+            Logger::Write(log);
         }
     }
 }

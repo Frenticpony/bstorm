@@ -4,10 +4,6 @@
 
 namespace bstorm
 {
-Log LogError(const std::wstring& msg);
-Log LogError(const std::string& msg);
-Log LogError(std::string&& msg);
-
 // CommonData
 Log cant_open_common_data_file(const std::wstring& filePath);
 Log failed_to_save_common_data_area();

@@ -10,9 +10,9 @@ FileLogger::FileLogger(const std::wstring & filePath, const std::shared_ptr<Logg
     file_.open(filePath, std::ios::app);
     if (!file_.good())
     {
-        throw Log(Log::Level::LV_ERROR)
-            .SetMessage("can't open log file.")
-            .SetParam(Log::Param(Log::Param::Tag::TEXT, filePath));
+        throw Log(LogLevel::LV_ERROR)
+            .Msg("can't open log file.")
+            .Param(LogParam(LogParam::Tag::TEXT, filePath));
     }
 }
 
@@ -23,7 +23,7 @@ FileLogger::~FileLogger()
 
 static void logToFile(const Log& lg, std::ofstream& file)
 {
-    if (lg.GetLevel() == Log::Level::LV_USER) return;
+    if (lg.Level() == LogLevel::LV_USER) return;
     {
         // date
         std::string date(23, '\0');
@@ -34,7 +34,7 @@ static void logToFile(const Log& lg, std::ofstream& file)
     }
     {
         // level tag
-        file << "[" << Log::GetLevelName(lg.GetLevel()) << "] ";
+        file << "[" << Log::GetLevelName(lg.Level()) << "] ";
     }
     file << lg.ToString() << std::endl;
 }

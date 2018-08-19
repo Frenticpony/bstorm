@@ -87,7 +87,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
                 Logger::Init(std::make_shared<FileLogger>(logFilePath, logWindow));
             } catch (Log& log)
             {
-                log.SetLevel(Log::Level::LV_WARN);
+                log.Level(LogLevel::LV_WARN);
                 logWindow->log(log);
             }
         }
@@ -280,11 +280,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
         }
     } catch (Log& log)
     {
-        Logger::WriteLog(log);
+        Logger::Write(log);
         MessageBoxW(hWnd, ToUnicode(log.ToString()).c_str(), L"Engine Error", MB_OK);
     } catch (const std::exception& e)
     {
-        Logger::WriteLog(Log::Level::LV_ERROR, e.what());
+        Logger::Write(LogLevel::LV_ERROR, e.what());
         MessageBoxW(hWnd, ToUnicode(e.what()).c_str(), L"Unexpected Error", MB_OK);
     }
     Logger::Shutdown();

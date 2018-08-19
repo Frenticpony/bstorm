@@ -116,18 +116,18 @@ Mesh::Mesh(const std::wstring& path, const std::shared_ptr<TextureStore>& textur
         CreateMeshMaterials(*mqo, textureStore, materials);
     } else
     {
-        throw Log(Log::Level::LV_ERROR)
-            .SetMessage("failed to load mesh.")
-            .SetParam(Log::Param(Log::Param::Tag::TEXT, path));
+        throw Log(LogLevel::LV_ERROR)
+            .Msg("failed to load mesh.")
+            .Param(LogParam(LogParam::Tag::TEXT, path));
     }
 }
 
 Mesh::~Mesh()
 {
-    Logger::WriteLog(std::move(
-        Log(Log::Level::LV_INFO)
-        .SetMessage("release mesh.")
-        .SetParam(Log::Param(Log::Param::Tag::MESH, path_))));
+    Logger::Write(std::move(
+        Log(LogLevel::LV_INFO)
+        .Msg("release mesh.")
+        .Param(LogParam(LogParam::Tag::MESH, path_))));
 }
 
 
@@ -142,9 +142,9 @@ const std::shared_ptr<Mesh>& MeshStore::Load(const std::wstring & path)
     const auto ext = GetLowerExt(path);
     if (ext != L".mqo")
     {
-        throw Log(Log::Level::LV_ERROR)
-            .SetMessage("this file format is not supported.")
-            .SetParam(Log::Param(Log::Param::Tag::TEXT, path));
+        throw Log(LogLevel::LV_ERROR)
+            .Msg("this file format is not supported.")
+            .Param(LogParam(LogParam::Tag::TEXT, path));
     }
 
     auto uniqPath = GetCanonicalPath(path);
@@ -153,9 +153,9 @@ const std::shared_ptr<Mesh>& MeshStore::Load(const std::wstring & path)
         return cacheStore_.Get(uniqPath);
     }
     auto & mesh = cacheStore_.Load(uniqPath, uniqPath, textureStore_, fileLoader_);
-    Logger::WriteLog(std::move(
-        Log(Log::Level::LV_INFO).SetMessage("load mesh.")
-        .SetParam(Log::Param(Log::Param::Tag::MESH, path))));
+    Logger::Write(std::move(
+        Log(LogLevel::LV_INFO).Msg("load mesh.")
+        .Param(LogParam(LogParam::Tag::MESH, path))));
     return mesh;
 }
 

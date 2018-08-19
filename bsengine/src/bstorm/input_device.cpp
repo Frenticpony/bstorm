@@ -42,11 +42,11 @@ InputDevice::InputDevice(HWND hWnd) :
     {
         if (FAILED(DirectInput8Create(GetModuleHandle(NULL), DIRECTINPUT_VERSION, IID_IDirectInput8, (LPVOID *)&dInput_, NULL)))
         {
-            throw Log(Log::Level::LV_ERROR).SetMessage("failed to init input device.");
+            throw Log(LogLevel::LV_ERROR).Msg("failed to init input device.");
         }
 
-        auto keyboardInitFailed = Log(Log::Level::LV_ERROR).SetMessage("failed to init keyboard.");
-        auto mouseInitFailed = Log(Log::Level::LV_ERROR).SetMessage("failed to init mouse.");
+        auto keyboardInitFailed = Log(LogLevel::LV_ERROR).Msg("failed to init keyboard.");
+        auto mouseInitFailed = Log(LogLevel::LV_ERROR).Msg("failed to init mouse.");
 
         // init keyboard
         if (FAILED(dInput_->CreateDevice(GUID_SysKeyboard, &keyboardDevice_, NULL)))

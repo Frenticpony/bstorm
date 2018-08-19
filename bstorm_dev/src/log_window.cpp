@@ -54,34 +54,34 @@ void LogWindow::log(Log&& lg) noexcept(false)
     scrollToBottom = true;
 }
 
-static const char* getLogLevelIcon(Log::Level level)
+static const char* getLogLevelIcon(LogLevel level)
 {
     switch (level)
     {
-        case Log::Level::LV_INFO: return ICON_FA_INFO_CIRCLE;
-        case Log::Level::LV_WARN: return ICON_FA_EXCLAMATION_TRIANGLE;
-        case Log::Level::LV_ERROR: return ICON_FA_TIMES_CIRCLE;
-        case Log::Level::LV_SUCCESS: return ICON_FA_CHECK_CIRCLE;
-        case Log::Level::LV_DEBUG: return ICON_FA_COG;
-        case Log::Level::LV_USER: return ICON_FA_COMMENT;
+        case LogLevel::LV_INFO: return ICON_FA_INFO_CIRCLE;
+        case LogLevel::LV_WARN: return ICON_FA_EXCLAMATION_TRIANGLE;
+        case LogLevel::LV_ERROR: return ICON_FA_TIMES_CIRCLE;
+        case LogLevel::LV_SUCCESS: return ICON_FA_CHECK_CIRCLE;
+        case LogLevel::LV_DEBUG: return ICON_FA_COG;
+        case LogLevel::LV_USER: return ICON_FA_COMMENT;
     }
     return ICON_FA_QUESTION_CIRCLE_O;
 }
 
-static ImU32 getLogLevelColor(Log::Level level)
+static ImU32 getLogLevelColor(LogLevel level)
 {
     switch (level)
     {
-        case Log::Level::LV_WARN: return IM_COL32(0xF8, 0xFF, 0x00, 0xFF);
-        case Log::Level::LV_ERROR: return IM_COL32(0xFF, 0x00, 0x19, 0xFF);
-        case Log::Level::LV_SUCCESS: return IM_COL32(0x0B, 0xFF, 0x00, 0xFF);
-        case Log::Level::LV_DEBUG: return IM_COL32(0x00, 0xFF, 0xE1, 0xFF);
-        case Log::Level::LV_USER: return IM_COL32(0xFF, 0x6E, 0x00, 0xFF);
+        case LogLevel::LV_WARN: return IM_COL32(0xF8, 0xFF, 0x00, 0xFF);
+        case LogLevel::LV_ERROR: return IM_COL32(0xFF, 0x00, 0x19, 0xFF);
+        case LogLevel::LV_SUCCESS: return IM_COL32(0x0B, 0xFF, 0x00, 0xFF);
+        case LogLevel::LV_DEBUG: return IM_COL32(0x00, 0xFF, 0xE1, 0xFF);
+        case LogLevel::LV_USER: return IM_COL32(0xFF, 0x6E, 0x00, 0xFF);
     }
     return IM_COL32_WHITE;
 }
 
-static void showLevelMenu(Log::Level level, bool* selected)
+static void showLevelMenu(LogLevel level, bool* selected)
 {
     std::string icon = getLogLevelIcon(level);
     std::string name = Log::GetLevelName(level);
@@ -94,8 +94,8 @@ static void showLevelMenu(Log::Level level, bool* selected)
 
 static bool matchLog(const std::string& searchText, const Log& log)
 {
-    if (IsMatchString(searchText, log.GetMessage())) return true;
-    if (log.GetParam() && IsMatchString(searchText, log.GetParam()->GetText())) return true;
+    if (IsMatchString(searchText, log.Msg())) return true;
+    if (log.Param() && IsMatchString(searchText, log.Param()->GetText())) return true;
     return false;
 }
 
@@ -126,10 +126,10 @@ void LogWindow::draw()
                     }
                     ImGui::PopItemFlag();
                 }
-                showLevelMenu(Log::Level::LV_INFO, &showInfoLevel);
-                showLevelMenu(Log::Level::LV_WARN, &showWarnLevel);
-                showLevelMenu(Log::Level::LV_ERROR, &showErrorLevel);
-                showLevelMenu(Log::Level::LV_USER, &showUserLevel);
+                showLevelMenu(LogLevel::LV_INFO, &showInfoLevel);
+                showLevelMenu(LogLevel::LV_WARN, &showWarnLevel);
+                showLevelMenu(LogLevel::LV_ERROR, &showErrorLevel);
+                showLevelMenu(LogLevel::LV_USER, &showUserLevel);
                 ImGui::EndMenu();
             }
             ImGui::EndMenuBar();
@@ -160,55 +160,55 @@ void LogWindow::draw()
                         continue;
                     }
                 }
-                switch (log.GetLevel())
+                switch (log.Level())
                 {
                     // level filter
-                    case Log::Level::LV_INFO: if (!showInfoLevel) continue; break;
-                    case Log::Level::LV_WARN: if (!showWarnLevel) continue; break;
-                    case Log::Level::LV_ERROR: if (!showErrorLevel) continue; break;
-                    case Log::Level::LV_SUCCESS: if (!showInfoLevel) continue; break;
-                    case Log::Level::LV_DEBUG: if (!showInfoLevel) continue; break;
-                    case Log::Level::LV_USER: if (!showUserLevel) continue; break;
+                    case LogLevel::LV_INFO: if (!showInfoLevel) continue; break;
+                    case LogLevel::LV_WARN: if (!showWarnLevel) continue; break;
+                    case LogLevel::LV_ERROR: if (!showErrorLevel) continue; break;
+                    case LogLevel::LV_SUCCESS: if (!showInfoLevel) continue; break;
+                    case LogLevel::LV_DEBUG: if (!showInfoLevel) continue; break;
+                    case LogLevel::LV_USER: if (!showUserLevel) continue; break;
                 }
                 ImGui::PushID(logIdx); // ここ以降にbreak, continueを書かない
                 ImGui::Columns(5, NULL, false);
                 const float iconColWidth = defaultIconColWidth;
                 const float srcPosColWidth = log.GetSourcePosStack().empty() ? 0.0f : defaultSrcPosColWidth;
                 const float copyColWidth = defaultCopyColWidth;
-                const float msgColWidth = log.GetParam() ?
+                const float msgColWidth = log.Param() ?
                     (availWidth - iconColWidth - defaultSrcPosColWidth - copyColWidth) * 0.3f :
                     (availWidth - iconColWidth - srcPosColWidth - copyColWidth);
-                const float paramColWidth = log.GetParam() ? (availWidth - iconColWidth - msgColWidth - srcPosColWidth - copyColWidth) : 0.0f;
+                const float paramColWidth = log.Param() ? (availWidth - iconColWidth - msgColWidth - srcPosColWidth - copyColWidth) : 0.0f;
                 ImGui::SetColumnWidth(0, iconColWidth);
                 ImGui::SetColumnWidth(1, msgColWidth);
                 ImGui::SetColumnWidth(2, paramColWidth);
                 ImGui::SetColumnWidth(3, srcPosColWidth);
                 ImGui::SetColumnWidth(4, copyColWidth);
-                ImGui::PushStyleColor(ImGuiCol_Text, getLogLevelColor(log.GetLevel()));
-                ImGui::Text(getLogLevelIcon(log.GetLevel()));
+                ImGui::PushStyleColor(ImGuiCol_Text, getLogLevelColor(log.Level()));
+                ImGui::Text(getLogLevelIcon(log.Level()));
                 ImGui::NextColumn();
                 {
                     // msg
-                    ImGui::TextWrapped(log.GetMessage().c_str());
+                    ImGui::TextWrapped(log.Msg().c_str());
                 }
                 ImGui::PopStyleColor();
                 ImGui::NextColumn();
                 {
                     // param
-                    if (log.GetParam())
+                    if (log.Param())
                     {
                         ImU32 color;
-                        switch (log.GetParam()->GetTag())
+                        switch (log.Param()->GetTag())
                         {
-                            case Log::Param::Tag::TEXTURE:
-                            case Log::Param::Tag::PLAYER_SHOT_DATA:
-                            case Log::Param::Tag::ENEMY_SHOT_DATA:
-                            case Log::Param::Tag::ITEM_DATA:
-                            case Log::Param::Tag::MESH:
-                            case Log::Param::Tag::SCRIPT:
-                            case Log::Param::Tag::SOUND:
-                            case Log::Param::Tag::RENDER_TARGET:
-                            case Log::Param::Tag::SHADER:
+                            case LogParam::Tag::TEXTURE:
+                            case LogParam::Tag::PLAYER_SHOT_DATA:
+                            case LogParam::Tag::ENEMY_SHOT_DATA:
+                            case LogParam::Tag::ITEM_DATA:
+                            case LogParam::Tag::MESH:
+                            case LogParam::Tag::SCRIPT:
+                            case LogParam::Tag::SOUND:
+                            case LogParam::Tag::RENDER_TARGET:
+                            case LogParam::Tag::SHADER:
                                 color = IM_COL32(0x00, 0x85, 0xFF, 0xFF);
                                 break;
                             default:
@@ -216,7 +216,7 @@ void LogWindow::draw()
                                 break;
                         }
                         ImGui::PushStyleColor(ImGuiCol_Text, color);
-                        ImGui::TextWrapped(log.GetParam()->GetText().c_str());
+                        ImGui::TextWrapped(log.Param()->GetText().c_str());
                         ImGui::PopStyleColor();
                     }
                 }

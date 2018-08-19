@@ -75,9 +75,9 @@ void RenderTarget::OnResetDevice()
 {
     if (textureSurface_ != nullptr || textureDepthStencilSurface_ != nullptr) return;
 
-    Log err = Log(Log::Level::LV_ERROR)
-        .SetMessage("failed to create render target.")
-        .SetParam(Log::Param(Log::Param::Tag::RENDER_TARGET, name_));
+    Log err = Log(LogLevel::LV_ERROR)
+        .Msg("failed to create render target.")
+        .Param(LogParam(LogParam::Tag::RENDER_TARGET, name_));
 
     if (FAILED(d3DDevice_->CreateTexture(
         width_,

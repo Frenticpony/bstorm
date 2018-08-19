@@ -30,9 +30,9 @@ public :
         fp_ = loader_->OpenFile(*filePath_);
         if (fp_ == NULL)
         {
-            throw Log(Log::Level::LV_ERROR)
+            throw Log(LogLevel::LV_ERROR)
               .SetMessage("can't open file.")
-              .SetParam(Log::Param(Log::Param::Tag::TEXT, path));
+              .SetParam(LogParam(LogParam::Tag::TEXT, path));
         }
         in(fp_);
     }
@@ -141,9 +141,9 @@ newline \r?\n
 }
 
 . {
-    throw Log(Log::Level::LV_ERROR)
+    throw Log(LogLevel::LV_ERROR)
       .SetMessage("found illegal token.")
-      .SetParam(Log::Param(Log::Param::Tag::TEXT, str()))
+      .SetParam(LogParam(LogParam::Tag::TEXT, str()))
       .AddSourcePos(std::make_shared<SourcePos>(GetSourcePos()));
 }
 

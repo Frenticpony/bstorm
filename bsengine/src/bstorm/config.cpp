@@ -27,7 +27,7 @@ void read_value(const char* name, T& dst, const json& j, bool rethrowException =
         {
             throw;
         }
-        Logger::WriteLog(Log::Level::LV_WARN, "config property '" + std::string(name) + "' can't load from file, set a default value.");
+        Logger::Write(LogLevel::LV_WARN, "config property '" + std::string(name) + "' can't load from file, set a default value.");
     }
 }
 
@@ -128,11 +128,11 @@ conf::BstormConfig LoadBstormConfig(const std::string & path, bool isBinaryForma
             }
         } else
         {
-            Logger::WriteLog(Log::Level::LV_WARN, "can't open config file, load default settings.");
+            Logger::Write(LogLevel::LV_WARN, "can't open config file, load default settings.");
         }
     } catch (...)
     {
-        Logger::WriteLog(Log::Level::LV_WARN, "failed to load config file, load default settings.");
+        Logger::Write(LogLevel::LV_WARN, "failed to load config file, load default settings.");
     }
     return config;
 }

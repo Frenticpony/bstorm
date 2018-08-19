@@ -30,9 +30,9 @@ public :
         fp_ = loader_->OpenFile(*filePath_);
         if (fp_ == nullptr)
         {
-            throw Log(Log::Level::LV_ERROR)
+            throw Log(LogLevel::LV_ERROR)
               .SetMessage("can't open file")
-              .SetParam(Log::Param(Log::Param::Tag::TEXT, path));
+              .SetParam(LogParam(LogParam::Tag::TEXT, path));
         }
         in(fp_);
     }

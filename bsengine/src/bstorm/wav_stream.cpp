@@ -14,14 +14,14 @@ WavStream::WavStream(const std::wstring & path) :
     fileStream_.open(path, std::ios::binary | std::ios::in);
     if (!fileStream_.good())
     {
-        throw Log(Log::Level::LV_ERROR)
-            .SetMessage("can't open file")
-            .SetParam(Log::Param(Log::Param::Tag::TEXT, path));
+        throw Log(LogLevel::LV_ERROR)
+            .Msg("can't open file")
+            .Param(LogParam(LogParam::Tag::TEXT, path));
     }
 
-    auto illegal_wave_format = Log(Log::Level::LV_ERROR)
-        .SetMessage("illegal wave format file.")
-        .SetParam(Log::Param(Log::Param::Tag::TEXT, path));
+    auto illegal_wave_format = Log(LogLevel::LV_ERROR)
+        .Msg("illegal wave format file.")
+        .Param(LogParam(LogParam::Tag::TEXT, path));
 
     // read riff header
     fileStream_.read((char*)&riffHeader_, sizeof(riffHeader_));
