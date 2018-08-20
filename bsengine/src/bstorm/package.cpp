@@ -1343,6 +1343,7 @@ std::shared_ptr<ObjItem> Package::CreateItemA2(int itemType, float x, float y, f
     return item;
 }
 
+/*
 std::shared_ptr<ObjItem> Package::CreateItemU1(int itemDataId, float x, float y, PlayerScore score)
 {
     auto item = CreateObjItem(ITEM_USER);
@@ -1351,6 +1352,20 @@ std::shared_ptr<ObjItem> Package::CreateItemU1(int itemDataId, float x, float y,
     item->SetScore(score);
     item->SetItemData(GetItemData(itemDataId));
     return item;
+}
+*/
+
+std::shared_ptr<ObjItem> Package::CreateItemU1(int itemDataId, float x, float y, PlayerScore score)
+{
+	auto item = CreateObjItem(ITEM_USER);
+	item->SetMovePosition(x, y);
+	item->SetSpeed(-2.5);
+	item->SetAcceleration(0.05);
+	item->SetMaxSpeed(2.5);
+	item->SetAngle(90);
+	item->SetScore(score);
+	item->SetItemData(GetItemData(itemDataId));
+	return item;
 }
 
 std::shared_ptr<ObjItem> Package::CreateItemU2(int itemDataId, float x, float y, float destX, float destY, PlayerScore score)
@@ -1832,20 +1847,23 @@ void Package::DeleteShotAll(int target, int behavior)
         shots.erase(std::remove_if(shots.begin(), shots.end(), [](std::shared_ptr<ObjShot>& shot)->bool { return shot->IsPlayerShot(); }), shots.end());
     }
 
-    // delete
-    for (auto& shot : shots)
-    {
-        if (behavior == TYPE_IMMEDIATE)
-        {
-            shot->DeleteImmediate();
-        } else if (behavior == TYPE_FADE)
-        {
-            shot->FadeDelete();
-        } else if (behavior == TYPE_ITEM)
-        {
-            shot->ToItem();
-        }
-    }
+	// delete
+	for (auto& shot : shots)
+	{
+		if (behavior == TYPE_IMMEDIATE)
+		{
+			shot->DeleteImmediate();
+		}
+		else if (behavior == TYPE_FADE)
+		{
+			shot->FadeDelete();
+		}
+		else if (behavior == TYPE_ITEM)
+		{
+			shot->ToItem();
+			shot->FadeDelete();
+		}
+	}
 }
 
 void Package::DeleteShotInCircle(int target, int behavior, float x, float y, float r)
@@ -1855,22 +1873,25 @@ void Package::DeleteShotInCircle(int target, int behavior, float x, float y, flo
     {
         if (auto shotIsect = std::dynamic_pointer_cast<ShotIntersection>(isect))
         {
-            if (auto shot = shotIsect->GetShot().lock())
-            {
-                // スペル耐性弾は無視
-                if (target == TYPE_SHOT && shot->IsSpellResistEnabled()) continue;
+			if (auto shot = shotIsect->GetShot().lock())
+			{
+				// スペル耐性弾は無視
+				if (target == TYPE_SHOT && shot->IsSpellResistEnabled()) continue;
 
-                if (behavior == TYPE_IMMEDIATE)
-                {
-                    shot->DeleteImmediate();
-                } else if (behavior == TYPE_FADE)
-                {
-                    shot->FadeDelete();
-                } else if (behavior == TYPE_ITEM)
-                {
-                    shot->ToItem();
-                }
-            }
+				if (behavior == TYPE_IMMEDIATE)
+				{
+					shot->DeleteImmediate();
+				}
+				else if (behavior == TYPE_FADE)
+				{
+					shot->FadeDelete();
+				}
+				else if (behavior == TYPE_ITEM)
+				{
+					shot->ToItem();
+					shot->FadeDelete();
+				}
+			}
         }
     }
 }

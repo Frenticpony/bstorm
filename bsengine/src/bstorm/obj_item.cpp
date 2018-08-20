@@ -117,6 +117,7 @@ void ObjItem::Update()
         }
     }
 
+	/*
     if (player)
     {
         if (player->GetState() != STATE_NORMAL)
@@ -124,6 +125,7 @@ void ObjItem::Update()
             Obtained();
         }
     }
+	*/
 
     if (isObtained_)
     {
@@ -132,7 +134,7 @@ void ObjItem::Update()
             // 点数文字列生成
             if (auto package = GetPackage().lock())
             {
-                package->GenerateItemScoreText(GetX(), GetY(), GetScore());
+                //package->GenerateItemScoreText(GetX(), GetY(), GetScore());
             }
         }
         Die();

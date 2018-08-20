@@ -446,6 +446,7 @@ void ObjShot::GenerateBonusItem()
     }
 }
 
+/*
 void ObjShot::ToItem()
 {
     if (IsDead()) return;
@@ -473,33 +474,56 @@ void ObjShot::ToItem()
     }
     Die();
 }
+*/
+
+void ObjShot::ToItem()
+{
+	if (IsDead()) return;
+	if (isFadeDeleteStarted_) return;
+	if (IsItemChangeEnabled())
+	{
+		if (auto package = GetPackage().lock())
+		{
+			// EV_DELETE_SHOT_TO_ITEM 
+			auto evArgs = std::make_unique<DnhArray>();
+			evArgs->PushBack(std::make_unique<DnhReal>(GetID()));
+			evArgs->PushBack(std::make_unique<DnhArray>(Point2D(GetX(), GetY())));
+			if (package->IsDeleteShotToItemEventOnShotScriptEnabled())
+			{
+				package->NotifyEventAll(EV_DELETE_SHOT_TO_ITEM, evArgs);
+			}
+			GenerateBonusItem();
+		}
+	}
+}
 
 void ObjShot::EraseWithSpell()
 {
-    if (!IsSpellResistEnabled())
-    {
-        ToItem();
-    }
+	if (!IsSpellResistEnabled())
+	{
+		ToItem();
+		FadeDelete();
+	}
 }
 
 void ObjShot::DeleteImmediate()
 {
-    if (IsDead()) return;
-    if (auto package = GetPackage().lock())
-    {
-        // EV_DELETE_SHOT_IMMEDIATE
-        if (package->IsDeleteShotImmediateEventOnShotScriptEnabled())
-        {
-            if (auto shotScript = package->GetShotScript())
-            {
-                auto evArgs = std::make_unique<DnhArray>();
-                evArgs->PushBack(std::make_unique<DnhReal>(GetID()));
-                evArgs->PushBack(std::make_unique<DnhArray>(Point2D(GetX(), GetY())));
-                shotScript->NotifyEvent(EV_DELETE_SHOT_IMMEDIATE, evArgs);
-            }
-        }
-    }
-    Die();
+	if (IsDead()) return;
+	if (auto package = GetPackage().lock())
+	{
+		// EV_DELETE_SHOT_IMMEDIATE
+		if (package->IsDeleteShotImmediateEventOnShotScriptEnabled())
+		{
+			//if(auto shotScript = package->GetShotScript())
+			//{
+			auto evArgs = std::make_unique<DnhArray>();
+			evArgs->PushBack(std::make_unique<DnhReal>(GetID()));
+			evArgs->PushBack(std::make_unique<DnhArray>(Point2D(GetX(), GetY())));
+			package->NotifyEventAll(EV_DELETE_SHOT_IMMEDIATE, evArgs);
+			//}
+		}
+	}
+	Die();
 }
 
 void ObjShot::FadeDelete()
@@ -592,17 +616,17 @@ void ObjShot::TickDelayTimer()
 
 void ObjShot::TickDeleteFrameTimer()
 {
-    if (isFrameDeleteStarted_)
-    {
-        if (!IsDelay())
-        {
-            if (deleteFrameTimer_ <= 0)
-            {
-                DeleteImmediate();
-            }
-            deleteFrameTimer_--;
-        }
-    }
+	if (isFrameDeleteStarted_)
+	{
+		if (!IsDelay())
+		{
+			if (deleteFrameTimer_ <= 0)
+			{
+				FadeDelete();
+			}
+			deleteFrameTimer_--;
+		}
+	}
 }
 
 void ObjShot::TickAddedShotFrameCount()
@@ -654,26 +678,26 @@ void ObjShot::TickAddedShotFrameCount()
 
 void ObjShot::TickFadeDeleteTimer()
 {
-    if (!IsFadeDeleteStarted() || IsDead()) return;
-    fadeDeleteTimer_--;
-    if (fadeDeleteTimer_ <= 0)
-    {
-        if (auto package = GetPackage().lock())
-        {
-            //EV_DELETE_SHOT_FADE
-            if (package->IsDeleteShotFadeEventOnShotScriptEnabled())
-            {
-                if (auto shotScript = package->GetShotScript())
-                {
-                    auto evArgs = std::make_unique<DnhArray>();
-                    evArgs->PushBack(std::make_unique<DnhReal>(GetID()));
-                    evArgs->PushBack(std::make_unique<DnhArray>(Point2D{ GetX(), GetY() }));
-                    shotScript->NotifyEvent(EV_DELETE_SHOT_FADE, evArgs);
-                }
-            }
-        }
-        Die();
-    }
+	if (!IsFadeDeleteStarted() || IsDead()) return;
+	if (fadeDeleteTimer_ == 30)
+	{
+		if (auto package = GetPackage().lock())
+		{
+			//EV_DELETE_SHOT_FADE
+			if (package->IsDeleteShotFadeEventOnShotScriptEnabled())
+			{
+				auto evArgs = std::make_unique<DnhArray>();
+				evArgs->PushBack(std::make_unique<DnhReal>(GetID()));
+				evArgs->PushBack(std::make_unique<DnhArray>(Point2D{ GetX(), GetY() }));
+				package->NotifyEventAll(EV_DELETE_SHOT_FADE, evArgs);
+			}
+		}
+	}
+	if (fadeDeleteTimer_ <= 0)
+	{
+		Die();
+	}
+	fadeDeleteTimer_--;
 }
 
 void ObjShot::Graze()
@@ -859,26 +883,33 @@ void ObjLooseLaser::Render(const std::shared_ptr<Renderer>& renderer)
 
 void ObjLooseLaser::GenerateBonusItem()
 {
-    if (auto package = GetPackage().lock())
-    {
-        const Point2D head = GetHead();
-        const Point2D tail = GetTail();
-        const float dist = GetItemDistance();
-        const float dx = dist * (tail.x - head.x) / GetRenderLength();
-        const float dy = dist * (tail.y - head.y) / GetRenderLength();
-        float distSum = 0;
-        float x = head.x;
-        float y = head.y;
-        if (dist <= 0) return; // 無限ループ防止
-        while (true)
-        {
-            package->GenerateBonusItem(x, y);
-            x += dx;
-            y += dy;
-            distSum += dist;
-            if (distSum > GetRenderLength()) break;
-        }
-    }
+	if (auto package = GetPackage().lock())
+	{
+		const Point2D head = GetHead();
+		const Point2D tail = GetTail();
+		const float dist = GetItemDistance();
+		const float dx = dist * (tail.x - head.x) / GetRenderLength();
+		const float dy = dist * (tail.y - head.y) / GetRenderLength();
+		float distSum = 0;
+		float x = head.x;
+		float y = head.y;
+		if (dist <= 0) return; // 無限ループ防止
+		while (true)
+		{
+			package->GenerateBonusItem(x, y);
+			if (package->IsDeleteShotToItemEventOnShotScriptEnabled())
+			{
+				auto evArgs = std::make_unique<DnhArray>();
+				evArgs->PushBack(std::make_unique<DnhReal>(GetID()));
+				evArgs->PushBack(std::make_unique<DnhArray>(Point2D(x, y)));
+				package->NotifyEventAll(EV_DELETE_SHOT_TO_ITEM, evArgs);
+			}
+			x += dx;
+			y += dy;
+			distSum += dist;
+			if (distSum > GetRenderLength()) break;
+		}
+	}
 }
 
 float ObjLooseLaser::GetInvalidLengthHead() const
@@ -1195,18 +1226,31 @@ void ObjCrLaser::Render(const std::shared_ptr<Renderer>& renderer)
 
 void ObjCrLaser::GenerateBonusItem()
 {
-    if (auto package = GetPackage().lock())
-    {
-        if (GetLaserNodeCount() > 0)
-        {
-            for (int i = tailPos_; i < trail_.size(); i += 2)
-            {
-                float x = (trail_[i].x + trail_[i + 1].x) / 2;
-                float y = (trail_[i].y + trail_[i + 1].y) / 2;
-                package->GenerateBonusItem(x, y);
-            }
-        }
-    }
+	int j = 4;
+	if (auto package = GetPackage().lock())
+	{
+		if (GetLaserNodeCount() > 0)
+		{
+			for (int i = tailPos_; i < trail_.size(); i += 2)
+			{
+				float x = (trail_[i].x + trail_[i + 1].x) / 2;
+				float y = (trail_[i].y + trail_[i + 1].y) / 2;
+
+				if (j == 4)
+				{
+					auto evArgs = std::make_unique<DnhArray>();
+					evArgs->PushBack(std::make_unique<DnhReal>(GetID()));
+					evArgs->PushBack(std::make_unique<DnhArray>(Point2D(x, y)));
+					if (package->IsDeleteShotToItemEventOnShotScriptEnabled())
+					{
+						package->NotifyEventAll(EV_DELETE_SHOT_TO_ITEM, evArgs);
+					}
+					j = -1;
+				}
+				j++;
+			}
+		}
+	}
 }
 
 void ObjCrLaser::SetRenderWidth(float width)
