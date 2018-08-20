@@ -82,7 +82,7 @@ void Shape::Render(const std::shared_ptr<Renderer>& renderer, bool permitCamera)
             isInitialized = true;
         }
         D3DXMATRIX world = CreateScaleRotTransMatrix(params_.Circle.x, params_.Circle.y, 0.0f, 0.0f, 0.0f, 0.0f, params_.Circle.r, params_.Circle.r, 1.0f);
-        renderer->RenderPrim2D(D3DPT_TRIANGLEFAN, vertices.size(), vertices.data(), nullptr, BLEND_ALPHA, world, std::shared_ptr<Shader>(), permitCamera, false);
+        renderer->RenderPrim2D(D3DPT_TRIANGLEFAN, vertices.size(), vertices.data(), nullptr, BLEND_ALPHA, FILTER_LINEAR, world, std::shared_ptr<Shader>(), permitCamera, false);
     } else if (type_ == Type::RECT)
     {
         static std::array<Vertex, 4> vertices;
@@ -101,7 +101,7 @@ void Shape::Render(const std::shared_ptr<Renderer>& renderer, bool permitCamera)
         vertices[3].y = rect[2].y;
         D3DXMATRIX world;
         D3DXMatrixIdentity(&world);
-        renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, vertices.size(), vertices.data(), nullptr, BLEND_ALPHA, world, std::shared_ptr<Shader>(), permitCamera, false);
+        renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, vertices.size(), vertices.data(), nullptr, BLEND_ALPHA, FILTER_LINEAR, world, std::shared_ptr<Shader>(), permitCamera, false);
     }
 }
 }

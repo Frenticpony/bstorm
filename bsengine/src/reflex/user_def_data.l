@@ -31,8 +31,8 @@ public :
         if (fp_ == NULL)
         {
             throw Log(LogLevel::LV_ERROR)
-              .SetMessage("can't open file.")
-              .SetParam(LogParam(LogParam::Tag::TEXT, path));
+              .Msg("can't open file.")
+              .Param(LogParam(LogParam::Tag::TEXT, path));
         }
         in(fp_);
     }
@@ -98,6 +98,7 @@ newline \r?\n
 "id"               { return tk::TK_P_ID; }
 "rect"             { return tk::TK_P_RECT; }
 "render"           { return tk::TK_P_RENDER; }
+"filter"           { return tk::TK_P_FILTER; }
 "alpha"            { return tk::TK_P_ALPHA; }
 "delay_rect"       { return tk::TK_P_DELAY_RECT; }
 "delay_color"      { return tk::TK_P_DELAY_COLOR; }
@@ -115,6 +116,9 @@ newline \r?\n
 "MULTIPLY"         { return tk::TK_B_MULTIPLY; }
 "SUBTRACT"         { return tk::TK_B_SUBTRACT; }
 "INV_DESTRGB"      { return tk::TK_B_INV_DESTRGB; }
+
+"NONE"             { return tk::TK_F_NONE; }
+"LINEAR"           { return tk::TK_F_LINEAR; }
 
 "rand"             { return tk::TK_RAND; }
 "="                { return tk::TK_EQ; }
@@ -142,8 +146,8 @@ newline \r?\n
 
 . {
     throw Log(LogLevel::LV_ERROR)
-      .SetMessage("found illegal token.")
-      .SetParam(LogParam(LogParam::Tag::TEXT, str()))
+      .Msg("found illegal token.")
+      .Param(LogParam(LogParam::Tag::TEXT, str()))
       .AddSourcePos(std::make_shared<SourcePos>(GetSourcePos()));
 }
 

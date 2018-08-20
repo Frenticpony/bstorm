@@ -32,6 +32,7 @@ ObjItem::ObjItem(int itemType, const std::shared_ptr<CollisionDetector>& colDete
 {
     SetType(OBJ_ITEM);
     SetBlendType(BLEND_NONE);
+	SetFilterType(FILTER_NONE); //FP FILTER
 
     if (itemType != ITEM_USER)
     {
@@ -184,6 +185,18 @@ void ObjItem::Render(const std::shared_ptr<Renderer>& renderer)
             itemBlend = GetBlendType();
         }
 
+		/* ブレンド方法の選択 */
+		int itemFilter = FILTER_NONE; //FP FILTER
+		if (GetFilterType() == FILTER_NONE)
+		{
+			itemFilter = itemData_->filter;
+		}
+		else
+		{
+			/* ObjRenderで指定されたintがある場合はそちらを使う */
+			itemFilter = GetFilterType();
+		}
+
         // 色と透明度の適用
         D3DCOLOR renderColor = D3DCOLOR_ARGB(0xff, 0xff, 0xff, 0xff);
         if (itemType_ == ITEM_USER)
@@ -220,7 +233,7 @@ void ObjItem::Render(const std::shared_ptr<Renderer>& renderer)
         }
 
         auto vertices = GetRectVertices(renderColor, itemData_->texture->GetWidth(), itemData_->texture->GetHeight(), rect);
-        renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), itemData_->texture->GetTexture(), itemBlend, world, GetAppliedShader(), IsPermitCamera(), true);
+        renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), itemData_->texture->GetTexture(), itemBlend, itemFilter, world, GetAppliedShader(), IsPermitCamera(), true);
     }
 
     ObjCol::RenderIntersection(renderer, IsPermitCamera(), GetPackage());

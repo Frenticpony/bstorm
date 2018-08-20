@@ -96,6 +96,7 @@ void UserDefDataParser::error(const UserDefDataParser::location_type& yylloc, co
 {
     int id;
     int blend;
+    int filter;
     bool boolean;
     float num;
     Int3 rgb;
@@ -119,6 +120,7 @@ void UserDefDataParser::error(const UserDefDataParser::location_type& yylloc, co
 %token TK_P_ID "id"
 %token TK_P_RECT "rect"
 %token TK_P_RENDER "render"
+%token TK_P_FILTER "filter"
 %token TK_P_ALPHA "alpha"
 %token TK_P_DELAY_RECT "delay_rect"
 %token TK_P_DELAY_COLOR "delay_color"
@@ -137,6 +139,10 @@ void UserDefDataParser::error(const UserDefDataParser::location_type& yylloc, co
 %token TK_B_MULTIPLY "MULTIPLY"
 %token TK_B_SUBTRACT "SUBTRACT"
 %token TK_B_INV_DESTRGB "INV_DESTRGB"
+
+/* FP FILTER mode */
+%token TK_F_NONE "NONE"
+%token TK_F_LINEAR "LINEAR"
 
 /* operator */
 %token TK_RAND "rand"
@@ -166,6 +172,7 @@ void UserDefDataParser::error(const UserDefDataParser::location_type& yylloc, co
 %type <num> num
 %type <boolean> bool
 %type <blend> blend-type
+%type <filter> filter-type
 %type <rgb> rgb
 %type <rect> rect
 %type <collision> collision
@@ -212,7 +219,8 @@ shot-data-struct-params        : none
 shot-data-struct-param         : TK_P_ID                TK_EQ id         { ctx->shotData.id = $3; }
                                | TK_P_RECT              TK_EQ rect       { ctx->shotData.rect = Rect<int>($3.a, $3.b, $3.c, $3.d); }
                                | TK_P_RENDER            TK_EQ blend-type { ctx->shotData.render = $3; }
-                               | TK_P_ALPHA             TK_EQ num        { ctx->shotData.alpha = std::min(std::max((int)$3, 0), 0xff); }
+                               | TK_P_FILTER            TK_EQ filter-type { ctx->shotData.filter = $3; }
+							   | TK_P_ALPHA             TK_EQ num        { ctx->shotData.alpha = std::min(std::max((int)$3, 0), 0xff); }
                                | TK_P_DELAY_RECT        TK_EQ rect       { ctx->shotData.delayRect = Rect<int>($3.a, $3.b, $3.c, $3.d); ctx->shotData.useDelayRect = true;}
                                | TK_P_DELAY_COLOR       TK_EQ rgb        { ctx->shotData.delayColor = ColorRGB($3.a, $3.b, $3.c); ctx->shotData.useDelayColor = true; }
                                | TK_P_DELAY_RENDER      TK_EQ blend-type { ctx->shotData.delayRender = $3; }
@@ -227,12 +235,13 @@ shot-data-struct-param         : TK_P_ID                TK_EQ id         { ctx->
 item-data-struct             : { ctx->itemData = ItemData(); } TK_ST_ITEM_DATA TK_LBRACE item-data-struct-params TK_RBRACE
 item-data-struct-params      : none
                              | item-data-struct-params item-data-struct-param
-item-data-struct-param       : TK_P_ID                TK_EQ id         { ctx->itemData.id = $3; }
-                             | TK_P_TYPE              TK_EQ id         { ctx->itemData.type = $3; }
-                             | TK_P_RECT              TK_EQ rect       { ctx->itemData.rect = Rect<int>($3.a, $3.b, $3.c, $3. d); }
-                             | TK_P_OUT               TK_EQ rect       { ctx->itemData.out = Rect<int>($3.a, $3.b, $3.c, $3. d); }
-                             | TK_P_RENDER            TK_EQ blend-type { ctx->itemData.render = $3; }
-                             | animation-data-struct                   { ctx->itemData.animationData = ctx->animationData; }
+item-data-struct-param       : TK_P_ID                TK_EQ id          { ctx->itemData.id = $3; }
+                             | TK_P_TYPE              TK_EQ id          { ctx->itemData.type = $3; }
+                             | TK_P_RECT              TK_EQ rect        { ctx->itemData.rect = Rect<int>($3.a, $3.b, $3.c, $3. d); }
+                             | TK_P_OUT               TK_EQ rect        { ctx->itemData.out = Rect<int>($3.a, $3.b, $3.c, $3. d); }
+                             | TK_P_RENDER            TK_EQ blend-type  { ctx->itemData.render = $3; }
+                             | TK_P_FILTER            TK_EQ filter-type { ctx->itemData.filter = $3; }
+                             | animation-data-struct                    { ctx->itemData.animationData = ctx->animationData; }
                              | TK_SEMI
 
 animation-data-struct          : { ctx->animationData.clear(); } TK_ST_ANIMATION_DATA TK_LBRACE animation-data-struct-params TK_RBRACE
@@ -252,6 +261,9 @@ blend-type                     : TK_B_ALPHA       { $$ = BLEND_ALPHA; }
                                | TK_B_MULTIPLY    { $$ = BLEND_MULTIPLY; }
                                | TK_B_SUBTRACT    { $$ = BLEND_SUBTRACT; }
                                | TK_B_INV_DESTRGB { $$ = BLEND_INV_DESTRGB; }
+
+filter-type                    : TK_F_NONE       { $$ = FILTER_NONE; }
+                               | TK_F_LINEAR     { $$ = FILTER_LINEAR; }
 
 bool                           : TK_TRUE | TK_FALSE
 

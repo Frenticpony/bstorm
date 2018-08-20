@@ -70,7 +70,9 @@ public:
     void SetAlpha(int a);
     void SetColorHSV(int h, int s, int v);
     int GetBlendType() const { return blendType_; }
+	int GetFilterType() const { return filterType_; } //FP FILTER
     void SetBlendType(int t) { blendType_ = t; }
+	void SetFilterType(int t) { filterType_ = t; } //FP FILTER
     bool IsFogEnabled() const { return fogEnable_; }
     void SetFogEnable(bool enable) { fogEnable_ = enable; }
     bool IsZWriteEnabled() const { return zWriteEnable_; }
@@ -108,6 +110,7 @@ private:
     ColorRGB rgb_;
     int alpha_;
     int blendType_;
+	int filterType_; //FP FILTER
     bool fogEnable_;
     bool zWriteEnable_;
     bool zTestEnable_;

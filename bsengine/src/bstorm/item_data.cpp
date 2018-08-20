@@ -15,7 +15,8 @@ ItemData::ItemData() :
     type(ID_INVALID),
     rect(0, 0, 0, 0),
     out(0, 0, 0, 0),
-    render(BLEND_ALPHA)
+    render(BLEND_ALPHA),
+	filter(FILTER_NONE) //FP FILTER
 {
 }
 

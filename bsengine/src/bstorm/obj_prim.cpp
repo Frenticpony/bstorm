@@ -179,7 +179,7 @@ ObjPrim2D::ObjPrim2D(const std::shared_ptr<Package>& state) :
 void ObjPrim2D::Render(const std::shared_ptr<Renderer>& renderer)
 {
     D3DXMATRIX world = CreateScaleRotTransMatrix(GetX(), GetY(), GetZ(), GetAngleX(), GetAngleY(), GetAngleZ(), GetScaleX(), GetScaleY(), GetScaleZ());
-    renderer->RenderPrim2D(GetD3DPrimitiveType(), vertices_.size(), vertices_.data(), GetD3DTexture(), GetBlendType(), world, GetAppliedShader(), IsPermitCamera(), true);
+    renderer->RenderPrim2D(GetD3DPrimitiveType(), vertices_.size(), vertices_.data(), GetD3DTexture(), GetBlendType(), GetFilterType(), world, GetAppliedShader(), IsPermitCamera(), true);
 }
 
 ObjSprite2D::ObjSprite2D(const std::shared_ptr<Package>& state) :

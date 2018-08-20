@@ -28,6 +28,7 @@ ObjRender::ObjRender(const std::shared_ptr<Package>& package) :
     scaleZ_(1),
     alpha_(0xff),
     blendType_(BLEND_ALPHA),
+    filterType_(FILTER_LINEAR), //FP FILTER
     fogEnable_(true),
     zWriteEnable_(true),
     zTestEnable_(true),

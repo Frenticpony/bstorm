@@ -14,6 +14,7 @@ ShotData::ShotData() :
     id(ID_INVALID),
     rect(0, 0, 0, 0),
     render(BLEND_ALPHA),
+    filter(FILTER_LINEAR), //FP FILTER
     alpha(0xff),
     delayRect(0, 0, 0, 0),
     useDelayRect(false),

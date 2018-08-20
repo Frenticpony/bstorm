@@ -29,6 +29,7 @@ public:
     int id;
     Rect<int> rect;
     int render;
+    int filter; //FP FILTER
     int alpha;
     Rect<int> delayRect;
     bool useDelayRect;

@@ -49,6 +49,7 @@ ObjShot::ObjShot(bool isPlayerShot, const std::shared_ptr<CollisionDetector>& co
 {
     SetType(OBJ_SHOT);
     SetBlendType(BLEND_NONE);
+	SetFilterType(FILTER_LINEAR); //FP FILTER
     if (isPlayerShot_)
     {
         package->SuccPlayerShotCount();
@@ -147,11 +148,30 @@ void ObjShot::Render(const std::shared_ptr<Renderer>& renderer)
                 }
             }
 
-            // NOTE : ADD_RGBはADD_ARGBとして解釈
-            if (GetBlendType() == BLEND_NONE && shotBlend == BLEND_ADD_RGB)
-            {
-                shotBlend = BLEND_ADD_ARGB;
-            }
+			// NOTE : ADD_RGBはADD_ARGBとして解釈
+			if (GetBlendType() == BLEND_NONE && shotBlend == BLEND_ADD_RGB)
+			{
+				shotBlend = BLEND_ADD_ARGB;
+			}
+
+			/* ブレンド方法の選択 */
+			int shotFilter = FILTER_LINEAR; //FP FILTER
+			if (!IsDelay())
+			{
+				if (GetFilterType() == FILTER_LINEAR)
+				{
+					shotFilter = shotData_->filter;
+				}
+				else
+				{
+					/* ObjRenderで指定されたintがある場合はそちらを使う */
+					shotFilter = GetFilterType();
+				}
+			}
+			else
+			{
+				shotFilter = FILTER_LINEAR;
+			}
 
             // 色と透明度
             D3DCOLOR color;
@@ -168,7 +188,7 @@ void ObjShot::Render(const std::shared_ptr<Renderer>& renderer)
                 (animationIdx_ >= 0 && animationIdx_ < shotData_->animationData.size()) ? shotData_->animationData[animationIdx_].rect :
                                             shotData_->rect);
 
-            renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData_->texture->GetTexture(), shotBlend, world, GetAppliedShader(), IsPermitCamera(), true);
+            renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData_->texture->GetTexture(), shotBlend, shotFilter, world, GetAppliedShader(), IsPermitCamera(), true);
         }
         RenderIntersection(renderer);
     }
@@ -949,6 +969,7 @@ void ObjLooseLaser::RenderLaser(float width, float length, float angle, const st
         /* ブレンド方法の選択 */
         // NOTE : shotDataのrenderは使わない
         int laserBlend = GetBlendType() == BLEND_NONE ? BLEND_ADD_ARGB : GetBlendType();
+        int laserFilter = GetFilterType(); //FP FILTER
 
         // 色と透明度を設定
         D3DCOLOR color = GetColor().ToD3DCOLOR((int)(GetFadeScale() * std::min(shotData->alpha, GetAlpha())));
@@ -959,7 +980,7 @@ void ObjLooseLaser::RenderLaser(float width, float length, float angle, const st
         float rectHeight = abs(vertices[0].y - vertices[2].y);
         D3DXMATRIX world = CreateScaleRotTransMatrix(centerX, centerY, 0.0f, 0.0f, 0.0f, angle + 90.0f, width / rectWidth, length / rectHeight, 1.0f);
 
-        renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData->texture->GetTexture(), laserBlend, world, GetAppliedShader(), IsPermitCamera(), false);
+        renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData->texture->GetTexture(), laserBlend, laserFilter, world, GetAppliedShader(), IsPermitCamera(), false);
     }
 }
 
@@ -1028,7 +1049,8 @@ void ObjStLaser::Render(const std::shared_ptr<Renderer>& renderer)
                 /* ブレンド方法の選択 */
                 // NOTE :  delay_renderは使用しない
                 int laserBlend = GetSourceBlendType() == BLEND_NONE ? BLEND_ADD_ARGB : GetSourceBlendType();
-                renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData->texture->GetTexture(), laserBlend, world, GetAppliedShader(), IsPermitCamera(), false);
+                int laserFilter = GetFilterType(); //FP FILTER
+                renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData->texture->GetTexture(), laserBlend, laserFilter, world, GetAppliedShader(), IsPermitCamera(), false);
             }
             // 遅延時間時は予告線
             float renderWidth = IsDelay() ? GetRenderWidth() / 20.0f : GetRenderWidth() * laserWidthScale_;
@@ -1163,7 +1185,8 @@ void ObjCrLaser::Render(const std::shared_ptr<Renderer>& renderer)
                 D3DXMatrixIdentity(&world);
                 // ShotDataのrender値は使わない
                 int laserBlend = GetBlendType() == BLEND_NONE ? BLEND_ADD_ARGB : GetBlendType();
-                renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, trail_.size() - tailPos_, &trail_[tailPos_], shotData->texture->GetTexture(), laserBlend, world, GetAppliedShader(), IsPermitCamera(), false);
+                int laserFilter = GetFilterType(); //FP FILTER
+                renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, trail_.size() - tailPos_, &trail_[tailPos_], shotData->texture->GetTexture(), laserBlend, laserFilter, world, GetAppliedShader(), IsPermitCamera(), false);
             }
         }
     }

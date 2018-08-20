@@ -2721,6 +2721,15 @@ static int ObjRender_SetBlendType(lua_State* L)
     return 0;
 }
 
+static int ObjRender_SetFilterType(lua_State* L) //FP FILTER
+{
+	Package* package = Package::Current;
+	int objId = DnhValue::ToInt(L, 1);
+	int filterType = DnhValue::ToInt(L, 2);
+	if (auto obj = package->GetObject<ObjRender>(objId)) { obj->SetFilterType(filterType); }
+	return 0;
+}
+
 template <float (ObjRender::*func)() const>
 static int ObjRender_Get(lua_State* L)
 {
@@ -5824,6 +5833,9 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
     constI(BLEND_SHADOW);
     constI(BLEND_INV_DESTRGB);
 
+	constI(FILTER_NONE); //FP FILTER
+	constI(FILTER_LINEAR); //FP FILTER
+
     constI(PRIMITIVE_TRIANGLEFAN);
     constI(PRIMITIVE_TRIANGLESTRIP);
     constI(PRIMITIVE_TRIANGLELIST);
@@ -6517,6 +6529,7 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
     builtin(ObjRender_SetColorHSV, 4);
     builtin(ObjRender_SetAlpha, 2);
     builtin(ObjRender_SetBlendType, 2);
+    builtin(ObjRender_SetFilterType, 2); //FP FILTER
 
     builtin_real(ObjRender_GetX, 1);
     builtin_real(ObjRender_GetY, 1);

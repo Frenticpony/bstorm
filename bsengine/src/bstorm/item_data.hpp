@@ -24,6 +24,7 @@ public:
     Rect<int> rect;
     Rect<int> out;
     int render;
+    int filter; //FP FILTER
     AnimationData animationData;
     std::shared_ptr<Texture> texture;
 };

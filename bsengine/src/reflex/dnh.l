@@ -56,13 +56,13 @@ public :
             if (includeStack_.empty())
             {
                 throw Log(LogLevel::LV_ERROR)
-                  .SetMessage("can't open file.")
-                  .SetParam(LogParam(LogParam::Tag::TEXT, path));
+                  .Msg("can't open file.")
+                  .Param(LogParam(LogParam::Tag::TEXT, path));
             } else
             {
                 throw Log(LogLevel::LV_ERROR)
-                  .SetMessage("can't include file.")
-                  .SetParam(LogParam(LogParam::Tag::TEXT, path))
+                  .Msg("can't include file.")
+                  .Param(LogParam(LogParam::Tag::TEXT, path))
                   .AddSourcePos(std::make_shared<SourcePos>(GetSourcePos()));
             }
         }
@@ -225,8 +225,8 @@ newline \r?\n
 "#"{ident} { v_wstr_ = wstr().substr(1); return tk::TK_HEADER; }
 
 .  {
-    throw Log(LogLevel::LV_ERROR).SetMessage("found illegal token.")
-      .SetParam(LogParam(LogParam::Tag::TEXT, str()))
+    throw Log(LogLevel::LV_ERROR).Msg("found illegal token.")
+      .Param(LogParam(LogParam::Tag::TEXT, str()))
       .AddSourcePos(std::make_shared<SourcePos>(GetSourcePos()));
 }
 

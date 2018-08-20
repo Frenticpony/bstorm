@@ -96,6 +96,7 @@ Renderer::Renderer(IDirect3DDevice9* dev) :
     prim3DVertexShader_(nullptr),
     meshVertexShader_(nullptr),
     currentBlendType_(BLEND_NONE),
+    currentFilterType_(FILTER_LINEAR), //FP FILTER
     fogEnable_(false),
     fogStart_(0),
     fogEnd_(0)
@@ -159,6 +160,7 @@ void Renderer::InitRenderState()
     d3DDevice_->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 
     // 固定機能パイプラインのピクセルシェーダ用
+	currentFilterType_ = FILTER_LINEAR; //FP FILTER
     d3DDevice_->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
     d3DDevice_->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
     d3DDevice_->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
@@ -192,7 +194,7 @@ static int calcPolygonNum(D3DPRIMITIVETYPE primType, int vertexCount)
     }
 }
 
-void Renderer::RenderPrim2D(D3DPRIMITIVETYPE primType, int vertexCount, const Vertex* vertices, IDirect3DTexture9* texture, int blendType, const D3DXMATRIX & worldMatrix, const std::shared_ptr<Shader>& pixelShader, bool permitCamera, bool insertHalfPixelOffset)
+void Renderer::RenderPrim2D(D3DPRIMITIVETYPE primType, int vertexCount, const Vertex* vertices, IDirect3DTexture9* texture, int blendType, int filterType, const D3DXMATRIX & worldMatrix, const std::shared_ptr<Shader>& pixelShader, bool permitCamera, bool insertHalfPixelOffset)
 {
     // disable z-buffer-write, z-test, fog
     d3DDevice_->SetRenderState(D3DRS_ZENABLE, FALSE);
@@ -200,6 +202,8 @@ void Renderer::RenderPrim2D(D3DPRIMITIVETYPE primType, int vertexCount, const Ve
     d3DDevice_->SetRenderState(D3DRS_FOGENABLE, FALSE);
     // set blend type
     SetBlendType(blendType);
+	// set filter type
+	SetFilterType(filterType); //FP FILTER
     // set vertex shader
     d3DDevice_->SetVertexShader(prim2DVertexShader_);
     // set shader constant
@@ -409,6 +413,24 @@ void Renderer::SetBlendType(int type)
             break;
     }
     currentBlendType_ = type;
+}
+
+void Renderer::SetFilterType(int type) //FP FILTER
+{
+	if (type == currentFilterType_) return;
+	switch (type)
+	{
+	case FILTER_NONE:
+		d3DDevice_->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_NONE);
+		d3DDevice_->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_NONE);
+		break;
+	case FILTER_LINEAR:
+	default:
+		d3DDevice_->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+		d3DDevice_->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+		break;
+	}
+	currentFilterType_ = type;
 }
 
 void Renderer::EnableScissorTest(const RECT& rect)

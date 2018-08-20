@@ -62,6 +62,10 @@ constexpr int BLEND_SUBTRACT = 5;
 constexpr int BLEND_SHADOW = 6;
 constexpr int BLEND_INV_DESTRGB = 7;
 
+// filter type
+constexpr int FILTER_NONE = 0; //FP FILTER
+constexpr int FILTER_LINEAR = 1; //FP FILTER
+
 // primitive type
 constexpr int PRIMITIVE_TRIANGLEFAN = 6;
 constexpr int PRIMITIVE_TRIANGLESTRIP = 5;
