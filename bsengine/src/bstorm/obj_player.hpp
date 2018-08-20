@@ -88,6 +88,8 @@ private:
     int state_;
     float normalSpeed_;
     float slowSpeed_;
+	float normalSpeedDiagonal_;
+	float slowSpeedDiagonal_;
     float clipLeft_;
     float clipTop_;
     float clipRight_;

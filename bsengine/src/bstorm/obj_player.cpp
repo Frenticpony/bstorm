@@ -28,8 +28,10 @@ ObjPlayer::ObjPlayer(const std::shared_ptr<CollisionDetector>& colDetector, cons
     permitPlayerShot_(true),
     permitPlayerSpell_(true),
     state_(STATE_NORMAL),
-    normalSpeed_(4.0f),
-    slowSpeed_(1.6f),
+	normalSpeed_(4.0f),
+	slowSpeed_(1.6f),
+	normalSpeedDiagonal_(4.0f / sqrt(2)),
+	slowSpeedDiagonal_(1.6f / sqrt(2)),
     clipLeft_(0),
     clipTop_(0),
     clipRight_(384),
@@ -153,12 +155,14 @@ void ObjPlayer::ClearIntersection()
 
 void ObjPlayer::SetNormalSpeed(double speed)
 {
-    normalSpeed_ = speed;
+	normalSpeed_ = speed;
+	normalSpeedDiagonal_ = speed / sqrt(2);
 }
 
 void ObjPlayer::SetSlowSpeed(double speed)
 {
-    slowSpeed_ = speed;
+	slowSpeed_ = speed;
+	slowSpeedDiagonal_ = speed / sqrt(2);
 }
 
 void ObjPlayer::SetClip(float left, float top, float right, float bottom)
@@ -402,27 +406,41 @@ void ObjPlayer::Rebirth()
 
 void ObjPlayer::MoveByKeyInput()
 {
-    if (auto package = GetPackage().lock())
-    {
-        auto r = package->GetVirtualKeyState(VK_RIGHT, true);
-        auto l = package->GetVirtualKeyState(VK_LEFT, true);
-        auto u = package->GetVirtualKeyState(VK_UP, true);
-        auto d = package->GetVirtualKeyState(VK_DOWN, true);
+	if (auto package = GetPackage().lock())
+	{
+		auto r = package->GetVirtualKeyState(VK_RIGHT, true);
+		auto l = package->GetVirtualKeyState(VK_LEFT, true);
+		auto u = package->GetVirtualKeyState(VK_UP, true);
+		auto d = package->GetVirtualKeyState(VK_DOWN, true);
 
-        auto shift = package->GetVirtualKeyState(VK_SLOWMOVE, true);
-        bool isSlowMode = shift == KEY_HOLD || shift == KEY_PUSH;
-        float speed = (isSlowMode ? slowSpeed_ : normalSpeed_);
+		auto shift = package->GetVirtualKeyState(VK_SLOWMOVE, true);
+		bool isSlowMode = shift == KEY_HOLD || shift == KEY_PUSH;
+		float speed = (isSlowMode ? slowSpeed_ : normalSpeed_);
+		float speedDiagonal = (isSlowMode ? slowSpeedDiagonal_ : normalSpeedDiagonal_);
 
-        int dx = 0;
-        int dy = 0;
+		float dx = 0;
+		float dy = 0;
 
-        if (r == KEY_HOLD || r == KEY_PUSH) { dx++; }
-        if (l == KEY_HOLD || l == KEY_PUSH) { dx--; }
-        if (u == KEY_HOLD || u == KEY_PUSH) { dy--; }
-        if (d == KEY_HOLD || d == KEY_PUSH) { dy++; }
+		char dirX = 0;
+		char dirY = 0;
 
-        SetMovePosition(GetX() + speed * dx, GetY() + speed * dy);
-    }
+		if (r == KEY_HOLD || r == KEY_PUSH) { dirX = 1; }
+		if (l == KEY_HOLD || l == KEY_PUSH) { dirX = -1; }
+		if (u == KEY_HOLD || u == KEY_PUSH) { dirY = -1; }
+		if (d == KEY_HOLD || d == KEY_PUSH) { dirY = 1; }
+
+		if (dirX * dirY != 0) // Diagonal movement
+		{
+			dx = dirX * speedDiagonal;
+			dy = dirY * speedDiagonal;
+		}
+		else // Regular movement
+		{
+			dx = dirX * speed;
+			dy = dirY * speed;
+		}
+		SetMovePosition(GetX() + dx, GetY() + dy);
+	}
 }
 
 void ObjPlayer::ApplyClip()
