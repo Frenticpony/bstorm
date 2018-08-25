@@ -31,8 +31,8 @@ public :
         if (fp_ == nullptr)
         {
             throw Log(LogLevel::LV_ERROR)
-              .SetMessage("can't open file")
-              .SetParam(LogParam(LogParam::Tag::TEXT, path));
+              .Msg("can't open file")
+              .Param(LogParam(LogParam::Tag::TEXT, path));
         }
         in(fp_);
     }
