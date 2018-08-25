@@ -97,7 +97,6 @@ public:
     static void Write(LogLevel level, const std::wstring& text);
     static void Write(LogLevel level, std::string&& text);
     static void Shutdown();
-    static void SetEnable(bool enable);
     virtual ~Logger() {}
     virtual void log(Log& lg) noexcept(false) = 0;
     virtual void log(Log&& lg) noexcept(false) = 0;
@@ -107,6 +106,5 @@ public:
 private:
     static std::shared_ptr<Logger> logger;
     static std::mutex mutex;
-    static bool logEnabled;
 };
 }
