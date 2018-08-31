@@ -4699,10 +4699,19 @@ static int ObjShot_FadeDelete(lua_State* L)
 
 static int ObjShot_SetDeleteFrame(lua_State* L)
 {
+	Package* package = Package::Current;
+	int objId = DnhValue::ToInt(L, 1);
+	int deleteFrame = DnhValue::ToInt(L, 2);
+	if (auto obj = package->GetObject<ObjShot>(objId)) { obj->SetDeleteFrame(deleteFrame); }
+	return 0;
+}
+
+static int ObjShot_SetAutoDeleteDelay(lua_State* L)  //FP AUTO TIMER
+{
     Package* package = Package::Current;
     int objId = DnhValue::ToInt(L, 1);
     int deleteFrame = DnhValue::ToInt(L, 2);
-    if (auto obj = package->GetObject<ObjShot>(objId)) { obj->SetDeleteFrame(deleteFrame); }
+    if (auto obj = package->GetObject<ObjShot>(objId)) { obj->SetAutoDeleteDelay(deleteFrame); }
     return 0;
 }
 
@@ -6713,6 +6722,7 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
         builtin(ObjShot_SetAutoDelete, 2);
         builtin(ObjShot_FadeDelete, 1);
         builtin(ObjShot_SetDeleteFrame, 2);
+        builtin(ObjShot_SetAutoDeleteDelay, 2);
         builtin(ObjShot_SetDamage, 2);
         builtin(ObjShot_SetDelay, 2);
         builtin(ObjShot_SetSpellResist, 2);

@@ -27,7 +27,8 @@ ObjShot::ObjShot(bool isPlayerShot, const std::shared_ptr<CollisionDetector>& co
     isPlayerShot_(isPlayerShot),
     isRegistered_(false),
     intersectionEnable_(true),
-    autoDeleteEnable_(true),
+    autoDeleteEnable_(false),
+	autoDeleteTimer_(0), //FP AUTO TIMER
     spellResistEnable_(false),
     spellFactorEnable_(false),
     itemChangeEnable_(true),
@@ -68,10 +69,11 @@ void ObjShot::Update()
     if (IsRegistered())
     {
         if (GetPenetration() <= 0) { Die(); return; }
-        if (!IsDelay())
-        {
-            Move();
-            CheckAutoDelete(GetX(), GetY());
+		if (!IsDelay())
+		{
+			Move();
+			CheckAutoDelete(GetX(), GetY());
+
             if (shotData_)
             {
                 SetAngleZ(GetAngleZ() + GetAngularVelocity());
@@ -81,6 +83,7 @@ void ObjShot::Update()
         TickAddedShotFrameCount();
         TickDelayTimer();
         TickDeleteFrameTimer();
+        TickAutoDeleteTimer(); //FP AUTO TIMER
         TickFadeDeleteTimer();
     }
     UpdateTempIntersection();
@@ -565,8 +568,13 @@ int ObjShot::GetFadeDeleteFrameTimer() const
 
 void ObjShot::SetDeleteFrame(int frame)
 {
-    isFrameDeleteStarted_ = true;
-    deleteFrameTimer_ = frame;
+	isFrameDeleteStarted_ = true;
+	deleteFrameTimer_ = frame;
+}
+
+void ObjShot::SetAutoDeleteDelay(int frame)  //FP AUTO TIMER
+{
+	autoDeleteTimer_ = frame;
 }
 
 void ObjShot::OnTrans(float dx, float dy)
@@ -626,6 +634,19 @@ void ObjShot::TickDeleteFrameTimer()
 			}
 			deleteFrameTimer_--;
 		}
+	}
+}
+
+void ObjShot::TickAutoDeleteTimer() //FP AUTO TIMER
+{
+	if (autoDeleteTimer_ > -1)
+	{
+		autoDeleteEnable_ = false;
+		if (autoDeleteTimer_ == 0)
+		{
+			autoDeleteEnable_ = true;
+		}
+		autoDeleteTimer_--;
 	}
 }
 

@@ -164,7 +164,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
             ImGui::StyleColorsDark();
             imGuiStyle.FrameRounding = 3.0f;
 
-            ImGui::GetIO().MouseDrawCursor = true;
+            ImGui::GetIO().MouseDrawCursor = false;
         }
 
         /* message loop */

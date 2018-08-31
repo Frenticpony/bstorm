@@ -78,6 +78,7 @@ public:
     int GetDeleteFrameTimer() const;
     int GetFadeDeleteFrameTimer() const;
     void SetDeleteFrame(int frame);
+    void SetAutoDeleteDelay(int frame);  //FP AUTO TIMER
 
     // graze
     virtual void Graze();
@@ -112,6 +113,7 @@ protected:
     void UpdateAnimationPosition();
     void TickDelayTimer();
     void TickDeleteFrameTimer();
+    void TickAutoDeleteTimer(); //FP AUTO TIMER
     void TickAddedShotFrameCount();
     void TickFadeDeleteTimer();
     NullableSharedPtr<ShotData> shotData_;
@@ -130,6 +132,7 @@ private:
     bool itemChangeEnable_;
     bool intersectionEnable_;
     bool autoDeleteEnable_;
+    int autoDeleteTimer_; //FP AUTO TIMER
     float angularVelocity_;
     double damage_;
     int sourceBlendType_;
