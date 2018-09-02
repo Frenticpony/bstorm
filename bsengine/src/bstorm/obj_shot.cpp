@@ -29,6 +29,7 @@ ObjShot::ObjShot(bool isPlayerShot, const std::shared_ptr<CollisionDetector>& co
     intersectionEnable_(true),
     autoDeleteEnable_(false),
 	autoDeleteTimer_(0), //FP AUTO TIMER
+	spellResistTimer_(0), //FP SPELL RESIST DELAY
     spellResistEnable_(false),
     spellFactorEnable_(false),
     itemChangeEnable_(true),
@@ -84,6 +85,7 @@ void ObjShot::Update()
         TickDelayTimer();
         TickDeleteFrameTimer();
         TickAutoDeleteTimer(); //FP AUTO TIMER
+        TickSpellResistTimer(); //FP SPELL RESIST DELAY
         TickFadeDeleteTimer();
     }
     UpdateTempIntersection();
@@ -577,6 +579,11 @@ void ObjShot::SetAutoDeleteDelay(int frame)  //FP AUTO TIMER
 	autoDeleteTimer_ = frame;
 }
 
+void ObjShot::SetSpellResistDelay(int frame)  //FP SPELL RESIST DELAY
+{
+	spellResistTimer_ = frame;
+}
+
 void ObjShot::OnTrans(float dx, float dy)
 {
     ObjCol::TransIntersection(dx, dy);
@@ -647,6 +654,19 @@ void ObjShot::TickAutoDeleteTimer() //FP AUTO TIMER
 			autoDeleteEnable_ = true;
 		}
 		autoDeleteTimer_--;
+	}
+}
+
+void ObjShot::TickSpellResistTimer() //FP SPELL RESIST DELAY
+{
+	if (spellResistTimer_ > -1)
+	{
+		spellResistEnable_ = true;
+		if (spellResistTimer_ == 0)
+		{
+			spellResistEnable_ = false;
+		}
+		spellResistTimer_--;
 	}
 }
 

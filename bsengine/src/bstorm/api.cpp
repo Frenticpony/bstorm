@@ -4715,6 +4715,15 @@ static int ObjShot_SetAutoDeleteDelay(lua_State* L)  //FP AUTO TIMER
     return 0;
 }
 
+static int ObjShot_SetSpellResistDelay(lua_State* L)  //FP SPELL RESIST DELAY
+{
+	Package* package = Package::Current;
+	int objId = DnhValue::ToInt(L, 1);
+	int deleteFrame = DnhValue::ToInt(L, 2);
+	if (auto obj = package->GetObject<ObjShot>(objId)) { obj->SetSpellResistDelay(deleteFrame); }
+	return 0;
+}
+
 static int ObjShot_SetDamage(lua_State* L)
 {
     Package* package = Package::Current;
@@ -6722,7 +6731,8 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
         builtin(ObjShot_SetAutoDelete, 2);
         builtin(ObjShot_FadeDelete, 1);
         builtin(ObjShot_SetDeleteFrame, 2);
-        builtin(ObjShot_SetAutoDeleteDelay, 2);
+        builtin(ObjShot_SetAutoDeleteDelay, 2); //FP AUTO TIMER
+        builtin(ObjShot_SetSpellResistDelay, 2); //FP SPELL RESIST DELAY
         builtin(ObjShot_SetDamage, 2);
         builtin(ObjShot_SetDelay, 2);
         builtin(ObjShot_SetSpellResist, 2);

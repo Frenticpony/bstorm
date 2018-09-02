@@ -79,6 +79,7 @@ public:
     int GetFadeDeleteFrameTimer() const;
     void SetDeleteFrame(int frame);
     void SetAutoDeleteDelay(int frame);  //FP AUTO TIMER
+    void SetSpellResistDelay(int frame);  //FP SPELL RESIST DELAY
 
     // graze
     virtual void Graze();
@@ -114,6 +115,7 @@ protected:
     void TickDelayTimer();
     void TickDeleteFrameTimer();
     void TickAutoDeleteTimer(); //FP AUTO TIMER
+    void TickSpellResistTimer(); //FP SPELL RESIST DELAY
     void TickAddedShotFrameCount();
     void TickFadeDeleteTimer();
     NullableSharedPtr<ShotData> shotData_;
@@ -133,6 +135,7 @@ private:
     bool intersectionEnable_;
     bool autoDeleteEnable_;
     int autoDeleteTimer_; //FP AUTO TIMER
+    int spellResistTimer_; //FP SPELL RESIST DELAY
     float angularVelocity_;
     double damage_;
     int sourceBlendType_;
