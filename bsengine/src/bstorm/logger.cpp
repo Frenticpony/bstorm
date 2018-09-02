@@ -8,31 +8,31 @@ namespace bstorm
 void Logger::Write(Log& lg)
 {
     std::lock_guard<std::mutex> lock(mutex);
-    if (logEnabled) logger->log(lg);
+    logger->log(lg);
 }
 
 void Logger::Write(Log&& lg)
 {
     std::lock_guard<std::mutex> lock(mutex);
-    if (logEnabled) logger->log(std::move(lg));
+    logger->log(std::move(lg));
 }
 
 void Logger::Write(LogLevel level, const std::string & text)
 {
     std::lock_guard<std::mutex> lock(mutex);
-    if (logEnabled) logger->log(level, text);
+    logger->log(level, text);
 }
 
 void Logger::Write(LogLevel level, const std::wstring & text)
 {
     std::lock_guard<std::mutex> lock(mutex);
-    if (logEnabled) logger->log(level, ToUTF8(text));
+    logger->log(level, ToUTF8(text));
 }
 
 void Logger::Write(LogLevel level, std::string && text)
 {
     std::lock_guard<std::mutex> lock(mutex);
-    if (logEnabled) logger->log(level, std::move(text));
+    logger->log(level, std::move(text));
 }
 
 void Logger::Init(const std::shared_ptr<Logger>& l)
@@ -53,12 +53,6 @@ void Logger::Shutdown()
     logger.reset();
 }
 
-void Logger::SetEnable(bool enable)
-{
-    std::lock_guard<std::mutex> lock(mutex);
-    logEnabled = enable;
-}
-
 void Logger::log(LogLevel level, const std::string & text)
 {
     log(std::move(Log(level).Msg(text)));
@@ -76,7 +70,6 @@ void Logger::log(LogLevel level, std::string && text)
 
 std::shared_ptr<Logger> Logger::logger = std::make_shared<DummyLogger>();
 std::mutex Logger::mutex;
-bool Logger::logEnabled = true;
 
 LogParam::LogParam(Tag tag, const std::string & text) :
     tag_(tag),
