@@ -4886,6 +4886,51 @@ static int ObjShot_SetItemChange(lua_State* L)
     return 0;
 }
 
+static int ObjShot_GetInitialX(lua_State* L)
+{
+	Package* package = Package::Current;
+	int objId = DnhValue::ToNum(L, 1);
+	auto obj = package->GetObject<ObjShot>(objId);
+	lua_pushnumber(L, obj ? obj->GetInitX() : 0);
+	return 1;
+}
+
+static int ObjShot_GetInitialY(lua_State* L)
+{
+	Package* package = Package::Current;
+	int objId = DnhValue::ToNum(L, 1);
+	auto obj = package->GetObject<ObjShot>(objId);
+	lua_pushnumber(L, obj ? obj->GetInitY() : 0);
+	return 1;
+}
+
+static int ObjShot_GetInitialSpeed(lua_State* L)
+{
+	Package* package = Package::Current;
+	int objId = DnhValue::ToNum(L, 1);
+	auto obj = package->GetObject<ObjShot>(objId);
+	lua_pushnumber(L, obj ? obj->GetInitSpeed() : 0);
+	return 1;
+}
+
+static int ObjShot_GetInitialAngle(lua_State* L)
+{
+	Package* package = Package::Current;
+	int objId = DnhValue::ToNum(L, 1);
+	auto obj = package->GetObject<ObjShot>(objId);
+	lua_pushnumber(L, obj ? obj->GetInitAngle() : 0);
+	return 1;
+}
+
+static int ObjShot_GetInitialDelay(lua_State* L)
+{
+	Package* package = Package::Current;
+	int objId = DnhValue::ToInt(L, 1);
+	auto obj = package->GetObject<ObjShot>(objId);
+	lua_pushnumber(L, obj ? obj->GetInitDelay() : 0);
+	return 1;
+}
+
 static int ObjShot_GetDamage(lua_State* L)
 {
     Package* package = Package::Current;
@@ -6749,6 +6794,11 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
         builtin(ObjShot_SetIntersectionCircleA2, 4);
         builtin(ObjShot_SetIntersectionLine, 6);
         builtin(ObjShot_SetItemChange, 2);
+		builtin_real(ObjShot_GetInitialX, 1);
+		builtin_real(ObjShot_GetInitialY, 1);
+		builtin_real(ObjShot_GetInitialSpeed, 1);
+		builtin_real(ObjShot_GetInitialAngle, 1);
+		builtin_real(ObjShot_GetInitialDelay, 1);
         builtin_real(ObjShot_GetDamage, 1);
         builtin_real(ObjShot_GetPenetration, 1);
         builtin_real(ObjShot_GetDelay, 1);

@@ -25,6 +25,11 @@ ObjShot::ObjShot(bool isPlayerShot, const std::shared_ptr<CollisionDetector>& co
     ObjMove(this),
     ObjCol(colDetector),
     isPlayerShot_(isPlayerShot),
+	initX_(0),
+	initY_(0),
+	initSpeed_(0),
+	initAngle_(0),
+	initDelay_(0),
     isRegistered_(false),
     intersectionEnable_(true),
     autoDeleteEnable_(false),
@@ -38,6 +43,7 @@ ObjShot::ObjShot(bool isPlayerShot, const std::shared_ptr<CollisionDetector>& co
     penetration_(5),
     eraseShotEnable_(false),
     delayTimer_(0),
+	delayCounter_(0),
     deleteFrameTimer_(0),
     isFrameDeleteStarted_(false),
     sourceBlendType_(BLEND_NONE),
@@ -65,6 +71,7 @@ ObjShot::~ObjShot()
 {
 }
 
+/*
 void ObjShot::Update()
 {
     if (IsRegistered())
@@ -89,6 +96,43 @@ void ObjShot::Update()
         TickFadeDeleteTimer();
     }
     UpdateTempIntersection();
+}
+*/
+
+void ObjShot::Update()
+{
+	if (IsRegistered())
+	{
+		if(GetPenetration() <= 0) { Die(); return; }
+		if(!IsDelay())
+		{
+			Move();
+			CheckAutoDelete(GetX(), GetY());
+
+			if (shotData_)
+			{
+				SetAngleZ(GetAngleZ() + GetAngularVelocity());
+				UpdateAnimationPosition();
+			}
+		}
+		else
+		{
+			float d_maxrad = initSpeed_ * 3;
+
+			/* Delay Position Interpolation */
+			float d_loc_v = delayCounter_ / (float)initDelay_;
+			float d_rad = (0.0f * d_loc_v) + (d_maxrad * (1.0f - d_loc_v));
+
+			SetMovePosition(initX_ - (d_rad * cos(D3DXToRadian(initAngle_))), initY_ - (d_rad * sin(D3DXToRadian(initAngle_))));
+		}
+		TickAddedShotFrameCount();
+		TickDelayTimer();
+		TickDeleteFrameTimer();
+		TickAutoDeleteTimer(); //FP AUTO TIMER
+		TickSpellResistTimer(); //FP SPELL RESIST DELAY
+		TickFadeDeleteTimer();
+	}
+	UpdateTempIntersection();
 }
 
 void ObjShot::OnDead() noexcept
@@ -115,54 +159,25 @@ void ObjShot::Render(const std::shared_ptr<Renderer>& renderer)
     {
         if (shotData_)
         {
-            float delayScale = 2.0f - (23.0f - std::min(23, GetDelay())) / 16.0f; // delay=23から32Fで0になるように設定
+			//float loc_v = delayCounter_ / 16.0f;
+			//float delayScale = (0.65f * loc_v) + (0.65f * (1.0f - loc_v));
 
-            // カーブレーザーのときは遅延光がちょっと大きい
-            if (GetType() == OBJ_CURVE_LASER)
-            {
-                delayScale *= 1.8f; // 値は適当
-            }
-
-            /* 配置 */
-            // NOTE : fixedAngleじゃないなら移動方向に向ける
-            D3DXMATRIX world = CreateScaleRotTransMatrix(GetX(), GetY(), 0.0f,
-                                                         GetAngleX(), GetAngleY(), GetAngleZ() + (shotData_->fixedAngle ? 0.0f : GetAngle() + 90.0f),
-                                                         IsDelay() ? delayScale : GetScaleX(), IsDelay() ? delayScale : GetScaleY(), 1.0f);
-
-            /* ブレンド方法の選択 */
-            int shotBlend = BLEND_NONE;
-            if (!IsDelay())
-            {
-                if (GetBlendType() == BLEND_NONE)
-                {
-                    shotBlend = shotData_->render;
-                } else
-                {
-                    /* ObjRenderで指定されたintがある場合はそちらを使う */
-                    shotBlend = GetBlendType();
-                }
-            } else
-            {
-                /* 遅延時間時 */
-                if (GetSourceBlendType() == BLEND_NONE)
-                {
-                    shotBlend = shotData_->delayRender;
-                } else
-                {
-                    shotBlend = GetSourceBlendType();
-                }
-            }
-
-			// NOTE : ADD_RGBはADD_ARGBとして解釈
-			if (GetBlendType() == BLEND_NONE && shotBlend == BLEND_ADD_RGB)
-			{
-				shotBlend = BLEND_ADD_ARGB;
-			}
-
-			/* ブレンド方法の選択 */
+			int shotBlend = BLEND_NONE;
 			int shotFilter = FILTER_LINEAR; //FP FILTER
-			if (!IsDelay())
+			D3DCOLOR color;
+			float delayScale = 1.0f;
+			if(!IsDelay())
 			{
+				if (GetBlendType() == BLEND_NONE)
+				{
+					shotBlend = shotData_->render;
+				}
+				else
+				{
+					/* ObjRenderで指定されたintがある場合はそちらを使う */
+					shotBlend = GetBlendType();
+				}
+
 				if (GetFilterType() == FILTER_LINEAR)
 				{
 					shotFilter = shotData_->filter;
@@ -172,28 +187,71 @@ void ObjShot::Render(const std::shared_ptr<Renderer>& renderer)
 					/* ObjRenderで指定されたintがある場合はそちらを使う */
 					shotFilter = GetFilterType();
 				}
+
+				color = GetColor().ToD3DCOLOR((int)(GetFadeScale() * std::min(shotData_->alpha, GetAlpha())));
+
+				D3DXMATRIX world = CreateScaleRotTransMatrix(GetX(), GetY(), 0.0f,
+					GetAngleX(), GetAngleY(), GetAngleZ() + (shotData_->fixedAngle ? 0.0f : GetAngle() + 90.0f),
+					IsDelay() ? delayScale : GetScaleX(), IsDelay() ? delayScale : GetScaleY(), 1.0f);
+
+
+				// NOTE : ADD_RGBはADD_ARGBとして解釈
+				if (GetBlendType() == BLEND_NONE && shotBlend == BLEND_ADD_RGB)
+				{
+					shotBlend = BLEND_ADD_ARGB;
+				}
+
+				auto vertices = GetRectVertices(color, shotData_->texture->GetWidth(), shotData_->texture->GetHeight(), IsDelay() ? shotData_->delayRect :
+					(animationIdx_ >= 0 && animationIdx_ < shotData_->animationData.size()) ? shotData_->animationData[animationIdx_].rect :
+					shotData_->rect);
+
+				renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData_->texture->GetTexture(), shotBlend, shotFilter, world, GetAppliedShader(), IsPermitCamera(), true);
 			}
 			else
 			{
+				if (GetSourceBlendType() == BLEND_NONE)
+				{
+					shotBlend = shotData_->delayRender;
+				}
+				else
+				{
+					shotBlend = GetSourceBlendType();
+				}
+
 				shotFilter = FILTER_LINEAR;
+
+				/* Delay Scale Interpolation */
+				float d_loc_v = delayCounter_ / (float)initDelay_;
+				d_loc_v = 1.0f - (1.0f - d_loc_v) * (1.0f - d_loc_v);
+				delayScale = (0.65f * d_loc_v) + (3.0f * (1.0f - d_loc_v));
+				//float delayScale = 2.0f - (23.0f - std::min(23, GetDelay())) / 16.0f; // delay=23から32Fで0になるように設定
+
+				/* Delay Alpha Interpolation */
+				float a_loc_v = delayCounter_ / (float)initDelay_;
+				float delayAlpha = (255.0f * a_loc_v) + (0.0f * (1.0f - a_loc_v));
+
+				// In the case of a curve laser, the delay scale is slightly larger
+				if (GetType() == OBJ_CURVE_LASER)
+				{
+					delayScale *= 1.8f;
+				}
+
+				color = GetColor().ToD3DCOLOR((int)(delayAlpha));
+
+				D3DXMATRIX world = CreateScaleRotTransMatrix(GetX(), GetY(), 0.0f,
+					GetAngleX(), GetAngleY(), GetAngleZ() + (GetAngle() + 90.0f),
+					IsDelay() ? delayScale : GetScaleX(), IsDelay() ? delayScale : GetScaleY(), 1.0f);
+
+				// NOTE: Interpret ADD_RGB as ADD_ARGB
+				if (GetBlendType() == BLEND_NONE && shotBlend == BLEND_ADD_RGB)
+				{
+					shotBlend = BLEND_ADD_ARGB;
+				}
+
+				auto vertices = GetRectVertices(color, shotData_->texture->GetWidth(), shotData_->texture->GetHeight(), shotData_->delayRect);
+
+				renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData_->texture->GetTexture(), shotBlend, shotFilter, world, GetAppliedShader(), IsPermitCamera(), true);
 			}
-
-            // 色と透明度
-            D3DCOLOR color;
-            if (!IsDelay())
-            {
-                color = GetColor().ToD3DCOLOR((int)(GetFadeScale() * std::min(shotData_->alpha, GetAlpha())));
-            } else
-            {
-                // NOTE: 遅延光は透明度反映無し
-                color = shotData_->delayColor.ToD3DCOLOR(0xff);
-            }
-
-            auto vertices = GetRectVertices(color, shotData_->texture->GetWidth(), shotData_->texture->GetHeight(), IsDelay() ? shotData_->delayRect :
-                (animationIdx_ >= 0 && animationIdx_ < shotData_->animationData.size()) ? shotData_->animationData[animationIdx_].rect :
-                                            shotData_->rect);
-
-            renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData_->texture->GetTexture(), shotBlend, shotFilter, world, GetAppliedShader(), IsPermitCamera(), true);
         }
         RenderIntersection(renderer);
     }
@@ -218,7 +276,7 @@ int ObjShot::GetDelay() const
     return delayTimer_;
 }
 
-void ObjShot::SetDelay(int delay) { delayTimer_ = std::max(delay, 0); }
+void ObjShot::SetDelay(int delay) { delayTimer_ = std::max(delay, 0); delayCounter_ = 0; }
 
 bool ObjShot::IsDelay() const
 {
@@ -233,6 +291,31 @@ int ObjShot::GetSourceBlendType() const
 void ObjShot::SetSourceBlendType(int blendType)
 {
     sourceBlendType_ = blendType;
+}
+
+float ObjShot::GetInitX() const
+{
+	return initX_;
+}
+
+float ObjShot::GetInitY() const
+{
+	return initY_;
+}
+
+float ObjShot::GetInitSpeed() const
+{
+	return initSpeed_;
+}
+
+float ObjShot::GetInitAngle() const
+{
+	return initAngle_;
+}
+
+int ObjShot::GetInitDelay() const
+{
+	return initDelay_;
 }
 
 float ObjShot::GetAngularVelocity() const
@@ -360,6 +443,11 @@ bool ObjShot::IsRegistered() const { return isRegistered_; }
 
 void ObjShot::Regist()
 {
+	initX_ = GetX();
+	initY_ = GetY();
+	initSpeed_ = GetSpeed();
+	initAngle_ = GetAngle();
+	initDelay_ = GetDelay();
     isRegistered_ = true;
 }
 
@@ -627,6 +715,10 @@ void ObjShot::UpdateAnimationPosition()
 void ObjShot::TickDelayTimer()
 {
     delayTimer_ = std::max(0, delayTimer_ - 1);
+	if(IsDelay())
+	{
+		delayCounter_++;
+	}
 }
 
 void ObjShot::TickDeleteFrameTimer()

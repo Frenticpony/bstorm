@@ -54,6 +54,11 @@ public:
     bool IsDelay() const;
     int GetSourceBlendType() const;
     void SetSourceBlendType(int blendType);
+	float GetInitX() const;
+	float GetInitY() const;
+	float GetInitSpeed() const;
+	float GetInitAngle() const;
+	int GetInitDelay() const;
     float GetAngularVelocity() const;
     void SetAngularVelocity(float angularVelocity);
     bool IsSpellResistEnabled() const;
@@ -125,6 +130,11 @@ private:
     void AddIntersection(const std::shared_ptr<ShotIntersection>& isect);
     void AddTempIntersection(const std::shared_ptr<ShotIntersection>& isect);
     const bool isPlayerShot_;
+	float initX_;
+	float initY_;
+	float initSpeed_;
+	float initAngle_;
+	int initDelay_;
     bool isRegistered_;
     bool isFrameDeleteStarted_;
     bool isFadeDeleteStarted_;
@@ -142,6 +152,7 @@ private:
     int penetration_;
     int fadeDeleteTimer_;
     int delayTimer_;
+	int delayCounter_;
     int deleteFrameTimer_;
     int fadeDeleteFrame_;
     int animationFrameCnt_;
