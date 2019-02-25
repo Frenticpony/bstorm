@@ -66,6 +66,22 @@ constexpr int BLEND_INV_DESTRGB = 7;
 constexpr int FILTER_NONE = 0; //FP FILTER
 constexpr int FILTER_LINEAR = 1; //FP FILTER
 
+// interpolate type
+constexpr int IP_LINEAR_1X = 0;
+constexpr int IP_ACCEL_2X = 1;
+constexpr int IP_ACCEL_3X = 2;
+constexpr int IP_ACCEL_4X = 3;
+constexpr int IP_ACCEL_5X = 4;
+constexpr int IP_DECEL_2X = 5;
+constexpr int IP_DECEL_3X = 6;
+constexpr int IP_DECEL_4X = 7;
+constexpr int IP_DECEL_5X = 8;
+constexpr int IP_SMOOTH_2X = 9;
+constexpr int IP_SMOOTH_3X = 10;
+constexpr int IP_SMOOTH_4X = 11;
+constexpr int IP_SMOOTH_5X = 12;
+
+
 // primitive type
 constexpr int PRIMITIVE_TRIANGLEFAN = 6;
 constexpr int PRIMITIVE_TRIANGLESTRIP = 5;

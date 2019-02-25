@@ -35,6 +35,7 @@
     <ClInclude Include="src\bstorm\cache_store.hpp" />
     <ClInclude Include="src\bstorm\file_logger.hpp" />
     <ClInclude Include="src\bstorm\font_params.hpp" />
+    <ClInclude Include="src\bstorm\interpolation.hpp" />
     <ClInclude Include="src\bstorm\key_types.hpp" />
     <ClInclude Include="src\bstorm\lua_util.hpp" />
     <ClInclude Include="src\bstorm\math_util.hpp" />
@@ -130,6 +131,7 @@
     <ClCompile Include="src\bstorm\engine.cpp" />
     <ClCompile Include="src\bstorm\file_logger.cpp" />
     <ClCompile Include="src\bstorm\font_params.cpp" />
+    <ClCompile Include="src\bstorm\interpolation.cpp" />
     <ClCompile Include="src\bstorm\log_error.cpp" />
     <ClCompile Include="src\bstorm\camera2D.cpp" />
     <ClCompile Include="src\bstorm\camera3D.cpp" />

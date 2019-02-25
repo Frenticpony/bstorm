@@ -2,6 +2,7 @@
 
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/script_name_prefix.hpp>
+#include <bstorm/interpolation.hpp>
 #include <bstorm/file_util.hpp>
 #include <bstorm/string_util.hpp>
 #include <bstorm/lua_util.hpp>
@@ -146,6 +147,15 @@ static int GetCurrentFps(lua_State* L)
 }
 
 // API
+
+static int Interpolate(lua_State* L)
+{
+	Package* package = Package::Current;
+	float f_n = GetInterpolateResult(DnhValue::ToInt(L, 1), DnhValue::ToNum(L, 2), DnhValue::ToNum(L, 3), DnhValue::ToInt(L, 4), DnhValue::ToInt(L, 5));
+	lua_pushnumber(L, f_n);
+	return 1;
+}
+
 static int InstallFont(lua_State* L)
 {
     Package* package = Package::Current;
@@ -5899,6 +5909,20 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
 	constI(FILTER_NONE); //FP FILTER
 	constI(FILTER_LINEAR); //FP FILTER
 
+	constI(IP_LINEAR_1X);
+	constI(IP_ACCEL_2X);
+	constI(IP_ACCEL_3X);
+	constI(IP_ACCEL_4X);
+	constI(IP_ACCEL_5X);
+	constI(IP_DECEL_2X);
+	constI(IP_DECEL_3X);
+	constI(IP_DECEL_4X);
+	constI(IP_DECEL_5X);
+	constI(IP_SMOOTH_2X);
+	constI(IP_SMOOTH_3X);
+	constI(IP_SMOOTH_4X);
+	constI(IP_SMOOTH_5X);
+
     constI(PRIMITIVE_TRIANGLEFAN);
     constI(PRIMITIVE_TRIANGLESTRIP);
     constI(PRIMITIVE_TRIANGLELIST);
@@ -6264,6 +6288,8 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
     runtime_real(floor, 1);
     runtime_real(absolute, 1);
     runtime_real(modc, 2);
+
+	builtin_real(Interpolate, 5);
 
     builtin(InstallFont, 1);
     builtin(ToString, 1);

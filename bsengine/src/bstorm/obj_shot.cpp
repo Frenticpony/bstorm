@@ -1,5 +1,6 @@
 ﻿#include <bstorm/obj_shot.hpp>
 
+#include <bstorm/interpolation.hpp>
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/math_util.hpp>
 #include <bstorm/dx_util.hpp>
@@ -120,8 +121,7 @@ void ObjShot::Update()
 			float d_maxrad = initSpeed_ * 3;
 
 			/* Delay Position Interpolation */
-			float d_loc_v = delayCounter_ / (float)initDelay_;
-			float d_rad = (0.0f * d_loc_v) + (d_maxrad * (1.0f - d_loc_v));
+			float d_rad = easeLinear(d_maxrad, 0.0f, delayCounter_, initDelay_);
 
 			SetMovePosition(initX_ - (d_rad * cos(D3DXToRadian(initAngle_))), initY_ - (d_rad * sin(D3DXToRadian(initAngle_))));
 		}
@@ -221,14 +221,10 @@ void ObjShot::Render(const std::shared_ptr<Renderer>& renderer)
 				shotFilter = FILTER_LINEAR;
 
 				/* Delay Scale Interpolation */
-				float d_loc_v = delayCounter_ / (float)initDelay_;
-				d_loc_v = 1.0f - (1.0f - d_loc_v) * (1.0f - d_loc_v);
-				delayScale = (0.65f * d_loc_v) + (3.0f * (1.0f - d_loc_v));
-				//float delayScale = 2.0f - (23.0f - std::min(23, GetDelay())) / 16.0f; // delay=23から32Fで0になるように設定
-
+				float delayScale = easeOutCubic(3.0f, 0.65f, delayCounter_, initDelay_);
+				
 				/* Delay Alpha Interpolation */
-				float a_loc_v = delayCounter_ / (float)initDelay_;
-				float delayAlpha = (255.0f * a_loc_v) + (0.0f * (1.0f - a_loc_v));
+				float delayAlpha = easeOutQuad(0.0f, 255.0f, delayCounter_, initDelay_);
 
 				// In the case of a curve laser, the delay scale is slightly larger
 				if (GetType() == OBJ_CURVE_LASER)

@@ -1,5 +1,6 @@
 ﻿#include <bstorm/package.hpp>
 
+#include <bstorm/interpolation.hpp>
 #include <bstorm/file_util.hpp>
 #include <bstorm/math_util.hpp>
 #include <bstorm/string_util.hpp>
