@@ -129,7 +129,7 @@ void Script::CallLuaChunk(int argCnt)
             try
             {
                 throw Log(LogLevel::LV_ERROR)
-                    .Msg("unexpected script runtime error occured, please send a bug report.")
+                    .Msg("Unexpected script runtime error occured.  Please send a bug report.")
                     .Param(LogParam(LogParam::Tag::TEXT, msg));
             } catch (...)
             {
@@ -163,7 +163,7 @@ void Script::Load()
     RunBuiltInSub("Loading");
     Logger::Write(std::move(
         Log(LogLevel::LV_INFO)
-        .Msg("load script.")
+        .Msg("Loaded script.")
         .Param(LogParam(LogParam(LogParam::Tag::SCRIPT, path_)))
         .AddSourcePos(compileSrcPos_)));
     state_.isLoaded = true;

@@ -117,7 +117,7 @@ Mesh::Mesh(const std::wstring& path, const std::shared_ptr<TextureStore>& textur
     } else
     {
         throw Log(LogLevel::LV_ERROR)
-            .Msg("failed to load mesh.")
+            .Msg("Failed to load mesh.")
             .Param(LogParam(LogParam::Tag::TEXT, path));
     }
 }
@@ -126,7 +126,7 @@ Mesh::~Mesh()
 {
     Logger::Write(std::move(
         Log(LogLevel::LV_INFO)
-        .Msg("release mesh.")
+        .Msg("Released mesh.")
         .Param(LogParam(LogParam::Tag::MESH, path_))));
 }
 
@@ -143,7 +143,7 @@ const std::shared_ptr<Mesh>& MeshStore::Load(const std::wstring & path)
     if (ext != L".mqo")
     {
         throw Log(LogLevel::LV_ERROR)
-            .Msg("this file format is not supported.")
+            .Msg("File format not supported.")
             .Param(LogParam(LogParam::Tag::TEXT, path));
     }
 
@@ -154,7 +154,7 @@ const std::shared_ptr<Mesh>& MeshStore::Load(const std::wstring & path)
     }
     auto & mesh = cacheStore_.Load(uniqPath, uniqPath, textureStore_, fileLoader_);
     Logger::Write(std::move(
-        Log(LogLevel::LV_INFO).Msg("load mesh.")
+        Log(LogLevel::LV_INFO).Msg("Loaded mesh.")
         .Param(LogParam(LogParam::Tag::MESH, path))));
     return mesh;
 }

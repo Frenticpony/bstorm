@@ -28,7 +28,7 @@ void Shader::OnLostDevice()
 {
     if (FAILED(effect_->OnLostDevice()))
     {
-        throw Log(LogLevel::LV_ERROR).Msg("failed to release shader.");
+        throw Log(LogLevel::LV_ERROR).Msg("Failed to release shader.");
     }
 }
 
@@ -36,7 +36,7 @@ void Shader::OnResetDevice()
 {
     if (FAILED(effect_->OnResetDevice()))
     {
-        throw Log(LogLevel::LV_ERROR).Msg("failed to reset shader.");
+        throw Log(LogLevel::LV_ERROR).Msg("Failed to reset shader.");
     }
 }
 

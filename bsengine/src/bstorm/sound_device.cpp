@@ -16,7 +16,7 @@ SoundDevice::SoundDevice(HWND hWnd) :
     if (DS_OK != DirectSoundCreate8(nullptr, &dSound_, nullptr))
     {
         throw Log(LogLevel::LV_ERROR)
-            .Msg("failed to init sound device.");
+            .Msg("Failed to initialize sound device.");
     }
     dSound_->SetCooperativeLevel(hWnd, DSSCL_PRIORITY);
 }
@@ -38,7 +38,7 @@ std::shared_ptr<SoundBuffer> SoundDevice::LoadSound(const std::wstring & path)
         return std::make_shared<SoundBuffer>(std::make_unique<OggVorbisStream>(uniqPath), shared_from_this());
     }
     throw Log(LogLevel::LV_ERROR)
-        .Msg("unsupported sound file format.")
+        .Msg("Unsupported sound file format.")
         .Param(LogParam(LogParam::Tag::TEXT, path));
 }
 }

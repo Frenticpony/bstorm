@@ -64,7 +64,7 @@ failed_to_create:
     safe_release(dsTempBuffer);
     safe_release(dsBuffer);
     throw Log(LogLevel::LV_ERROR)
-        .Msg("failed to create sound buffer.")
+        .Msg("Failed to create sound buffer.")
         .Param(LogParam(LogParam::Tag::TEXT, stream->GetPath()));
 
 }

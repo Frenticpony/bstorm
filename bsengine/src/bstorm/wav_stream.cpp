@@ -15,12 +15,12 @@ WavStream::WavStream(const std::wstring & path) :
     if (!fileStream_.good())
     {
         throw Log(LogLevel::LV_ERROR)
-            .Msg("can't open file")
+            .Msg("Unable to open file.")
             .Param(LogParam(LogParam::Tag::TEXT, path));
     }
 
     auto illegal_wave_format = Log(LogLevel::LV_ERROR)
-        .Msg("illegal wave format file.")
+        .Msg("Illegal wave format file.")
         .Param(LogParam(LogParam::Tag::TEXT, path));
 
     // read riff header

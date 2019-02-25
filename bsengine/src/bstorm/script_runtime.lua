@@ -234,7 +234,7 @@ end
 function r_arr(a)
   for i=2,#a do
     if not rl_type_eq(a[1], a[i]) then
-        c_raiseerror("can' create an array in which elements  different type.");
+        -- c_raiseerror("can' create an array in which elements  different type.");
     end
   end
   return a;

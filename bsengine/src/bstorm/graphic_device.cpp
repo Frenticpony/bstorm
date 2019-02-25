@@ -42,7 +42,7 @@ GraphicDevice::GraphicDevice(HWND hWnd) :
             {
                 d3D_->Release();
                 throw Log(LogLevel::LV_ERROR)
-                    .Msg("failed to init graphic device.");
+                    .Msg("Failed to initialize D3D graphic device.");
             }
         }
     }
@@ -65,7 +65,7 @@ void GraphicDevice::Reset()
     safe_release(backBufferDepthStencilSurface_);
     if (FAILED(d3DDevice_->Reset(&presentParams_)))
     {
-        throw Log(LogLevel::LV_ERROR).Msg("failed to reset graphic device.");
+        throw Log(LogLevel::LV_ERROR).Msg("Failed to reset D3D graphic device.");
     }
     d3DDevice_->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &backBufferSurface_);
     d3DDevice_->GetDepthStencilSurface(&backBufferDepthStencilSurface_);

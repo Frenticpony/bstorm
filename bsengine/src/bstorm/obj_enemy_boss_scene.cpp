@@ -304,7 +304,7 @@ const ObjEnemyBossScene::Phase& ObjEnemyBossScene::GetCurrentPhase() const
 {
     if (!ExistPhase())
     {
-        throw Log(LogLevel::LV_ERROR).Msg("phase not exists, please send bug report.");
+        throw Log(LogLevel::LV_ERROR).Msg("Phase does not exist.  Please send a bug report.");
     }
     const auto& phases = steps_.at(currentStep_);
     return phases.at(currentPhase_);

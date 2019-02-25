@@ -31,7 +31,7 @@ public :
         if (fp_ == NULL)
         {
             throw Log(LogLevel::LV_ERROR)
-              .Msg("can't open file.")
+              .Msg("Unable to open file. (File not found.)")
               .Param(LogParam(LogParam::Tag::TEXT, path));
         }
         in(fp_);
@@ -146,7 +146,7 @@ newline \r?\n
 
 . {
     throw Log(LogLevel::LV_ERROR)
-      .Msg("found illegal token.")
+      .Msg("Found illegal token.")
       .Param(LogParam(LogParam::Tag::TEXT, str()))
       .AddSourcePos(std::make_shared<SourcePos>(GetSourcePos()));
 }

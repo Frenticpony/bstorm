@@ -31,7 +31,7 @@ public :
         if (fp_ == nullptr)
         {
             throw Log(LogLevel::LV_ERROR)
-              .Msg("can't open file")
+              .Msg("Unable to open file. (File not found.)")
               .Param(LogParam(LogParam::Tag::TEXT, path));
         }
         in(fp_);

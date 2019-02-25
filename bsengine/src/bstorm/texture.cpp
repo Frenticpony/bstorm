@@ -46,7 +46,7 @@ Texture::~Texture()
     safe_release(d3DTexture_);
     Logger::Write(std::move(
         Log(LogLevel::LV_INFO)
-        .Msg("release texture.")
+        .Msg("Released texture.")
         .Param(LogParam(LogParam::Tag::TEXTURE, path_))));
 }
 
@@ -76,7 +76,7 @@ void Texture::Reload()
     if (texture == nullptr)
     {
         throw Log(LogLevel::LV_ERROR)
-            .Msg("failed to load texture.")
+            .Msg("Failed to load texture.")
             .Param(LogParam(LogParam::Tag::TEXTURE, path_));
     }
     d3DTexture_ = texture;
@@ -128,7 +128,7 @@ const std::shared_ptr<Texture>& TextureStore::Load(const std::wstring & path)
     }
     auto& texture = cacheStore_.Load(uniqPath, uniqPath, graphicDevice_);
     Logger::Write(std::move(
-        Log(LogLevel::LV_INFO).Msg(std::string("load texture."))
+        Log(LogLevel::LV_INFO).Msg(std::string("Loaded texture."))
         .Param(LogParam(LogParam::Tag::TEXTURE, uniqPath))));
     return texture;
 }
@@ -139,7 +139,7 @@ void TextureStore::LoadInThread(const std::wstring & path)
     if (cacheStore_.Contains(uniqPath)) return;
     cacheStore_.LoadAsync(uniqPath, uniqPath, graphicDevice_);
     Logger::Write(std::move(
-        Log(LogLevel::LV_INFO).Msg(std::string("load texture (async)."))
+        Log(LogLevel::LV_INFO).Msg(std::string("Loaded texture (async)."))
         .Param(LogParam(LogParam::Tag::TEXTURE, uniqPath))));
 }
 

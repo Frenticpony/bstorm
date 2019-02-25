@@ -202,7 +202,7 @@ static int assert(lua_State* L)
     if (!cond)
     {
         throw Log(LogLevel::LV_ERROR)
-            .Msg("assertion failed.")
+            .Msg("Assertion failed.")
             .Param(LogParam(LogParam::Tag::TEXT, std::move(msg)));
     }
     return 0;
@@ -5712,7 +5712,7 @@ static int WrapException(lua_State* L, lua_CFunction func)
         try
         {
             throw Log(LogLevel::LV_ERROR)
-                .Msg("unexpected script runtime error occured.")
+                .Msg("Unexpected script runtime error occured.")
                 .Param(LogParam(LogParam::Tag::TEXT, e.what()))
                 .AddSourcePos(srcPos);
         } catch (...)
@@ -5825,7 +5825,7 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
             std::string msg = lua_tostring(L, -1);
             lua_pop(L, 1);
             throw Log(LogLevel::LV_ERROR)
-                .Msg("runtime library error.")
+                .Msg("Runtime library error.")
                 .Param(LogParam(LogParam::Tag::TEXT, msg));
         }
 

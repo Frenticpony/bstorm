@@ -7,27 +7,27 @@ namespace bstorm
 static Log invalid_return(const std::shared_ptr<SourcePos>& srcPos)
 {
     return Log(LogLevel::LV_ERROR)
-        .Msg("'return' with a value is available only to function.")
+        .Msg("Invalid return: 'return' with a value is available only to 'function' function type.")
         .AddSourcePos(srcPos);
 }
 
 static Log variable_call(const std::shared_ptr<SourcePos>& srcPos, const std::string& name)
 {
     return Log(LogLevel::LV_ERROR)
-        .Msg("can't call variable '" + name + "' as if it were a function.")
+        .Msg("Invalid variable call: Variable '" + name + "' can not be called as if it were a function.")
         .AddSourcePos(srcPos);
 }
 
 static Log undefined_name(const std::shared_ptr<SourcePos>& srcPos, const std::string& name)
 {
     return Log(LogLevel::LV_ERROR)
-        .Msg("'" + name + "' is not defined.")
+        .Msg("Undefined name: '" + name + "' is not defined.")
         .AddSourcePos(srcPos);
 }
 
 static Log wrong_number_args(const std::shared_ptr<SourcePos>& srcPos, const std::string& name, int passed, int expected)
 {
-    auto msg = "wrong number of arguments was passed to '" + name + "' (passed : " + std::to_string(passed) + ", expected : " + std::to_string(expected) + ").";
+    auto msg = "Argument count mismatch: Wrong number of arguments passed to '" + name + "' (passed : " + std::to_string(passed) + ", expected : " + std::to_string(expected) + ").";
     return Log(LogLevel::LV_ERROR)
         .Msg(msg)
         .AddSourcePos(srcPos);
@@ -36,28 +36,28 @@ static Log wrong_number_args(const std::shared_ptr<SourcePos>& srcPos, const std
 static Log invalid_left_value(const std::shared_ptr<SourcePos>& srcPos, const std::string& name)
 {
     return Log(LogLevel::LV_ERROR)
-        .Msg("invalid assignment : '" + name + "' is not a variable.")
+        .Msg("Invalid assignment: '" + name + "' is not a variable.")
         .AddSourcePos(srcPos);
 }
 
 static Log invalid_sub_call(const std::shared_ptr<SourcePos>& srcPos, const std::string& name)
 {
     return Log(LogLevel::LV_ERROR)
-        .Msg("can't call subroutine '" + name + "' as an expression.")
+        .Msg("Invalid subroutine call: Sub '" + name + "' can not be called as an expression.")
         .AddSourcePos(srcPos);
 }
 
 static Log invalid_task_call(const std::shared_ptr<SourcePos>& srcPos, const std::string& name)
 {
     return Log(LogLevel::LV_ERROR)
-        .Msg("can't call micro thread '" + name + "' as an expression.")
+        .Msg("Invalid micro thread call: Task '" + name + "' can not be called as an expression.")
         .AddSourcePos(srcPos);
 }
 
 static Log invalid_break(const std::shared_ptr<SourcePos>& srcPos)
 {
     return Log(LogLevel::LV_ERROR)
-        .Msg("'break' outside the loop.")
+        .Msg("Invalid break: 'break' found outside a loop.")
         .AddSourcePos(srcPos);
 }
 

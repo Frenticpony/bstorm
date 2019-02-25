@@ -11,7 +11,7 @@ FileLogger::FileLogger(const std::wstring & filePath, const std::shared_ptr<Logg
     if (!file_.good())
     {
         throw Log(LogLevel::LV_ERROR)
-            .Msg("can't open log file.")
+            .Msg("Unable to open log file.")
             .Param(LogParam(LogParam::Tag::TEXT, filePath));
     }
 }

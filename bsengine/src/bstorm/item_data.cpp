@@ -44,7 +44,7 @@ void ItemDataTable::Load(const std::wstring & path, const std::shared_ptr<Source
     {
         Logger::Write(std::move(
             Log(LogLevel::LV_WARN)
-            .Msg("item data already loaded.")
+            .Msg("Item data already loaded.")
             .Param(LogParam(LogParam::Tag::ITEM_DATA, path))
             .AddSourcePos(srcPos)));
     } else
@@ -67,7 +67,7 @@ void ItemDataTable::Reload(const std::wstring & path, const std::shared_ptr<Sour
     loadedPaths_.insert(uniqPath);
     Logger::Write(std::move(
         Log(LogLevel::LV_INFO)
-        .Msg("load item data.")
+        .Msg("Loaded item data.")
         .Param(LogParam(LogParam::Tag::ITEM_DATA, path))
         .AddSourcePos(srcPos)));
 }

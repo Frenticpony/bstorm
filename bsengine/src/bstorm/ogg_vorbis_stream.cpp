@@ -46,7 +46,7 @@ OggVorbisStream::OggVorbisStream(const std::wstring & path) :
     if (!fileStream_.good())
     {
         throw Log(LogLevel::LV_ERROR)
-            .Msg("can't open file")
+            .Msg("Unable to open file.")
             .Param(LogParam(LogParam::Tag::TEXT, path));
     }
 
@@ -54,7 +54,7 @@ OggVorbisStream::OggVorbisStream(const std::wstring & path) :
     if (ov_open_callbacks(&fileStream_, &ovFile_, 0, 0, cbs) != 0)
     {
         throw Log(LogLevel::LV_ERROR)
-            .Msg("illegal ogg vorbis format file.")
+            .Msg("Illegal ogg vorbis format file.")
             .Param(LogParam(LogParam::Tag::TEXT, path));
     }
 

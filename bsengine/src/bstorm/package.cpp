@@ -144,7 +144,7 @@ Package::~Package()
 {
     Logger::Write(std::move(
         Log(LogLevel::LV_INFO)
-        .Msg("close package.")
+        .Msg("Closed package.")
         .Param(LogParam(LogParam::Tag::SCRIPT, GetMainScriptPath()))));
 }
 
@@ -464,7 +464,7 @@ bool Package::InstallFont(const std::wstring & path, const std::shared_ptr<Sourc
     {
         Logger::Write(std::move(
             Log(LogLevel::LV_WARN)
-            .Msg("failed to install font.")
+            .Msg("Failed to install font.")
             .Param(LogParam(LogParam::Tag::TEXT, path))
             .AddSourcePos(srcPos)));
     }
@@ -479,7 +479,7 @@ std::shared_ptr<RenderTarget> Package::CreateRenderTarget(const std::wstring & n
     lostableGraphicResourceManager_->AddResource(renderTarget);
     Logger::Write(std::move(
         Log(LogLevel::LV_INFO)
-        .Msg("create render target.")
+        .Msg("Created render target.")
         .Param(LogParam(LogParam::Tag::RENDER_TARGET, name))
         .AddSourcePos(srcPos)));
     return renderTarget;
@@ -493,7 +493,7 @@ void Package::RemoveRenderTarget(const std::wstring & name, const std::shared_pt
         renderTargets_.erase(it);
         Logger::Write(std::move(
             Log(LogLevel::LV_INFO)
-            .Msg("remove render target.")
+            .Msg("Removed render target.")
             .Param(LogParam(LogParam::Tag::RENDER_TARGET, name))
             .AddSourcePos(srcPos)));
     }
@@ -559,7 +559,7 @@ void Package::SaveRenderedTextureA2(const std::wstring & name, const std::wstrin
     }
     Logger::Write(std::move(
         Log(LogLevel::LV_WARN)
-        .Msg("failed to save render target.")
+        .Msg("Failed to save render target.")
         .Param(LogParam(LogParam::Tag::RENDER_TARGET, name))
         .AddSourcePos(srcPos)));
 }
@@ -583,7 +583,7 @@ void Package::SaveSnapShotA2(const std::wstring & path, int left, int top, int r
         Logger::Write(log);
         Logger::Write(std::move(
             Log(LogLevel::LV_WARN)
-            .Msg("failed to create snap shot.")
+            .Msg("Failed to create snap shot.")
             .Param(LogParam(LogParam::Tag::TEXT, path))
             .AddSourcePos(srcPos)));
     }
@@ -1401,7 +1401,7 @@ std::shared_ptr<ObjEnemyBossScene> Package::CreateObjEnemyBossScene(const std::s
         {
             Logger::Write(std::move(
                 Log(LogLevel::LV_WARN)
-                .Msg("boss scene object already exists.")
+                .Msg("Boss scene object already exists.")
                 .AddSourcePos(srcPos)));
             return bossScene;
         }
@@ -1622,7 +1622,7 @@ ScriptInfo Package::GetScriptInfo(const std::wstring & path, const std::shared_p
         Logger::Write(log);
         Logger::Write(std::move(
             Log(LogLevel::LV_WARN)
-            .Msg("failed to load script info.")
+            .Msg("Failed to load script info.")
             .Param(LogParam(LogParam::Tag::SCRIPT, path))
             .AddSourcePos(srcPos)));
         return ScriptInfo();
@@ -1790,7 +1790,7 @@ void Package::StartShotScript(const std::wstring & path, const std::shared_ptr<S
     {
         Logger::Write(std::move(
             Log(LogLevel::LV_WARN)
-            .Msg("shot script is only available in stage.")
+            .Msg("Shot script available only in stage.")
             .Param(LogParam(LogParam::Tag::SCRIPT, GetCanonicalPath(path)))
             .AddSourcePos(srcPos)));
         return;
@@ -1988,7 +1988,7 @@ void Package::StartItemScript(const std::wstring & path, const std::shared_ptr<S
     {
         Logger::Write(std::move(
             Log(LogLevel::LV_WARN)
-            .Msg("item script is only available in stage.")
+            .Msg("Item script available only in stage.")
             .Param(LogParam(LogParam::Tag::SCRIPT, GetCanonicalPath(path)))
             .AddSourcePos(srcPos)));
         return;
@@ -2066,7 +2066,7 @@ void Package::Start()
     packageStartTime_ = std::make_shared<TimePoint>();
     Logger::Write(std::move(
         Log(LogLevel::LV_INFO)
-        .Msg("start package.")
+        .Msg("Startd package.")
         .Param(LogParam(LogParam::Tag::SCRIPT, GetMainScriptPath()))));
     auto script = scriptManager_->Compile(packageMainScriptInfo_.path, ScriptType::Value::PACKAGE, packageMainScriptInfo_.version, shared_from_this(), nullptr);
     packageMainScript_ = script;
@@ -2269,7 +2269,7 @@ void Package::StartStageScene(const std::shared_ptr<SourcePos>& srcPos)
     playerObj_ = player;
     Logger::Write(std::move(
         Log(LogLevel::LV_INFO)
-        .Msg("create player object.")
+        .Msg("Created player object.")
         .AddSourcePos(srcPos)));
 
     auto playerScript = scriptManager_->Compile(stagePlayerScriptInfo_.path, ScriptType::Value::PLAYER, stagePlayerScriptInfo_.version, shared_from_this(), srcPos);

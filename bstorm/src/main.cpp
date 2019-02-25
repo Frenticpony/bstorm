@@ -112,7 +112,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
 
         if (packageMainScriptPath.empty())
         {
-            throw Log(LogLevel::LV_ERROR).Msg("package main script not specified.");
+            throw Log(LogLevel::LV_ERROR).Msg("Package main script not specified.");
         }
 
         Engine engine(hWnd, &config.keyConfig);
@@ -164,7 +164,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
                         }
                         break;
                     case D3DERR_DRIVERINTERNALERROR:
-                        throw Log(LogLevel::LV_ERROR).Msg("graphic device internal error occured.");
+                        throw Log(LogLevel::LV_ERROR).Msg("D3D: Internal graphic device error occured.");
                         break;
                 }
             }

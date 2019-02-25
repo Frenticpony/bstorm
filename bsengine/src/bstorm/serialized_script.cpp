@@ -67,7 +67,7 @@ SerializedScript::SerializedScript(const SerializedScriptSignature& signature, c
         if (!errors_.empty())
         {
             throw Log(LogLevel::LV_ERROR)
-                .Msg("found " + std::to_string(errors_.size()) + " script error" + (errors_.size() > 1 ? "s." : "."))
+                .Msg("Found " + std::to_string(errors_.size()) + " script error" + (errors_.size() > 1 ? "s." : "."))
                 .Param(LogParam(LogParam::Tag::SCRIPT, signature.path));
         }
     }
@@ -94,7 +94,7 @@ SerializedScript::SerializedScript(const SerializedScriptSignature& signature, c
             {
                 auto ss = Split(ToUnicode(msg), L':');
                 Log err = Log(LogLevel::LV_ERROR)
-                    .Msg("too many local variable declared in one function.");
+                    .Msg("Too many local variables declared in one function. (Limit 200.)");
                 if (ss.size() >= 2)
                 {
                     int line = _wtoi(ss[1].c_str());
@@ -107,7 +107,7 @@ SerializedScript::SerializedScript(const SerializedScriptSignature& signature, c
             } else
             {
                 throw Log(LogLevel::LV_ERROR)
-                    .Msg("unexpected compile error occured, please send a bug report. (" + msg + ")")
+                    .Msg("Unexpected compile error occured.  Please send a bug report. (" + msg + ")")
                     .Param(LogParam(LogParam::Tag::SCRIPT, signature.path));
             }
         }

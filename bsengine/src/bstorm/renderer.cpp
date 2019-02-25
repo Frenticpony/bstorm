@@ -109,7 +109,7 @@ Renderer::Renderer(IDirect3DDevice9* dev) :
         if (FAILED(D3DXCompileShader(prim2DVertexShaderSrc, sizeof(prim2DVertexShaderSrc) - 1, nullptr, nullptr, "main", "vs_1_1", D3DXSHADER_PACKMATRIX_ROWMAJOR, &code, &error, nullptr)))
         {
             throw Log(LogLevel::LV_ERROR)
-                .Msg("internal shader compile error.")
+                .Msg("Internal shader compile error.")
                 .Param(LogParam(LogParam::Tag::TEXT, (const char*)error->GetBufferPointer()));
         }
         d3DDevice_->CreateVertexShader((const DWORD*)code->GetBufferPointer(), &prim2DVertexShader_);
@@ -120,7 +120,7 @@ Renderer::Renderer(IDirect3DDevice9* dev) :
         if (FAILED(D3DXCompileShader(prim3DVertexShaderSrc, sizeof(prim3DVertexShaderSrc) - 1, nullptr, nullptr, "main", "vs_1_1", D3DXSHADER_PACKMATRIX_ROWMAJOR, &code, &error, nullptr)))
         {
             throw Log(LogLevel::LV_ERROR)
-                .Msg("internal shader compile error.")
+                .Msg("Internal shader compile error.")
                 .Param(LogParam(LogParam::Tag::TEXT, (const char*)error->GetBufferPointer()));
         }
         d3DDevice_->CreateVertexShader((const DWORD*)code->GetBufferPointer(), &prim3DVertexShader_);
@@ -131,7 +131,7 @@ Renderer::Renderer(IDirect3DDevice9* dev) :
         if (FAILED(D3DXCompileShader(meshVertexShaderSrc, sizeof(meshVertexShaderSrc) - 1, nullptr, nullptr, "main", "vs_1_1", D3DXSHADER_PACKMATRIX_ROWMAJOR, &code, &error, nullptr)))
         {
             throw Log(LogLevel::LV_ERROR)
-                .Msg("internal shader compile error.")
+                .Msg("Internal shader compile error.")
                 .Param(LogParam(LogParam::Tag::TEXT, (const char*)error->GetBufferPointer()));
         }
         d3DDevice_->CreateVertexShader((const DWORD*)code->GetBufferPointer(), &meshVertexShader_);
