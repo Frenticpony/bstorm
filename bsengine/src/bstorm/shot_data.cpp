@@ -20,6 +20,8 @@ ShotData::ShotData() :
     useDelayRect(false),
     delayColor(0, 0, 0),
     useDelayColor(false),
+	fadeRect(0, 0, 0, 0),
+	useFadeRect(false),
     delayRender(BLEND_ADD_ARGB),
     angularVelocity(0),
     useAngularVelocityRand(false),
@@ -94,6 +96,12 @@ void ShotDataTable::Reload(const std::wstring & path, const std::shared_ptr<Sour
         {
             data.delayColor = userShotData->delayColor;
         }
+
+		if (!data.useFadeRect)
+		{
+			data.fadeRect = userShotData->fadeRect;
+		}
+
         if (data.collisions.empty())
         {
             float width = std::abs(data.rect.right - data.rect.left);
@@ -107,7 +115,7 @@ void ShotDataTable::Reload(const std::wstring & path, const std::shared_ptr<Sour
     alreadyLoadedPaths_.insert(uniqPath);
     Logger::Write(std::move(
         Log(LogLevel::LV_INFO)
-        .Msg("load " + std::string(GetTypeName(type_)) + " shot data.")
+        .Msg("Loaded " + std::string(GetTypeName(type_)) + " shot data.")
         .Param(LogParam(getElemTag(type_), path))
         .AddSourcePos(srcPos)));
 }

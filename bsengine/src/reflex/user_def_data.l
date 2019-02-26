@@ -103,6 +103,7 @@ newline \r?\n
 "delay_rect"       { return tk::TK_P_DELAY_RECT; }
 "delay_color"      { return tk::TK_P_DELAY_COLOR; }
 "delay_render"     { return tk::TK_P_DELAY_RENDER; }
+"fade_rect"        { return tk::TK_P_FADE_RECT; }
 "angular_velocity" { return tk::TK_P_ANGULAR_VELOCITY; }
 "fixed_angle"      { return tk::TK_P_FIXED_ANGLE; }
 "collision"        { return tk::TK_P_COLLISION; }

@@ -170,6 +170,7 @@ public:
     void AddMovePattern(const std::shared_ptr<MovePattern>& pattern);
 protected:
     void Move();
+    void MoveFade();
 private:
     std::shared_ptr<MoveMode> mode;
     std::list<std::shared_ptr<MovePattern>> patterns_;

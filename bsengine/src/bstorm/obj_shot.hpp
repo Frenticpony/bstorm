@@ -135,6 +135,11 @@ private:
 	float initSpeed_;
 	float initAngle_;
 	int initDelay_;
+	int initFadeDelete_;
+	float fadeX_;
+	float fadeY_;
+	int fadeRandA_;
+	int fadeRandB_;
     bool isRegistered_;
     bool isFrameDeleteStarted_;
     bool isFadeDeleteStarted_;
@@ -153,6 +158,7 @@ private:
     int fadeDeleteTimer_;
     int delayTimer_;
 	int delayCounter_;
+	int fadeDeleteCounter_;
     int deleteFrameTimer_;
     int fadeDeleteFrame_;
     int animationFrameCnt_;

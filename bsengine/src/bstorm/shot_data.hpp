@@ -36,6 +36,8 @@ public:
     ColorRGB delayColor;
     bool useDelayColor;
     int delayRender;
+	Rect<int> fadeRect;
+	bool useFadeRect;
     float angularVelocity;
     float angularVelocityRandMin;
     float angularVelocityRandMax;
@@ -51,13 +53,15 @@ class UserShotData
 public:
     UserShotData() :
         delayRect(0, 0, 0, 0),
-        delayColor(0xff, 0xff, 0xff)
+        delayColor(0xff, 0xff, 0xff),
+		fadeRect(0, 0, 0, 0)
     {
     }
     std::wstring path;
     std::wstring imagePath;
     Rect<int> delayRect;
     ColorRGB delayColor;
+	Rect<int> fadeRect;
     std::unordered_map<int, ShotData> dataMap;
 };
 

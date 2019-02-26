@@ -125,6 +125,7 @@ void UserDefDataParser::error(const UserDefDataParser::location_type& yylloc, co
 %token TK_P_DELAY_RECT "delay_rect"
 %token TK_P_DELAY_COLOR "delay_color"
 %token TK_P_DELAY_RENDER "delay_render"
+%token TK_P_FADE_RECT "fade_rect"
 %token TK_P_ANGULAR_VELOCITY "angular_velocity"
 %token TK_P_FIXED_ANGLE "fixed_angle"
 %token TK_P_COLLISION "collision"
@@ -224,6 +225,7 @@ shot-data-struct-param         : TK_P_ID                TK_EQ id         { ctx->
                                | TK_P_DELAY_RECT        TK_EQ rect       { ctx->shotData.delayRect = Rect<int>($3.a, $3.b, $3.c, $3.d); ctx->shotData.useDelayRect = true;}
                                | TK_P_DELAY_COLOR       TK_EQ rgb        { ctx->shotData.delayColor = ColorRGB($3.a, $3.b, $3.c); ctx->shotData.useDelayColor = true; }
                                | TK_P_DELAY_RENDER      TK_EQ blend-type { ctx->shotData.delayRender = $3; }
+                               | TK_P_FADE_RECT         TK_EQ rect       { ctx->shotData.fadeRect = Rect<int>($3.a, $3.b, $3.c, $3.d); ctx->shotData.useFadeRect = true;}
                                | TK_P_ANGULAR_VELOCITY  TK_EQ num        { ctx->shotData.angularVelocity = $3; ctx->shotData.useAngularVelocityRand = false; }
                                | TK_P_ANGULAR_VELOCITY  TK_EQ TK_RAND TK_LPAREN num TK_COMMA num TK_RPAREN
                                                                          { ctx->shotData.useAngularVelocityRand = true; ctx->shotData.angularVelocityRandMin = $5; ctx->shotData.angularVelocityRandMax = $7; }

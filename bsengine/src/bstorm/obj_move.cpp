@@ -155,6 +155,14 @@ void ObjMove::Move()
     SetMovePosition(x, y);
 }
 
+void ObjMove::MoveFade()
+{
+	float x = GetMoveX();
+	float y = GetMoveY();
+	mode->Move(x, y);
+	SetMovePosition(x, y);
+}
+
 const std::shared_ptr<MoveMode>& ObjMove::GetMoveMode() const
 {
     return mode;
