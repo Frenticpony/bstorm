@@ -48,6 +48,9 @@ struct Int4 {
 struct Int5 {
   int a; int b; int c; int d; int e;
 };
+struct Float4 {
+  float a; float b; float c; float d;
+};
 }
 }
 
@@ -97,6 +100,7 @@ void UserDefDataParser::error(const UserDefDataParser::location_type& yylloc, co
     int id;
     int blend;
     int filter;
+    int cons;
     bool boolean;
     float num;
     Int3 rgb;
@@ -126,6 +130,8 @@ void UserDefDataParser::error(const UserDefDataParser::location_type& yylloc, co
 %token TK_P_DELAY_COLOR "delay_color"
 %token TK_P_DELAY_RENDER "delay_render"
 %token TK_P_FADE_RECT "fade_rect"
+%token TK_P_DELAY_DATA "delay_type"
+%token TK_P_FADE_DATA "fade_type"
 %token TK_P_ANGULAR_VELOCITY "angular_velocity"
 %token TK_P_FIXED_ANGLE "fixed_angle"
 %token TK_P_COLLISION "collision"
@@ -177,6 +183,8 @@ void UserDefDataParser::error(const UserDefDataParser::location_type& yylloc, co
 %type <rgb> rgb
 %type <rect> rect
 %type <collision> collision
+%type <meta> meta
+%type <cons> cons
 %type <anim_clip> animation-clip animation-data-struct-param
 
 %start data
@@ -219,13 +227,15 @@ shot-data-struct-params        : none
 
 shot-data-struct-param         : TK_P_ID                TK_EQ id         { ctx->shotData.id = $3; }
                                | TK_P_RECT              TK_EQ rect       { ctx->shotData.rect = Rect<int>($3.a, $3.b, $3.c, $3.d); }
-                               | TK_P_RENDER            TK_EQ blend-type { ctx->shotData.render = $3; }
+                               | TK_P_RENDER            TK_EQ blend-type { ctx->shotData.render = $3; ctx->shotData.fadeRender = $3;}
                                | TK_P_FILTER            TK_EQ filter-type { ctx->shotData.filter = $3; }
 							   | TK_P_ALPHA             TK_EQ num        { ctx->shotData.alpha = std::min(std::max((int)$3, 0), 0xff); }
                                | TK_P_DELAY_RECT        TK_EQ rect       { ctx->shotData.delayRect = Rect<int>($3.a, $3.b, $3.c, $3.d); ctx->shotData.useDelayRect = true;}
                                | TK_P_DELAY_COLOR       TK_EQ rgb        { ctx->shotData.delayColor = ColorRGB($3.a, $3.b, $3.c); ctx->shotData.useDelayColor = true; }
                                | TK_P_DELAY_RENDER      TK_EQ blend-type { ctx->shotData.delayRender = $3; }
                                | TK_P_FADE_RECT         TK_EQ rect       { ctx->shotData.fadeRect = Rect<int>($3.a, $3.b, $3.c, $3.d); ctx->shotData.useFadeRect = true;}
+                               | TK_P_DELAY_DATA        TK_EQ id         { ctx->shotData.delayType = $3; ctx->shotData.delayData.SetValues(0.0f, 0.0f);}
+                               | TK_P_FADE_DATA         TK_EQ id         { ctx->shotData.fadeType = $3; ctx->shotData.fadeData.SetValues(0, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0.0f); }
                                | TK_P_ANGULAR_VELOCITY  TK_EQ num        { ctx->shotData.angularVelocity = $3; ctx->shotData.useAngularVelocityRand = false; }
                                | TK_P_ANGULAR_VELOCITY  TK_EQ TK_RAND TK_LPAREN num TK_COMMA num TK_RPAREN
                                                                          { ctx->shotData.useAngularVelocityRand = true; ctx->shotData.angularVelocityRandMin = $5; ctx->shotData.angularVelocityRandMax = $7; }

@@ -21,6 +21,33 @@ struct ShotCollision
     float y;
 };
 
+struct DelayMetadata
+{
+	float vA;
+	float vB;
+
+	void SetValues(float va, float vb)
+	{
+		vA = va; vB = vb;
+	}
+};
+
+struct FadeMetadata
+{
+	int vA;
+	float vB;
+	float vC;
+	float vD;
+	float vE;
+	int vF;
+	float vG;
+
+	void SetValues(int va, float vb, float vc, float vd, float ve, int vf, float vg)
+	{
+		vA = va; vB = vb; vC = vc; vD = vd; vE = ve; vF = vf; vG = vg;
+	}
+};
+
 class Texture;
 class ShotData
 {
@@ -38,14 +65,22 @@ public:
     int delayRender;
 	Rect<int> fadeRect;
 	bool useFadeRect;
+	int fadeRender;
     float angularVelocity;
     float angularVelocityRandMin;
     float angularVelocityRandMax;
     bool useAngularVelocityRand;
     bool fixedAngle;
     std::vector<ShotCollision> collisions;
+	int delayType;
+	int fadeType;
+	DelayMetadata delayData;
+	FadeMetadata fadeData;
     AnimationData animationData;
     std::shared_ptr<Texture> texture;
+	bool useSelfDelayRect;
+	bool useSelfFadeRect;
+	bool useExFade;
 };
 
 class UserShotData

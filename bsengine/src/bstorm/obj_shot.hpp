@@ -14,6 +14,13 @@ namespace bstorm
 class ShotData;
 class ShotIntersection;
 class ShotCounter;
+struct FadeDeleteEffect
+{
+	float effFadeExStart;
+	float effFadeExMiddle;
+	float effFadeExEnd;
+	float effFadeExScale;
+};
 class ObjShot : public ObjRender, public ObjMove, public ObjCol, public std::enable_shared_from_this<ObjShot>
 {
 public:
@@ -86,6 +93,9 @@ public:
     void SetAutoDeleteDelay(int frame);  //FP AUTO TIMER
     void SetSpellResistDelay(int frame);  //FP SPELL RESIST DELAY
 
+	FadeDeleteEffect FadeEx;
+	void FadeExDraw(const std::shared_ptr<Renderer>& renderer);
+
     // graze
     virtual void Graze();
     virtual bool IsGrazeEnabled() const;
@@ -140,6 +150,10 @@ private:
 	float fadeY_;
 	int fadeRandA_;
 	int fadeRandB_;
+	int fadeRandC_;
+	int fadeRandD_;
+	bool useSelfDelayRect_;
+	bool useSelfFadeRect_;
     bool isRegistered_;
     bool isFrameDeleteStarted_;
     bool isFadeDeleteStarted_;

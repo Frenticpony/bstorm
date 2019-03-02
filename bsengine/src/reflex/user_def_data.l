@@ -104,6 +104,8 @@ newline \r?\n
 "delay_color"      { return tk::TK_P_DELAY_COLOR; }
 "delay_render"     { return tk::TK_P_DELAY_RENDER; }
 "fade_rect"        { return tk::TK_P_FADE_RECT; }
+"delay_type"       { return tk::TK_P_DELAY_DATA; }
+"fade_type"        { return tk::TK_P_FADE_DATA; }
 "angular_velocity" { return tk::TK_P_ANGULAR_VELOCITY; }
 "fixed_angle"      { return tk::TK_P_FIXED_ANGLE; }
 "collision"        { return tk::TK_P_COLLISION; }

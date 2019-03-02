@@ -34,8 +34,13 @@ ObjShot::ObjShot(bool isPlayerShot, const std::shared_ptr<CollisionDetector>& co
 	initFadeDelete_(0),
 	fadeX_(0),
 	fadeY_(0),
-	fadeRandA_(std::rand() % 360),
+	fadeRandA_(0),
 	fadeRandB_(0),
+	fadeRandC_(0),
+	fadeRandD_(0),
+	useSelfDelayRect_(false),
+	useSelfFadeRect_(false),
+	FadeEx{ 1.0f, 1.65f, 0.5f, 1.0f },
     isRegistered_(false),
     intersectionEnable_(true),
     autoDeleteEnable_(false),
@@ -131,12 +136,12 @@ void ObjShot::Update()
 		}
 		else
 		{
-			float d_maxrad = initSpeed_ * 3;
+			float d_maxrad = (initSpeed_ / 2) * initDelay_;
 
 			/* Delay Position Interpolation */
-			float d_rad = easeLinear(d_maxrad, 0.0f, delayCounter_, initDelay_);
+			float d_rad = easeLinear(0.0f, d_maxrad, delayCounter_, initDelay_);
 
-			SetMovePosition(initX_ - (d_rad * cos(D3DXToRadian(initAngle_))), initY_ - (d_rad * sin(D3DXToRadian(initAngle_))));
+			SetMovePosition(initX_ + (d_rad * cos(D3DXToRadian(initAngle_))), initY_ + (d_rad * sin(D3DXToRadian(initAngle_))));
 		}
 		TickAddedShotFrameCount();
 		TickDelayTimer();
@@ -180,10 +185,11 @@ void ObjShot::Render(const std::shared_ptr<Renderer>& renderer)
 			float fadeScale = 1.0f;
 			float fadeAlpha = 1.0f;
 			float fadeScaleSub = 1.0f;
-			float fadeAlphaSub = 160.0f;
+			float fadeAlphaSub = 128.0f;
+			float fadeXOff = 0.0f;
 			float fadeYOff = 0.0f;
 
-			if(!IsDelay())
+			if(!IsDelay() || IsFadeDeleteStarted())
 			{
 				if (GetBlendType() == BLEND_NONE)
 				{
@@ -205,27 +211,15 @@ void ObjShot::Render(const std::shared_ptr<Renderer>& renderer)
 
 				if (IsFadeDeleteStarted())
 				{
-					fadeScale = easeLinear(1.0f, 0.0f, std::min(fadeDeleteCounter_, 12), 12);
-					//fadeAlpha = easeLinear(1.0f, 0.0f, std::min(fadeDeleteCounter_, 12), 12);
-					shotBlend = BLEND_ADD_ARGB;
+					fadeScale = easeLinear((float)shotData_->fadeData.vB, (float)shotData_->fadeData.vC, std::min(fadeDeleteCounter_, 12), 12);
+					fadeAlpha = easeLinear((float)shotData_->fadeData.vD, (float)shotData_->fadeData.vE, std::min(fadeDeleteCounter_, 12), 12);
+					shotBlend = shotData_->fadeRender;
 					shotFilter = FILTER_LINEAR;
 
-					// ----- Fade Delete Extra Sprite -----
-					if (fadeDeleteCounter_ <= 8)
+					if (shotData_->useExFade)
 					{
-						fadeScaleSub = easeLinear(1.0f, 1.2f, fadeDeleteCounter_, 8);
+						FadeExDraw(renderer);
 					}
-					else
-					{
-						fadeScaleSub = easeInCubic(1.2f, 0.5f, fadeDeleteCounter_ - 8, 16);
-						fadeAlphaSub = easeLinear(40.0f, 0.0f, fadeDeleteCounter_ - 8, 16);
-					}
-					fadeYOff = easeLinear(0.0f, 40.0f, fadeDeleteCounter_, 38);
-
-					colorF = GetColor().ToD3DCOLOR((int)(fadeAlphaSub));
-					D3DXMATRIX worldF = CreateScaleRotTransMatrix(fadeX_, fadeY_ - fadeYOff, 0.0f, GetAngleX(), GetAngleY(), fadeRandA_, fadeScaleSub, fadeScaleSub, 1.0f);
-					auto verticesF = GetRectVertices(colorF, shotData_->texture->GetWidth(), shotData_->texture->GetHeight(), shotData_->fadeRect);
-					renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, verticesF.data(), shotData_->texture->GetTexture(), BLEND_ADD_ARGB, FILTER_LINEAR, worldF, GetAppliedShader(), IsPermitCamera(), true);
 				}
 				
 				// NOTE: Interpret ADD_RGB as ADD_ARGB
@@ -235,8 +229,8 @@ void ObjShot::Render(const std::shared_ptr<Renderer>& renderer)
 				}
 
 				color = GetColor().ToD3DCOLOR((int)(fadeAlpha * std::min(shotData_->alpha, GetAlpha())));
-				D3DXMATRIX world = CreateScaleRotTransMatrix(GetX(), GetY(), 0.0f, GetAngleX(), GetAngleY(), GetAngleZ() + (IsFadeDeleteStarted() ? fadeRandB_ : shotData_->fixedAngle ? 0.0f : GetAngle() + 90.0f), IsFadeDeleteStarted() ? fadeScale : GetScaleX(), IsFadeDeleteStarted() ? fadeScale : GetScaleY(), 1.0f);
-				auto vertices = GetRectVertices(color, shotData_->texture->GetWidth(), shotData_->texture->GetHeight(), IsDelay() ? shotData_->delayRect : (animationIdx_ >= 0 && animationIdx_ < shotData_->animationData.size()) ? shotData_->animationData[animationIdx_].rect : IsFadeDeleteStarted() ? shotData_->fadeRect : shotData_->rect );
+				D3DXMATRIX world = CreateScaleRotTransMatrix(GetX(), GetY(), 0.0f, GetAngleX(), GetAngleY(), GetAngleZ() + ((IsFadeDeleteStarted() && !shotData_->fixedAngle) ? fadeRandB_ : shotData_->fixedAngle ? 0.0f : GetAngle() + 90.0f), IsFadeDeleteStarted() ? fadeScale : GetScaleX(), IsFadeDeleteStarted() ? fadeScale : GetScaleY(), 1.0f);
+				auto vertices = GetRectVertices(color, shotData_->texture->GetWidth(), shotData_->texture->GetHeight(), IsDelay() ? shotData_->delayRect : (animationIdx_ >= 0 && animationIdx_ < shotData_->animationData.size()) ? shotData_->animationData[animationIdx_].rect : (IsFadeDeleteStarted() && !shotData_->useSelfFadeRect) ? shotData_->fadeRect : shotData_->rect );
 				renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData_->texture->GetTexture(), shotBlend, shotFilter, world, GetAppliedShader(), IsPermitCamera(), true);
 			}
 			else
@@ -253,10 +247,11 @@ void ObjShot::Render(const std::shared_ptr<Renderer>& renderer)
 				shotFilter = FILTER_LINEAR;
 
 				/* Delay Scale Interpolation */
-				float delayScale = easeOutCubic(3.0f, 0.65f, delayCounter_, initDelay_);
+				//float delayScale = easeOutCubic(2.75f, 0.5f, delayCounter_, initDelay_);
+				float delayScale = easeOutCubic((float)shotData_->delayData.vA, (float)shotData_->delayData.vB, delayCounter_, initDelay_);
 				
 				/* Delay Alpha Interpolation */
-				float delayAlpha = easeOutQuad(0.0f, 255.0f, delayCounter_, initDelay_);
+				float delayAlpha = easeLinear(75.0f, 255.0f, delayCounter_, initDelay_);
 
 				// In the case of a curve laser, the delay scale is slightly larger
 				if (GetType() == OBJ_CURVE_LASER)
@@ -267,7 +262,7 @@ void ObjShot::Render(const std::shared_ptr<Renderer>& renderer)
 				color = GetColor().ToD3DCOLOR((int)(delayAlpha));
 
 				D3DXMATRIX world = CreateScaleRotTransMatrix(GetX(), GetY(), 0.0f,
-					GetAngleX(), GetAngleY(), GetAngleZ() + fadeRandA_,
+					GetAngleX(), GetAngleY(), (shotData_->useSelfDelayRect && !shotData_->fixedAngle) ? GetAngleZ() + 90.0f : GetAngleZ(),
 					IsDelay() ? delayScale : GetScaleX(), IsDelay() ? delayScale : GetScaleY(), 1.0f);
 
 				// NOTE: Interpret ADD_RGB as ADD_ARGB
@@ -276,13 +271,40 @@ void ObjShot::Render(const std::shared_ptr<Renderer>& renderer)
 					shotBlend = BLEND_ADD_ARGB;
 				}
 
-				auto vertices = GetRectVertices(color, shotData_->texture->GetWidth(), shotData_->texture->GetHeight(), shotData_->delayRect);
+				auto vertices = GetRectVertices(color, shotData_->texture->GetWidth(), shotData_->texture->GetHeight(), shotData_->useSelfDelayRect ? shotData_->rect : shotData_->delayRect);
 
 				renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, vertices.data(), shotData_->texture->GetTexture(), shotBlend, shotFilter, world, GetAppliedShader(), IsPermitCamera(), true);
 			}
         }
         RenderIntersection(renderer);
     }
+}
+
+void ObjShot::FadeExDraw(const std::shared_ptr<Renderer>& renderer)
+{
+	// ----- Fade Delete Extra Sprite -----
+	
+	float fadeScaleSub;
+	float fadeAlphaSub = 160.0f;
+	float fadeXOff = 0.0f;
+	float fadeYOff = 0.0f;
+
+	if (fadeDeleteCounter_ <= 8)
+	{
+		fadeScaleSub = easeLinear(FadeEx.effFadeExStart, FadeEx.effFadeExMiddle, fadeDeleteCounter_, 8);
+	}
+	else
+	{
+		fadeScaleSub = easeInCubic(FadeEx.effFadeExMiddle, FadeEx.effFadeExEnd, fadeDeleteCounter_ - 8, 16);
+		fadeAlphaSub = easeInCubic(16.0f, 0.0f, fadeDeleteCounter_ - 8, 16);
+	}
+	fadeXOff = easeInCubic(0.0f, fadeRandC_ - 10, fadeDeleteCounter_, 38);
+	fadeYOff = easeOutCubic(0.0f, 42.0f - (fadeRandD_), fadeDeleteCounter_, 38);
+
+	D3DCOLOR colorFade = GetColor().ToD3DCOLOR((int)(fadeAlphaSub));
+	D3DXMATRIX worldF = CreateScaleRotTransMatrix(fadeX_ + fadeXOff, fadeY_ - fadeYOff, 0.0f, GetAngleX(), GetAngleY(), fadeRandA_, fadeScaleSub, fadeScaleSub, 1.0f);
+	auto verticesF = GetRectVertices(colorFade, shotData_->texture->GetWidth(), shotData_->texture->GetHeight(), shotData_->fadeRect);
+	renderer->RenderPrim2D(D3DPT_TRIANGLESTRIP, 4, verticesF.data(), shotData_->texture->GetTexture(), BLEND_ADD_ARGB, FILTER_LINEAR, worldF, GetAppliedShader(), IsPermitCamera(), true);
 }
 
 double ObjShot::GetDamage() const
@@ -654,7 +676,10 @@ void ObjShot::FadeDelete()
     if (isFadeDeleteStarted_) return;
 	fadeX_ = GetX();
 	fadeY_ = GetY();
+	fadeRandA_ = std::rand() % 360;
 	fadeRandB_ = std::rand() % 360;
+	fadeRandC_ = std::rand() % 20;
+	fadeRandD_ = std::rand() % 16;
     isFadeDeleteStarted_ = true;
     fadeDeleteTimer_ = fadeDeleteFrame_;
 }
