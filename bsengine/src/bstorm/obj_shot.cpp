@@ -96,6 +96,7 @@ void ObjShot::Update()
 			}
 			else
 			{
+				SetSpeed(GetSpeed() * 0.925f);
 				MoveFade();
 			}
 			CheckAutoDelete(GetX(), GetY());
