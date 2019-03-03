@@ -100,7 +100,6 @@ void UserDefDataParser::error(const UserDefDataParser::location_type& yylloc, co
     int id;
     int blend;
     int filter;
-    int cons;
     bool boolean;
     float num;
     Int3 rgb;
@@ -183,8 +182,6 @@ void UserDefDataParser::error(const UserDefDataParser::location_type& yylloc, co
 %type <rgb> rgb
 %type <rect> rect
 %type <collision> collision
-%type <meta> meta
-%type <cons> cons
 %type <anim_clip> animation-clip animation-data-struct-param
 
 %start data

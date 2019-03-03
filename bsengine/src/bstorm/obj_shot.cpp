@@ -83,34 +83,6 @@ ObjShot::~ObjShot()
 {
 }
 
-/*
-void ObjShot::Update()
-{
-    if (IsRegistered())
-    {
-        if (GetPenetration() <= 0) { Die(); return; }
-		if (!IsDelay())
-		{
-			Move();
-			CheckAutoDelete(GetX(), GetY());
-
-            if (shotData_)
-            {
-                SetAngleZ(GetAngleZ() + GetAngularVelocity());
-                UpdateAnimationPosition();
-            }
-        }
-        TickAddedShotFrameCount();
-        TickDelayTimer();
-        TickDeleteFrameTimer();
-        TickAutoDeleteTimer(); //FP AUTO TIMER
-        TickSpellResistTimer(); //FP SPELL RESIST DELAY
-        TickFadeDeleteTimer();
-    }
-    UpdateTempIntersection();
-}
-*/
-
 void ObjShot::Update()
 {
 	if (IsRegistered())
@@ -180,14 +152,9 @@ void ObjShot::Render(const std::shared_ptr<Renderer>& renderer)
 			int shotBlend = BLEND_NONE;
 			int shotFilter = FILTER_LINEAR; //FP FILTER
 			D3DCOLOR color;
-			D3DCOLOR colorF;
 			float delayScale = 1.0f;
 			float fadeScale = 1.0f;
 			float fadeAlpha = 1.0f;
-			float fadeScaleSub = 1.0f;
-			float fadeAlphaSub = 128.0f;
-			float fadeXOff = 0.0f;
-			float fadeYOff = 0.0f;
 
 			if(!IsDelay() || IsFadeDeleteStarted())
 			{
