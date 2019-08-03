@@ -365,7 +365,8 @@ void ScriptExplorer::reload()
                         {
                             freePlayerScriptPaths.push_back(script.path);
                         }
-                    } else
+                    }
+					else if (script.type != ScriptType::Value::UNKNOWN)
                     {
                         mainScripts[script.path] = script;
                     }

@@ -43,6 +43,7 @@ private:
     void OnTrans(float dx, float dy) override;
     void UpdateAnimationPosition();
     int itemType_;
+	int itemDelay_;
     bool autoCollectEnable_;
     bool isAutoCollected_;
     bool renderScoreEnable_;

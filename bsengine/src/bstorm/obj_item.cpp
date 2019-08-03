@@ -18,6 +18,7 @@ ObjItem::ObjItem(int itemType, const std::shared_ptr<CollisionDetector>& colDete
     ObjMove(this),
     ObjCol(colDetector),
     itemType_(itemType),
+	itemDelay_(0),
     score_(0),
     autoCollectEnable_(true),
     isAutoCollected_(false),
@@ -101,7 +102,8 @@ void ObjItem::Update()
             }
             Move();
         }
-    } else
+    }
+	else
     {
         Move();
         if (autoCollectEnable_)

@@ -100,6 +100,41 @@ private:
     const float sinAngle_;
 };
 
+class MoveModeECL : public MoveMode
+{
+public:
+	MoveModeECL();
+	void Move(float& x, float& y) override;
+	float GetSpeed() const override { return speed_; }
+	float GetAngle() const override { return angle_; }
+	float GetAcceleration() const { return accel_; }
+	float GetMinSpeed() const { return minSpeed_; }
+	float GetMaxSpeed() const { return maxSpeed_; }
+	float GetAngularVelocity() const { return angularVelocity_; }
+	float GetGravityAngle() const { return gravAngle_; }
+	void SetSpeed(float v) { speed_ = v; }
+	void SetAngle(float v) { angle_ = v; }
+	void SetAcceleration(float v) { accel_ = v; }
+	void SetMinSpeed(float v) { minSpeed_ = v; }
+	void SetMaxSpeed(float v) { maxSpeed_ = v; }
+	void SetAngularVelocity(float v) { angularVelocity_ = v; }
+	void SetGravityAngle(float v) { gravAngle_ = v; }
+
+private:
+	float speed_;
+	float angle_;
+	float accel_;
+	float minSpeed_;
+	float maxSpeed_;
+	float angularVelocity_;
+	float gravAngle_;
+
+	float speedX_;
+	float speedY_;
+	float accelX_;
+	float accelY_;
+};
+
 class ObjRender;
 class ObjMove;
 class MovePattern
