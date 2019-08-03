@@ -43,9 +43,9 @@ ObjShot::ObjShot(bool isPlayerShot, const std::shared_ptr<CollisionDetector>& co
 	FadeEx{ 1.0f, 1.65f, 0.5f, 1.0f },
     isRegistered_(false),
     intersectionEnable_(true),
-    autoDeleteEnable_(false),
-	autoDeleteTimer_(0), //FP AUTO TIMER
-	spellResistTimer_(0), //FP SPELL RESIST DELAY
+    autoDeleteEnable_(true),
+	autoDeleteTimer_(-1), //FP AUTO TIMER
+	spellResistTimer_(-1), //FP SPELL RESIST DELAY
     spellResistEnable_(false),
     spellFactorEnable_(false),
     itemChangeEnable_(true),
@@ -109,7 +109,7 @@ void ObjShot::Update()
 		}
 		else
 		{
-			float d_maxrad = (initSpeed_ / 2) * initDelay_;
+			float d_maxrad = (initSpeed_ * 0.5f) * initDelay_;
 
 			/* Delay Position Interpolation */
 			float d_rad = easeLinear(0.0f, d_maxrad, delayCounter_, initDelay_);
@@ -230,7 +230,7 @@ void ObjShot::Render(const std::shared_ptr<Renderer>& renderer)
 				color = GetColor().ToD3DCOLOR((int)(delayAlpha));
 
 				D3DXMATRIX world = CreateScaleRotTransMatrix(GetX(), GetY(), 0.0f,
-					GetAngleX(), GetAngleY(), (shotData_->useSelfDelayRect && !shotData_->fixedAngle) ? GetAngleZ() + 90.0f : GetAngleZ(),
+					GetAngleX(), GetAngleY(), (shotData_->useSelfDelayRect && !shotData_->fixedAngle) ? GetAngle() + 90.0f : GetAngle(),
 					IsDelay() ? delayScale : GetScaleX(), IsDelay() ? delayScale : GetScaleY(), 1.0f);
 
 				// NOTE: Interpret ADD_RGB as ADD_ARGB
