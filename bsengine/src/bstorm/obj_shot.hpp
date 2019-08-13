@@ -3,8 +3,8 @@
 #include <bstorm/point2D.hpp>
 #include <bstorm/vertex.hpp>
 #include <bstorm/obj_render.hpp>
+#include <bstorm/obj_move.hpp>
 #include <bstorm/obj_col.hpp>
-#include <bstorm/ecl_move.hpp>
 
 #include <list>
 #include <deque>

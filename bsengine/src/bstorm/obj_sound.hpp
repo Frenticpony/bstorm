@@ -7,6 +7,8 @@
 namespace bstorm
 {
 class SoundBuffer;
+class SoundStreamBuffer;
+
 class ObjSound : public Obj
 {
 public:
@@ -19,6 +21,7 @@ public:
     ~ObjSound();
     void Update() override;
     void SetSound(const std::shared_ptr<SoundBuffer>& buf);
+    void SetSoundStream(const std::shared_ptr<SoundStreamBuffer>& buf);
     void Play();
     void Stop();
     void SetVolumeRate(float vol);
@@ -30,9 +33,11 @@ public:
     void SetRestartEnable(bool enable);
     void SetSoundDivision(SoundDivision division);
     bool IsPlaying() const;
+	bool IsStream;
     float GetVolumeRate() const;
 private:
     NullableSharedPtr<SoundBuffer> soundBuffer_;
+    NullableSharedPtr<SoundStreamBuffer> soundStreamBuffer_;
     bool restartEnable_;
     float fadeRatePerSec_;
     SoundDivision division_;

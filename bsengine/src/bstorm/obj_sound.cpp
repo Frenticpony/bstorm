@@ -1,5 +1,6 @@
 ﻿#include <bstorm/obj_sound.hpp>
 
+#include <bstorm/logger.hpp>
 #include <bstorm/dnh_const.hpp>
 #include <bstorm/sound_buffer.hpp>
 
@@ -10,7 +11,8 @@ ObjSound::ObjSound(const std::shared_ptr<Package>& package) :
     soundBuffer_(NULL),
     restartEnable_(false),
     division_(SoundDivision::BGM),
-    fadeRatePerSec_(0)
+    fadeRatePerSec_(0),
+	IsStream(true)
 {
     SetType(OBJ_SOUND);
 }
@@ -36,16 +38,36 @@ void ObjSound::SetSound(const std::shared_ptr<SoundBuffer>& buf)
     soundBuffer_ = buf;
 }
 
+void ObjSound::SetSoundStream(const std::shared_ptr<SoundStreamBuffer>& buf)
+{
+	restartEnable_ = false;
+	soundStreamBuffer_ = buf;
+}
+
 void ObjSound::Play()
 {
-    if (soundBuffer_)
-    {
-        if (IsPlaying() || !restartEnable_)
-        {
-            soundBuffer_->Rewind();
-        }
-        soundBuffer_->Play();
-    }
+	if(IsStream)
+	{
+		if (soundStreamBuffer_)
+		{
+			if (IsPlaying() || !restartEnable_)
+			{
+				soundStreamBuffer_->Rewind();
+			}
+			soundStreamBuffer_->Play();
+		}
+	}
+	else
+	{
+		if (soundBuffer_)
+		{
+			if (IsPlaying() || !restartEnable_)
+			{
+				soundBuffer_->Seek(0);
+			}
+			soundBuffer_->Play();
+		}
+	}
 }
 
 void ObjSound::Stop()
@@ -68,7 +90,7 @@ void ObjSound::SetPanRate(float pan)
 {
     if (soundBuffer_)
     {
-        soundBuffer_->SetPan(pan / 100.0f);
+        soundBuffer_->SetPanRate(pan / 100.0f);
     }
 }
 

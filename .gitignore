@@ -49,3 +49,5 @@ bstorm.exe
 script/third_party/
 
 !.gitkeep
+*.png
+*.dds

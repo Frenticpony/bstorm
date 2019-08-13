@@ -85,6 +85,8 @@ class ShotCounter;
 class ShotData;
 class ShotDataTable;
 class SoundBuffer;
+class SoundBuffer;
+class SoundStreamBuffer;
 class SoundDevice;
 class StageCommonPlayerParams;
 class Texture;
@@ -182,11 +184,17 @@ public:
 
     /* sound */
     std::shared_ptr<SoundBuffer> LoadSound(const std::wstring& path);
-    void LoadOrphanSound(const std::wstring& path);
-    void RemoveOrphanSound(const std::wstring& path);
-    void PlayBGM(const std::wstring& path, double loopStartSec, double loopEndSec);
-    void PlaySE(const std::wstring& path);
-    void StopOrphanSound(const std::wstring& path);
+	void LoadOrphanSound(const std::wstring& path);
+	void RemoveOrphanSound(const std::wstring& path);
+	void PlayBGM(const std::wstring& path, double loopStartSec, double loopEndSec);
+	void PlaySE(const std::wstring& path);
+	void StopOrphanSound(const std::wstring& path);
+    std::shared_ptr<SoundStreamBuffer> LoadSoundStream(const std::wstring& path);
+    void LoadOrphanSoundStream(const std::wstring& path);
+    void RemoveOrphanSoundStream(const std::wstring& path);
+    void StreamBGM(const std::wstring& path, double loopStartSec, double loopEndSec);
+    void StreamSE(const std::wstring& path);
+    void StopOrphanSoundStream(const std::wstring& path);
 
     /* layer */
     void SetObjectRenderPriority(const std::shared_ptr<ObjRender>& obj, int priority);
@@ -501,6 +509,7 @@ private:
     std::shared_ptr<FileLoader> fileLoader_;
     std::shared_ptr<SoundDevice> soundDevice;
     std::unordered_map <std::wstring, std::shared_ptr<SoundBuffer>> orphanSounds_;
+    std::unordered_map <std::wstring, std::shared_ptr<SoundStreamBuffer>> orphanSoundsStream_;
     std::shared_ptr<Renderer> renderer_;
     std::shared_ptr<ObjectTable> objTable_;
     std::shared_ptr<ObjectLayerList> objLayerList_;

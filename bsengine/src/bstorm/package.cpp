@@ -616,23 +616,71 @@ void Package::RemoveUnusedMesh()
 
 std::shared_ptr<SoundBuffer> Package::LoadSound(const std::wstring & path)
 {
-    return soundDevice->LoadSound(path);
+	return soundDevice->LoadSound(path);
 }
 
 void Package::LoadOrphanSound(const std::wstring & path)
 {
-    orphanSounds_[GetCanonicalPath(path)] = LoadSound(path);
+	orphanSounds_[GetCanonicalPath(path)] = LoadSound(path);
 }
 
 void Package::RemoveOrphanSound(const std::wstring & path)
 {
-    orphanSounds_.erase(GetCanonicalPath(path));
+	orphanSounds_.erase(GetCanonicalPath(path));
 }
 
 void Package::PlayBGM(const std::wstring & path, double loopStartSec, double loopEndSec)
 {
-    auto it = orphanSounds_.find(GetCanonicalPath(path));
-    if (it != orphanSounds_.end())
+	auto it = orphanSounds_.find(GetCanonicalPath(path));
+	if (it != orphanSounds_.end())
+	{
+		auto& sound = it->second;
+		if (sound->IsPlaying()) sound->Seek(0);
+		sound->SetLoopEnable(true);
+		sound->SetLoopTime(loopStartSec, loopEndSec);
+		sound->Play();
+	}
+}
+
+void Package::PlaySE(const std::wstring & path)
+{
+	auto it = orphanSounds_.find(GetCanonicalPath(path));
+	if (it != orphanSounds_.end())
+	{
+		auto& sound = it->second;
+		if (sound->IsPlaying()) sound->Seek(0);
+		sound->Play();
+	}
+}
+
+void Package::StopOrphanSound(const std::wstring & path)
+{
+	auto it = orphanSounds_.find(GetCanonicalPath(path));
+	if (it != orphanSounds_.end())
+	{
+		it->second->Stop();
+	}
+}
+
+std::shared_ptr<SoundStreamBuffer> Package::LoadSoundStream(const std::wstring & path)
+{
+    return soundDevice->LoadSoundStream(path);
+}
+
+void Package::LoadOrphanSoundStream(const std::wstring & path)
+{
+    orphanSoundsStream_[GetCanonicalPath(path)] = LoadSoundStream(path);
+}
+
+void Package::RemoveOrphanSoundStream(const std::wstring & path)
+{
+    orphanSoundsStream_.erase(GetCanonicalPath(path));
+}
+
+void Package::StreamBGM(const std::wstring & path, double loopStartSec, double loopEndSec)
+{
+    auto it = orphanSoundsStream_.find(GetCanonicalPath(path));
+    if (it != orphanSoundsStream_.end())
     {
         auto& sound = it->second;
         if (sound->IsPlaying()) sound->Rewind();
@@ -642,10 +690,10 @@ void Package::PlayBGM(const std::wstring & path, double loopStartSec, double loo
     }
 }
 
-void Package::PlaySE(const std::wstring & path)
+void Package::StreamSE(const std::wstring & path)
 {
-    auto it = orphanSounds_.find(GetCanonicalPath(path));
-    if (it != orphanSounds_.end())
+    auto it = orphanSoundsStream_.find(GetCanonicalPath(path));
+    if (it != orphanSoundsStream_.end())
     {
         auto& sound = it->second;
         if (sound->IsPlaying()) sound->Rewind();
@@ -653,10 +701,10 @@ void Package::PlaySE(const std::wstring & path)
     }
 }
 
-void Package::StopOrphanSound(const std::wstring & path)
+void Package::StopOrphanSoundStream(const std::wstring & path)
 {
-    auto it = orphanSounds_.find(GetCanonicalPath(path));
-    if (it != orphanSounds_.end())
+    auto it = orphanSoundsStream_.find(GetCanonicalPath(path));
+    if (it != orphanSoundsStream_.end())
     {
         it->second->Stop();
     }

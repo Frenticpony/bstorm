@@ -419,6 +419,48 @@ static int StopSound(lua_State* L)
     return 0;
 }
 
+static int LoadSoundStream(lua_State* L)
+{
+	Package* package = Package::Current;
+	auto path = DnhValue::ToString(L, 1);
+	package->LoadOrphanSoundStream(path);
+	return 0;
+}
+
+static int RemoveSoundStream(lua_State* L)
+{
+	Package* package = Package::Current;
+	auto path = DnhValue::ToString(L, 1);
+	package->RemoveOrphanSoundStream(path);
+	return 0;
+}
+
+static int StreamBGM(lua_State* L)
+{
+	Package* package = Package::Current;
+	auto path = DnhValue::ToString(L, 1);
+	double loopStartSec = DnhValue::ToNum(L, 2);
+	double loopEndSec = DnhValue::ToNum(L, 3);
+	package->StreamBGM(path, loopStartSec, loopEndSec);
+	return 0;
+}
+
+static int StreamSE(lua_State* L)
+{
+	Package* package = Package::Current;
+	auto path = DnhValue::ToString(L, 1);
+	package->StreamSE(path);
+	return 0;
+}
+
+static int StopSoundStream(lua_State* L)
+{
+	Package* package = Package::Current;
+	auto path = DnhValue::ToString(L, 1);
+	package->StopOrphanSoundStream(path);
+	return 0;
+}
+
 static int GetVirtualKeyState(lua_State* L)
 {
     Script* script = GetScript(L);
@@ -3682,10 +3724,27 @@ static int ObjSound_Load(lua_State* L)
     auto path = DnhValue::ToString(L, 2);
     if (auto obj = package->GetObject<ObjSound>(objId))
     {
-        obj->SetSound(nullptr);
+		obj->SetSound(nullptr);
+		obj->SetSoundStream(nullptr);
+		obj->IsStream = false;
         obj->SetSound(package->LoadSound(path));
     }
     return 0;
+}
+
+static int ObjSound_LoadStream(lua_State* L)
+{
+	Package* package = Package::Current;
+	int objId = DnhValue::ToInt(L, 1);
+	auto path = DnhValue::ToString(L, 2);
+	if (auto obj = package->GetObject<ObjSound>(objId))
+	{
+		obj->SetSound(nullptr);
+		obj->SetSoundStream(nullptr);
+		obj->IsStream = true;
+		obj->SetSoundStream(package->LoadSoundStream(path));
+	}
+	return 0;
 }
 
 static int ObjSound_Play(lua_State* L)
@@ -6366,6 +6425,11 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
     builtin(PlayBGM, 3);
     builtin(PlaySE, 1);
     builtin(StopSound, 1);
+	builtin(LoadSoundStream, 1);
+	builtin(RemoveSoundStream, 1);
+	builtin(StreamBGM, 3);
+	builtin(StreamSE, 1);
+	builtin(StopSoundStream, 1);
 
     builtin_real(GetVirtualKeyState, 1);
     builtin(SetVirtualKeyState, 2);
@@ -6714,6 +6778,7 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
 
     builtin_real(ObjSound_Create, 0);
     builtin(ObjSound_Load, 2);
+    builtin(ObjSound_LoadStream, 2);
     builtin(ObjSound_Play, 1);
     builtin(ObjSound_Stop, 1);
     builtin(ObjSound_SetVolumeRate, 2);

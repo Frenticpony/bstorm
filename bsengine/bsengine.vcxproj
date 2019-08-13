@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ecl_move.hpp" />
     <ClInclude Include="src\bstorm\animation.hpp" />
     <ClInclude Include="src\bstorm\api.hpp" />
     <ClInclude Include="src\bstorm\camera2D.hpp" />
@@ -122,7 +121,6 @@
     <ClInclude Include="src\reflex\user_def_data_lexer.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ecl_move.cpp" />
     <ClCompile Include="src\bstorm\api.cpp" />
     <ClCompile Include="src\bison\dnh.tab.cpp" />
     <ClCompile Include="src\bison\mqo.tab.cpp" />
@@ -480,6 +478,7 @@
       <OmitFramePointers>true</OmitFramePointers>
       <DisableSpecificWarnings>4477;4503;4819;</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
