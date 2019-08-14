@@ -21,11 +21,12 @@
 
 namespace bstorm
 {
-ObjShot::ObjShot(bool isPlayerShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package) :
+ObjShot::ObjShot(bool isPlayerShot, bool isECLShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package) :
     ObjRender(package),
     ObjMove(this),
     ObjCol(colDetector),
     isPlayerShot_(isPlayerShot),
+    isECLShot_(isECLShot),
 	initX_(0),
 	initY_(0),
 	initSpeed_(0),
@@ -92,7 +93,16 @@ void ObjShot::Update()
 		{
 			if (!IsFadeDeleteStarted())
 			{
-				Move();
+				if(!isECLShot_)
+				{
+					Logger::Write(Log(LogLevel::LV_USER).Msg("NOT ECL"));
+					Move();
+				}
+				else
+				{
+					Logger::Write(Log(LogLevel::LV_USER).Msg("ECL Move"));
+					ECLMove();
+				}
 			}
 			else
 			{
@@ -887,8 +897,8 @@ ObjShot::AddedShot::AddedShot(int objId, int frame, float dist, float angle) :
 {
 }
 
-ObjLaser::ObjLaser(bool isPlayerShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package) :
-    ObjShot(isPlayerShot, colDetector, package),
+ObjLaser::ObjLaser(bool isPlayerShot, bool isECLShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package) :
+    ObjShot(isPlayerShot, isECLShot, colDetector, package),
     length_(0),
     renderWidth_(0),
     intersectionWidth_(0),
@@ -991,8 +1001,8 @@ void ObjLaser::TickGrazeInvalidTimer()
     }
 }
 
-ObjLooseLaser::ObjLooseLaser(bool isPlayerShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package) :
-    ObjLaser(isPlayerShot, colDetector, package),
+ObjLooseLaser::ObjLooseLaser(bool isPlayerShot, bool isECLShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package) :
+    ObjLaser(isPlayerShot, isECLShot, colDetector, package),
     renderLength_(0),
     invalidLengthHead_(0),
     invalidLengthTail_(0),
@@ -1184,8 +1194,8 @@ void ObjLooseLaser::Extend()
     }
 }
 
-ObjStLaser::ObjStLaser(bool isPlayerShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package) :
-    ObjLooseLaser(isPlayerShot, colDetector, package),
+ObjStLaser::ObjStLaser(bool isPlayerShot, bool isECLShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package) :
+    ObjLooseLaser(isPlayerShot, isECLShot, colDetector, package),
     laserAngle_(270),
     laserSourceEnable_(true),
     laserWidthScale_(0)
@@ -1284,8 +1294,8 @@ float ObjStLaser::GetRenderLength() const
     return GetLength();
 }
 
-ObjCrLaser::ObjCrLaser(bool isPlayerShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package) :
-    ObjLaser(isPlayerShot, colDetector, package),
+ObjCrLaser::ObjCrLaser(bool isPlayerShot, bool isECLShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package) :
+    ObjLaser(isPlayerShot, isECLShot, colDetector, package),
     totalLaserLength_(0),
     tailPos_(0),
     hasHead_(false),

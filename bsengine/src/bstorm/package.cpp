@@ -1197,11 +1197,36 @@ std::shared_ptr<ObjShader> Package::CreateObjShader()
     return obj;
 }
 
+std::shared_ptr<ObjShot> Package::CreateECLShot(bool isPlayerShot, std::list<std::shared_ptr<ECLPattern>> eclData)
+{
+	auto shot = objTable_->Create<ObjShot>(isPlayerShot, true, colDetector_, shared_from_this());
+	shot->SetECLData(eclData);
+	objLayerList_->SetRenderPriority(shot, objLayerList_->GetShotRenderPriority());
+	return shot;
+
+}
+
 std::shared_ptr<ObjShot> Package::CreateObjShot(bool isPlayerShot)
 {
-    auto shot = objTable_->Create<ObjShot>(isPlayerShot, colDetector_, shared_from_this());
+    auto shot = objTable_->Create<ObjShot>(isPlayerShot, false, colDetector_, shared_from_this());
     objLayerList_->SetRenderPriority(shot, objLayerList_->GetShotRenderPriority());
     return shot;
+}
+
+std::shared_ptr<ObjShot> Package::CreateShotE1(float x, float y, float speed, float angle, int shotDataId, int delay, bool isPlayerShot)
+{
+	std::list<std::shared_ptr<ECLPattern>> eclData;
+	eclData.push_back(std::make_shared<ECLPattern_Initialize>(speed, angle));
+	eclData.push_back(std::make_shared<ECLPattern_SPUP>(false, 24, 0.1f));
+	eclData.push_back(std::make_shared<ECLPattern_SPUP>(false, 24, -0.1f));
+	auto shot = CreateECLShot(isPlayerShot, eclData);
+	shot->SetMovePosition(x, y);
+	shot->SetSpeed(speed);
+	shot->SetAngle(angle);
+	shot->SetShotData(isPlayerShot ? GetPlayerShotData(shotDataId) : GetEnemyShotData(shotDataId));
+	shot->SetDelay(delay);
+	shot->Regist();
+	return shot;
 }
 
 std::shared_ptr<ObjShot> Package::CreateShotA1(float x, float y, float speed, float angle, int shotDataId, int delay, bool isPlayerShot)
@@ -1284,7 +1309,7 @@ NullableSharedPtr<ObjShot> Package::CreatePlayerShotA1(float x, float y, float s
 
 std::shared_ptr<ObjLooseLaser> Package::CreateObjLooseLaser(bool isPlayerShot)
 {
-    auto laser = objTable_->Create<ObjLooseLaser>(isPlayerShot, colDetector_, shared_from_this());
+    auto laser = objTable_->Create<ObjLooseLaser>(isPlayerShot, false, colDetector_, shared_from_this());
     objLayerList_->SetRenderPriority(laser, objLayerList_->GetShotRenderPriority());
     return laser;
 }
@@ -1305,7 +1330,7 @@ std::shared_ptr<ObjLooseLaser> Package::CreateLooseLaserA1(float x, float y, flo
 
 std::shared_ptr<ObjStLaser> Package::CreateObjStLaser(bool isPlayerShot)
 {
-    auto laser = objTable_->Create<ObjStLaser>(isPlayerShot, colDetector_, shared_from_this());
+    auto laser = objTable_->Create<ObjStLaser>(isPlayerShot, false, colDetector_, shared_from_this());
     objLayerList_->SetRenderPriority(laser, objLayerList_->GetShotRenderPriority());
     return laser;
 }
@@ -1326,7 +1351,7 @@ std::shared_ptr<ObjStLaser> Package::CreateStraightLaserA1(float x, float y, flo
 
 std::shared_ptr<ObjCrLaser> Package::CreateObjCrLaser(bool isPlayerShot)
 {
-    auto laser = objTable_->Create<ObjCrLaser>(isPlayerShot, colDetector_, shared_from_this());
+    auto laser = objTable_->Create<ObjCrLaser>(isPlayerShot, false, colDetector_, shared_from_this());
     objLayerList_->SetRenderPriority(laser, objLayerList_->GetShotRenderPriority());
     return laser;
 }

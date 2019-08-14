@@ -10,7 +10,8 @@ namespace bstorm
 {
 ObjMove::ObjMove(ObjRender *obj) :
     obj_(obj),
-    mode(std::make_shared<MoveModeA>())
+    mode(std::make_shared<MoveModeA>()),
+	eclMode(std::make_shared<MoveModeECL>())
 {
 }
 
@@ -136,6 +137,11 @@ void ObjMove::AddMovePattern(const std::shared_ptr<MovePattern>& pattern)
     }
 }
 
+void ObjMove::SetECLData(const std::list<std::shared_ptr<ECLPattern>>& eclPatterns)
+{
+	eclMode->SetData(eclPatterns);
+}
+
 void ObjMove::Move()
 {
     auto it = patterns_.begin();
@@ -153,6 +159,14 @@ void ObjMove::Move()
     float y = GetMoveY();
     mode->Move(x, y);
     SetMovePosition(x, y);
+}
+
+void ObjMove::ECLMove()
+{
+	float x = GetMoveX();
+	float y = GetMoveY();
+	eclMode->Move(x, y);
+	SetMovePosition(x, y);
 }
 
 void ObjMove::MoveFade()

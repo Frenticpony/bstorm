@@ -94,6 +94,7 @@ class TextureStore;
 class TimePoint;
 class VirtualKeyInputSource;
 class EngineDevelopOptions;
+class ECLPattern;
 struct SourcePos;
 
 namespace conf { struct KeyConfig; }
@@ -350,7 +351,9 @@ public:
     std::shared_ptr<ObjStLaser> CreateStraightLaserA1(float x, float y, float angle, float length, float width, int deleteFrame, int shotDataId, int delay, bool isPlayerShot);
     std::shared_ptr<ObjCrLaser> CreateObjCrLaser(bool isPlayerShot);
     std::shared_ptr<ObjCrLaser> CreateCurveLaserA1(float x, float y, float speed, float angle, float length, float width, int shotDataId, int delay, bool isPlayerShot);
-    std::shared_ptr<ObjItem> CreateObjItem(int itemType);
+	std::shared_ptr<ObjShot> CreateECLShot(bool isPlayerShot, std::list<std::shared_ptr<ECLPattern>> eclData);
+	std::shared_ptr<ObjShot> CreateShotE1(float x, float y, float speed, float angle, int shotDataId, int delay, bool isPlayerShot);
+	std::shared_ptr<ObjItem> CreateObjItem(int itemType);
     void GenerateBonusItem(float x, float y);
     void GenerateItemScoreText(float x, float y, PlayerScore score);
     std::shared_ptr<ObjItem> CreateItemA1(int itemType, float x, float y, PlayerScore score);

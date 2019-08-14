@@ -1808,6 +1808,28 @@ static int DeleteShotInCircle(lua_State* L)
     return 0;
 }
 
+static int CreateShotE1(lua_State* L)
+{
+	Package* package = Package::Current;
+	Script* script = GetScript(L);
+	double x = DnhValue::ToNum(L, 1);
+	double y = DnhValue::ToNum(L, 2);
+	double speed = DnhValue::ToNum(L, 3);
+	double angle = DnhValue::ToNum(L, 4);
+	int graphic = DnhValue::ToInt(L, 5);
+	int delay = DnhValue::ToInt(L, 6);
+	if (auto shot = package->CreateShotE1(x, y, speed, angle, graphic, delay, script->GetType() == ScriptType::Value::PLAYER))
+	{
+		script->AddAutoDeleteTargetObjectId(shot->GetID());
+		lua_pushnumber(L, shot->GetID());
+	}
+	else
+	{
+		lua_pushnumber(L, ID_INVALID);
+	}
+	return 1;
+}
+
 static int CreateShotA1(lua_State* L)
 {
     Package* package = Package::Current;
@@ -6611,6 +6633,7 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
 
         builtin(DeleteShotAll, 2);
         builtin(DeleteShotInCircle, 5);
+        builtin_real(CreateShotE1, 6);
         builtin_real(CreateShotA1, 6);
         builtin_real(CreateShotA2, 8);
         builtin_real(CreateShotOA1, 5);

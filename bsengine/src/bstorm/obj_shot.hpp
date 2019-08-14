@@ -24,7 +24,7 @@ struct FadeDeleteEffect
 class ObjShot : public ObjRender, public ObjMove, public ObjCol, public std::enable_shared_from_this<ObjShot>
 {
 public:
-    ObjShot(bool isPlayerShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package);
+    ObjShot(bool isPlayerShot, bool isECLShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package);
     ~ObjShot();
 
     void Update() override;
@@ -34,6 +34,7 @@ public:
     bool IsRegistered() const;
     void Regist();
     bool IsPlayerShot() const;
+	bool IsECLShot() const;
 
     // intersection
     void AddIntersectionCircleA1(float r);
@@ -140,6 +141,7 @@ private:
     void AddIntersection(const std::shared_ptr<ShotIntersection>& isect);
     void AddTempIntersection(const std::shared_ptr<ShotIntersection>& isect);
     const bool isPlayerShot_;
+    const bool isECLShot_;
 	float initX_;
 	float initY_;
 	float initSpeed_;
@@ -184,7 +186,7 @@ private:
 class ObjLaser : public ObjShot
 {
 public:
-    ObjLaser(bool isPlayerShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package);
+    ObjLaser(bool isPlayerShot, bool isECLShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package);
     void SetShotData(const std::shared_ptr<ShotData>& shotData) override;
     void Graze() override;
     bool IsGrazeEnabled() const override;
@@ -215,7 +217,7 @@ private:
 class ObjLooseLaser : public ObjLaser
 {
 public:
-    ObjLooseLaser(bool isPlayerShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package);
+    ObjLooseLaser(bool isPlayerShot, bool isECLShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package);
     void Update() override;
     void Render(const std::shared_ptr<Renderer>& renderer) override;
     void GenerateBonusItem() override;
@@ -241,7 +243,7 @@ private:
 class ObjStLaser : public ObjLooseLaser
 {
 public:
-    ObjStLaser(bool isPlayerShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package);
+    ObjStLaser(bool isPlayerShot, bool isECLShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package);
     void Update() override;
     void Render(const std::shared_ptr<Renderer>& renderer) override;
     Point2D GetTail() const override;
@@ -259,7 +261,7 @@ private:
 class ObjCrLaser : public ObjLaser
 {
 public:
-    ObjCrLaser(bool isPlayerShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package);
+    ObjCrLaser(bool isPlayerShot, bool isECLShot, const std::shared_ptr<CollisionDetector>& colDetector, const std::shared_ptr<Package>& package);
     void Update() override;
     void Render(const std::shared_ptr<Renderer>& renderer) override;
     void GenerateBonusItem() override;

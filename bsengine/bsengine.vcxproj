@@ -50,6 +50,7 @@
     <ClInclude Include="src\bstorm\serialized_script.hpp" />
     <ClInclude Include="src\bstorm\shot_counter.hpp" />
     <ClInclude Include="src\bstorm\sound_buffer.hpp" />
+    <ClInclude Include="src\bstorm\thecl.hpp" />
     <ClInclude Include="src\bstorm\wave_format.hpp" />
     <ClInclude Include="src\bstorm\wave_sample_stream.hpp" />
     <ClInclude Include="src\bstorm\stage_common_player_params.hpp" />
@@ -157,6 +158,7 @@
     <ClCompile Include="src\bstorm\serialized_script.cpp" />
     <ClCompile Include="src\bstorm\sound_buffer.cpp" />
     <ClCompile Include="src\bstorm\string_util.cpp" />
+    <ClCompile Include="src\bstorm\thecl.cpp" />
     <ClCompile Include="src\bstorm\time_point.cpp" />
     <ClCompile Include="src\bstorm\time_stamp.cpp" />
     <ClCompile Include="src\bstorm\vertex.cpp" />
