@@ -4224,6 +4224,8 @@ static int ObjFileB_ReadString(lua_State*L)
     return 1;
 }
 
+
+
 template <void (ObjMove::*func)(float)>
 static int ObjMove_Set(lua_State* L)
 {
@@ -4723,7 +4725,6 @@ static int ObjEnemyBossScene_StartSpell(lua_State* L)
     }
     return 0;
 }
-
 
 static int ObjShot_Create(lua_State* L)
 {
@@ -5717,6 +5718,37 @@ static int SaveReplay(lua_State* L)
     return 0;
 }
 
+//ECL
+
+static int thECL_Create(lua_State* L)
+{
+	Package* package = Package::Current;
+	Script* script = GetScript(L);
+	if (auto obj = package->CreateECLStorage())
+	{
+		lua_pushnumber(L, obj->GetID());
+	}
+	else
+	{
+		lua_pushnumber(L, ID_INVALID);
+	}
+	return 1;
+}
+
+/*
+static int thECL_InitPattern(lua_State* L)
+{
+	Package* package = Package::Current;
+	int objId = DnhValue::ToInt(L, 1);
+	if (auto obj = package->GetObject<ECLStorage>(objId)) { obj->ECL_InitPattern(); }
+	return 0;
+}
+*/
+
+static int thECL_AddSpeedUp(lua_State* L)
+{
+		
+}
 // runtime helper
 
 static int c_chartonum(lua_State* L)

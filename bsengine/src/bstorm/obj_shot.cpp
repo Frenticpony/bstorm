@@ -95,12 +95,10 @@ void ObjShot::Update()
 			{
 				if(!isECLShot_)
 				{
-					Logger::Write(Log(LogLevel::LV_USER).Msg("NOT ECL"));
 					Move();
 				}
 				else
 				{
-					Logger::Write(Log(LogLevel::LV_USER).Msg("ECL Move"));
 					ECLMove();
 				}
 			}

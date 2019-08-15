@@ -32,6 +32,7 @@ namespace bstorm
 	{
 		if (pat_counter == 0)
 		{
+			Logger::Write(Log(LogLevel::LV_USER).Msg("APPLY ACCEL"));
 			eclMode->SetAcceleration(pat_accel);
 			pat_counter++;
 		}
@@ -47,6 +48,30 @@ namespace bstorm
 		}
 	}
 
+	ECLPattern_ANGVEL::ECLPattern_ANGVEL(bool _isWait, int _time, float _angvel) :
+		pat_isWait(_isWait),
+		pat_time(_time),
+		pat_angvel(_angvel) {}
+	void ECLPattern_ANGVEL::Apply(MoveModeECL* eclMode)
+	{
+		if (pat_counter == 0)
+		{
+			Logger::Write(Log(LogLevel::LV_USER).Msg("APPLY ANGVEL"));
+			eclMode->SetAngularVelocity(pat_angvel);
+			pat_counter++;
+		}
+		else if (pat_counter < pat_time)
+		{
+			pat_counter++;
+		}
+
+		if (pat_counter == pat_time)
+		{
+			eclMode->SetAngularVelocity(0);
+			pat_complete = true;
+		}
+	}
+
 	MoveModeECL::MoveModeECL() : 
 		mv_speed(0),
 		mv_angle(0),
@@ -57,19 +82,45 @@ namespace bstorm
 		pattern_counter(0){}
 	void MoveModeECL::Move(float & x, float & y)
 	{
+		//EX_WAIT
 		auto pattern_counter = ecl_data.begin();
 		if (pattern_counter != ecl_data.end())
 		{
 			auto pat = *pattern_counter;
 			if (pat->IsPatternComplete() == false)
 			{
-				pat->Apply(this);
+				if (pat->IsWait() == true)
+				{
+					PushToNoWait(pat);
+					pattern_counter = ecl_data.erase(pattern_counter);
+					++pattern_counter;
+				}
+				else
+				{
+					pat->Apply(this);
+				}
 			}
 			else
 			{
 				pattern_counter = ecl_data.erase(pattern_counter);
 				++pattern_counter;
 			}
+		}
+
+		//EX_NOWAIT
+		auto pattern_counter_n = ecl_noWaitData.begin();
+		while (pattern_counter_n != ecl_noWaitData.end())
+		{
+			auto pat_n = *pattern_counter_n;
+			if (pat_n->IsPatternComplete() == false)
+			{
+				pat_n->Apply(this);
+			}
+			else
+			{
+				pattern_counter_n = ecl_noWaitData.erase(pattern_counter_n);
+			}
+			++pattern_counter_n;
 		}
 
 		mv_speed += mv_acceleration;
@@ -95,7 +146,20 @@ namespace bstorm
 	{
 		ecl_data = loc_data;
 	}
+	void MoveModeECL::PushToNoWait(const std::shared_ptr<ECLPattern>& loc_data)
+	{
+		ecl_noWaitData.push_back(loc_data);
+	}
 	
+	ECLStorage::ECLStorage(const std::shared_ptr<Package>& package) :
+		Obj(package)
+	{
+	}
+
+	ECLStorage::~ECLStorage()
+	{
+	}
+
 	void ECLStorage::CreateTestList(std::list<std::shared_ptr<ECLPattern>> testList)
 	{
 	}
