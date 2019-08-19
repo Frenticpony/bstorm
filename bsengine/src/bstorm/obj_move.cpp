@@ -15,6 +15,15 @@ ObjMove::ObjMove(ObjRender *obj) :
 {
 }
 
+/*
+ObjMove::ObjMove(ObjRender *obj, std::shared_ptr<ECLDefinition> ecl_data) :
+	obj_(obj),
+	mode(std::make_shared<MoveModeA>()),
+	eclMode(std::make_shared<MoveModeECL>(ecl_data))
+{
+}
+*/
+
 float ObjMove::GetMoveX() const { return obj_->GetX(); }
 
 void ObjMove::SetMoveX(float x) { obj_->SetX(x); }
@@ -140,6 +149,14 @@ void ObjMove::AddMovePattern(const std::shared_ptr<MovePattern>& pattern)
 void ObjMove::SetECLData(const std::list<std::shared_ptr<ECLPattern>>& eclPatterns)
 {
 	eclMode->SetData(eclPatterns);
+}
+
+void ObjMove::SetECLInit(float _speed, float _angle, float _maxSpeed, float _minSpeed)
+{
+	eclMode->SetSpeed(_speed);
+	eclMode->SetAngle(_angle);
+	eclMode->SetMaxSpeed(_maxSpeed);
+	eclMode->SetMinSpeed(_minSpeed);
 }
 
 void ObjMove::Move()

@@ -367,7 +367,7 @@ public:
 	/* ECL */
 	std::shared_ptr<ECLStorage> CreateECLStorage();
 	std::shared_ptr<ObjShot> CreateECLShot(bool isPlayerShot, std::list<std::shared_ptr<ECLPattern>> eclData);
-	std::shared_ptr<ObjShot> CreateShotE1(float x, float y, float speed, float angle, int shotDataId, int delay, bool isPlayerShot);
+	std::shared_ptr<ObjShot> CreateShotE1(float x, float y, float speed, float angle, int shotDataId, int delay, bool isPlayerShot, float maxSpeed, float minSpeed, std::list<std::shared_ptr<ECLPattern>> eclData);
 
     /* script */
     NullableSharedPtr<Script> GetScript(int scriptId) const;

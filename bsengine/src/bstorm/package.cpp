@@ -1482,17 +1482,19 @@ std::shared_ptr<ObjShot> Package::CreateECLShot(bool isPlayerShot, std::list<std
 
 }
 
-std::shared_ptr<ObjShot> Package::CreateShotE1(float x, float y, float speed, float angle, int shotDataId, int delay, bool isPlayerShot)
+std::shared_ptr<ObjShot> Package::CreateShotE1(float x, float y, float speed, float angle, int shotDataId, int delay, bool isPlayerShot, float maxSpeed, float minSpeed, std::list<std::shared_ptr<ECLPattern>> eclData)
 {
-	std::list<std::shared_ptr<ECLPattern>> eclData;
-	eclData.push_back(std::make_shared<ECLPattern_Initialize>(speed, angle));
-	eclData.push_back(std::make_shared<ECLPattern_SPUP>(false, 50, 0.05f));
-	eclData.push_back(std::make_shared<ECLPattern_SPUP>(true, 32, -0.05f));
-	eclData.push_back(std::make_shared<ECLPattern_ANGVEL>(true, 32, -5.0f));
+	//eclData.push_back(std::make_shared<ECLPattern_Initialize>(speed, angle));
+	//eclData.push_back(std::make_shared<ECLPattern_SPUP>(false, 50, 0.05f));
+	//eclData.push_back(std::make_shared<ECLPattern_SPUP>(true, 32, -0.05f));
+	//eclData.push_back(std::make_shared<ECLPattern_ANGVEL>(true, 32, -5.0f));
+	//std::list<std::shared_ptr<ECLPattern>> eclPatterns;
+	//std::copy(eclData.begin(), eclData.end(), std::back_inserter(eclPatterns));
 	auto shot = CreateECLShot(isPlayerShot, eclData);
 	shot->SetMovePosition(x, y);
-	shot->SetSpeed(speed);
-	shot->SetAngle(angle);
+	//shot->SetSpeed(speed);
+	//shot->SetAngle(angle);
+	shot->SetECLInit(speed, angle, maxSpeed, minSpeed);
 	shot->SetShotData(isPlayerShot ? GetPlayerShotData(shotDataId) : GetEnemyShotData(shotDataId));
 	shot->SetDelay(delay);
 	shot->Regist();

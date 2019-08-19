@@ -151,6 +151,7 @@ class ObjMove
 {
 public:
     ObjMove(ObjRender *obj);
+    ObjMove(ObjRender *obj, std::shared_ptr<ECLDefinition> ecl_data);
     float GetMoveX() const;
     void SetMoveX(float x);
     float GetMoveY() const;
@@ -170,6 +171,7 @@ public:
     void SetMoveMode(const std::shared_ptr<MoveMode>& mode);
     void AddMovePattern(const std::shared_ptr<MovePattern>& pattern);
 	void SetECLData(const std::list<std::shared_ptr<ECLPattern>>& eclPatterns);
+	void SetECLInit(float _speed, float _angle, float _maxSpeed, float _minSpeed);
 protected:
     void Move();
     void ECLMove();

@@ -4,24 +4,15 @@
 
 namespace bstorm
 {
+	
 	ECLPattern::ECLPattern() :
 		pat_counter(0),
 		pat_complete(false) {}
-	ECLPattern::~ECLPattern() {}
-	void ECLPattern::Apply(MoveModeECL* eclMode)
+	ECLPattern::~ECLPattern()
 	{
 	}
-
-	ECLPattern_Initialize::ECLPattern_Initialize(float _speed, float _angle) :
-		pat_speed(_speed),
-		pat_angle(_angle){}
-	void ECLPattern_Initialize::Apply(MoveModeECL* eclMode)
+	void ECLPattern::Apply(MoveModeECL* eclMode)
 	{
-		eclMode->SetSpeed(pat_speed);
-		eclMode->SetAngle(pat_angle);
-		eclMode->SetMinSpeed(0.0f);
-		eclMode->SetMaxSpeed(999.0f);
-		pat_complete = true;
 	}
 
 	ECLPattern_SPUP::ECLPattern_SPUP(bool _isWait, int _time, float _accel) :
@@ -32,7 +23,6 @@ namespace bstorm
 	{
 		if (pat_counter == 0)
 		{
-			Logger::Write(Log(LogLevel::LV_USER).Msg("APPLY ACCEL"));
 			eclMode->SetAcceleration(pat_accel);
 			pat_counter++;
 		}
@@ -56,7 +46,6 @@ namespace bstorm
 	{
 		if (pat_counter == 0)
 		{
-			Logger::Write(Log(LogLevel::LV_USER).Msg("APPLY ANGVEL"));
 			eclMode->SetAngularVelocity(pat_angvel);
 			pat_counter++;
 		}
@@ -72,38 +61,97 @@ namespace bstorm
 		}
 	}
 
-	MoveModeECL::MoveModeECL() : 
-		mv_speed(0),
-		mv_angle(0),
-		mv_minSpeed(0),
-		mv_maxSpeed(0),
-		mv_angularVelocity(0),
-		mv_acceleration(0),
-		pattern_counter(0){}
+	ECLDefinition::ECLDefinition() :
+		etamaStyle(0),
+		x(0),
+		y(0),
+		speed(1),
+		maxSpeed(999),
+		minSpeed(0),
+		angle(0),
+		graphic(0),
+		delay(0),
+		count(1),
+		layer(1) {}
+	ECLDefinition::~ECLDefinition() {}
+	void ECLDefinition::SetInitProperties(int _style, float _x, float _y, float _speed, float _angle, int _graphic, int _delay, int _count, int _layer)
+	{
+		etamaStyle = _style;
+		x = _x;
+		y = _y,
+		speed = _speed;
+		angle = _angle;
+		graphic = _graphic;
+		delay = _delay;
+		count = _count;
+		layer = _layer;
+	}
+	std::list<std::shared_ptr<ECLPattern>> ECLDefinition::GetPatternList()
+	{
+		return pat_list;
+	}
+	void ECLDefinition::AddPattern(std::shared_ptr<ECLPattern> newPat)
+	{
+		pat_list.push_back(newPat);
+	}
+
+	ECLStorage::ECLStorage(const std::shared_ptr<Package>& package) :
+		Obj(package)
+	{
+		for (int i = 0; i < 9; i++)
+		{
+			ecl_list.push_back(std::make_shared<ECLDefinition>());
+		}
+	}
+	ECLStorage::~ECLStorage(){}
+	void ECLStorage::ECL_InitDefinition() {}
+	std::shared_ptr<ECLDefinition> ECLStorage::ECL_GetDefinition(int _index)
+	{
+		auto it = ecl_list.begin();
+		if (_index > 0)
+		{
+			std::advance(it, _index);
+		}
+		auto def = *it;
+		return def;
+	}
+	void ECLStorage::ECL_SetMoveObject(int _obj) { ecl_move_obj = _obj; }
+	int ECLStorage::ECL_GetMoveObject() const { return ecl_move_obj; }
+
+	MoveModeECL::MoveModeECL(){}
 	void MoveModeECL::Move(float & x, float & y)
 	{
 		//EX_WAIT
+		patApplied = false;
 		auto pattern_counter = ecl_data.begin();
+		std::advance(pattern_counter, pattern_count);
 		if (pattern_counter != ecl_data.end())
 		{
-			auto pat = *pattern_counter;
-			if (pat->IsPatternComplete() == false)
+			while (!patApplied)
 			{
-				if (pat->IsWait() == true)
+				if (pattern_counter != ecl_data.end()) { patApplied = true; }
+				auto pat = *pattern_counter;
+				if (pat->IsPatternComplete() == false)
 				{
-					PushToNoWait(pat);
-					pattern_counter = ecl_data.erase(pattern_counter);
-					++pattern_counter;
+					if (pat->IsWait() == true)
+					{
+						PushToNoWait(pat);
+						pattern_counter = ecl_data.erase(pattern_counter);
+						++pattern_counter;
+						++pattern_count;
+					}
+					else
+					{
+						pat->Apply(this);
+						patApplied = true;
+					}
 				}
 				else
 				{
-					pat->Apply(this);
+					//pattern_counter = ecl_data.erase(pattern_counter);
+					++pattern_counter;
+					++pattern_count;
 				}
-			}
-			else
-			{
-				pattern_counter = ecl_data.erase(pattern_counter);
-				++pattern_counter;
 			}
 		}
 
@@ -144,23 +192,20 @@ namespace bstorm
 	}
 	void MoveModeECL::SetData(const std::list<std::shared_ptr<ECLPattern>>& loc_data)
 	{
-		ecl_data = loc_data;
+		std::list<std::shared_ptr<ECLPattern>> pattern;
+
+		auto pattern_counter_n = loc_data.begin();
+		while (pattern_counter_n != loc_data.end())
+		{
+			auto cur_pat = *pattern_counter_n;
+			auto copy_pat = cur_pat->clone();
+			pattern.push_back(copy_pat);
+			++pattern_counter_n;
+		}
+		ecl_data = pattern;
 	}
 	void MoveModeECL::PushToNoWait(const std::shared_ptr<ECLPattern>& loc_data)
 	{
 		ecl_noWaitData.push_back(loc_data);
-	}
-	
-	ECLStorage::ECLStorage(const std::shared_ptr<Package>& package) :
-		Obj(package)
-	{
-	}
-
-	ECLStorage::~ECLStorage()
-	{
-	}
-
-	void ECLStorage::CreateTestList(std::list<std::shared_ptr<ECLPattern>> testList)
-	{
 	}
 }

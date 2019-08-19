@@ -1808,28 +1808,6 @@ static int DeleteShotInCircle(lua_State* L)
     return 0;
 }
 
-static int CreateShotE1(lua_State* L)
-{
-	Package* package = Package::Current;
-	Script* script = GetScript(L);
-	double x = DnhValue::ToNum(L, 1);
-	double y = DnhValue::ToNum(L, 2);
-	double speed = DnhValue::ToNum(L, 3);
-	double angle = DnhValue::ToNum(L, 4);
-	int graphic = DnhValue::ToInt(L, 5);
-	int delay = DnhValue::ToInt(L, 6);
-	if (auto shot = package->CreateShotE1(x, y, speed, angle, graphic, delay, script->GetType() == ScriptType::Value::PLAYER))
-	{
-		script->AddAutoDeleteTargetObjectId(shot->GetID());
-		lua_pushnumber(L, shot->GetID());
-	}
-	else
-	{
-		lua_pushnumber(L, ID_INVALID);
-	}
-	return 1;
-}
-
 static int CreateShotA1(lua_State* L)
 {
     Package* package = Package::Current;
@@ -5720,12 +5698,14 @@ static int SaveReplay(lua_State* L)
 
 //ECL
 
-static int thECL_Create(lua_State* L)
+static int __ecl_init(lua_State* L)
 {
 	Package* package = Package::Current;
 	Script* script = GetScript(L);
+	int objId = DnhValue::ToInt(L, 1);
 	if (auto obj = package->CreateECLStorage())
 	{
+		obj->ECL_SetMoveObject(objId);
 		lua_pushnumber(L, obj->GetID());
 	}
 	else
@@ -5735,19 +5715,61 @@ static int thECL_Create(lua_State* L)
 	return 1;
 }
 
-/*
-static int thECL_InitPattern(lua_State* L)
+static int __et_set(lua_State* L)
 {
 	Package* package = Package::Current;
 	int objId = DnhValue::ToInt(L, 1);
-	if (auto obj = package->GetObject<ECLStorage>(objId)) { obj->ECL_InitPattern(); }
+	int index = DnhValue::ToInt(L, 2);
+	int style = DnhValue::ToInt(L, 3);
+	double speed = DnhValue::ToNum(L, 4);
+	double angle = DnhValue::ToNum(L, 5);
+	int graphic = DnhValue::ToInt(L, 6);
+	int delay = DnhValue::ToInt(L, 7);
+	int count = DnhValue::ToInt(L, 8);
+	int layer = DnhValue::ToInt(L, 9);
+	if (auto obj = package->GetObject<ECLStorage>(objId)) 
+	{ 
+		auto eclDef = obj->ECL_GetDefinition(index);
+		eclDef->SetInitProperties(style, 0, 0, speed, angle, graphic, delay, count, layer);
+	}
 	return 0;
 }
-*/
 
-static int thECL_AddSpeedUp(lua_State* L)
+static int __ex_spup(lua_State* L)
 {
-		
+	Package* package = Package::Current;
+	int objId = DnhValue::ToInt(L, 1);
+	int index = DnhValue::ToInt(L, 2);
+	bool isWait = DnhValue::ToBool(L, 3);
+	int time = DnhValue::ToInt(L, 4);
+	double accel = DnhValue::ToNum(L, 5);
+	float accelF = (float)accel;
+	
+	if (auto obj = package->GetObject<ECLStorage>(objId))
+	{
+		auto eclDef = obj->ECL_GetDefinition(index);
+		auto eclPat = std::make_shared<ECLPattern_SPUP>(isWait, time, (float)accel);
+		eclDef->AddPattern(eclPat);
+	}
+	return 0;
+}
+
+static int __et_on(lua_State* L)
+{
+	Package* package = Package::Current;
+	int objId = DnhValue::ToInt(L, 1);
+	int index = DnhValue::ToInt(L, 2);
+	if (auto obj = package->GetObject<ECLStorage>(objId))
+	{
+		int objMId = obj->ECL_GetMoveObject();
+		if (auto objMove = package->GetObject<ObjMove>(objMId))
+		{
+			auto eclDef = obj->ECL_GetDefinition(index);
+			auto patternList = eclDef->GetPatternList();
+			package->CreateShotE1(objMove->GetMoveX(), objMove->GetMoveY(), eclDef->GetInitSpeed(), eclDef->GetInitAngle(), eclDef->GetInitGraphic(), eclDef->GetInitDelay(), false, eclDef->GetInitMaxSpeed(), eclDef->GetInitMinSpeed(), patternList);
+		}
+	}
+	return 0;
 }
 // runtime helper
 
@@ -6665,7 +6687,6 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
 
         builtin(DeleteShotAll, 2);
         builtin(DeleteShotInCircle, 5);
-        builtin_real(CreateShotE1, 6);
         builtin_real(CreateShotA1, 6);
         builtin_real(CreateShotA2, 8);
         builtin_real(CreateShotOA1, 5);
@@ -6874,6 +6895,12 @@ std::shared_ptr<Env> CreateInitRootEnv(ScriptType scriptType, const std::wstring
 
     if (TypeIs(~t_package))
     {
+		//ECL
+        builtin_real(__ecl_init, 1);
+        builtin(__et_set, 9);
+        builtin(__ex_spup, 5);
+        builtin(__et_on, 2);
+
         builtin(ObjMove_SetX, 2);
         builtin(ObjMove_SetY, 2);
         builtin(ObjMove_SetPosition, 3);
